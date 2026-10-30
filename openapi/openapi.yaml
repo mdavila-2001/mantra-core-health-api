@@ -2826,6 +2826,809 @@ paths:
       description: >-
         Elimina el borrador al completar el alta exitosamente o por descarte del usuario. Operación pública; no requiere
         JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+  /profiles/practitioners/me/admission:
+    get:
+      description: Estados, qué falta y los mensajes dirigidos al médico. Nada del personal.
+      operationId: OwnAdmissionController_get
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnAdmissionDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Estado de mi verificación
+      tags:
+        - profiles-practitioner-admission
+  /profiles/practitioners/me/admission/resubmit:
+    post:
+      description: >-
+        Sólo desde INFORMACION_REQUERIDA, RECHAZADA, EXPIRADA o ABANDONADA, con tope de reenvíos. El cuerpo lleva la
+        declaración: `{ attested: true, attestationVersion }`; sin ella, 412 ADMISSION_ATTESTATION_REQUIRED. El servidor
+        guarda cuándo se aceptó y qué versión del texto.
+      operationId: OwnAdmissionController_resubmit
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResubmitAdmissionDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnAdmissionDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Reenviar mi solicitud
+      tags:
+        - profiles-practitioner-admission
+  /profiles/practitioners/me/admission/withdraw:
+    post:
+      operationId: OwnAdmissionController_withdraw
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnAdmissionDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
+      tags:
+        - profiles-practitioner-admission
+      description: >-
+        Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /admissions:
+    get:
+      description: >-
+        Orden por vencimiento (`due_at`) con paginación por cursor y conteos por estado. La cédula va enmascarada. Para
+        buscar por cédula, preferir `POST /admissions/search`: una query string queda en los logs del proxy.
+      operationId: AdmissionsController_list
+      parameters:
+        - name: type
+          required: false
+          in: query
+          description: Tipo de admisión; hoy ALTA_DE_DOCTOR.
+          schema:
+            default: ALTA_DE_DOCTOR
+            type: string
+        - name: status
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - ENVIADA
+              - EN_REVISION
+              - INFORMACION_REQUERIDA
+              - VERIFICADA
+              - RECHAZADA
+              - SUSPENDIDA
+              - EXPIRADA
+              - RETIRADA
+              - ABANDONADA
+        - name: assignedTo
+          required: false
+          in: query
+          description: Cuenta asignada, o `me`, o `none` (sin asignar).
+          schema:
+            type: string
+        - name: overdue
+          required: false
+          in: query
+          description: true = sólo vencidas.
+          schema:
+            type: boolean
+        - name: q
+          required: false
+          in: query
+          description: Nombre, cédula o matrícula (2 a 80 caracteres).
+          schema:
+            maxLength: 80
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor opaco de la página anterior.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 25
+            type: number
+        - name: sort
+          required: false
+          in: query
+          schema:
+            default: due_at
+            type: string
+            enum:
+              - due_at
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Bandeja de admisiones
+      tags:
+        - admissions
+  /admissions/search:
+    post:
+      description: Igual que `GET /admissions`, pero el texto buscado (nombre, cédula, matrícula) no viaja en la URL.
+      operationId: AdmissionsController_search
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListAdmissionsQueryDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Bandeja de admisiones con los filtros en el cuerpo
+      tags:
+        - admissions
+  /admissions/expire-sweep:
+    post:
+      description: >-
+        Baja las verificaciones vencidas (y con ellas el check) y cierra por abandono las solicitudes sin respuesta del
+        solicitante. Idempotente.
+      operationId: AdmissionsController_expireSweep
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionSweepResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Barrido de vencimientos
+      tags:
+        - admissions
+  /admissions/{id}:
+    get:
+      description: >-
+        Datos completos del profesional (con cédula), checklist de requisitos, documentos, formulario enviado y
+        bitácora. La lectura queda registrada.
+      operationId: AdmissionsController_detail
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Detalle de una admisión
+      tags:
+        - admissions
+  /admissions/{id}/claim:
+    post:
+      operationId: AdmissionsController_claim
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimAdmissionDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Tomar la admisión para revisarla
+      tags:
+        - admissions
+      description: >-
+        Tomar la admisión para revisarla. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /admissions/{id}/release:
+    post:
+      operationId: AdmissionsController_release
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimAdmissionDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Soltar una revisión tomada para que otro la tome
+      tags:
+        - admissions
+      description: >-
+        Soltar una revisión tomada para que otro la tome. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /admissions/{id}/reassign:
+    post:
+      operationId: AdmissionsController_reassign
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReassignAdmissionDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Pasar la revisión a otro revisor
+      tags:
+        - admissions
+      description: >-
+        Pasar la revisión a otro revisor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /admissions/{id}/request-info:
+    post:
+      operationId: AdmissionsController_requestInfo
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestAdmissionInfoDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Pedir información al médico
+      tags:
+        - admissions
+      description: >-
+        Pedir información al médico. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
+        respuestas de error usan el envelope ErrorResponse.
+  /admissions/{id}/items/{itemId}/review:
+    post:
+      description: >-
+        `itemId` es el `id` del ítem del checklist (la revisión). VERIFIED exige la fuente consultada; REJECTED e
+        INFO_REQUIRED exigen motivo. Concurrencia por ítem.
+      operationId: AdmissionsController_reviewItem
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: itemId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewAdmissionItemDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Revisar un ítem del checklist
+      tags:
+        - admissions
+  /admissions/{id}/decision:
+    post:
+      description: >-
+        No recibe ítems: el servidor los deriva de las revisiones. VERIFIED exige el checklist completo (422
+        ADMISSION_CHECKLIST_INCOMPLETE); REJECTED exige motivo.
+      operationId: AdmissionsController_decide
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecideAdmissionDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: 'Resolver la admisión: VERIFIED o REJECTED'
+      tags:
+        - admissions
+  /admissions/{id}/suspend:
+    post:
+      operationId: AdmissionsController_suspend
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuspendAdmissionDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Suspender una verificación (quita el check)
+      tags:
+        - admissions
+      description: >-
+        Suspender una verificación (quita el check). Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /admissions/{id}/reinstate:
+    post:
+      operationId: AdmissionsController_reinstate
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuspendAdmissionDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDetailDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Reponer una verificación suspendida (devuelve el check)
+      tags:
+        - admissions
+      description: >-
+        Reponer una verificación suspendida (devuelve el check). Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /admissions/{id}/documents/{fileId}/download-url:
+    post:
+      description: Vida de 2 minutos, atada a quien la pide y a la admisión. El archivo debe ser de ESA admisión.
+      operationId: AdmissionsController_documentUrl
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: fileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdmissionDocumentUrlDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: URL firmada para abrir un documento de la admisión
+      tags:
+        - admissions
+  /admissions/{id}/documents/{fileId}/content:
+    get:
+      description: 'Sin `Content-Type` sniffing, sin caché y con sandbox: el documento no puede ejecutar nada.'
+      operationId: AdmissionsController_documentContent
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: fileId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Contenido de un documento de la admisión (URL firmada)
+      tags:
+        - admissions
   /profiles/practitioners/me/signature-assets:
     get:
       operationId: PractitionerSignatureAssetsController_getOwn
@@ -22973,7 +23776,44 @@ paths:
       description: >-
         Establecer conexión de integración externa. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
-  /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings:
+    get:
+      operationId: PharmacyIntegrationSyncController_listConnections
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationConnectionListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Conexiones de integración de la farmacia
+      tags:
+        - pharmacy-inventory
+      description: >-
+        Conexiones de integración de la farmacia. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings:
     post:
       operationId: PharmacyController_mapProduct
       parameters:
@@ -22982,7 +23822,7 @@ paths:
           in: path
           schema:
             type: string
-        - name: connId
+        - name: connectionId
           required: true
           in: path
           schema:
@@ -23024,6 +23864,48 @@ paths:
       description: >-
         Mapear producto a código de proveedor externo. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+    get:
+      operationId: PharmacyIntegrationSyncController_listMappings
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: connectionId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationMappingListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Vínculos de productos de una conexión
+      tags:
+        - pharmacy-inventory
+      description: >-
+        Vínculos de productos de una conexión. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /pharmacies/{pharmacyId}/projections:
     post:
       operationId: PharmacyController_projectCatalog
@@ -23664,6 +24546,206 @@ paths:
       description: >-
         Farmacias que publican un medicamento, con precio y distancia. Operación pública; no requiere JWT. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/categories/bulk:
+    post:
+      operationId: PharmacyBulkController_bulkCategories
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cargar categorías en lote, con vista previa
+      tags:
+        - pharmacy
+      description: >-
+        Cargar categorías en lote, con vista previa. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/products/bulk:
+    post:
+      operationId: PharmacyBulkController_bulkProducts
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cargar productos en lote, con vista previa
+      tags:
+        - pharmacy
+      description: >-
+        Cargar productos en lote, con vista previa. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/prices/bulk:
+    post:
+      operationId: PharmacyBulkController_bulkPrices
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cargar precios de venta en lote, con vista previa
+      tags:
+        - pharmacy
+      description: >-
+        Cargar precios de venta en lote, con vista previa. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/sites/bulk:
+    post:
+      operationId: PharmacyBulkController_bulkSites
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cargar sucursales (sedes de venta) en lote, con vista previa
+      tags:
+        - pharmacy
+      description: >-
+        Cargar sucursales (sedes de venta) en lote, con vista previa. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /admin/content-packs:
     get:
       operationId: ContentPacksController_listar
@@ -35194,6 +36276,197 @@ paths:
       description: >-
         Evaluar actor efectivo por propósito (step-up). Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /clinical/prescription-shares:
+    post:
+      description: Exactamente uno de `encounterId` o `medicationRequestId`. Devuelve el token en claro una sola vez.
+      operationId: PrescriptionSharesController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePrescriptionShareDto'
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionShareCreatedDto'
+        '400':
+          description: No vino exactamente uno de los dos ids
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Una médica que no emitió la receta
+        '404':
+          description: La receta no existe o es de otro paciente
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          description: Sin ítems emitidos y vigentes (PRESCRIPTION_SHARE_NO_ACTIVE_ITEMS)
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Compartir una receta con un enlace
+      tags:
+        - clinical-prescription-shares
+    get:
+      description: El paciente ve los suyos; una médica, los que creó para ese paciente. Sin token.
+      operationId: PrescriptionSharesController_list
+      parameters:
+        - name: patientProfileId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PrescriptionShareSummaryDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Es otro paciente
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Enlaces de receta de un paciente
+      tags:
+        - clinical-prescription-shares
+  /clinical/prescription-shares/by-token/{token}:
+    get:
+      description: 200 solo para el paciente dueño o quien lo creó; 404 para cualquier otro. No registra uso.
+      operationId: PrescriptionSharesController_resolveOwnership
+      parameters:
+        - name: token
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrescriptionShareOwnershipDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: El enlace no existe o no es suyo
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Saber si un enlace es de la sesión
+      tags:
+        - clinical-prescription-shares
+  /clinical/prescription-shares/{shareId}/revoke:
+    post:
+      description: Solo el paciente dueño o quien lo creó. Revocar uno ya revocado no cambia nada.
+      operationId: PrescriptionSharesController_revoke
+      parameters:
+        - name: shareId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Revocado
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: El enlace no existe o no es suyo
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Revocar un enlace de receta
+      tags:
+        - clinical-prescription-shares
+  /public/prescription-shares/{token}:
+    get:
+      description: >-
+        Sin autenticación y sin datos del paciente ni de los fármacos: estado, emisión, nombre y matrícula del
+        prescriptor.
+      operationId: PrescriptionSharesPublicController_read
+      parameters:
+        - name: token
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: user-agent
+          required: true
+          in: header
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPrescriptionShareDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: El enlace no existe
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: Comprobar un enlace de receta compartida
+      tags:
+        - clinical-prescription-shares-public
+      security: []
   /medical-centers/search:
     get:
       description: >-
@@ -46539,6 +47812,152 @@ paths:
       description: >-
         Conciliar gateway contra ledger y abrir excepciones. Requiere JWT y los roles o alcances declarados por el
         controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /payments/gateway-webhooks:
+    post:
+      description: >-
+        Verifica la firma Standard Webhooks y la marca de tiempo, aplica `payment_intent.*` una sola vez (inbox por
+        `webhook-id`) y responde 2xx solo cuando el efecto quedó persistido. Con `payments.via_gateway` apagado responde
+        503 sin efecto.
+      operationId: PaymentsGatewayWebhooksController_receive
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      summary: Recibir un webhook de la pasarela de pagos (idempotente)
+      tags:
+        - payments-gateway-webhooks
+      security: []
+  /payments/gateway-dispatches/pending-reconciliation:
+    get:
+      description: >-
+        Intenciones con una reserva sin `pi_…` más vieja que el plazo (o con fecha ilegible). Bloquean la deuda hasta
+        que se concilian o se cierran.
+      operationId: PaymentsGatewayDispatchesController_listPending
+      parameters: []
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Reservas de despacho que requieren conciliación
+      tags:
+        - payments-gateway-dispatches
+  /payments/gateway-dispatches/{intentId}/reconcile:
+    post:
+      description: >-
+        Reenvía la MISMA creación con la MISMA Idempotency-Key: asocia el cobro que la pasarela ya tenía, o crea el de
+        esta intención una sola vez. Pasadas 23 h no reenvía (409): se cierra a mano. Exige riesgo aprobado.
+      operationId: PaymentsGatewayDispatchesController_reconcile
+      parameters:
+        - name: intentId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReconcileGatewayDispatchDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Conciliar una reserva de despacho con la pasarela
+      tags:
+        - payments-gateway-dispatches
+  /payments/gateway-dispatches/{intentId}/close:
+    post:
+      description: >-
+        No reenvía nada a la pasarela: cancela la intención y libera la deuda. Solo si la reserva ya requiere
+        conciliación. El motivo es obligatorio.
+      operationId: PaymentsGatewayDispatchesController_close
+      parameters:
+        - name: intentId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseGatewayDispatchDto'
+      responses:
+        '201':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Cerrar a mano una reserva de despacho
+      tags:
+        - payments-gateway-dispatches
   /pharma-labs:
     post:
       operationId: PharmaLabsController_create
@@ -50618,6 +52037,51 @@ paths:
       summary: Dispensar el pedido en el mostrador (FAR-E3)
       tags:
         - pharmacy-orders
+  /pharmacy/prescription-shares/{token}:
+    get:
+      description: >-
+        Registra la apertura. Los ítems vigentes de la receta, cruzados por fármaco con los productos de las farmacias
+        del tenant y su disponibilidad por sede. Del paciente, solo iniciales y los últimos 3 dígitos del documento.
+      operationId: PharmacyPrescriptionSharesController_open
+      parameters:
+        - name: token
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: user-agent
+          required: true
+          in: header
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PharmacyPrescriptionShareDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: La sesión no es de una farmacia
+        '404':
+          description: El enlace no existe, o el tenant no tiene farmacia
+        '410':
+          description: Enlace vencido o revocado (`reason` `PRESCRIPTION_SHARE_EXPIRED` o `PRESCRIPTION_SHARE_REVOKED`)
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Abrir una receta compartida desde la farmacia (FAR-02)
+      tags:
+        - pharmacy-prescription-shares
   /pharmacy/{pharmacyId}/dispensations:
     post:
       operationId: PharmacyDispensingController_dispense
@@ -50920,6 +52384,204 @@ paths:
       description: >-
         Consultar qué sedes pueden surtir un conjunto de productos. Requiere JWT y los roles o alcances declarados por
         el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability:
+    put:
+      operationId: PharmacySiteAvailabilityController_setSiteAvailability
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: siteId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: productId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetSiteAvailabilityDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteAvailabilityResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Marcar si una sucursal tiene un producto, y cuántas unidades
+      tags:
+        - pharmacy-inventory
+      description: >-
+        Marcar si una sucursal tiene un producto, y cuántas unidades. Requiere JWT y los roles o alcances declarados por
+        el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync:
+    post:
+      operationId: PharmacyIntegrationSyncController_syncNow
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: connectionId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationSyncResponseDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Traer el stock del sistema de la farmacia y aplicarlo por sede
+      tags:
+        - pharmacy-inventory
+      description: >-
+        Traer el stock del sistema de la farmacia y aplicarlo por sede. Requiere JWT y los roles o alcances declarados
+        por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products:
+    get:
+      operationId: PharmacyIntegrationSyncController_listExternalProducts
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: connectionId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalCatalogListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Catálogo del sistema de la farmacia, con el vínculo de cada código
+      tags:
+        - pharmacy-inventory
+      description: >-
+        Catálogo del sistema de la farmacia, con el vínculo de cada código. Requiere JWT y los roles o alcances
+        declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+  /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches:
+    get:
+      operationId: PharmacyIntegrationSyncController_listSyncBatches
+      parameters:
+        - name: pharmacyId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: connectionId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Entre 1 y 20; por defecto 5
+          schema: {}
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationSyncBatchListDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Últimas sincronizaciones de una conexión
+      tags:
+        - pharmacy-inventory
+      description: >-
+        Últimas sincronizaciones de una conexión. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /ops/change-requests:
     post:
       description: Atarla a una ventana obliga a que el cambio quepa dentro de ella.
@@ -67806,6 +69468,10 @@ tags:
     description: >-
       Operaciones del dominio funcional admin portal. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: admissions
+    description: >-
+      Operaciones del dominio funcional admissions. Consulte el catálogo Markdown de endpoints para payloads mínimos,
+      restricciones, ejemplos completos y semántica de negocio.
   - name: ads
     description: >-
       Operaciones del dominio funcional ads. Consulte el catálogo Markdown de endpoints para payloads mínimos,
@@ -67990,6 +69656,14 @@ tags:
     description: >-
       Operaciones del dominio funcional clinical prescription policies. Consulte el catálogo Markdown de endpoints para
       payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: clinical-prescription-shares
+    description: >-
+      Operaciones del dominio funcional clinical prescription shares. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: clinical-prescription-shares-public
+    description: >-
+      Operaciones del dominio funcional clinical prescription shares public. Consulte el catálogo Markdown de endpoints
+      para payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: clinical-prescriptions
     description: >-
       Operaciones del dominio funcional clinical prescriptions. Consulte el catálogo Markdown de endpoints para payloads
@@ -68494,6 +70168,14 @@ tags:
     description: >-
       Operaciones del dominio funcional payments. Consulte el catálogo Markdown de endpoints para payloads mínimos,
       restricciones, ejemplos completos y semántica de negocio.
+  - name: payments-gateway-dispatches
+    description: >-
+      Operaciones del dominio funcional payments gateway dispatches. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: payments-gateway-webhooks
+    description: >-
+      Operaciones del dominio funcional payments gateway webhooks. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: payments-intents
     description: >-
       Operaciones del dominio funcional payments intents. Consulte el catálogo Markdown de endpoints para payloads
@@ -68574,6 +70256,10 @@ tags:
     description: >-
       Operaciones del dominio funcional pharmacy orders. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: pharmacy-prescription-shares
+    description: >-
+      Operaciones del dominio funcional pharmacy prescription shares. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: pharmacy-public
     description: >-
       Operaciones del dominio funcional pharmacy public. Consulte el catálogo Markdown de endpoints para payloads
@@ -68610,6 +70296,10 @@ tags:
     description: >-
       Operaciones del dominio funcional profiles patients. Consulte el catálogo Markdown de endpoints para payloads
       mínimos, restricciones, ejemplos completos y semántica de negocio.
+  - name: profiles-practitioner-admission
+    description: >-
+      Operaciones del dominio funcional profiles practitioner admission. Consulte el catálogo Markdown de endpoints para
+      payloads mínimos, restricciones, ejemplos completos y semántica de negocio.
   - name: profiles-practitioners
     description: >-
       Operaciones del dominio funcional profiles practitioners. Consulte el catálogo Markdown de endpoints para payloads
@@ -69645,6 +71335,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RegisterPractitionerCredentialDto'
+        attestationAccepted:
+          type: boolean
+          description: true si aceptó la declaración de veracidad y la verificación de sus datos
+        attestationTextVersion:
+          type: string
+          maxLength: 40
+          example: '2026-10-29'
         reason:
           type: string
           description: Motivo del alta administrativa (trazabilidad C-18)
@@ -70866,6 +72563,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RegisterPractitionerCredentialDto'
+        attestationAccepted:
+          type: boolean
+          description: true si aceptó la declaración de veracidad y la verificación de sus datos
+        attestationTextVersion:
+          type: string
+          maxLength: 40
+          example: '2026-10-29'
       required:
         - email
         - password
@@ -70973,6 +72677,1087 @@ components:
         - currentPassword
         - newPassword
       additionalProperties: false
+    AdmissionCodeLabelDto:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+      required:
+        - code
+        - label
+    OwnAdmissionItemDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - LICENSE
+            - CREDENTIAL
+            - SPECIALTY
+            - PROFILE
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+        state:
+          type: string
+          enum:
+            - PENDING
+            - VERIFIED
+            - REJECTED
+            - INFO_REQUIRED
+        reasonText:
+          type: string
+          nullable: true
+        reasonCode:
+          type: string
+          nullable: true
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+      required:
+        - type
+        - id
+        - label
+        - state
+    AdmissionResubmissionsDto:
+      type: object
+      properties:
+        used:
+          type: number
+          description: Reenvíos ya hechos.
+          minimum: 0
+        max:
+          type: number
+          description: Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`).
+          minimum: 0
+        remaining:
+          type: number
+          description: 'Reenvíos que quedan: `max - used`, nunca negativo.'
+          minimum: 0
+      required:
+        - used
+        - max
+        - remaining
+    OwnAdmissionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        submittedAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        infoRequestedText:
+          type: string
+          nullable: true
+        infoDueAt:
+          type: string
+          nullable: true
+        decisionReasonText:
+          type: string
+          nullable: true
+        validUntil:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OwnAdmissionItemDto'
+        resubmissionCount:
+          type: number
+          description: Reenvíos hechos (igual a `resubmissions.used`; se conserva).
+        resubmissions:
+          $ref: '#/components/schemas/AdmissionResubmissionsDto'
+        canResubmit:
+          type: boolean
+          description: 'El servidor decide: el estado admite reenviar y no se llegó al tope.'
+        canWithdraw:
+          type: boolean
+          description: 'El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran.'
+      required:
+        - id
+        - status
+        - submittedAt
+        - dueAt
+        - items
+        - resubmissionCount
+        - resubmissions
+        - canResubmit
+        - canWithdraw
+    ResubmitAdmissionDto:
+      type: object
+      properties:
+        attested:
+          type: boolean
+          description: 'Debe ser `true`: el solicitante acepta la declaración. Sin ella, 412 ADMISSION_ATTESTATION_REQUIRED.'
+        attestationVersion:
+          type: string
+          description: Versión del texto de la declaración que se mostró.
+          maxLength: 32
+          example: 2026-10
+      required:
+        - attested
+        - attestationVersion
+      additionalProperties: false
+    AdmissionItemsSummaryDto:
+      type: object
+      properties:
+        licenses:
+          type: number
+        credentials:
+          type: number
+        specialties:
+          type: number
+      required:
+        - licenses
+        - credentials
+        - specialties
+    AdmissionRequirementsSummaryDto:
+      type: object
+      properties:
+        total:
+          type: number
+        verified:
+          type: number
+        rejected:
+          type: number
+        pending:
+          type: number
+      required:
+        - total
+        - verified
+        - rejected
+        - pending
+    AdmissionActorDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+        - id
+        - name
+    AdmissionPractitionerSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        profession:
+          type: string
+          nullable: true
+        maskedNationalId:
+          type: string
+          nullable: true
+      required:
+        - id
+        - fullName
+    AdmissionSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        status:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        itemsSummary:
+          $ref: '#/components/schemas/AdmissionItemsSummaryDto'
+        requirementsSummary:
+          $ref: '#/components/schemas/AdmissionRequirementsSummaryDto'
+        submittedAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        overdue:
+          type: boolean
+          description: Venció su plazo y la plataforma le debe una respuesta.
+        assignedTo:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionActorDto'
+        rowVersion:
+          type: number
+          description: Versión de la fila; se manda como expectedRowVersion.
+        practitioner:
+          $ref: '#/components/schemas/AdmissionPractitionerSummaryDto'
+      required:
+        - id
+        - type
+        - status
+        - itemsSummary
+        - requirementsSummary
+        - submittedAt
+        - dueAt
+        - overdue
+        - assignedTo
+        - rowVersion
+        - practitioner
+    AdmissionListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionSummaryDto'
+        nextCursor:
+          type: string
+          nullable: true
+        counts:
+          type: object
+          description: Cantidad por código de estado, con los filtros menos el de estado.
+          additionalProperties:
+            type: number
+      required:
+        - items
+        - nextCursor
+        - counts
+    ListAdmissionsQueryDto:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Tipo de admisión; hoy ALTA_DE_DOCTOR.
+          default: ALTA_DE_DOCTOR
+        status:
+          type: string
+          enum:
+            - ENVIADA
+            - EN_REVISION
+            - INFORMACION_REQUERIDA
+            - VERIFICADA
+            - RECHAZADA
+            - SUSPENDIDA
+            - EXPIRADA
+            - RETIRADA
+            - ABANDONADA
+        assignedTo:
+          type: string
+          description: Cuenta asignada, o `me`, o `none` (sin asignar).
+        overdue:
+          type: boolean
+          description: true = sólo vencidas.
+        q:
+          type: string
+          description: Nombre, cédula o matrícula (2 a 80 caracteres).
+          maxLength: 80
+        cursor:
+          type: string
+          description: Cursor opaco de la página anterior.
+        limit:
+          type: number
+          minimum: 1
+          maximum: 100
+          default: 25
+        sort:
+          type: string
+          enum:
+            - due_at
+          default: due_at
+      additionalProperties: false
+    AdmissionSweepResultDto:
+      type: object
+      properties:
+        expired:
+          type: number
+          description: Verificaciones vencidas (VERIFICADA a EXPIRADA).
+        abandoned:
+          type: number
+          description: Solicitudes cerradas por falta de respuesta (a ABANDONADA).
+        skipped:
+          type: boolean
+          description: '`true` si no corrió porque otro nodo tenía el barrido en curso (no es un error: repetir es inocuo).'
+      required:
+        - expired
+        - abandoned
+        - skipped
+    AdmissionPractitionerDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        profession:
+          type: string
+          nullable: true
+        maskedNationalId:
+          type: string
+          nullable: true
+        nationalId:
+          type: string
+          nullable: true
+        nationalIdIssuer:
+          type: string
+          nullable: true
+        birthDate:
+          type: string
+          nullable: true
+        age:
+          type: number
+          nullable: true
+        occupation:
+          type: string
+          nullable: true
+        personalMobile:
+          type: string
+          nullable: true
+        personalEmail:
+          type: string
+          nullable: true
+        workMobile:
+          type: string
+          nullable: true
+        workPhone:
+          type: string
+          nullable: true
+        workEmail:
+          type: string
+          nullable: true
+      required:
+        - id
+        - fullName
+    AdmissionLicenseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requirementCode:
+          type: string
+        number:
+          type: string
+        jurisdiction:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        fileId:
+          type: string
+          nullable: true
+          format: uuid
+        verifiedAt:
+          type: string
+          nullable: true
+        verificationSourceUri:
+          type: string
+          nullable: true
+        rejectionReasonText:
+          type: string
+          nullable: true
+      required:
+        - id
+        - requirementCode
+        - number
+        - state
+    AdmissionCredentialDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requirementCode:
+          type: string
+        level:
+          type: string
+        title:
+          type: string
+          nullable: true
+        institution:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        fileId:
+          type: string
+          nullable: true
+          format: uuid
+        verifiedAt:
+          type: string
+          nullable: true
+        verificationSourceUri:
+          type: string
+          nullable: true
+        rejectionReasonText:
+          type: string
+          nullable: true
+      required:
+        - id
+        - requirementCode
+        - level
+        - state
+    AdmissionSpecialtyDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requirementCode:
+          type: string
+        name:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        supportingCredentialId:
+          type: string
+          nullable: true
+          format: uuid
+      required:
+        - id
+        - requirementCode
+        - state
+    AdmissionEventDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        fromStatus:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        toStatus:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        itemType:
+          type: string
+          nullable: true
+        itemId:
+          type: string
+          nullable: true
+          format: uuid
+        requirementCode:
+          type: string
+          nullable: true
+        verificationSourceUri:
+          type: string
+          nullable: true
+        reasonCode:
+          type: string
+          nullable: true
+        reasonText:
+          type: string
+          nullable: true
+        actor:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionActorDto'
+        actorRole:
+          type: string
+          nullable: true
+        occurredAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - occurredAt
+    AdmissionChecklistItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+          format: uuid
+          description: >-
+            Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y
+            se materializa.
+        itemId:
+          type: string
+          format: uuid
+          description: 'La ficha: matrícula, título, especialidad o perfil.'
+        itemType:
+          type: string
+          enum:
+            - LICENSE
+            - CREDENTIAL
+            - SPECIALTY
+            - PROFILE
+        label:
+          type: string
+        state:
+          type: string
+          enum:
+            - PENDING
+            - VERIFIED
+            - REJECTED
+            - INFO_REQUIRED
+        fileId:
+          type: string
+          nullable: true
+          format: uuid
+        verificationSourceUri:
+          type: string
+          nullable: true
+        sourceType:
+          type: string
+          nullable: true
+          enum:
+            - REGISTRO_MINSALUD
+            - COLEGIO_MEDICO
+            - COLEGIO_ODONTOLOGOS
+            - SEDES
+            - SEGIP
+            - DOCUMENTO_APORTADO
+            - OTRO
+        sourceRef:
+          type: string
+          nullable: true
+        sourceConsultedAt:
+          type: string
+          nullable: true
+        reasonCode:
+          type: string
+          nullable: true
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+        reasonText:
+          type: string
+          nullable: true
+        internalNote:
+          type: string
+          nullable: true
+          description: Sólo para el personal; nunca llega al médico.
+        reviewedBy:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionActorDto'
+        reviewedAt:
+          type: string
+          nullable: true
+        evidenceChanged:
+          type: boolean
+          description: 'El dato o el archivo cambió después de revisarse: la revisión ya no vale.'
+        evidenceSha256:
+          type: string
+          description: >-
+            Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem:
+            así el servidor sabe qué vio el revisor.
+        rowVersion:
+          type: number
+          nullable: true
+          description: expectedRowVersion del ítem.
+      required:
+        - itemId
+        - itemType
+        - label
+        - state
+        - evidenceChanged
+        - evidenceSha256
+    AdmissionChecklistRequirementDto:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+          nullable: true
+        required:
+          type: boolean
+        evidenceKind:
+          type: string
+          enum:
+            - DOCUMENT
+            - DATA
+        requiresSource:
+          type: boolean
+          description: Verificar un ítem exige declarar la fuente consultada.
+        professionGroup:
+          type: string
+          nullable: true
+          enum:
+            - MEDICO
+            - ODONTOLOGO
+        minItems:
+          type: number
+          nullable: true
+        maxItems:
+          type: number
+          nullable: true
+        state:
+          type: string
+          enum:
+            - NOT_PROVIDED
+            - MISSING
+            - PENDING
+            - INFO_REQUIRED
+            - VERIFIED
+            - REJECTED
+        satisfied:
+          type: boolean
+          description: El requisito está cumplido.
+        blockedBy:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionChecklistItemDto'
+      required:
+        - code
+        - label
+        - required
+        - evidenceKind
+        - requiresSource
+        - state
+        - satisfied
+        - items
+    AdmissionBlockerDto:
+      type: object
+      properties:
+        requirementCode:
+          type: string
+        label:
+          type: string
+        reason:
+          type: string
+          enum:
+            - MISSING
+            - REJECTED
+            - PENDING
+            - INFO_REQUIRED
+            - BELOW_MINIMUM
+      required:
+        - requirementCode
+        - label
+        - reason
+    AdmissionDocumentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requirementCode:
+          type: string
+        fileId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        mimeType:
+          type: string
+        sizeBytes:
+          type: number
+        uploadedAt:
+          type: string
+          format: date-time
+        pages:
+          type: number
+          nullable: true
+        reviewState:
+          type: string
+          enum:
+            - PENDING
+            - VERIFIED
+            - REJECTED
+            - INFO_REQUIRED
+        evidenceSha256:
+          type: string
+          description: Huella (sha256) de la evidencia del ítem al que pertenece el archivo.
+      required:
+        - id
+        - requirementCode
+        - fileId
+        - name
+        - mimeType
+        - sizeBytes
+        - uploadedAt
+        - reviewState
+        - evidenceSha256
+    AdmissionDetailDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        status:
+          $ref: '#/components/schemas/AdmissionCodeLabelDto'
+        itemsSummary:
+          $ref: '#/components/schemas/AdmissionItemsSummaryDto'
+        requirementsSummary:
+          $ref: '#/components/schemas/AdmissionRequirementsSummaryDto'
+        submittedAt:
+          type: string
+          format: date-time
+        dueAt:
+          type: string
+          format: date-time
+        overdue:
+          type: boolean
+          description: Venció su plazo y la plataforma le debe una respuesta.
+        assignedTo:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/AdmissionActorDto'
+        rowVersion:
+          type: number
+          description: Versión de la fila; se manda como expectedRowVersion.
+        practitioner:
+          $ref: '#/components/schemas/AdmissionPractitionerDetailDto'
+        licenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionLicenseDto'
+        credentials:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionCredentialDto'
+        specialties:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionSpecialtyDto'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionEventDto'
+        infoRequestedText:
+          type: string
+          nullable: true
+        infoDueAt:
+          type: string
+          nullable: true
+        decisionReasonText:
+          type: string
+          nullable: true
+        decisionReasonCode:
+          type: string
+          nullable: true
+        internalNote:
+          type: string
+          nullable: true
+        validUntil:
+          type: string
+          nullable: true
+          description: YYYY-MM-DD, inclusive, fin de día en America/La_Paz.
+        resubmissionCount:
+          type: number
+        attestedAt:
+          type: string
+          nullable: true
+        fourEyesRequired:
+          type: boolean
+          description: La configuración exige un aprobador distinto de los revisores.
+        requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionChecklistRequirementDto'
+        blockers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionBlockerDto'
+        canVerify:
+          type: boolean
+          description: Hoy se podría resolver VERIFICADA (lo decide el servidor).
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionDocumentDto'
+        submittedForm:
+          type: object
+          description: El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`.
+          additionalProperties: true
+        submittedFormSource:
+          type: string
+          enum:
+            - SNAPSHOT
+            - LIVE
+          description: >-
+            SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las
+            del backfill).
+      required:
+        - id
+        - type
+        - status
+        - itemsSummary
+        - requirementsSummary
+        - submittedAt
+        - dueAt
+        - overdue
+        - assignedTo
+        - rowVersion
+        - practitioner
+        - licenses
+        - credentials
+        - specialties
+        - events
+        - resubmissionCount
+        - fourEyesRequired
+        - requirements
+        - blockers
+        - canVerify
+        - documents
+        - submittedForm
+        - submittedFormSource
+    ClaimAdmissionDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+      required:
+        - expectedRowVersion
+      additionalProperties: false
+    ReassignAdmissionDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+        toUserId:
+          type: string
+          format: uuid
+          description: Cuenta del revisor que recibe la admisión.
+      required:
+        - expectedRowVersion
+        - toUserId
+      additionalProperties: false
+    AdmissionItemRefDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - LICENSE
+            - CREDENTIAL
+            - SPECIALTY
+            - PROFILE
+        id:
+          type: string
+          format: uuid
+          description: La ficha (matrícula, título, especialidad o perfil).
+      required:
+        - type
+        - id
+      additionalProperties: false
+    RequestAdmissionInfoDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+        reason:
+          type: string
+          maxLength: 500
+          description: Qué debe corregir o aportar el médico.
+        reasonCode:
+          type: string
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+        items:
+          description: Ítems puntuales; los marca INFO_REQUIRED.
+          type: array
+          items:
+            $ref: '#/components/schemas/AdmissionItemRefDto'
+      required:
+        - expectedRowVersion
+        - reason
+      additionalProperties: false
+    ReviewAdmissionItemDto:
+      type: object
+      properties:
+        decision:
+          type: string
+          enum:
+            - VERIFIED
+            - REJECTED
+            - INFO_REQUIRED
+        reason:
+          type: string
+          maxLength: 500
+          description: Obligatorio si no es VERIFIED. Lo ve el médico.
+        reasonCode:
+          type: string
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+          description: Motivo estructurado; por omisión OTRO.
+        internalNote:
+          type: string
+          maxLength: 1000
+          description: 'Nota interna: nunca llega al médico.'
+        sourceType:
+          type: string
+          enum:
+            - REGISTRO_MINSALUD
+            - COLEGIO_MEDICO
+            - COLEGIO_ODONTOLOGOS
+            - SEDES
+            - SEGIP
+            - DOCUMENTO_APORTADO
+            - OTRO
+          description: Fuente consultada (tipo).
+        sourceRef:
+          type: string
+          maxLength: 500
+          description: Nº de trámite, comprobante o URL de la fuente.
+        sourceConsultedAt:
+          type: string
+          format: date-time
+          description: Cuándo se consultó la fuente (por omisión, ahora).
+        verificationSourceUri:
+          type: string
+          maxLength: 2000
+          description: >-
+            URL de la fuente consultada. Compatibilidad: con VERIFIED alcanza como fuente (se registra como tipo OTRO si
+            no viene `sourceType`).
+        evidenceSha256:
+          type: string
+          description: >-
+            Huella (`evidenceSha256`) del ítem tal como la entregó `GET /admissions/:id`: lo que el revisor tuvo
+            delante. OBLIGATORIA para VERIFIED; si ya no coincide con la evidencia viva responde 409
+            ADMISSION_EVIDENCE_CHANGED y no cambia nada.
+          pattern: ^[0-9a-f]{64}$
+        expectedRowVersion:
+          type: number
+          description: Versión del ÍTEM (`rowVersion` del item del checklist).
+          minimum: 1
+      required:
+        - decision
+        - expectedRowVersion
+      additionalProperties: false
+    DecideAdmissionDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+        decision:
+          type: string
+          enum:
+            - VERIFIED
+            - REJECTED
+        reason:
+          type: string
+          maxLength: 500
+          description: Obligatorio al rechazar. Lo ve el médico.
+        reasonCode:
+          type: string
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+        internalNote:
+          type: string
+          maxLength: 1000
+          description: 'Nota interna: nunca llega al médico.'
+        items:
+          deprecated: true
+          description: >-
+            YA NO SE ACEPTA: el estado de cada ítem lo fija `.../items/:itemId/review` y el servidor lo deriva de las
+            revisiones. Mandarlo responde 422 ADMISSION_DECISION_ITEMS_NOT_ACCEPTED.
+          type: array
+          items:
+            type: string
+      required:
+        - expectedRowVersion
+        - decision
+      additionalProperties: false
+    SuspendAdmissionDto:
+      type: object
+      properties:
+        expectedRowVersion:
+          type: number
+          description: Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE.
+          minimum: 1
+        reason:
+          type: string
+          maxLength: 500
+        reasonCode:
+          type: string
+          enum:
+            - ILEGIBLE
+            - VENCIDO
+            - NO_COINCIDE_NOMBRE
+            - NO_FIGURA_EN_REGISTRO
+            - DOCUMENTO_INCOMPLETO
+            - SOSPECHA_DE_FRAUDE
+            - OTRO
+        internalNote:
+          type: string
+          maxLength: 1000
+      required:
+        - expectedRowVersion
+        - reason
+      additionalProperties: false
+    AdmissionDocumentUrlDto:
+      type: object
+      properties:
+        url:
+          type: string
+          description: Ruta de la API para abrir el documento (vida corta, atada al actor).
+        expiresAt:
+          type: string
+          format: date-time
+        name:
+          type: string
+        mimeType:
+          type: string
+      required:
+        - url
+        - expiresAt
+        - name
+        - mimeType
     PractitionerSignatureAssetsDto:
       type: object
       properties:
@@ -72040,6 +74825,28 @@ components:
       required:
         - id
         - status
+    PractitionerVerificationDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - VERIFIED
+            - IN_REVIEW
+            - UNVERIFIED
+            - SUSPENDED
+            - EXPIRED
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+        validUntil:
+          type: string
+          nullable: true
+      required:
+        - status
+        - verifiedAt
+        - validUntil
     PractitionerSpecialtyDto:
       type: object
       properties:
@@ -72346,6 +75153,8 @@ components:
         verificationStatusConceptId:
           type: string
           format: uuid
+        verification:
+          $ref: '#/components/schemas/PractitionerVerificationDto'
         practiceStatusConceptId:
           type: string
           format: uuid
@@ -72384,6 +75193,7 @@ components:
         - practitionerCode
         - practitionerCategoryConceptId
         - verificationStatusConceptId
+        - verification
         - practiceStatusConceptId
         - acceptsNewPatients
         - telehealthAvailable
@@ -72855,7 +75665,11 @@ components:
       properties:
         decision:
           type: string
-          description: Resultado de la verificación
+          description: >-
+            Resultado de la verificación. Mientras el profesional tenga una admisión abierta (o esté pendiente),
+            VERIFIED se rechaza con 412 ADMISSION_VERIFY_VIA_REVIEW: el título se verifica desde `POST
+            /admissions/:id/items/:itemId/review`, con la huella de lo que se vio. REJECTED sigue valiendo para quien
+            tomó la revisión.
           enum:
             - VERIFIED
             - REJECTED
@@ -72866,6 +75680,10 @@ components:
             OBLIGATORIA cuando la decisión es VERIFIED: habilitar a un profesional sin declarar contra qué se comprobó
             su matrícula no deja rastro auditable. Para REJECTED es opcional, porque se puede rechazar por defectos de
             forma del propio documento sin consultar a nadie.
+        reason:
+          type: string
+          maxLength: 500
+          description: Motivo del rechazo; lo ve el profesional en su admisión.
       required:
         - decision
       additionalProperties: false
@@ -74449,6 +77267,7 @@ components:
             - SCHEDULING
             - MESSAGES
             - SOCIAL
+            - ADMISSION
         optedIn:
           type: boolean
       required:
@@ -84706,6 +87525,75 @@ components:
         - medication
         - offers
         - generatedAt
+    BulkRequestDto:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum:
+            - CREATE
+            - UPDATE
+            - UPSERT
+        dryRun:
+          type: boolean
+          default: false
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          minItems: 1
+          maxItems: 1000
+      required:
+        - mode
+        - rows
+      additionalProperties: false
+    BulkRowErrorDto:
+      type: object
+      properties:
+        field:
+          type: string
+        reason:
+          type: string
+        message:
+          type: string
+      required:
+        - field
+        - reason
+    BulkRowResultDto:
+      type: object
+      properties:
+        row:
+          type: number
+        outcome:
+          type: string
+          enum:
+            - CREATED
+            - UPDATED
+            - REJECTED
+            - UNCHANGED
+        id:
+          type: string
+          format: uuid
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkRowErrorDto'
+      required:
+        - row
+        - outcome
+    BulkResponseDto:
+      type: object
+      properties:
+        dryRun:
+          type: boolean
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkRowResultDto'
+      required:
+        - dryRun
+        - results
     ApplyContentPackDto:
       type: object
       properties:
@@ -91877,6 +94765,122 @@ components:
         - practitionerDelegateAssignmentId
         - purpose
       additionalProperties: false
+    CreatePrescriptionShareDto:
+      type: object
+      properties:
+        encounterId:
+          type: string
+          format: uuid
+          description: Encuentro de la receta. Excluye a `medicationRequestId`.
+        medicationRequestId:
+          type: string
+          format: uuid
+          description: Fármaco suelto. Excluye a `encounterId`.
+      additionalProperties: false
+    PrescriptionShareCreatedDto:
+      type: object
+      properties:
+        shareId:
+          type: string
+          format: uuid
+        url:
+          type: string
+          description: 'Enlace para compartir: `<web>/rx/<token>`'
+        token:
+          type: string
+          description: Token en claro; se devuelve una sola vez
+        expiresAt:
+          type: string
+          format: date-time
+        itemCount:
+          type: number
+      required:
+        - shareId
+        - url
+        - token
+        - expiresAt
+        - itemCount
+    PrescriptionShareSummaryDto:
+      type: object
+      properties:
+        shareId:
+          type: string
+          format: uuid
+        resourceType:
+          type: string
+          enum:
+            - PRESCRIPTION_ENCOUNTER
+            - MEDICATION_REQUEST
+        resourceId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - VALID
+            - EXPIRED
+            - REVOKED
+        uses:
+          type: number
+      required:
+        - shareId
+        - resourceType
+        - resourceId
+        - createdAt
+        - expiresAt
+        - status
+        - uses
+    PrescriptionShareOwnershipDto:
+      type: object
+      properties:
+        shareId:
+          type: string
+          format: uuid
+        resourceType:
+          type: string
+          enum:
+            - PRESCRIPTION_ENCOUNTER
+            - MEDICATION_REQUEST
+        resourceId:
+          type: string
+          format: uuid
+      required:
+        - shareId
+        - resourceType
+        - resourceId
+    PublicPrescriptionShareDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - VALID
+            - EXPIRED
+            - REVOKED
+        issuedAt:
+          type: string
+          format: date-time
+          nullable: true
+        prescriberName:
+          type: string
+          nullable: true
+        prescriberLicense:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PrescriberLicenseDto'
+        itemCount:
+          type: number
+      required:
+        - status
+        - issuedAt
+        - itemCount
     MedicalCenterOfferDto:
       type: object
       properties:
@@ -98856,6 +101860,14 @@ components:
         authorizationCode:
           type: string
           description: Código de autorización del emisor
+        paymentMethodType:
+          type: string
+          description: Medio de pago en la pasarela. Obligatorio sólo con `payments.via_gateway` encendido; sin el flag se ignora.
+          enum:
+            - qr
+            - card
+            - bank_transfer
+            - wallet
       required:
         - operation
       additionalProperties: false
@@ -99232,6 +102244,33 @@ components:
         - periodStart
         - periodEnd
         - providerRecords
+      additionalProperties: false
+    ReconcileGatewayDispatchDto:
+      type: object
+      properties:
+        paymentMethodType:
+          type: string
+          description: >-
+            El MISMO medio de pago con el que se intentó el cobro la primera vez (no se persiste): con otro, la pasarela
+            contesta `idempotency_key_reused`.
+          enum:
+            - qr
+            - card
+            - bank_transfer
+            - wallet
+      required:
+        - paymentMethodType
+      additionalProperties: false
+    CloseGatewayDispatchDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: 'Motivo del cierre, obligatorio: qué se comprobó contra la pasarela. Sin datos personales ni de pacientes.'
+          minLength: 10
+          maxLength: 300
+      required:
+        - reason
       additionalProperties: false
     CreatePharmaLabDto:
       type: object
@@ -100854,6 +103893,156 @@ components:
       required:
         - pickupCode
       additionalProperties: false
+    PharmacyPrescriptionLicenseDto:
+      type: object
+      properties:
+        number:
+          type: string
+        authority:
+          type: string
+          nullable: true
+        state:
+          type: string
+          enum:
+            - ACTIVE
+            - PENDING
+      required:
+        - number
+        - state
+    PharmacyPrescriptionPrescriberDto:
+      type: object
+      properties:
+        name:
+          type: string
+          nullable: true
+        license:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PharmacyPrescriptionLicenseDto'
+    PharmacyPrescriptionPatientDto:
+      type: object
+      properties:
+        maskedName:
+          type: string
+          nullable: true
+          example: L. P. Q.
+        documentLast3:
+          type: string
+          nullable: true
+          example: '123'
+    PharmacyPrescriptionSiteDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        siteName:
+          type: string
+        available:
+          type: boolean
+        quantity:
+          type: number
+          nullable: true
+        stockUpdatedAt:
+          type: string
+          nullable: true
+      required:
+        - siteId
+        - siteName
+        - available
+    PharmacyPrescriptionMatchDto:
+      type: object
+      properties:
+        pharmacyId:
+          type: string
+          format: uuid
+        pharmacyProductId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price:
+          type: string
+          nullable: true
+        currencyCode:
+          type: string
+          nullable: true
+        requiresPrescription:
+          type: boolean
+        outOfStockDeclared:
+          type: boolean
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyPrescriptionSiteDto'
+      required:
+        - pharmacyId
+        - pharmacyProductId
+        - name
+        - requiresPrescription
+        - outOfStockDeclared
+        - sites
+    PharmacyPrescriptionItemDto:
+      type: object
+      properties:
+        medicationRequestId:
+          type: string
+          format: uuid
+        medicationConceptId:
+          type: string
+          format: uuid
+        display:
+          type: string
+          nullable: true
+        dosageText:
+          type: string
+          nullable: true
+        prescribedQuantity:
+          type: number
+          nullable: true
+        unitCode:
+          type: string
+          nullable: true
+        dispensedQuantity:
+          type: number
+          nullable: true
+        remainingQuantity:
+          type: number
+          nullable: true
+        matches:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyPrescriptionMatchDto'
+      required:
+        - medicationRequestId
+        - medicationConceptId
+        - matches
+    PharmacyPrescriptionShareDto:
+      type: object
+      properties:
+        shareId:
+          type: string
+          format: uuid
+        issuedAt:
+          type: string
+          nullable: true
+        validTo:
+          type: string
+          nullable: true
+        prescriber:
+          $ref: '#/components/schemas/PharmacyPrescriptionPrescriberDto'
+        patient:
+          $ref: '#/components/schemas/PharmacyPrescriptionPatientDto'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PharmacyPrescriptionItemDto'
+      required:
+        - shareId
+        - prescriber
+        - patient
+        - items
     DispensationLineDto:
       type: object
       properties:
@@ -101171,6 +104360,222 @@ components:
         - requestedProductIds
         - items
         - count
+    SetSiteAvailabilityDto:
+      type: object
+      properties:
+        available:
+          type: boolean
+          description: «Lo tengo» en esta sucursal
+        quantity:
+          type: number
+          minimum: 0
+          maximum: 1000000
+      required:
+        - available
+      additionalProperties: false
+    SiteAvailabilityResponseDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        available:
+          type: boolean
+        quantity:
+          type: number
+        stockUpdatedAt:
+          type: string
+          format: date-time
+      required:
+        - siteId
+        - productId
+        - available
+        - quantity
+        - stockUpdatedAt
+    UnmappedExternalProductDto:
+      type: object
+      properties:
+        externalCode:
+          type: string
+        name:
+          type: string
+      required:
+        - externalCode
+        - name
+    IntegrationSyncResponseDto:
+      type: object
+      properties:
+        batchId:
+          type: string
+          format: uuid
+        received:
+          type: number
+        mapped:
+          type: number
+        unmapped:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnmappedExternalProductDto'
+        applied:
+          type: number
+      required:
+        - batchId
+        - received
+        - mapped
+        - unmapped
+        - applied
+    IntegrationConnectionDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        pharmacySiteId:
+          type: object
+          format: uuid
+          nullable: true
+        siteName:
+          type: object
+          nullable: true
+        integrationMode:
+          type: string
+          enum:
+            - BATCH
+            - REALTIME
+        supportsStockQuery:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        providerConfigured:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - integrationMode
+        - supportsStockQuery
+        - status
+        - providerConfigured
+        - createdAt
+    IntegrationConnectionListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationConnectionDto'
+        providerConfigured:
+          type: boolean
+      required:
+        - items
+        - providerConfigured
+    IntegrationMappingDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        externalProductCode:
+          type: string
+        pharmacyProductId:
+          type: string
+          format: uuid
+        productCode:
+          type: object
+          nullable: true
+        productName:
+          type: object
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - externalProductCode
+        - pharmacyProductId
+        - createdAt
+    IntegrationMappingListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationMappingDto'
+      required:
+        - items
+    ExternalCatalogProductDto:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        presentation:
+          type: object
+          nullable: true
+        unitCode:
+          type: object
+          nullable: true
+        mappedProductId:
+          type: object
+          format: uuid
+          nullable: true
+      required:
+        - code
+        - name
+    ExternalCatalogListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalCatalogProductDto'
+      required:
+        - items
+    IntegrationSyncBatchDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - RECEIVED
+            - COMPLETED
+        receivedAt:
+          type: object
+          format: date-time
+          nullable: true
+        completedAt:
+          type: object
+          format: date-time
+          nullable: true
+        itemCount:
+          type: number
+        discrepancies:
+          type: number
+      required:
+        - id
+        - status
+        - itemCount
+        - discrepancies
+    IntegrationSyncBatchListDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationSyncBatchDto'
+      required:
+        - items
     CreateChangeRequestDto:
       type: object
       properties:

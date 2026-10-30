@@ -2,11 +2,11 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1627 árboles de decisión**.
+**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1665 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1469 · sin ellas: 158
+- Operaciones con decisiones propias: 1506 · sin ellas: 159
 - Operaciones sin proceso asignado: 0
-- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
+- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 14 · MIXTO 26 · CURADO_EN_DOCUMENTO 2
 
 Método y límites: [README del inventario](../README.md). Los procesos de módulo se construyen del README de cada módulo (tabla UC → ruta); lo que el README no asigna a un caso de uso se agrupa por controlador y se marca `AGRUPACION_POR_CONTROLADOR`.
 
@@ -31,7 +31,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `crm` | 1 | 16 | 0 | [crm.md](crm.md) |
 | `cross_store_consistency` | 1 | 16 | 0 | [cross_store_consistency.md](cross_store_consistency.md) |
 | `data_catalog` | 1 | 38 | 0 | [data_catalog.md](data_catalog.md) |
-| `delegated_access` | 1 | 12 | 0 | [delegated_access.md](delegated_access.md) |
+| `delegated_access` | 1 | 17 | 0 | [delegated_access.md](delegated_access.md) |
 | `diagnostic_units` | 1 | 21 | 0 | [diagnostic_units.md](diagnostic_units.md) |
 | `diagnostics` | 1 | 31 | 0 | [diagnostics.md](diagnostics.md) |
 | `directory` | 1 | 26 | 0 | [directory.md](directory.md) |
@@ -56,15 +56,15 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `object_storage` | 1 | 14 | 0 | [object_storage.md](object_storage.md) |
 | `ops_console` | 1 | 9 | 0 | [ops_console.md](ops_console.md) |
 | `organization_extensions` | 1 | 9 | 0 | [organization_extensions.md](organization_extensions.md) |
-| `payments` | 1 | 14 | 1 | [payments.md](payments.md) |
+| `payments` | 1 | 18 | 1 | [payments.md](payments.md) |
 | `pharma_lab` | 1 | 76 | 3 | [pharma_lab.md](pharma_lab.md) |
-| `pharmacy` | 1 | 33 | 0 | [pharmacy.md](pharmacy.md) |
-| `pharmacy_inventory` | 1 | 30 | 1 | [pharmacy_inventory.md](pharmacy_inventory.md) |
+| `pharmacy` | 1 | 37 | 0 | [pharmacy.md](pharmacy.md) |
+| `pharmacy_inventory` | 1 | 37 | 1 | [pharmacy_inventory.md](pharmacy_inventory.md) |
 | `platform_ops` | 1 | 15 | 0 | [platform_ops.md](platform_ops.md) |
 | `polyglot_storage` | 1 | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |
 | `practice` | 1 | 37 | 1 | [practice.md](practice.md) |
 | `procedures_perioperative` | 1 | 32 | 0 | [procedures_perioperative.md](procedures_perioperative.md) |
-| `profiles` | 1 | 67 | 0 | [profiles.md](profiles.md) |
+| `profiles` | 1 | 85 | 0 | [profiles.md](profiles.md) |
 | `promotions` | 1 | 20 | 0 | [promotions.md](promotions.md) |
 | `public` | 1 | 4 | 0 | [public.md](public.md) |
 | `qa_execution` | 1 | 9 | 0 | [qa_execution.md](qa_execution.md) |

@@ -7,46 +7,52 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Concepto | Cantidad |
 |---|---|
 | Tablas en el DDL del modelo | 1230 |
-| Entidades del ORM | 1283 |
+| Entidades del ORM | 1289 |
 | Tablas del DDL con entidad | 1230 |
 | Tablas del DDL **sin** entidad | 0 |
-| Entidades del ORM **sin** tabla en el DDL | 53 |
+| Entidades del ORM **sin** tabla en el DDL | 59 |
 | Columnas del DDL ausentes en su entidad | 1 |
 | Columnas con nulabilidad divergente | 26 |
 | Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 89 |
+| Columnas de la entidad que el DDL no tiene | 95 |
 
 ## Entidades del ORM sin tabla en el DDL
 
 | Tabla que declara | Clase | Dónde la declara el modelo |
 |---|---|---|
-| `accounting.practitioner_simple_accounts` | PractitionerSimpleAccounts | **en ninguna fuente de DDL del modelo** |
-| `accounting.practitioner_simple_records` | PractitionerSimpleRecords | **en ninguna fuente de DDL del modelo** |
-| `accounting.practitioner_simple_transactions` | PractitionerSimpleTransactions | **en ninguna fuente de DDL del modelo** |
-| `billing.siat_simulated_invoices` | SiatSimulatedInvoices | **en ninguna fuente de DDL del modelo** |
-| `billing.siat_simulated_outbox` | SiatSimulatedOutbox | **en ninguna fuente de DDL del modelo** |
+| `accounting.practitioner_simple_accounts` | PractitionerSimpleAccounts | sólo en un parche: `SQL/patches/2026-10-24_accounting_practitioner_simple.sql` |
+| `accounting.practitioner_simple_records` | PractitionerSimpleRecords | sólo en un parche: `SQL/patches/2026-10-24_accounting_practitioner_simple.sql` |
+| `accounting.practitioner_simple_transactions` | PractitionerSimpleTransactions | sólo en un parche: `SQL/patches/2026-10-24_accounting_practitioner_simple.sql` |
+| `billing.siat_simulated_invoices` | SiatSimulatedInvoices | sólo en un parche: `SQL/patches/2026-10-11_v4244_billing_siat_simulated.sql` |
+| `billing.siat_simulated_outbox` | SiatSimulatedOutbox | sólo en un parche: `SQL/patches/2026-10-11_v4244_billing_siat_simulated.sql` |
 | `clinical.patient_reported_health_statements` | PatientReportedHealthStatements | **en ninguna fuente de DDL del modelo** |
-| `clinical.received_services` | ReceivedServices | **en ninguna fuente de DDL del modelo** |
-| `clinical.service_request_notes` | ServiceRequestNotes | **en ninguna fuente de DDL del modelo** |
+| `clinical.received_services` | ReceivedServices | sólo en un parche: `SQL/patches/2026-10-25_v4249_clinical_received_services.sql` |
+| `clinical.service_request_notes` | ServiceRequestNotes | sólo en un parche: `SQL/patches/2026-10-26_v4253_clinical_service_request_notes.sql` |
 | `data_catalog.catalog_operation_impacts` | CatalogOperationImpacts | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
 | `data_catalog.catalog_operations` | CatalogOperations | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
 | `data_catalog.catalog_process_step_operations` | CatalogProcessStepOperations | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
 | `data_catalog.catalog_process_steps` | CatalogProcessSteps | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
 | `data_catalog.catalog_processes` | CatalogProcesses | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
+| `delegated_access.shared_access_link_uses` | SharedAccessLinkUses | sólo en un parche: `SQL/patches/2026-10-24_v4249_shared_access_links.sql` |
+| `delegated_access.shared_access_links` | SharedAccessLinks | sólo en un parche: `SQL/patches/2026-10-24_v4249_shared_access_links.sql` |
 | `directory.tenant_medical_facilities` | TenantMedicalFacilities | **en ninguna fuente de DDL del modelo** |
 | `directory.tenant_medical_facility_sites` | TenantMedicalFacilitySites | **en ninguna fuente de DDL del modelo** |
 | `organization_extensions.data_use_agreements` | DataUseAgreements | **en ninguna fuente de DDL del modelo** |
 | `payments.cash_registers` | CashRegisters | **en ninguna fuente de DDL del modelo** |
-| `pharmacy.pharmacy_on_call_shifts` | PharmacyOnCallShifts | **en ninguna fuente de DDL del modelo** |
-| `pharmacy.pharmacy_product_categories` | PharmacyProductCategories | **en ninguna fuente de DDL del modelo** |
-| `pharmacy.pharmacy_product_images` | PharmacyProductImages | **en ninguna fuente de DDL del modelo** |
+| `pharmacy.pharmacy_on_call_shifts` | PharmacyOnCallShifts | sólo en un parche: `SQL/patches/2026-10-26_v4260_pharmacy_open_24h_on_call_shifts.sql` |
+| `pharmacy.pharmacy_product_categories` | PharmacyProductCategories | sólo en un parche: `SQL/patches/2026-10-26_v4255_pharmacy_catalog.sql` |
+| `pharmacy.pharmacy_product_images` | PharmacyProductImages | sólo en un parche: `SQL/patches/2026-10-26_v4255_pharmacy_catalog.sql` |
 | `pharmacy_inventory.purchase_quotations` | PurchaseQuotations | sólo en un parche: `SQL/patches/2026-09-08_v428_billing_quotations.sql` |
 | `procedures_perioperative.instrument_sets` | InstrumentSets | **en ninguna fuente de DDL del modelo** |
 | `procedures_perioperative.sterilization_loads` | SterilizationLoads | **en ninguna fuente de DDL del modelo** |
-| `profiles.patient_primary_practitioners` | PatientPrimaryPractitioners | **en ninguna fuente de DDL del modelo** |
-| `scheduling.appointment_payment_receipts` | AppointmentPaymentReceipts | **en ninguna fuente de DDL del modelo** |
+| `profiles.admission_requirements` | AdmissionRequirements | **en ninguna fuente de DDL del modelo** |
+| `profiles.patient_primary_practitioners` | PatientPrimaryPractitioners | sólo en un parche: `SQL/patches/2026-10-28_v4265_patient_primary_practitioners.sql` |
+| `profiles.practitioner_admission_events` | PractitionerAdmissionEvents | **en ninguna fuente de DDL del modelo** |
+| `profiles.practitioner_admission_reviews` | PractitionerAdmissionReviews | **en ninguna fuente de DDL del modelo** |
+| `profiles.practitioner_admissions` | PractitionerAdmissions | **en ninguna fuente de DDL del modelo** |
+| `scheduling.appointment_payment_receipts` | AppointmentPaymentReceipts | sólo en un parche: `SQL/patches/2026-10-27_v4264_comprobantes_logo_flexible.sql` |
 | `system_ops.accepted_risks` | AcceptedRisks | **en ninguna fuente de DDL del modelo** |
-| `terminology.concept_relationship_evidence` | ConceptRelationshipEvidence | **en ninguna fuente de DDL del modelo** |
+| `terminology.concept_relationship_evidence` | ConceptRelationshipEvidence | sólo en un parche: `SQL/patches/2026-10-25_v4250_terminology_relationship_evidence.sql` |
 | `time_series.ads_delivery_event_series` | AdsDeliveryEventSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
 | `time_series.ai_runtime_metric_series` | AiRuntimeMetricSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |
 | `time_series.application_tracking_series` | ApplicationTrackingSeries | almacén no relacional: `NoSQL/58_time_series_timescaledb/time_series.timescaledb.sql` |

@@ -69,7 +69,8 @@ describe('IamPractitionerSelfRegistrationService', () => {
     };
     const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
     const credentialsRepo = {
-      findLivePasswordBySubject: fn().mockResolvedValue(null),
+      lockEmailForRegistration: fn().mockResolvedValue(undefined),
+      findLivePasswordByEmail: fn().mockResolvedValue(null),
       createPassword: fn(),
       // El alta administrativa reserva el login sin secreto: la contraseña la
       // fija el titular al consumir el token de activación.
@@ -1505,7 +1506,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
   it('rejects an email that already has a live credential', async () => {
     const d = build();
-    d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
       id: 'cred-existing',
     });
 
@@ -1513,6 +1514,21 @@ describe('IamPractitionerSelfRegistrationService', () => {
       ConflictException,
     );
     expect(d.usersRepo.create).not.toHaveBeenCalled();
+  });
+
+  // #1000: cerrojo por correo antes de comprobarlo, sin distinguir mayúsculas.
+  it('locks the email before checking it case-insensitively', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    const lock = d.credentialsRepo.lockEmailForRegistration;
+    const check = d.credentialsRepo.findLivePasswordByEmail;
+    expect(lock).toHaveBeenCalledWith(expect.anything(), dto.email);
+    expect(check).toHaveBeenCalledWith(expect.anything(), dto.email);
+    expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
+      check.mock.invocationCallOrder[0],
+    );
   });
 
   it('registers the practitioner even if the verification email cannot be queued', async () => {

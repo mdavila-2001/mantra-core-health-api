@@ -3,86 +3,3266 @@
 # Endpoints del módulo `profiles`
 
 - **Bloque:** Núcleo y Terminología (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
-- **Operaciones:** 67 (67 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 30 · MEDIO 10 · BAJO 27
-- **Tablas distintas que tocan:** 51
+- **Operaciones:** 85 (84 en el contrato, 1 sólo en el código)
+- **Riesgo:** ALTO 38 · MEDIO 13 · BAJO 34
+- **Tablas distintas que tocan:** 61
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/profiles.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/profiles/credentials` | Listar credenciales pendientes de verificación | BAJO | 1 | SECURITY_ADMIN |
-| 2 | POST | `/profiles/credentials/{credentialId}/verify` | Verificar credencial profesional | MEDIO | 8 | SECURITY_ADMIN |
-| 3 | GET | `/profiles/patients` | UC-05-13: listado paginado de pacientes | BAJO | 6 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
-| 4 | POST | `/profiles/patients` | Alta de persona y perfil de paciente | MEDIO | 4 | SECURITY_ADMIN |
-| 5 | GET | `/profiles/patients/{profileId}` | UC-05-14: ficha de filiación de un paciente (F-01) | BAJO | 3 | SECURITY_ADMIN, CLINICIAN, PRACTITIONER |
-| 6 | POST | `/profiles/patients/{profileId}/identity-links` | Vincular identidad externa de paciente (MPI) | MEDIO | 5 | SECURITY_ADMIN |
-| 7 | POST | `/profiles/patients/{profileId}/portal-proxies` | Otorgar proxy de portal a un representante | MEDIO | 4 | SECURITY_ADMIN |
-| 8 | POST | `/profiles/patients/{profileId}/related-persons` | Registrar persona relacionada / contacto de emergencia | ALTO | 6 | sesión (sin roles) |
-| 9 | GET | `/profiles/patients/me` | Consultar los propios datos de filiación | BAJO | 14 | sesión (sin roles) |
-| 10 | PATCH | `/profiles/patients/me` | Editar los propios datos de filiación | ALTO | 20 | sesión (sin roles) |
-| 11 | GET | `/profiles/patients/me/addresses` | Listar las propias direcciones (la preferida primero) | BAJO | 3 | sesión (sin roles) |
-| 12 | POST | `/profiles/patients/me/addresses` | Guardar una dirección nueva | BAJO | 3 | sesión (sin roles) |
-| 13 | DELETE | `/profiles/patients/me/addresses/{id}` | Quitar una dirección guardada o la del trabajo | ALTO | 4 | sesión (sin roles) |
-| 14 | PATCH | `/profiles/patients/me/addresses/{id}` | Corregir una dirección (cierra la vigente y abre otra) | ALTO | 4 | sesión (sin roles) |
-| 15 | PUT | `/profiles/patients/me/addresses/{id}/preferred` | Marcar la dirección que se ofrece primero | BAJO | 3 | sesión (sin roles) |
-| 16 | GET | `/profiles/patients/me/dependent-candidates` | Buscar por nombre a quién pedirle que deje representarla | BAJO | 5 | sesión (sin roles) |
-| 17 | POST | `/profiles/patients/me/dependent-requests` | Pedir representar a una persona que ya tiene cuenta | ALTO | 16 | sesión (sin roles) |
-| 18 | POST | `/profiles/patients/me/dependent-requests/{id}/accept` | Aceptar una solicitud de dependiente | ALTO | 15 | sesión (sin roles) |
-| 19 | POST | `/profiles/patients/me/dependent-requests/{id}/reject` | Rechazar una solicitud de dependiente | ALTO | 14 | sesión (sin roles) |
-| 20 | GET | `/profiles/patients/me/dependent-requests/incoming` | Listar las solicitudes de dependiente recibidas | BAJO | 4 | sesión (sin roles) |
-| 21 | GET | `/profiles/patients/me/dependents` | Listar los dependientes a cargo del paciente autenticado | BAJO | 5 | sesión (sin roles) |
-| 22 | POST | `/profiles/patients/me/dependents` | Registrar un dependiente (menor o adulto mayor tutelado) | ALTO | 13 | sesión (sin roles) |
-| 23 | DELETE | `/profiles/patients/me/photo` | Quitar la propia foto de perfil | BAJO | 14 | sesión (sin roles) |
-| 24 | PUT | `/profiles/patients/me/photo` | Fijar la propia foto de perfil | BAJO | 16 | sesión (sin roles) |
-| 25 | DELETE | `/profiles/patients/me/primary-practitioner` | Quitar el propio médico de cabecera | ALTO | 5 | sesión (sin roles) |
-| 26 | GET | `/profiles/patients/me/primary-practitioner` | Consultar el propio médico de cabecera | BAJO | 4 | sesión (sin roles) |
-| 27 | PUT | `/profiles/patients/me/primary-practitioner` | Elegir o cambiar el propio médico de cabecera | ALTO | 6 | sesión (sin roles) |
-| 28 | GET | `/profiles/patients/me/summary` | Consultar el resumen propio | BAJO | 3 | sesión (sin roles) |
-| 29 | POST | `/profiles/patients/merge` | Fusionar pacientes duplicados | MEDIO | 8 | SECURITY_ADMIN |
-| 30 | GET | `/profiles/patients/merge-events` | Listar eventos de fusión de pacientes | BAJO | 1 | SECURITY_ADMIN |
-| 31 | POST | `/profiles/patients/merge/{eventId}/reverse` | Revertir una fusión de pacientes | MEDIO | 6 | SECURITY_ADMIN |
-| 32 | POST | `/profiles/patients/search` | UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo | BAJO | 6 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
-| 33 | POST | `/profiles/persons/{personId}/account-links` | Vincular cuenta de portal a una persona | MEDIO | 3 | SECURITY_ADMIN |
-| 34 | POST | `/profiles/persons/{personId}/decease` | Registrar defunción y anonimización de una persona | MEDIO | 4 | SECURITY_ADMIN |
-| 35 | GET | `/profiles/practitioners` | Listar profesionales para la guía, con sus especialidades | BAJO | 4 | sesión (sin roles) |
-| 36 | POST | `/profiles/practitioners` | Alta de profesional de salud (workforce generalista) | MEDIO | 12 | SECURITY_ADMIN |
-| 37 | PATCH | `/profiles/practitioners/{profileId}` | Corregir el perfil profesional de otro (titular o plataforma) | ALTO | 26 | sesión (sin roles) |
-| 38 | POST | `/profiles/practitioners/{profileId}/affiliations` | Registrar un consultorio de un profesional sin cuenta | MEDIO | 25 | SECURITY_ADMIN |
-| 39 | POST | `/profiles/practitioners/{profileId}/jurisdiction-authorizations` | Registrar/renovar autorización jurisdiccional (licencia) | ALTO | 5 | sesión (sin roles) |
-| 40 | DELETE | `/profiles/practitioners/{profileId}/photo` | Quitar la foto del perfil profesional | ALTO | 16 | sesión (sin roles) |
-| 41 | PUT | `/profiles/practitioners/{profileId}/photo` | Fijar la foto del perfil profesional | ALTO | 18 | sesión (sin roles) |
-| 42 | POST | `/profiles/practitioners/{profileId}/specialties` | Agregar especialidad con credencial de soporte | ALTO | 9 | sesión (sin roles) |
-| 43 | GET | `/profiles/practitioners/{profileId}/summary` | Consultar el perfil profesional de un colega (ficha de la guía) | BAJO | 15 | sesión (sin roles) |
-| 44 | PATCH | `/profiles/practitioners/me` | Editar la presentación del propio perfil profesional | ALTO | 26 | sesión (sin roles) |
-| 45 | GET | `/profiles/practitioners/me/affiliations` | Historial laboral propio (instituciones donde trabajó) | BAJO | 3 | sesión (sin roles) |
-| 46 | POST | `/profiles/practitioners/me/affiliations` | Registrar una afiliación institucional en el historial propio | ALTO | 25 | sesión (sin roles) |
-| 47 | DELETE | `/profiles/practitioners/me/affiliations/{affiliationId}` | Quitar una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
-| 48 | PATCH | `/profiles/practitioners/me/affiliations/{affiliationId}` | Corregir una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
-| 49 | POST | `/profiles/practitioners/me/credentials` | Agregar un título propio (diplomado, maestría, doctorado…) | ALTO | 5 | sesión (sin roles) |
-| 50 | DELETE | `/profiles/practitioners/me/credentials/{credentialId}` | Retirar un título propio pendiente | ALTO | 4 | sesión (sin roles) |
-| 51 | PATCH | `/profiles/practitioners/me/credentials/{credentialId}` | Editar un título propio pendiente de verificación | ALTO | 6 | sesión (sin roles) |
-| 52 | DELETE | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Retirar una matrícula propia pendiente de verificación | ALTO | 6 | sesión (sin roles) |
-| 53 | PATCH | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Corregir una matrícula propia pendiente de verificación | BAJO | 6 | sesión (sin roles) |
-| 54 | GET | `/profiles/practitioners/me/linkable-organizations` | Buscar instituciones del padrón para declarar una afiliación | BAJO | 5 | sesión (sin roles) |
-| 55 | GET | `/profiles/practitioners/me/onboarding` | Qué le falta al profesional para completar su alta | BAJO | 7 | sesión (sin roles) |
-| 56 | GET | `/profiles/practitioners/me/primary-patients` | Listar los pacientes que me eligieron como médico de cabecera | BAJO | 5 | sesión (sin roles) |
-| 57 | GET | `/profiles/practitioners/me/signature-assets` | Consultar las imágenes de firma y sello propias | BAJO | 2 | sesión (sin roles) |
-| 58 | PUT | `/profiles/practitioners/me/signature-assets` | Guardar o quitar las imágenes de firma y sello propias | ALTO | 5 | sesión (sin roles) |
-| 59 | DELETE | `/profiles/practitioners/me/specialties/{specialtyId}` | Retirar una especialidad propia pendiente de verificación | ALTO | 4 | sesión (sin roles) |
-| 60 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}` | Corregir una especialidad propia pendiente de verificación | ALTO | 7 | sesión (sin roles) |
-| 61 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}/primary` | Marcar una especialidad propia como la principal | ALTO | 4 | sesión (sin roles) |
-| 62 | GET | `/profiles/practitioners/me/summary` | Consultar el perfil profesional propio (trayectoria y actividad) | BAJO | 15 | sesión (sin roles) |
-| 63 | GET | `/profiles/practitioners/specialty-counts` | Contar profesionales visibles por especialidad | BAJO | 2 | sesión (sin roles) |
-| 64 | GET | `/tenants/{tenantId}/practitioner-requests` | Solicitudes de médicos que piden atender en la organización | BAJO | 5 | sesión (sin roles) |
-| 65 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` | Aprobar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
-| 66 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` | Rechazar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
-| 67 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` | Dar de baja un vínculo ya aprobado | ALTO | 19 | sesión (sin roles) |
+| 1 | DESCONOCIDO | `/admissions` | — | BAJO | 0 | sesión (sin roles) |
+| 2 | GET | `/admissions` | Bandeja de admisiones | BAJO | 17 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 3 | GET | `/admissions/{id}` | Detalle de una admisión | BAJO | 18 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 4 | POST | `/admissions/{id}/claim` | Tomar la admisión para revisarla | ALTO | 40 | ADMISSIONS_REVIEWER, SECURITY_ADMIN |
+| 5 | POST | `/admissions/{id}/decision` | Resolver la admisión: VERIFIED o REJECTED | ALTO | 50 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 6 | GET | `/admissions/{id}/documents/{fileId}/content` | Contenido de un documento de la admisión (URL firmada) | BAJO | 12 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 7 | POST | `/admissions/{id}/documents/{fileId}/download-url` | URL firmada para abrir un documento de la admisión | BAJO | 12 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 8 | POST | `/admissions/{id}/items/{itemId}/review` | Revisar un ítem del checklist | MEDIO | 20 | ADMISSIONS_REVIEWER, SECURITY_ADMIN |
+| 9 | POST | `/admissions/{id}/reassign` | Pasar la revisión a otro revisor | ALTO | 27 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 10 | POST | `/admissions/{id}/reinstate` | Reponer una verificación suspendida (devuelve el check) | MEDIO | 44 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 11 | POST | `/admissions/{id}/release` | Soltar una revisión tomada para que otro la tome | MEDIO | 20 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 12 | POST | `/admissions/{id}/request-info` | Pedir información al médico | ALTO | 40 | ADMISSIONS_REVIEWER, SECURITY_ADMIN |
+| 13 | POST | `/admissions/{id}/suspend` | Suspender una verificación (quita el check) | MEDIO | 40 | ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 14 | POST | `/admissions/expire-sweep` | Barrido de vencimientos | MEDIO | 25 | SYSTEM, SECURITY_ADMIN |
+| 15 | POST | `/admissions/search` | Bandeja de admisiones con los filtros en el cuerpo | BAJO | 17 | ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN |
+| 16 | GET | `/profiles/credentials` | Listar credenciales pendientes de verificación | BAJO | 1 | SECURITY_ADMIN |
+| 17 | POST | `/profiles/credentials/{credentialId}/verify` | Verificar credencial profesional | ALTO | 24 | SECURITY_ADMIN |
+| 18 | GET | `/profiles/patients` | UC-05-13: listado paginado de pacientes | BAJO | 6 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
+| 19 | POST | `/profiles/patients` | Alta de persona y perfil de paciente | MEDIO | 4 | SECURITY_ADMIN |
+| 20 | GET | `/profiles/patients/{profileId}` | UC-05-14: ficha de filiación de un paciente (F-01) | BAJO | 3 | SECURITY_ADMIN, CLINICIAN, PRACTITIONER |
+| 21 | POST | `/profiles/patients/{profileId}/identity-links` | Vincular identidad externa de paciente (MPI) | MEDIO | 5 | SECURITY_ADMIN |
+| 22 | POST | `/profiles/patients/{profileId}/portal-proxies` | Otorgar proxy de portal a un representante | MEDIO | 4 | SECURITY_ADMIN |
+| 23 | POST | `/profiles/patients/{profileId}/related-persons` | Registrar persona relacionada / contacto de emergencia | ALTO | 6 | sesión (sin roles) |
+| 24 | GET | `/profiles/patients/me` | Consultar los propios datos de filiación | BAJO | 14 | sesión (sin roles) |
+| 25 | PATCH | `/profiles/patients/me` | Editar los propios datos de filiación | ALTO | 20 | sesión (sin roles) |
+| 26 | GET | `/profiles/patients/me/addresses` | Listar las propias direcciones (la preferida primero) | BAJO | 3 | sesión (sin roles) |
+| 27 | POST | `/profiles/patients/me/addresses` | Guardar una dirección nueva | BAJO | 3 | sesión (sin roles) |
+| 28 | DELETE | `/profiles/patients/me/addresses/{id}` | Quitar una dirección guardada o la del trabajo | ALTO | 4 | sesión (sin roles) |
+| 29 | PATCH | `/profiles/patients/me/addresses/{id}` | Corregir una dirección (cierra la vigente y abre otra) | ALTO | 4 | sesión (sin roles) |
+| 30 | PUT | `/profiles/patients/me/addresses/{id}/preferred` | Marcar la dirección que se ofrece primero | BAJO | 3 | sesión (sin roles) |
+| 31 | GET | `/profiles/patients/me/dependent-candidates` | Buscar por nombre a quién pedirle que deje representarla | BAJO | 5 | sesión (sin roles) |
+| 32 | POST | `/profiles/patients/me/dependent-requests` | Pedir representar a una persona que ya tiene cuenta | ALTO | 16 | sesión (sin roles) |
+| 33 | POST | `/profiles/patients/me/dependent-requests/{id}/accept` | Aceptar una solicitud de dependiente | ALTO | 15 | sesión (sin roles) |
+| 34 | POST | `/profiles/patients/me/dependent-requests/{id}/reject` | Rechazar una solicitud de dependiente | ALTO | 14 | sesión (sin roles) |
+| 35 | GET | `/profiles/patients/me/dependent-requests/incoming` | Listar las solicitudes de dependiente recibidas | BAJO | 4 | sesión (sin roles) |
+| 36 | GET | `/profiles/patients/me/dependents` | Listar los dependientes a cargo del paciente autenticado | BAJO | 5 | sesión (sin roles) |
+| 37 | POST | `/profiles/patients/me/dependents` | Registrar un dependiente (menor o adulto mayor tutelado) | ALTO | 13 | sesión (sin roles) |
+| 38 | DELETE | `/profiles/patients/me/photo` | Quitar la propia foto de perfil | BAJO | 14 | sesión (sin roles) |
+| 39 | PUT | `/profiles/patients/me/photo` | Fijar la propia foto de perfil | BAJO | 16 | sesión (sin roles) |
+| 40 | DELETE | `/profiles/patients/me/primary-practitioner` | Quitar el propio médico de cabecera | ALTO | 5 | sesión (sin roles) |
+| 41 | GET | `/profiles/patients/me/primary-practitioner` | Consultar el propio médico de cabecera | BAJO | 4 | sesión (sin roles) |
+| 42 | PUT | `/profiles/patients/me/primary-practitioner` | Elegir o cambiar el propio médico de cabecera | ALTO | 6 | sesión (sin roles) |
+| 43 | GET | `/profiles/patients/me/summary` | Consultar el resumen propio | BAJO | 3 | sesión (sin roles) |
+| 44 | POST | `/profiles/patients/merge` | Fusionar pacientes duplicados | MEDIO | 8 | SECURITY_ADMIN |
+| 45 | GET | `/profiles/patients/merge-events` | Listar eventos de fusión de pacientes | BAJO | 1 | SECURITY_ADMIN |
+| 46 | POST | `/profiles/patients/merge/{eventId}/reverse` | Revertir una fusión de pacientes | MEDIO | 6 | SECURITY_ADMIN |
+| 47 | POST | `/profiles/patients/search` | UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo | BAJO | 6 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
+| 48 | POST | `/profiles/persons/{personId}/account-links` | Vincular cuenta de portal a una persona | MEDIO | 3 | SECURITY_ADMIN |
+| 49 | POST | `/profiles/persons/{personId}/decease` | Registrar defunción y anonimización de una persona | MEDIO | 4 | SECURITY_ADMIN |
+| 50 | GET | `/profiles/practitioners` | Listar profesionales para la guía, con sus especialidades | BAJO | 12 | sesión (sin roles) |
+| 51 | POST | `/profiles/practitioners` | Alta de profesional de salud (workforce generalista) | ALTO | 35 | SECURITY_ADMIN |
+| 52 | PATCH | `/profiles/practitioners/{profileId}` | Corregir el perfil profesional de otro (titular o plataforma) | ALTO | 27 | sesión (sin roles) |
+| 53 | POST | `/profiles/practitioners/{profileId}/affiliations` | Registrar un consultorio de un profesional sin cuenta | MEDIO | 25 | SECURITY_ADMIN |
+| 54 | POST | `/profiles/practitioners/{profileId}/jurisdiction-authorizations` | Registrar/renovar autorización jurisdiccional (licencia) | ALTO | 5 | sesión (sin roles) |
+| 55 | DELETE | `/profiles/practitioners/{profileId}/photo` | Quitar la foto del perfil profesional | ALTO | 17 | sesión (sin roles) |
+| 56 | PUT | `/profiles/practitioners/{profileId}/photo` | Fijar la foto del perfil profesional | ALTO | 19 | sesión (sin roles) |
+| 57 | POST | `/profiles/practitioners/{profileId}/specialties` | Agregar especialidad con credencial de soporte | ALTO | 9 | sesión (sin roles) |
+| 58 | GET | `/profiles/practitioners/{profileId}/summary` | Consultar el perfil profesional de un colega (ficha de la guía) | BAJO | 16 | sesión (sin roles) |
+| 59 | PATCH | `/profiles/practitioners/me` | Editar la presentación del propio perfil profesional | ALTO | 27 | sesión (sin roles) |
+| 60 | GET | `/profiles/practitioners/me/admission` | Estado de mi verificación | BAJO | 16 | sesión (sin roles) |
+| 61 | POST | `/profiles/practitioners/me/admission/resubmit` | Reenviar mi solicitud | ALTO | 38 | sesión (sin roles) |
+| 62 | POST | `/profiles/practitioners/me/admission/withdraw` | Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA) | ALTO | 32 | sesión (sin roles) |
+| 63 | GET | `/profiles/practitioners/me/affiliations` | Historial laboral propio (instituciones donde trabajó) | BAJO | 3 | sesión (sin roles) |
+| 64 | POST | `/profiles/practitioners/me/affiliations` | Registrar una afiliación institucional en el historial propio | ALTO | 25 | sesión (sin roles) |
+| 65 | DELETE | `/profiles/practitioners/me/affiliations/{affiliationId}` | Quitar una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
+| 66 | PATCH | `/profiles/practitioners/me/affiliations/{affiliationId}` | Corregir una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
+| 67 | POST | `/profiles/practitioners/me/credentials` | Agregar un título propio (diplomado, maestría, doctorado…) | ALTO | 5 | sesión (sin roles) |
+| 68 | DELETE | `/profiles/practitioners/me/credentials/{credentialId}` | Retirar un título propio pendiente | ALTO | 4 | sesión (sin roles) |
+| 69 | PATCH | `/profiles/practitioners/me/credentials/{credentialId}` | Editar un título propio pendiente de verificación | ALTO | 6 | sesión (sin roles) |
+| 70 | DELETE | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Retirar una matrícula propia pendiente de verificación | ALTO | 6 | sesión (sin roles) |
+| 71 | PATCH | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Corregir una matrícula propia pendiente de verificación | BAJO | 6 | sesión (sin roles) |
+| 72 | GET | `/profiles/practitioners/me/linkable-organizations` | Buscar instituciones del padrón para declarar una afiliación | BAJO | 5 | sesión (sin roles) |
+| 73 | GET | `/profiles/practitioners/me/onboarding` | Qué le falta al profesional para completar su alta | BAJO | 7 | sesión (sin roles) |
+| 74 | GET | `/profiles/practitioners/me/primary-patients` | Listar los pacientes que me eligieron como médico de cabecera | BAJO | 5 | sesión (sin roles) |
+| 75 | GET | `/profiles/practitioners/me/signature-assets` | Consultar las imágenes de firma y sello propias | BAJO | 2 | sesión (sin roles) |
+| 76 | PUT | `/profiles/practitioners/me/signature-assets` | Guardar o quitar las imágenes de firma y sello propias | ALTO | 5 | sesión (sin roles) |
+| 77 | DELETE | `/profiles/practitioners/me/specialties/{specialtyId}` | Retirar una especialidad propia pendiente de verificación | ALTO | 4 | sesión (sin roles) |
+| 78 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}` | Corregir una especialidad propia pendiente de verificación | ALTO | 7 | sesión (sin roles) |
+| 79 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}/primary` | Marcar una especialidad propia como la principal | ALTO | 4 | sesión (sin roles) |
+| 80 | GET | `/profiles/practitioners/me/summary` | Consultar el perfil profesional propio (trayectoria y actividad) | BAJO | 16 | sesión (sin roles) |
+| 81 | GET | `/profiles/practitioners/specialty-counts` | Contar profesionales visibles por especialidad | BAJO | 2 | sesión (sin roles) |
+| 82 | GET | `/tenants/{tenantId}/practitioner-requests` | Solicitudes de médicos que piden atender en la organización | BAJO | 5 | sesión (sin roles) |
+| 83 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` | Aprobar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
+| 84 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` | Rechazar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
+| 85 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` | Dar de baja un vínculo ya aprobado | ALTO | 19 | sesión (sin roles) |
 
 ---
 
-## 1. GET /profiles/credentials
+## 1. DESCONOCIDO /admissions
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — No toca tablas relacionales
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.caller` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:86`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`DESCONOCIDO /admissions` la atiende `AdmissionsController.caller` (src/modules/profiles/presentation/controllers/admissions.controller.ts:86). Exige sesión; el controlador no declara roles. No toca tablas relacionales: el handler no invoca ningún servicio.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/admissions.controller.ts:86` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+No toca tablas relacionales: el handler no invoca ningún servicio. _(automática; fuente: `src/modules/profiles/presentation/controllers/admissions.controller.ts:86`)_
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `AdmissionCaller`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. GET /admissions
+
+- **Origen:** CONTRATO
+- **Nombre:** Bandeja de admisiones
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.list` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:90`
+
+### Qué es y para qué sirve (negocio)
+
+Bandeja de admisiones. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /admissions` la atiende `AdmissionsController.list` (src/modules/profiles/presentation/controllers/admissions.controller.ts:90). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. Delega en `PractitionerAdmissionsReadService.list`. Lee common.addresses, common.file_versions, common.files, common.identifiers, iam.users, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements y 9 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:90` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:162` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | POR_SQL | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsRepository.listPage | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:244` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PersonAccountLinksRepository.findActivePersonIdsByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:169` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionReviewsRepository.findByAdmissions | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:101` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:114` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.professionGroups | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:872` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.list → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.professionGroups → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `type` | query | No | `string` | Tipo de admisión; hoy ALTA_DE_DOCTOR. |
+| `status` | query | No | `string` | — |
+| `assignedTo` | query | No | `string` | Cuenta asignada, o `me`, o `none` (sin asignar). |
+| `overdue` | query | No | `boolean` | true = sólo vencidas. |
+| `q` | query | No | `string` | Nombre, cédula o matrícula (2 a 80 caracteres). |
+| `cursor` | query | No | `string` | Cursor opaco de la página anterior. |
+| `limit` | query | No | `number` | — |
+| `sort` | query | No | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<AdmissionListDto>` · DTO `AdmissionListDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<AdmissionSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:107` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `items[].type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `items[].type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `items[].type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `items[].status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `items[].status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `items[].status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `items[].itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `items[].itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `items[].itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `items[].itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `items[].requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `items[].requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `items[].requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `items[].requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `items[].requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `items[].submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `items[].dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `items[].overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `items[].assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `items[].assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `items[].assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `items[].rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `items[].practitioner` | `AdmissionPractitionerSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:102` |
+| `items[].practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `items[].practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `items[].practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `items[].practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:108` |
+| `counts` | `object` | Sí | — | — | Cantidad por código de estado, con los filtros menos el de estado. | `src/modules/profiles/presentation/dto/admissions.dto.ts:115` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 3. GET /admissions/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Detalle de una admisión
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.detail` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:146`
+
+### Qué es y para qué sirve (negocio)
+
+Detalle de una admisión. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /admissions/{id}` la atiende `AdmissionsController.detail` (src/modules/profiles/presentation/controllers/admissions.controller.ts:146). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. Delega en `PractitionerAdmissionsReadService.detail`. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.users, practice.practice_sites, practice.practitioner_role_assignments y 10 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:146` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:146` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:508` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:824` |
+| `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:114` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.detail → PractitionerAdmissionsReadService.detail → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<AdmissionDetailDto>` · DTO `AdmissionDetailDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `practitioner` | `AdmissionPractitionerDetailDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:356` |
+| `practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `practitioner.nationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:120` |
+| `practitioner.nationalIdIssuer` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:122` |
+| `practitioner.birthDate` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:124` |
+| `practitioner.age` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:126` |
+| `practitioner.occupation` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:127` |
+| `practitioner.personalMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:129` |
+| `practitioner.personalEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:131` |
+| `practitioner.workMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:133` |
+| `practitioner.workPhone` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:135` |
+| `practitioner.workEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:137` |
+| `licenses` | `array<AdmissionLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:358` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:143` |
+| `licenses[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:144` |
+| `licenses[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:145` |
+| `licenses[].jurisdiction` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:146` |
+| `licenses[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:148` |
+| `licenses[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `licenses[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `licenses[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:150` |
+| `licenses[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:151` |
+| `licenses[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:154` |
+| `licenses[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:155` |
+| `credentials` | `array<AdmissionCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:360` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:161` |
+| `credentials[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:162` |
+| `credentials[].level` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:163` |
+| `credentials[].title` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:164` |
+| `credentials[].institution` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:165` |
+| `credentials[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:167` |
+| `credentials[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `credentials[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `credentials[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:169` |
+| `credentials[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:170` |
+| `credentials[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:173` |
+| `credentials[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:174` |
+| `specialties` | `array<AdmissionSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:362` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:180` |
+| `specialties[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:181` |
+| `specialties[].name` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:182` |
+| `specialties[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:183` |
+| `specialties[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `specialties[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `specialties[].supportingCredentialId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:185` |
+| `events` | `array<AdmissionEventDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:363` |
+| `events[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:190` |
+| `events[].type` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:191` |
+| `events[].fromStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:193` |
+| `events[].fromStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].fromStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:195` |
+| `events[].toStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].itemType` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:196` |
+| `events[].itemId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:199` |
+| `events[].requirementCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:200` |
+| `events[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:203` |
+| `events[].reasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:204` |
+| `events[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:206` |
+| `events[].actor` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:209` |
+| `events[].actor.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `events[].actor.name` | `string` | No | — | — | — | sin fuente |
+| `events[].actorRole` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:210` |
+| `events[].occurredAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:212` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:364` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:366` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:368` |
+| `decisionReasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:370` |
+| `internalNote` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:372` |
+| `validUntil` | `string` | No | admite null | — | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `src/modules/profiles/presentation/dto/admissions.dto.ts:379` |
+| `resubmissionCount` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:380` |
+| `attestedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:381` |
+| `fourEyesRequired` | `boolean` | Sí | — | — | La configuración exige un aprobador distinto de los revisores. | `src/modules/profiles/presentation/dto/admissions.dto.ts:387` |
+| `requirements` | `array<AdmissionChecklistRequirementDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:389` |
+| `requirements[].code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:285` |
+| `requirements[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:286` |
+| `requirements[].description` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:287` |
+| `requirements[].required` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:289` |
+| `requirements[].evidenceKind` | `string` | Sí | valores: DOCUMENT, DATA | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:290` |
+| `requirements[].requiresSource` | `boolean` | Sí | — | — | Verificar un ítem exige declarar la fuente consultada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:294` |
+| `requirements[].professionGroup` | `string` | No | valores: MEDICO, ODONTOLOGO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:300` |
+| `requirements[].minItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:301` |
+| `requirements[].maxItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:303` |
+| `requirements[].state` | `string` | Sí | valores: NOT_PROVIDED, MISSING, PENDING, INFO_REQUIRED, VERIFIED, REJECTED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:315` |
+| `requirements[].satisfied` | `boolean` | Sí | — | — | El requisito está cumplido. | `src/modules/profiles/presentation/dto/admissions.dto.ts:317` |
+| `requirements[].blockedBy` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:318` |
+| `requirements[].items` | `array<AdmissionChecklistItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:321` |
+| `requirements[].items[].id` | `string` | No | formato uuid; admite null | — | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `src/modules/profiles/presentation/dto/admissions.dto.ts:225` |
+| `requirements[].items[].itemId` | `string` | Sí | formato uuid | — | La ficha: matrícula, título, especialidad o perfil. | `src/modules/profiles/presentation/dto/admissions.dto.ts:230` |
+| `requirements[].items[].itemType` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:232` |
+| `requirements[].items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:233` |
+| `requirements[].items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:235` |
+| `requirements[].items[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:237` |
+| `requirements[].items[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:239` |
+| `requirements[].items[].sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:245` |
+| `requirements[].items[].sourceRef` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:246` |
+| `requirements[].items[].sourceConsultedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:248` |
+| `requirements[].items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:251` |
+| `requirements[].items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:252` |
+| `requirements[].items[].internalNote` | `string` | No | admite null | — | Sólo para el personal; nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:259` |
+| `requirements[].items[].reviewedBy` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:261` |
+| `requirements[].items[].reviewedBy.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `requirements[].items[].reviewedBy.name` | `string` | No | — | — | — | sin fuente |
+| `requirements[].items[].reviewedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:262` |
+| `requirements[].items[].evidenceChanged` | `boolean` | Sí | — | — | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `src/modules/profiles/presentation/dto/admissions.dto.ts:268` |
+| `requirements[].items[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `src/modules/profiles/presentation/dto/admissions.dto.ts:274` |
+| `requirements[].items[].rowVersion` | `number` | No | admite null | — | expectedRowVersion del ítem. | `src/modules/profiles/presentation/dto/admissions.dto.ts:280` |
+| `blockers` | `array<AdmissionBlockerDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:391` |
+| `blockers[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:345` |
+| `blockers[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:346` |
+| `blockers[].reason` | `string` | Sí | valores: MISSING, REJECTED, PENDING, INFO_REQUIRED, BELOW_MINIMUM | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:350` |
+| `canVerify` | `boolean` | Sí | — | — | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:395` |
+| `documents` | `array<AdmissionDocumentDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:397` |
+| `documents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:326` |
+| `documents[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:327` |
+| `documents[].fileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:328` |
+| `documents[].name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:329` |
+| `documents[].mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:330` |
+| `documents[].sizeBytes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:331` |
+| `documents[].uploadedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:332` |
+| `documents[].pages` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:333` |
+| `documents[].reviewState` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:335` |
+| `documents[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:340` |
+| `submittedForm` | `object` | Sí | — | — | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `src/modules/profiles/presentation/dto/admissions.dto.ts:404` |
+| `submittedFormSource` | `string` | Sí | valores: SNAPSHOT, LIVE | — | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `src/modules/profiles/presentation/dto/admissions.dto.ts:411` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:156` |
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 4. POST /admissions/{id}/claim
+
+- **Origen:** CONTRATO
+- **Nombre:** Tomar la admisión para revisarla
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Borra filas
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.claim` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:167`
+
+### Qué es y para qué sirve (negocio)
+
+Tomar la admisión para revisarla. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/{id}/claim` la atiende `AdmissionsController.claim` (src/modules/profiles/presentation/controllers/admissions.controller.ts:167). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, SECURITY_ADMIN. Valida el cuerpo como `ClaimAdmissionDto` (1 campo, 1 obligatorio). Delega en `PractitionerAdmissionsService.claim`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza iam.devices, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, iam.users, messaging.message_channels y 19 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:508` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:824` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim | `src/modules/profiles/application/services/practitioner-admissions.service.ts:264` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.claim → PractitionerAdmissionsService.claim → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `ClaimAdmissionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1; máximo 2_147_483_647 | `@IsInt()` `@Min(1)` `@Max(2_147_483_647)` | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `src/modules/profiles/presentation/dto/admissions.dto.ts:546` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdmissionDetailDto>` · DTO `AdmissionDetailDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `practitioner` | `AdmissionPractitionerDetailDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:356` |
+| `practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `practitioner.nationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:120` |
+| `practitioner.nationalIdIssuer` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:122` |
+| `practitioner.birthDate` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:124` |
+| `practitioner.age` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:126` |
+| `practitioner.occupation` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:127` |
+| `practitioner.personalMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:129` |
+| `practitioner.personalEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:131` |
+| `practitioner.workMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:133` |
+| `practitioner.workPhone` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:135` |
+| `practitioner.workEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:137` |
+| `licenses` | `array<AdmissionLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:358` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:143` |
+| `licenses[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:144` |
+| `licenses[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:145` |
+| `licenses[].jurisdiction` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:146` |
+| `licenses[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:148` |
+| `licenses[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `licenses[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `licenses[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:150` |
+| `licenses[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:151` |
+| `licenses[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:154` |
+| `licenses[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:155` |
+| `credentials` | `array<AdmissionCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:360` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:161` |
+| `credentials[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:162` |
+| `credentials[].level` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:163` |
+| `credentials[].title` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:164` |
+| `credentials[].institution` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:165` |
+| `credentials[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:167` |
+| `credentials[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `credentials[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `credentials[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:169` |
+| `credentials[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:170` |
+| `credentials[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:173` |
+| `credentials[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:174` |
+| `specialties` | `array<AdmissionSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:362` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:180` |
+| `specialties[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:181` |
+| `specialties[].name` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:182` |
+| `specialties[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:183` |
+| `specialties[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `specialties[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `specialties[].supportingCredentialId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:185` |
+| `events` | `array<AdmissionEventDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:363` |
+| `events[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:190` |
+| `events[].type` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:191` |
+| `events[].fromStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:193` |
+| `events[].fromStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].fromStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:195` |
+| `events[].toStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].itemType` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:196` |
+| `events[].itemId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:199` |
+| `events[].requirementCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:200` |
+| `events[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:203` |
+| `events[].reasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:204` |
+| `events[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:206` |
+| `events[].actor` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:209` |
+| `events[].actor.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `events[].actor.name` | `string` | No | — | — | — | sin fuente |
+| `events[].actorRole` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:210` |
+| `events[].occurredAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:212` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:364` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:366` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:368` |
+| `decisionReasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:370` |
+| `internalNote` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:372` |
+| `validUntil` | `string` | No | admite null | — | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `src/modules/profiles/presentation/dto/admissions.dto.ts:379` |
+| `resubmissionCount` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:380` |
+| `attestedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:381` |
+| `fourEyesRequired` | `boolean` | Sí | — | — | La configuración exige un aprobador distinto de los revisores. | `src/modules/profiles/presentation/dto/admissions.dto.ts:387` |
+| `requirements` | `array<AdmissionChecklistRequirementDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:389` |
+| `requirements[].code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:285` |
+| `requirements[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:286` |
+| `requirements[].description` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:287` |
+| `requirements[].required` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:289` |
+| `requirements[].evidenceKind` | `string` | Sí | valores: DOCUMENT, DATA | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:290` |
+| `requirements[].requiresSource` | `boolean` | Sí | — | — | Verificar un ítem exige declarar la fuente consultada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:294` |
+| `requirements[].professionGroup` | `string` | No | valores: MEDICO, ODONTOLOGO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:300` |
+| `requirements[].minItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:301` |
+| `requirements[].maxItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:303` |
+| `requirements[].state` | `string` | Sí | valores: NOT_PROVIDED, MISSING, PENDING, INFO_REQUIRED, VERIFIED, REJECTED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:315` |
+| `requirements[].satisfied` | `boolean` | Sí | — | — | El requisito está cumplido. | `src/modules/profiles/presentation/dto/admissions.dto.ts:317` |
+| `requirements[].blockedBy` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:318` |
+| `requirements[].items` | `array<AdmissionChecklistItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:321` |
+| `requirements[].items[].id` | `string` | No | formato uuid; admite null | — | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `src/modules/profiles/presentation/dto/admissions.dto.ts:225` |
+| `requirements[].items[].itemId` | `string` | Sí | formato uuid | — | La ficha: matrícula, título, especialidad o perfil. | `src/modules/profiles/presentation/dto/admissions.dto.ts:230` |
+| `requirements[].items[].itemType` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:232` |
+| `requirements[].items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:233` |
+| `requirements[].items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:235` |
+| `requirements[].items[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:237` |
+| `requirements[].items[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:239` |
+| `requirements[].items[].sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:245` |
+| `requirements[].items[].sourceRef` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:246` |
+| `requirements[].items[].sourceConsultedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:248` |
+| `requirements[].items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:251` |
+| `requirements[].items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:252` |
+| `requirements[].items[].internalNote` | `string` | No | admite null | — | Sólo para el personal; nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:259` |
+| `requirements[].items[].reviewedBy` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:261` |
+| `requirements[].items[].reviewedBy.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `requirements[].items[].reviewedBy.name` | `string` | No | — | — | — | sin fuente |
+| `requirements[].items[].reviewedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:262` |
+| `requirements[].items[].evidenceChanged` | `boolean` | Sí | — | — | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `src/modules/profiles/presentation/dto/admissions.dto.ts:268` |
+| `requirements[].items[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `src/modules/profiles/presentation/dto/admissions.dto.ts:274` |
+| `requirements[].items[].rowVersion` | `number` | No | admite null | — | expectedRowVersion del ítem. | `src/modules/profiles/presentation/dto/admissions.dto.ts:280` |
+| `blockers` | `array<AdmissionBlockerDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:391` |
+| `blockers[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:345` |
+| `blockers[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:346` |
+| `blockers[].reason` | `string` | Sí | valores: MISSING, REJECTED, PENDING, INFO_REQUIRED, BELOW_MINIMUM | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:350` |
+| `canVerify` | `boolean` | Sí | — | — | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:395` |
+| `documents` | `array<AdmissionDocumentDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:397` |
+| `documents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:326` |
+| `documents[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:327` |
+| `documents[].fileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:328` |
+| `documents[].name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:329` |
+| `documents[].mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:330` |
+| `documents[].sizeBytes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:331` |
+| `documents[].uploadedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:332` |
+| `documents[].pages` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:333` |
+| `documents[].reviewState` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:335` |
+| `documents[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:340` |
+| `submittedForm` | `object` | Sí | — | — | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `src/modules/profiles/presentation/dto/admissions.dto.ts:404` |
+| `submittedFormSource` | `string` | Sí | valores: SNAPSHOT, LIVE | — | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `src/modules/profiles/presentation/dto/admissions.dto.ts:411` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. POST /admissions/{id}/decision
+
+- **Origen:** CONTRATO
+- **Nombre:** Resolver la admisión: VERIFIED o REJECTED
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Borra filas
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.decide` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:286`
+
+### Qué es y para qué sirve (negocio)
+
+Resolver la admisión: VERIFIED o REJECTED. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/{id}/decision` la atiende `AdmissionsController.decide` (src/modules/profiles/presentation/controllers/admissions.controller.ts:286). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `DecideAdmissionDto` (6 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.decide`. Crea filas en audit.verified_badges_history, authz.user_role_assignments, community.verified_badges, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza community.public_profiles, community.verified_badges, iam.devices, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions y 2 más. Borra de profiles.practitioner_admission_reviews. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 23 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
+| `authz.roles` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode | `src/modules/authz/services/authz-effective-roles.service.ts:139` |
+| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:201` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
+| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
+| `community.verified_badges` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified | `src/modules/profiles/application/services/practitioner-verification-projector.service.ts:84` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:508` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerVerificationProjector.projectVerified → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:824` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide | `src/modules/profiles/application/services/practitioner-admissions.service.ts:697` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.decide → PractitionerAdmissionsService.decide → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `DecideAdmissionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1; máximo 2_147_483_647 | `@IsInt()` `@Min(1)` `@Max(2_147_483_647)` | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `src/modules/profiles/presentation/dto/admissions.dto.ts:546` |
+| `decision` | `string` | Sí | valores: VERIFIED, REJECTED | `@IsIn(['VERIFIED', 'REJECTED'])` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:700` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Obligatorio al rechazar. Lo ve el médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:709` |
+| `reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO | `@IsOptional()` `@IsIn(REASON_CODES)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:714` |
+| `internalNote` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | Nota interna: nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:723` |
+| `items` | `array<string>` | No | — | `@IsOptional()` `@IsArray()` | YA NO SE ACEPTA: el estado de cada ítem lo fija `.../items/:itemId/review` y el servidor lo deriva de las revisiones. Mandarlo responde 422 ADMISSION_DECISION_ITEMS_NOT_ACCEPTED. | `src/modules/profiles/presentation/dto/admissions.dto.ts:734` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1,
+  "decision": "VERIFIED"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1,
+  "decision": "VERIFIED",
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "internalNote": "valor-ejemplo",
+  "items": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdmissionDetailDto>` · DTO `AdmissionDetailDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `practitioner` | `AdmissionPractitionerDetailDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:356` |
+| `practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `practitioner.nationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:120` |
+| `practitioner.nationalIdIssuer` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:122` |
+| `practitioner.birthDate` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:124` |
+| `practitioner.age` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:126` |
+| `practitioner.occupation` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:127` |
+| `practitioner.personalMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:129` |
+| `practitioner.personalEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:131` |
+| `practitioner.workMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:133` |
+| `practitioner.workPhone` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:135` |
+| `practitioner.workEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:137` |
+| `licenses` | `array<AdmissionLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:358` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:143` |
+| `licenses[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:144` |
+| `licenses[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:145` |
+| `licenses[].jurisdiction` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:146` |
+| `licenses[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:148` |
+| `licenses[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `licenses[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `licenses[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:150` |
+| `licenses[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:151` |
+| `licenses[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:154` |
+| `licenses[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:155` |
+| `credentials` | `array<AdmissionCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:360` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:161` |
+| `credentials[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:162` |
+| `credentials[].level` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:163` |
+| `credentials[].title` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:164` |
+| `credentials[].institution` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:165` |
+| `credentials[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:167` |
+| `credentials[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `credentials[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `credentials[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:169` |
+| `credentials[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:170` |
+| `credentials[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:173` |
+| `credentials[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:174` |
+| `specialties` | `array<AdmissionSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:362` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:180` |
+| `specialties[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:181` |
+| `specialties[].name` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:182` |
+| `specialties[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:183` |
+| `specialties[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `specialties[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `specialties[].supportingCredentialId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:185` |
+| `events` | `array<AdmissionEventDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:363` |
+| `events[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:190` |
+| `events[].type` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:191` |
+| `events[].fromStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:193` |
+| `events[].fromStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].fromStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:195` |
+| `events[].toStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].itemType` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:196` |
+| `events[].itemId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:199` |
+| `events[].requirementCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:200` |
+| `events[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:203` |
+| `events[].reasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:204` |
+| `events[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:206` |
+| `events[].actor` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:209` |
+| `events[].actor.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `events[].actor.name` | `string` | No | — | — | — | sin fuente |
+| `events[].actorRole` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:210` |
+| `events[].occurredAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:212` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:364` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:366` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:368` |
+| `decisionReasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:370` |
+| `internalNote` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:372` |
+| `validUntil` | `string` | No | admite null | — | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `src/modules/profiles/presentation/dto/admissions.dto.ts:379` |
+| `resubmissionCount` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:380` |
+| `attestedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:381` |
+| `fourEyesRequired` | `boolean` | Sí | — | — | La configuración exige un aprobador distinto de los revisores. | `src/modules/profiles/presentation/dto/admissions.dto.ts:387` |
+| `requirements` | `array<AdmissionChecklistRequirementDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:389` |
+| `requirements[].code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:285` |
+| `requirements[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:286` |
+| `requirements[].description` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:287` |
+| `requirements[].required` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:289` |
+| `requirements[].evidenceKind` | `string` | Sí | valores: DOCUMENT, DATA | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:290` |
+| `requirements[].requiresSource` | `boolean` | Sí | — | — | Verificar un ítem exige declarar la fuente consultada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:294` |
+| `requirements[].professionGroup` | `string` | No | valores: MEDICO, ODONTOLOGO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:300` |
+| `requirements[].minItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:301` |
+| `requirements[].maxItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:303` |
+| `requirements[].state` | `string` | Sí | valores: NOT_PROVIDED, MISSING, PENDING, INFO_REQUIRED, VERIFIED, REJECTED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:315` |
+| `requirements[].satisfied` | `boolean` | Sí | — | — | El requisito está cumplido. | `src/modules/profiles/presentation/dto/admissions.dto.ts:317` |
+| `requirements[].blockedBy` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:318` |
+| `requirements[].items` | `array<AdmissionChecklistItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:321` |
+| `requirements[].items[].id` | `string` | No | formato uuid; admite null | — | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `src/modules/profiles/presentation/dto/admissions.dto.ts:225` |
+| `requirements[].items[].itemId` | `string` | Sí | formato uuid | — | La ficha: matrícula, título, especialidad o perfil. | `src/modules/profiles/presentation/dto/admissions.dto.ts:230` |
+| `requirements[].items[].itemType` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:232` |
+| `requirements[].items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:233` |
+| `requirements[].items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:235` |
+| `requirements[].items[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:237` |
+| `requirements[].items[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:239` |
+| `requirements[].items[].sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:245` |
+| `requirements[].items[].sourceRef` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:246` |
+| `requirements[].items[].sourceConsultedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:248` |
+| `requirements[].items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:251` |
+| `requirements[].items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:252` |
+| `requirements[].items[].internalNote` | `string` | No | admite null | — | Sólo para el personal; nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:259` |
+| `requirements[].items[].reviewedBy` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:261` |
+| `requirements[].items[].reviewedBy.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `requirements[].items[].reviewedBy.name` | `string` | No | — | — | — | sin fuente |
+| `requirements[].items[].reviewedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:262` |
+| `requirements[].items[].evidenceChanged` | `boolean` | Sí | — | — | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `src/modules/profiles/presentation/dto/admissions.dto.ts:268` |
+| `requirements[].items[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `src/modules/profiles/presentation/dto/admissions.dto.ts:274` |
+| `requirements[].items[].rowVersion` | `number` | No | admite null | — | expectedRowVersion del ítem. | `src/modules/profiles/presentation/dto/admissions.dto.ts:280` |
+| `blockers` | `array<AdmissionBlockerDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:391` |
+| `blockers[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:345` |
+| `blockers[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:346` |
+| `blockers[].reason` | `string` | Sí | valores: MISSING, REJECTED, PENDING, INFO_REQUIRED, BELOW_MINIMUM | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:350` |
+| `canVerify` | `boolean` | Sí | — | — | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:395` |
+| `documents` | `array<AdmissionDocumentDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:397` |
+| `documents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:326` |
+| `documents[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:327` |
+| `documents[].fileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:328` |
+| `documents[].name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:329` |
+| `documents[].mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:330` |
+| `documents[].sizeBytes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:331` |
+| `documents[].uploadedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:332` |
+| `documents[].pages` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:333` |
+| `documents[].reviewState` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:335` |
+| `documents[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:340` |
+| `submittedForm` | `object` | Sí | — | — | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `src/modules/profiles/presentation/dto/admissions.dto.ts:404` |
+| `submittedFormSource` | `string` | Sí | valores: SNAPSHOT, LIVE | — | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `src/modules/profiles/presentation/dto/admissions.dto.ts:411` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Cuatro ojos: la resolución debe hacerla una persona distinta de quien revisó |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La resolución no recibe ítems: se revisan uno por uno en .../items/:itemId/review; PreconditionFailedException: La acción no es válida desde el estado {from}; PreconditionFailedException: El checklist no está completo: hay requisitos sin verificar o rechazados; PreconditionFailedException: Una matrícula verificada ya venció: no se puede verificar con ella |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. GET /admissions/{id}/documents/{fileId}/content
+
+- **Origen:** CONTRATO
+- **Nombre:** Contenido de un documento de la admisión (URL firmada)
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.documentContent` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:373`
+
+### Qué es y para qué sirve (negocio)
+
+Contenido de un documento de la admisión (URL firmada). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /admissions/{id}/documents/{fileId}/content` la atiende `AdmissionsController.documentContent` (src/modules/profiles/presentation/controllers/admissions.controller.ts:373). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. Delega en `PractitionerAdmissionDocumentsService.open`. Lee common.addresses, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.jurisdiction_authorizations, profiles.persons y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:373` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, fileId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:373` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:162` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:114` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.documentContent → PractitionerAdmissionDocumentsService.open → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+| `fileId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<void>`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para abrir documentos de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Archivo no encontrado |
+| 410 | — | GoneException: {{ code: ErrorCode.PRECONDITION_FAILED, message: 'La URL del…} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:250` |
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. POST /admissions/{id}/documents/{fileId}/download-url
+
+- **Origen:** CONTRATO
+- **Nombre:** URL firmada para abrir un documento de la admisión
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.documentUrl` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:350`
+
+### Qué es y para qué sirve (negocio)
+
+URL firmada para abrir un documento de la admisión. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/{id}/documents/{fileId}/download-url` la atiende `AdmissionsController.documentUrl` (src/modules/profiles/presentation/controllers/admissions.controller.ts:350). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. Delega en `PractitionerAdmissionDocumentsService.issueUrl`. Lee common.addresses, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.jurisdiction_authorizations, profiles.persons y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:350` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, fileId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:350` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:162` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:114` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.documentUrl → PractitionerAdmissionDocumentsService.issueUrl → PractitionerAdmissionDocumentsService.assertFileBelongs → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+| `fileId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<AdmissionDocumentUrlDto>` · DTO `AdmissionDocumentUrlDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `url` | `string` | Sí | — | — | Ruta de la API para abrir el documento (vida corta, atada al actor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:529` |
+| `expiresAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:530` |
+| `name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:531` |
+| `mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:532` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para abrir documentos de admisiones |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 8. POST /admissions/{id}/items/{itemId}/review
+
+- **Origen:** CONTRATO
+- **Nombre:** Revisar un ítem del checklist
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.reviewItem` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:256`
+
+### Qué es y para qué sirve (negocio)
+
+Revisar un ítem del checklist. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/{id}/items/{itemId}/review` la atiende `AdmissionsController.reviewItem` (src/modules/profiles/presentation/controllers/admissions.controller.ts:256). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, SECURITY_ADMIN. Valida el cuerpo como `ReviewAdmissionItemDto` (10 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.reviewItem`. Crea filas en profiles.practitioner_admission_events. Actualiza profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.users, practice.practice_sites, practice.practitioner_role_assignments y 10 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:256` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, itemId | `src/modules/profiles/presentation/controllers/admissions.controller.ts:256` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:162` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem | `src/modules/profiles/application/services/practitioner-admissions.service.ts:553` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionReviewsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:111` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:114` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.reviewItem → PractitionerAdmissionsService.reviewItem → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+| `itemId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `ReviewAdmissionItemDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `decision` | `string` | Sí | valores: VERIFIED, REJECTED, INFO_REQUIRED | `@IsIn(['VERIFIED', 'REJECTED', 'INFO_REQUIRED'])` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:607` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Obligatorio si no es VERIFIED. Lo ve el médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:616` |
+| `reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO | `@IsOptional()` `@IsIn(REASON_CODES)` | Motivo estructurado; por omisión OTRO. | `src/modules/profiles/presentation/dto/admissions.dto.ts:624` |
+| `internalNote` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | Nota interna: nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:633` |
+| `sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO | `@IsOptional()` `@IsIn(SOURCE_TYPE_CODES)` | Fuente consultada (tipo). | `src/modules/profiles/presentation/dto/admissions.dto.ts:641` |
+| `sourceRef` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Nº de trámite, comprobante o URL de la fuente. | `src/modules/profiles/presentation/dto/admissions.dto.ts:650` |
+| `sourceConsultedAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | Cuándo se consultó la fuente (por omisión, ahora). | `src/modules/profiles/presentation/dto/admissions.dto.ts:658` |
+| `verificationSourceUri` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | URL de la fuente consultada. Compatibilidad: con VERIFIED alcanza como fuente (se registra como tipo OTRO si no viene `sourceType`). | `src/modules/profiles/presentation/dto/admissions.dto.ts:669` |
+| `evidenceSha256` | `string` | No | patrón ^[0-9a-f]{64}$; patrón runtime /^[0-9a-f]{64}$/ | `@ValidateIf( (o: ReviewAdmissionItemDto) => o.decision === 'VERIFIED' \|\| o.evidenceSha256 !== undefined, )` `@IsString()` `@Matches(/^[0-9a-f]{64}$/)` | Huella (`evidenceSha256`) del ítem tal como la entregó `GET /admissions/:id`: lo que el revisor tuvo delante. OBLIGATORIA para VERIFIED; si ya no coincide con la evidencia viva responde 409 ADMISSION_EVIDENCE_CHANGED y no cambia nada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:684` |
+| `expectedRowVersion` | `number` | Sí | mínimo 1; máximo 2_147_483_647 | `@IsInt()` `@Min(1)` `@Max(2_147_483_647)` | Versión del ÍTEM (`rowVersion` del item del checklist). | `src/modules/profiles/presentation/dto/admissions.dto.ts:693` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "decision": "VERIFIED",
+  "expectedRowVersion": 1
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "decision": "VERIFIED",
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "internalNote": "valor-ejemplo",
+  "sourceType": "REGISTRO_MINSALUD",
+  "sourceRef": "valor-ejemplo",
+  "sourceConsultedAt": "2026-07-31T12:00:00.000Z",
+  "verificationSourceUri": "valor-ejemplo",
+  "evidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "expectedRowVersion": 1
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdmissionDetailDto>` · DTO `AdmissionDetailDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `practitioner` | `AdmissionPractitionerDetailDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:356` |
+| `practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `practitioner.nationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:120` |
+| `practitioner.nationalIdIssuer` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:122` |
+| `practitioner.birthDate` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:124` |
+| `practitioner.age` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:126` |
+| `practitioner.occupation` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:127` |
+| `practitioner.personalMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:129` |
+| `practitioner.personalEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:131` |
+| `practitioner.workMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:133` |
+| `practitioner.workPhone` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:135` |
+| `practitioner.workEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:137` |
+| `licenses` | `array<AdmissionLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:358` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:143` |
+| `licenses[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:144` |
+| `licenses[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:145` |
+| `licenses[].jurisdiction` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:146` |
+| `licenses[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:148` |
+| `licenses[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `licenses[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `licenses[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:150` |
+| `licenses[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:151` |
+| `licenses[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:154` |
+| `licenses[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:155` |
+| `credentials` | `array<AdmissionCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:360` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:161` |
+| `credentials[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:162` |
+| `credentials[].level` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:163` |
+| `credentials[].title` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:164` |
+| `credentials[].institution` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:165` |
+| `credentials[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:167` |
+| `credentials[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `credentials[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `credentials[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:169` |
+| `credentials[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:170` |
+| `credentials[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:173` |
+| `credentials[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:174` |
+| `specialties` | `array<AdmissionSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:362` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:180` |
+| `specialties[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:181` |
+| `specialties[].name` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:182` |
+| `specialties[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:183` |
+| `specialties[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `specialties[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `specialties[].supportingCredentialId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:185` |
+| `events` | `array<AdmissionEventDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:363` |
+| `events[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:190` |
+| `events[].type` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:191` |
+| `events[].fromStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:193` |
+| `events[].fromStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].fromStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:195` |
+| `events[].toStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].itemType` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:196` |
+| `events[].itemId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:199` |
+| `events[].requirementCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:200` |
+| `events[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:203` |
+| `events[].reasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:204` |
+| `events[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:206` |
+| `events[].actor` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:209` |
+| `events[].actor.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `events[].actor.name` | `string` | No | — | — | — | sin fuente |
+| `events[].actorRole` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:210` |
+| `events[].occurredAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:212` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:364` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:366` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:368` |
+| `decisionReasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:370` |
+| `internalNote` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:372` |
+| `validUntil` | `string` | No | admite null | — | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `src/modules/profiles/presentation/dto/admissions.dto.ts:379` |
+| `resubmissionCount` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:380` |
+| `attestedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:381` |
+| `fourEyesRequired` | `boolean` | Sí | — | — | La configuración exige un aprobador distinto de los revisores. | `src/modules/profiles/presentation/dto/admissions.dto.ts:387` |
+| `requirements` | `array<AdmissionChecklistRequirementDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:389` |
+| `requirements[].code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:285` |
+| `requirements[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:286` |
+| `requirements[].description` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:287` |
+| `requirements[].required` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:289` |
+| `requirements[].evidenceKind` | `string` | Sí | valores: DOCUMENT, DATA | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:290` |
+| `requirements[].requiresSource` | `boolean` | Sí | — | — | Verificar un ítem exige declarar la fuente consultada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:294` |
+| `requirements[].professionGroup` | `string` | No | valores: MEDICO, ODONTOLOGO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:300` |
+| `requirements[].minItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:301` |
+| `requirements[].maxItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:303` |
+| `requirements[].state` | `string` | Sí | valores: NOT_PROVIDED, MISSING, PENDING, INFO_REQUIRED, VERIFIED, REJECTED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:315` |
+| `requirements[].satisfied` | `boolean` | Sí | — | — | El requisito está cumplido. | `src/modules/profiles/presentation/dto/admissions.dto.ts:317` |
+| `requirements[].blockedBy` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:318` |
+| `requirements[].items` | `array<AdmissionChecklistItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:321` |
+| `requirements[].items[].id` | `string` | No | formato uuid; admite null | — | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `src/modules/profiles/presentation/dto/admissions.dto.ts:225` |
+| `requirements[].items[].itemId` | `string` | Sí | formato uuid | — | La ficha: matrícula, título, especialidad o perfil. | `src/modules/profiles/presentation/dto/admissions.dto.ts:230` |
+| `requirements[].items[].itemType` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:232` |
+| `requirements[].items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:233` |
+| `requirements[].items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:235` |
+| `requirements[].items[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:237` |
+| `requirements[].items[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:239` |
+| `requirements[].items[].sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:245` |
+| `requirements[].items[].sourceRef` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:246` |
+| `requirements[].items[].sourceConsultedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:248` |
+| `requirements[].items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:251` |
+| `requirements[].items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:252` |
+| `requirements[].items[].internalNote` | `string` | No | admite null | — | Sólo para el personal; nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:259` |
+| `requirements[].items[].reviewedBy` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:261` |
+| `requirements[].items[].reviewedBy.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `requirements[].items[].reviewedBy.name` | `string` | No | — | — | — | sin fuente |
+| `requirements[].items[].reviewedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:262` |
+| `requirements[].items[].evidenceChanged` | `boolean` | Sí | — | — | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `src/modules/profiles/presentation/dto/admissions.dto.ts:268` |
+| `requirements[].items[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `src/modules/profiles/presentation/dto/admissions.dto.ts:274` |
+| `requirements[].items[].rowVersion` | `number` | No | admite null | — | expectedRowVersion del ítem. | `src/modules/profiles/presentation/dto/admissions.dto.ts:280` |
+| `blockers` | `array<AdmissionBlockerDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:391` |
+| `blockers[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:345` |
+| `blockers[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:346` |
+| `blockers[].reason` | `string` | Sí | valores: MISSING, REJECTED, PENDING, INFO_REQUIRED, BELOW_MINIMUM | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:350` |
+| `canVerify` | `boolean` | Sí | — | — | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:395` |
+| `documents` | `array<AdmissionDocumentDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:397` |
+| `documents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:326` |
+| `documents[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:327` |
+| `documents[].fileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:328` |
+| `documents[].name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:329` |
+| `documents[].mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:330` |
+| `documents[].sizeBytes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:331` |
+| `documents[].uploadedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:332` |
+| `documents[].pages` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:333` |
+| `documents[].reviewState` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:335` |
+| `documents[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:340` |
+| `submittedForm` | `object` | Sí | — | — | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `src/modules/profiles/presentation/dto/admissions.dto.ts:404` |
+| `submittedFormSource` | `string` | Sí | valores: SNAPSHOT, LIVE | — | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `src/modules/profiles/presentation/dto/admissions.dto.ts:411` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Sólo quien tomó la revisión puede actuar sobre sus ítems |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ítem de la admisión no encontrado; ResourceNotFoundException: Admisión no encontrada |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: La evidencia del ítem cambió desde que la revisó: vuelva a abrirla |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La admisión no está en revisión; PreconditionFailedException: La fecha de consulta de la fuente no puede ser futura; PreconditionFailedException: Verificar este ítem exige declarar la fuente consultada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 9. POST /admissions/{id}/reassign
+
+- **Origen:** CONTRATO
+- **Nombre:** Pasar la revisión a otro revisor
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Borra filas
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.reassign` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:213`
+
+### Qué es y para qué sirve (negocio)
+
+Pasar la revisión a otro revisor. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/{id}/reassign` la atiende `AdmissionsController.reassign` (src/modules/profiles/presentation/controllers/admissions.controller.ts:213). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `ReassignAdmissionDto` (2 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.reassign`. Crea filas en profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.users, practice.practice_sites, practice.practitioner_role_assignments y 11 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.userExists → AdmissionForeignReadsAdapter.userExists | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:65` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:508` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PersonAccountLinksRepository.hasActiveLink | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:127` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:824` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign | `src/modules/profiles/application/services/practitioner-admissions.service.ts:357` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.reassign → PractitionerAdmissionsService.reassign → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `ReassignAdmissionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1; máximo 2_147_483_647 | `@IsInt()` `@Min(1)` `@Max(2_147_483_647)` | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `src/modules/profiles/presentation/dto/admissions.dto.ts:546` |
+| `toUserId` | `string` | Sí | formato uuid | `@IsUUID()` | Cuenta del revisor que recibe la admisión. | `src/modules/profiles/presentation/dto/admissions.dto.ts:559` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1,
+  "toUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1,
+  "toUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdmissionDetailDto>` · DTO `AdmissionDetailDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `practitioner` | `AdmissionPractitionerDetailDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:356` |
+| `practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `practitioner.nationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:120` |
+| `practitioner.nationalIdIssuer` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:122` |
+| `practitioner.birthDate` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:124` |
+| `practitioner.age` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:126` |
+| `practitioner.occupation` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:127` |
+| `practitioner.personalMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:129` |
+| `practitioner.personalEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:131` |
+| `practitioner.workMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:133` |
+| `practitioner.workPhone` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:135` |
+| `practitioner.workEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:137` |
+| `licenses` | `array<AdmissionLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:358` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:143` |
+| `licenses[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:144` |
+| `licenses[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:145` |
+| `licenses[].jurisdiction` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:146` |
+| `licenses[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:148` |
+| `licenses[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `licenses[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `licenses[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:150` |
+| `licenses[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:151` |
+| `licenses[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:154` |
+| `licenses[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:155` |
+| `credentials` | `array<AdmissionCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:360` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:161` |
+| `credentials[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:162` |
+| `credentials[].level` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:163` |
+| `credentials[].title` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:164` |
+| `credentials[].institution` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:165` |
+| `credentials[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:167` |
+| `credentials[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `credentials[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `credentials[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:169` |
+| `credentials[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:170` |
+| `credentials[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:173` |
+| `credentials[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:174` |
+| `specialties` | `array<AdmissionSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:362` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:180` |
+| `specialties[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:181` |
+| `specialties[].name` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:182` |
+| `specialties[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:183` |
+| `specialties[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `specialties[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `specialties[].supportingCredentialId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:185` |
+| `events` | `array<AdmissionEventDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:363` |
+| `events[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:190` |
+| `events[].type` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:191` |
+| `events[].fromStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:193` |
+| `events[].fromStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].fromStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:195` |
+| `events[].toStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].itemType` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:196` |
+| `events[].itemId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:199` |
+| `events[].requirementCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:200` |
+| `events[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:203` |
+| `events[].reasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:204` |
+| `events[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:206` |
+| `events[].actor` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:209` |
+| `events[].actor.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `events[].actor.name` | `string` | No | — | — | — | sin fuente |
+| `events[].actorRole` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:210` |
+| `events[].occurredAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:212` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:364` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:366` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:368` |
+| `decisionReasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:370` |
+| `internalNote` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:372` |
+| `validUntil` | `string` | No | admite null | — | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `src/modules/profiles/presentation/dto/admissions.dto.ts:379` |
+| `resubmissionCount` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:380` |
+| `attestedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:381` |
+| `fourEyesRequired` | `boolean` | Sí | — | — | La configuración exige un aprobador distinto de los revisores. | `src/modules/profiles/presentation/dto/admissions.dto.ts:387` |
+| `requirements` | `array<AdmissionChecklistRequirementDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:389` |
+| `requirements[].code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:285` |
+| `requirements[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:286` |
+| `requirements[].description` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:287` |
+| `requirements[].required` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:289` |
+| `requirements[].evidenceKind` | `string` | Sí | valores: DOCUMENT, DATA | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:290` |
+| `requirements[].requiresSource` | `boolean` | Sí | — | — | Verificar un ítem exige declarar la fuente consultada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:294` |
+| `requirements[].professionGroup` | `string` | No | valores: MEDICO, ODONTOLOGO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:300` |
+| `requirements[].minItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:301` |
+| `requirements[].maxItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:303` |
+| `requirements[].state` | `string` | Sí | valores: NOT_PROVIDED, MISSING, PENDING, INFO_REQUIRED, VERIFIED, REJECTED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:315` |
+| `requirements[].satisfied` | `boolean` | Sí | — | — | El requisito está cumplido. | `src/modules/profiles/presentation/dto/admissions.dto.ts:317` |
+| `requirements[].blockedBy` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:318` |
+| `requirements[].items` | `array<AdmissionChecklistItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:321` |
+| `requirements[].items[].id` | `string` | No | formato uuid; admite null | — | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `src/modules/profiles/presentation/dto/admissions.dto.ts:225` |
+| `requirements[].items[].itemId` | `string` | Sí | formato uuid | — | La ficha: matrícula, título, especialidad o perfil. | `src/modules/profiles/presentation/dto/admissions.dto.ts:230` |
+| `requirements[].items[].itemType` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:232` |
+| `requirements[].items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:233` |
+| `requirements[].items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:235` |
+| `requirements[].items[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:237` |
+| `requirements[].items[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:239` |
+| `requirements[].items[].sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:245` |
+| `requirements[].items[].sourceRef` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:246` |
+| `requirements[].items[].sourceConsultedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:248` |
+| `requirements[].items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:251` |
+| `requirements[].items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:252` |
+| `requirements[].items[].internalNote` | `string` | No | admite null | — | Sólo para el personal; nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:259` |
+| `requirements[].items[].reviewedBy` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:261` |
+| `requirements[].items[].reviewedBy.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `requirements[].items[].reviewedBy.name` | `string` | No | — | — | — | sin fuente |
+| `requirements[].items[].reviewedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:262` |
+| `requirements[].items[].evidenceChanged` | `boolean` | Sí | — | — | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `src/modules/profiles/presentation/dto/admissions.dto.ts:268` |
+| `requirements[].items[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `src/modules/profiles/presentation/dto/admissions.dto.ts:274` |
+| `requirements[].items[].rowVersion` | `number` | No | admite null | — | expectedRowVersion del ítem. | `src/modules/profiles/presentation/dto/admissions.dto.ts:280` |
+| `blockers` | `array<AdmissionBlockerDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:391` |
+| `blockers[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:345` |
+| `blockers[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:346` |
+| `blockers[].reason` | `string` | Sí | valores: MISSING, REJECTED, PENDING, INFO_REQUIRED, BELOW_MINIMUM | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:350` |
+| `canVerify` | `boolean` | Sí | — | — | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:395` |
+| `documents` | `array<AdmissionDocumentDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:397` |
+| `documents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:326` |
+| `documents[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:327` |
+| `documents[].fileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:328` |
+| `documents[].name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:329` |
+| `documents[].mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:330` |
+| `documents[].sizeBytes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:331` |
+| `documents[].uploadedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:332` |
+| `documents[].pages` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:333` |
+| `documents[].reviewState` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:335` |
+| `documents[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:340` |
+| `submittedForm` | `object` | Sí | — | — | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `src/modules/profiles/presentation/dto/admissions.dto.ts:404` |
+| `submittedFormSource` | `string` | Sí | valores: SNAPSHOT, LIVE | — | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `src/modules/profiles/presentation/dto/admissions.dto.ts:411` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from}; PreconditionFailedException: El revisor indicado no existe o es el propio solicitante |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 10. POST /admissions/{id}/reinstate
+
+- **Origen:** CONTRATO
+- **Nombre:** Reponer una verificación suspendida (devuelve el check)
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.reinstate` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:329`
+
+### Qué es y para qué sirve (negocio)
+
+Reponer una verificación suspendida (devuelve el check). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/{id}/reinstate` la atiende `AdmissionsController.reinstate` (src/modules/profiles/presentation/controllers/admissions.controller.ts:329). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `SuspendAdmissionDto` (4 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.reinstate`. Crea filas en audit.verified_badges_history, authz.user_role_assignments, community.verified_badges, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza community.public_profiles, community.verified_badges, iam.devices, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.practitioner_admissions. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles y 23 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:329` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:329` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
+| `authz.roles` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode | `src/modules/authz/services/authz-effective-roles.service.ts:139` |
+| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:201` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
+| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
+| `community.verified_badges` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → CommunityVerificationSealAdapter.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findActive | `src/modules/community/repositories/verified-badges.repository.ts:61` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified | `src/modules/profiles/application/services/practitioner-verification-projector.service.ts:84` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:508` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerVerificationProjector.projectVerified → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:824` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate | `src/modules/profiles/application/services/practitioner-admissions.service.ts:846` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.reinstate → PractitionerAdmissionsService.reinstate → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SuspendAdmissionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1; máximo 2_147_483_647 | `@IsInt()` `@Min(1)` `@Max(2_147_483_647)` | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `src/modules/profiles/presentation/dto/admissions.dto.ts:546` |
+| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:742` |
+| `reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO | `@IsOptional()` `@IsIn(REASON_CODES)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:747` |
+| `internalNote` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:753` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "internalNote": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdmissionDetailDto>` · DTO `AdmissionDetailDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `practitioner` | `AdmissionPractitionerDetailDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:356` |
+| `practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `practitioner.nationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:120` |
+| `practitioner.nationalIdIssuer` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:122` |
+| `practitioner.birthDate` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:124` |
+| `practitioner.age` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:126` |
+| `practitioner.occupation` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:127` |
+| `practitioner.personalMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:129` |
+| `practitioner.personalEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:131` |
+| `practitioner.workMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:133` |
+| `practitioner.workPhone` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:135` |
+| `practitioner.workEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:137` |
+| `licenses` | `array<AdmissionLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:358` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:143` |
+| `licenses[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:144` |
+| `licenses[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:145` |
+| `licenses[].jurisdiction` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:146` |
+| `licenses[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:148` |
+| `licenses[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `licenses[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `licenses[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:150` |
+| `licenses[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:151` |
+| `licenses[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:154` |
+| `licenses[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:155` |
+| `credentials` | `array<AdmissionCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:360` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:161` |
+| `credentials[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:162` |
+| `credentials[].level` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:163` |
+| `credentials[].title` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:164` |
+| `credentials[].institution` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:165` |
+| `credentials[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:167` |
+| `credentials[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `credentials[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `credentials[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:169` |
+| `credentials[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:170` |
+| `credentials[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:173` |
+| `credentials[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:174` |
+| `specialties` | `array<AdmissionSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:362` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:180` |
+| `specialties[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:181` |
+| `specialties[].name` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:182` |
+| `specialties[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:183` |
+| `specialties[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `specialties[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `specialties[].supportingCredentialId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:185` |
+| `events` | `array<AdmissionEventDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:363` |
+| `events[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:190` |
+| `events[].type` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:191` |
+| `events[].fromStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:193` |
+| `events[].fromStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].fromStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:195` |
+| `events[].toStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].itemType` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:196` |
+| `events[].itemId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:199` |
+| `events[].requirementCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:200` |
+| `events[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:203` |
+| `events[].reasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:204` |
+| `events[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:206` |
+| `events[].actor` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:209` |
+| `events[].actor.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `events[].actor.name` | `string` | No | — | — | — | sin fuente |
+| `events[].actorRole` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:210` |
+| `events[].occurredAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:212` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:364` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:366` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:368` |
+| `decisionReasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:370` |
+| `internalNote` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:372` |
+| `validUntil` | `string` | No | admite null | — | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `src/modules/profiles/presentation/dto/admissions.dto.ts:379` |
+| `resubmissionCount` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:380` |
+| `attestedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:381` |
+| `fourEyesRequired` | `boolean` | Sí | — | — | La configuración exige un aprobador distinto de los revisores. | `src/modules/profiles/presentation/dto/admissions.dto.ts:387` |
+| `requirements` | `array<AdmissionChecklistRequirementDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:389` |
+| `requirements[].code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:285` |
+| `requirements[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:286` |
+| `requirements[].description` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:287` |
+| `requirements[].required` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:289` |
+| `requirements[].evidenceKind` | `string` | Sí | valores: DOCUMENT, DATA | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:290` |
+| `requirements[].requiresSource` | `boolean` | Sí | — | — | Verificar un ítem exige declarar la fuente consultada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:294` |
+| `requirements[].professionGroup` | `string` | No | valores: MEDICO, ODONTOLOGO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:300` |
+| `requirements[].minItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:301` |
+| `requirements[].maxItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:303` |
+| `requirements[].state` | `string` | Sí | valores: NOT_PROVIDED, MISSING, PENDING, INFO_REQUIRED, VERIFIED, REJECTED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:315` |
+| `requirements[].satisfied` | `boolean` | Sí | — | — | El requisito está cumplido. | `src/modules/profiles/presentation/dto/admissions.dto.ts:317` |
+| `requirements[].blockedBy` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:318` |
+| `requirements[].items` | `array<AdmissionChecklistItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:321` |
+| `requirements[].items[].id` | `string` | No | formato uuid; admite null | — | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `src/modules/profiles/presentation/dto/admissions.dto.ts:225` |
+| `requirements[].items[].itemId` | `string` | Sí | formato uuid | — | La ficha: matrícula, título, especialidad o perfil. | `src/modules/profiles/presentation/dto/admissions.dto.ts:230` |
+| `requirements[].items[].itemType` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:232` |
+| `requirements[].items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:233` |
+| `requirements[].items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:235` |
+| `requirements[].items[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:237` |
+| `requirements[].items[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:239` |
+| `requirements[].items[].sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:245` |
+| `requirements[].items[].sourceRef` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:246` |
+| `requirements[].items[].sourceConsultedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:248` |
+| `requirements[].items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:251` |
+| `requirements[].items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:252` |
+| `requirements[].items[].internalNote` | `string` | No | admite null | — | Sólo para el personal; nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:259` |
+| `requirements[].items[].reviewedBy` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:261` |
+| `requirements[].items[].reviewedBy.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `requirements[].items[].reviewedBy.name` | `string` | No | — | — | — | sin fuente |
+| `requirements[].items[].reviewedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:262` |
+| `requirements[].items[].evidenceChanged` | `boolean` | Sí | — | — | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `src/modules/profiles/presentation/dto/admissions.dto.ts:268` |
+| `requirements[].items[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `src/modules/profiles/presentation/dto/admissions.dto.ts:274` |
+| `requirements[].items[].rowVersion` | `number` | No | admite null | — | expectedRowVersion del ítem. | `src/modules/profiles/presentation/dto/admissions.dto.ts:280` |
+| `blockers` | `array<AdmissionBlockerDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:391` |
+| `blockers[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:345` |
+| `blockers[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:346` |
+| `blockers[].reason` | `string` | Sí | valores: MISSING, REJECTED, PENDING, INFO_REQUIRED, BELOW_MINIMUM | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:350` |
+| `canVerify` | `boolean` | Sí | — | — | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:395` |
+| `documents` | `array<AdmissionDocumentDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:397` |
+| `documents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:326` |
+| `documents[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:327` |
+| `documents[].fileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:328` |
+| `documents[].name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:329` |
+| `documents[].mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:330` |
+| `documents[].sizeBytes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:331` |
+| `documents[].uploadedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:332` |
+| `documents[].pages` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:333` |
+| `documents[].reviewState` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:335` |
+| `documents[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:340` |
+| `submittedForm` | `object` | Sí | — | — | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `src/modules/profiles/presentation/dto/admissions.dto.ts:404` |
+| `submittedFormSource` | `string` | Sí | valores: SNAPSHOT, LIVE | — | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `src/modules/profiles/presentation/dto/admissions.dto.ts:411` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from}; PreconditionFailedException: La verificación ya venció: el médico debe renovarla |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 11. POST /admissions/{id}/release
+
+- **Origen:** CONTRATO
+- **Nombre:** Soltar una revisión tomada para que otro la tome
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.release` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:190`
+
+### Qué es y para qué sirve (negocio)
+
+Soltar una revisión tomada para que otro la tome. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/{id}/release` la atiende `AdmissionsController.release` (src/modules/profiles/presentation/controllers/admissions.controller.ts:190). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `ClaimAdmissionDto` (1 campo, 1 obligatorio). Delega en `PractitionerAdmissionsService.release`. Crea filas en profiles.practitioner_admission_events. Actualiza profiles.practitioner_admissions. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.users, practice.practice_sites, practice.practitioner_role_assignments y 10 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:190` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:190` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:508` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:824` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.release → PractitionerAdmissionsService.release | `src/modules/profiles/application/services/practitioner-admissions.service.ts:302` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.release → PractitionerAdmissionsService.release → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `ClaimAdmissionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1; máximo 2_147_483_647 | `@IsInt()` `@Min(1)` `@Max(2_147_483_647)` | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `src/modules/profiles/presentation/dto/admissions.dto.ts:546` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdmissionDetailDto>` · DTO `AdmissionDetailDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `practitioner` | `AdmissionPractitionerDetailDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:356` |
+| `practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `practitioner.nationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:120` |
+| `practitioner.nationalIdIssuer` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:122` |
+| `practitioner.birthDate` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:124` |
+| `practitioner.age` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:126` |
+| `practitioner.occupation` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:127` |
+| `practitioner.personalMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:129` |
+| `practitioner.personalEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:131` |
+| `practitioner.workMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:133` |
+| `practitioner.workPhone` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:135` |
+| `practitioner.workEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:137` |
+| `licenses` | `array<AdmissionLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:358` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:143` |
+| `licenses[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:144` |
+| `licenses[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:145` |
+| `licenses[].jurisdiction` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:146` |
+| `licenses[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:148` |
+| `licenses[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `licenses[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `licenses[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:150` |
+| `licenses[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:151` |
+| `licenses[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:154` |
+| `licenses[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:155` |
+| `credentials` | `array<AdmissionCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:360` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:161` |
+| `credentials[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:162` |
+| `credentials[].level` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:163` |
+| `credentials[].title` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:164` |
+| `credentials[].institution` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:165` |
+| `credentials[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:167` |
+| `credentials[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `credentials[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `credentials[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:169` |
+| `credentials[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:170` |
+| `credentials[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:173` |
+| `credentials[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:174` |
+| `specialties` | `array<AdmissionSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:362` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:180` |
+| `specialties[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:181` |
+| `specialties[].name` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:182` |
+| `specialties[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:183` |
+| `specialties[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `specialties[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `specialties[].supportingCredentialId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:185` |
+| `events` | `array<AdmissionEventDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:363` |
+| `events[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:190` |
+| `events[].type` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:191` |
+| `events[].fromStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:193` |
+| `events[].fromStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].fromStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:195` |
+| `events[].toStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].itemType` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:196` |
+| `events[].itemId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:199` |
+| `events[].requirementCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:200` |
+| `events[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:203` |
+| `events[].reasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:204` |
+| `events[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:206` |
+| `events[].actor` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:209` |
+| `events[].actor.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `events[].actor.name` | `string` | No | — | — | — | sin fuente |
+| `events[].actorRole` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:210` |
+| `events[].occurredAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:212` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:364` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:366` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:368` |
+| `decisionReasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:370` |
+| `internalNote` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:372` |
+| `validUntil` | `string` | No | admite null | — | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `src/modules/profiles/presentation/dto/admissions.dto.ts:379` |
+| `resubmissionCount` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:380` |
+| `attestedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:381` |
+| `fourEyesRequired` | `boolean` | Sí | — | — | La configuración exige un aprobador distinto de los revisores. | `src/modules/profiles/presentation/dto/admissions.dto.ts:387` |
+| `requirements` | `array<AdmissionChecklistRequirementDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:389` |
+| `requirements[].code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:285` |
+| `requirements[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:286` |
+| `requirements[].description` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:287` |
+| `requirements[].required` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:289` |
+| `requirements[].evidenceKind` | `string` | Sí | valores: DOCUMENT, DATA | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:290` |
+| `requirements[].requiresSource` | `boolean` | Sí | — | — | Verificar un ítem exige declarar la fuente consultada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:294` |
+| `requirements[].professionGroup` | `string` | No | valores: MEDICO, ODONTOLOGO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:300` |
+| `requirements[].minItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:301` |
+| `requirements[].maxItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:303` |
+| `requirements[].state` | `string` | Sí | valores: NOT_PROVIDED, MISSING, PENDING, INFO_REQUIRED, VERIFIED, REJECTED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:315` |
+| `requirements[].satisfied` | `boolean` | Sí | — | — | El requisito está cumplido. | `src/modules/profiles/presentation/dto/admissions.dto.ts:317` |
+| `requirements[].blockedBy` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:318` |
+| `requirements[].items` | `array<AdmissionChecklistItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:321` |
+| `requirements[].items[].id` | `string` | No | formato uuid; admite null | — | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `src/modules/profiles/presentation/dto/admissions.dto.ts:225` |
+| `requirements[].items[].itemId` | `string` | Sí | formato uuid | — | La ficha: matrícula, título, especialidad o perfil. | `src/modules/profiles/presentation/dto/admissions.dto.ts:230` |
+| `requirements[].items[].itemType` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:232` |
+| `requirements[].items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:233` |
+| `requirements[].items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:235` |
+| `requirements[].items[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:237` |
+| `requirements[].items[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:239` |
+| `requirements[].items[].sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:245` |
+| `requirements[].items[].sourceRef` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:246` |
+| `requirements[].items[].sourceConsultedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:248` |
+| `requirements[].items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:251` |
+| `requirements[].items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:252` |
+| `requirements[].items[].internalNote` | `string` | No | admite null | — | Sólo para el personal; nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:259` |
+| `requirements[].items[].reviewedBy` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:261` |
+| `requirements[].items[].reviewedBy.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `requirements[].items[].reviewedBy.name` | `string` | No | — | — | — | sin fuente |
+| `requirements[].items[].reviewedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:262` |
+| `requirements[].items[].evidenceChanged` | `boolean` | Sí | — | — | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `src/modules/profiles/presentation/dto/admissions.dto.ts:268` |
+| `requirements[].items[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `src/modules/profiles/presentation/dto/admissions.dto.ts:274` |
+| `requirements[].items[].rowVersion` | `number` | No | admite null | — | expectedRowVersion del ítem. | `src/modules/profiles/presentation/dto/admissions.dto.ts:280` |
+| `blockers` | `array<AdmissionBlockerDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:391` |
+| `blockers[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:345` |
+| `blockers[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:346` |
+| `blockers[].reason` | `string` | Sí | valores: MISSING, REJECTED, PENDING, INFO_REQUIRED, BELOW_MINIMUM | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:350` |
+| `canVerify` | `boolean` | Sí | — | — | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:395` |
+| `documents` | `array<AdmissionDocumentDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:397` |
+| `documents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:326` |
+| `documents[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:327` |
+| `documents[].fileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:328` |
+| `documents[].name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:329` |
+| `documents[].mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:330` |
+| `documents[].sizeBytes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:331` |
+| `documents[].uploadedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:332` |
+| `documents[].pages` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:333` |
+| `documents[].reviewState` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:335` |
+| `documents[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:340` |
+| `submittedForm` | `object` | Sí | — | — | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `src/modules/profiles/presentation/dto/admissions.dto.ts:404` |
+| `submittedFormSource` | `string` | Sí | valores: SNAPSHOT, LIVE | — | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `src/modules/profiles/presentation/dto/admissions.dto.ts:411` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 12. POST /admissions/{id}/request-info
+
+- **Origen:** CONTRATO
+- **Nombre:** Pedir información al médico
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Borra filas
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.requestInfo` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:237`
+
+### Qué es y para qué sirve (negocio)
+
+Pedir información al médico. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/{id}/request-info` la atiende `AdmissionsController.requestInfo` (src/modules/profiles/presentation/controllers/admissions.controller.ts:237). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, SECURITY_ADMIN. Valida el cuerpo como `RequestAdmissionInfoDto` (6 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.requestInfo`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza iam.devices, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, iam.users, messaging.message_channels y 19 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_REVIEWER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:508` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:824` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1485` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo | `src/modules/profiles/application/services/practitioner-admissions.service.ts:430` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.requestInfo → PractitionerAdmissionsService.requestInfo → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `RequestAdmissionInfoDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1; máximo 2_147_483_647 | `@IsInt()` `@Min(1)` `@Max(2_147_483_647)` | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `src/modules/profiles/presentation/dto/admissions.dto.ts:546` |
+| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | Qué debe corregir o aportar el médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:584` |
+| `reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO | `@IsOptional()` `@IsIn(REASON_CODES)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:589` |
+| `items` | `array<AdmissionItemRefDto>` | No | máximo MAX_INFO_REQUEST_ITEMS elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(MAX_INFO_REQUEST_ITEMS)` `@ValidateNested({ each: true })` `@Type(() => AdmissionItemRefDto)` | Ítems puntuales; los marca INFO_REQUIRED. | `src/modules/profiles/presentation/dto/admissions.dto.ts:600` |
+| `items[].type` | `string` | No | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | `@IsIn(['LICENSE', 'CREDENTIAL', 'SPECIALTY', 'PROFILE'])` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:566` |
+| `items[].id` | `string` | No | formato uuid | `@IsUUID()` | La ficha (matrícula, título, especialidad o perfil). | `src/modules/profiles/presentation/dto/admissions.dto.ts:573` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "items": [
+    {
+      "type": "LICENSE",
+      "id": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdmissionDetailDto>` · DTO `AdmissionDetailDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `practitioner` | `AdmissionPractitionerDetailDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:356` |
+| `practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `practitioner.nationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:120` |
+| `practitioner.nationalIdIssuer` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:122` |
+| `practitioner.birthDate` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:124` |
+| `practitioner.age` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:126` |
+| `practitioner.occupation` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:127` |
+| `practitioner.personalMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:129` |
+| `practitioner.personalEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:131` |
+| `practitioner.workMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:133` |
+| `practitioner.workPhone` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:135` |
+| `practitioner.workEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:137` |
+| `licenses` | `array<AdmissionLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:358` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:143` |
+| `licenses[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:144` |
+| `licenses[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:145` |
+| `licenses[].jurisdiction` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:146` |
+| `licenses[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:148` |
+| `licenses[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `licenses[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `licenses[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:150` |
+| `licenses[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:151` |
+| `licenses[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:154` |
+| `licenses[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:155` |
+| `credentials` | `array<AdmissionCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:360` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:161` |
+| `credentials[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:162` |
+| `credentials[].level` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:163` |
+| `credentials[].title` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:164` |
+| `credentials[].institution` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:165` |
+| `credentials[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:167` |
+| `credentials[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `credentials[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `credentials[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:169` |
+| `credentials[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:170` |
+| `credentials[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:173` |
+| `credentials[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:174` |
+| `specialties` | `array<AdmissionSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:362` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:180` |
+| `specialties[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:181` |
+| `specialties[].name` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:182` |
+| `specialties[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:183` |
+| `specialties[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `specialties[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `specialties[].supportingCredentialId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:185` |
+| `events` | `array<AdmissionEventDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:363` |
+| `events[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:190` |
+| `events[].type` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:191` |
+| `events[].fromStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:193` |
+| `events[].fromStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].fromStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:195` |
+| `events[].toStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].itemType` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:196` |
+| `events[].itemId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:199` |
+| `events[].requirementCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:200` |
+| `events[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:203` |
+| `events[].reasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:204` |
+| `events[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:206` |
+| `events[].actor` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:209` |
+| `events[].actor.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `events[].actor.name` | `string` | No | — | — | — | sin fuente |
+| `events[].actorRole` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:210` |
+| `events[].occurredAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:212` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:364` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:366` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:368` |
+| `decisionReasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:370` |
+| `internalNote` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:372` |
+| `validUntil` | `string` | No | admite null | — | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `src/modules/profiles/presentation/dto/admissions.dto.ts:379` |
+| `resubmissionCount` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:380` |
+| `attestedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:381` |
+| `fourEyesRequired` | `boolean` | Sí | — | — | La configuración exige un aprobador distinto de los revisores. | `src/modules/profiles/presentation/dto/admissions.dto.ts:387` |
+| `requirements` | `array<AdmissionChecklistRequirementDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:389` |
+| `requirements[].code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:285` |
+| `requirements[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:286` |
+| `requirements[].description` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:287` |
+| `requirements[].required` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:289` |
+| `requirements[].evidenceKind` | `string` | Sí | valores: DOCUMENT, DATA | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:290` |
+| `requirements[].requiresSource` | `boolean` | Sí | — | — | Verificar un ítem exige declarar la fuente consultada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:294` |
+| `requirements[].professionGroup` | `string` | No | valores: MEDICO, ODONTOLOGO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:300` |
+| `requirements[].minItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:301` |
+| `requirements[].maxItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:303` |
+| `requirements[].state` | `string` | Sí | valores: NOT_PROVIDED, MISSING, PENDING, INFO_REQUIRED, VERIFIED, REJECTED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:315` |
+| `requirements[].satisfied` | `boolean` | Sí | — | — | El requisito está cumplido. | `src/modules/profiles/presentation/dto/admissions.dto.ts:317` |
+| `requirements[].blockedBy` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:318` |
+| `requirements[].items` | `array<AdmissionChecklistItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:321` |
+| `requirements[].items[].id` | `string` | No | formato uuid; admite null | — | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `src/modules/profiles/presentation/dto/admissions.dto.ts:225` |
+| `requirements[].items[].itemId` | `string` | Sí | formato uuid | — | La ficha: matrícula, título, especialidad o perfil. | `src/modules/profiles/presentation/dto/admissions.dto.ts:230` |
+| `requirements[].items[].itemType` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:232` |
+| `requirements[].items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:233` |
+| `requirements[].items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:235` |
+| `requirements[].items[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:237` |
+| `requirements[].items[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:239` |
+| `requirements[].items[].sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:245` |
+| `requirements[].items[].sourceRef` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:246` |
+| `requirements[].items[].sourceConsultedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:248` |
+| `requirements[].items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:251` |
+| `requirements[].items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:252` |
+| `requirements[].items[].internalNote` | `string` | No | admite null | — | Sólo para el personal; nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:259` |
+| `requirements[].items[].reviewedBy` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:261` |
+| `requirements[].items[].reviewedBy.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `requirements[].items[].reviewedBy.name` | `string` | No | — | — | — | sin fuente |
+| `requirements[].items[].reviewedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:262` |
+| `requirements[].items[].evidenceChanged` | `boolean` | Sí | — | — | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `src/modules/profiles/presentation/dto/admissions.dto.ts:268` |
+| `requirements[].items[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `src/modules/profiles/presentation/dto/admissions.dto.ts:274` |
+| `requirements[].items[].rowVersion` | `number` | No | admite null | — | expectedRowVersion del ítem. | `src/modules/profiles/presentation/dto/admissions.dto.ts:280` |
+| `blockers` | `array<AdmissionBlockerDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:391` |
+| `blockers[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:345` |
+| `blockers[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:346` |
+| `blockers[].reason` | `string` | Sí | valores: MISSING, REJECTED, PENDING, INFO_REQUIRED, BELOW_MINIMUM | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:350` |
+| `canVerify` | `boolean` | Sí | — | — | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:395` |
+| `documents` | `array<AdmissionDocumentDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:397` |
+| `documents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:326` |
+| `documents[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:327` |
+| `documents[].fileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:328` |
+| `documents[].name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:329` |
+| `documents[].mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:330` |
+| `documents[].sizeBytes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:331` |
+| `documents[].uploadedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:332` |
+| `documents[].pages` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:333` |
+| `documents[].reviewState` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:335` |
+| `documents[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:340` |
+| `submittedForm` | `object` | Sí | — | — | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `src/modules/profiles/presentation/dto/admissions.dto.ts:404` |
+| `submittedFormSource` | `string` | Sí | valores: SNAPSHOT, LIVE | — | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `src/modules/profiles/presentation/dto/admissions.dto.ts:411` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Sólo quien tomó la revisión puede actuar sobre sus ítems |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 13. POST /admissions/{id}/suspend
+
+- **Origen:** CONTRATO
+- **Nombre:** Suspender una verificación (quita el check)
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.suspend` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:310`
+
+### Qué es y para qué sirve (negocio)
+
+Suspender una verificación (quita el check). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/{id}/suspend` la atiende `AdmissionsController.suspend` (src/modules/profiles/presentation/controllers/admissions.controller.ts:310). Exige sesión con alguno de los roles ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `SuspendAdmissionDto` (4 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.suspend`. Crea filas en audit.verified_badges_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza community.public_profiles, community.verified_badges, iam.devices, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.practitioner_admissions. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, community.public_profiles, community.verified_badges, iam.devices y 21 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:310` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/admissions.controller.ts:310` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges | `src/modules/community/services/community-verification.service.ts:275` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
+| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.revoke | `src/modules/community/repositories/verified-badges.repository.ts:140` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.findAllBySubject | `src/modules/community/repositories/verified-badges.repository.ts:73` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerVerificationProjector.projectNotVerified | `src/modules/profiles/application/services/practitioner-verification-projector.service.ts:150` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:829` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:508` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:824` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_events` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionEventsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:403` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.suspend → PractitionerAdmissionsService.suspend | `src/modules/profiles/application/services/practitioner-admissions.service.ts:779` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsService.loadLocked → PractitionerAdmissionsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:122` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:514` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:511` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.suspend → PractitionerAdmissionsService.suspend → PractitionerAdmissionsReadService.detailOf → PractitionerAdmissionsReadService.practitionerBasics → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SuspendAdmissionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expectedRowVersion` | `number` | Sí | mínimo 1; máximo 2_147_483_647 | `@IsInt()` `@Min(1)` `@Max(2_147_483_647)` | Versión que el cliente leyó (`rowVersion`); si cambió, la respuesta es 409 ADMISSION_STALE. | `src/modules/profiles/presentation/dto/admissions.dto.ts:546` |
+| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:742` |
+| `reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO | `@IsOptional()` `@IsIn(REASON_CODES)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:747` |
+| `internalNote` | `string` | No | longitud máxima 1000 | `@IsOptional()` `@IsString()` `@MaxLength(1000)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:753` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "expectedRowVersion": 1,
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "ILEGIBLE",
+  "internalNote": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdmissionDetailDto>` · DTO `AdmissionDetailDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `practitioner` | `AdmissionPractitionerDetailDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:356` |
+| `practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `practitioner.nationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:120` |
+| `practitioner.nationalIdIssuer` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:122` |
+| `practitioner.birthDate` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:124` |
+| `practitioner.age` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:126` |
+| `practitioner.occupation` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:127` |
+| `practitioner.personalMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:129` |
+| `practitioner.personalEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:131` |
+| `practitioner.workMobile` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:133` |
+| `practitioner.workPhone` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:135` |
+| `practitioner.workEmail` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:137` |
+| `licenses` | `array<AdmissionLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:358` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:143` |
+| `licenses[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:144` |
+| `licenses[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:145` |
+| `licenses[].jurisdiction` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:146` |
+| `licenses[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:148` |
+| `licenses[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `licenses[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `licenses[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:150` |
+| `licenses[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:151` |
+| `licenses[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:154` |
+| `licenses[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:155` |
+| `credentials` | `array<AdmissionCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:360` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:161` |
+| `credentials[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:162` |
+| `credentials[].level` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:163` |
+| `credentials[].title` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:164` |
+| `credentials[].institution` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:165` |
+| `credentials[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:167` |
+| `credentials[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `credentials[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `credentials[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:169` |
+| `credentials[].verifiedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:170` |
+| `credentials[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:173` |
+| `credentials[].rejectionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:174` |
+| `specialties` | `array<AdmissionSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:362` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:180` |
+| `specialties[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:181` |
+| `specialties[].name` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:182` |
+| `specialties[].state` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:183` |
+| `specialties[].state.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `specialties[].state.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `specialties[].supportingCredentialId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:185` |
+| `events` | `array<AdmissionEventDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:363` |
+| `events[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:190` |
+| `events[].type` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:191` |
+| `events[].fromStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:193` |
+| `events[].fromStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].fromStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus` | `AdmissionCodeLabelDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:195` |
+| `events[].toStatus.code` | `string` | No | — | — | — | sin fuente |
+| `events[].toStatus.label` | `string` | No | — | — | — | sin fuente |
+| `events[].itemType` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:196` |
+| `events[].itemId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:199` |
+| `events[].requirementCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:200` |
+| `events[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:203` |
+| `events[].reasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:204` |
+| `events[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:206` |
+| `events[].actor` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:209` |
+| `events[].actor.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `events[].actor.name` | `string` | No | — | — | — | sin fuente |
+| `events[].actorRole` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:210` |
+| `events[].occurredAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:212` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:364` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:366` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:368` |
+| `decisionReasonCode` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:370` |
+| `internalNote` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:372` |
+| `validUntil` | `string` | No | admite null | — | YYYY-MM-DD, inclusive, fin de día en America/La_Paz. | `src/modules/profiles/presentation/dto/admissions.dto.ts:379` |
+| `resubmissionCount` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:380` |
+| `attestedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:381` |
+| `fourEyesRequired` | `boolean` | Sí | — | — | La configuración exige un aprobador distinto de los revisores. | `src/modules/profiles/presentation/dto/admissions.dto.ts:387` |
+| `requirements` | `array<AdmissionChecklistRequirementDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:389` |
+| `requirements[].code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:285` |
+| `requirements[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:286` |
+| `requirements[].description` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:287` |
+| `requirements[].required` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:289` |
+| `requirements[].evidenceKind` | `string` | Sí | valores: DOCUMENT, DATA | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:290` |
+| `requirements[].requiresSource` | `boolean` | Sí | — | — | Verificar un ítem exige declarar la fuente consultada. | `src/modules/profiles/presentation/dto/admissions.dto.ts:294` |
+| `requirements[].professionGroup` | `string` | No | valores: MEDICO, ODONTOLOGO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:300` |
+| `requirements[].minItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:301` |
+| `requirements[].maxItems` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:303` |
+| `requirements[].state` | `string` | Sí | valores: NOT_PROVIDED, MISSING, PENDING, INFO_REQUIRED, VERIFIED, REJECTED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:315` |
+| `requirements[].satisfied` | `boolean` | Sí | — | — | El requisito está cumplido. | `src/modules/profiles/presentation/dto/admissions.dto.ts:317` |
+| `requirements[].blockedBy` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:318` |
+| `requirements[].items` | `array<AdmissionChecklistItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:321` |
+| `requirements[].items[].id` | `string` | No | formato uuid; admite null | — | Id de la revisión (el `:itemId` de `.../items/:itemId/review`). Es null hasta que alguien toma la admisión y se materializa. | `src/modules/profiles/presentation/dto/admissions.dto.ts:225` |
+| `requirements[].items[].itemId` | `string` | Sí | formato uuid | — | La ficha: matrícula, título, especialidad o perfil. | `src/modules/profiles/presentation/dto/admissions.dto.ts:230` |
+| `requirements[].items[].itemType` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:232` |
+| `requirements[].items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:233` |
+| `requirements[].items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:235` |
+| `requirements[].items[].fileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:237` |
+| `requirements[].items[].verificationSourceUri` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:239` |
+| `requirements[].items[].sourceType` | `string` | No | valores: REGISTRO_MINSALUD, COLEGIO_MEDICO, COLEGIO_ODONTOLOGOS, SEDES, SEGIP, DOCUMENTO_APORTADO, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:245` |
+| `requirements[].items[].sourceRef` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:246` |
+| `requirements[].items[].sourceConsultedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:248` |
+| `requirements[].items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:251` |
+| `requirements[].items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:252` |
+| `requirements[].items[].internalNote` | `string` | No | admite null | — | Sólo para el personal; nunca llega al médico. | `src/modules/profiles/presentation/dto/admissions.dto.ts:259` |
+| `requirements[].items[].reviewedBy` | `AdmissionActorDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:261` |
+| `requirements[].items[].reviewedBy.id` | `string` | No | formato uuid | — | — | sin fuente |
+| `requirements[].items[].reviewedBy.name` | `string` | No | — | — | — | sin fuente |
+| `requirements[].items[].reviewedAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:262` |
+| `requirements[].items[].evidenceChanged` | `boolean` | Sí | — | — | El dato o el archivo cambió después de revisarse: la revisión ya no vale. | `src/modules/profiles/presentation/dto/admissions.dto.ts:268` |
+| `requirements[].items[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) del dato y del archivo de HOY. Se devuelve tal cual en `evidenceSha256` al revisar el ítem: así el servidor sabe qué vio el revisor. | `src/modules/profiles/presentation/dto/admissions.dto.ts:274` |
+| `requirements[].items[].rowVersion` | `number` | No | admite null | — | expectedRowVersion del ítem. | `src/modules/profiles/presentation/dto/admissions.dto.ts:280` |
+| `blockers` | `array<AdmissionBlockerDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:391` |
+| `blockers[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:345` |
+| `blockers[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:346` |
+| `blockers[].reason` | `string` | Sí | valores: MISSING, REJECTED, PENDING, INFO_REQUIRED, BELOW_MINIMUM | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:350` |
+| `canVerify` | `boolean` | Sí | — | — | Hoy se podría resolver VERIFICADA (lo decide el servidor). | `src/modules/profiles/presentation/dto/admissions.dto.ts:395` |
+| `documents` | `array<AdmissionDocumentDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:397` |
+| `documents[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:326` |
+| `documents[].requirementCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:327` |
+| `documents[].fileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:328` |
+| `documents[].name` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:329` |
+| `documents[].mimeType` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:330` |
+| `documents[].sizeBytes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:331` |
+| `documents[].uploadedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:332` |
+| `documents[].pages` | `number` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:333` |
+| `documents[].reviewState` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:335` |
+| `documents[].evidenceSha256` | `string` | Sí | — | — | Huella (sha256) de la evidencia del ítem al que pertenece el archivo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:340` |
+| `submittedForm` | `object` | Sí | — | — | El formulario tal como lo envió el médico (SnapshotForm). Ver `submittedFormSource`. | `src/modules/profiles/presentation/dto/admissions.dto.ts:404` |
+| `submittedFormSource` | `string` | Sí | valores: SNAPSHOT, LIVE | — | SNAPSHOT: foto tomada al enviar o reenviar. LIVE: lectura viva del perfil (admisiones sin foto, p. ej. las del backfill). | `src/modules/profiles/presentation/dto/admissions.dto.ts:411` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. POST /admissions/expire-sweep
+
+- **Origen:** CONTRATO
+- **Nombre:** Barrido de vencimientos
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.expireSweep` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:125`
+
+### Qué es y para qué sirve (negocio)
+
+Barrido de vencimientos. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/expire-sweep` la atiende `AdmissionsController.expireSweep` (src/modules/profiles/presentation/controllers/admissions.controller.ts:125). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN. Delega en `PractitionerAdmissionsService.expireSweep`. Crea filas en audit.verified_badges_history, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza community.public_profiles, community.verified_badges, iam.devices, messaging.notification_requests, profiles.health_practitioner_profiles, profiles.practitioner_admissions. Lee common.contact_points, community.public_profiles, community.verified_badges, iam.devices, messaging.message_channels, messaging.message_templates, messaging.messaging_providers, messaging.notification_deliveries y 6 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:125` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
+| `common.contact_points` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → MessagingAdmissionNoticeAdapter.enqueueEmail | `src/modules/profiles/infrastructure/adapters/messaging-admission-notice.adapter.ts:175` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges | `src/modules/community/services/community-verification.service.ts:275` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
+| `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.revoke | `src/modules/community/repositories/verified-badges.repository.ts:140` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → CommunityVerificationSealAdapter.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.findAllBySubject | `src/modules/community/repositories/verified-badges.repository.ts:73` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified | `src/modules/profiles/application/services/practitioner-verification-projector.service.ts:150` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerVerificationProjector.projectNotVerified → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsRepository.setStatus | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:219` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.expireSweep → PractitionerAdmissionsService.expireSweep → PractitionerAdmissionsService.sweepLocked → PractitionerAdmissionsRepository.findExpired | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:186` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<AdmissionSweepResultDto>` · DTO `AdmissionSweepResultDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `expired` | `number` | Sí | — | — | Verificaciones vencidas (VERIFICADA a EXPIRADA). | `src/modules/profiles/presentation/dto/admissions.dto.ts:511` |
+| `abandoned` | `number` | Sí | — | — | Solicitudes cerradas por falta de respuesta (a ABANDONADA). | `src/modules/profiles/presentation/dto/admissions.dto.ts:515` |
+| `skipped` | `boolean` | Sí | — | — | `true` si no corrió porque otro nodo tenía el barrido en curso (no es un error: repetir es inocuo). | `src/modules/profiles/presentation/dto/admissions.dto.ts:520` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 15. POST /admissions/search
+
+- **Origen:** CONTRATO
+- **Nombre:** Bandeja de admisiones con los filtros en el cuerpo
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AdmissionsController.search` — `src/modules/profiles/presentation/controllers/admissions.controller.ts:107`
+
+### Qué es y para qué sirve (negocio)
+
+Bandeja de admisiones con los filtros en el cuerpo. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /admissions/search` la atiende `AdmissionsController.search` (src/modules/profiles/presentation/controllers/admissions.controller.ts:107). Exige sesión con alguno de los roles ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN. Valida el cuerpo como `ListAdmissionsQueryDto` (8 campos, 0 obligatorios). Delega en `PractitionerAdmissionsReadService.list`. Lee common.addresses, common.file_versions, common.files, common.identifiers, iam.users, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements y 9 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: ADMISSIONS_REVIEWER, ADMISSIONS_APPROVER, SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/admissions.controller.ts:107` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:162` |
+| `common.file_versions` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.users` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.userNames → AdmissionForeignReadsAdapter.userNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:56` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | POR_SQL | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsRepository.listPage | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:244` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PersonAccountLinksRepository.findActivePersonIdsByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:169` |
+| `profiles.persons` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionReviewsRepository.findByAdmissions | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:101` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionsRepository.findById | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:114` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.liveSummary → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.professionGroups | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:872` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | AdmissionsController.search → PractitionerAdmissionsReadService.list → PractitionerAdmissionsReadService.summaries → PractitionerAdmissionsReadService.professionGroups → PractitionerAdmissionsReadService.conceptDisplay → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Cuerpo — DTO `ListAdmissionsQueryDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `type` | `string` | No | valores: ALTA_DE_DOCTOR | `@IsOptional()` `@IsIn(['ALTA_DE_DOCTOR'])` | Tipo de admisión; hoy ALTA_DE_DOCTOR. | `src/modules/profiles/presentation/dto/admissions.dto.ts:764` |
+| `status` | `string` | No | valores: ENVIADA, EN_REVISION, INFORMACION_REQUERIDA, VERIFICADA, RECHAZADA, SUSPENDIDA, EXPIRADA, RETIRADA, ABANDONADA | `@IsOptional()` `@IsIn(ADMISSION_STATUS_CODES)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:769` |
+| `assignedTo` | `string` | No | longitud máxima 40 | `@IsOptional()` `@IsString()` `@MaxLength(40)` | Cuenta asignada, o `me`, o `none` (sin asignar). | `src/modules/profiles/presentation/dto/admissions.dto.ts:777` |
+| `overdue` | `boolean` | No | — | `@IsOptional()` `@Type(() => Boolean)` `@IsBoolean()` | true = sólo vencidas. | `src/modules/profiles/presentation/dto/admissions.dto.ts:783` |
+| `q` | `string` | No | longitud máxima 80 | `@IsOptional()` `@IsString()` `@MaxLength(80)` | Nombre, cédula o matrícula (2 a 80 caracteres). | `src/modules/profiles/presentation/dto/admissions.dto.ts:792` |
+| `cursor` | `string` | No | longitud máxima 512 | `@IsOptional()` `@IsString()` `@MaxLength(512)` | Cursor opaco de la página anterior. | `src/modules/profiles/presentation/dto/admissions.dto.ts:798` |
+| `limit` | `number` | No | mínimo 1; máximo 100 | `@IsOptional()` `@Type(() => Number)` `@IsInt()` `@Min(1)` `@Max(100)` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:806` |
+| `sort` | `string` | No | valores: due_at | `@IsOptional()` `@IsIn(['due_at'])` | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:811` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "type": "ALTA_DE_DOCTOR",
+  "status": "ENVIADA",
+  "assignedTo": "valor-ejemplo",
+  "overdue": true,
+  "q": "valor-ejemplo",
+  "cursor": "valor-ejemplo",
+  "limit": 25,
+  "sort": "due_at"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<AdmissionListDto>` · DTO `AdmissionListDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<AdmissionSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:107` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:78` |
+| `items[].type` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:79` |
+| `items[].type.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `items[].type.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `items[].status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:80` |
+| `items[].status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `items[].status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `items[].itemsSummary` | `AdmissionItemsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:82` |
+| `items[].itemsSummary.licenses` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:63` |
+| `items[].itemsSummary.credentials` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:64` |
+| `items[].itemsSummary.specialties` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:65` |
+| `items[].requirementsSummary` | `AdmissionRequirementsSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:84` |
+| `items[].requirementsSummary.total` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:70` |
+| `items[].requirementsSummary.verified` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:71` |
+| `items[].requirementsSummary.rejected` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:72` |
+| `items[].requirementsSummary.pending` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:73` |
+| `items[].submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:85` |
+| `items[].dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:86` |
+| `items[].overdue` | `boolean` | Sí | — | — | Venció su plazo y la plataforma le debe una respuesta. | `src/modules/profiles/presentation/dto/admissions.dto.ts:90` |
+| `items[].assignedTo` | `AdmissionActorDto` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:92` |
+| `items[].assignedTo.id` | `string` | Sí | formato uuid | — | — | sin fuente |
+| `items[].assignedTo.name` | `string` | Sí | — | — | — | sin fuente |
+| `items[].rowVersion` | `number` | Sí | — | — | Versión de la fila; se manda como expectedRowVersion. | `src/modules/profiles/presentation/dto/admissions.dto.ts:96` |
+| `items[].practitioner` | `AdmissionPractitionerSummaryDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:102` |
+| `items[].practitioner.id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:53` |
+| `items[].practitioner.fullName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:54` |
+| `items[].practitioner.profession` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:55` |
+| `items[].practitioner.maskedNationalId` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:57` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:108` |
+| `counts` | `object` | Sí | — | — | Cantidad por código de estado, con los filtros menos el de estado. | `src/modules/profiles/presentation/dto/admissions.dto.ts:115` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:AdmissionsController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 16. GET /profiles/credentials
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar credenciales pendientes de verificación
@@ -107,8 +3287,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:782` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -132,18 +3312,18 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PendingCredentialSummaryDto>` | Sí | — | — | Credenciales de esta página, ordenadas por `id`. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:109` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:74` |
-| `items[].practitionerProfileId` | `string` | Sí | formato uuid | — | Profesional dueño de la credencial. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:78` |
-| `items[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | Concepto del tipo de credencial (matrícula, título, certificación). | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:82` |
-| `items[].number` | `string` | Sí | — | — | Número de matrícula o de documento declarado. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:86` |
-| `items[].issuingInstitutionText` | `string` | No | — | — | Institución u organismo emisor, en texto libre. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:90` |
-| `items[].fileId` | `string` | No | formato uuid | — | Archivo adjunto (diploma o certificado), si se cargó uno. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:94` |
-| `items[].state` | `string` | Sí | formato uuid | — | Estado actual de la credencial. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:98` |
-| `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha en que se cargó la credencial. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:102` |
-| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:112` |
-| `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:115` |
-| `nextCursor` | `string` | Sí | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:119` |
+| `items` | `array<PendingCredentialSummaryDto>` | Sí | — | — | Credenciales de esta página, ordenadas por `id`. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:127` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:92` |
+| `items[].practitionerProfileId` | `string` | Sí | formato uuid | — | Profesional dueño de la credencial. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:96` |
+| `items[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | Concepto del tipo de credencial (matrícula, título, certificación). | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:100` |
+| `items[].number` | `string` | Sí | — | — | Número de matrícula o de documento declarado. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:104` |
+| `items[].issuingInstitutionText` | `string` | No | — | — | Institución u organismo emisor, en texto libre. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:108` |
+| `items[].fileId` | `string` | No | formato uuid | — | Archivo adjunto (diploma o certificado), si se cargó uno. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:112` |
+| `items[].state` | `string` | Sí | formato uuid | — | Estado actual de la credencial. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:116` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | Fecha en que se cargó la credencial. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:120` |
+| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:130` |
+| `limit` | `number` | Sí | — | — | Tope aplicado a la consulta. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:133` |
+| `nextCursor` | `string` | Sí | admite null | — | Cursor opaco de continuación, o `null` si ésta es la última página. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:137` |
 
 ### Respuestas posibles
 
@@ -166,12 +3346,12 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 2. POST /profiles/credentials/{credentialId}/verify
+## 17. POST /profiles/credentials/{credentialId}/verify
 
 - **Origen:** CONTRATO
 - **Nombre:** Verificar credencial profesional
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `ProfilesPractitionersController.verifyCredential` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813`
 
@@ -183,7 +3363,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/credentials/{credentialId}/verify` la atiende `ProfilesPractitionersController.verifyCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyCredentialDto` (2 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.verifyCredential`. Crea filas en authz.user_role_assignments. Actualiza profiles.health_practitioner_profiles, profiles.professional_credentials. Lee authz.roles, authz.user_role_assignments, profiles.health_practitioner_profiles, profiles.person_account_links, profiles.professional_credentials.
+`POST /profiles/credentials/{credentialId}/verify` la atiende `ProfilesPractitionersController.verifyCredential` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `VerifyCredentialDto` (3 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.verifyCredential`. Crea filas en profiles.practitioner_admission_events, profiles.practitioner_admission_reviews, profiles.practitioner_admissions. Actualiza profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements y 8 más.
 
 ### Requerimientos
 
@@ -191,24 +3371,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `authz.roles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode | `src/modules/authz/services/authz-effective-roles.service.ts:139` |
-| `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
-| `authz.user_role_assignments` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2261` |
-| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
-| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2237` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1209` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.applyReview | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1485` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:90` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsRepository.findOpenByPractitionerForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:148` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2309` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → ProfessionalCredentialsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:104` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerAdmissionsService.recordCredentialReview → PractitionerAdmissionsService.recordItemOutcome → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
 
 ### Parámetros
 
@@ -220,8 +3416,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `decision` | `string` | Sí | valores: VERIFIED, REJECTED | `@IsIn(['VERIFIED', 'REJECTED'])` | Resultado de la verificación | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:17` |
-| `verificationSourceUri` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | URI de la fuente de verificación consultada (registro del colegio profesional, resolución de la autoridad). OBLIGATORIA cuando la decisión es VERIFIED: habilitar a un profesional sin declarar contra qué se comprobó su matrícula no deja rastro auditable. Para REJECTED es opcional, porque se puede rechazar por defectos de forma del propio documento sin consultar a nadie. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:34` |
+| `decision` | `string` | Sí | valores: VERIFIED, REJECTED | `@IsIn(['VERIFIED', 'REJECTED'])` | Resultado de la verificación. Mientras el profesional tenga una admisión abierta (o esté pendiente), VERIFIED se rechaza con 412 ADMISSION_VERIFY_VIA_REVIEW: el título se verifica desde `POST /admissions/:id/items/:itemId/review`, con la huella de lo que se vio. REJECTED sigue valiendo para quien tomó la revisión. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:21` |
+| `verificationSourceUri` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | URI de la fuente de verificación consultada (registro del colegio profesional, resolución de la autoridad). OBLIGATORIA cuando la decisión es VERIFIED: habilitar a un profesional sin declarar contra qué se comprobó su matrícula no deja rastro auditable. Para REJECTED es opcional, porque se puede rechazar por defectos de forma del propio documento sin consultar a nadie. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:38` |
+| `reason` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo del rechazo; lo ve el profesional en su admisión. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:51` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -236,7 +3433,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 ```json
 {
   "decision": "VERIFIED",
-  "verificationSourceUri": "valor-ejemplo"
+  "verificationSourceUri": "valor-ejemplo",
+  "reason": "Texto descriptivo de ejemplo"
 }
 ```
 
@@ -246,10 +3444,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:43` |
-| `state` | `string` | Sí | formato uuid | — | Concept id del estado de la credencial | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:52` |
-| `verifiedAt` | `string` | No | formato date-time | — | Valor de verified at mantenido por la instancia. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:58` |
-| `practitionerVerified` | `boolean` | Sí | — | — | true si al verificar quedó habilitado todo el perfil profesional | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:67` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:60` |
+| `state` | `string` | Sí | formato uuid | — | Concept id del estado de la credencial | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:69` |
+| `verifiedAt` | `string` | No | formato date-time | — | Valor de verified at mantenido por la instancia. | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:75` |
+| `practitionerVerified` | `boolean` | Sí | — | — | Siempre false desde v4.2.67: verificar una credencial ya no habilita el perfil; | `src/modules/profiles/presentation/dto/verify-credential.dto.ts:85` |
 
 ### Respuestas posibles
 
@@ -258,9 +3456,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Sólo quien tomó la revisión puede actuar sobre sus ítems |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Credencial no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una credencial verificada debe declarar la fuente consultada; PreconditionFailedException: La credencial no está pendiente de verificación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una credencial verificada debe declarar la fuente consultada; PreconditionFailedException: La credencial no está pendiente de verificación; PreconditionFailedException: Un título de una admisión abierta se verifica desde la revisión de la admisión (POST /admissions/:id/items/:itemId/review), con la huella de lo que se vio; PreconditionFailedException: La admisión no está en revisión: tómela antes de verificar sus títulos |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/profiles.md).
@@ -277,7 +3475,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 3. GET /profiles/patients
+## 18. GET /profiles/patients
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-05-13: listado paginado de pacientes
@@ -302,8 +3500,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:309` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -370,7 +3568,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 4. POST /profiles/patients
+## 19. POST /profiles/patients
 
 - **Origen:** CONTRATO
 - **Nombre:** Alta de persona y perfil de paciente
@@ -395,10 +3593,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:444` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -484,7 +3682,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 5. GET /profiles/patients/{profileId}
+## 20. GET /profiles/patients/{profileId}
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-05-14: ficha de filiación de un paciente (F-01)
@@ -509,9 +3707,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:425` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:425` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -589,7 +3787,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 6. POST /profiles/patients/{profileId}/identity-links
+## 21. POST /profiles/patients/{profileId}/identity-links
 
 - **Origen:** CONTRATO
 - **Nombre:** Vincular identidad externa de paciente (MPI)
@@ -614,11 +3812,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:479` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:479` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -706,7 +3904,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 7. POST /profiles/patients/{profileId}/portal-proxies
+## 22. POST /profiles/patients/{profileId}/portal-proxies
 
 - **Origen:** CONTRATO
 - **Nombre:** Otorgar proxy de portal a un representante
@@ -731,11 +3929,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:551` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:551` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -824,7 +4022,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 8. POST /profiles/patients/{profileId}/related-persons
+## 23. POST /profiles/patients/{profileId}/related-persons
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar persona relacionada / contacto de emergencia
@@ -849,11 +4047,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:532` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:532` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -941,7 +4139,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 9. GET /profiles/patients/me
+## 24. GET /profiles/patients/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar los propios datos de filiación
@@ -966,8 +4164,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1107,7 +4305,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 10. PATCH /profiles/patients/me
+## 25. PATCH /profiles/patients/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar los propios datos de filiación
@@ -1132,10 +4330,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:147` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1355,7 +4553,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 11. GET /profiles/patients/me/addresses
+## 26. GET /profiles/patients/me/addresses
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las propias direcciones (la preferida primero)
@@ -1380,8 +4578,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1434,7 +4632,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. POST /profiles/patients/me/addresses
+## 27. POST /profiles/patients/me/addresses
 
 - **Origen:** CONTRATO
 - **Nombre:** Guardar una dirección nueva
@@ -1459,10 +4657,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1549,7 +4747,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. DELETE /profiles/patients/me/addresses/{id}
+## 28. DELETE /profiles/patients/me/addresses/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar una dirección guardada o la del trabajo
@@ -1574,9 +4772,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1637,7 +4835,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. PATCH /profiles/patients/me/addresses/{id}
+## 29. PATCH /profiles/patients/me/addresses/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una dirección (cierra la vigente y abre otra)
@@ -1662,11 +4860,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1756,7 +4954,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. PUT /profiles/patients/me/addresses/{id}/preferred
+## 30. PUT /profiles/patients/me/addresses/{id}/preferred
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar la dirección que se ofrece primero
@@ -1781,9 +4979,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1842,7 +5040,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. GET /profiles/patients/me/dependent-candidates
+## 31. GET /profiles/patients/me/dependent-candidates
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscar por nombre a quién pedirle que deje representarla
@@ -1867,7 +5065,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:117` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 30, ttl: 60_000 } }) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:117` |
 
 ### Tablas que afecta
@@ -1922,7 +5120,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 17. POST /profiles/patients/me/dependent-requests
+## 32. POST /profiles/patients/me/dependent-requests
 
 - **Origen:** CONTRATO
 - **Nombre:** Pedir representar a una persona que ya tiene cuenta
@@ -1947,8 +5145,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | Límite propio: Throttle({ default: { limit: 10, ttl: 60_000 } }) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:73` |
 
@@ -2032,7 +5230,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 18. POST /profiles/patients/me/dependent-requests/{id}/accept
+## 33. POST /profiles/patients/me/dependent-requests/{id}/accept
 
 - **Origen:** CONTRATO
 - **Nombre:** Aceptar una solicitud de dependiente
@@ -2057,11 +5255,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:159` |
-| CUERPO | application/json; máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json; máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -2145,7 +5343,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 19. POST /profiles/patients/me/dependent-requests/{id}/reject
+## 34. POST /profiles/patients/me/dependent-requests/{id}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar una solicitud de dependiente
@@ -2170,9 +5368,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:186` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:186` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -2237,7 +5435,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 20. GET /profiles/patients/me/dependent-requests/incoming
+## 35. GET /profiles/patients/me/dependent-requests/incoming
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las solicitudes de dependiente recibidas
@@ -2262,8 +5460,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-dependent-requests.controller.ts:142` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -2310,7 +5508,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 21. GET /profiles/patients/me/dependents
+## 36. GET /profiles/patients/me/dependents
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los dependientes a cargo del paciente autenticado
@@ -2335,8 +5533,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:223` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -2394,7 +5592,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 22. POST /profiles/patients/me/dependents
+## 37. POST /profiles/patients/me/dependents
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un dependiente (menor o adulto mayor tutelado)
@@ -2419,10 +5617,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:250` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -2530,7 +5728,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 23. DELETE /profiles/patients/me/photo
+## 38. DELETE /profiles/patients/me/photo
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar la propia foto de perfil
@@ -2555,8 +5753,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:201` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -2694,7 +5892,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 24. PUT /profiles/patients/me/photo
+## 39. PUT /profiles/patients/me/photo
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar la propia foto de perfil
@@ -2719,10 +5917,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:179` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -2883,7 +6081,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 25. DELETE /profiles/patients/me/primary-practitioner
+## 40. DELETE /profiles/patients/me/primary-practitioner
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar el propio médico de cabecera
@@ -2908,8 +6106,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -2956,7 +6154,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 26. GET /profiles/patients/me/primary-practitioner
+## 41. GET /profiles/patients/me/primary-practitioner
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el propio médico de cabecera
@@ -2981,8 +6179,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -3030,7 +6228,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 27. PUT /profiles/patients/me/primary-practitioner
+## 42. PUT /profiles/patients/me/primary-practitioner
 
 - **Origen:** CONTRATO
 - **Nombre:** Elegir o cambiar el propio médico de cabecera
@@ -3055,10 +6253,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -3129,7 +6327,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 28. GET /profiles/patients/me/summary
+## 43. GET /profiles/patients/me/summary
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el resumen propio
@@ -3154,8 +6352,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:98` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -3206,7 +6404,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 29. POST /profiles/patients/merge
+## 44. POST /profiles/patients/merge
 
 - **Origen:** CONTRATO
 - **Nombre:** Fusionar pacientes duplicados
@@ -3231,10 +6429,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:497` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -3316,7 +6514,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 30. GET /profiles/patients/merge-events
+## 45. GET /profiles/patients/merge-events
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar eventos de fusión de pacientes
@@ -3341,8 +6539,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:406` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -3396,7 +6594,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 31. POST /profiles/patients/merge/{eventId}/reverse
+## 46. POST /profiles/patients/merge/{eventId}/reverse
 
 - **Origen:** CONTRATO
 - **Nombre:** Revertir una fusión de pacientes
@@ -3421,11 +6619,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:514` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: eventId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:514` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -3504,7 +6702,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 32. POST /profiles/patients/search
+## 47. POST /profiles/patients/search
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
@@ -3529,10 +6727,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:378` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -3616,7 +6814,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 33. POST /profiles/persons/{personId}/account-links
+## 48. POST /profiles/persons/{personId}/account-links
 
 - **Origen:** CONTRATO
 - **Nombre:** Vincular cuenta de portal a una persona
@@ -3641,17 +6839,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:461` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:461` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.person_account_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.linkAccount → ProfilesPatientsService.linkAccount → PersonAccountLinksRepository.supersedeActiveForUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:113` |
+| `profiles.person_account_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.linkAccount → ProfilesPatientsService.linkAccount → PersonAccountLinksRepository.supersedeActiveForUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:183` |
 | `profiles.person_account_links` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.linkAccount → ProfilesPatientsService.linkAccount → PersonAccountLinksRepository.create | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:50` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.linkAccount → ProfilesPatientsService.linkAccount → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
@@ -3723,7 +6921,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 34. POST /profiles/persons/{personId}/decease
+## 49. POST /profiles/persons/{personId}/decease
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar defunción y anonimización de una persona
@@ -3748,18 +6946,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:569` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: personId | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:569` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `profiles.patient_portal_proxies` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PatientPortalProxiesRepository.revokeActiveForPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:515` |
-| `profiles.person_account_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PersonAccountLinksRepository.revokeActiveForPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:130` |
+| `profiles.person_account_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PersonAccountLinksRepository.revokeActiveForPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:200` |
 | `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.decease → ProfilesPatientsService.decease | `src/modules/profiles/application/services/profiles-patients.service.ts:2534` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
@@ -3830,7 +7028,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 35. GET /profiles/practitioners
+## 50. GET /profiles/practitioners
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar profesionales para la guía, con sus especialidades
@@ -3847,7 +7045,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners` la atiende `ProfilesPractitionersController.listPractitioners` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:148). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.listPractitioners`. Lee profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_affiliations, profiles.practitioner_specialties.
+`GET /profiles/practitioners` la atiende `ProfilesPractitionersController.listPractitioners` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:148). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.listPractitioners`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, community.public_profiles, community.service_reviews, profiles.health_practitioner_profiles, profiles.person_account_links y 4 más.
 
 ### Requerimientos
 
@@ -3855,15 +7053,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:148` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `chart.clinical_note_headers` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
+| `chart.document_records` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
+| `clinical.encounters` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
+| `clinical.medication_requests` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:97` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:97` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → HealthPractitionerProfilesRepository.findVisibleProfileIds | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:144` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerContextAdapter.directoryStats | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:81` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PersonsRepository.findByIds | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:113` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerAffiliationsRepository.findByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:100` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.listPractitioners → ProfilesPractitionersService.listPractitioners → PractitionerSpecialtiesRepository.findCurrentSpecialtyPairs | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:211` |
 
@@ -3884,23 +7090,34 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<PractitionerListItemDto>` | Sí | — | — | Las filas de esta página. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:122` |
-| `items[].profileId` | `string` | Sí | formato uuid | — | Con este id se abre la ficha (`GET /profiles/practitioners/:id/summary`). | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:37` |
-| `items[].practitionerCode` | `string` | Sí | — | — | Código único del profesional | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:43` |
-| `items[].displayName` | `string` | No | — | — | Nombre visible de la persona | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:49` |
-| `items[].professionalTitle` | `string` | No | — | — | Título profesional declarado. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:55` |
-| `items[].photoFileId` | `string` | No | formato uuid | — | Archivo de la foto | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:61` |
-| `items[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | Estado de verificación de la matrícula. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:67` |
-| `items[].verified` | `boolean` | Sí | — | — | Si la matrícula fue verificada | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:78` |
-| `items[].acceptsNewPatients` | `boolean` | Sí | — | — | Si declara tomar pacientes nuevos. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:84` |
-| `items[].telehealthAvailable` | `boolean` | Sí | — | — | Si atiende por telemedicina. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:90` |
-| `items[].specialties` | `array<PractitionerListSpecialtyDto>` | Sí | — | — | Sus especialidades, la principal primero. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:96` |
-| `items[].specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | Concept id de la especialidad | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:14` |
-| `items[].specialties[].isPrimary` | `boolean` | Sí | — | — | Si es la especialidad con la que se presenta. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:20` |
-| `items[].workplaces` | `array<string>` | Sí | — | — | Dónde atiende, en texto | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:111` |
-| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:128` |
-| `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:134` |
-| `nextCursor` | `string` | No | admite null | — | Cursor opaco de la página siguiente; null si no hay más | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:144` |
+| `items` | `array<PractitionerListItemDto>` | Sí | — | — | Las filas de esta página. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:165` |
+| `items[].profileId` | `string` | Sí | formato uuid | — | Con este id se abre la ficha (`GET /profiles/practitioners/:id/summary`). | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:39` |
+| `items[].practitionerCode` | `string` | Sí | — | — | Código único del profesional | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:45` |
+| `items[].displayName` | `string` | No | — | — | Nombre visible de la persona | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:51` |
+| `items[].professionalTitle` | `string` | No | — | — | Título profesional declarado. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:57` |
+| `items[].photoFileId` | `string` | No | formato uuid | — | Archivo de la foto | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:63` |
+| `items[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | Estado de verificación de la matrícula. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:69` |
+| `items[].verified` | `boolean` | Sí | — | — | Si la matrícula fue verificada. Equivale a `verification.status === "VERIFIED"`: | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:84` |
+| `items[].verification` | `PractitionerVerificationDto` | Sí | — | — | Estado visible de verificación (admisión vigente), aditivo. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:90` |
+| `items[].verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `items[].verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `items[].verification.validUntil` | `string` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `items[].acceptsNewPatients` | `boolean` | Sí | — | — | Si declara tomar pacientes nuevos. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:96` |
+| `items[].telehealthAvailable` | `boolean` | Sí | — | — | Si atiende por telemedicina. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:102` |
+| `items[].specialties` | `array<PractitionerListSpecialtyDto>` | Sí | — | — | Sus especialidades, la principal primero. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:108` |
+| `items[].specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | Concept id de la especialidad | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:16` |
+| `items[].specialties[].isPrimary` | `boolean` | Sí | — | — | Si es la especialidad con la que se presenta. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:22` |
+| `items[].workplaces` | `array<string>` | Sí | — | — | Dónde atiende, en texto | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:123` |
+| `items[].ratingAverage` | `number` | Sí | admite null | — | Media de reseñas publicadas; null si no tiene | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:137` |
+| `items[].ratingCount` | `number` | Sí | — | — | Reseñas publicadas | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:143` |
+| `items[].activity` | `PractitionerActivityDto` | Sí | — | — | Lo que asentó en la plataforma: consultas, recetas, notas y documentos. Las mismas cuatro cifras —y el mismo criterio— que la sección `activity` de su ficha, para que ordenar la guía por «más atenciones» y abrir al primero muestren el mismo número. Cuentas, nunca contenido: no es PHI. En cero para quien no tiene cuenta vinculada. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:154` |
+| `items[].activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:208` |
+| `items[].activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:212` |
+| `items[].activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:216` |
+| `items[].activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:220` |
+| `count` | `number` | Sí | — | — | Cantidad devuelta en esta página | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:171` |
+| `limit` | `number` | Sí | — | — | Tope de resultados aplicado | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:177` |
+| `nextCursor` | `string` | No | admite null | — | Cursor opaco de la página siguiente; null si no hay más | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:187` |
 
 ### Respuestas posibles
 
@@ -3925,12 +7142,12 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 36. POST /profiles/practitioners
+## 51. POST /profiles/practitioners
 
 - **Origen:** CONTRATO
 - **Nombre:** Alta de profesional de salud (workforce generalista)
 - **Bloque:** Núcleo y Terminología
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `ProfilesPractitionersController.onboardPractitioner` — `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:353`
 
@@ -3942,7 +7159,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /profiles/practitioners` la atiende `ProfilesPractitionersController.onboardPractitioner` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:353). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePractitionerDto` (17 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.onboardPractitioner`. Crea filas en profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_profiles, profiles.persons, profiles.practitioner_languages, profiles.practitioner_specialties, profiles.professional_credentials. Lee profiles.health_practitioner_profiles, profiles.persons, terminology.value_set_members, terminology.value_set_versions, terminology.value_sets.
+`POST /profiles/practitioners` la atiende `ProfilesPractitionersController.onboardPractitioner` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:353). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreatePractitionerDto` (17 campos, 1 obligatorio). Delega en `ProfilesPractitionersService.onboardPractitioner`. Crea filas en profiles.health_practitioner_profiles, profiles.jurisdiction_authorizations, profiles.person_profiles, profiles.persons, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_languages y 2 más. Actualiza profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements y 12 más.
 
 ### Requerimientos
 
@@ -3950,24 +7167,47 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:353` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
 | `profiles.health_practitioner_profiles` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → HealthPractitionerProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:161` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → HealthPractitionerProfilesRepository.findByCode | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:79` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → JurisdictionAuthorizationsRepository.create | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:114` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 | `profiles.person_profiles` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PersonProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/person-profiles.repository.ts:57` |
 | `profiles.persons` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PersonsRepository.create | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:119` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:90` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.findOpenByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:135` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_specialties` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → PractitionerSpecialtiesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:61` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
 | `profiles.professional_credentials` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfessionalCredentialsRepository.create | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:122` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
 | `terminology.value_sets` | LEE | LEE | DIRECTA | ProfilesPractitionersController.onboardPractitioner → ProfilesPractitionersService.onboardPractitioner → ProfilesPractitionersService.declareSpecialties → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
@@ -4072,7 +7312,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 37. PATCH /profiles/practitioners/{profileId}
+## 52. PATCH /profiles/practitioners/{profileId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir el perfil profesional de otro (titular o plataforma)
@@ -4089,7 +7329,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/{profileId}` la atiende `ProfilesPractitionersController.updatePractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updatePractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 10 más.
+`PATCH /profiles/practitioners/{profileId}` la atiende `ProfilesPractitionersController.updatePractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updatePractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 11 más.
 
 ### Requerimientos
 
@@ -4097,35 +7337,36 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:44` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.closeContact → ContactPointsRepository.closeCurrent | `src/modules/common/repositories/contact-points.repository.ts:192` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.createContact → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1320` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1377` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfileOwnershipService.assertOwnsPractitionerProfile → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1347` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1404` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:84` |
-| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1536` |
+| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1593` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -4241,34 +7482,34 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:231` |
-| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:234` |
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:237` |
-| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:240` |
-| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:243` |
-| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:247` |
-| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:251` |
-| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:255` |
-| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:268` |
-| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:272` |
-| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:283` |
-| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:287` |
-| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:291` |
-| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:295` |
-| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:299` |
-| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:308` |
-| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:311` |
-| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:314` |
-| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:317` |
-| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:320` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:327` |
-| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:334` |
-| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:342` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:348` |
-| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:352` |
-| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:356` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:362` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:369` |
+| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:232` |
+| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:235` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:238` |
+| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:241` |
+| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:244` |
+| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:248` |
+| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:252` |
+| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:256` |
+| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:269` |
+| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:273` |
+| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:284` |
+| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:288` |
+| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:292` |
+| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:296` |
+| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:300` |
+| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:309` |
+| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:312` |
+| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:315` |
+| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:318` |
+| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:321` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:328` |
+| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:335` |
+| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:343` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:349` |
+| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:353` |
+| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -4276,7 +7517,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
+| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -4284,53 +7525,57 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:405` |
-| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:408` |
-| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:411` |
-| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:414` |
-| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:418` |
-| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:421` |
-| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:424` |
-| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:42` |
-| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:45` |
-| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:49` |
-| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:53` |
-| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:57` |
-| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:60` |
-| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:63` |
-| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:67` |
-| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:427` |
-| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:80` |
-| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:83` |
-| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:87` |
-| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:95` |
-| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:99` |
-| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:103` |
-| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:107` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:111` |
-| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:115` |
-| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:118` |
-| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:121` |
-| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:124` |
-| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:132` |
-| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:140` |
-| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:430` |
-| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:146` |
-| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:149` |
-| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:152` |
-| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:155` |
-| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:158` |
-| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:161` |
-| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:164` |
-| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:171` |
-| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:433` |
-| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:183` |
-| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:186` |
-| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:189` |
-| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:442` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:406` |
+| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:409` |
+| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:412` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:419` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:422` |
+| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:426` |
+| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:429` |
+| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:432` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:43` |
+| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:46` |
+| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:50` |
+| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:54` |
+| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:58` |
+| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:61` |
+| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:64` |
+| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:68` |
+| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:435` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:81` |
+| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:84` |
+| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:88` |
+| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:96` |
+| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:100` |
+| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:104` |
+| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:108` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:112` |
+| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:116` |
+| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:119` |
+| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:122` |
+| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:125` |
+| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:133` |
+| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:141` |
+| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:438` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:147` |
+| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:150` |
+| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:153` |
+| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:156` |
+| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:159` |
+| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:162` |
+| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:165` |
+| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:172` |
+| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:441` |
+| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:184` |
+| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:187` |
+| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:190` |
+| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:450` |
 | `affiliations[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:139` |
 | `affiliations[].practitionerProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:145` |
 | `affiliations[].organizationName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:151` |
@@ -4345,12 +7590,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `affiliations[].statusKind` | `string` | Sí | valores: pendiente, declarado, aprobado, rechazado, revocado, desconocido | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:227` |
 | `affiliations[].decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:243` |
 | `affiliations[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:249` |
-| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:445` |
-| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:207` |
-| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:211` |
-| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:215` |
-| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:219` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:448` |
+| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:453` |
+| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:208` |
+| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:212` |
+| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:216` |
+| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:220` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:456` |
 
 ### Respuestas posibles
 
@@ -4379,7 +7624,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 38. POST /profiles/practitioners/{profileId}/affiliations
+## 53. POST /profiles/practitioners/{profileId}/affiliations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un consultorio de un profesional sin cuenta
@@ -4404,11 +7649,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:624` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:624` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -4424,7 +7669,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -4527,7 +7772,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 39. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 54. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar/renovar autorización jurisdiccional (licencia)
@@ -4552,11 +7797,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -4647,7 +7892,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 40. DELETE /profiles/practitioners/{profileId}/photo
+## 55. DELETE /profiles/practitioners/{profileId}/photo
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar la foto del perfil profesional
@@ -4664,7 +7909,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Cómo se atiende (sistema)
 
-`DELETE /profiles/practitioners/{profileId}/photo` la atiende `ProfilesPractitionersController.removePractitionerPhoto` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removePractitionerPhoto`. Actualiza profiles.health_practitioner_profiles. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 7 más.
+`DELETE /profiles/practitioners/{profileId}/photo` la atiende `ProfilesPractitionersController.removePractitionerPhoto` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.removePractitionerPhoto`. Actualiza profiles.health_practitioner_profiles. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
 
 ### Requerimientos
 
@@ -4672,26 +7917,27 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:44` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1845` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1902` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -4711,34 +7957,34 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:231` |
-| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:234` |
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:237` |
-| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:240` |
-| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:243` |
-| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:247` |
-| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:251` |
-| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:255` |
-| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:268` |
-| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:272` |
-| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:283` |
-| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:287` |
-| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:291` |
-| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:295` |
-| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:299` |
-| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:308` |
-| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:311` |
-| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:314` |
-| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:317` |
-| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:320` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:327` |
-| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:334` |
-| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:342` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:348` |
-| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:352` |
-| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:356` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:362` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:369` |
+| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:232` |
+| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:235` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:238` |
+| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:241` |
+| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:244` |
+| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:248` |
+| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:252` |
+| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:256` |
+| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:269` |
+| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:273` |
+| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:284` |
+| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:288` |
+| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:292` |
+| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:296` |
+| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:300` |
+| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:309` |
+| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:312` |
+| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:315` |
+| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:318` |
+| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:321` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:328` |
+| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:335` |
+| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:343` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:349` |
+| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:353` |
+| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -4746,7 +7992,7 @@ La operación no recibe cuerpo.
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
+| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -4754,53 +8000,57 @@ La operación no recibe cuerpo.
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:405` |
-| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:408` |
-| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:411` |
-| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:414` |
-| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:418` |
-| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:421` |
-| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:424` |
-| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:42` |
-| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:45` |
-| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:49` |
-| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:53` |
-| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:57` |
-| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:60` |
-| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:63` |
-| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:67` |
-| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:427` |
-| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:80` |
-| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:83` |
-| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:87` |
-| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:95` |
-| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:99` |
-| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:103` |
-| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:107` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:111` |
-| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:115` |
-| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:118` |
-| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:121` |
-| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:124` |
-| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:132` |
-| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:140` |
-| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:430` |
-| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:146` |
-| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:149` |
-| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:152` |
-| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:155` |
-| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:158` |
-| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:161` |
-| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:164` |
-| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:171` |
-| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:433` |
-| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:183` |
-| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:186` |
-| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:189` |
-| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:442` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:406` |
+| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:409` |
+| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:412` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:419` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:422` |
+| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:426` |
+| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:429` |
+| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:432` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:43` |
+| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:46` |
+| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:50` |
+| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:54` |
+| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:58` |
+| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:61` |
+| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:64` |
+| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:68` |
+| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:435` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:81` |
+| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:84` |
+| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:88` |
+| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:96` |
+| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:100` |
+| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:104` |
+| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:108` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:112` |
+| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:116` |
+| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:119` |
+| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:122` |
+| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:125` |
+| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:133` |
+| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:141` |
+| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:438` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:147` |
+| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:150` |
+| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:153` |
+| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:156` |
+| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:159` |
+| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:162` |
+| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:165` |
+| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:172` |
+| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:441` |
+| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:184` |
+| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:187` |
+| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:190` |
+| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:450` |
 | `affiliations[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:139` |
 | `affiliations[].practitionerProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:145` |
 | `affiliations[].organizationName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:151` |
@@ -4815,12 +8065,12 @@ La operación no recibe cuerpo.
 | `affiliations[].statusKind` | `string` | Sí | valores: pendiente, declarado, aprobado, rechazado, revocado, desconocido | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:227` |
 | `affiliations[].decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:243` |
 | `affiliations[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:249` |
-| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:445` |
-| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:207` |
-| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:211` |
-| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:215` |
-| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:219` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:448` |
+| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:453` |
+| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:208` |
+| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:212` |
+| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:216` |
+| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:220` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:456` |
 
 ### Respuestas posibles
 
@@ -4847,7 +8097,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 41. PUT /profiles/practitioners/{profileId}/photo
+## 56. PUT /profiles/practitioners/{profileId}/photo
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar la foto del perfil profesional
@@ -4864,7 +8114,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 ### Cómo se atiende (sistema)
 
-`PUT /profiles/practitioners/{profileId}/photo` la atiende `ProfilesPractitionersController.setPractitionerPhoto` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetPractitionerPhotoDto` (1 campo, 1 obligatorio). Delega en `ProfilesPractitionersService.setPractitionerPhoto`. Actualiza profiles.health_practitioner_profiles. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.file_versions, common.files y 9 más.
+`PUT /profiles/practitioners/{profileId}/photo` la atiende `ProfilesPractitionersController.setPractitionerPhoto` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetPractitionerPhotoDto` (1 campo, 1 obligatorio). Delega en `ProfilesPractitionersService.setPractitionerPhoto`. Actualiza profiles.health_practitioner_profiles. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.file_versions, common.files y 10 más.
 
 ### Requerimientos
 
@@ -4872,30 +8122,31 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:44` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1797` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1854` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -4935,34 +8186,34 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:231` |
-| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:234` |
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:237` |
-| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:240` |
-| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:243` |
-| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:247` |
-| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:251` |
-| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:255` |
-| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:268` |
-| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:272` |
-| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:283` |
-| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:287` |
-| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:291` |
-| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:295` |
-| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:299` |
-| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:308` |
-| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:311` |
-| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:314` |
-| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:317` |
-| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:320` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:327` |
-| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:334` |
-| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:342` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:348` |
-| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:352` |
-| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:356` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:362` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:369` |
+| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:232` |
+| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:235` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:238` |
+| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:241` |
+| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:244` |
+| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:248` |
+| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:252` |
+| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:256` |
+| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:269` |
+| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:273` |
+| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:284` |
+| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:288` |
+| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:292` |
+| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:296` |
+| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:300` |
+| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:309` |
+| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:312` |
+| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:315` |
+| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:318` |
+| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:321` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:328` |
+| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:335` |
+| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:343` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:349` |
+| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:353` |
+| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -4970,7 +8221,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
+| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -4978,53 +8229,57 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:405` |
-| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:408` |
-| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:411` |
-| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:414` |
-| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:418` |
-| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:421` |
-| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:424` |
-| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:42` |
-| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:45` |
-| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:49` |
-| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:53` |
-| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:57` |
-| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:60` |
-| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:63` |
-| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:67` |
-| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:427` |
-| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:80` |
-| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:83` |
-| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:87` |
-| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:95` |
-| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:99` |
-| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:103` |
-| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:107` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:111` |
-| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:115` |
-| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:118` |
-| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:121` |
-| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:124` |
-| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:132` |
-| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:140` |
-| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:430` |
-| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:146` |
-| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:149` |
-| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:152` |
-| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:155` |
-| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:158` |
-| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:161` |
-| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:164` |
-| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:171` |
-| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:433` |
-| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:183` |
-| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:186` |
-| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:189` |
-| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:442` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:406` |
+| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:409` |
+| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:412` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:419` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:422` |
+| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:426` |
+| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:429` |
+| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:432` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:43` |
+| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:46` |
+| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:50` |
+| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:54` |
+| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:58` |
+| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:61` |
+| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:64` |
+| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:68` |
+| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:435` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:81` |
+| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:84` |
+| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:88` |
+| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:96` |
+| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:100` |
+| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:104` |
+| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:108` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:112` |
+| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:116` |
+| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:119` |
+| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:122` |
+| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:125` |
+| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:133` |
+| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:141` |
+| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:438` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:147` |
+| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:150` |
+| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:153` |
+| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:156` |
+| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:159` |
+| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:162` |
+| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:165` |
+| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:172` |
+| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:441` |
+| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:184` |
+| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:187` |
+| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:190` |
+| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:450` |
 | `affiliations[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:139` |
 | `affiliations[].practitionerProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:145` |
 | `affiliations[].organizationName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:151` |
@@ -5039,12 +8294,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `affiliations[].statusKind` | `string` | Sí | valores: pendiente, declarado, aprobado, rechazado, revocado, desconocido | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:227` |
 | `affiliations[].decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:243` |
 | `affiliations[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:249` |
-| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:445` |
-| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:207` |
-| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:211` |
-| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:215` |
-| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:219` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:448` |
+| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:453` |
+| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:208` |
+| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:212` |
+| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:216` |
+| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:220` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:456` |
 
 ### Respuestas posibles
 
@@ -5072,7 +8327,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 42. POST /profiles/practitioners/{profileId}/specialties
+## 57. POST /profiles/practitioners/{profileId}/specialties
 
 - **Origen:** CONTRATO
 - **Nombre:** Agregar especialidad con credencial de soporte
@@ -5097,11 +8352,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -5190,7 +8445,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 43. GET /profiles/practitioners/{profileId}/summary
+## 58. GET /profiles/practitioners/{profileId}/summary
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el perfil profesional de un colega (ficha de la guía)
@@ -5207,7 +8462,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/{profileId}/summary` la atiende `ProfilesPractitionersController.getPractitionerSummary` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getPractitionerSummary`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 7 más.
+`GET /profiles/practitioners/{profileId}/summary` la atiende `ProfilesPractitionersController.getPractitionerSummary` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getPractitionerSummary`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
 
 ### Requerimientos
 
@@ -5215,18 +8470,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:214` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:44` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
@@ -5234,6 +8489,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -5253,34 +8509,34 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:231` |
-| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:234` |
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:237` |
-| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:240` |
-| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:243` |
-| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:247` |
-| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:251` |
-| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:255` |
-| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:268` |
-| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:272` |
-| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:283` |
-| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:287` |
-| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:291` |
-| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:295` |
-| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:299` |
-| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:308` |
-| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:311` |
-| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:314` |
-| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:317` |
-| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:320` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:327` |
-| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:334` |
-| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:342` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:348` |
-| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:352` |
-| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:356` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:362` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:369` |
+| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:232` |
+| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:235` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:238` |
+| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:241` |
+| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:244` |
+| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:248` |
+| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:252` |
+| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:256` |
+| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:269` |
+| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:273` |
+| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:284` |
+| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:288` |
+| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:292` |
+| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:296` |
+| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:300` |
+| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:309` |
+| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:312` |
+| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:315` |
+| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:318` |
+| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:321` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:328` |
+| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:335` |
+| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:343` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:349` |
+| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:353` |
+| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -5288,7 +8544,7 @@ La operación no recibe cuerpo.
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
+| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -5296,53 +8552,57 @@ La operación no recibe cuerpo.
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:405` |
-| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:408` |
-| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:411` |
-| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:414` |
-| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:418` |
-| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:421` |
-| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:424` |
-| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:42` |
-| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:45` |
-| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:49` |
-| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:53` |
-| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:57` |
-| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:60` |
-| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:63` |
-| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:67` |
-| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:427` |
-| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:80` |
-| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:83` |
-| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:87` |
-| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:95` |
-| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:99` |
-| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:103` |
-| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:107` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:111` |
-| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:115` |
-| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:118` |
-| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:121` |
-| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:124` |
-| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:132` |
-| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:140` |
-| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:430` |
-| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:146` |
-| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:149` |
-| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:152` |
-| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:155` |
-| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:158` |
-| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:161` |
-| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:164` |
-| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:171` |
-| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:433` |
-| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:183` |
-| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:186` |
-| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:189` |
-| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:442` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:406` |
+| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:409` |
+| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:412` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:419` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:422` |
+| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:426` |
+| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:429` |
+| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:432` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:43` |
+| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:46` |
+| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:50` |
+| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:54` |
+| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:58` |
+| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:61` |
+| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:64` |
+| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:68` |
+| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:435` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:81` |
+| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:84` |
+| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:88` |
+| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:96` |
+| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:100` |
+| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:104` |
+| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:108` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:112` |
+| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:116` |
+| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:119` |
+| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:122` |
+| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:125` |
+| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:133` |
+| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:141` |
+| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:438` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:147` |
+| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:150` |
+| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:153` |
+| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:156` |
+| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:159` |
+| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:162` |
+| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:165` |
+| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:172` |
+| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:441` |
+| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:184` |
+| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:187` |
+| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:190` |
+| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:450` |
 | `affiliations[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:139` |
 | `affiliations[].practitionerProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:145` |
 | `affiliations[].organizationName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:151` |
@@ -5357,12 +8617,12 @@ La operación no recibe cuerpo.
 | `affiliations[].statusKind` | `string` | Sí | valores: pendiente, declarado, aprobado, rechazado, revocado, desconocido | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:227` |
 | `affiliations[].decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:243` |
 | `affiliations[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:249` |
-| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:445` |
-| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:207` |
-| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:211` |
-| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:215` |
-| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:219` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:448` |
+| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:453` |
+| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:208` |
+| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:212` |
+| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:216` |
+| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:220` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:456` |
 
 ### Respuestas posibles
 
@@ -5391,7 +8651,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 44. PATCH /profiles/practitioners/me
+## 59. PATCH /profiles/practitioners/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar la presentación del propio perfil profesional
@@ -5408,7 +8668,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/me` la atiende `ProfilesPractitionersController.updateOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnPractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 10 más.
+`PATCH /profiles/practitioners/me` la atiende `ProfilesPractitionersController.updateOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnPractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 11 más.
 
 ### Requerimientos
 
@@ -5416,34 +8676,35 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:44` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.closeContact → ContactPointsRepository.closeCurrent | `src/modules/common/repositories/contact-points.repository.ts:192` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.createContact → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.findCurrentContact → ContactPointsRepository.findCurrentByOwnerAndSystem | `src/modules/common/repositories/contact-points.repository.ts:126` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1320` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1377` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1347` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1404` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:84` |
-| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1536` |
+| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1593` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -5553,34 +8814,34 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:231` |
-| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:234` |
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:237` |
-| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:240` |
-| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:243` |
-| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:247` |
-| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:251` |
-| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:255` |
-| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:268` |
-| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:272` |
-| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:283` |
-| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:287` |
-| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:291` |
-| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:295` |
-| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:299` |
-| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:308` |
-| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:311` |
-| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:314` |
-| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:317` |
-| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:320` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:327` |
-| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:334` |
-| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:342` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:348` |
-| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:352` |
-| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:356` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:362` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:369` |
+| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:232` |
+| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:235` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:238` |
+| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:241` |
+| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:244` |
+| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:248` |
+| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:252` |
+| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:256` |
+| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:269` |
+| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:273` |
+| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:284` |
+| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:288` |
+| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:292` |
+| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:296` |
+| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:300` |
+| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:309` |
+| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:312` |
+| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:315` |
+| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:318` |
+| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:321` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:328` |
+| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:335` |
+| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:343` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:349` |
+| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:353` |
+| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -5588,7 +8849,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
+| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -5596,53 +8857,57 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:405` |
-| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:408` |
-| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:411` |
-| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:414` |
-| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:418` |
-| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:421` |
-| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:424` |
-| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:42` |
-| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:45` |
-| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:49` |
-| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:53` |
-| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:57` |
-| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:60` |
-| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:63` |
-| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:67` |
-| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:427` |
-| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:80` |
-| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:83` |
-| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:87` |
-| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:95` |
-| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:99` |
-| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:103` |
-| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:107` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:111` |
-| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:115` |
-| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:118` |
-| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:121` |
-| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:124` |
-| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:132` |
-| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:140` |
-| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:430` |
-| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:146` |
-| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:149` |
-| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:152` |
-| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:155` |
-| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:158` |
-| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:161` |
-| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:164` |
-| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:171` |
-| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:433` |
-| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:183` |
-| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:186` |
-| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:189` |
-| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:442` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:406` |
+| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:409` |
+| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:412` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:419` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:422` |
+| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:426` |
+| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:429` |
+| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:432` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:43` |
+| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:46` |
+| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:50` |
+| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:54` |
+| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:58` |
+| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:61` |
+| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:64` |
+| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:68` |
+| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:435` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:81` |
+| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:84` |
+| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:88` |
+| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:96` |
+| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:100` |
+| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:104` |
+| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:108` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:112` |
+| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:116` |
+| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:119` |
+| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:122` |
+| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:125` |
+| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:133` |
+| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:141` |
+| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:438` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:147` |
+| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:150` |
+| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:153` |
+| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:156` |
+| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:159` |
+| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:162` |
+| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:165` |
+| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:172` |
+| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:441` |
+| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:184` |
+| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:187` |
+| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:190` |
+| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:450` |
 | `affiliations[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:139` |
 | `affiliations[].practitionerProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:145` |
 | `affiliations[].organizationName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:151` |
@@ -5657,12 +8922,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `affiliations[].statusKind` | `string` | Sí | valores: pendiente, declarado, aprobado, rechazado, revocado, desconocido | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:227` |
 | `affiliations[].decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:243` |
 | `affiliations[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:249` |
-| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:445` |
-| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:207` |
-| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:211` |
-| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:215` |
-| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:219` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:448` |
+| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:453` |
+| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:208` |
+| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:212` |
+| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:216` |
+| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:220` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:456` |
 
 ### Respuestas posibles
 
@@ -5692,7 +8957,390 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 45. GET /profiles/practitioners/me/affiliations
+## 60. GET /profiles/practitioners/me/admission
+
+- **Origen:** CONTRATO
+- **Nombre:** Estado de mi verificación
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OwnAdmissionController.get` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:45`
+
+### Qué es y para qué sirve (negocio)
+
+Estado de mi verificación. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /profiles/practitioners/me/admission` la atiende `OwnAdmissionController.get` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:45). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsReadService.own`. Lee common.addresses, common.file_versions, common.files, common.identifiers, practice.practice_sites, practice.practitioner_role_assignments, profiles.admission_requirements, profiles.health_practitioner_profiles y 8 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:45` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:162` |
+| `common.file_versions` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:706` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:153` |
+| `profiles.persons` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | OwnAdmissionController.get → PractitionerAdmissionsReadService.own → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<OwnAdmissionDto>` · DTO `OwnAdmissionDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:446` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:447` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:448` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:449` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:450` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:452` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:454` |
+| `validUntil` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:456` |
+| `items` | `array<OwnAdmissionItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:458` |
+| `items[].type` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:417` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:418` |
+| `items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:419` |
+| `items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:421` |
+| `items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:422` |
+| `items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:425` |
+| `resubmissionCount` | `number` | Sí | — | — | Reenvíos hechos (igual a `resubmissions.used`; se conserva). | `src/modules/profiles/presentation/dto/admissions.dto.ts:462` |
+| `resubmissions` | `AdmissionResubmissionsDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:464` |
+| `resubmissions.used` | `number` | Sí | mínimo 0 | — | Reenvíos ya hechos. | `src/modules/profiles/presentation/dto/admissions.dto.ts:431` |
+| `resubmissions.max` | `number` | Sí | mínimo 0 | — | Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`). | `src/modules/profiles/presentation/dto/admissions.dto.ts:436` |
+| `resubmissions.remaining` | `number` | Sí | mínimo 0 | — | Reenvíos que quedan: `max - used`, nunca negativo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:441` |
+| `canResubmit` | `boolean` | Sí | — | — | El servidor decide: el estado admite reenviar y no se llegó al tope. | `src/modules/profiles/presentation/dto/admissions.dto.ts:469` |
+| `canWithdraw` | `boolean` | Sí | — | — | El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran. | `src/modules/profiles/presentation/dto/admissions.dto.ts:474` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:182` |
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:OwnAdmissionController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 61. POST /profiles/practitioners/me/admission/resubmit
+
+- **Origen:** CONTRATO
+- **Nombre:** Reenviar mi solicitud
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Borra filas; Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OwnAdmissionController.resubmit` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:56`
+
+### Qué es y para qué sirve (negocio)
+
+Reenviar mi solicitud. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /profiles/practitioners/me/admission/resubmit` la atiende `OwnAdmissionController.resubmit` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:56). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ResubmitAdmissionDto` (2 campos, 2 obligatorios). Delega en `PractitionerAdmissionsService.resubmit`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events, profiles.practitioner_admission_reviews. Actualiza iam.devices, messaging.notification_requests, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_admissions, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, messaging.message_channels, messaging.message_templates y 17 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:56` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
+| `common.contact_points` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
+| `common.file_versions` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:706` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:373` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:153` |
+| `profiles.persons` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:366` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1049` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:379` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:376` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | OwnAdmissionController.resubmit → PractitionerAdmissionsService.resubmit → PractitionerAdmissionEvidenceService.buildSnapshot → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Cuerpo — DTO `ResubmitAdmissionDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `attested` | `boolean` | Sí | — | `@IsOptional()` `@IsBoolean()` | Debe ser `true`: el solicitante acepta la declaración. Sin ella, 412 ADMISSION_ATTESTATION_REQUIRED. | `src/modules/profiles/presentation/dto/admissions.dto.ts:493` |
+| `attestationVersion` | `string` | Sí | longitud máxima 32 | `@IsOptional()` `@IsString()` `@MaxLength(MAX_ATTESTATION_VERSION_LENGTH)` | Versión del texto de la declaración que se mostró. | `src/modules/profiles/presentation/dto/admissions.dto.ts:503` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "attested": true,
+  "attestationVersion": "2026-10"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "attested": true,
+  "attestationVersion": "2026-10"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<OwnAdmissionDto>` · DTO `OwnAdmissionDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:446` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:447` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:448` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:449` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:450` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:452` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:454` |
+| `validUntil` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:456` |
+| `items` | `array<OwnAdmissionItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:458` |
+| `items[].type` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:417` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:418` |
+| `items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:419` |
+| `items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:421` |
+| `items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:422` |
+| `items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:425` |
+| `resubmissionCount` | `number` | Sí | — | — | Reenvíos hechos (igual a `resubmissions.used`; se conserva). | `src/modules/profiles/presentation/dto/admissions.dto.ts:462` |
+| `resubmissions` | `AdmissionResubmissionsDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:464` |
+| `resubmissions.used` | `number` | Sí | mínimo 0 | — | Reenvíos ya hechos. | `src/modules/profiles/presentation/dto/admissions.dto.ts:431` |
+| `resubmissions.max` | `number` | Sí | mínimo 0 | — | Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`). | `src/modules/profiles/presentation/dto/admissions.dto.ts:436` |
+| `resubmissions.remaining` | `number` | Sí | mínimo 0 | — | Reenvíos que quedan: `max - used`, nunca negativo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:441` |
+| `canResubmit` | `boolean` | Sí | — | — | El servidor decide: el estado admite reenviar y no se llegó al tope. | `src/modules/profiles/presentation/dto/admissions.dto.ts:469` |
+| `canWithdraw` | `boolean` | Sí | — | — | El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran. | `src/modules/profiles/presentation/dto/admissions.dto.ts:474` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No tiene una solicitud de verificación; ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from}; PreconditionFailedException: Llegó al tope de reenvíos de la solicitud; PreconditionFailedException: Debe aceptar la declaración para reenviar la solicitud |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:183` |
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:OwnAdmissionController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 62. POST /profiles/practitioners/me/admission/withdraw
+
+- **Origen:** CONTRATO
+- **Nombre:** Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `OwnAdmissionController.withdraw` — `src/modules/profiles/presentation/controllers/own-admission.controller.ts:78`
+
+### Qué es y para qué sirve (negocio)
+
+Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /profiles/practitioners/me/admission/withdraw` la atiende `OwnAdmissionController.withdraw` (src/modules/profiles/presentation/controllers/own-admission.controller.ts:78). Exige sesión; el controlador no declara roles. Delega en `PractitionerAdmissionsService.withdraw`. Crea filas en messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests, profiles.practitioner_admission_events. Actualiza iam.devices, messaging.notification_requests, profiles.practitioner_admissions. Lee common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.devices, messaging.message_channels, messaging.message_templates y 17 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:78` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:162` |
+| `common.contact_points` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → MessagingAdmissionNoticeAdapter.enqueueEmail | `src/modules/profiles/infrastructure/adapters/messaging-admission-notice.adapter.ts:175` |
+| `common.file_versions` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.fileFacts → AdmissionForeignReadsAdapter.fileFacts | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:75` |
+| `common.identifiers` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
+| `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
+| `iam.devices` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
+| `messaging.messaging_providers` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
+| `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
+| `messaging.notification_deliveries` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
+| `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.emit → MessagingAdmissionNoticeAdapter.emit → MessagingAdmissionNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:159` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId | `src/modules/profiles/application/services/practitioner-admissions-read.service.ts:706` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsReadService.ownPersonId → PersonAccountLinksRepository.findSelfActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:153` |
+| `profiles.persons` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | ACTUALIZA | POR_TIPO | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw | `src/modules/profiles/application/services/practitioner-admissions.service.ts:1092` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsService.ownLocked → PractitionerAdmissionsReadService.currentOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | OwnAdmissionController.withdraw → PractitionerAdmissionsService.withdraw → PractitionerAdmissionsReadService.ownOf → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<OwnAdmissionDto>` · DTO `OwnAdmissionDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:446` |
+| `status` | `AdmissionCodeLabelDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:447` |
+| `status.code` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:41` |
+| `status.label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:42` |
+| `submittedAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:448` |
+| `dueAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:449` |
+| `infoRequestedText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:450` |
+| `infoDueAt` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:452` |
+| `decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:454` |
+| `validUntil` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:456` |
+| `items` | `array<OwnAdmissionItemDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:458` |
+| `items[].type` | `string` | Sí | valores: LICENSE, CREDENTIAL, SPECIALTY, PROFILE | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:417` |
+| `items[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:418` |
+| `items[].label` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:419` |
+| `items[].state` | `string` | Sí | valores: PENDING, VERIFIED, REJECTED, INFO_REQUIRED | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:421` |
+| `items[].reasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:422` |
+| `items[].reasonCode` | `string` | No | valores: ILEGIBLE, VENCIDO, NO_COINCIDE_NOMBRE, NO_FIGURA_EN_REGISTRO, DOCUMENTO_INCOMPLETO, SOSPECHA_DE_FRAUDE, OTRO; admite null | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:425` |
+| `resubmissionCount` | `number` | Sí | — | — | Reenvíos hechos (igual a `resubmissions.used`; se conserva). | `src/modules/profiles/presentation/dto/admissions.dto.ts:462` |
+| `resubmissions` | `AdmissionResubmissionsDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/admissions.dto.ts:464` |
+| `resubmissions.used` | `number` | Sí | mínimo 0 | — | Reenvíos ya hechos. | `src/modules/profiles/presentation/dto/admissions.dto.ts:431` |
+| `resubmissions.max` | `number` | Sí | mínimo 0 | — | Tope de reenvíos (`ADMISSIONS_MAX_RESUBMISSIONS`). | `src/modules/profiles/presentation/dto/admissions.dto.ts:436` |
+| `resubmissions.remaining` | `number` | Sí | mínimo 0 | — | Reenvíos que quedan: `max - used`, nunca negativo. | `src/modules/profiles/presentation/dto/admissions.dto.ts:441` |
+| `canResubmit` | `boolean` | Sí | — | — | El servidor decide: el estado admite reenviar y no se llegó al tope. | `src/modules/profiles/presentation/dto/admissions.dto.ts:469` |
+| `canWithdraw` | `boolean` | Sí | — | — | El servidor decide: sólo ENVIADA o INFORMACION_REQUERIDA se retiran. | `src/modules/profiles/presentation/dto/admissions.dto.ts:474` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No tiene una solicitud de verificación; ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/profiles/presentation/controllers/admissions.controller.spec.ts:188` |
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:OwnAdmissionController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 63. GET /profiles/practitioners/me/affiliations
 
 - **Origen:** CONTRATO
 - **Nombre:** Historial laboral propio (instituciones donde trabajó)
@@ -5717,8 +9365,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:446` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -5774,7 +9422,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 46. POST /profiles/practitioners/me/affiliations
+## 64. POST /profiles/practitioners/me/affiliations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una afiliación institucional en el historial propio
@@ -5799,10 +9447,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:457` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -5818,7 +9466,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -5917,7 +9565,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 47. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+## 65. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar una afiliación del historial laboral propio
@@ -5942,9 +9590,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -5992,7 +9640,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 48. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+## 66. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una afiliación del historial laboral propio
@@ -6017,11 +9665,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: affiliationId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -6029,7 +9677,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → ProfilesPractitionersService.ownOrNothing → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → ProfilesPractitionersService.ownOrNothing → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3176` |
+| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3207` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → PractitionerAffiliationsRepository.findSame | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:254` |
 
 ### Parámetros
@@ -6112,7 +9760,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 49. POST /profiles/practitioners/me/credentials
+## 67. POST /profiles/practitioners/me/credentials
 
 - **Origen:** CONTRATO
 - **Nombre:** Agregar un título propio (diplomado, maestría, doctorado…)
@@ -6137,10 +9785,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:535` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -6236,7 +9884,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 50. DELETE /profiles/practitioners/me/credentials/{credentialId}
+## 68. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar un título propio pendiente
@@ -6261,9 +9909,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -6312,7 +9960,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 51. PATCH /profiles/practitioners/me/credentials/{credentialId}
+## 69. PATCH /profiles/practitioners/me/credentials/{credentialId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar un título propio pendiente de verificación
@@ -6337,11 +9985,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: credentialId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -6351,7 +9999,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3460` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3491` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → ProfessionalCredentialsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:104` |
 
 ### Parámetros
@@ -6428,7 +10076,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 52. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 70. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar una matrícula propia pendiente de verificación
@@ -6453,16 +10101,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.jurisdiction_authorizations_history` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → PractitionerContextAdapter.hasAuthorizationHistory | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:52` |
-| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → PractitionerContextAdapter.hasOpenIdentityCase | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:60` |
+| `audit.jurisdiction_authorizations_history` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → PractitionerContextAdapter.hasAuthorizationHistory | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:157` |
+| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → PractitionerContextAdapter.hasOpenIdentityCase | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:165` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → JurisdictionAuthorizationsRepository.remove | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:89` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removeOwnLicense → ProfilesPractitionersService.removeOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → JurisdictionAuthorizationsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:80` |
@@ -6506,7 +10154,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 53. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 71. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una matrícula propia pendiente de verificación
@@ -6531,11 +10179,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:739` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: licenseId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:739` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -6543,7 +10191,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → PractitionerContextAdapter.hasOpenIdentityCase | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:60` |
+| `identity_assurance.identity_verification_cases` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → PractitionerContextAdapter.hasOpenIdentityCase | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:165` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → JurisdictionAuthorizationsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:80` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnLicense → ProfilesPractitionersService.updateOwnLicense → ProfilesPractitionersService.lockOwnEditableLicense → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
@@ -6610,7 +10258,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 54. GET /profiles/practitioners/me/linkable-organizations
+## 72. GET /profiles/practitioners/me/linkable-organizations
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscar instituciones del padrón para declarar una afiliación
@@ -6635,8 +10283,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:414` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -6695,7 +10343,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 55. GET /profiles/practitioners/me/onboarding
+## 73. GET /profiles/practitioners/me/onboarding
 
 - **Origen:** CONTRATO
 - **Nombre:** Qué le falta al profesional para completar su alta
@@ -6720,8 +10368,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -6732,8 +10380,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
-| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerContextAdapter.onboardingContext | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:29` |
-| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerContextAdapter.onboardingContext | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:25` |
+| `scheduling.bookable_slots` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerContextAdapter.onboardingContext | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:32` |
+| `scheduling.schedulable_resources` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnOnboarding → ProfilesPractitionersService.getOwnOnboarding → PractitionerContextAdapter.onboardingContext | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:28` |
 
 ### Cuerpo
 
@@ -6775,7 +10423,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 56. GET /profiles/practitioners/me/primary-patients
+## 74. GET /profiles/practitioners/me/primary-patients
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los pacientes que me eligieron como médico de cabecera
@@ -6800,8 +10448,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:80` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -6859,7 +10507,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 57. GET /profiles/practitioners/me/signature-assets
+## 75. GET /profiles/practitioners/me/signature-assets
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar las imágenes de firma y sello propias
@@ -6884,8 +10532,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -6930,7 +10578,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 58. PUT /profiles/practitioners/me/signature-assets
+## 76. PUT /profiles/practitioners/me/signature-assets
 
 - **Origen:** CONTRATO
 - **Nombre:** Guardar o quitar las imágenes de firma y sello propias
@@ -6955,10 +10603,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/practitioner-signature-assets.controller.ts:34` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -7027,7 +10675,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 59. DELETE /profiles/practitioners/me/specialties/{specialtyId}
+## 77. DELETE /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar una especialidad propia pendiente de verificación
@@ -7052,9 +10700,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -7103,7 +10751,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 60. PATCH /profiles/practitioners/me/specialties/{specialtyId}
+## 78. PATCH /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una especialidad propia pendiente de verificación
@@ -7128,11 +10776,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -7140,7 +10788,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2639` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2670` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → PractitionerSpecialtiesRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:101` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
@@ -7205,7 +10853,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 61. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+## 79. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar una especialidad propia como la principal
@@ -7230,9 +10878,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: specialtyId | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -7289,7 +10937,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 62. GET /profiles/practitioners/me/summary
+## 80. GET /profiles/practitioners/me/summary
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el perfil profesional propio (trayectoria y actividad)
@@ -7306,7 +10954,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /profiles/practitioners/me/summary` la atiende `ProfilesPractitionersController.getOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:97). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getOwnPractitionerProfile`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 7 más.
+`GET /profiles/practitioners/me/summary` la atiende `ProfilesPractitionersController.getOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:97). Exige sesión; el controlador no declara roles. Delega en `ProfilesPractitionersService.getOwnPractitionerProfile`. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 8 más.
 
 ### Requerimientos
 
@@ -7314,17 +10962,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:44` |
-| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
-| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
+| `chart.clinical_note_headers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:47` |
+| `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:48` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
+| `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:46` |
 | `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
@@ -7332,6 +10980,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAdmissionsReadService.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -7345,34 +10994,34 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:231` |
-| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:234` |
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:237` |
-| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:240` |
-| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:243` |
-| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:247` |
-| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:251` |
-| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:255` |
-| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:268` |
-| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:272` |
-| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:283` |
-| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:287` |
-| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:291` |
-| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:295` |
-| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:299` |
-| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:308` |
-| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:311` |
-| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:314` |
-| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:317` |
-| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:320` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:327` |
-| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:334` |
-| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:342` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:348` |
-| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:352` |
-| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:356` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:362` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:369` |
+| `unavailableSections` | `array<string>` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:232` |
+| `profileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:235` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:238` |
+| `practitionerCode` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:241` |
+| `displayName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:244` |
+| `professionalTitle` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:248` |
+| `professionalBio` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:252` |
+| `photoFileId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:256` |
+| `email` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:269` |
+| `phone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:273` |
+| `workEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:284` |
+| `personalEmail` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:288` |
+| `mobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:292` |
+| `workMobilePhone` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:296` |
+| `workLandline` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:300` |
+| `name` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:309` |
+| `middleName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:312` |
+| `lastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:315` |
+| `motherLastName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:318` |
+| `birthDate` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:321` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:328` |
+| `nationalId` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:335` |
+| `identityVerified` | `boolean` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:343` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento emisor (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:349` |
+| `taxId` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:353` |
+| `taxHolderName` | `string` | No | — | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:357` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio de residencia (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:363` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:370` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -7380,7 +11029,7 @@ La operación no recibe cuerpo.
 | `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
+| `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:374` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
@@ -7388,53 +11037,57 @@ La operación no recibe cuerpo.
 | `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:405` |
-| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:408` |
-| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:411` |
-| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:414` |
-| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:418` |
-| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:421` |
-| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:424` |
-| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:42` |
-| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:45` |
-| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:49` |
-| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:53` |
-| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:57` |
-| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:60` |
-| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:63` |
-| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:67` |
-| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:427` |
-| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:80` |
-| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:83` |
-| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:87` |
-| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:95` |
-| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:99` |
-| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:103` |
-| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:107` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:111` |
-| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:115` |
-| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:118` |
-| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:121` |
-| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:124` |
-| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:132` |
-| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:140` |
-| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:430` |
-| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:146` |
-| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:149` |
-| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:152` |
-| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:155` |
-| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:158` |
-| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:161` |
-| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:164` |
-| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:171` |
-| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:433` |
-| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:183` |
-| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:186` |
-| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:189` |
-| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:442` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:384` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:391` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:402` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:406` |
+| `practitionerCategoryConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:409` |
+| `verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:412` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:419` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | — | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `practiceStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:422` |
+| `acceptsNewPatients` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:426` |
+| `telehealthAvailable` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:429` |
+| `specialties` | `array<PractitionerSpecialtyDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:432` |
+| `specialties[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:43` |
+| `specialties[].specialtyConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:46` |
+| `specialties[].isPrimary` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:50` |
+| `specialties[].boardCertified` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:54` |
+| `specialties[].practiceScopeText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:58` |
+| `specialties[].verificationStatusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:61` |
+| `specialties[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:64` |
+| `specialties[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:68` |
+| `credentials` | `array<PractitionerCredentialDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:435` |
+| `credentials[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:81` |
+| `credentials[].credentialTypeConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:84` |
+| `credentials[].number` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:88` |
+| `credentials[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia; permite descargar el diploma adjunto | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:96` |
+| `credentials[].issuingInstitutionText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:100` |
+| `credentials[].issuingCityText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:104` |
+| `credentials[].issuingCountryText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:108` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:112` |
+| `credentials[].titleText` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:116` |
+| `credentials[].issueDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:119` |
+| `credentials[].expiryDate` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:122` |
+| `credentials[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:125` |
+| `credentials[].verifiedAt` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:133` |
+| `credentials[].verificationSourceUri` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:141` |
+| `licenses` | `array<PractitionerLicenseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:438` |
+| `licenses[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:147` |
+| `licenses[].jurisdictionConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:150` |
+| `licenses[].licenseNumber` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:153` |
+| `licenses[].regulatoryAuthority` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:156` |
+| `licenses[].stateConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:159` |
+| `licenses[].validFrom` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:162` |
+| `licenses[].validTo` | `string` | No | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:165` |
+| `licenses[].fileId` | `string` | No | formato uuid | — | Sólo en la lectura propia | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:172` |
+| `languages` | `array<PractitionerLanguageDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:441` |
+| `languages[].languageConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:184` |
+| `languages[].proficiencyConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:187` |
+| `languages[].clinicalInterpretationAllowed` | `boolean` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:190` |
+| `affiliations` | `array<AffiliationResponseDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:450` |
 | `affiliations[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:139` |
 | `affiliations[].practitionerProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:145` |
 | `affiliations[].organizationName` | `string` | Sí | — | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:151` |
@@ -7449,12 +11102,12 @@ La operación no recibe cuerpo.
 | `affiliations[].statusKind` | `string` | Sí | valores: pendiente, declarado, aprobado, rechazado, revocado, desconocido | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:227` |
 | `affiliations[].decisionReasonText` | `string` | No | admite null | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:243` |
 | `affiliations[].createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/affiliation.dto.ts:249` |
-| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:445` |
-| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:207` |
-| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:211` |
-| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:215` |
-| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:219` |
-| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:448` |
+| `activity` | `PractitionerActivityDto` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:453` |
+| `activity.encounters` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:208` |
+| `activity.medicationRequests` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:212` |
+| `activity.clinicalNotes` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:216` |
+| `activity.documents` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:220` |
+| `createdAt` | `string` | Sí | formato date-time | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:456` |
 
 ### Respuestas posibles
 
@@ -7485,7 +11138,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 63. GET /profiles/practitioners/specialty-counts
+## 81. GET /profiles/practitioners/specialty-counts
 
 - **Origen:** CONTRATO
 - **Nombre:** Contar profesionales visibles por especialidad
@@ -7510,8 +11163,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:195` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -7528,11 +11181,11 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<SpecialtyPractitionerCountDto>` | Sí | — | — | Una fila por especialidad con al menos un profesional. Las que no tienen a nadie **no viajan**: una tarjeta que promete y abre vacía es peor que no estar. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:180` |
-| `items[].specialtyConceptId` | `string` | Sí | — | — | Concepto de la especialidad | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:155` |
-| `items[].practitionerCount` | `number` | Sí | — | — | Profesionales visibles que la ejercen | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:161` |
-| `practitionerTotal` | `number` | Sí | — | — | Profesionales visibles, sin repetir | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:188` |
-| `withoutSpecialtyCount` | `number` | Sí | — | — | Visibles sin ninguna especialidad vigente | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:199` |
+| `items` | `array<SpecialtyPractitionerCountDto>` | Sí | — | — | Una fila por especialidad con al menos un profesional. Las que no tienen a nadie **no viajan**: una tarjeta que promete y abre vacía es peor que no estar. | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:223` |
+| `items[].specialtyConceptId` | `string` | Sí | — | — | Concepto de la especialidad | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:198` |
+| `items[].practitionerCount` | `number` | Sí | — | — | Profesionales visibles que la ejercen | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:204` |
+| `practitionerTotal` | `number` | Sí | — | — | Profesionales visibles, sin repetir | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:231` |
+| `withoutSpecialtyCount` | `number` | Sí | — | — | Visibles sin ninguna especialidad vigente | `src/modules/profiles/presentation/dto/list-practitioners.dto.ts:242` |
 
 ### Respuestas posibles
 
@@ -7555,7 +11208,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 64. GET /tenants/{tenantId}/practitioner-requests
+## 82. GET /tenants/{tenantId}/practitioner-requests
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitudes de médicos que piden atender en la organización
@@ -7580,9 +11233,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:58` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -7644,7 +11297,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 65. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 83. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar la solicitud de un profesional
@@ -7669,9 +11322,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:73` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -7688,7 +11341,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -7738,7 +11391,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 66. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 84. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar la solicitud de un profesional
@@ -7763,11 +11416,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:90` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -7784,7 +11437,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
@@ -7850,7 +11503,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 67. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 85. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Dar de baja un vínculo ya aprobado
@@ -7875,11 +11528,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId, affiliationId | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -7896,7 +11549,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
 | `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |

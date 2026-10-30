@@ -3804,6 +3804,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: CLINICIAN, PRACTITIONER. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Destino no encontrado | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 422 | `PRECONDITION_FAILED` | Indique targetProfileId o targetTenantId. | Excepción explícita en src/modules/clinical_ext/services/referrals.service.ts |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(REFERRAL_TARGETS_RATE_LIMIT). | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
