@@ -846,6 +846,14 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+    {
+      display: 'Colegio profesional',
+      definition:
+        'Registro en el colegio de la profesión (Colegio Médico, de Odontólogos, etc.). Se suma a la matrícula y al SEDES, no los reemplaza.',
+    },
+  ],
+  [
     PROF.AUTH_PENDING,
     {
       display: 'Habilitación pendiente',
@@ -867,6 +875,408 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
       display: 'Habilitación vencida',
       definition:
         'La autorización para ejercer caducó y hay que renovarla antes de volver a atender.',
+    },
+  ],
+  // --- Admisiones de profesionales (v4.2.67) -------------------------------
+  [
+    PROF.AUTH_REJECTED,
+    {
+      display: 'Habilitación rechazada',
+      definition:
+        'La revisión de la plataforma no pudo verificar la matrícula; el motivo queda registrado y el profesional puede corregirla y reenviar.',
+    },
+  ],
+  [
+    PROF.SPEC_VERIF_REJECTED,
+    {
+      display: 'Especialidad rechazada',
+      definition:
+        'La revisión no pudo verificar el título que respalda la especialidad declarada.',
+    },
+  ],
+  [
+    PROF.ADMISSION_TYPE_PRACTITIONER_ONBOARDING,
+    {
+      display: 'Alta de doctor',
+      definition:
+        'Solicitud de admisión de un profesional de salud que se registró: la plataforma verifica su identidad, su matrícula y sus títulos antes de habilitarlo.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_SUBMITTED,
+    {
+      display: 'Enviada',
+      definition:
+        'La solicitud llegó a la plataforma y espera que alguien la tome. Equivale a «profesional pendiente de verificación».',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_IN_REVIEW,
+    {
+      display: 'En revisión',
+      definition:
+        'Un revisor tomó la solicitud y está comprobando los requisitos.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_INFO_REQUIRED,
+    {
+      display: 'Información requerida',
+      definition:
+        'El revisor pidió al solicitante corregir o aportar algo antes de seguir.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_VERIFIED,
+    {
+      display: 'Verificada',
+      definition:
+        'La plataforma comprobó todos los requisitos obligatorios; el profesional queda verificado hasta su fecha de vigencia.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_REJECTED,
+    {
+      display: 'Rechazada',
+      definition:
+        'La plataforma no pudo verificar al solicitante; el motivo queda registrado y puede corregir y reenviar.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_SUSPENDED,
+    {
+      display: 'Suspendida',
+      definition:
+        'Una verificación vigente se dejó sin efecto por un motivo registrado; se puede reponer.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_EXPIRED,
+    {
+      display: 'Expirada',
+      definition: 'La vigencia de una verificación venció; hay que renovarla.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_WITHDRAWN,
+    {
+      display: 'Retirada',
+      definition:
+        'El solicitante retiró su solicitud antes de que se resolviera.',
+    },
+  ],
+  [
+    PROF.ADMISSION_STATUS_ABANDONED,
+    {
+      display: 'Abandonada',
+      definition:
+        'El solicitante no respondió a la información pedida dentro de su plazo.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_CREATED,
+    {
+      display: 'Solicitud creada',
+      definition: 'Se registró la solicitud de admisión.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_CLAIMED,
+    {
+      display: 'Revisión tomada',
+      definition: 'Un revisor tomó la solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_INFO_REQUESTED,
+    {
+      display: 'Información pedida',
+      definition: 'El revisor pidió información al solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_RESUBMITTED,
+    {
+      display: 'Solicitud reenviada',
+      definition: 'El solicitante reenvió su solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_ITEM_VERIFIED,
+    {
+      display: 'Ítem verificado',
+      definition: 'Se verificó un requisito de la solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_ITEM_REJECTED,
+    {
+      display: 'Ítem rechazado',
+      definition: 'Se rechazó un requisito de la solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_ITEM_INFO_REQUIRED,
+    {
+      display: 'Información de un ítem',
+      definition: 'Se pidió información sobre un requisito puntual.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_VERIFIED,
+    {
+      display: 'Solicitud verificada',
+      definition: 'Se resolvió la solicitud como verificada.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_REJECTED,
+    {
+      display: 'Solicitud rechazada',
+      definition: 'Se resolvió la solicitud como rechazada.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_SUSPENDED,
+    {
+      display: 'Verificación suspendida',
+      definition: 'Se suspendió una verificación vigente.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_REINSTATED,
+    {
+      display: 'Verificación repuesta',
+      definition: 'Se repuso una verificación suspendida.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_EXPIRED,
+    {
+      display: 'Verificación vencida',
+      definition: 'La vigencia de la verificación venció.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_WITHDRAWN,
+    {
+      display: 'Solicitud retirada',
+      definition: 'El solicitante retiró su solicitud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_ABANDONED,
+    {
+      display: 'Solicitud abandonada',
+      definition:
+        'La solicitud se cerró por falta de respuesta del solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_RELEASED,
+    {
+      display: 'Revisión soltada',
+      definition: 'El revisor soltó la solicitud para que otro la tome.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_REASSIGNED,
+    {
+      display: 'Revisión reasignada',
+      definition: 'La solicitud pasó a otro revisor.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVENT_BACKFILLED,
+    {
+      display: 'Solicitud migrada',
+      definition:
+        'La solicitud se creó al migrar un profesional anterior a las admisiones.',
+    },
+  ],
+  [
+    PROF.ADMISSION_ITEM_LICENSE,
+    {
+      display: 'Matrícula',
+      definition:
+        'Una habilitación para ejercer (Ministerio de Salud, colegio, SEDES).',
+    },
+  ],
+  [
+    PROF.ADMISSION_ITEM_CREDENTIAL,
+    {
+      display: 'Título',
+      definition:
+        'Un título universitario, diplomado, maestría, doctorado o especialidad.',
+    },
+  ],
+  [
+    PROF.ADMISSION_ITEM_SPECIALTY,
+    {
+      display: 'Especialidad declarada',
+      definition: 'Una especialidad que el profesional declaró ejercer.',
+    },
+  ],
+  [
+    PROF.ADMISSION_ITEM_PROFILE,
+    {
+      display: 'Dato del perfil',
+      definition: 'Un dato del perfil que se comprueba: cédula, consultorios.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REVIEW_PENDING,
+    {
+      display: 'Pendiente',
+      definition: 'Todavía nadie revisó este ítem.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REVIEW_VERIFIED,
+    {
+      display: 'Verificado',
+      definition: 'El revisor comprobó este ítem.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REVIEW_REJECTED,
+    {
+      display: 'Rechazado',
+      definition: 'El revisor no pudo comprobar este ítem.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REVIEW_INFO_REQUIRED,
+    {
+      display: 'Información requerida',
+      definition: 'El revisor necesita algo más sobre este ítem.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVIDENCE_DOCUMENT,
+    {
+      display: 'Documento',
+      definition: 'La evidencia es un archivo que sube el solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_EVIDENCE_DATA,
+    {
+      display: 'Dato',
+      definition: 'La evidencia es un dato declarado en el formulario.',
+    },
+  ],
+  [
+    PROF.ADMISSION_METHOD_MANUAL,
+    {
+      display: 'Revisión manual',
+      definition: 'Una persona de la plataforma lo comprueba.',
+    },
+  ],
+  [
+    PROF.ADMISSION_METHOD_AUTHORITY_CHECK,
+    {
+      display: 'Consulta a la autoridad',
+      definition: 'Se comprueba contra la autoridad emisora.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_MINSALUD_REGISTRY,
+    {
+      display: 'Registro del Ministerio de Salud',
+      definition:
+        'Se consultó el registro de matrículas del Ministerio de Salud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_MEDICAL_COLLEGE,
+    {
+      display: 'Colegio Médico',
+      definition: 'Se consultó al Colegio Médico.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_DENTAL_COLLEGE,
+    {
+      display: 'Colegio de Odontólogos',
+      definition: 'Se consultó al Colegio de Odontólogos.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_SEDES,
+    {
+      display: 'SEDES',
+      definition: 'Se consultó al Servicio Departamental de Salud.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_SEGIP,
+    {
+      display: 'SEGIP',
+      definition: 'Se contrastó con el SEGIP.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_SUBMITTED_DOCUMENT,
+    {
+      display: 'Documento aportado',
+      definition: 'Se contrastó con el documento que aportó el solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_SOURCE_OTHER,
+    {
+      display: 'Otra fuente',
+      definition: 'Se consultó otra fuente, descrita en la referencia.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_ILLEGIBLE,
+    {
+      display: 'Documento ilegible',
+      definition: 'No se puede leer el documento.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_EXPIRED,
+    {
+      display: 'Documento vencido',
+      definition: 'El documento está vencido.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_NAME_MISMATCH,
+    {
+      display: 'El nombre no coincide',
+      definition: 'El nombre del documento no coincide con el del solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_NOT_IN_REGISTRY,
+    {
+      display: 'No figura en el registro',
+      definition: 'No se encontró en el registro consultado.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_INCOMPLETE,
+    {
+      display: 'Documento incompleto',
+      definition: 'Faltan páginas o datos.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_SUSPECTED_FRAUD,
+    {
+      display: 'Sospecha de fraude',
+      definition: 'Sólo para el personal: nunca se muestra al solicitante.',
+    },
+  ],
+  [
+    PROF.ADMISSION_REASON_OTHER,
+    {
+      display: 'Otro motivo',
+      definition: 'Otro motivo, descrito en el texto.',
     },
   ],
   [

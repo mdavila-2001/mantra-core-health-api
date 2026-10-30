@@ -77,11 +77,15 @@ import { composeAccountDisplayName } from '../../domain/person-name';
 import { applyOccupation, applyCompany } from '../../domain/person-work-fields';
 import { ProfileOwnershipService } from './profile-ownership.service';
 import { ProfilesAffiliationsService } from './profiles-affiliations.service';
+import type { PractitionerVerificationView } from '../../domain/admissions/admission-status';
 import { ProfilesErrorReason } from '../../profiles.error-reasons';
+import { PractitionerAdmissionsService } from './practitioner-admissions.service';
+import { PractitionerAdmissionsReadService } from './practitioner-admissions-read.service';
 import { BO_PROFESSION_CONCEPT_IDS } from '../../../../common/seed/bo-professions.catalog';
 import {
   PRACTITIONER_CONTEXT_PORT,
   type PractitionerContextPort,
+  type PractitionerDirectoryStats,
 } from '../ports/practitioner-context.port';
 import {
   PERSON_RECORDS_PORT,
@@ -251,6 +255,11 @@ export class ProfilesPractitionersService {
     private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
     private readonly administrativeAreas: AdministrativeAreaCatalogService,
     private readonly healthFacilities: HealthFacilityCatalogService,
+    // v4.2.67: la verificación del alta es de las admisiones. Este servicio las
+    // abre (alta con cuenta), les registra la verificación heredada de CV-20 y
+    // lee el estado visible de verificación para los DTO de profesional.
+    private readonly admissions: PractitionerAdmissionsService,
+    private readonly admissionsRead: PractitionerAdmissionsReadService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ProfilesPractitionersService.name);
@@ -612,7 +621,7 @@ export class ProfilesPractitionersService {
     const page = hasMore ? rows.slice(0, options.limit) : rows;
 
     const pageIds = page.map((row) => row.profileId);
-    const [persons, specialties, affiliations] = await Promise.all([
+    const [persons, specialties, affiliations, stats] = await Promise.all([
       this.personsRepo.findByIds(em, pageIds),
       this.specialtiesRepo.findByPractitioners(em, pageIds),
       // Dónde atiende cada uno. En lote y no de a uno: pedirlas por fila serían
@@ -620,6 +629,18 @@ export class ProfilesPractitionersService {
       this.affiliationsRepo.findByPractitioners(em, pageIds, [
         ...PUBLISHABLE_STATES,
       ]),
+      // Nota y actividad, para que la guía pueda ordenar por ellas. También en
+      // lote, y con el mismo resguardo que la ficha: si esta lectura falla, la
+      // guía sale con ceros y sin nota, no se cae entera.
+      this.practitionerContext
+        .directoryStats(em, pageIds)
+        .catch((error: unknown) => {
+          this.logger.warn(
+            { err: error, pieza: 'cifras-de-la-guia', count: pageIds.length },
+            'No se pudieron leer las cifras de la guía; salen en cero',
+          );
+          return new Map<string, PractitionerDirectoryStats>();
+        }),
     ]);
 
     // Por profesional, sin repetir. El padrón trae la misma sede escrita de dos
@@ -659,8 +680,17 @@ export class ProfilesPractitionersService {
       specialtiesByProfile.set(specialty.practitionerProfileId, list);
     }
 
+    const visibleVerification = await this.admissionsRead.verificationOf(
+      em,
+      page.map((row) => row.profileId),
+    );
     const items = page.map((row) => {
       const person = persons.get(row.profileId);
+      const verification = visibleVerification.get(row.profileId) ?? {
+        status: 'UNVERIFIED' as const,
+        verifiedAt: null,
+        validUntil: null,
+      };
       return {
         profileId: row.profileId,
         practitionerCode: row.practitionerCode,
@@ -671,11 +701,17 @@ export class ProfilesPractitionersService {
         // Resuelto acá y no en el front: comparar contra el uuid del concepto
         // exigiría llevarlo escrito en el cliente, que es el literal mágico
         // que este proyecto prohíbe.
-        verified: row.verificationStatusConceptId === PROF.PRACT_VERIF_VERIFIED,
+        // Una verificación vencida o suspendida deja de contar aunque el perfil
+        // todavía diga PRACT_VERIF_VERIFIED: el check lo decide la admisión.
+        verified: verification.status === 'VERIFIED',
+        verification,
         acceptsNewPatients: row.acceptsNewPatients ?? false,
         telehealthAvailable: row.telehealthAvailable ?? false,
         specialties: specialtiesByProfile.get(row.profileId) ?? [],
         workplaces: workplacesByProfile.get(row.profileId) ?? [],
+        ratingAverage: stats.get(row.profileId)?.ratingAverage ?? null,
+        ratingCount: stats.get(row.profileId)?.ratingCount ?? 0,
+        activity: stats.get(row.profileId)?.activity ?? { ...WITHOUT_ACTIVITY },
       };
     });
 
@@ -811,6 +847,8 @@ export class ProfilesPractitionersService {
     changes: {
       municipalityConceptId?: string;
       lines?: string;
+      /** Distrito o zona; `''` lo quita (ADR-0028). */
+      district?: string;
       /** `null` en las dos quita el punto. Ver `ReplaceResidenceAddressData`. */
       latitude?: number | null;
       longitude?: number | null;
@@ -825,6 +863,7 @@ export class ProfilesPractitionersService {
         useConceptId,
         municipalityConceptId: changes.municipalityConceptId,
         lines: changes.lines,
+        district: changes.district,
         latitude: changes.latitude,
         longitude: changes.longitude,
         actorUserId,
@@ -1054,6 +1093,26 @@ export class ProfilesPractitionersService {
           punto.systemConceptId === system && punto.useConceptId === usage,
       )?.value;
 
+    // El estado visible de verificación sale de la admisión vigente. Si la
+    // lectura falla no tumba la ficha (F-18): el perfil sigue diciendo su
+    // `verificationStatusConceptId` y el cliente cae a `UNVERIFIED`.
+    const verification = (
+      await this.withoutBreakingRecord(
+        () => this.admissionsRead.verificationOf(em, [profileId]),
+        new Map<string, PractitionerVerificationView>(),
+        {
+          profileId,
+          pieza: 'verificación',
+          section: 'verification',
+          unavailable,
+        },
+      )
+    ).get(profileId) ?? {
+      status: 'UNVERIFIED' as const,
+      verifiedAt: null,
+      validUntil: null,
+    };
+
     return {
       ...(unavailable.length > 0
         ? { unavailableSections: [...unavailable].sort() }
@@ -1133,6 +1192,7 @@ export class ProfilesPractitionersService {
         : {}),
       practitionerCategoryConceptId: practitioner.practitionerCategoryConceptId,
       verificationStatusConceptId: practitioner.verificationStatusConceptId,
+      verification,
       practiceStatusConceptId: practitioner.practiceStatusConceptId,
       acceptsNewPatients: practitioner.acceptsNewPatients ?? false,
       telehealthAvailable: practitioner.telehealthAvailable ?? false,
@@ -1442,6 +1502,7 @@ export class ProfilesPractitionersService {
         if (
           dto.residenceMunicipalityConceptId !== undefined ||
           dto.homeAddressLines !== undefined ||
+          dto.homeDistrict !== undefined ||
           // `null` también cuenta: quitar el punto es un cambio.
           dto.homeLatitude !== undefined ||
           dto.homeLongitude !== undefined
@@ -1453,6 +1514,7 @@ export class ProfilesPractitionersService {
             {
               municipalityConceptId: dto.residenceMunicipalityConceptId,
               lines: dto.homeAddressLines,
+              district: dto.homeDistrict,
               latitude: dto.homeLatitude,
               longitude: dto.homeLongitude,
             },
@@ -1462,6 +1524,7 @@ export class ProfilesPractitionersService {
         }
         if (
           dto.workAddressLines !== undefined ||
+          dto.workDistrict !== undefined ||
           dto.workLatitude !== undefined ||
           dto.workLongitude !== undefined
         ) {
@@ -1471,6 +1534,7 @@ export class ProfilesPractitionersService {
             CONCEPTS.ADDR_USE_WORK,
             {
               lines: dto.workAddressLines,
+              district: dto.workDistrict,
               latitude: dto.workLatitude,
               longitude: dto.workLongitude,
             },
@@ -2023,6 +2087,21 @@ export class ProfilesPractitionersService {
       );
       await tx.flush();
 
+      // La solicitud de admisión sólo nace si la persona tiene CUENTA: una ficha
+      // de directorio (el padrón de una aseguradora) no es una solicitud de nadie,
+      // y abrir una por cada una llenaría la bandeja de solicitudes fantasma.
+      // Cuando esa persona se registra o reclama el perfil, la abre el alta.
+      const hasAccount = await this.accountLinksRepo.findActiveByPerson(
+        tx,
+        personId,
+      );
+      if (hasAccount) {
+        await this.admissions.openForRegistration(tx, {
+          practitionerProfileId: personId,
+          actorUserId: actor.id,
+        });
+      }
+
       this.logger.info(
         { operation: 'profiles.practitioner.onboard', profileId: personId },
         'Practitioner onboarded',
@@ -2234,76 +2313,35 @@ export class ProfilesPractitionersService {
       credential.verifiedAt = now;
       if (dto.verificationSourceUri)
         credential.verificationSourceUri = dto.verificationSourceUri;
-      touch(credential, actor.id);
-
-      // Si al verificar no quedan credenciales pendientes, habilita el perfil.
-      let practitionerVerified = false;
-      if (verified) {
-        const pending = await this.credentialsRepo.countInStateExcept(
-          tx,
-          credential.practitionerProfileId,
-          PROF.CRED_PENDING,
-          credentialId,
-        );
-        if (pending === 0) {
-          const practitioner = await this.practitionersRepo.findById(
-            tx,
-            credential.practitionerProfileId,
-          );
-          if (practitioner) {
-            practitioner.verificationStatusConceptId =
-              PROF.PRACT_VERIF_VERIFIED;
-            practitioner.practiceStatusConceptId = PROF.PRACTICE_ACTIVE;
-            practitioner.acceptsNewPatients = true;
-            touch(practitioner, actor.id);
-            practitionerVerified = true;
-
-            // Habilitado para ejercer y sin rol con el que hacerlo es un estado
-            // que no sirve a nadie: hasta aquí, el profesional recién verificado
-            // seguía recibiendo 403 en todo endpoint clínico porque su token
-            // sólo llevaba `USER`. Se le concede `PRACTITIONER`, que es
-            // exactamente lo que la verificación acaba de acreditar; los roles
-            // más específicos (`SURGEON`, `ANESTHESIOLOGIST`…) siguen siendo
-            // decisión explícita de un administrador, porque la matrícula no
-            // dice en qué equipo trabaja.
-            //
-            // Es fail-closed: el rol llega tras una verificación con fuente
-            // declarada, no por el mero hecho de registrarse.
-            const link = await this.accountLinksRepo.findActiveByPerson(
-              tx,
-              credential.practitionerProfileId,
-            );
-            if (link) {
-              const granted =
-                await this.practitionerContext.ensurePractitionerRole(
-                  tx,
-                  link.userId,
-                  actor.id,
-                );
-              if (!granted) {
-                // No se rompe la verificación —que es correcta— pero tampoco se
-                // oculta: sin el catálogo de roles sembrado, el profesional
-                // quedará verificado y sin poder ejercer.
-                this.logger.warn(
-                  {
-                    operation: 'profiles.credential.verify',
-                    practitionerProfileId: credential.practitionerProfileId,
-                    roleCode: 'PRACTITIONER',
-                  },
-                  'Profesional verificado sin rol asistencial: el rol no existe o no es asignable',
-                );
-              }
-            }
-          }
-        }
+      if (!verified && dto.reason?.trim()) {
+        credential.rejectionReasonText = dto.reason.trim();
       }
+      touch(credential, actor.id, now);
+
+      // v4.2.67 · D-01: esta ruta ya NO habilita al profesional. Antes, al
+      // quedar sin credenciales pendientes, ella misma escribía
+      // PRACT_VERIF_VERIFIED, concedía el rol PRACTITIONER y abría la agenda: un
+      // solo SECURITY_ADMIN verificaba a un médico sin cuatro ojos y sin que la
+      // admisión se enterara. Ahora la verificación del título queda como
+      // revisión de su requisito en la admisión abierta (con su fuente y su
+      // motivo); el cierre —verificar, rechazar— es de la admisión, y el único
+      // que escribe PRACT_VERIF_* es su proyector.
+      await tx.flush();
+      await this.admissions.recordCredentialReview(tx, {
+        credentialId,
+        practitionerProfileId: credential.practitionerProfileId,
+        decision: dto.decision,
+        verificationSourceUri: dto.verificationSourceUri,
+        reason: dto.reason,
+        actor,
+      });
       await tx.flush();
 
       return {
         id: credential.id,
         state: credential.stateConceptId,
         verifiedAt: credential.verifiedAt,
-        practitionerVerified,
+        practitionerVerified: false,
       };
     });
   }

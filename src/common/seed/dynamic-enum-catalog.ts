@@ -483,6 +483,8 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       PROF.JURISDICTION_SEDES_TARIJA,
       PROF.JURISDICTION_SEDES_BENI,
       PROF.JURISDICTION_SEDES_PANDO,
+      // Al final: el seed numera por posición y sólo inserta.
+      PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
     ],
     defaultConceptId: PROF.JURISDICTION_NATIONAL,
     targets: ['profiles.jurisdiction_authorizations.jurisdiction_concept_id'],
@@ -491,7 +493,12 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'jurisdiction-authorization-status',
     name: 'Estado de la autorización jurisdiccional',
     description: 'Situación de la licencia para ejercer en una jurisdicción.',
-    concepts: [PROF.AUTH_PENDING, PROF.AUTH_ACTIVE, PROF.AUTH_EXPIRED],
+    concepts: [
+      PROF.AUTH_PENDING,
+      PROF.AUTH_ACTIVE,
+      PROF.AUTH_EXPIRED,
+      PROF.AUTH_REJECTED,
+    ],
     defaultConceptId: PROF.AUTH_PENDING,
     targets: ['profiles.jurisdiction_authorizations.state_concept_id'],
   },
@@ -502,6 +509,150 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
   // un solo miembro en inglés) que era el único atado a la columna: por eso pedir el
   // catálogo por campo destino devolvía una sola opción y un médico no podía decir
   // que es cardiólogo (F-19). Re-declararlo lo resucitaría sólo en bases nuevas.
+  // --- Admisiones de profesionales (v4.2.67) ---
+  {
+    code: 'admission-type',
+    name: 'Tipo de admisión',
+    description: 'Qué clase de alta revisa la bandeja de Admisiones.',
+    concepts: [PROF.ADMISSION_TYPE_PRACTITIONER_ONBOARDING],
+    defaultConceptId: PROF.ADMISSION_TYPE_PRACTITIONER_ONBOARDING,
+    targets: [
+      'profiles.practitioner_admissions.admission_type_concept_id',
+      'profiles.admission_requirements.admission_type_concept_id',
+    ],
+  },
+  {
+    code: 'admission-status',
+    name: 'Estado de la admisión',
+    description: 'Ciclo de vida de la solicitud de admisión de un profesional.',
+    concepts: [
+      PROF.ADMISSION_STATUS_SUBMITTED,
+      PROF.ADMISSION_STATUS_IN_REVIEW,
+      PROF.ADMISSION_STATUS_INFO_REQUIRED,
+      PROF.ADMISSION_STATUS_VERIFIED,
+      PROF.ADMISSION_STATUS_REJECTED,
+      PROF.ADMISSION_STATUS_SUSPENDED,
+      PROF.ADMISSION_STATUS_EXPIRED,
+      PROF.ADMISSION_STATUS_WITHDRAWN,
+      PROF.ADMISSION_STATUS_ABANDONED,
+    ],
+    defaultConceptId: PROF.ADMISSION_STATUS_SUBMITTED,
+    targets: [
+      'profiles.practitioner_admissions.status_concept_id',
+      'profiles.practitioner_admission_events.from_status_concept_id',
+      'profiles.practitioner_admission_events.to_status_concept_id',
+    ],
+  },
+  {
+    code: 'admission-event-type',
+    name: 'Evento de la admisión',
+    description: 'Qué ocurrió en la bitácora de una admisión.',
+    concepts: [
+      PROF.ADMISSION_EVENT_CREATED,
+      PROF.ADMISSION_EVENT_CLAIMED,
+      PROF.ADMISSION_EVENT_INFO_REQUESTED,
+      PROF.ADMISSION_EVENT_RESUBMITTED,
+      PROF.ADMISSION_EVENT_ITEM_VERIFIED,
+      PROF.ADMISSION_EVENT_ITEM_REJECTED,
+      PROF.ADMISSION_EVENT_ITEM_INFO_REQUIRED,
+      PROF.ADMISSION_EVENT_VERIFIED,
+      PROF.ADMISSION_EVENT_REJECTED,
+      PROF.ADMISSION_EVENT_SUSPENDED,
+      PROF.ADMISSION_EVENT_REINSTATED,
+      PROF.ADMISSION_EVENT_EXPIRED,
+      PROF.ADMISSION_EVENT_WITHDRAWN,
+      PROF.ADMISSION_EVENT_ABANDONED,
+      PROF.ADMISSION_EVENT_RELEASED,
+      PROF.ADMISSION_EVENT_REASSIGNED,
+      PROF.ADMISSION_EVENT_BACKFILLED,
+    ],
+    targets: ['profiles.practitioner_admission_events.event_type_concept_id'],
+  },
+  {
+    code: 'admission-item-type',
+    name: 'Clase de ítem de la admisión',
+    description:
+      'Qué ficha revisa un requisito: matrícula, título, especialidad o dato del perfil.',
+    concepts: [
+      PROF.ADMISSION_ITEM_LICENSE,
+      PROF.ADMISSION_ITEM_CREDENTIAL,
+      PROF.ADMISSION_ITEM_SPECIALTY,
+      PROF.ADMISSION_ITEM_PROFILE,
+    ],
+    targets: [
+      'profiles.admission_requirements.item_type_concept_id',
+      'profiles.practitioner_admission_events.item_type_concept_id',
+    ],
+  },
+  {
+    code: 'admission-review-status',
+    name: 'Estado de la revisión de un ítem',
+    description:
+      'Estado vigente de un requisito o ítem dentro de una admisión.',
+    concepts: [
+      PROF.ADMISSION_REVIEW_PENDING,
+      PROF.ADMISSION_REVIEW_VERIFIED,
+      PROF.ADMISSION_REVIEW_REJECTED,
+      PROF.ADMISSION_REVIEW_INFO_REQUIRED,
+    ],
+    defaultConceptId: PROF.ADMISSION_REVIEW_PENDING,
+    targets: ['profiles.practitioner_admission_reviews.status_concept_id'],
+  },
+  {
+    code: 'admission-evidence-kind',
+    name: 'Tipo de evidencia de un requisito',
+    description: 'Si el requisito se prueba con un documento o con un dato.',
+    concepts: [PROF.ADMISSION_EVIDENCE_DOCUMENT, PROF.ADMISSION_EVIDENCE_DATA],
+    targets: ['profiles.admission_requirements.evidence_kind_concept_id'],
+  },
+  {
+    code: 'admission-verification-method',
+    name: 'Método de verificación',
+    description: 'Cómo se comprueba un requisito.',
+    concepts: [
+      PROF.ADMISSION_METHOD_MANUAL,
+      PROF.ADMISSION_METHOD_AUTHORITY_CHECK,
+    ],
+    defaultConceptId: PROF.ADMISSION_METHOD_MANUAL,
+    targets: ['profiles.admission_requirements.verification_method_concept_id'],
+  },
+  {
+    code: 'admission-source-type',
+    name: 'Fuente consultada al verificar',
+    description:
+      'Contra qué se verificó un ítem (tipo; la referencia va aparte).',
+    concepts: [
+      PROF.ADMISSION_SOURCE_MINSALUD_REGISTRY,
+      PROF.ADMISSION_SOURCE_MEDICAL_COLLEGE,
+      PROF.ADMISSION_SOURCE_DENTAL_COLLEGE,
+      PROF.ADMISSION_SOURCE_SEDES,
+      PROF.ADMISSION_SOURCE_SEGIP,
+      PROF.ADMISSION_SOURCE_SUBMITTED_DOCUMENT,
+      PROF.ADMISSION_SOURCE_OTHER,
+    ],
+    targets: ['profiles.practitioner_admission_reviews.source_type_concept_id'],
+  },
+  {
+    code: 'admission-reason',
+    name: 'Motivo de una resolución de admisión',
+    description:
+      'Motivo estructurado de un rechazo, una suspensión o una petición de información.',
+    concepts: [
+      PROF.ADMISSION_REASON_ILLEGIBLE,
+      PROF.ADMISSION_REASON_EXPIRED,
+      PROF.ADMISSION_REASON_NAME_MISMATCH,
+      PROF.ADMISSION_REASON_NOT_IN_REGISTRY,
+      PROF.ADMISSION_REASON_INCOMPLETE,
+      PROF.ADMISSION_REASON_SUSPECTED_FRAUD,
+      PROF.ADMISSION_REASON_OTHER,
+    ],
+    defaultConceptId: PROF.ADMISSION_REASON_OTHER,
+    targets: [
+      'profiles.practitioner_admission_reviews.reason_code_concept_id',
+      'profiles.practitioner_admissions.decision_reason_code_concept_id',
+      'profiles.practitioner_admission_events.reason_code_concept_id',
+    ],
+  },
   {
     code: 'practitioner-specialty-role',
     name: 'Rol de la especialidad',
@@ -514,7 +665,11 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     code: 'practitioner-specialty-verification-status',
     name: 'Verificación de la especialidad',
     description: 'Si la especialidad declarada fue verificada.',
-    concepts: [PROF.SPEC_VERIF_PENDING, PROF.SPEC_VERIF_VERIFIED],
+    concepts: [
+      PROF.SPEC_VERIF_PENDING,
+      PROF.SPEC_VERIF_VERIFIED,
+      PROF.SPEC_VERIF_REJECTED,
+    ],
     defaultConceptId: PROF.SPEC_VERIF_PENDING,
     targets: [
       'profiles.practitioner_specialties.verification_status_concept_id',

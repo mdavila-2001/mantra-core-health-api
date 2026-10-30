@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `profiles`
 
-Referencia exhaustiva de 58 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 67 operación(es) del módulo `profiles`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`
-- **Controladores:** `PractitionerSignatureAssetsController`, `ProfilesDependentRequestsController`, `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
+- **Etiquetas OpenAPI:** `profiles-affiliations`, `profiles-patients`, `profiles-practitioners`, `profiles-primary-practitioner`
+- **Controladores:** `PatientAddressBookController`, `PractitionerSignatureAssetsController`, `PrimaryPractitionerController`, `ProfilesDependentRequestsController`, `ProfilesPatientsController`, `ProfilesPractitionersController`, `TenantPractitionerRequestsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -21,54 +21,63 @@ Referencia exhaustiva de 58 operación(es) del módulo `profiles`, derivada del 
 8. [POST /profiles/patients/{profileId}/related-persons](#8-post-profiles-patients-profileid-related-persons) — Registrar persona relacionada / contacto de emergencia
 9. [GET /profiles/patients/me](#9-get-profiles-patients-me) — Consultar los propios datos de filiación
 10. [PATCH /profiles/patients/me](#10-patch-profiles-patients-me) — Editar los propios datos de filiación
-11. [GET /profiles/patients/me/dependent-candidates](#11-get-profiles-patients-me-dependent-candidates) — Buscar por nombre a quién pedirle que deje representarla
-12. [POST /profiles/patients/me/dependent-requests](#12-post-profiles-patients-me-dependent-requests) — Pedir representar a una persona que ya tiene cuenta
-13. [POST /profiles/patients/me/dependent-requests/{id}/accept](#13-post-profiles-patients-me-dependent-requests-id-accept) — Aceptar una solicitud de dependiente
-14. [POST /profiles/patients/me/dependent-requests/{id}/reject](#14-post-profiles-patients-me-dependent-requests-id-reject) — Rechazar una solicitud de dependiente
-15. [GET /profiles/patients/me/dependent-requests/incoming](#15-get-profiles-patients-me-dependent-requests-incoming) — Listar las solicitudes de dependiente recibidas
-16. [GET /profiles/patients/me/dependents](#16-get-profiles-patients-me-dependents) — Listar los dependientes a cargo del paciente autenticado
-17. [POST /profiles/patients/me/dependents](#17-post-profiles-patients-me-dependents) — Registrar un dependiente (menor o adulto mayor tutelado)
-18. [DELETE /profiles/patients/me/photo](#18-delete-profiles-patients-me-photo) — Quitar la propia foto de perfil
-19. [PUT /profiles/patients/me/photo](#19-put-profiles-patients-me-photo) — Fijar la propia foto de perfil
-20. [GET /profiles/patients/me/summary](#20-get-profiles-patients-me-summary) — Consultar el resumen propio
-21. [POST /profiles/patients/merge](#21-post-profiles-patients-merge) — Fusionar pacientes duplicados
-22. [GET /profiles/patients/merge-events](#22-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
-23. [POST /profiles/patients/merge/{eventId}/reverse](#23-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
-24. [POST /profiles/patients/search](#24-post-profiles-patients-search) — UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
-25. [POST /profiles/persons/{personId}/account-links](#25-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
-26. [POST /profiles/persons/{personId}/decease](#26-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
-27. [GET /profiles/practitioners](#27-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
-28. [POST /profiles/practitioners](#28-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
-29. [PATCH /profiles/practitioners/{profileId}](#29-patch-profiles-practitioners-profileid) — Corregir el perfil profesional de otro (titular o plataforma)
-30. [POST /profiles/practitioners/{profileId}/affiliations](#30-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
-31. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#31-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
-32. [DELETE /profiles/practitioners/{profileId}/photo](#32-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
-33. [PUT /profiles/practitioners/{profileId}/photo](#33-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
-34. [POST /profiles/practitioners/{profileId}/specialties](#34-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
-35. [GET /profiles/practitioners/{profileId}/summary](#35-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
-36. [PATCH /profiles/practitioners/me](#36-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
-37. [GET /profiles/practitioners/me/affiliations](#37-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
-38. [POST /profiles/practitioners/me/affiliations](#38-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
-39. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#39-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
-40. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#40-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
-41. [POST /profiles/practitioners/me/credentials](#41-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
-42. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#42-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
-43. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#43-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
-44. [DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#44-delete-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Retirar una matrícula propia pendiente de verificación
-45. [PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#45-patch-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Corregir una matrícula propia pendiente de verificación
-46. [GET /profiles/practitioners/me/linkable-organizations](#46-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
-47. [GET /profiles/practitioners/me/onboarding](#47-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
-48. [GET /profiles/practitioners/me/signature-assets](#48-get-profiles-practitioners-me-signature-assets) — Consultar las imágenes de firma y sello propias
-49. [PUT /profiles/practitioners/me/signature-assets](#49-put-profiles-practitioners-me-signature-assets) — Guardar o quitar las imágenes de firma y sello propias
-50. [DELETE /profiles/practitioners/me/specialties/{specialtyId}](#50-delete-profiles-practitioners-me-specialties-specialtyid) — Retirar una especialidad propia pendiente de verificación
-51. [PATCH /profiles/practitioners/me/specialties/{specialtyId}](#51-patch-profiles-practitioners-me-specialties-specialtyid) — Corregir una especialidad propia pendiente de verificación
-52. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#52-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
-53. [GET /profiles/practitioners/me/summary](#53-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
-54. [GET /profiles/practitioners/specialty-counts](#54-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
-55. [GET /tenants/{tenantId}/practitioner-requests](#55-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
-56. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#56-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
-57. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#57-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
-58. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#58-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
+11. [GET /profiles/patients/me/addresses](#11-get-profiles-patients-me-addresses) — Listar las propias direcciones (la preferida primero)
+12. [POST /profiles/patients/me/addresses](#12-post-profiles-patients-me-addresses) — Guardar una dirección nueva
+13. [DELETE /profiles/patients/me/addresses/{id}](#13-delete-profiles-patients-me-addresses-id) — Quitar una dirección guardada o la del trabajo
+14. [PATCH /profiles/patients/me/addresses/{id}](#14-patch-profiles-patients-me-addresses-id) — Corregir una dirección (cierra la vigente y abre otra)
+15. [PUT /profiles/patients/me/addresses/{id}/preferred](#15-put-profiles-patients-me-addresses-id-preferred) — Marcar la dirección que se ofrece primero
+16. [GET /profiles/patients/me/dependent-candidates](#16-get-profiles-patients-me-dependent-candidates) — Buscar por nombre a quién pedirle que deje representarla
+17. [POST /profiles/patients/me/dependent-requests](#17-post-profiles-patients-me-dependent-requests) — Pedir representar a una persona que ya tiene cuenta
+18. [POST /profiles/patients/me/dependent-requests/{id}/accept](#18-post-profiles-patients-me-dependent-requests-id-accept) — Aceptar una solicitud de dependiente
+19. [POST /profiles/patients/me/dependent-requests/{id}/reject](#19-post-profiles-patients-me-dependent-requests-id-reject) — Rechazar una solicitud de dependiente
+20. [GET /profiles/patients/me/dependent-requests/incoming](#20-get-profiles-patients-me-dependent-requests-incoming) — Listar las solicitudes de dependiente recibidas
+21. [GET /profiles/patients/me/dependents](#21-get-profiles-patients-me-dependents) — Listar los dependientes a cargo del paciente autenticado
+22. [POST /profiles/patients/me/dependents](#22-post-profiles-patients-me-dependents) — Registrar un dependiente (menor o adulto mayor tutelado)
+23. [DELETE /profiles/patients/me/photo](#23-delete-profiles-patients-me-photo) — Quitar la propia foto de perfil
+24. [PUT /profiles/patients/me/photo](#24-put-profiles-patients-me-photo) — Fijar la propia foto de perfil
+25. [DELETE /profiles/patients/me/primary-practitioner](#25-delete-profiles-patients-me-primary-practitioner) — Quitar el propio médico de cabecera
+26. [GET /profiles/patients/me/primary-practitioner](#26-get-profiles-patients-me-primary-practitioner) — Consultar el propio médico de cabecera
+27. [PUT /profiles/patients/me/primary-practitioner](#27-put-profiles-patients-me-primary-practitioner) — Elegir o cambiar el propio médico de cabecera
+28. [GET /profiles/patients/me/summary](#28-get-profiles-patients-me-summary) — Consultar el resumen propio
+29. [POST /profiles/patients/merge](#29-post-profiles-patients-merge) — Fusionar pacientes duplicados
+30. [GET /profiles/patients/merge-events](#30-get-profiles-patients-merge-events) — Listar eventos de fusión de pacientes
+31. [POST /profiles/patients/merge/{eventId}/reverse](#31-post-profiles-patients-merge-eventid-reverse) — Revertir una fusión de pacientes
+32. [POST /profiles/patients/search](#32-post-profiles-patients-search) — UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
+33. [POST /profiles/persons/{personId}/account-links](#33-post-profiles-persons-personid-account-links) — Vincular cuenta de portal a una persona
+34. [POST /profiles/persons/{personId}/decease](#34-post-profiles-persons-personid-decease) — Registrar defunción y anonimización de una persona
+35. [GET /profiles/practitioners](#35-get-profiles-practitioners) — Listar profesionales para la guía, con sus especialidades
+36. [POST /profiles/practitioners](#36-post-profiles-practitioners) — Alta de profesional de salud (workforce generalista)
+37. [PATCH /profiles/practitioners/{profileId}](#37-patch-profiles-practitioners-profileid) — Corregir el perfil profesional de otro (titular o plataforma)
+38. [POST /profiles/practitioners/{profileId}/affiliations](#38-post-profiles-practitioners-profileid-affiliations) — Registrar un consultorio de un profesional sin cuenta
+39. [POST /profiles/practitioners/{profileId}/jurisdiction-authorizations](#39-post-profiles-practitioners-profileid-jurisdiction-authorizations) — Registrar/renovar autorización jurisdiccional (licencia)
+40. [DELETE /profiles/practitioners/{profileId}/photo](#40-delete-profiles-practitioners-profileid-photo) — Quitar la foto del perfil profesional
+41. [PUT /profiles/practitioners/{profileId}/photo](#41-put-profiles-practitioners-profileid-photo) — Fijar la foto del perfil profesional
+42. [POST /profiles/practitioners/{profileId}/specialties](#42-post-profiles-practitioners-profileid-specialties) — Agregar especialidad con credencial de soporte
+43. [GET /profiles/practitioners/{profileId}/summary](#43-get-profiles-practitioners-profileid-summary) — Consultar el perfil profesional de un colega (ficha de la guía)
+44. [PATCH /profiles/practitioners/me](#44-patch-profiles-practitioners-me) — Editar la presentación del propio perfil profesional
+45. [GET /profiles/practitioners/me/affiliations](#45-get-profiles-practitioners-me-affiliations) — Historial laboral propio (instituciones donde trabajó)
+46. [POST /profiles/practitioners/me/affiliations](#46-post-profiles-practitioners-me-affiliations) — Registrar una afiliación institucional en el historial propio
+47. [DELETE /profiles/practitioners/me/affiliations/{affiliationId}](#47-delete-profiles-practitioners-me-affiliations-affiliationid) — Quitar una afiliación del historial laboral propio
+48. [PATCH /profiles/practitioners/me/affiliations/{affiliationId}](#48-patch-profiles-practitioners-me-affiliations-affiliationid) — Corregir una afiliación del historial laboral propio
+49. [POST /profiles/practitioners/me/credentials](#49-post-profiles-practitioners-me-credentials) — Agregar un título propio (diplomado, maestría, doctorado…)
+50. [DELETE /profiles/practitioners/me/credentials/{credentialId}](#50-delete-profiles-practitioners-me-credentials-credentialid) — Retirar un título propio pendiente
+51. [PATCH /profiles/practitioners/me/credentials/{credentialId}](#51-patch-profiles-practitioners-me-credentials-credentialid) — Editar un título propio pendiente de verificación
+52. [DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#52-delete-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Retirar una matrícula propia pendiente de verificación
+53. [PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}](#53-patch-profiles-practitioners-me-jurisdiction-authorizations-licenseid) — Corregir una matrícula propia pendiente de verificación
+54. [GET /profiles/practitioners/me/linkable-organizations](#54-get-profiles-practitioners-me-linkable-organizations) — Buscar instituciones del padrón para declarar una afiliación
+55. [GET /profiles/practitioners/me/onboarding](#55-get-profiles-practitioners-me-onboarding) — Qué le falta al profesional para completar su alta
+56. [GET /profiles/practitioners/me/primary-patients](#56-get-profiles-practitioners-me-primary-patients) — Listar los pacientes que me eligieron como médico de cabecera
+57. [GET /profiles/practitioners/me/signature-assets](#57-get-profiles-practitioners-me-signature-assets) — Consultar las imágenes de firma y sello propias
+58. [PUT /profiles/practitioners/me/signature-assets](#58-put-profiles-practitioners-me-signature-assets) — Guardar o quitar las imágenes de firma y sello propias
+59. [DELETE /profiles/practitioners/me/specialties/{specialtyId}](#59-delete-profiles-practitioners-me-specialties-specialtyid) — Retirar una especialidad propia pendiente de verificación
+60. [PATCH /profiles/practitioners/me/specialties/{specialtyId}](#60-patch-profiles-practitioners-me-specialties-specialtyid) — Corregir una especialidad propia pendiente de verificación
+61. [PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary](#61-patch-profiles-practitioners-me-specialties-specialtyid-primary) — Marcar una especialidad propia como la principal
+62. [GET /profiles/practitioners/me/summary](#62-get-profiles-practitioners-me-summary) — Consultar el perfil profesional propio (trayectoria y actividad)
+63. [GET /profiles/practitioners/specialty-counts](#63-get-profiles-practitioners-specialty-counts) — Contar profesionales visibles por especialidad
+64. [GET /tenants/{tenantId}/practitioner-requests](#64-get-tenants-tenantid-practitioner-requests) — Solicitudes de médicos que piden atender en la organización
+65. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve](#65-post-tenants-tenantid-practitioner-requests-affiliationid-approve) — Aprobar la solicitud de un profesional
+66. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject](#66-post-tenants-tenantid-practitioner-requests-affiliationid-reject) — Rechazar la solicitud de un profesional
+67. [POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke](#67-post-tenants-tenantid-practitioner-requests-affiliationid-revoke) — Dar de baja un vínculo ya aprobado
 
 ---
 
@@ -1305,6 +1314,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1312,6 +1323,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1400,16 +1413,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -1542,6 +1559,8 @@ Content-Type: application/json
 | `taxHolderName` | No | `string` | longitud máxima 200 | Nombre o razón social del titular del NIT. Cadena vacía para quitarla. | `Nombre de ejemplo` |
 | `homeAddressLines` | No | `string` | longitud máxima 300 | Domicilio, tal como lo escribe la persona. Vacío para quitarlo. | `valor-ejemplo` |
 | `workAddressLines` | No | `string` | longitud máxima 300 | Dirección de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio. Vacío para quitarlo. | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del trabajo. Vacío para quitarlo. | `valor-ejemplo` |
 | `issuerAdministrativeAreaConceptId` | No | `string` | formato `uuid` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `00000000-0000-4000-8000-000000000001` |
 | `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
@@ -1581,6 +1600,8 @@ Content-Type: application/json
   "taxHolderName": "Nombre de ejemplo",
   "homeAddressLines": "valor-ejemplo",
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "homeLatitude": {},
   "homeLongitude": {},
@@ -1643,6 +1664,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1650,6 +1673,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -1738,16 +1763,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -1823,7 +1852,656 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /profiles/patients/me/dependent-candidates
+## 11. GET /profiles/patients/me/addresses
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Listar las propias direcciones (la preferida primero)
+- **Operation ID:** `PatientAddressBookController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.list](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Listar las propias direcciones (la preferida primero). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients/me/addresses` en `PatientAddressBookController_list`. El controlador delega en `PatientAddressBookService.list`. No recibe body. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients/me/addresses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients/me/addresses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses"
+}
+```
+
+---
+
+## 12. POST /profiles/patients/me/addresses
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Guardar una dirección nueva
+- **Operation ID:** `PatientAddressBookController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.create](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Guardar una dirección nueva. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /profiles/patients/me/addresses` en `PatientAddressBookController_create`. El controlador delega en `PatientAddressBookService.create`. Valida el body como `CreatePatientAddressDto` y consume `application/json`. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreatePatientAddressDto`; los campos opcionales se omiten.
+
+```http
+POST /profiles/patients/me/addresses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "label": "Casa de mi mamá",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `label` | Sí | `string` | longitud mínima 1; longitud máxima 60 | Sin descripción específica en el contrato OpenAPI. | `Casa de mi mamá` |
+| `municipalityConceptId` | Sí | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `lines` | No | `string` | longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `district` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `isPreferred` | No | `boolean` | Sin restricción adicional declarada | Marcarla como la que se ofrece primero | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /profiles/patients/me/addresses HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "label": "Casa de mi mamá",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "lines": "valor-ejemplo",
+  "district": "valor-ejemplo",
+  "latitude": 1,
+  "longitude": 1,
+  "isPreferred": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 413 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 409 | `CONFLICT` | La libreta cambió mientras la editaba. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses"
+}
+```
+
+---
+
+## 13. DELETE /profiles/patients/me/addresses/{id}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Quitar una dirección guardada o la del trabajo
+- **Operation ID:** `PatientAddressBookController_remove`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.remove](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Quitar una dirección guardada o la del trabajo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /profiles/patients/me/addresses/{id}` en `PatientAddressBookController_remove`. El controlador delega en `PatientAddressBookService.remove`. No recibe body. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 404 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 404 | `NOT_FOUND` | Dirección no encontrada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 409 | `CONFLICT` | La libreta cambió mientras la editaba. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | Su domicilio no se puede quitar: puede corregirlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses/{id}"
+}
+```
+
+---
+
+## 14. PATCH /profiles/patients/me/addresses/{id}
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Corregir una dirección (cierra la vigente y abre otra)
+- **Operation ID:** `PatientAddressBookController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.update](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Corregir una dirección (cierra la vigente y abre otra). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /profiles/patients/me/addresses/{id}` en `PatientAddressBookController_update`. El controlador delega en `PatientAddressBookService.update`. Valida el body como `UpdatePatientAddressDto` y consume `application/json`. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdatePatientAddressDto`; los campos opcionales se omiten.
+
+```http
+PATCH /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `label` | No | `string` | longitud mínima 1; longitud máxima 60 | Sólo para las guardadas: domicilio y trabajo tienen nombre fijo. | `valor-ejemplo` |
+| `municipalityConceptId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `lines` | No | `string` | longitud máxima 300 | Vacío para quitarla | `valor-ejemplo` |
+| `district` | No | `string` | longitud máxima 200 | Vacío para quitarlo | `valor-ejemplo` |
+| `latitude` | No | `number` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `longitude` | No | `number` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "label": "valor-ejemplo",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "lines": "valor-ejemplo",
+  "district": "valor-ejemplo",
+  "latitude": 1,
+  "longitude": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 404 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 413 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 404 | `NOT_FOUND` | Dirección no encontrada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 409 | `CONFLICT` | La libreta cambió mientras la editaba. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El domicilio y el trabajo tienen nombre fijo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses/{id}"
+}
+```
+
+---
+
+## 15. PUT /profiles/patients/me/addresses/{id}/preferred
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-patients`
+- **Nombre:** Marcar la dirección que se ofrece primero
+- **Operation ID:** `PatientAddressBookController_prefer`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientAddressBookController.prefer](../../src/modules/profiles/presentation/controllers/patient-address-book.controller.ts)
+
+### Descripción de negocio
+
+Marcar la dirección que se ofrece primero. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /profiles/patients/me/addresses/{id}/preferred` en `PatientAddressBookController_prefer`. El controlador delega en `PatientAddressBookService.prefer`. No recibe body. El tipo de retorno estático es `Promise<PatientAddressDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+PUT /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001/preferred HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+PUT /profiles/patients/me/addresses/00000000-0000-4000-8000-000000000001/preferred HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 404 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientAddressDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientAddressDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "kind": "HOME",
+    "label": "valor-ejemplo",
+    "lines": "valor-ejemplo",
+    "city": "valor-ejemplo",
+    "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
+    "latitude": 1,
+    "longitude": 1,
+    "isPreferred": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 404 | `NOT_FOUND` | Dirección no encontrada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 409 | `CONFLICT` | La libreta cambió mientras la editaba. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/patient-address-book.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/addresses/{id}/preferred"
+}
+```
+
+---
+
+## 16. GET /profiles/patients/me/dependent-candidates
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -1931,7 +2609,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /profiles/patients/me/dependent-requests
+## 17. POST /profiles/patients/me/dependent-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2059,7 +2737,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /profiles/patients/me/dependent-requests/{id}/accept
+## 18. POST /profiles/patients/me/dependent-requests/{id}/accept
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2187,7 +2865,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /profiles/patients/me/dependent-requests/{id}/reject
+## 19. POST /profiles/patients/me/dependent-requests/{id}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2300,7 +2978,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. GET /profiles/patients/me/dependent-requests/incoming
+## 20. GET /profiles/patients/me/dependent-requests/incoming
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2404,7 +3082,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. GET /profiles/patients/me/dependents
+## 21. GET /profiles/patients/me/dependents
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2517,7 +3195,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. POST /profiles/patients/me/dependents
+## 22. POST /profiles/patients/me/dependents
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2685,7 +3363,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. DELETE /profiles/patients/me/photo
+## 23. DELETE /profiles/patients/me/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -2781,6 +3459,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -2788,6 +3468,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -2876,16 +3558,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -2959,7 +3645,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. PUT /profiles/patients/me/photo
+## 24. PUT /profiles/patients/me/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3069,6 +3755,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -3076,6 +3764,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -3164,16 +3854,20 @@ Campos de la respuesta:
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
 | `email` | No | `string` | Sin restricción adicional declarada | Correo de contacto vigente | `usuario@example.com` |
 | `photoFileId` | No | `string` | formato `uuid` | Foto de perfil (id de archivo en `common.files`) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Domicilio, con calle y punto en el mapa si los declaró | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Dirección de trabajo | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `coverages` | Sí | `array<OwnCoverageDto>` | Sin restricción adicional declarada | Seguros declarados. Vacío si no declaró ninguno. | `[{"id":"00000000-0000-4000-8000-000000000001","carrierName":"Nombre de ejemplo","planName":"Nombre de ejemplo","isPublic":true,"policyIdentifier":"valor-ejemplo","memberIdentifier":"valor-ejemplo","verified":true,"status":"ok","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","referenceDate":"2026-07-31","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31","currencyCode":"BOB","carrierWhatsappNumber":"valor-ejemplo","carrierCallCenterPhone":"+59170000000","benefits":[{"id":"00000000-0000-4000-8000-000000000001","categoryCode":"CODIGO_EJEMPLO","categoryName":"Nombre de ejemplo","serviceConceptId":"00000000-0000-4000-8000-000000000001","serviceName":"Nombre de ejemplo","coveragePercent":"80.00","copayAmount":"20.00","deductibleAmount":"0.00","statusCode":"CODIGO_EJEMPLO","validityStatus":"CURRENT","effectiveFrom":"2026-07-31","effectiveTo":"2026-07-31"}],"planId":"00000000-0000-4000-8000-000000000001","coverageOrder":1}]` |
@@ -3249,7 +3943,368 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. GET /profiles/patients/me/summary
+## 25. DELETE /profiles/patients/me/primary-practitioner
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-primary-practitioner`
+- **Nombre:** Quitar el propio médico de cabecera
+- **Operation ID:** `PrimaryPractitionerController_removeOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrimaryPractitionerController.removeOwn](../../src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Quitar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /profiles/patients/me/primary-practitioner` en `PrimaryPractitionerController_removeOwn`. El controlador delega en `PrimaryPractitionerService.removeOwn`. No recibe body. El tipo de retorno estático es `Promise<OwnPrimaryPractitionerDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPrimaryPractitionerDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "current": {
+    "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Nombre de ejemplo",
+    "professionalTitle": "valor-ejemplo",
+    "since": "2026-07-31T12:00:00.000Z"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `current` | No | `PrimaryPractitionerDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"practitionerProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","since":"2026-07-31T12:00:00.000Z"}` |
+| `current.practitionerProfileId` | No | `string` | formato `uuid` | Con este id se abre su ficha en la guía | `00000000-0000-4000-8000-000000000001` |
+| `current.displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible del profesional | `Nombre de ejemplo` |
+| `current.professionalTitle` | No | `string` | Sin restricción adicional declarada | Título profesional declarado | `valor-ejemplo` |
+| `current.since` | No | `string` | formato `date-time` | Desde cuándo es su médico de cabecera | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 409 | `CONFLICT` | Su médico de cabecera cambió mientras lo elegía. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/primary-practitioner"
+}
+```
+
+---
+
+## 26. GET /profiles/patients/me/primary-practitioner
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-primary-practitioner`
+- **Nombre:** Consultar el propio médico de cabecera
+- **Operation ID:** `PrimaryPractitionerController_getOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrimaryPractitionerController.getOwn](../../src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Consultar el propio médico de cabecera. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/patients/me/primary-practitioner` en `PrimaryPractitionerController_getOwn`. El controlador delega en `PrimaryPractitionerService.getOwn`. No recibe body. El tipo de retorno estático es `Promise<OwnPrimaryPractitionerDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPrimaryPractitionerDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "current": {
+    "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Nombre de ejemplo",
+    "professionalTitle": "valor-ejemplo",
+    "since": "2026-07-31T12:00:00.000Z"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `current` | No | `PrimaryPractitionerDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"practitionerProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","since":"2026-07-31T12:00:00.000Z"}` |
+| `current.practitionerProfileId` | No | `string` | formato `uuid` | Con este id se abre su ficha en la guía | `00000000-0000-4000-8000-000000000001` |
+| `current.displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible del profesional | `Nombre de ejemplo` |
+| `current.professionalTitle` | No | `string` | Sin restricción adicional declarada | Título profesional declarado | `valor-ejemplo` |
+| `current.since` | No | `string` | formato `date-time` | Desde cuándo es su médico de cabecera | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/primary-practitioner"
+}
+```
+
+---
+
+## 27. PUT /profiles/patients/me/primary-practitioner
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-primary-practitioner`
+- **Nombre:** Elegir o cambiar el propio médico de cabecera
+- **Operation ID:** `PrimaryPractitionerController_setOwn`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrimaryPractitionerController.setOwn](../../src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Cierra la elección vigente (si la hay) y abre otra. Elegir al que ya es el vigente no cambia nada. No concede acceso clínico.
+
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /profiles/patients/me/primary-practitioner` en `PrimaryPractitionerController_setOwn`. El controlador delega en `PrimaryPractitionerService.setOwn`. Valida el body como `SetPrimaryPractitionerDto` y consume `application/json`. El tipo de retorno estático es `Promise<OwnPrimaryPractitionerDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SetPrimaryPractitionerDto`; los campos opcionales se omiten.
+
+```http
+PUT /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Perfil profesional que el paciente elige como médico de cabecera | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /profiles/patients/me/primary-practitioner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OwnPrimaryPractitionerDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OwnPrimaryPractitionerDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "current": {
+    "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Nombre de ejemplo",
+    "professionalTitle": "valor-ejemplo",
+    "since": "2026-07-31T12:00:00.000Z"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `current` | No | `PrimaryPractitionerDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"practitionerProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","professionalTitle":"valor-ejemplo","since":"2026-07-31T12:00:00.000Z"}` |
+| `current.practitionerProfileId` | No | `string` | formato `uuid` | Con este id se abre su ficha en la guía | `00000000-0000-4000-8000-000000000001` |
+| `current.displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible del profesional | `Nombre de ejemplo` |
+| `current.professionalTitle` | No | `string` | Sin restricción adicional declarada | Título profesional declarado | `valor-ejemplo` |
+| `current.since` | No | `string` | formato `date-time` | Desde cuándo es su médico de cabecera | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 404 | `NOT_FOUND` | Paciente no encontrado | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 409 | `CONFLICT` | Su médico de cabecera cambió mientras lo elegía. Vuelva a intentarlo. | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No puede elegirse a sí mismo como médico de cabecera. | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | Este profesional no está aceptando pacientes nuevos. | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/patients/me/primary-practitioner"
+}
+```
+
+---
+
+## 28. GET /profiles/patients/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3365,7 +4420,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /profiles/patients/merge
+## 29. POST /profiles/patients/merge
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3504,7 +4559,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /profiles/patients/merge-events
+## 30. GET /profiles/patients/merge-events
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3630,7 +4685,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. POST /profiles/patients/merge/{eventId}/reverse
+## 31. POST /profiles/patients/merge/{eventId}/reverse
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3765,7 +4820,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /profiles/patients/search
+## 32. POST /profiles/patients/search
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -3915,7 +4970,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /profiles/persons/{personId}/account-links
+## 33. POST /profiles/persons/{personId}/account-links
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -4051,7 +5106,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /profiles/persons/{personId}/decease
+## 34. POST /profiles/persons/{personId}/decease
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-patients`
@@ -4187,7 +5242,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /profiles/practitioners
+## 35. GET /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4335,7 +5390,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /profiles/practitioners
+## 36. POST /profiles/practitioners
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4508,7 +5563,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. PATCH /profiles/practitioners/{profileId}
+## 37. PATCH /profiles/practitioners/{profileId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -4581,6 +5636,8 @@ Content-Type: application/json
 | `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workAddressLines` | No | `string` | longitud máxima 300 | Dirección del lugar de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio. Vacío para quitarlo. | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del trabajo. Vacío para quitarlo. | `valor-ejemplo` |
 | `workLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
@@ -4628,6 +5685,8 @@ Content-Type: application/json
   "homeLatitude": {},
   "homeLongitude": {},
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "workLatitude": {},
   "workLongitude": {},
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
@@ -4697,6 +5756,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -4704,6 +5765,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -4824,16 +5887,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -4937,7 +6004,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /profiles/practitioners/{profileId}/affiliations
+## 38. POST /profiles/practitioners/{profileId}/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5110,7 +6177,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 39. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5257,7 +6324,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. DELETE /profiles/practitioners/{profileId}/photo
+## 40. DELETE /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5363,6 +6430,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5370,6 +6439,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5490,16 +6561,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -5599,7 +6674,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. PUT /profiles/practitioners/{profileId}/photo
+## 41. PUT /profiles/practitioners/{profileId}/photo
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -5719,6 +6794,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5726,6 +6803,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -5846,16 +6925,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -5956,7 +7039,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /profiles/practitioners/{profileId}/specialties
+## 42. POST /profiles/practitioners/{profileId}/specialties
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6102,7 +7185,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /profiles/practitioners/{profileId}/summary
+## 43. GET /profiles/practitioners/{profileId}/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6206,6 +7289,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6213,6 +7298,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6333,16 +7420,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -6440,7 +7531,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. PATCH /profiles/practitioners/me
+## 44. PATCH /profiles/practitioners/me
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -6510,6 +7601,8 @@ Content-Type: application/json
 | `homeLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `homeLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workAddressLines` | No | `string` | longitud máxima 300 | Dirección del lugar de trabajo. Vacío para quitarla. | `valor-ejemplo` |
+| `homeDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del domicilio. Vacío para quitarlo. | `valor-ejemplo` |
+| `workDistrict` | No | `string` | longitud máxima 200 | Distrito o zona del trabajo. Vacío para quitarlo. | `valor-ejemplo` |
 | `workLatitude` | No | `object` | mínimo -90; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `workLongitude` | No | `object` | mínimo -180; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `{}` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `00000000-0000-4000-8000-000000000001` |
@@ -6557,6 +7650,8 @@ Content-Type: application/json
   "homeLatitude": {},
   "homeLongitude": {},
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "workLatitude": {},
   "workLongitude": {},
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
@@ -6625,6 +7720,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6632,6 +7729,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -6752,16 +7851,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -6865,7 +7968,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /profiles/practitioners/me/affiliations
+## 45. GET /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7001,7 +8104,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /profiles/practitioners/me/affiliations
+## 46. POST /profiles/practitioners/me/affiliations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7168,7 +8271,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+## 47. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7267,7 +8370,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+## 48. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7427,7 +8530,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /profiles/practitioners/me/credentials
+## 49. POST /profiles/practitioners/me/credentials
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7588,7 +8691,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. DELETE /profiles/practitioners/me/credentials/{credentialId}
+## 50. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7688,7 +8791,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. PATCH /profiles/practitioners/me/credentials/{credentialId}
+## 51. PATCH /profiles/practitioners/me/credentials/{credentialId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7818,7 +8921,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 52. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -7920,7 +9023,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 53. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8040,7 +9143,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /profiles/practitioners/me/linkable-organizations
+## 54. GET /profiles/practitioners/me/linkable-organizations
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8166,7 +9269,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. GET /profiles/practitioners/me/onboarding
+## 55. GET /profiles/practitioners/me/onboarding
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8285,7 +9388,131 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. GET /profiles/practitioners/me/signature-assets
+## 56. GET /profiles/practitioners/me/primary-patients
+
+- **Módulo:** `profiles`
+- **Etiqueta OpenAPI:** `profiles-primary-practitioner`
+- **Nombre:** Listar los pacientes que me eligieron como médico de cabecera
+- **Operation ID:** `PrimaryPractitionerController_listOwnPatients`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PrimaryPractitionerController.listOwnPatients](../../src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts)
+
+### Descripción de negocio
+
+Nombre, código de paciente y desde cuándo: ningún dato del expediente.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /profiles/practitioners/me/primary-patients` en `PrimaryPractitionerController_listOwnPatients`. El controlador delega en `PrimaryPractitionerService.listOwnPatients`. No recibe body. El tipo de retorno estático es `Promise<PrimaryPatientsPageDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | máximo 200 | Sin descripción específica en OpenAPI. | `50` |
+| `offset` | query | No | `number` | mínimo 0 | Sin descripción específica en OpenAPI. | `0` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /profiles/practitioners/me/primary-patients HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /profiles/practitioners/me/primary-patients?limit=50&offset=0 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PrimaryPatientsPageDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PrimaryPatientsPageDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PrimaryPatientsPageDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "patientCode": "CODIGO_EJEMPLO",
+      "since": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "total": 1,
+  "limit": 1,
+  "offset": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<PrimaryPatientDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"patientProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","patientCode":"CODIGO_EJEMPLO","since":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | No | `string` | Sin restricción adicional declarada | Nombre visible del paciente | `Nombre de ejemplo` |
+| `items[].patientCode` | No | `string` | Sin restricción adicional declarada | Código de paciente | `CODIGO_EJEMPLO` |
+| `items[].since` | Sí | `string` | formato `date-time` | Desde cuándo lo tiene como médico de cabecera | `2026-07-31T12:00:00.000Z` |
+| `total` | Sí | `number` | Sin restricción adicional declarada | Pacientes de cabecera vigentes, en total | `1` |
+| `limit` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `offset` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene perfil profesional | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/primary-practitioner.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/profiles/practitioners/me/primary-patients"
+}
+```
+
+---
+
+## 57. GET /profiles/practitioners/me/signature-assets
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8390,7 +9617,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. PUT /profiles/practitioners/me/signature-assets
+## 58. PUT /profiles/practitioners/me/signature-assets
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8514,7 +9741,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. DELETE /profiles/practitioners/me/specialties/{specialtyId}
+## 59. DELETE /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8614,7 +9841,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. PATCH /profiles/practitioners/me/specialties/{specialtyId}
+## 60. PATCH /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8732,7 +9959,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+## 61. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8852,7 +10079,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. GET /profiles/practitioners/me/summary
+## 62. GET /profiles/practitioners/me/summary
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -8952,6 +10179,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -8959,6 +10188,8 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "lines": "valor-ejemplo",
     "city": "valor-ejemplo",
     "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+    "administrativeArea2ConceptId": "00000000-0000-4000-8000-000000000001",
+    "district": "valor-ejemplo",
     "latitude": 1,
     "longitude": 1
   },
@@ -9079,16 +10310,20 @@ Campos de la respuesta:
 | `taxId` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `00000000-0000-4000-8000-000000000001` |
 | `taxHolderName` | No | `string` | Sin restricción adicional declarada | Sólo en la lectura propia | `Nombre de ejemplo` |
 | `residenceMunicipalityConceptId` | No | `string` | formato `uuid` | Municipio de residencia (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
-| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `homeAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `homeAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `homeAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `homeAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `homeAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `homeAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `homeAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
-| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","latitude":1,"longitude":1}` |
+| `workAddress` | No | `OwnAddressDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"lines":"valor-ejemplo","city":"valor-ejemplo","municipalityConceptId":"00000000-0000-4000-8000-000000000001","administrativeArea2ConceptId":"00000000-0000-4000-8000-000000000001","district":"valor-ejemplo","latitude":1,"longitude":1}` |
 | `workAddress.lines` | No | `string` | Sin restricción adicional declarada | Calle y número, tal como la escribió | `valor-ejemplo` |
 | `workAddress.city` | No | `string` | Sin restricción adicional declarada | Ciudad, derivada del municipio | `valor-ejemplo` |
 | `workAddress.municipalityConceptId` | No | `string` | formato `uuid` | Municipio (VS_BO_MUNICIPALITY) | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.administrativeArea2ConceptId` | No | `string` | formato `uuid` | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `00000000-0000-4000-8000-000000000001` |
+| `workAddress.district` | No | `string` | Sin restricción adicional declarada | Distrito o zona, tal como lo dio el mapa | `valor-ejemplo` |
 | `workAddress.latitude` | No | `number` | Sin restricción adicional declarada | Latitud, si marcó el punto en el mapa | `1` |
 | `workAddress.longitude` | No | `number` | Sin restricción adicional declarada | Longitud; viaja siempre junto a la latitud | `1` |
 | `occupationConceptId` | No | `string` | formato `uuid` | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `00000000-0000-4000-8000-000000000001` |
@@ -9186,7 +10421,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. GET /profiles/practitioners/specialty-counts
+## 63. GET /profiles/practitioners/specialty-counts
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-practitioners`
@@ -9299,7 +10534,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. GET /tenants/{tenantId}/practitioner-requests
+## 64. GET /tenants/{tenantId}/practitioner-requests
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -9429,7 +10664,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 65. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -9529,7 +10764,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 66. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`
@@ -9642,7 +10877,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 67. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Módulo:** `profiles`
 - **Etiqueta OpenAPI:** `profiles-affiliations`

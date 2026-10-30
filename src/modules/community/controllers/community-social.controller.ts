@@ -57,6 +57,7 @@ import {
   UnbookmarkQueryDto,
   UnblockQueryDto,
   SocialRemovalResponseDto,
+  OrganizationShowcasesDto,
 } from '../dto';
 
 /** Tope por defecto de filas por página, igual que en el resto de la API. */
@@ -160,6 +161,29 @@ export class CommunitySocialController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<ProfileStatsDto> {
     return this.service.getOwnProfileStats(actor);
+  }
+
+  /**
+   * Las vitrinas de organización (farmacia, clínica) con las que la sesión
+   * puede atender la mensajería: lo que ofrece el selector «Escribiendo como».
+   *
+   * Va declarado **antes** que toda ruta `profiles/:profileId…` y que
+   * `profiles/by-slug/:slug`, como `profiles/me`: Nest resuelve por orden de
+   * declaración.
+   *
+   * Sin `@Roles`: el sujeto lo resuelve el servidor desde la sesión, con la
+   * misma regla que autoriza actuar como la vitrina (`canAttend`). Sin
+   * `@AccessLogged`: no lee datos de salud de nadie, sólo vitrinas públicas
+   * de organizaciones. Sin `@Audited`: es un `GET`.
+   */
+  @Get('profiles/organization-showcases/me')
+  @ApiOperation({
+    summary: 'Vitrinas de organización que la sesión puede atender en el chat',
+  })
+  listOwnOrganizationShowcases(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<OrganizationShowcasesDto> {
+    return this.readService.listAttendableOrganizationShowcases(actor);
   }
 
   /** UC-19-01. */

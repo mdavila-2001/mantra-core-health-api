@@ -26,9 +26,34 @@ export class SurveyTemplates {
   /**
    * Profesional dueño del instrumento. Es quien puede editarlo y quien puede
    * leer las respuestas: la autorización de lectura sale de acá, no de un rol.
+   * Nulo cuando el dueño es el par tipado (`ownerTypeConceptId` + `ownerId`),
+   * como en la encuesta base del sistema.
    */
-  @Property({ fieldName: 'owner_practitioner_id', type: 'uuid' }) // FK → profiles.practitioner_profiles
-  ownerPractitionerId!: string;
+  @Property({
+    fieldName: 'owner_practitioner_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → profiles.practitioner_profiles
+  ownerPractitionerId?: string;
+
+  /**
+   * Tipo del dueño alterno (CAN-SURVEY-001). Va junto con `ownerId` y sólo
+   * cuando `ownerPractitionerId` es nulo. Para la encuesta base del sistema es
+   * `SURVEYS.SYSTEM_BASE_CONSULTATION` o `SURVEYS.SYSTEM_BASE_SERVICE`.
+   */
+  @Property({
+    fieldName: 'owner_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  ownerTypeConceptId?: string;
+
+  /**
+   * Identificador del dueño alterno, interpretado según `ownerTypeConceptId`.
+   * Para la encuesta base del sistema es el tenant al que pertenece.
+   */
+  @Property({ fieldName: 'owner_id', type: 'uuid', nullable: true })
+  ownerId?: string;
 
   /**
    * Título visible del instrumento.

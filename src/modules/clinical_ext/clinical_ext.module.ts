@@ -30,6 +30,7 @@ import {
   DrugInteractionsRepository,
   OrderSetsRepository,
   ReferralsRepository,
+  ReferralTargetsRepository,
   CareGapsRepository,
   ImmunizationSchedulesRepository,
   VirtualEncountersRepository,
@@ -58,6 +59,17 @@ import {
   PatientProfilesRepository,
   PersonsRepository,
 } from '../profiles/infrastructure/repositories';
+// Derivación a un servicio puntual (destino profesional u organización): se
+// leen el catálogo de servicios, las ofertas del profesional, las prácticas y
+// los tenants con los repositorios de sus módulos —todos sin estado, reciben
+// el EntityManager por parámetro—, sin importar esos módulos enteros (mismo
+// criterio que `ProfileOwnershipService`). `PracticeModule` no importa nada,
+// así que se importa para tomar el `PracticesRepository` que ya exporta.
+import { PracticeModule } from '../practice/practice.module';
+import { ServiceCatalogRepository } from '../billing/repositories/service-catalog.repository';
+import { SchedulingOfferingsRepository } from '../scheduling/infrastructure/repositories/scheduling-offerings.repository';
+import { TenantsRepository } from '../directory/repositories/tenants.repository';
+import { CatalogConceptsRepository } from '../terminology/repositories/catalog-concepts.repository';
 
 /**
  * Módulo Clinical-Ext (18): coordinación de cuidado (equipos), decisión clínica
@@ -74,6 +86,7 @@ import {
     ClinicalModule,
     // El aviso a la paciente cuando su médico la deriva sale por la campana.
     MessagingModule,
+    PracticeModule,
   ],
   controllers: [
     CareTeamsController,
@@ -99,6 +112,12 @@ import {
     VirtualEncountersRepository,
     ReferenceRangesRepository,
     PrescriptionFavoritesRepository,
+    ReferralTargetsRepository,
+    // Destino de derivación: catálogo, ofertas, tenants y conceptos
+    ServiceCatalogRepository,
+    SchedulingOfferingsRepository,
+    TenantsRepository,
+    CatalogConceptsRepository,
     // Repositorio de otro módulo (clinical) reutilizado por el fan-out de order sets
     ServiceRequestsRepository,
     EncountersRepository,

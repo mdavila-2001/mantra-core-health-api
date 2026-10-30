@@ -16,8 +16,10 @@ import {
   ResourceNotFoundException,
 } from '../../../common';
 import { CEXT } from '../clinical_ext.concepts';
+import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import { ClinicalExtErrorReason } from '../clinical_ext.error-reasons';
 import { ACTIVE_TENANT, inTenant, thrown } from './clinical-ext-tenant.testing';
+import { Branches } from '../../directory/entities';
 
 const actor = { id: 'md-1', roles: ['USER'] } as any;
 /** Destinatario de la referencia: profesional con su perfil en el token. */
@@ -34,16 +36,51 @@ const doctor = {
   tenantIds: ['t-1'],
 } as any;
 
+/** Derivación tipada mínima válida (v4266). */
+const typed = {
+  patientProfileId: 'p1',
+  referralType: 'THERAPY',
+  targetExternalName: 'Centro de Fisioterapia San Martín',
+  requestedServiceText: 'Fisioterapia de rodilla, 10 sesiones',
+  clinicalSummary: 'Gonartrosis grado II, dolor mecánico',
+};
+
+/**
+ * Espera un error con el `reason` estable y el status dados.
+ *
+ * @param p - Promesa que debe fallar.
+ * @param status - Código HTTP.
+ * @param reason - Sub-código estable.
+ */
+async function expectReason(
+  p: Promise<unknown>,
+  status: number,
+  reason: ClinicalExtErrorReason,
+) {
+  await expect(p).rejects.toMatchObject({ status, reason });
+}
+
 /**
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
 function build() {
-  const tx = {
+  const tx: any = {
     flush: mockFn().mockResolvedValue(undefined),
     execute: mockFn().mockResolvedValue(undefined),
+    findOne: mockFn().mockResolvedValue(null),
+    find: mockFn().mockResolvedValue([]),
   };
-  const em: any = { transactional: mockFn((cb: any) => cb(tx)) };
+  // `em` y `tx` comparten por defecto los mismos mocks de lectura: según el
+  // método, el servicio lee con `em.fork()` o dentro de la transacción, y cada
+  // test puede ajustar `d.tx.find` o sobrescribir `d.em.find`.
+  const em: any = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    flush: tx.flush,
+    execute: tx.execute,
+    findOne: tx.findOne,
+    find: tx.find,
+  };
   em.fork = mockFn(() => em);
   const referralsRepo = {
     findById: mockFn(),
@@ -65,6 +102,30 @@ function build() {
     findById: mockFn(() => Promise.resolve({ profileId: 'hp-2' })),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const targetsRepo = {
+    searchPractitioners: mockFn(() => Promise.resolve([])),
+    searchOrganizations: mockFn(() => Promise.resolve([])),
+  };
+  const offeringsRepo = {
+    findOfferingOf: mockFn(() =>
+      Promise.resolve({ statusConceptId: SCHED.OFFERING_ACTIVE }),
+    ),
+    listOfferings: mockFn(() => Promise.resolve([])),
+    findCatalogItems: mockFn(() => Promise.resolve([])),
+  };
+  const serviceCatalogRepo = {
+    findById: mockFn(() => Promise.resolve(null)),
+    searchPage: mockFn(() => Promise.resolve([])),
+  };
+  const practicesRepo = {
+    findById: mockFn(() => Promise.resolve(null)),
+    findByTenant: mockFn(() => Promise.resolve([])),
+  };
+  const tenantsRepo = {
+    findById: mockFn(() => Promise.resolve(null)),
+    searchPage: mockFn(() => Promise.resolve([])),
+  };
+  const conceptsRepo = { findByIds: mockFn(() => Promise.resolve(new Map())) };
   const raw = new ReferralsService(
     em as any,
     referralsRepo,
@@ -75,6 +136,12 @@ function build() {
     notifier as any,
     practitionersRepo as any,
     logger as any,
+    targetsRepo as any,
+    offeringsRepo as any,
+    serviceCatalogRepo as any,
+    practicesRepo as any,
+    tenantsRepo as any,
+    conceptsRepo as any,
   );
   return {
     service: inTenant(raw),
@@ -86,6 +153,13 @@ function build() {
     encountersRepo,
     notifier,
     practitionersRepo,
+    targetsRepo,
+    offeringsRepo,
+    serviceCatalogRepo,
+    practicesRepo,
+    tenantsRepo,
+    conceptsRepo,
+    em,
   };
 }
 
@@ -100,7 +174,11 @@ describe('ReferralsService', () => {
         statusConceptId: CEXT.REFERRAL_REQUESTED,
         createdAt: new Date(),
       });
-      const res = await d.service.create({ patientProfileId: 'p1' }, actor);
+      // Derivar exige un destino (profesional, organización o servicio).
+      const res = await d.service.create(
+        { patientProfileId: 'p1', targetTenantId: 'ten-dest' },
+        actor,
+      );
       expect(res.statusConceptId).toBe(CEXT.REFERRAL_REQUESTED);
     });
 
@@ -178,7 +256,11 @@ describe('ReferralsService', () => {
         d.referralsRepo.create.mockReturnValue(created);
 
         await d.service.create(
-          { patientProfileId: 'p1', sourceEncounterId: 'e1' } as any,
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetTenantId: 'ten-dest',
+          } as any,
           doctor,
         );
 
@@ -251,7 +333,11 @@ describe('ReferralsService', () => {
         });
 
         await d.service.create(
-          { patientProfileId: 'p1', referringProfileId: 'falsificado' } as any,
+          {
+            patientProfileId: 'p1',
+            referringProfileId: 'falsificado',
+            targetTenantId: 'ten-dest',
+          } as any,
           doctor,
         );
 
@@ -270,7 +356,11 @@ describe('ReferralsService', () => {
         });
 
         await d.service.create(
-          { patientProfileId: 'p1', referringProfileId: 'falsificado' } as any,
+          {
+            patientProfileId: 'p1',
+            referringProfileId: 'falsificado',
+            targetTenantId: 'ten-dest',
+          } as any,
           actor,
         );
 
@@ -311,7 +401,8 @@ describe('ReferralsService', () => {
         { decision: 'ACCEPT' } as any,
         destActor,
       );
-      expect(res).toEqual({ ok: true });
+      // v4266: además del `ok`, la derivación actualizada.
+      expect(res).toMatchObject({ ok: true, id: 'ref1', status: 'ACCEPTED' });
       expect(referral.statusConceptId).toBe(CEXT.REFERRAL_ACCEPTED);
     });
 
@@ -319,7 +410,12 @@ describe('ReferralsService', () => {
       const d = build();
       d.referralsRepo.findById.mockResolvedValue(null);
       await expect(
-        d.service.respond('ref1', { decision: 'REJECT' } as any, destActor),
+        d.service.respond(
+          'ref1',
+          // v4266: REJECT exige motivo (sin él, 400 antes de buscar).
+          { decision: 'REJECT', rejectReason: 'Sin cupo' } as any,
+          destActor,
+        ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
     });
 
@@ -368,7 +464,16 @@ describe('ReferralsService', () => {
         'pp-own',
         50,
       );
-      expect(res).toEqual([{ id: 'r1' }]);
+      expect(res).toEqual([
+        {
+          id: 'r1',
+          status: 'PENDING',
+          referralType: null,
+          targetServiceCatalogId: null,
+          targetDisplayName: null,
+          targetServiceName: null,
+        },
+      ]);
     });
   });
 
@@ -451,7 +556,11 @@ describe('ReferralsService', () => {
       const d = build();
       const referral = requested({ targetProfileId: 'pr-dest' });
       d.referralsRepo.findById.mockResolvedValue(referral);
-      await d.service.respond('ref1', { decision: 'REJECT' } as any, destActor);
+      await d.service.respond(
+        'ref1',
+        { decision: 'REJECT', rejectReason: 'Sin cupo' } as any,
+        destActor,
+      );
       expect(referral.statusConceptId).toBe(CEXT.REFERRAL_REJECTED);
     });
 
@@ -514,7 +623,749 @@ describe('ReferralsService', () => {
         'p1',
         actor,
       );
-      expect(res).toEqual([{ id: 'r1' }]);
+      expect(res).toEqual([
+        {
+          id: 'r1',
+          status: 'PENDING',
+          referralType: null,
+          targetServiceCatalogId: null,
+          targetDisplayName: null,
+          targetServiceName: null,
+        },
+      ]);
+    });
+  });
+
+  describe('derivación tipada (v4266)', () => {
+    it('creates a typed referral to an external destination with all fields', async () => {
+      const d = build();
+      d.referralsRepo.create.mockImplementation((_tx: any, data: any) => ({
+        id: 'ref1',
+        createdAt: new Date(),
+        ...data,
+      }));
+      const res = await d.service.create(
+        { ...typed, diagnosisText: 'M17.1', treatmentGivenText: 'AINE' } as any,
+        actor,
+      );
+      expect(d.referralsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          referralTypeConceptId: CEXT.REFERRAL_TYPE_THERAPY,
+          targetExternalName: 'Centro de Fisioterapia San Martín',
+          requestedServiceText: 'Fisioterapia de rodilla, 10 sesiones',
+          clinicalSummary: 'Gonartrosis grado II, dolor mecánico',
+          statusConceptId: CEXT.REFERRAL_REQUESTED,
+        }),
+      );
+      expect(res).toMatchObject({
+        status: 'PENDING',
+        referralType: 'THERAPY',
+        diagnosisText: 'M17.1',
+      });
+    });
+
+    it('requires at least one destination', async () => {
+      const d = build();
+      await expectReason(
+        d.service.create(
+          { ...typed, targetExternalName: undefined } as any,
+          actor,
+        ),
+        400,
+        ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED,
+      );
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('requires clinical summary and requested service', async () => {
+      const d = build();
+      await expect(
+        d.service.create(
+          {
+            ...typed,
+            clinicalSummary: ' ',
+            requestedServiceText: undefined,
+          } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 400,
+        reason: ClinicalExtErrorReason.REFERRAL_SERVICE_INFORMATION_INCOMPLETE,
+        details: { fields: ['clinicalSummary', 'requestedServiceText'] },
+      });
+    });
+
+    it('keeps legacy referrals (no referralType) working without the new rules', async () => {
+      const d = build();
+      d.referralsRepo.create.mockReturnValue({
+        id: 'ref1',
+        patientProfileId: 'p1',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+        createdAt: new Date(),
+      });
+      const res = await d.service.create(
+        { patientProfileId: 'p1', targetTenantId: 'ten-1' },
+        actor,
+      );
+      expect(res.status).toBe('PENDING');
+    });
+
+    it('404 when the target branch does not exist', async () => {
+      const d = build();
+      d.tx.findOne.mockResolvedValue(null);
+      await expectReason(
+        d.service.create({ ...typed, targetBranchId: 'br-x' } as any, actor),
+        404,
+        ClinicalExtErrorReason.REFERRAL_TARGET_BRANCH_NOT_FOUND,
+      );
+      expect(d.tx.findOne).toHaveBeenCalledWith(Branches, { id: 'br-x' });
+    });
+
+    it('rejects informedConsentId: the link is written by the consent', async () => {
+      const d = build();
+      await expectReason(
+        d.service.create({ ...typed, informedConsentId: 'c1' } as any, actor),
+        400,
+        ClinicalExtErrorReason.REFERRAL_CONSENT_LINK_NOT_ALLOWED,
+      );
+      expect(d.clinicalRead.assertCanWriteHistory).not.toHaveBeenCalled();
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('requires write access to the patient history', async () => {
+      const d = build();
+      d.clinicalRead.assertCanWriteHistory.mockRejectedValue(
+        new ForbiddenException(),
+      );
+      await expect(
+        d.service.create(typed as any, actor),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('respond con motivo de rechazo (v4266)', () => {
+    it('400 when rejecting without a reason', async () => {
+      const d = build();
+      await expectReason(
+        d.service.respond('ref1', { decision: 'REJECT' } as any, actor),
+        400,
+        ClinicalExtErrorReason.REFERRAL_REJECT_REASON_REQUIRED,
+      );
+      expect(d.referralsRepo.findById).not.toHaveBeenCalled();
+    });
+
+    it('stores the reject reason', async () => {
+      const d = build();
+      const referral: any = {
+        id: 'ref1',
+        targetProfileId: 'pr-dest',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      };
+      d.referralsRepo.findById.mockResolvedValue(referral);
+      const res = await d.service.respond(
+        'ref1',
+        { decision: 'REJECT', rejectReason: 'Sin cupo este mes' },
+        destActor,
+      );
+      expect(referral.rejectReason).toBe('Sin cupo este mes');
+      expect(res).toMatchObject({
+        status: 'REJECTED',
+        rejectReason: 'Sin cupo este mes',
+      });
+    });
+  });
+
+  describe('get', () => {
+    it('lets the destination practitioner read without history access', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetProfileId: 'hp-9',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      });
+      const res = await d.service.get('ref1', {
+        id: 'u9',
+        roles: ['CLINICIAN'],
+        practitionerProfileId: 'hp-9',
+      } as any);
+      expect(d.clinicalRead.assertCanReadHistory).not.toHaveBeenCalled();
+      expect(res.id).toBe('ref1');
+    });
+
+    it('otherwise requires read access to the history', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetTenantId: 'ten-dest',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      });
+      d.clinicalRead.assertCanReadHistory.mockRejectedValue(
+        new ForbiddenException(),
+      );
+      await expect(
+        d.service.get('ref1', {
+          id: 'u1',
+          roles: ['CLINICIAN'],
+          tenantIds: ['other'],
+        } as any),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('resolves the target branch and tenant names', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetBranchId: 'br1',
+        targetTenantId: 'ten1',
+        statusConceptId: CEXT.REFERRAL_ACCEPTED,
+      });
+      d.tx.find.mockImplementation((entity: any) =>
+        Promise.resolve(
+          entity === Branches
+            ? [{ id: 'br1', name: 'Sede Equipetrol' }]
+            : [
+                {
+                  id: 'ten1',
+                  legalName: 'Clínica SRL',
+                  tradeName: 'Clínica Norte',
+                },
+              ],
+        ),
+      );
+      const res = await d.service.get('ref1', actor);
+      expect(res).toMatchObject({
+        status: 'ACCEPTED',
+        targetBranchName: 'Sede Equipetrol',
+        targetTenantName: 'Clínica Norte',
+      });
+    });
+
+    it('404 with a stable reason', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue(null);
+      await expectReason(
+        d.service.get('ref1', actor),
+        404,
+        ClinicalExtErrorReason.REFERRAL_NOT_FOUND,
+      );
+    });
+  });
+
+  describe('counter-referral', () => {
+    it('the destination tenant closes an accepted referral', async () => {
+      const d = build();
+      const referral: any = {
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetTenantId: ACTIVE_TENANT,
+        statusConceptId: CEXT.REFERRAL_ACCEPTED,
+      };
+      d.referralsRepo.findById.mockResolvedValue(referral);
+      const res = await d.service.counterReferral(
+        'ref1',
+        { counterReferralText: 'Completó 10 sesiones, alta' },
+        { id: 'u2', roles: ['CLINICIAN'], tenantIds: [ACTIVE_TENANT] } as any,
+      );
+      expect(referral.statusConceptId).toBe(CEXT.REFERRAL_COMPLETED);
+      expect(referral.counterReferralAt).toBeInstanceOf(Date);
+      expect(res).toMatchObject({
+        status: 'COMPLETED',
+        counterReferralText: 'Completó 10 sesiones, alta',
+      });
+    });
+
+    it('the destination branch tenant may record it', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetBranchId: 'br1',
+        statusConceptId: CEXT.REFERRAL_ACCEPTED,
+      });
+      d.tx.findOne.mockResolvedValue({ id: 'br1', tenantId: ACTIVE_TENANT });
+      const res = await d.service.counterReferral(
+        'ref1',
+        { counterReferralText: 'ok' },
+        { id: 'u2', roles: ['CLINICIAN'], tenantIds: [ACTIVE_TENANT] } as any,
+      );
+      expect(res.status).toBe('COMPLETED');
+    });
+
+    it('404 (como inexistente) for someone who is not the destination', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetProfileId: 'hp-9',
+        statusConceptId: CEXT.REFERRAL_ACCEPTED,
+      });
+      await expectReason(
+        d.service.counterReferral('ref1', { counterReferralText: 'x' }, {
+          id: 'u1',
+          roles: ['CLINICIAN'],
+          practitionerProfileId: 'hp-1',
+        } as any),
+        404,
+        ClinicalExtErrorReason.REFERRAL_NOT_FOUND,
+      );
+    });
+
+    it('external-only destination: transcribed by who can write the history, even while pending', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetExternalName: 'Dr. Externo',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      });
+      const res = await d.service.counterReferral(
+        'ref1',
+        { counterReferralText: 'Informe en papel' },
+        actor,
+      );
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(res.status).toBe('COMPLETED');
+    });
+
+    it('422 when the referral is not accepted', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        patientProfileId: 'p1',
+        targetTenantId: ACTIVE_TENANT,
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      });
+      await expectReason(
+        d.service.counterReferral('ref1', { counterReferralText: 'x' }, {
+          id: 'u2',
+          roles: ['CLINICIAN'],
+          tenantIds: [ACTIVE_TENANT],
+        } as any),
+        422,
+        ClinicalExtErrorReason.REFERRAL_COUNTER_REFERRAL_NOT_ALLOWED,
+      );
+    });
+  });
+
+  describe('cancel', () => {
+    it('cancels a pending referral after checking write access', async () => {
+      const d = build();
+      const referral: any = {
+        id: 'ref1',
+        patientProfileId: 'p1',
+        statusConceptId: CEXT.REFERRAL_REQUESTED,
+      };
+      d.referralsRepo.findById.mockResolvedValue(referral);
+      const res = await d.service.cancel('ref1', actor);
+      expect(d.clinicalRead.assertCanWriteHistory).toHaveBeenCalledWith(
+        'p1',
+        actor,
+      );
+      expect(res.status).toBe('CANCELLED');
+    });
+
+    it('422 when already closed', async () => {
+      const d = build();
+      d.referralsRepo.findById.mockResolvedValue({
+        id: 'ref1',
+        patientProfileId: 'p1',
+        statusConceptId: CEXT.REFERRAL_COMPLETED,
+      });
+      await expectReason(
+        d.service.cancel('ref1', actor),
+        422,
+        ClinicalExtErrorReason.REFERRAL_ALREADY_CLOSED,
+      );
+    });
+  });
+
+  describe('derivación a servicio específico con tipo', () => {
+    const created = {
+      id: 'ref1',
+      patientProfileId: 'p1',
+      statusConceptId: CEXT.REFERRAL_REQUESTED,
+      createdAt: new Date(),
+    };
+    const activeService = {
+      id: 'svc-1',
+      practiceId: 'pr-1',
+      code: 'FISIO',
+      name: 'Fisioterapia',
+      isActive: true,
+      defaultPrice: '150.00',
+      currencyConceptId: 'cur-bob',
+    };
+
+    it('persiste el tipo pedido como concepto y el servicio destino', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      d.referralsRepo.create.mockReturnValue(created);
+
+      await d.service.create(
+        {
+          patientProfileId: 'p1',
+          targetProfileId: 'hp-2',
+          targetServiceCatalogId: 'svc-1',
+          referralType: 'TREATMENT',
+        } as any,
+        doctor,
+      );
+
+      const data = d.referralsRepo.create.mock.calls[0][1];
+      expect(data.referralTypeConceptId).toBe(CEXT.REFERRAL_TYPE_TREATMENT);
+      expect(data.targetServiceCatalogId).toBe('svc-1');
+      // Sin targetTenantId, el tenant destino sale del servicio.
+      expect(data.targetTenantId).toBe('ten-dest');
+      expect(d.offeringsRepo.findOfferingOf).toHaveBeenCalledWith(
+        expect.anything(),
+        'hp-2',
+        'svc-1',
+      );
+    });
+
+    it('sin tipo, persiste CONSULTATION', async () => {
+      const d = build();
+      d.referralsRepo.create.mockReturnValue(created);
+      await d.service.create(
+        { patientProfileId: 'p1', targetTenantId: 'ten-dest' } as any,
+        actor,
+      );
+      expect(
+        d.referralsRepo.create.mock.calls[0][1].referralTypeConceptId,
+      ).toBe(CEXT.REFERRAL_TYPE_CONSULTATION);
+    });
+
+    it('sin ningún destino responde 422 y no crea nada', async () => {
+      const d = build();
+      const err = await thrown(
+        d.service.create(
+          { patientProfileId: 'p1', specialtyConceptId: 's1' } as any,
+          doctor,
+        ),
+      );
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect(err.getStatus()).toBe(422);
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un servicio de OTRA organización que la destino responde 422', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-otra',
+      });
+      const err = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            targetTenantId: 'ten-dest',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un servicio que el profesional destino no ofrece responde 422', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      d.offeringsRepo.findOfferingOf.mockResolvedValue(null);
+      const err = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            targetProfileId: 'hp-2',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(err).toBeInstanceOf(PreconditionFailedException);
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('una oferta inactiva del profesional también responde 422', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      d.offeringsRepo.findOfferingOf.mockResolvedValue({
+        statusConceptId: SCHED.OFFERING_INACTIVE,
+      });
+      await expect(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            targetProfileId: 'hp-2',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('un servicio inexistente responde 404 y uno inactivo 422', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(null);
+      await expect(
+        d.service.create(
+          { patientProfileId: 'p1', targetServiceCatalogId: 'svc-x' } as any,
+          doctor,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+
+      d.serviceCatalogRepo.findById.mockResolvedValue({
+        ...activeService,
+        isActive: false,
+      });
+      await expect(
+        d.service.create(
+          { patientProfileId: 'p1', targetServiceCatalogId: 'svc-1' } as any,
+          doctor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el duplicado con servicio compara encuentro, servicio y tipo', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue({
+        id: 'e1',
+        patientProfileId: 'p1',
+        tenantId: 't-1',
+      });
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      d.referralsRepo.findDuplicate.mockResolvedValue({ id: 'ref0' });
+      const err = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetServiceCatalogId: 'svc-1',
+            referralType: 'PROCEDURE',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(err).toBeInstanceOf(ConflictException);
+      expect(d.referralsRepo.findDuplicate).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          sourceEncounterId: 'e1',
+          targetServiceCatalogId: 'svc-1',
+          referralTypeConceptId: CEXT.REFERRAL_TYPE_PROCEDURE,
+          treatNullTypeAsSame: false,
+        }),
+      );
+    });
+
+    describe('searchTargets', () => {
+      it('menos de dos caracteres útiles responde 422 sin consultar', async () => {
+        const d = build();
+        await expect(
+          d.service.searchTargets({ q: ' a ' } as any),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+        expect(d.targetsRepo.searchPractitioners).not.toHaveBeenCalled();
+        expect(d.targetsRepo.searchOrganizations).not.toHaveBeenCalled();
+      });
+
+      it('ORGANIZATION busca tenants activos y devuelve la forma del contrato', async () => {
+        const d = build();
+        d.targetsRepo.searchOrganizations.mockResolvedValue([
+          {
+            tenantId: 'ten-1',
+            legalName: 'Clínica Norte S.R.L.',
+            tradeName: 'Clínica Norte',
+          },
+        ]);
+        const res = await d.service.searchTargets({
+          q: 'norte',
+          kind: 'ORGANIZATION',
+        });
+        expect(d.targetsRepo.searchOrganizations).toHaveBeenCalledWith(
+          expect.anything(),
+          'norte',
+          20,
+        );
+        expect(d.targetsRepo.searchPractitioners).not.toHaveBeenCalled();
+        expect(res).toEqual({
+          items: [
+            {
+              kind: 'ORGANIZATION',
+              id: 'ten-1',
+              displayName: 'Clínica Norte',
+              tenantId: 'ten-1',
+              subtitle: 'Clínica Norte S.R.L.',
+            },
+          ],
+        });
+      });
+
+      it('PRACTITIONER devuelve el perfil con su nombre, tenant y subtítulo', async () => {
+        const d = build();
+        d.targetsRepo.searchPractitioners.mockResolvedValue([
+          {
+            profileId: 'hp-2',
+            professionalTitle: 'Cardióloga',
+            tenantId: 'ten-1',
+            practiceName: 'Consultorio Sur',
+          },
+        ]);
+        d.em.find = mockFn((entity: any) =>
+          Promise.resolve(
+            entity.name === 'HealthPractitionerProfiles'
+              ? [{ profileId: 'hp-2' }]
+              : [{ id: 'hp-2', displayName: 'Ana Pérez' }],
+          ),
+        );
+        const res = await d.service.searchTargets({
+          q: 'ana',
+          kind: 'PRACTITIONER',
+        });
+        expect(d.targetsRepo.searchOrganizations).not.toHaveBeenCalled();
+        expect(res.items).toEqual([
+          {
+            kind: 'PRACTITIONER',
+            id: 'hp-2',
+            displayName: 'Ana Pérez',
+            tenantId: 'ten-1',
+            subtitle: 'Cardióloga · Consultorio Sur',
+          },
+        ]);
+      });
+    });
+
+    describe('listTargetServices', () => {
+      it('sin destino responde 422', async () => {
+        const d = build();
+        await expect(d.service.listTargetServices({})).rejects.toBeInstanceOf(
+          PreconditionFailedException,
+        );
+      });
+
+      it('de un profesional: sólo ofertas activas y servicios activos', async () => {
+        const d = build();
+        d.offeringsRepo.listOfferings.mockResolvedValue([
+          { serviceCatalogId: 'svc-1' },
+          { serviceCatalogId: 'svc-2' },
+        ]);
+        d.offeringsRepo.findCatalogItems.mockResolvedValue([
+          activeService,
+          { ...activeService, id: 'svc-2', name: 'Otro', isActive: false },
+        ]);
+        d.practicesRepo.findById.mockResolvedValue({
+          id: 'pr-1',
+          tenantId: 'ten-dest',
+          name: 'Consultorio Sur',
+        });
+        d.conceptsRepo.findByIds.mockResolvedValue(
+          new Map([['cur-bob', { code: 'BOB' }]]),
+        );
+        const res = await d.service.listTargetServices({
+          targetProfileId: 'hp-2',
+        });
+        expect(d.offeringsRepo.listOfferings).toHaveBeenCalledWith(
+          expect.anything(),
+          'hp-2',
+          { statusConceptId: SCHED.OFFERING_ACTIVE },
+        );
+        expect(res).toEqual({
+          items: [
+            {
+              id: 'svc-1',
+              code: 'FISIO',
+              name: 'Fisioterapia',
+              description: null,
+              price: 150,
+              currency: 'BOB',
+              tenantId: 'ten-dest',
+              practiceName: 'Consultorio Sur',
+            },
+          ],
+        });
+      });
+
+      it('de una organización: servicios activos de sus prácticas activas', async () => {
+        const d = build();
+        d.practicesRepo.findByTenant.mockResolvedValue([{ id: 'pr-1' }]);
+        d.serviceCatalogRepo.searchPage.mockResolvedValue([activeService]);
+        d.practicesRepo.findById.mockResolvedValue({
+          id: 'pr-1',
+          tenantId: 'ten-dest',
+          name: 'Clínica Norte',
+        });
+        const res = await d.service.listTargetServices({
+          targetTenantId: 'ten-dest',
+        });
+        expect(d.serviceCatalogRepo.searchPage).toHaveBeenCalledWith(
+          expect.anything(),
+          { practiceId: 'pr-1', isActive: true },
+          200,
+        );
+        expect(res.items.map((item) => item.id)).toEqual(['svc-1']);
+        expect(res.items[0].practiceName).toBe('Clínica Norte');
+        expect(res.items[0].currency).toBeNull();
+      });
+    });
+
+    it('los listados exponen tipo, servicio y nombres legibles', async () => {
+      const d = build();
+      d.referralsRepo.findByPatient.mockResolvedValue([
+        {
+          id: 'r1',
+          targetTenantId: 'ten-dest',
+          targetServiceCatalogId: 'svc-1',
+          referralTypeConceptId: CEXT.REFERRAL_TYPE_TREATMENT,
+        },
+      ]);
+      d.tenantsRepo.findById.mockResolvedValue({
+        id: 'ten-dest',
+        legalName: 'Clínica Norte S.R.L.',
+        tradeName: 'Clínica Norte',
+      });
+      d.offeringsRepo.findCatalogItems.mockResolvedValue([activeService]);
+      const res = await d.service.listByPatient('p1', actor);
+      expect(res).toEqual([
+        {
+          id: 'r1',
+          targetTenantId: 'ten-dest',
+          referralTypeConceptId: CEXT.REFERRAL_TYPE_TREATMENT,
+          status: 'PENDING',
+          referralType: 'TREATMENT',
+          targetServiceCatalogId: 'svc-1',
+          targetDisplayName: 'Clínica Norte',
+          targetServiceName: 'Fisioterapia',
+        },
+      ]);
     });
   });
 });

@@ -1,0 +1,14 @@
+✔ lo curado que la descarta manda sobre lo colaborativo que la menciona (0.218292ms)
+✔ si otra evidencia curada la afirma, no queda descartada (0.145042ms)
+✔ sin evidencias: fuerza 0 y sin nivel (0.784542ms)
+✔ valores desconocidos fallan en vez de inventar un puntaje (0.555583ms)
+ℹ tests 121
+ℹ suites 0
+ℹ pass 120
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 92.987166
+typecheck exit 0
+lint: NO corrido (OOM de eslint con heap por defecto; ademas no cubre tools/*.mjs)

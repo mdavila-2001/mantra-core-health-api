@@ -1,0 +1,30 @@
+{
+ "#fixture-source": "cima.ndjson (CIMA/AEMPS, bajado 2026-09-30), fila Abacavir sin el HTML de las secciones",
+ "row": {
+  "slug": "cima-vtm-116084008",
+  "esName": "Abacavir",
+  "drugFacts": {
+   "referenceProduct": {
+    "nregistro": "84740",
+    "name": "ABACAVIR TARBIS 300 MG COMPRIMIDOS RECUBIERTOS CON PELICULA EFG",
+    "criterion": "comercializado primero; luego nº de registro más bajo, entre los que tienen ficha técnica segmentada"
+   },
+   "sections": [
+    {
+     "section": "4.1",
+     "nregistro": "84740",
+     "productName": "ABACAVIR TARBIS 300 MG COMPRIMIDOS RECUBIERTOS CON PELICULA EFG",
+     "documentUrl": "https://cima.aemps.es/cima/dochtml/ft/84740/FT_84740.html",
+     "documentDate": "2024-01-22T23:38:32.000Z"
+    },
+    {
+     "section": "4.3",
+     "nregistro": "84740",
+     "productName": "ABACAVIR TARBIS 300 MG COMPRIMIDOS RECUBIERTOS CON PELICULA EFG",
+     "documentUrl": "https://cima.aemps.es/cima/dochtml/ft/84740/FT_84740.html",
+     "documentDate": "2024-01-22T23:38:32.000Z"
+    }
+   ]
+  }
+ }
+}

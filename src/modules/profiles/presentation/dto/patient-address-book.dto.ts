@@ -18,6 +18,9 @@ export const ADDRESS_LABEL_MAX_LENGTH = 60;
 /** Tope de la calle; el mismo que el domicilio del alta y del perfil. */
 export const ADDRESS_LINES_MAX_LENGTH = 300;
 
+/** Tope del distrito o zona: un nombre, no una dirección. */
+export const DISTRICT_MAX_LENGTH = 200;
+
 /** Qué es cada dirección de la libreta. */
 export const ADDRESS_BOOK_KINDS = ['HOME', 'WORK', 'SAVED'] as const;
 export type AddressBookKind = (typeof ADDRESS_BOOK_KINDS)[number];
@@ -53,6 +56,18 @@ export class PatientAddressDto {
     description: 'Municipio (VS_BO_MUNICIPALITY)',
   })
   municipalityConceptId?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description:
+      'Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio',
+  })
+  administrativeArea2ConceptId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Distrito o zona, tal como lo dio el mapa',
+  })
+  district?: string;
 
   @ApiPropertyOptional()
   latitude?: number;
@@ -91,6 +106,13 @@ export class CreatePatientAddressDto {
   @IsString()
   @MaxLength(ADDRESS_LINES_MAX_LENGTH)
   lines?: string;
+
+  /** Distrito o zona, tal como lo da el mapa (ADR-0028). */
+  @ApiPropertyOptional({ maxLength: DISTRICT_MAX_LENGTH })
+  @IsOptional()
+  @IsString()
+  @MaxLength(DISTRICT_MAX_LENGTH)
+  district?: string;
 
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(conPunto)
@@ -145,6 +167,16 @@ export class UpdatePatientAddressDto {
   @IsString()
   @MaxLength(ADDRESS_LINES_MAX_LENGTH)
   lines?: string;
+
+  /** Distrito o zona. Vacío para quitarlo; ausente lo conserva. */
+  @ApiPropertyOptional({
+    maxLength: DISTRICT_MAX_LENGTH,
+    description: 'Vacío para quitarlo',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(DISTRICT_MAX_LENGTH)
+  district?: string;
 
   @ApiPropertyOptional({ minimum: -90, maximum: 90 })
   @ValidateIf(conPunto)

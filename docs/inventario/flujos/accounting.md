@@ -4407,20 +4407,17 @@ flowchart TD
   n15 -->|"sí"| n16
   n17[("LEE accounting.practitioner_simple_accounts")]:::efecto
   n16 --> n17
-  n18["Repite: por cada const [code, name, accountClass] de GENERAL_ACCOUNTS"]:::bucle
+  n18["Llama a PractitionerSimpleAccountingRepository.seedAccounts"]:::llamada
   n17 --> n18
   n15 -->|"no"| n18
-  n19["Llama a PractitionerSimpleAccountingRepository.createAccount"]:::llamada
-  n18 -->|"cada elemento"| n19
-  n20[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n19[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n18 --> n19
+  n20["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
   n19 --> n20
-  n21["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
+  n21[("LEE accounting.practitioner_simple_accounts")]:::efecto
   n20 --> n21
-  n18 -->|"al terminar"| n21
-  n22[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n22(("200 Responde con éxito")):::ok
   n21 --> n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4498,30 +4495,27 @@ flowchart TD
   n26 -->|"sí"| n27
   n28[("LEE accounting.practitioner_simple_accounts")]:::efecto
   n27 --> n28
-  n29["Repite: por cada const [code, name, accountClass] de GENERAL_ACCOUNTS"]:::bucle
+  n29["Llama a PractitionerSimpleAccountingRepository.seedAccounts"]:::llamada
   n28 --> n29
   n26 -->|"no"| n29
-  n30["Llama a PractitionerSimpleAccountingRepository.createAccount"]:::llamada
-  n29 -->|"cada elemento"| n30
-  n31[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n30[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n29 --> n30
+  n31["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
   n30 --> n31
-  n32["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
+  n32[("LEE accounting.practitioner_simple_accounts")]:::efecto
   n31 --> n32
-  n29 -->|"al terminar"| n32
-  n33[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n33["Llama a PractitionerSimpleAccountingService.assertNameFree"]:::llamada
   n32 --> n33
-  n34["Llama a PractitionerSimpleAccountingService.assertNameFree"]:::llamada
+  n34{"taken"}:::decision
   n33 --> n34
-  n35{"taken"}:::decision
-  n34 --> n35
-  n36(["409 CONFLICT Ya tiene una cuenta con ese nombre en esa clase."]):::error
-  n35 -->|"sí"| n36
-  n37["Llama a PractitionerSimpleAccountingRepository.createAccount"]:::llamada
-  n35 -->|"no"| n37
-  n38[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n35(["409 CONFLICT Ya tiene una cuenta con ese nombre en esa clase."]):::error
+  n34 -->|"sí"| n35
+  n36["Llama a PractitionerSimpleAccountingRepository.createAccount"]:::llamada
+  n34 -->|"no"| n36
+  n37[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n36 --> n37
+  n38(("201 Responde con éxito")):::ok
   n37 --> n38
-  n39(("201 Responde con éxito")):::ok
-  n38 --> n39
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

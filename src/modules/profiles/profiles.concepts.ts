@@ -132,9 +132,20 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
       code: 'JURISDICTION_SEDES_PANDO',
       display: 'SEDES — Gobierno Autónomo Departamental de Pando',
     },
+    // El registro en el colegio de la profesión (Colegio Médico, de
+    // Odontólogos…): la tercera habilitación del alta. No es territorial, pero
+    // vive en la misma tabla que las otras dos para que el perfil las muestre
+    // juntas; el nombre del colegio va en `regulatory_authority`.
+    JURISDICTION_PROFESSIONAL_COLLEGE: {
+      code: 'JURISDICTION_PROFESSIONAL_COLLEGE',
+      display: 'Professional college registration',
+    },
     AUTH_PENDING: { code: 'AUTH_PENDING', display: 'Authorization pending' },
     AUTH_ACTIVE: { code: 'AUTH_ACTIVE', display: 'Authorization active' },
     AUTH_EXPIRED: { code: 'AUTH_EXPIRED', display: 'Authorization expired' },
+    // v4.2.67: la matrícula que la admisión rechazó. Sin este estado, un rechazo
+    // sólo podía dejarla en AUTH_PENDING, indistinguible de «nadie la miró».
+    AUTH_REJECTED: { code: 'AUTH_REJECTED', display: 'Authorization rejected' },
 
     // Credenciales profesionales
     // Los cinco que el registro de procesos enumera para el médico (MÓDULO
@@ -186,6 +197,244 @@ export const { seeds: PROFILES_CONCEPT_SEEDS, ids: PROF } =
     SPEC_VERIF_VERIFIED: {
       code: 'SPEC_VERIF_VERIFIED',
       display: 'Specialty verified',
+    },
+    SPEC_VERIF_REJECTED: {
+      code: 'SPEC_VERIF_REJECTED',
+      display: 'Specialty verification rejected',
+    },
+
+    // --- Admisiones de profesionales (v4.2.67) -----------------------------
+    // Tipo de admisión. La bandeja «Admisiones» es genérica: hoy sólo existe
+    // ALTA_DE_DOCTOR; organización, farmacia, laboratorio y aseguradora se
+    // agregan como conceptos de este mismo value set, sin tocar el esquema.
+    ADMISSION_TYPE_PRACTITIONER_ONBOARDING: {
+      code: 'ADMISSION_TYPE_PRACTITIONER_ONBOARDING',
+      display: 'Practitioner onboarding admission',
+    },
+    // Estado de la admisión. `ENVIADA` equivale a PRACT_VERIF_PENDING del perfil.
+    ADMISSION_STATUS_SUBMITTED: {
+      code: 'ADMISSION_STATUS_SUBMITTED',
+      display: 'Admission submitted',
+    },
+    ADMISSION_STATUS_IN_REVIEW: {
+      code: 'ADMISSION_STATUS_IN_REVIEW',
+      display: 'Admission in review',
+    },
+    ADMISSION_STATUS_INFO_REQUIRED: {
+      code: 'ADMISSION_STATUS_INFO_REQUIRED',
+      display: 'Admission needs more information',
+    },
+    ADMISSION_STATUS_VERIFIED: {
+      code: 'ADMISSION_STATUS_VERIFIED',
+      display: 'Admission verified',
+    },
+    ADMISSION_STATUS_REJECTED: {
+      code: 'ADMISSION_STATUS_REJECTED',
+      display: 'Admission rejected',
+    },
+    ADMISSION_STATUS_SUSPENDED: {
+      code: 'ADMISSION_STATUS_SUSPENDED',
+      display: 'Admission suspended',
+    },
+    ADMISSION_STATUS_EXPIRED: {
+      code: 'ADMISSION_STATUS_EXPIRED',
+      display: 'Admission expired',
+    },
+    ADMISSION_STATUS_WITHDRAWN: {
+      code: 'ADMISSION_STATUS_WITHDRAWN',
+      display: 'Admission withdrawn',
+    },
+    // ABANDONADA: el solicitante no respondió a la información pedida dentro de su
+    // plazo. Distinta de EXPIRADA, que es la vigencia vencida de una VERIFICADA.
+    ADMISSION_STATUS_ABANDONED: {
+      code: 'ADMISSION_STATUS_ABANDONED',
+      display: 'Admission abandoned',
+    },
+    // Eventos de la bitácora (append-only).
+    ADMISSION_EVENT_CREATED: {
+      code: 'ADMISSION_EVENT_CREATED',
+      display: 'Admission created',
+    },
+    ADMISSION_EVENT_CLAIMED: {
+      code: 'ADMISSION_EVENT_CLAIMED',
+      display: 'Admission claimed for review',
+    },
+    ADMISSION_EVENT_INFO_REQUESTED: {
+      code: 'ADMISSION_EVENT_INFO_REQUESTED',
+      display: 'Admission information requested',
+    },
+    ADMISSION_EVENT_RESUBMITTED: {
+      code: 'ADMISSION_EVENT_RESUBMITTED',
+      display: 'Admission resubmitted',
+    },
+    ADMISSION_EVENT_ITEM_VERIFIED: {
+      code: 'ADMISSION_EVENT_ITEM_VERIFIED',
+      display: 'Admission item verified',
+    },
+    ADMISSION_EVENT_ITEM_REJECTED: {
+      code: 'ADMISSION_EVENT_ITEM_REJECTED',
+      display: 'Admission item rejected',
+    },
+    ADMISSION_EVENT_ITEM_INFO_REQUIRED: {
+      code: 'ADMISSION_EVENT_ITEM_INFO_REQUIRED',
+      display: 'Admission item needs more information',
+    },
+    ADMISSION_EVENT_VERIFIED: {
+      code: 'ADMISSION_EVENT_VERIFIED',
+      display: 'Admission verified',
+    },
+    ADMISSION_EVENT_REJECTED: {
+      code: 'ADMISSION_EVENT_REJECTED',
+      display: 'Admission rejected',
+    },
+    ADMISSION_EVENT_SUSPENDED: {
+      code: 'ADMISSION_EVENT_SUSPENDED',
+      display: 'Admission suspended',
+    },
+    ADMISSION_EVENT_REINSTATED: {
+      code: 'ADMISSION_EVENT_REINSTATED',
+      display: 'Admission reinstated',
+    },
+    ADMISSION_EVENT_EXPIRED: {
+      code: 'ADMISSION_EVENT_EXPIRED',
+      display: 'Admission expired',
+    },
+    ADMISSION_EVENT_WITHDRAWN: {
+      code: 'ADMISSION_EVENT_WITHDRAWN',
+      display: 'Admission withdrawn',
+    },
+    ADMISSION_EVENT_ABANDONED: {
+      code: 'ADMISSION_EVENT_ABANDONED',
+      display: 'Admission abandoned',
+    },
+    ADMISSION_EVENT_RELEASED: {
+      code: 'ADMISSION_EVENT_RELEASED',
+      display: 'Admission released back to the queue',
+    },
+    ADMISSION_EVENT_REASSIGNED: {
+      code: 'ADMISSION_EVENT_REASSIGNED',
+      display: 'Admission reassigned to another reviewer',
+    },
+    ADMISSION_EVENT_BACKFILLED: {
+      code: 'ADMISSION_EVENT_BACKFILLED',
+      display: 'Admission created by backfill',
+    },
+    // Clase de ficha que revisa un requisito.
+    ADMISSION_ITEM_LICENSE: {
+      code: 'ADMISSION_ITEM_LICENSE',
+      display: 'Admission item: license',
+    },
+    ADMISSION_ITEM_CREDENTIAL: {
+      code: 'ADMISSION_ITEM_CREDENTIAL',
+      display: 'Admission item: credential',
+    },
+    ADMISSION_ITEM_SPECIALTY: {
+      code: 'ADMISSION_ITEM_SPECIALTY',
+      display: 'Admission item: specialty',
+    },
+    ADMISSION_ITEM_PROFILE: {
+      code: 'ADMISSION_ITEM_PROFILE',
+      display: 'Admission item: profile data',
+    },
+    // Estado vigente de la revisión de un requisito/ítem.
+    ADMISSION_REVIEW_PENDING: {
+      code: 'ADMISSION_REVIEW_PENDING',
+      display: 'Review pending',
+    },
+    ADMISSION_REVIEW_VERIFIED: {
+      code: 'ADMISSION_REVIEW_VERIFIED',
+      display: 'Review verified',
+    },
+    ADMISSION_REVIEW_REJECTED: {
+      code: 'ADMISSION_REVIEW_REJECTED',
+      display: 'Review rejected',
+    },
+    ADMISSION_REVIEW_INFO_REQUIRED: {
+      code: 'ADMISSION_REVIEW_INFO_REQUIRED',
+      display: 'Review needs more information',
+    },
+    // Tipo de evidencia y método de verificación de un requisito.
+    ADMISSION_EVIDENCE_DOCUMENT: {
+      code: 'ADMISSION_EVIDENCE_DOCUMENT',
+      display: 'Evidence: document',
+    },
+    ADMISSION_EVIDENCE_DATA: {
+      code: 'ADMISSION_EVIDENCE_DATA',
+      display: 'Evidence: data',
+    },
+    ADMISSION_METHOD_MANUAL: {
+      code: 'ADMISSION_METHOD_MANUAL',
+      display: 'Verification method: manual review',
+    },
+    ADMISSION_METHOD_AUTHORITY_CHECK: {
+      code: 'ADMISSION_METHOD_AUTHORITY_CHECK',
+      display: 'Verification method: authority check',
+    },
+    // Fuente consultada al verificar un ítem (tipo estructurado; mapea a FHIR
+    // primarySource.type). No hay registros públicos con URL estable: la fuente es
+    // un tipo + una referencia, no sólo un enlace.
+    ADMISSION_SOURCE_MINSALUD_REGISTRY: {
+      code: 'ADMISSION_SOURCE_MINSALUD_REGISTRY',
+      display: 'Source: Ministry of Health registry',
+    },
+    ADMISSION_SOURCE_MEDICAL_COLLEGE: {
+      code: 'ADMISSION_SOURCE_MEDICAL_COLLEGE',
+      display: 'Source: medical college',
+    },
+    ADMISSION_SOURCE_DENTAL_COLLEGE: {
+      code: 'ADMISSION_SOURCE_DENTAL_COLLEGE',
+      display: 'Source: dental college',
+    },
+    ADMISSION_SOURCE_SEDES: {
+      code: 'ADMISSION_SOURCE_SEDES',
+      display: 'Source: departmental health service (SEDES)',
+    },
+    ADMISSION_SOURCE_SEGIP: {
+      code: 'ADMISSION_SOURCE_SEGIP',
+      display: 'Source: SEGIP',
+    },
+    ADMISSION_SOURCE_SUBMITTED_DOCUMENT: {
+      code: 'ADMISSION_SOURCE_SUBMITTED_DOCUMENT',
+      display: 'Source: document submitted by the applicant',
+    },
+    ADMISSION_SOURCE_OTHER: {
+      code: 'ADMISSION_SOURCE_OTHER',
+      display: 'Source: other',
+    },
+    // Motivo estructurado de un rechazo o de una petición de información.
+    ADMISSION_REASON_ILLEGIBLE: {
+      code: 'ADMISSION_REASON_ILLEGIBLE',
+      display: 'Reason: illegible document',
+    },
+    ADMISSION_REASON_EXPIRED: {
+      code: 'ADMISSION_REASON_EXPIRED',
+      display: 'Reason: document expired',
+    },
+    ADMISSION_REASON_NAME_MISMATCH: {
+      code: 'ADMISSION_REASON_NAME_MISMATCH',
+      display: 'Reason: name does not match',
+    },
+    ADMISSION_REASON_NOT_IN_REGISTRY: {
+      code: 'ADMISSION_REASON_NOT_IN_REGISTRY',
+      display: 'Reason: not found in the registry',
+    },
+    ADMISSION_REASON_INCOMPLETE: {
+      code: 'ADMISSION_REASON_INCOMPLETE',
+      display: 'Reason: incomplete document',
+    },
+    // Sólo para el personal: al solicitante se le muestra como ADMISSION_REASON_OTHER.
+    ADMISSION_REASON_SUSPECTED_FRAUD: {
+      code: 'ADMISSION_REASON_SUSPECTED_FRAUD',
+      display: 'Reason: suspected fraud (staff only)',
+    },
+    ADMISSION_REASON_OTHER: {
+      code: 'ADMISSION_REASON_OTHER',
+      display: 'Reason: other',
+    },
+    // Categoría del aviso que recibe el médico en cada transición.
+    NOTICE_ADMISSION: {
+      code: 'ADMISSION_NOTICE',
+      display: 'Admission notice',
     },
 
     // Vínculo del profesional con la institución. Desde v4.1.9 el estado es el

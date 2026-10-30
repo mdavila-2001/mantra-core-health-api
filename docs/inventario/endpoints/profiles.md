@@ -3,9 +3,9 @@
 # Endpoints del módulo `profiles`
 
 - **Bloque:** Núcleo y Terminología (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
-- **Operaciones:** 58 (58 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 26 · MEDIO 10 · BAJO 22
-- **Tablas distintas que tocan:** 50
+- **Operaciones:** 67 (67 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 30 · MEDIO 10 · BAJO 27
+- **Tablas distintas que tocan:** 51
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/profiles.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -22,54 +22,63 @@
 | 8 | POST | `/profiles/patients/{profileId}/related-persons` | Registrar persona relacionada / contacto de emergencia | ALTO | 6 | sesión (sin roles) |
 | 9 | GET | `/profiles/patients/me` | Consultar los propios datos de filiación | BAJO | 14 | sesión (sin roles) |
 | 10 | PATCH | `/profiles/patients/me` | Editar los propios datos de filiación | ALTO | 20 | sesión (sin roles) |
-| 11 | GET | `/profiles/patients/me/dependent-candidates` | Buscar por nombre a quién pedirle que deje representarla | BAJO | 5 | sesión (sin roles) |
-| 12 | POST | `/profiles/patients/me/dependent-requests` | Pedir representar a una persona que ya tiene cuenta | ALTO | 16 | sesión (sin roles) |
-| 13 | POST | `/profiles/patients/me/dependent-requests/{id}/accept` | Aceptar una solicitud de dependiente | ALTO | 15 | sesión (sin roles) |
-| 14 | POST | `/profiles/patients/me/dependent-requests/{id}/reject` | Rechazar una solicitud de dependiente | ALTO | 14 | sesión (sin roles) |
-| 15 | GET | `/profiles/patients/me/dependent-requests/incoming` | Listar las solicitudes de dependiente recibidas | BAJO | 4 | sesión (sin roles) |
-| 16 | GET | `/profiles/patients/me/dependents` | Listar los dependientes a cargo del paciente autenticado | BAJO | 5 | sesión (sin roles) |
-| 17 | POST | `/profiles/patients/me/dependents` | Registrar un dependiente (menor o adulto mayor tutelado) | ALTO | 13 | sesión (sin roles) |
-| 18 | DELETE | `/profiles/patients/me/photo` | Quitar la propia foto de perfil | BAJO | 14 | sesión (sin roles) |
-| 19 | PUT | `/profiles/patients/me/photo` | Fijar la propia foto de perfil | BAJO | 16 | sesión (sin roles) |
-| 20 | GET | `/profiles/patients/me/summary` | Consultar el resumen propio | BAJO | 3 | sesión (sin roles) |
-| 21 | POST | `/profiles/patients/merge` | Fusionar pacientes duplicados | MEDIO | 8 | SECURITY_ADMIN |
-| 22 | GET | `/profiles/patients/merge-events` | Listar eventos de fusión de pacientes | BAJO | 1 | SECURITY_ADMIN |
-| 23 | POST | `/profiles/patients/merge/{eventId}/reverse` | Revertir una fusión de pacientes | MEDIO | 6 | SECURITY_ADMIN |
-| 24 | POST | `/profiles/patients/search` | UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo | BAJO | 6 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
-| 25 | POST | `/profiles/persons/{personId}/account-links` | Vincular cuenta de portal a una persona | MEDIO | 3 | SECURITY_ADMIN |
-| 26 | POST | `/profiles/persons/{personId}/decease` | Registrar defunción y anonimización de una persona | MEDIO | 4 | SECURITY_ADMIN |
-| 27 | GET | `/profiles/practitioners` | Listar profesionales para la guía, con sus especialidades | BAJO | 4 | sesión (sin roles) |
-| 28 | POST | `/profiles/practitioners` | Alta de profesional de salud (workforce generalista) | MEDIO | 12 | SECURITY_ADMIN |
-| 29 | PATCH | `/profiles/practitioners/{profileId}` | Corregir el perfil profesional de otro (titular o plataforma) | ALTO | 26 | sesión (sin roles) |
-| 30 | POST | `/profiles/practitioners/{profileId}/affiliations` | Registrar un consultorio de un profesional sin cuenta | MEDIO | 25 | SECURITY_ADMIN |
-| 31 | POST | `/profiles/practitioners/{profileId}/jurisdiction-authorizations` | Registrar/renovar autorización jurisdiccional (licencia) | ALTO | 5 | sesión (sin roles) |
-| 32 | DELETE | `/profiles/practitioners/{profileId}/photo` | Quitar la foto del perfil profesional | ALTO | 16 | sesión (sin roles) |
-| 33 | PUT | `/profiles/practitioners/{profileId}/photo` | Fijar la foto del perfil profesional | ALTO | 18 | sesión (sin roles) |
-| 34 | POST | `/profiles/practitioners/{profileId}/specialties` | Agregar especialidad con credencial de soporte | ALTO | 9 | sesión (sin roles) |
-| 35 | GET | `/profiles/practitioners/{profileId}/summary` | Consultar el perfil profesional de un colega (ficha de la guía) | BAJO | 15 | sesión (sin roles) |
-| 36 | PATCH | `/profiles/practitioners/me` | Editar la presentación del propio perfil profesional | ALTO | 26 | sesión (sin roles) |
-| 37 | GET | `/profiles/practitioners/me/affiliations` | Historial laboral propio (instituciones donde trabajó) | BAJO | 3 | sesión (sin roles) |
-| 38 | POST | `/profiles/practitioners/me/affiliations` | Registrar una afiliación institucional en el historial propio | ALTO | 25 | sesión (sin roles) |
-| 39 | DELETE | `/profiles/practitioners/me/affiliations/{affiliationId}` | Quitar una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
-| 40 | PATCH | `/profiles/practitioners/me/affiliations/{affiliationId}` | Corregir una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
-| 41 | POST | `/profiles/practitioners/me/credentials` | Agregar un título propio (diplomado, maestría, doctorado…) | ALTO | 5 | sesión (sin roles) |
-| 42 | DELETE | `/profiles/practitioners/me/credentials/{credentialId}` | Retirar un título propio pendiente | ALTO | 4 | sesión (sin roles) |
-| 43 | PATCH | `/profiles/practitioners/me/credentials/{credentialId}` | Editar un título propio pendiente de verificación | ALTO | 6 | sesión (sin roles) |
-| 44 | DELETE | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Retirar una matrícula propia pendiente de verificación | ALTO | 6 | sesión (sin roles) |
-| 45 | PATCH | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Corregir una matrícula propia pendiente de verificación | BAJO | 6 | sesión (sin roles) |
-| 46 | GET | `/profiles/practitioners/me/linkable-organizations` | Buscar instituciones del padrón para declarar una afiliación | BAJO | 5 | sesión (sin roles) |
-| 47 | GET | `/profiles/practitioners/me/onboarding` | Qué le falta al profesional para completar su alta | BAJO | 7 | sesión (sin roles) |
-| 48 | GET | `/profiles/practitioners/me/signature-assets` | Consultar las imágenes de firma y sello propias | BAJO | 2 | sesión (sin roles) |
-| 49 | PUT | `/profiles/practitioners/me/signature-assets` | Guardar o quitar las imágenes de firma y sello propias | ALTO | 5 | sesión (sin roles) |
-| 50 | DELETE | `/profiles/practitioners/me/specialties/{specialtyId}` | Retirar una especialidad propia pendiente de verificación | ALTO | 4 | sesión (sin roles) |
-| 51 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}` | Corregir una especialidad propia pendiente de verificación | ALTO | 7 | sesión (sin roles) |
-| 52 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}/primary` | Marcar una especialidad propia como la principal | ALTO | 4 | sesión (sin roles) |
-| 53 | GET | `/profiles/practitioners/me/summary` | Consultar el perfil profesional propio (trayectoria y actividad) | BAJO | 15 | sesión (sin roles) |
-| 54 | GET | `/profiles/practitioners/specialty-counts` | Contar profesionales visibles por especialidad | BAJO | 2 | sesión (sin roles) |
-| 55 | GET | `/tenants/{tenantId}/practitioner-requests` | Solicitudes de médicos que piden atender en la organización | BAJO | 5 | sesión (sin roles) |
-| 56 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` | Aprobar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
-| 57 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` | Rechazar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
-| 58 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` | Dar de baja un vínculo ya aprobado | ALTO | 19 | sesión (sin roles) |
+| 11 | GET | `/profiles/patients/me/addresses` | Listar las propias direcciones (la preferida primero) | BAJO | 3 | sesión (sin roles) |
+| 12 | POST | `/profiles/patients/me/addresses` | Guardar una dirección nueva | BAJO | 3 | sesión (sin roles) |
+| 13 | DELETE | `/profiles/patients/me/addresses/{id}` | Quitar una dirección guardada o la del trabajo | ALTO | 4 | sesión (sin roles) |
+| 14 | PATCH | `/profiles/patients/me/addresses/{id}` | Corregir una dirección (cierra la vigente y abre otra) | ALTO | 4 | sesión (sin roles) |
+| 15 | PUT | `/profiles/patients/me/addresses/{id}/preferred` | Marcar la dirección que se ofrece primero | BAJO | 3 | sesión (sin roles) |
+| 16 | GET | `/profiles/patients/me/dependent-candidates` | Buscar por nombre a quién pedirle que deje representarla | BAJO | 5 | sesión (sin roles) |
+| 17 | POST | `/profiles/patients/me/dependent-requests` | Pedir representar a una persona que ya tiene cuenta | ALTO | 16 | sesión (sin roles) |
+| 18 | POST | `/profiles/patients/me/dependent-requests/{id}/accept` | Aceptar una solicitud de dependiente | ALTO | 15 | sesión (sin roles) |
+| 19 | POST | `/profiles/patients/me/dependent-requests/{id}/reject` | Rechazar una solicitud de dependiente | ALTO | 14 | sesión (sin roles) |
+| 20 | GET | `/profiles/patients/me/dependent-requests/incoming` | Listar las solicitudes de dependiente recibidas | BAJO | 4 | sesión (sin roles) |
+| 21 | GET | `/profiles/patients/me/dependents` | Listar los dependientes a cargo del paciente autenticado | BAJO | 5 | sesión (sin roles) |
+| 22 | POST | `/profiles/patients/me/dependents` | Registrar un dependiente (menor o adulto mayor tutelado) | ALTO | 13 | sesión (sin roles) |
+| 23 | DELETE | `/profiles/patients/me/photo` | Quitar la propia foto de perfil | BAJO | 14 | sesión (sin roles) |
+| 24 | PUT | `/profiles/patients/me/photo` | Fijar la propia foto de perfil | BAJO | 16 | sesión (sin roles) |
+| 25 | DELETE | `/profiles/patients/me/primary-practitioner` | Quitar el propio médico de cabecera | ALTO | 5 | sesión (sin roles) |
+| 26 | GET | `/profiles/patients/me/primary-practitioner` | Consultar el propio médico de cabecera | BAJO | 4 | sesión (sin roles) |
+| 27 | PUT | `/profiles/patients/me/primary-practitioner` | Elegir o cambiar el propio médico de cabecera | ALTO | 6 | sesión (sin roles) |
+| 28 | GET | `/profiles/patients/me/summary` | Consultar el resumen propio | BAJO | 3 | sesión (sin roles) |
+| 29 | POST | `/profiles/patients/merge` | Fusionar pacientes duplicados | MEDIO | 8 | SECURITY_ADMIN |
+| 30 | GET | `/profiles/patients/merge-events` | Listar eventos de fusión de pacientes | BAJO | 1 | SECURITY_ADMIN |
+| 31 | POST | `/profiles/patients/merge/{eventId}/reverse` | Revertir una fusión de pacientes | MEDIO | 6 | SECURITY_ADMIN |
+| 32 | POST | `/profiles/patients/search` | UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo | BAJO | 6 | SECURITY_ADMIN, SUPERADMIN, CLINICIAN, PRACTITIONER |
+| 33 | POST | `/profiles/persons/{personId}/account-links` | Vincular cuenta de portal a una persona | MEDIO | 3 | SECURITY_ADMIN |
+| 34 | POST | `/profiles/persons/{personId}/decease` | Registrar defunción y anonimización de una persona | MEDIO | 4 | SECURITY_ADMIN |
+| 35 | GET | `/profiles/practitioners` | Listar profesionales para la guía, con sus especialidades | BAJO | 4 | sesión (sin roles) |
+| 36 | POST | `/profiles/practitioners` | Alta de profesional de salud (workforce generalista) | MEDIO | 12 | SECURITY_ADMIN |
+| 37 | PATCH | `/profiles/practitioners/{profileId}` | Corregir el perfil profesional de otro (titular o plataforma) | ALTO | 26 | sesión (sin roles) |
+| 38 | POST | `/profiles/practitioners/{profileId}/affiliations` | Registrar un consultorio de un profesional sin cuenta | MEDIO | 25 | SECURITY_ADMIN |
+| 39 | POST | `/profiles/practitioners/{profileId}/jurisdiction-authorizations` | Registrar/renovar autorización jurisdiccional (licencia) | ALTO | 5 | sesión (sin roles) |
+| 40 | DELETE | `/profiles/practitioners/{profileId}/photo` | Quitar la foto del perfil profesional | ALTO | 16 | sesión (sin roles) |
+| 41 | PUT | `/profiles/practitioners/{profileId}/photo` | Fijar la foto del perfil profesional | ALTO | 18 | sesión (sin roles) |
+| 42 | POST | `/profiles/practitioners/{profileId}/specialties` | Agregar especialidad con credencial de soporte | ALTO | 9 | sesión (sin roles) |
+| 43 | GET | `/profiles/practitioners/{profileId}/summary` | Consultar el perfil profesional de un colega (ficha de la guía) | BAJO | 15 | sesión (sin roles) |
+| 44 | PATCH | `/profiles/practitioners/me` | Editar la presentación del propio perfil profesional | ALTO | 26 | sesión (sin roles) |
+| 45 | GET | `/profiles/practitioners/me/affiliations` | Historial laboral propio (instituciones donde trabajó) | BAJO | 3 | sesión (sin roles) |
+| 46 | POST | `/profiles/practitioners/me/affiliations` | Registrar una afiliación institucional en el historial propio | ALTO | 25 | sesión (sin roles) |
+| 47 | DELETE | `/profiles/practitioners/me/affiliations/{affiliationId}` | Quitar una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
+| 48 | PATCH | `/profiles/practitioners/me/affiliations/{affiliationId}` | Corregir una afiliación del historial laboral propio | ALTO | 4 | sesión (sin roles) |
+| 49 | POST | `/profiles/practitioners/me/credentials` | Agregar un título propio (diplomado, maestría, doctorado…) | ALTO | 5 | sesión (sin roles) |
+| 50 | DELETE | `/profiles/practitioners/me/credentials/{credentialId}` | Retirar un título propio pendiente | ALTO | 4 | sesión (sin roles) |
+| 51 | PATCH | `/profiles/practitioners/me/credentials/{credentialId}` | Editar un título propio pendiente de verificación | ALTO | 6 | sesión (sin roles) |
+| 52 | DELETE | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Retirar una matrícula propia pendiente de verificación | ALTO | 6 | sesión (sin roles) |
+| 53 | PATCH | `/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}` | Corregir una matrícula propia pendiente de verificación | BAJO | 6 | sesión (sin roles) |
+| 54 | GET | `/profiles/practitioners/me/linkable-organizations` | Buscar instituciones del padrón para declarar una afiliación | BAJO | 5 | sesión (sin roles) |
+| 55 | GET | `/profiles/practitioners/me/onboarding` | Qué le falta al profesional para completar su alta | BAJO | 7 | sesión (sin roles) |
+| 56 | GET | `/profiles/practitioners/me/primary-patients` | Listar los pacientes que me eligieron como médico de cabecera | BAJO | 5 | sesión (sin roles) |
+| 57 | GET | `/profiles/practitioners/me/signature-assets` | Consultar las imágenes de firma y sello propias | BAJO | 2 | sesión (sin roles) |
+| 58 | PUT | `/profiles/practitioners/me/signature-assets` | Guardar o quitar las imágenes de firma y sello propias | ALTO | 5 | sesión (sin roles) |
+| 59 | DELETE | `/profiles/practitioners/me/specialties/{specialtyId}` | Retirar una especialidad propia pendiente de verificación | ALTO | 4 | sesión (sin roles) |
+| 60 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}` | Corregir una especialidad propia pendiente de verificación | ALTO | 7 | sesión (sin roles) |
+| 61 | PATCH | `/profiles/practitioners/me/specialties/{specialtyId}/primary` | Marcar una especialidad propia como la principal | ALTO | 4 | sesión (sin roles) |
+| 62 | GET | `/profiles/practitioners/me/summary` | Consultar el perfil profesional propio (trayectoria y actividad) | BAJO | 15 | sesión (sin roles) |
+| 63 | GET | `/profiles/practitioners/specialty-counts` | Contar profesionales visibles por especialidad | BAJO | 2 | sesión (sin roles) |
+| 64 | GET | `/tenants/{tenantId}/practitioner-requests` | Solicitudes de médicos que piden atender en la organización | BAJO | 5 | sesión (sin roles) |
+| 65 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/approve` | Aprobar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
+| 66 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/reject` | Rechazar la solicitud de un profesional | ALTO | 19 | sesión (sin roles) |
+| 67 | POST | `/tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke` | Dar de baja un vínculo ya aprobado | ALTO | 19 | sesión (sin roles) |
 
 ---
 
@@ -195,10 +204,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.roles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode | `src/modules/authz/services/authz-effective-roles.service.ts:139` |
 | `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PractitionerContextAdapter.ensurePractitionerRole → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2254` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2261` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2230` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2237` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.verifyCredential → ProfilesPractitionersService.verifyCredential → ProfessionalCredentialsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:104` |
 
 ### Parámetros
@@ -615,10 +624,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `profiles.patient_identity_links` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink | `src/modules/profiles/application/services/profiles-patients.service.ts:2067` |
+| `profiles.patient_identity_links` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink | `src/modules/profiles/application/services/profiles-patients.service.ts:2088` |
 | `profiles.patient_identity_links` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink → PatientIdentityLinksRepository.create | `src/modules/profiles/infrastructure/repositories/patient-identity-links.repository.ts:78` |
 | `profiles.patient_identity_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink → PatientIdentityLinksRepository.findBySource | `src/modules/profiles/infrastructure/repositories/patient-identity-links.repository.ts:60` |
-| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink | `src/modules/profiles/application/services/profiles-patients.service.ts:2092` |
+| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink | `src/modules/profiles/application/services/profiles-patients.service.ts:2113` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.addIdentityLink → ProfilesPatientsService.addIdentityLink → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 
 ### Parámetros
@@ -964,9 +973,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → PersonRecordsAdapter.findCurrentContact → ContactPointsRepository.findCurrentByOwnerAndSystem | `src/modules/common/repositories/contact-points.repository.ts:126` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readIdentifiers → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readIdentifiers → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:168` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | ProfilesPatientsController.getOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
@@ -987,84 +996,88 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:521` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:527` |
-| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
-| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
-| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
-| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
-| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:560` |
-| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:571` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:581` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:596` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:606` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:622` |
-| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:640` |
-| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:649` |
-| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:658` |
-| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:669` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:675` |
-| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:678` |
-| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:682` |
-| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:685` |
-| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:700` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:706` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
+| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
+| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
+| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:557` |
+| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
+| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:572` |
+| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:583` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:593` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:608` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:634` |
+| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:652` |
+| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:661` |
+| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:670` |
+| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
+| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:690` |
+| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:694` |
+| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:697` |
+| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | sin fuente |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
+| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | sin fuente |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
-| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
-| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
-| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
-| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:403` |
-| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
-| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
-| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:414` |
-| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:417` |
-| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:420` |
-| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:425` |
-| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:428` |
-| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:431` |
-| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:434` |
-| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
-| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:442` |
-| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:445` |
-| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:448` |
-| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:352` |
-| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:355` |
-| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:361` |
-| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
-| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:368` |
-| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:371` |
-| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:374` |
-| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:377` |
-| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:382` |
-| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:385` |
-| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:388` |
-| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:451` |
-| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
-| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
-| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
-| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
-| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:496` |
-| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
-| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
-| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
-| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:472` |
-| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:475` |
-| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
-| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:481` |
+| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
+| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
+| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
+| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:412` |
+| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:415` |
+| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:418` |
+| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:421` |
+| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:426` |
+| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
+| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
+| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
+| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:440` |
+| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:443` |
+| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:446` |
+| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:449` |
+| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
+| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:457` |
+| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:460` |
+| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
+| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:367` |
+| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:370` |
+| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:373` |
+| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:376` |
+| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:380` |
+| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:383` |
+| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:386` |
+| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:389` |
+| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
+| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
+| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
+| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:463` |
+| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
+| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:736` |
+| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
+| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:505` |
+| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
+| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:511` |
+| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:742` |
+| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
+| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
+| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
+| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
+| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
 
 ### Respuestas posibles
 
@@ -1111,7 +1124,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/patients/me` la atiende `ProfilesPatientsController.updateOwnProfile` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:147). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPatientProfileDto` (27 campos, 0 obligatorios). Delega en `ProfilesPatientsService.updateOwnProfile`. Crea filas en common.contact_points, common.identifiers. Actualiza common.addresses, common.contact_points, profiles.persons, profiles.related_persons. Lee common.addresses, common.contact_points, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 6 más.
+`PATCH /profiles/patients/me` la atiende `ProfilesPatientsController.updateOwnProfile` (src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:147). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPatientProfileDto` (29 campos, 0 obligatorios). Delega en `ProfilesPatientsService.updateOwnProfile`. Crea filas en common.contact_points, common.identifiers. Actualiza common.addresses, common.contact_points, profiles.persons, profiles.related_persons. Lee common.addresses, common.contact_points, common.identifiers, insurance.insurance_carriers, insurance.insurance_plan_benefits, insurance.insurance_plans, insurance.insurance_products, insurance.patient_coverages y 6 más.
 
 ### Requerimientos
 
@@ -1128,24 +1141,24 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceAddress → PersonRecordsAdapter.closeAddress → AddressesRepository.closeCurrent | `src/modules/common/repositories/addresses.repository.ts:112` |
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceAddress → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceAddress → PersonRecordsAdapter.closeAddress → AddressesRepository.closeCurrent | `src/modules/common/repositories/addresses.repository.ts:148` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceAddress → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replacePhone → PersonRecordsAdapter.closeContact → ContactPointsRepository.closeCurrent | `src/modules/common/repositories/contact-points.repository.ts:192` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replacePhone → PersonRecordsAdapter.createContact → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replacePhone → PersonRecordsAdapter.findCurrentContact → ContactPointsRepository.findCurrentByOwnerAndSystem | `src/modules/common/repositories/contact-points.repository.ts:126` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceNit → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceNit → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceNit → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:168` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_products` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
-| `insurance.patient_coverages` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.declareCoverage → PatientCoveragesAdapter.isDeclared → CoverageRepository.findActiveByPatientAndOrder | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:80` |
+| `insurance.patient_coverages` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.declareCoverage → PatientCoveragesAdapter.isDeclared → CoverageRepository.findActiveByPatientAndOrder | `src/modules/insurance/infrastructure/repositories/coverage.repository.ts:96` |
 | `profiles.patient_portal_proxies` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readGuardians → PatientPortalProxiesRepository.listActiveGuardiansOfPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:311` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.resolveOwnPatient → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.resolveOwnPatient → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.rebuildDisplayName | `src/modules/profiles/application/services/profiles-patients.service.ts:1334` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.rebuildDisplayName | `src/modules/profiles/application/services/profiles-patients.service.ts:1345` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.resolveOwnPatient → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
-| `profiles.related_persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceTutor | `src/modules/profiles/application/services/profiles-patients.service.ts:1688` |
+| `profiles.related_persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceTutor | `src/modules/profiles/application/services/profiles-patients.service.ts:1709` |
 | `profiles.related_persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.replaceTutor → RelatedPersonsRepository.findActiveDeclaredGuardian | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:159` |
 | `terminology.catalog_concepts` | LEE | LEE | POR_SQL | ProfilesPatientsController.updateOwnProfile → ProfilesPatientsService.updateOwnProfile → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 
@@ -1167,19 +1180,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `taxHolderName` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Nombre o razón social del titular del NIT. Cadena vacía para quitarla. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:286` |
 | `homeAddressLines` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Domicilio, tal como lo escribe la persona. Vacío para quitarlo. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:308` |
 | `workAddressLines` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Dirección de trabajo. Vacío para quitarla. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:317` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:332` |
-| `homeLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => !removesDot(dto.homeLatitude, dto.homeLongitude) && (dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:346` |
-| `homeLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => !removesDot(dto.homeLatitude, dto.homeLongitude) && (dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:358` |
-| `workMunicipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Municipio del trabajo (catálogo VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:369` |
-| `workLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:381` |
-| `workLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:393` |
-| `workEmployerConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => dto.workEmployerConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:410` |
-| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:424` |
-| `guardianName` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Nombre del tutor o persona autorizada. No hay forma de quitarlo, sólo de declararlo o corregirlo. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:444` |
-| `guardianPhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Teléfono del tutor, en formato E.164 o nacional | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:461` |
-| `guardianRelationshipConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Parentesco del tutor o contacto de emergencia (conjunto related-person-relationship) | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:474` |
-| `privateInsurancePlanId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Plan de la aseguradora privada declarada. Sólo si la persona no tenía ninguna ya. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:494` |
-| `publicInsurancePlanId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Plan del seguro público declarado. Sólo si la persona no tenía ninguno ya. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:507` |
+| `homeDistrict` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Distrito o zona del domicilio. Vacío para quitarlo. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:330` |
+| `workDistrict` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Distrito o zona del trabajo. Vacío para quitarlo. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:340` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:355` |
+| `homeLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => !removesDot(dto.homeLatitude, dto.homeLongitude) && (dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:369` |
+| `homeLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => !removesDot(dto.homeLatitude, dto.homeLongitude) && (dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:381` |
+| `workMunicipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Municipio del trabajo (catálogo VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:392` |
+| `workLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:404` |
+| `workLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:416` |
+| `workEmployerConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPatientProfileDto) => dto.workEmployerConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:433` |
+| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:447` |
+| `guardianName` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Nombre del tutor o persona autorizada. No hay forma de quitarlo, sólo de declararlo o corregirlo. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:467` |
+| `guardianPhone` | `string` | No | longitud máxima 40; patrón runtime PHONE_PATTERN | `@IsOptional()` `@IsString()` `@MaxLength(40)` `@Matches(PHONE_PATTERN, { message: PHONE_PATTERN_MESSAGE })` | Teléfono del tutor, en formato E.164 o nacional | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:484` |
+| `guardianRelationshipConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Parentesco del tutor o contacto de emergencia (conjunto related-person-relationship) | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:497` |
+| `privateInsurancePlanId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Plan de la aseguradora privada declarada. Sólo si la persona no tenía ninguna ya. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:517` |
+| `publicInsurancePlanId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Plan del seguro público declarado. Sólo si la persona no tenía ninguno ya. | `src/modules/profiles/presentation/dto/update-own-patient-profile.dto.ts:530` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1205,6 +1220,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "taxHolderName": "Nombre de ejemplo",
   "homeAddressLines": "valor-ejemplo",
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "issuerAdministrativeAreaConceptId": "00000000-0000-4000-8000-000000000001",
   "homeLatitude": {},
   "homeLongitude": {},
@@ -1227,84 +1244,88 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:521` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:527` |
-| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
-| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
-| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
-| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
-| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:560` |
-| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:571` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:581` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:596` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:606` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:622` |
-| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:640` |
-| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:649` |
-| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:658` |
-| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:669` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:675` |
-| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:678` |
-| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:682` |
-| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:685` |
-| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:700` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:706` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
+| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
+| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
+| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:557` |
+| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
+| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:572` |
+| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:583` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:593` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:608` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:634` |
+| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:652` |
+| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:661` |
+| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:670` |
+| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
+| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:690` |
+| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:694` |
+| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:697` |
+| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | sin fuente |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
+| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | sin fuente |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
-| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
-| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
-| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
-| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:403` |
-| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
-| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
-| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:414` |
-| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:417` |
-| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:420` |
-| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:425` |
-| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:428` |
-| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:431` |
-| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:434` |
-| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
-| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:442` |
-| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:445` |
-| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:448` |
-| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:352` |
-| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:355` |
-| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:361` |
-| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
-| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:368` |
-| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:371` |
-| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:374` |
-| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:377` |
-| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:382` |
-| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:385` |
-| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:388` |
-| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:451` |
-| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
-| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
-| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
-| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
-| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:496` |
-| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
-| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
-| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
-| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:472` |
-| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:475` |
-| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
-| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:481` |
+| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
+| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
+| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
+| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:412` |
+| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:415` |
+| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:418` |
+| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:421` |
+| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:426` |
+| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
+| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
+| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
+| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:440` |
+| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:443` |
+| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:446` |
+| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:449` |
+| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
+| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:457` |
+| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:460` |
+| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
+| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:367` |
+| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:370` |
+| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:373` |
+| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:376` |
+| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:380` |
+| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:383` |
+| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:386` |
+| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:389` |
+| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
+| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
+| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
+| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:463` |
+| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
+| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:736` |
+| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
+| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:505` |
+| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
+| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:511` |
+| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:742` |
+| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
+| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
+| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
+| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
+| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
 
 ### Respuestas posibles
 
@@ -1334,7 +1355,494 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 11. GET /profiles/patients/me/dependent-candidates
+## 11. GET /profiles/patients/me/addresses
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar las propias direcciones (la preferida primero)
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PatientAddressBookController.list` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:47`
+
+### Qué es y para qué sirve (negocio)
+
+Listar las propias direcciones (la preferida primero). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /profiles/patients/me/addresses` la atiende `PatientAddressBookController.list` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:47). Exige sesión; el controlador no declara roles. Delega en `PatientAddressBookService.list`. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:47` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.list → PatientAddressBookService.list → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.list → PatientAddressBookService.list → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.list → PatientAddressBookService.list → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PatientAddressDto[]>` · DTO `PatientAddressDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:37` |
+| `kind` | `string` | Sí | valores: HOME, WORK, SAVED | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:40` |
+| `label` | `string` | Sí | — | — | Nombre para mostrar: el que puso la persona, o «Casa» / «Trabajo» para domicilio y trabajo. | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:46` |
+| `lines` | `string` | No | — | — | Calle, número y referencia | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:49` |
+| `city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:52` |
+| `municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:58` |
+| `administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:65` |
+| `district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:70` |
+| `latitude` | `number` | No | — | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:73` |
+| `longitude` | `number` | No | — | — | Viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:76` |
+| `isPreferred` | `boolean` | Sí | — | — | Si es la que se ofrece primero | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:79` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:PatientAddressBookController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 12. POST /profiles/patients/me/addresses
+
+- **Origen:** CONTRATO
+- **Nombre:** Guardar una dirección nueva
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PatientAddressBookController.create` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57`
+
+### Qué es y para qué sirve (negocio)
+
+Guardar una dirección nueva. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`POST /profiles/patients/me/addresses` la atiende `PatientAddressBookController.create` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreatePatientAddressDto` (7 campos, 2 obligatorios). Delega en `PatientAddressBookService.create`. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.create → PatientAddressBookService.create → PatientAddressBookService.write → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.create → PatientAddressBookService.create → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.create → PatientAddressBookService.create → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Cuerpo — DTO `CreatePatientAddressDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `label` | `string` | Sí | longitud mínima 1; longitud máxima 60 | `@IsString()` `@IsNotEmpty()` `@MaxLength(ADDRESS_LABEL_MAX_LENGTH)` | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:95` |
+| `municipalityConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:102` |
+| `lines` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(ADDRESS_LINES_MAX_LENGTH)` | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:108` |
+| `district` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(DISTRICT_MAX_LENGTH)` | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:115` |
+| `latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf(conPunto)` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:122` |
+| `longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf(conPunto)` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:129` |
+| `isPreferred` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Marcarla como la que se ofrece primero | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:136` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "label": "Casa de mi mamá",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "label": "Casa de mi mamá",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "lines": "valor-ejemplo",
+  "district": "valor-ejemplo",
+  "latitude": 1,
+  "longitude": 1,
+  "isPreferred": true
+}
+```
+
+</details>
+
+### Respuesta — `Promise<PatientAddressDto[]>` · DTO `PatientAddressDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:37` |
+| `kind` | `string` | Sí | valores: HOME, WORK, SAVED | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:40` |
+| `label` | `string` | Sí | — | — | Nombre para mostrar: el que puso la persona, o «Casa» / «Trabajo» para domicilio y trabajo. | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:46` |
+| `lines` | `string` | No | — | — | Calle, número y referencia | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:49` |
+| `city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:52` |
+| `municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:58` |
+| `administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:65` |
+| `district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:70` |
+| `latitude` | `number` | No | — | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:73` |
+| `longitude` | `number` | No | — | — | Viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:76` |
+| `isPreferred` | `boolean` | Sí | — | — | Si es la que se ofrece primero | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:79` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | QuotaExceededException: Puede guardar hasta {SAVED_ADDRESSES_MAX} direcciones además de su domicilio. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: createSavedAddress no creó fila con municipio declarado |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:PatientAddressBookController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 13. DELETE /profiles/patients/me/addresses/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Quitar una dirección guardada o la del trabajo
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PatientAddressBookController.remove` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86`
+
+### Qué es y para qué sirve (negocio)
+
+Quitar una dirección guardada o la del trabajo. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /profiles/patients/me/addresses/{id}` la atiende `PatientAddressBookController.remove` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86). Exige sesión; el controlador no declara roles. Delega en `PatientAddressBookService.remove`. Actualiza common.addresses. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | ESCRIBE | ACTUALIZA | POR_TIPO | PatientAddressBookController.remove → PatientAddressBookService.remove → PatientAddressBookAdapter.close → AddressesRepository.closeCurrent | `src/modules/common/repositories/addresses.repository.ts:148` |
+| `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.remove → PatientAddressBookService.remove → PatientAddressBookService.write → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.remove → PatientAddressBookService.remove → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.remove → PatientAddressBookService.remove → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PatientAddressDto[]>` · DTO `PatientAddressDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:37` |
+| `kind` | `string` | Sí | valores: HOME, WORK, SAVED | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:40` |
+| `label` | `string` | Sí | — | — | Nombre para mostrar: el que puso la persona, o «Casa» / «Trabajo» para domicilio y trabajo. | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:46` |
+| `lines` | `string` | No | — | — | Calle, número y referencia | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:49` |
+| `city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:52` |
+| `municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:58` |
+| `administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:65` |
+| `district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:70` |
+| `latitude` | `number` | No | — | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:73` |
+| `longitude` | `number` | No | — | — | Viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:76` |
+| `isPreferred` | `boolean` | Sí | — | — | Si es la que se ofrece primero | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:79` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dirección no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Su domicilio no se puede quitar: puede corregirlo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:PatientAddressBookController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 14. PATCH /profiles/patients/me/addresses/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Corregir una dirección (cierra la vigente y abre otra)
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PatientAddressBookController.update` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68`
+
+### Qué es y para qué sirve (negocio)
+
+Corregir una dirección (cierra la vigente y abre otra). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /profiles/patients/me/addresses/{id}` la atiende `PatientAddressBookController.update` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdatePatientAddressDto` (6 campos, 0 obligatorios). Delega en `PatientAddressBookService.update`. Actualiza common.addresses. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | ESCRIBE | ACTUALIZA | POR_TIPO | PatientAddressBookController.update → PatientAddressBookService.update → PatientAddressBookAdapter.close → AddressesRepository.closeCurrent | `src/modules/common/repositories/addresses.repository.ts:148` |
+| `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.update → PatientAddressBookService.update → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.update → PatientAddressBookService.update → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.update → PatientAddressBookService.update → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdatePatientAddressDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `label` | `string` | No | longitud mínima 1; longitud máxima 60 | `@IsOptional()` `@IsString()` `@IsNotEmpty()` `@MaxLength(ADDRESS_LABEL_MAX_LENGTH)` | Sólo para las guardadas: domicilio y trabajo tienen nombre fijo. | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:155` |
+| `municipalityConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:160` |
+| `lines` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(ADDRESS_LINES_MAX_LENGTH)` | Vacío para quitarla | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:169` |
+| `district` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(DISTRICT_MAX_LENGTH)` | Vacío para quitarlo | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:179` |
+| `latitude` | `number` | No | mínimo -90; máximo 90 | `@ValidateIf(conPunto)` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:186` |
+| `longitude` | `number` | No | mínimo -180; máximo 180 | `@ValidateIf(conPunto)` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:193` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "label": "valor-ejemplo",
+  "municipalityConceptId": "00000000-0000-4000-8000-000000000001",
+  "lines": "valor-ejemplo",
+  "district": "valor-ejemplo",
+  "latitude": 1,
+  "longitude": 1
+}
+```
+
+</details>
+
+### Respuesta — `Promise<PatientAddressDto[]>` · DTO `PatientAddressDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:37` |
+| `kind` | `string` | Sí | valores: HOME, WORK, SAVED | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:40` |
+| `label` | `string` | Sí | — | — | Nombre para mostrar: el que puso la persona, o «Casa» / «Trabajo» para domicilio y trabajo. | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:46` |
+| `lines` | `string` | No | — | — | Calle, número y referencia | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:49` |
+| `city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:52` |
+| `municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:58` |
+| `administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:65` |
+| `district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:70` |
+| `latitude` | `number` | No | — | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:73` |
+| `longitude` | `number` | No | — | — | Viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:76` |
+| `isPreferred` | `boolean` | Sí | — | — | Si es la que se ofrece primero | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:79` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dirección no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El domicilio y el trabajo tienen nombre fijo. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: createSavedAddress no creó fila con municipio declarado |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:PatientAddressBookController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 15. PUT /profiles/patients/me/addresses/{id}/preferred
+
+- **Origen:** CONTRATO
+- **Nombre:** Marcar la dirección que se ofrece primero
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PatientAddressBookController.prefer` — `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101`
+
+### Qué es y para qué sirve (negocio)
+
+Marcar la dirección que se ofrece primero. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`PUT /profiles/patients/me/addresses/{id}/preferred` la atiende `PatientAddressBookController.prefer` (src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101). Exige sesión; el controlador no declara roles. Delega en `PatientAddressBookService.prefer`. Lee common.addresses, profiles.patient_profiles, profiles.person_account_links.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:101` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `common.addresses` | LEE | LEE | DIRECTA | PatientAddressBookController.prefer → PatientAddressBookService.prefer → PatientAddressBookService.write → PatientAddressBookAdapter.listCurrent → AddressesRepository.findCurrentByOwnerAndUses | `src/modules/common/repositories/addresses.repository.ts:132` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PatientAddressBookController.prefer → PatientAddressBookService.prefer → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PatientAddressBookController.prefer → PatientAddressBookService.prefer → PatientAddressBookService.write → PatientAddressBookService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PatientAddressDto[]>` · DTO `PatientAddressDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:37` |
+| `kind` | `string` | Sí | valores: HOME, WORK, SAVED | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:40` |
+| `label` | `string` | Sí | — | — | Nombre para mostrar: el que puso la persona, o «Casa» / «Trabajo» para domicilio y trabajo. | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:46` |
+| `lines` | `string` | No | — | — | Calle, número y referencia | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:49` |
+| `city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:52` |
+| `municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:58` |
+| `administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:65` |
+| `district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:70` |
+| `latitude` | `number` | No | — | — | — | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:73` |
+| `longitude` | `number` | No | — | — | Viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:76` |
+| `isPreferred` | `boolean` | Sí | — | — | Si es la que se ofrece primero | `src/modules/profiles/presentation/dto/patient-address-book.dto.ts:79` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Dirección no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:PatientAddressBookController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 16. GET /profiles/patients/me/dependent-candidates
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscar por nombre a quién pedirle que deje representarla
@@ -1347,7 +1855,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 Buscar por nombre a quién pedirle que deje representarla. Caso de uso H4 §C: Search accounts by name to choose whom to ask (≥3 letters, ≤8 rows, CI masked). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:109`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:113`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -1414,7 +1922,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 12. POST /profiles/patients/me/dependent-requests
+## 17. POST /profiles/patients/me/dependent-requests
 
 - **Origen:** CONTRATO
 - **Nombre:** Pedir representar a una persona que ya tiene cuenta
@@ -1427,7 +1935,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 Pedir representar a una persona que ya tiene cuenta. Caso de uso H4 §C: Ask to represent someone who already has an account (by CI or by chosen profile). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:108`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:112`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -1524,7 +2032,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 13. POST /profiles/patients/me/dependent-requests/{id}/accept
+## 18. POST /profiles/patients/me/dependent-requests/{id}/accept
 
 - **Origen:** CONTRATO
 - **Nombre:** Aceptar una solicitud de dependiente
@@ -1537,7 +2045,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 Aceptar una solicitud de dependiente. Caso de uso H4 §C: Accept: the requester becomes the representative. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:111`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:115`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -1637,7 +2145,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 14. POST /profiles/patients/me/dependent-requests/{id}/reject
+## 19. POST /profiles/patients/me/dependent-requests/{id}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar una solicitud de dependiente
@@ -1650,7 +2158,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 Rechazar una solicitud de dependiente. Caso de uso H4 §C: Reject: no link is created. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:112`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:116`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -1729,7 +2237,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 15. GET /profiles/patients/me/dependent-requests/incoming
+## 20. GET /profiles/patients/me/dependent-requests/incoming
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar las solicitudes de dependiente recibidas
@@ -1742,7 +2250,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 Listar las solicitudes de dependiente recibidas. Caso de uso H4 §C: Requests waiting for this account's answer. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:110`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:114`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -1802,7 +2310,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 16. GET /profiles/patients/me/dependents
+## 21. GET /profiles/patients/me/dependents
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los dependientes a cargo del paciente autenticado
@@ -1886,7 +2394,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 17. POST /profiles/patients/me/dependents
+## 22. POST /profiles/patients/me/dependents
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un dependiente (menor o adulto mayor tutelado)
@@ -2022,7 +2530,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 18. DELETE /profiles/patients/me/photo
+## 23. DELETE /profiles/patients/me/photo
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar la propia foto de perfil
@@ -2054,9 +2562,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → PersonRecordsAdapter.findCurrentContact → ContactPointsRepository.findCurrentByOwnerAndSystem | `src/modules/common/repositories/contact-points.repository.ts:126` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readIdentifiers → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readIdentifiers → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | POR_SQL | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:168` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | ProfilesPatientsController.removeOwnPhoto → ProfilesPatientsService.removeOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
@@ -2077,84 +2585,88 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:521` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:527` |
-| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
-| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
-| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
-| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
-| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:560` |
-| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:571` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:581` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:596` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:606` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:622` |
-| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:640` |
-| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:649` |
-| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:658` |
-| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:669` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:675` |
-| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:678` |
-| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:682` |
-| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:685` |
-| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:700` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:706` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
+| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
+| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
+| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:557` |
+| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
+| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:572` |
+| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:583` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:593` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:608` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:634` |
+| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:652` |
+| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:661` |
+| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:670` |
+| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
+| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:690` |
+| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:694` |
+| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:697` |
+| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | sin fuente |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
+| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | sin fuente |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
-| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
-| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
-| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
-| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:403` |
-| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
-| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
-| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:414` |
-| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:417` |
-| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:420` |
-| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:425` |
-| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:428` |
-| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:431` |
-| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:434` |
-| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
-| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:442` |
-| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:445` |
-| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:448` |
-| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:352` |
-| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:355` |
-| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:361` |
-| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
-| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:368` |
-| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:371` |
-| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:374` |
-| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:377` |
-| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:382` |
-| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:385` |
-| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:388` |
-| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:451` |
-| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
-| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
-| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
-| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
-| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:496` |
-| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
-| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
-| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
-| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:472` |
-| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:475` |
-| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
-| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:481` |
+| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
+| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
+| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
+| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:412` |
+| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:415` |
+| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:418` |
+| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:421` |
+| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:426` |
+| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
+| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
+| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
+| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:440` |
+| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:443` |
+| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:446` |
+| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:449` |
+| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
+| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:457` |
+| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:460` |
+| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
+| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:367` |
+| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:370` |
+| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:373` |
+| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:376` |
+| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:380` |
+| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:383` |
+| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:386` |
+| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:389` |
+| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
+| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
+| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
+| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:463` |
+| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
+| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:736` |
+| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
+| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:505` |
+| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
+| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:511` |
+| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:742` |
+| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
+| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
+| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
+| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
+| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
 
 ### Respuestas posibles
 
@@ -2182,7 +2694,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 19. PUT /profiles/patients/me/photo
+## 24. PUT /profiles/patients/me/photo
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar la propia foto de perfil
@@ -2216,11 +2728,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → PersonRecordsAdapter.findCurrentContact → ContactPointsRepository.findCurrentByOwnerAndSystem | `src/modules/common/repositories/contact-points.repository.ts:126` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readIdentifiers → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readIdentifiers → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
 | `insurance.insurance_carriers` | LEE | LEE | POR_SQL | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
 | `insurance.insurance_plan_benefits` | LEE | LEE | POR_SQL | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:168` |
 | `insurance.insurance_plans` | LEE | LEE | POR_SQL | ProfilesPatientsController.setOwnPhoto → ProfilesPatientsService.setOwnPhoto → ProfilesPatientsService.getOwnProfile → ProfilesPatientsService.readCoverages → PatientCoveragesAdapter.read → DeclaredCoveragesReader.read | `src/modules/insurance/application/services/declared-coverages-reader.ts:125` |
@@ -2261,84 +2773,88 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:521` |
-| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:527` |
-| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
-| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
-| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
-| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
-| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:560` |
-| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:571` |
-| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:581` |
-| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:596` |
-| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:606` |
-| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
-| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:622` |
-| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
-| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:640` |
-| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:649` |
-| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:658` |
-| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:669` |
-| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:675` |
-| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:678` |
-| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:682` |
-| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:685` |
-| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:700` |
-| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:706` |
+| `personId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:533` |
+| `patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:539` |
+| `name` | `string` | No | — | — | Nombre de pila | `src/modules/profiles/presentation/dto/read-patients.dto.ts:545` |
+| `middleName` | `string` | No | — | — | Segundo nombre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:551` |
+| `lastName` | `string` | No | — | — | Apellido paterno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:557` |
+| `motherLastName` | `string` | No | — | — | Apellido materno | `src/modules/profiles/presentation/dto/read-patients.dto.ts:563` |
+| `displayName` | `string` | No | — | — | Nombre compuesto por el servidor a partir de las partes. No se edita directamente. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:572` |
+| `birthDate` | `string` | No | formato date | — | Fecha sin hora: serializarla como instante la desplazaría un día | `src/modules/profiles/presentation/dto/read-patients.dto.ts:583` |
+| `sexAtBirth` | `string` | No | valores: MALE, FEMALE, INTERSEX, UNKNOWN | — | Sexo asignado al nacer. Se devuelve el código y no el concept id: es el mismo valor que acepta el alta, y así el formulario no tiene que resolver terminología. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:593` |
+| `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:608` |
+| `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:618` |
+| `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:630` |
+| `workEmployerFreeText` | `string` | No | — | — | Empresa declarada en texto libre | `src/modules/profiles/presentation/dto/read-patients.dto.ts:634` |
+| `phone` | `string` | No | — | — | Teléfono de contacto vigente (`common.contact_points`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:642` |
+| `residenceMunicipalityConceptId` | `string` | No | formato uuid | — | Municipio del domicilio vigente (catálogo VS_BO_MUNICIPALITY). El departamento lo deriva el servidor. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:652` |
+| `identityVerified` | `boolean` | Sí | — | — | Si el titular tiene una aserción de identidad vigente. Con `false` el perfil llega sin `patientCode`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:661` |
+| `patientCode` | `string` | No | — | — | Código de paciente. Sólo con identidad verificada: ausente mientras `identityVerified` sea `false`. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:670` |
+| `nationalId` | `string` | No | — | — | Documento de identidad. Es su usuario de acceso, así que no se edita desde acá. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:681` |
+| `issuerAdministrativeAreaConceptId` | `string` | No | formato uuid | — | Departamento que emitió el documento (VS_BO_DEPARTMENT) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:687` |
+| `taxId` | `string` | No | — | — | NIT para facturación | `src/modules/profiles/presentation/dto/read-patients.dto.ts:690` |
+| `taxHolderName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:694` |
+| `email` | `string` | No | — | — | Correo de contacto vigente | `src/modules/profiles/presentation/dto/read-patients.dto.ts:697` |
+| `photoFileId` | `string` | No | formato uuid | — | Foto de perfil (id de archivo en `common.files`) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
+| `homeAddress` | `OwnAddressDto` | No | — | — | Domicilio, con calle y punto en el mapa si los declaró | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | sin fuente |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:712` |
+| `workAddress` | `OwnAddressDto` | No | — | — | Dirección de trabajo | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | sin fuente |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | sin fuente |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | sin fuente |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | sin fuente |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | sin fuente |
 | `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | sin fuente |
 | `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | sin fuente |
-| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:718` |
-| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
-| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
-| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
-| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:403` |
-| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
-| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
-| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:414` |
-| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:417` |
-| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:420` |
-| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:425` |
-| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:428` |
-| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:431` |
-| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:434` |
-| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
-| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:442` |
-| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:445` |
-| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:448` |
-| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:352` |
-| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:355` |
-| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
-| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:361` |
-| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
-| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:368` |
-| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:371` |
-| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:374` |
-| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:377` |
-| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:382` |
-| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:385` |
-| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:388` |
-| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:451` |
-| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
-| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:724` |
-| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
-| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
-| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:496` |
-| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
-| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
-| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
-| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:472` |
-| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:475` |
-| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
-| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:481` |
+| `coverages` | `array<OwnCoverageDto>` | Sí | — | — | Seguros declarados. Vacío si no declaró ninguno. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:730` |
+| `coverages[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:406` |
+| `coverages[].carrierName` | `string` | Sí | — | — | Aseguradora, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:409` |
+| `coverages[].planName` | `string` | No | — | — | Plan contratado, en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:412` |
+| `coverages[].isPublic` | `boolean` | Sí | — | — | Si el seguro es público o privado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:415` |
+| `coverages[].policyIdentifier` | `string` | No | — | — | Número de póliza declarado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:418` |
+| `coverages[].memberIdentifier` | `string` | No | — | — | Con qué documento figura afiliado | `src/modules/profiles/presentation/dto/read-patients.dto.ts:421` |
+| `coverages[].verified` | `boolean` | Sí | — | — | Si la plataforma confirmó la cobertura con la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:426` |
+| `coverages[].status` | `string` | No | — | — | Estado legible de la cobertura | `src/modules/profiles/presentation/dto/read-patients.dto.ts:429` |
+| `coverages[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:432` |
+| `coverages[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:437` |
+| `coverages[].referenceDate` | `string` | Sí | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:440` |
+| `coverages[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:443` |
+| `coverages[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:446` |
+| `coverages[].currencyCode` | `string` | No | — | — | Código de moneda del plan | `src/modules/profiles/presentation/dto/read-patients.dto.ts:449` |
+| `coverages[].carrierWhatsappNumber` | `string` | No | — | — | Canal oficial de WhatsApp de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:454` |
+| `coverages[].carrierCallCenterPhone` | `string` | No | — | — | Call center oficial de la aseguradora | `src/modules/profiles/presentation/dto/read-patients.dto.ts:457` |
+| `coverages[].benefits` | `array<CoverageBenefitSummaryDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:460` |
+| `coverages[].benefits[].id` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:364` |
+| `coverages[].benefits[].categoryCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:367` |
+| `coverages[].benefits[].categoryName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:370` |
+| `coverages[].benefits[].serviceConceptId` | `string` | No | formato uuid | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:373` |
+| `coverages[].benefits[].serviceName` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:376` |
+| `coverages[].benefits[].coveragePercent` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:380` |
+| `coverages[].benefits[].copayAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:383` |
+| `coverages[].benefits[].deductibleAmount` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:386` |
+| `coverages[].benefits[].statusCode` | `string` | No | — | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:389` |
+| `coverages[].benefits[].validityStatus` | `string` | Sí | valores: CURRENT, UPCOMING, EXPIRED, INACTIVE, UNKNOWN | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:394` |
+| `coverages[].benefits[].effectiveFrom` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:397` |
+| `coverages[].benefits[].effectiveTo` | `string` | No | formato date | — | — | `src/modules/profiles/presentation/dto/read-patients.dto.ts:400` |
+| `coverages[].planId` | `string` | No | formato uuid | — | Plan de salud elegido | `src/modules/profiles/presentation/dto/read-patients.dto.ts:463` |
+| `coverages[].coverageOrder` | `number` | Sí | — | — | Orden de la cobertura: 1 privada, 2 pública | `src/modules/profiles/presentation/dto/read-patients.dto.ts:466` |
+| `emergencyContacts` | `array<OwnEmergencyContactDto>` | Sí | — | — | Contactos de emergencia activos. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:736` |
+| `emergencyContacts[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:499` |
+| `emergencyContacts[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:505` |
+| `emergencyContacts[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:508` |
+| `emergencyContacts[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:511` |
+| `guardians` | `array<OwnGuardianDto>` | Sí | — | — | Representantes con apoderamiento activo, con su parentesco. | `src/modules/profiles/presentation/dto/read-patients.dto.ts:742` |
+| `guardians[].displayName` | `string` | No | — | — | Cómo se llama | `src/modules/profiles/presentation/dto/read-patients.dto.ts:478` |
+| `guardians[].relationshipConceptId` | `string` | No | formato uuid | — | Parentesco (concept id) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:484` |
+| `guardians[].relationshipDisplay` | `string` | Sí | — | — | Parentesco en palabras | `src/modules/profiles/presentation/dto/read-patients.dto.ts:487` |
+| `guardians[].isLegalGuardian` | `boolean` | Sí | — | — | Es su representante legal | `src/modules/profiles/presentation/dto/read-patients.dto.ts:490` |
+| `guardians[].phone` | `string` | No | — | — | Su teléfono | `src/modules/profiles/presentation/dto/read-patients.dto.ts:493` |
 
 ### Respuestas posibles
 
@@ -2367,7 +2883,253 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 20. GET /profiles/patients/me/summary
+## 25. DELETE /profiles/patients/me/primary-practitioner
+
+- **Origen:** CONTRATO
+- **Nombre:** Quitar el propio médico de cabecera
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PrimaryPractitionerController.removeOwn` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67`
+
+### Qué es y para qué sirve (negocio)
+
+Quitar el propio médico de cabecera. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /profiles/patients/me/primary-practitioner` la atiende `PrimaryPractitionerController.removeOwn` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67). Exige sesión; el controlador no declara roles. Delega en `PrimaryPractitionerService.removeOwn`. Actualiza profiles.patient_primary_practitioners. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.present → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_primary_practitioners` | ESCRIBE | ACTUALIZA | POR_TIPO | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PatientPrimaryPractitionersRepository.close | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:66` |
+| `profiles.patient_primary_practitioners` | LEE | LEE | DIRECTA | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PrimaryPractitionerService.write → PatientPrimaryPractitionersRepository.findCurrentByPatient | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:36` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrimaryPractitionerController.removeOwn → PrimaryPractitionerService.removeOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PrimaryPractitionerService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<OwnPrimaryPractitionerDto>` · DTO `OwnPrimaryPractitionerDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `current` | `PrimaryPractitionerDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:52` |
+| `current.practitionerProfileId` | `string` | No | formato uuid | — | Con este id se abre su ficha en la guía | sin fuente |
+| `current.displayName` | `string` | No | — | — | Nombre visible del profesional | sin fuente |
+| `current.professionalTitle` | `string` | No | — | — | Título profesional declarado | sin fuente |
+| `current.since` | `string` | No | formato date-time | — | Desde cuándo es su médico de cabecera | sin fuente |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:PrimaryPractitionerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 26. GET /profiles/patients/me/primary-practitioner
+
+- **Origen:** CONTRATO
+- **Nombre:** Consultar el propio médico de cabecera
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PrimaryPractitionerController.getOwn` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:38`
+
+### Qué es y para qué sirve (negocio)
+
+Consultar el propio médico de cabecera. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /profiles/patients/me/primary-practitioner` la atiende `PrimaryPractitionerController.getOwn` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:38). Exige sesión; el controlador no declara roles. Delega en `PrimaryPractitionerService.getOwn`. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:38` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.getOwn → PrimaryPractitionerService.getOwn → PrimaryPractitionerService.present → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_primary_practitioners` | LEE | LEE | DIRECTA | PrimaryPractitionerController.getOwn → PrimaryPractitionerService.getOwn → PatientPrimaryPractitionersRepository.findCurrentByPatient | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:36` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.getOwn → PrimaryPractitionerService.getOwn → PrimaryPractitionerService.resolveOwnPatientId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrimaryPractitionerController.getOwn → PrimaryPractitionerService.getOwn → PrimaryPractitionerService.resolveOwnPatientId → PrimaryPractitionerService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<OwnPrimaryPractitionerDto>` · DTO `OwnPrimaryPractitionerDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `current` | `PrimaryPractitionerDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:52` |
+| `current.practitionerProfileId` | `string` | No | formato uuid | — | Con este id se abre su ficha en la guía | sin fuente |
+| `current.displayName` | `string` | No | — | — | Nombre visible del profesional | sin fuente |
+| `current.professionalTitle` | `string` | No | — | — | Título profesional declarado | sin fuente |
+| `current.since` | `string` | No | formato date-time | — | Desde cuándo es su médico de cabecera | sin fuente |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:PrimaryPractitionerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 27. PUT /profiles/patients/me/primary-practitioner
+
+- **Origen:** CONTRATO
+- **Nombre:** Elegir o cambiar el propio médico de cabecera
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PrimaryPractitionerController.setOwn` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48`
+
+### Qué es y para qué sirve (negocio)
+
+Elegir o cambiar el propio médico de cabecera. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`PUT /profiles/patients/me/primary-practitioner` la atiende `PrimaryPractitionerController.setOwn` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SetPrimaryPractitionerDto` (1 campo, 1 obligatorio). Delega en `PrimaryPractitionerService.setOwn`. Crea filas en profiles.patient_primary_practitioners. Actualiza profiles.patient_primary_practitioners. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_primary_practitioners` | ESCRIBE | ACTUALIZA | POR_TIPO | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PatientPrimaryPractitionersRepository.close | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:66` |
+| `profiles.patient_primary_practitioners` | ESCRIBE | CREA | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PatientPrimaryPractitionersRepository.open | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:52` |
+| `profiles.patient_primary_practitioners` | LEE | LEE | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PrimaryPractitionerService.write → PatientPrimaryPractitionersRepository.findCurrentByPatient | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:36` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrimaryPractitionerController.setOwn → PrimaryPractitionerService.setOwn → PrimaryPractitionerService.write → PrimaryPractitionerService.resolveOwnPatientId → PrimaryPractitionerService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+
+### Cuerpo — DTO `SetPrimaryPractitionerDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `practitionerProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil profesional que el paciente elige como médico de cabecera | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:19` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<OwnPrimaryPractitionerDto>` · DTO `OwnPrimaryPractitionerDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `current` | `PrimaryPractitionerDto` | No | admite null | — | — | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:52` |
+| `current.practitionerProfileId` | `string` | No | formato uuid | — | Con este id se abre su ficha en la guía | sin fuente |
+| `current.displayName` | `string` | No | — | — | Nombre visible del profesional | sin fuente |
+| `current.professionalTitle` | `string` | No | — | — | Título profesional declarado | sin fuente |
+| `current.since` | `string` | No | formato date-time | — | Desde cuándo es su médico de cabecera | sin fuente |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Profesional no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No puede elegirse a sí mismo como médico de cabecera.; PreconditionFailedException: Este profesional no está aceptando pacientes nuevos. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:PrimaryPractitionerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 28. GET /profiles/patients/me/summary
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el resumen propio
@@ -2444,7 +3206,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 21. POST /profiles/patients/merge
+## 29. POST /profiles/patients/merge
 
 - **Origen:** CONTRATO
 - **Nombre:** Fusionar pacientes duplicados
@@ -2481,9 +3243,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `profiles.patient_identity_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PatientIdentityLinksRepository.reassignPatientProfile | `src/modules/profiles/infrastructure/repositories/patient-identity-links.repository.ts:103` |
 | `profiles.patient_merge_events` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PatientMergeEventsRepository.create | `src/modules/profiles/infrastructure/repositories/patient-merge-events.repository.ts:113` |
 | `profiles.patient_portal_proxies` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PatientPortalProxiesRepository.reassignPatientProfile | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:529` |
-| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients | `src/modules/profiles/application/services/profiles-patients.service.ts:2177` |
+| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients | `src/modules/profiles/application/services/profiles-patients.service.ts:2198` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients | `src/modules/profiles/application/services/profiles-patients.service.ts:2187` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients | `src/modules/profiles/application/services/profiles-patients.service.ts:2208` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.related_persons` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.mergePatients → ProfilesPatientsService.mergePatients → RelatedPersonsRepository.reassignPatientProfile | `src/modules/profiles/infrastructure/repositories/related-persons.repository.ts:178` |
 
@@ -2554,7 +3316,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 22. GET /profiles/patients/merge-events
+## 30. GET /profiles/patients/merge-events
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar eventos de fusión de pacientes
@@ -2634,7 +3396,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 23. POST /profiles/patients/merge/{eventId}/reverse
+## 31. POST /profiles/patients/merge/{eventId}/reverse
 
 - **Origen:** CONTRATO
 - **Nombre:** Revertir una fusión de pacientes
@@ -2671,9 +3433,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.patient_merge_events` | ESCRIBE | CREA | DIRECTA | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge → PatientMergeEventsRepository.create | `src/modules/profiles/infrastructure/repositories/patient-merge-events.repository.ts:113` |
 | `profiles.patient_merge_events` | LEE | LEE | DIRECTA | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge → PatientMergeEventsRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-merge-events.repository.ts:56` |
-| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge | `src/modules/profiles/application/services/profiles-patients.service.ts:2318` |
+| `profiles.patient_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge | `src/modules/profiles/application/services/profiles-patients.service.ts:2339` |
 | `profiles.patient_profiles` | LEE | LEE | DIRECTA | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge → PatientProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/patient-profiles.repository.ts:97` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge | `src/modules/profiles/application/services/profiles-patients.service.ts:2325` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge | `src/modules/profiles/application/services/profiles-patients.service.ts:2346` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.reverseMerge → ProfilesPatientsService.reverseMerge → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
 ### Parámetros
@@ -2742,7 +3504,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 24. POST /profiles/patients/search
+## 32. POST /profiles/patients/search
 
 - **Origen:** CONTRATO
 - **Nombre:** UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
@@ -2755,7 +3517,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo. Caso de uso H4 §C: UC-05-13 search with the filters in the body (name/CI never in the URL). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:107`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:111`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -2854,7 +3616,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 25. POST /profiles/persons/{personId}/account-links
+## 33. POST /profiles/persons/{personId}/account-links
 
 - **Origen:** CONTRATO
 - **Nombre:** Vincular cuenta de portal a una persona
@@ -2961,7 +3723,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 26. POST /profiles/persons/{personId}/decease
+## 34. POST /profiles/persons/{personId}/decease
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar defunción y anonimización de una persona
@@ -2998,7 +3760,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.patient_portal_proxies` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PatientPortalProxiesRepository.revokeActiveForPatient | `src/modules/profiles/infrastructure/repositories/patient-portal-proxies.repository.ts:515` |
 | `profiles.person_account_links` | ESCRIBE | ACTUALIZA | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PersonAccountLinksRepository.revokeActiveForPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:130` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.decease → ProfilesPatientsService.decease | `src/modules/profiles/application/services/profiles-patients.service.ts:2513` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPatientsController.decease → ProfilesPatientsService.decease | `src/modules/profiles/application/services/profiles-patients.service.ts:2534` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPatientsController.decease → ProfilesPatientsService.decease → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 
 ### Parámetros
@@ -3068,7 +3830,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 27. GET /profiles/practitioners
+## 35. GET /profiles/practitioners
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar profesionales para la guía, con sus especialidades
@@ -3163,7 +3925,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 28. POST /profiles/practitioners
+## 36. POST /profiles/practitioners
 
 - **Origen:** CONTRATO
 - **Nombre:** Alta de profesional de salud (workforce generalista)
@@ -3310,7 +4072,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 29. PATCH /profiles/practitioners/{profileId}
+## 37. PATCH /profiles/practitioners/{profileId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir el perfil profesional de otro (titular o plataforma)
@@ -3327,7 +4089,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/{profileId}` la atiende `ProfilesPractitionersController.updatePractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (35 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updatePractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 10 más.
+`PATCH /profiles/practitioners/{profileId}` la atiende `ProfilesPractitionersController.updatePractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updatePractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 10 más.
 
 ### Requerimientos
 
@@ -3349,21 +4111,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.closeContact → ContactPointsRepository.closeCurrent | `src/modules/common/repositories/contact-points.repository.ts:192` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.createContact → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1317` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1320` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfileOwnershipService.assertOwnsPractitionerProfile → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1344` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1347` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:84` |
-| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1529` |
+| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1536` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updatePractitionerProfile → ProfilesPractitionersService.updatePractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -3407,13 +4169,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `homeLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.homeLatitude, dto.homeLongitude) && (dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:359` |
 | `homeLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.homeLatitude, dto.homeLongitude) && (dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:371` |
 | `workAddressLines` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Dirección del lugar de trabajo. Vacío para quitarla. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:381` |
-| `workLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:393` |
-| `workLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:405` |
-| `occupationConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => dto.occupationConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:431` |
-| `occupationFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)` | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:446` |
-| `workEmployerConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => dto.workEmployerConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:463` |
-| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:477` |
-| `languages` | `array<PractitionerLanguageInputDto>` | No | máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(MAX_PRACTITIONER_LANGUAGES)` `@ValidateNested({ each: true })` `@Type(() => PractitionerLanguageInputDto)` | Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:496` |
+| `homeDistrict` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Distrito o zona del domicilio. Vacío para quitarlo. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:395` |
+| `workDistrict` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Distrito o zona del trabajo. Vacío para quitarlo. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:405` |
+| `workLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:417` |
+| `workLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:429` |
+| `occupationConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => dto.occupationConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:455` |
+| `occupationFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)` | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:470` |
+| `workEmployerConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => dto.workEmployerConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:487` |
+| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:501` |
+| `languages` | `array<PractitionerLanguageInputDto>` | No | máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(MAX_PRACTITIONER_LANGUAGES)` `@ValidateNested({ each: true })` `@Type(() => PractitionerLanguageInputDto)` | Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:520` |
 | `languages[].languageConceptId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:84` |
 | `languages[].proficiencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:90` |
 | `languages[].clinicalInterpretationAllowed` | `boolean` | No | — | `@IsBoolean()` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:95` |
@@ -3453,6 +4217,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "homeLatitude": {},
   "homeLongitude": {},
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "workLatitude": {},
   "workLongitude": {},
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
@@ -3506,14 +4272,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
@@ -3609,7 +4379,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 30. POST /profiles/practitioners/{profileId}/affiliations
+## 38. POST /profiles/practitioners/{profileId}/affiliations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un consultorio de un profesional sin cuenta
@@ -3644,7 +4414,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.hasAdministrators → TenantAdministrationService.hasAdministrators → TenantMembershipsRepository.countActiveByTenantRole | `src/modules/directory/repositories/tenant-memberships.repository.ts:113` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.hasAdministrators → TenantAdministrationService.hasAdministrators → TenantMembershipsRepository.countActiveByTenantRole | `src/modules/directory/repositories/tenant-memberships.repository.ts:118` |
 | `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
 | `iam.devices` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addAffiliationFor → ProfilesPractitionersService.addAffiliationFor → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
@@ -3757,7 +4527,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 31. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+## 39. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar/renovar autorización jurisdiccional (licencia)
@@ -3877,7 +4647,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 32. DELETE /profiles/practitioners/{profileId}/photo
+## 40. DELETE /profiles/practitioners/{profileId}/photo
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar la foto del perfil profesional
@@ -3890,7 +4660,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 Quitar la foto del perfil profesional. Caso de uso P5 §3: Clear the practitioner profile photo (the file is not deleted). Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:106`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:110`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -3914,10 +4684,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1838` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1845` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.removePractitionerPhoto → ProfilesPractitionersService.removePractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
@@ -3972,14 +4742,18 @@ La operación no recibe cuerpo.
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
@@ -4073,7 +4847,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 33. PUT /profiles/practitioners/{profileId}/photo
+## 41. PUT /profiles/practitioners/{profileId}/photo
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar la foto del perfil profesional
@@ -4086,7 +4860,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 Fijar la foto del perfil profesional. Caso de uso P5 §3: Set the practitioner profile photo from an already uploaded file. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:105`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profiles/README.md:109`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
 
 ### Cómo se atiende (sistema)
 
@@ -4112,12 +4886,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
 | `common.file_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1790` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1797` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.setPractitionerPhoto → ProfilesPractitionersService.setPractitionerPhoto → ProfilesPractitionersService.getPractitionerSummary → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
@@ -4192,14 +4966,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/profile
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
@@ -4294,7 +5072,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 34. POST /profiles/practitioners/{profileId}/specialties
+## 42. POST /profiles/practitioners/{profileId}/specialties
 
 - **Origen:** CONTRATO
 - **Nombre:** Agregar especialidad con credencial de soporte
@@ -4412,7 +5190,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 35. GET /profiles/practitioners/{profileId}/summary
+## 43. GET /profiles/practitioners/{profileId}/summary
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el perfil profesional de un colega (ficha de la guía)
@@ -4449,9 +5227,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getPractitionerSummary → ProfilesPractitionersService.getPractitionerSummary → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
@@ -4506,14 +5284,18 @@ La operación no recibe cuerpo.
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
@@ -4609,7 +5391,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 36. PATCH /profiles/practitioners/me
+## 44. PATCH /profiles/practitioners/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar la presentación del propio perfil profesional
@@ -4626,7 +5408,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /profiles/practitioners/me` la atiende `ProfilesPractitionersController.updateOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (35 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnPractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 10 más.
+`PATCH /profiles/practitioners/me` la atiende `ProfilesPractitionersController.updateOwnPractitionerProfile` (src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateOwnPractitionerProfileDto` (37 campos, 0 obligatorios). Delega en `ProfilesPractitionersService.updateOwnPractitionerProfile`. Crea filas en common.contact_points, common.identifiers, profiles.practitioner_languages. Actualiza common.contact_points, profiles.health_practitioner_profiles, profiles.persons, profiles.practitioner_languages. Borra de profiles.practitioner_languages. Lee chart.clinical_note_headers, chart.document_records, clinical.encounters, clinical.medication_requests, common.addresses, common.contact_points, common.identifiers, profiles.health_practitioner_profiles y 10 más.
 
 ### Requerimientos
 
@@ -4647,21 +5429,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.closeContact → ContactPointsRepository.closeCurrent | `src/modules/common/repositories/contact-points.repository.ts:192` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.createContact → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceContact → PersonRecordsAdapter.findCurrentContact → ContactPointsRepository.findCurrentByOwnerAndSystem | `src/modules/common/repositories/contact-points.repository.ts:126` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
-| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1317` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.fixNationalId → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
+| `profiles.health_practitioner_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1320` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1344` |
+| `profiles.persons` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1347` |
 | `profiles.persons` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → PersonsRepository.findById | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:94` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerAffiliationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:69` |
 | `profiles.practitioner_languages` | BORRA | BORRA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:84` |
-| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1529` |
+| `profiles.practitioner_languages` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages | `src/modules/profiles/application/services/profiles-practitioners.service.ts:1536` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_languages` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.applyProfileUpdate → ProfilesPractitionersService.replaceLanguages → PractitionerLanguagesRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:55` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnPractitionerProfile → ProfilesPractitionersService.updateOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PractitionerSpecialtiesRepository.findAllByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:143` |
@@ -4699,13 +5481,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `homeLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.homeLatitude, dto.homeLongitude) && (dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:359` |
 | `homeLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.homeLatitude, dto.homeLongitude) && (dto.homeLatitude !== undefined \|\| dto.homeLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:371` |
 | `workAddressLines` | `string` | No | longitud máxima 300 | `@IsOptional()` `@IsString()` `@MaxLength(300)` | Dirección del lugar de trabajo. Vacío para quitarla. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:381` |
-| `workLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:393` |
-| `workLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:405` |
-| `occupationConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => dto.occupationConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:431` |
-| `occupationFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)` | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:446` |
-| `workEmployerConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => dto.workEmployerConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:463` |
-| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:477` |
-| `languages` | `array<PractitionerLanguageInputDto>` | No | máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(MAX_PRACTITIONER_LANGUAGES)` `@ValidateNested({ each: true })` `@Type(() => PractitionerLanguageInputDto)` | Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:496` |
+| `homeDistrict` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Distrito o zona del domicilio. Vacío para quitarlo. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:395` |
+| `workDistrict` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Distrito o zona del trabajo. Vacío para quitarlo. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:405` |
+| `workLatitude` | `object` | No | mínimo -90; máximo 90 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-90)` `@Max(90)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:417` |
+| `workLongitude` | `object` | No | mínimo -180; máximo 180 | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => !removesDot(dto.workLatitude, dto.workLongitude) && (dto.workLatitude !== undefined \|\| dto.workLongitude !== undefined), )` `@IsNumber()` `@Min(-180)` `@Max(180)` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:429` |
+| `occupationConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => dto.occupationConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Ocupación del catálogo (VS_BO_OCCUPATION). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:455` |
+| `occupationFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(OCCUPATION_FREE_TEXT_MAX_LENGTH)` | Ocupación en texto libre, para cuando no está en el catálogo. Cadena vacía para borrarla. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:470` |
+| `workEmployerConceptId` | `string` | No | formato uuid | `@ValidateIf( (dto: UpdateOwnPractitionerProfileDto) => dto.workEmployerConceptId !== '', )` `@IsOptional()` `@IsUUID()` | Empresa donde trabaja (VS_BO_EMPLOYER). Cadena vacía para borrarla. Si viene, el texto libre se descarta. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:487` |
+| `workEmployerFreeText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(EMPLOYER_FREE_TEXT_MAX_LENGTH)` | Empresa en texto libre. Cadena vacía para borrarla. Se descarta si viene el concepto. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:501` |
+| `languages` | `array<PractitionerLanguageInputDto>` | No | máximo 20 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(MAX_PRACTITIONER_LANGUAGES)` `@ValidateNested({ each: true })` `@Type(() => PractitionerLanguageInputDto)` | Idiomas de atención. Reemplaza la lista guardada; [] la vacía. Un idioma no puede repetirse. | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:520` |
 | `languages[].languageConceptId` | `string` | No | formato uuid | `@IsUUID()` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:84` |
 | `languages[].proficiencyConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:90` |
 | `languages[].clinicalInterpretationAllowed` | `boolean` | No | — | `@IsBoolean()` | — | `src/modules/profiles/presentation/dto/update-practitioner-profile.dto.ts:95` |
@@ -4745,6 +5529,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
   "homeLatitude": {},
   "homeLongitude": {},
   "workAddressLines": "valor-ejemplo",
+  "homeDistrict": "valor-ejemplo",
+  "workDistrict": "valor-ejemplo",
   "workLatitude": {},
   "workLongitude": {},
   "occupationConceptId": "00000000-0000-4000-8000-000000000001",
@@ -4798,14 +5584,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
@@ -4902,7 +5692,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 37. GET /profiles/practitioners/me/affiliations
+## 45. GET /profiles/practitioners/me/affiliations
 
 - **Origen:** CONTRATO
 - **Nombre:** Historial laboral propio (instituciones donde trabajó)
@@ -4984,7 +5774,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 38. POST /profiles/practitioners/me/affiliations
+## 46. POST /profiles/practitioners/me/affiliations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una afiliación institucional en el historial propio
@@ -5018,7 +5808,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.hasAdministrators → TenantAdministrationService.hasAdministrators → TenantMembershipsRepository.countActiveByTenantRole | `src/modules/directory/repositories/tenant-memberships.repository.ts:113` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesAffiliationsService.initialState → AffiliationOrganizationsAdapter.hasAdministrators → TenantAdministrationService.hasAdministrators → TenantMembershipsRepository.countActiveByTenantRole | `src/modules/directory/repositories/tenant-memberships.repository.ts:118` |
 | `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
 | `iam.devices` | LEE | LEE | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | ProfilesPractitionersController.addOwnAffiliation → ProfilesPractitionersService.addOwnAffiliation → ProfilesPractitionersService.addAffiliation → ProfilesPractitionersService.orderNotify → ProfilesAffiliationsService.orderNotify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
@@ -5127,7 +5917,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 39. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+## 47. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Quitar una afiliación del historial laboral propio
@@ -5202,7 +5992,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 40. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+## 48. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una afiliación del historial laboral propio
@@ -5239,7 +6029,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → ProfilesPractitionersService.ownOrNothing → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → ProfilesPractitionersService.ownOrNothing → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3169` |
+| `profiles.practitioner_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3176` |
 | `profiles.practitioner_affiliations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnAffiliation → ProfilesPractitionersService.updateOwnAffiliation → PractitionerAffiliationsRepository.findSame | `src/modules/profiles/infrastructure/repositories/practitioner-affiliations.repository.ts:254` |
 
 ### Parámetros
@@ -5322,7 +6112,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 41. POST /profiles/practitioners/me/credentials
+## 49. POST /profiles/practitioners/me/credentials
 
 - **Origen:** CONTRATO
 - **Nombre:** Agregar un título propio (diplomado, maestría, doctorado…)
@@ -5446,7 +6236,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 42. DELETE /profiles/practitioners/me/credentials/{credentialId}
+## 50. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar un título propio pendiente
@@ -5522,7 +6312,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 43. PATCH /profiles/practitioners/me/credentials/{credentialId}
+## 51. PATCH /profiles/practitioners/me/credentials/{credentialId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar un título propio pendiente de verificación
@@ -5561,7 +6351,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `common.files` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → AttachableFilesAdapter.assertUsableBy → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3453` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential | `src/modules/profiles/application/services/profiles-practitioners.service.ts:3460` |
 | `profiles.professional_credentials` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnCredential → ProfilesPractitionersService.updateOwnCredential → ProfessionalCredentialsRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:104` |
 
 ### Parámetros
@@ -5638,7 +6428,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 44. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 52. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar una matrícula propia pendiente de verificación
@@ -5716,7 +6506,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 45. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+## 53. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una matrícula propia pendiente de verificación
@@ -5820,7 +6610,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 46. GET /profiles/practitioners/me/linkable-organizations
+## 54. GET /profiles/practitioners/me/linkable-organizations
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscar instituciones del padrón para declarar una afiliación
@@ -5905,7 +6695,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 47. GET /profiles/practitioners/me/onboarding
+## 55. GET /profiles/practitioners/me/onboarding
 
 - **Origen:** CONTRATO
 - **Nombre:** Qué le falta al profesional para completar su alta
@@ -5985,7 +6775,91 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 48. GET /profiles/practitioners/me/signature-assets
+## 56. GET /profiles/practitioners/me/primary-patients
+
+- **Origen:** CONTRATO
+- **Nombre:** Listar los pacientes que me eligieron como médico de cabecera
+- **Bloque:** Núcleo y Terminología
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PrimaryPractitionerController.listOwnPatients` — `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:80`
+
+### Qué es y para qué sirve (negocio)
+
+Listar los pacientes que me eligieron como médico de cabecera. Dentro del módulo (descripción del modelo, en inglés): «Separates the human person from login accounts and from domain roles.» Dominio: Núcleo y Terminología.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_05_profiles.puml:9`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:28`)
+
+### Cómo se atiende (sistema)
+
+`GET /profiles/practitioners/me/primary-patients` la atiende `PrimaryPractitionerController.listOwnPatients` (src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:80). Exige sesión; el controlador no declara roles. Delega en `PrimaryPractitionerService.listOwnPatients`. Lee profiles.health_practitioner_profiles, profiles.patient_primary_practitioners, profiles.patient_profiles, profiles.person_account_links, profiles.persons.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:80` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.listOwnPatients → PrimaryPractitionerService.listOwnPatients → PrimaryPractitionerService.resolveOwnPractitionerId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
+| `profiles.patient_primary_practitioners` | LEE | LEE | DIRECTA | PrimaryPractitionerController.listOwnPatients → PrimaryPractitionerService.listOwnPatients → PatientPrimaryPractitionersRepository.listCurrentPatients | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:90` |
+| `profiles.patient_profiles` | LEE | LEE | DIRECTA | PrimaryPractitionerController.listOwnPatients → PrimaryPractitionerService.listOwnPatients → PatientPrimaryPractitionersRepository.listCurrentPatients | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:106` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | PrimaryPractitionerController.listOwnPatients → PrimaryPractitionerService.listOwnPatients → PrimaryPractitionerService.resolveOwnPractitionerId → PrimaryPractitionerService.resolveOwnPersonId → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
+| `profiles.persons` | LEE | LEE | DIRECTA | PrimaryPractitionerController.listOwnPatients → PrimaryPractitionerService.listOwnPatients → PatientPrimaryPractitionersRepository.listCurrentPatients | `src/modules/profiles/infrastructure/repositories/patient-primary-practitioners.repository.ts:105` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `limit` | query | No | `number` | — |
+| `offset` | query | No | `number` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PrimaryPatientsPageDto>` · DTO `PrimaryPatientsPageDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<PrimaryPatientDto>` | Sí | — | — | — | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:98` |
+| `items[].patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:79` |
+| `items[].displayName` | `string` | No | — | — | Nombre visible del paciente | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:82` |
+| `items[].patientCode` | `string` | No | — | — | Código de paciente | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:85` |
+| `items[].since` | `string` | Sí | formato date-time | — | Desde cuándo lo tiene como médico de cabecera | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:92` |
+| `total` | `number` | Sí | — | — | Pacientes de cabecera vigentes, en total | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:101` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:104` |
+| `offset` | `number` | Sí | — | — | — | `src/modules/profiles/presentation/dto/primary-practitioner.dto.ts:107` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: La cuenta no tiene perfil profesional |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/profiles.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Profiles Module (05) — etapa `ctrl:PrimaryPractitionerController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 57. GET /profiles/practitioners/me/signature-assets
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar las imágenes de firma y sello propias
@@ -6056,7 +6930,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 49. PUT /profiles/practitioners/me/signature-assets
+## 58. PUT /profiles/practitioners/me/signature-assets
 
 - **Origen:** CONTRATO
 - **Nombre:** Guardar o quitar las imágenes de firma y sello propias
@@ -6153,7 +7027,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 50. DELETE /profiles/practitioners/me/specialties/{specialtyId}
+## 59. DELETE /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Retirar una especialidad propia pendiente de verificación
@@ -6229,7 +7103,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 51. PATCH /profiles/practitioners/me/specialties/{specialtyId}
+## 60. PATCH /profiles/practitioners/me/specialties/{specialtyId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Corregir una especialidad propia pendiente de verificación
@@ -6266,7 +7140,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → ProfileOwnershipService.requireOwnPractitionerProfileId → ProfileOwnershipService.personOf → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
-| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2632` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty | `src/modules/profiles/application/services/profiles-practitioners.service.ts:2639` |
 | `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → PractitionerSpecialtiesRepository.findByIdForUpdate | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:101` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | ProfilesPractitionersController.updateOwnSpecialty → ProfilesPractitionersService.updateOwnSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
@@ -6331,7 +7205,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 52. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+## 61. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar una especialidad propia como la principal
@@ -6415,7 +7289,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 53. GET /profiles/practitioners/me/summary
+## 62. GET /profiles/practitioners/me/summary
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el perfil profesional propio (trayectoria y actividad)
@@ -6451,9 +7325,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `chart.document_records` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:45` |
 | `clinical.encounters` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:42` |
 | `clinical.medication_requests` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.countActivity → PractitionerContextAdapter.activity | `src/modules/profiles/infrastructure/adapters/practitioner-context.adapter.ts:43` |
-| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:84` |
+| `common.addresses` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentAddress → AddressesRepository.findCurrentByOwnerAndUse | `src/modules/common/repositories/addresses.repository.ts:95` |
 | `common.contact_points` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → PersonRecordsAdapter.findAllCurrentContacts → ContactPointsRepository.findAllCurrentByOwner | `src/modules/common/repositories/contact-points.repository.ts:71` |
-| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:128` |
+| `common.identifiers` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → ProfilesPractitionersService.readDocumentAndAddresses → PersonRecordsAdapter.findCurrentIdentifiers | `src/modules/profiles/infrastructure/adapters/person-records.adapter.ts:129` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → HealthPractitionerProfilesRepository.findById | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:71` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → ProfilesPractitionersService.buildSummary → JurisdictionAuthorizationsRepository.findByPractitioner | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:107` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | ProfilesPractitionersController.getOwnPractitionerProfile → ProfilesPractitionersService.getOwnPractitionerProfile → PersonAccountLinksRepository.findActiveByUser | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:80` |
@@ -6502,14 +7376,18 @@ La operación no recibe cuerpo.
 | `homeAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `homeAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `homeAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `homeAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `homeAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `homeAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `homeAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `workAddress` | `OwnAddressDto` | No | — | — | — | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:373` |
 | `workAddress.lines` | `string` | No | — | — | Calle y número, tal como la escribió | `src/modules/profiles/presentation/dto/read-patients.dto.ts:329` |
 | `workAddress.city` | `string` | No | — | — | Ciudad, derivada del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:332` |
 | `workAddress.municipalityConceptId` | `string` | No | formato uuid | — | Municipio (VS_BO_MUNICIPALITY) | `src/modules/profiles/presentation/dto/read-patients.dto.ts:338` |
-| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:341` |
-| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:346` |
+| `workAddress.administrativeArea2ConceptId` | `string` | No | formato uuid | — | Provincia o condado (VS_ADMIN_DIVISION, nivel 2), deducida del municipio | `src/modules/profiles/presentation/dto/read-patients.dto.ts:345` |
+| `workAddress.district` | `string` | No | — | — | Distrito o zona, tal como lo dio el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:350` |
+| `workAddress.latitude` | `number` | No | — | — | Latitud, si marcó el punto en el mapa | `src/modules/profiles/presentation/dto/read-patients.dto.ts:353` |
+| `workAddress.longitude` | `number` | No | — | — | Longitud; viaja siempre junto a la latitud | `src/modules/profiles/presentation/dto/read-patients.dto.ts:358` |
 | `occupationConceptId` | `string` | No | formato uuid | — | Ocupación elegida del catálogo (VS_BO_OCCUPATION) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:383` |
 | `occupationFreeText` | `string` | No | — | — | Ocupación declarada en texto libre | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:390` |
 | `workEmployerConceptId` | `string` | No | formato uuid | — | Empresa donde trabaja, del catálogo (VS_BO_EMPLOYER) | `src/modules/profiles/presentation/dto/read-practitioner-profile.dto.ts:401` |
@@ -6607,7 +7485,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 54. GET /profiles/practitioners/specialty-counts
+## 63. GET /profiles/practitioners/specialty-counts
 
 - **Origen:** CONTRATO
 - **Nombre:** Contar profesionales visibles por especialidad
@@ -6677,7 +7555,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 55. GET /tenants/{tenantId}/practitioner-requests
+## 64. GET /tenants/{tenantId}/practitioner-requests
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitudes de médicos que piden atender en la organización
@@ -6710,7 +7588,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → AffiliationOrganizationsAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → AffiliationOrganizationsAdapter.assertCanAdminister → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → AffiliationOrganizationsAdapter.findSitesByTenant | `src/modules/profiles/infrastructure/adapters/affiliation-organizations.adapter.ts:23` |
 | `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:340` |
 | `profiles.persons` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.list → ProfilesAffiliationsService.listRequests → ProfilesAffiliationsService.identity | `src/modules/profiles/application/services/profiles-affiliations.service.ts:339` |
@@ -6766,7 +7644,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 56. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+## 65. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar la solicitud de un profesional
@@ -6799,8 +7677,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:131` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:136` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
 | `iam.devices` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.approve → ProfilesAffiliationsService.approve → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
@@ -6860,7 +7738,7 @@ El árbol de decisión completo está en [flujos](../flujos/profiles.md).
 
 ---
 
-## 57. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+## 66. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar la solicitud de un profesional
@@ -6895,8 +7773,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:131` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:136` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
 | `iam.devices` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.reject → ProfilesAffiliationsService.reject → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
@@ -6972,7 +7850,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 58. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+## 67. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Dar de baja un vínculo ya aprobado
@@ -7007,8 +7885,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:131` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:136` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.grantMembership → AffiliationOrganizationsAdapter.ensureCareMembership → DirectoryMembershipsService.ensureCareMembership → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
 | `iam.devices` | LEE | LEE | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | TenantPractitionerRequestsController.revoke → ProfilesAffiliationsService.revoke → ProfilesAffiliationsService.decide → ProfilesAffiliationsService.notify → MessagingAffiliationNoticeAdapter.emit → MessagingAffiliationNoticeAdapter.issue → NotificationsService.deliverNotification → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |

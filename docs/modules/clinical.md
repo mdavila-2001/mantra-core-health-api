@@ -9,7 +9,7 @@
 # Módulo `clinical`
 
 **Fuente:** [`src/modules/clinical/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/clinical/README.md)
-· 11 controllers · 20 services · 18 repositories · 24 entidades · 18 DTO
+· 11 controllers · 21 services · 18 repositories · 25 entidades · 18 DTO
 
 ---
 
@@ -82,7 +82,7 @@ Importa (`clinical.module.ts`): `AuditModule`, `MessagingModule`, `CommonModule`
 | UC | Endpoint | Método | Descripción |
 |----|----------|--------|-------------|
 | UC-08-01 | `/clinical/care-episodes` | POST | Abrir episodio de cuidado |
-| UC-08-02 | `/clinical/encounters/check-in` | POST | Check-in de encuentro (participantes + ubicación); deja la relación asistencial de los profesionales que exige el cobro con seguro (`insurance`, REQ-16-035) |
+| UC-08-02 | `/clinical/encounters/check-in` | POST | Check-in de encuentro (participantes + ubicación) |
 | UC-08-03 | `/clinical/observations` | POST | Registrar observación (componentes, rangos, ejecutantes, notas) |
 | UC-08-04 | `/clinical/observations/{id}/amend` | PATCH | Corregir/enmendar observación |
 | UC-08-05 | `/clinical/service-requests` | POST | Crear orden de servicio |

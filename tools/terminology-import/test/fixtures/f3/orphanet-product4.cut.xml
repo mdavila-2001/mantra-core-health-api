@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- fixture-source: en_product4.xml https://www.orphadata.com/data/xml/en_product4.xml (JDBOR 2026-06-23); un trastorno, una asociación por cada grado de frecuencia; texto de cada bloque idéntico al original -->
+<JDBOR date="2026-06-23 07:57:18" version="1.3.42 / 4.1.8 [2025-03-03]" copyright="Orphanet (c) 2026" dbserver="jdbc:sybase:Tds:canard.orpha.net:2020">
+  <Availability> 
+    <Licence>
+      <FullName lang="en">Creative Commons Attribution 4.0 International</FullName>
+      <ShortIdentifier>CC-BY-4.0</ShortIdentifier>
+      <LegalCode>https://creativecommons.org/licenses/by/4.0/legalcode</LegalCode>
+    </Licence>
+  </Availability>
+  <HPODisorderSetStatusList count="1">
+<HPODisorderSetStatus id="1">
+<Disorder id="1011">
+        <OrphaCode>243</OrphaCode>
+        <ExpertLink lang="en">http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&amp;Expert=243</ExpertLink>
+        <Name lang="en">46,XX gonadal dysgenesis</Name>
+        <DisorderType id="21401">
+          <Name lang="en">Malformation syndrome</Name>
+        </DisorderType>
+        <DisorderGroup id="36547">
+          <Name lang="en">Disorder</Name>
+        </DisorderGroup>
+        <HPODisorderAssociationList count="25">
+          <HPODisorderAssociation id="539557">
+            <HPO id="1537">
+              <HPOId>HP:0000133</HPOId>
+              <HPOTerm>Gonadal dysgenesis</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28405">
+              <Name lang="en">Obligate (100%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+<HPODisorderAssociation id="539559">
+            <HPO id="678">
+              <HPOId>HP:0000144</HPOId>
+              <HPOTerm>Decreased fertility</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28412">
+              <Name lang="en">Very frequent (99-80%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+<HPODisorderAssociation id="539565">
+            <HPO id="16">
+              <HPOId>HP:0000938</HPOId>
+              <HPOTerm>Osteopenia</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28419">
+              <Name lang="en">Frequent (79-30%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+<HPODisorderAssociation id="539573">
+            <HPO id="71">
+              <HPOId>HP:0000365</HPOId>
+              <HPOTerm>Hearing impairment</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28426">
+              <Name lang="en">Occasional (29-5%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+<HPODisorderAssociation id="539577">
+            <HPO id="123">
+              <HPOId>HP:0000252</HPOId>
+              <HPOTerm>Microcephaly</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28433">
+              <Name lang="en">Very rare (&lt;4-1%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+<HPODisorderAssociation id="539581">
+            <HPO id="1044">
+              <HPOId>HP:0000062</HPOId>
+              <HPOTerm>Ambiguous genitalia</HPOTerm>
+            </HPO>
+            <HPOFrequency id="28440">
+              <Name lang="en">Excluded (0%)</Name>
+            </HPOFrequency>
+            <DiagnosticCriteria/>
+          </HPODisorderAssociation>
+</HPODisorderAssociationList></Disorder></HPODisorderSetStatus></HPODisorderSetStatusList></JDBOR>

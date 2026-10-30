@@ -1,3 +1,4 @@
+import { PractitionerVerificationDto } from './practitioner-verification.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AffiliationResponseDto } from './affiliation.dto';
 import { OwnAddressDto } from './read-patients.dto';
@@ -409,6 +410,13 @@ export class PractitionerProfileSummaryDto {
 
   @ApiProperty({ format: 'uuid' })
   verificationStatusConceptId!: string;
+
+  /**
+   * Estado visible de verificación (admisión vigente): lo que el cliente pinta
+   * como «en proceso de verificación» o con el check de verificado. Aditivo.
+   */
+  @ApiProperty({ type: PractitionerVerificationDto })
+  verification!: PractitionerVerificationDto;
 
   @ApiProperty({ format: 'uuid' })
   practiceStatusConceptId!: string;

@@ -11,6 +11,7 @@ export interface PatientSpendingRow {
   readonly occurredAt: Date | string;
   readonly invoiceNumber: string;
   readonly isCreditNote: boolean;
+  /** Es una consulta: tiene encuentro o es el cobro de una cita (FAC-01). */
   readonly hasEncounter: boolean;
   readonly hasProcedure: boolean;
   readonly hasPharmacy: boolean;
@@ -168,7 +169,11 @@ export class PatientSpendingRepository {
              a.occurred_at                              AS "occurredAt",
              a.invoice_number                           AS "invoiceNumber",
              (a.status_concept_id = ?)                  AS "isCreditNote",
-             (a.encounter_id IS NOT NULL)               AS "hasEncounter",
+             -- FAC-01: una cita cobrada antes de atenderse también es consulta,
+             -- aunque su encuentro todavía no exista (S-3 lo liga al abrirlo).
+             (a.encounter_id IS NOT NULL OR EXISTS (
+                SELECT 1 FROM scheduling.appointment_payment_states ps
+                 WHERE ps.invoice_id = a.id))           AS "hasEncounter",
              COALESCE(a.has_procedure, false)           AS "hasProcedure",
              COALESCE(a.has_pharmacy, false)            AS "hasPharmacy",
              COALESCE(a.has_imaging, false)             AS "hasImaging",

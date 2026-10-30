@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { NotificationsService } from '../../messaging/services';
 import { PersonAccountLinksRepository } from '../../profiles/infrastructure/repositories';
 import { PublicProfilesRepository } from '../repositories';
+import { CommunityOrganizationStaffService } from './community-organization-staff.service';
 
 /**
  * Carril P2 · «tenés un mensaje nuevo».
@@ -25,9 +26,13 @@ import { PublicProfilesRepository } from '../repositories';
  *    profesional y el de paciente, que se identifican por su persona);
  * 2. `created_by_user_id`, que cubre el perfil que alguien creó para sí.
  *
- * Si ninguna resuelve, **no se avisa y no se falla**: hay perfiles públicos de
- * organización que ninguna cuenta encarna, y un mensaje a uno de ellos sigue
- * siendo un mensaje válido que su destinatario verá al abrir su bandeja.
+ * Si ninguna resuelve, **no se avisa y no se falla**.
+ *
+ * La vitrina de un **tenant** (farmacia o clínica) no la encarna ninguna
+ * cuenta: la atiende su personal. A ésa se le avisa a cada miembro activo que
+ * atiende la bandeja (`CommunityOrganizationStaffService.attendantUserIds`) y
+ * **nunca** a `created_by_user_id`, que en una vitrina proyectada al verificar
+ * el tenant es el administrador de plataforma que la verificó.
  *
  * ## No lanza
  *
@@ -44,6 +49,7 @@ export class CommunityMessageNotificationsService {
    * @param profilesRepo - Perfiles públicos.
    * @param accountLinks - Vínculo entre una persona y su cuenta.
    * @param logger - Logger estructurado.
+   * @param organizationStaff - Quién atiende la bandeja de una organización.
    */
   constructor(
     private readonly em: EntityManager,
@@ -51,6 +57,7 @@ export class CommunityMessageNotificationsService {
     private readonly profilesRepo: PublicProfilesRepository,
     private readonly accountLinks: PersonAccountLinksRepository,
     private readonly logger: PinoLogger,
+    private readonly organizationStaff: CommunityOrganizationStaffService,
   ) {
     this.logger.setContext(CommunityMessageNotificationsService.name);
   }
@@ -80,21 +87,22 @@ export class CommunityMessageNotificationsService {
       const ofWhom = sender?.displayName ?? 'Alguien';
 
       for (const recipient of recipientProfileIds) {
-        const recipientUserId = await this.account(em, recipient);
-        if (!recipientUserId) continue;
-
-        await this.notifications.emitInApp({
-          recipientUserId,
-          category: 'MESSAGES',
-          subject: `${ofWhom} le escribió`,
-          bodyText: 'Tiene un mensaje nuevo.',
-          destination: { type: 'CONVERSATION', id: conversationId },
-          // Diez mensajes seguidos en el mismo hilo son un campanazo, no diez.
-          // La clave incluye al destinatario: si no, el rebote de uno taparía
-          // el aviso del otro en una conversación de tres.
-          debounceKey: `conversation:${conversationId}:${recipientUserId}`,
-          actorUserId,
-        });
+        for (const recipientUserId of await this.accounts(em, recipient)) {
+          // Quien escribió como la organización no se avisa a sí mismo.
+          if (recipientUserId === actorUserId) continue;
+          await this.notifications.emitInApp({
+            recipientUserId,
+            category: 'MESSAGES',
+            subject: `${ofWhom} le escribió`,
+            bodyText: 'Tiene un mensaje nuevo.',
+            destination: { type: 'CONVERSATION', id: conversationId },
+            // Diez mensajes seguidos en el mismo hilo son un campanazo, no diez.
+            // La clave incluye al destinatario: si no, el rebote de uno taparía
+            // el aviso del otro en una conversación de tres.
+            debounceKey: `conversation:${conversationId}:${recipientUserId}`,
+            actorUserId,
+          });
+        }
       }
     } catch (error) {
       this.logger.error(
@@ -105,23 +113,33 @@ export class CommunityMessageNotificationsService {
   }
 
   /**
-   * La cuenta que encarna un perfil público, o `null` si ninguna lo encarna.
+   * Las cuentas a avisar por un perfil público: la que lo encarna, o el
+   * personal que atiende la bandeja si es la vitrina de una organización.
+   * Vacía si nadie lo encarna.
    *
    * @param em - Contexto de persistencia.
    * @param profileId - Perfil público destinatario.
-   * @returns El id de usuario, o `null`.
+   * @returns Los ids de usuario.
    */
-  private async account(
+  private async accounts(
     em: EntityManager,
     profileId: string,
-  ): Promise<string | null> {
+  ): Promise<string[]> {
     const profile = await this.profilesRepo.findById(em, profileId);
-    if (!profile) return null;
+    if (!profile) return [];
+
+    // Sólo la vitrina de un tenant se atiende por membresía. Una de tipo
+    // organización que no es de un tenant (SupportAdmin, con `target_id` = la
+    // cuenta del sistema) sigue avisando por vínculo o `created_by_user_id`.
+    if (await this.organizationStaff.isTenantBacked(em, profile)) {
+      return this.organizationStaff.attendantUserIds(em, profile);
+    }
 
     const link = await this.accountLinks.findActiveByPerson(
       em,
       profile.targetId,
     );
-    return link?.userId ?? profile.createdByUserId ?? null;
+    const userId = link?.userId ?? profile.createdByUserId ?? null;
+    return userId ? [userId] : [];
   }
 }

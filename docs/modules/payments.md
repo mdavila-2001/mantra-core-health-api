@@ -9,7 +9,7 @@
 # Módulo `payments`
 
 **Fuente:** [`src/modules/payments/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/payments/README.md)
-· 4 controllers · 7 services · 6 repositories · 53 entidades · 5 DTO
+· 5 controllers · 7 services · 6 repositories · 53 entidades · 6 DTO
 
 ---
 

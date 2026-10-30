@@ -56,6 +56,16 @@ export class OwnSiteAddressDto {
   @IsUUID()
   municipalityConceptId?: string;
 
+  /**
+   * Distrito o zona de la sede, tal como lo da el mapa (ADR-0028). Va en
+   * `common.addresses.district_text`, aparte de las líneas.
+   */
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  district?: string;
+
   /** Departamento boliviano, miembro de `VS_BO_DEPARTMENT`. */
   @ApiPropertyOptional({ format: 'uuid' })
   @IsOptional()
@@ -133,4 +143,18 @@ export class CreateOwnSiteDto {
   @Matches(SITE_CONTACT_PHONE_PATTERN)
   @MaxLength(40)
   contactPhone?: string;
+
+  /**
+   * Logo del consultorio, ya subido.
+   *
+   * En el alta del médico es una pre-carga anónima que el alta reclama en su
+   * misma transacción; en `POST /practitioners/me/sites` es un archivo que el
+   * profesional ya subió con su sesión. En los dos casos se valida como el logo
+   * de una organización (png, jpeg o webp, NORMAL y hasta 2 MB) y, si no
+   * cumple, la operación entera responde 422 sin escribir nada.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  logoFileId?: string;
 }

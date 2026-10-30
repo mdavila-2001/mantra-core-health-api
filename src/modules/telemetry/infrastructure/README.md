@@ -6,10 +6,12 @@ Adaptadores que implementan los puertos del dominio y su selección por entorno.
 
 ### Subcarpetas
 
-- [`google-analytics/`](./google-analytics/README.md): adaptador del Measurement
-  Protocol de Google Analytics 4.
+- `repositories/`: acceso a datos propio del módulo.
+- `adapters/`: implementaciones del puerto de analítica web.
+  - [`google-analytics/`](./adapters/google-analytics/README.md): adaptador del
+    Measurement Protocol de Google Analytics 4.
 
-### Archivos
+### Archivos de `adapters/`
 
 | Archivo | Responsabilidad |
 | --- | --- |

@@ -18,6 +18,13 @@ export class SiatSimulatedOutbox {
   @Property({ columnType: 'varchar(24)' })
   status!: string;
 
+  @Property({
+    fieldName: 'siat_mode',
+    columnType: 'varchar(12)',
+    default: 'simulated',
+  })
+  siatMode: 'simulated' | 'real' = 'simulated';
+
   @Property({ fieldName: 'queued_at', columnType: 'timestamptz' })
   queuedAt!: Date;
 

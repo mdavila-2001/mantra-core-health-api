@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   Audited,
@@ -6,8 +14,16 @@ import {
   Roles,
   type AuthenticatedUser,
 } from '../../../common';
-import { CommunityReviewsService } from '../services';
-import { CreateReviewDto, ReviewResponseDto } from '../dto';
+import {
+  CommunityReviewableCareService,
+  CommunityReviewsService,
+} from '../services';
+import {
+  CreateReviewDto,
+  ReviewableCareDto,
+  ReviewableCareQueryDto,
+  ReviewResponseDto,
+} from '../dto';
 
 /**
  * Calificar la atención recibida, desde el portal del paciente (C.2).
@@ -33,8 +49,33 @@ export class PatientReviewsController {
    * Inicializa la instancia y sus dependencias.
    *
    * @param service - Escrituras de reseñas.
+   * @param reviewableCare - Lectura de si una atención se puede reseñar.
    */
-  constructor(private readonly service: CommunityReviewsService) {}
+  constructor(
+    private readonly service: CommunityReviewsService,
+    private readonly reviewableCare: CommunityReviewableCareService,
+  ) {}
+
+  /**
+   * ¿Puedo calificar la atención de esta reserva? Devuelve el encuentro que la
+   * respalda y si la reseña sería aceptada.
+   */
+  @Get('reviewable-care')
+  @Roles('PATIENT')
+  @ApiOperation({
+    summary: 'Consultar si una atención recibida se puede calificar',
+    description:
+      'Parte de la reserva (la misma de la encuesta) y devuelve el encuentro que respalda la reseña pública, el nombre público del profesional, y `alreadyReviewed` / `canReview`. Una reserva ajena o inexistente responde 404 igual.',
+  })
+  getReviewableCare(
+    @Query() query: ReviewableCareQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ReviewableCareDto> {
+    return this.reviewableCare.getReviewableCare(
+      query.appointmentBookingId,
+      actor,
+    );
+  }
 
   /**
    * Califico una atención que ya terminó.
