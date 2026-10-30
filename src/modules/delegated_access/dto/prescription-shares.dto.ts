@@ -91,7 +91,7 @@ export class PrescriptionShareSummaryDto {
   @ApiProperty({ enum: PRESCRIPTION_SHARE_STATUSES })
   status!: 'VALID' | 'EXPIRED' | 'REVOKED';
 
-  /** Aperturas `OPENED` por una farmacia. */
+  /** Aperturas `OPENED`: de una farmacia o de la vista pública del enlace. */
   @ApiProperty()
   uses!: number;
 }

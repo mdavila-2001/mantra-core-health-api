@@ -1,4 +1,4 @@
-import { Controller, Get, Header, Param } from '@nestjs/common';
+import { Controller, Get, Header, Headers, Ip, Param } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -23,6 +23,9 @@ export const PRESCRIPTION_SHARE_PUBLIC_RATE_LIMIT = {
  * Vista sin sesión del enlace compartido de una receta (S-4, D-2): si es
  * válida, quién la emitió y cuándo. **Nada del paciente ni de los fármacos.**
  *
+ * Cada apertura queda en `shared_access_link_uses` con la IP y el agente del
+ * cliente (S-4); ver `PrescriptionSharesService.readPublic`.
+ *
  * `no-store` gana sobre el `Cache-Control` público genérico: revocar tiene
  * que verse en la próxima apertura. El token viaja en la ruta y
  * `pino-options.ts` lo redacta en el log.
@@ -43,7 +46,11 @@ export class PrescriptionSharesPublicController {
   })
   @ApiOkResponse({ type: PublicPrescriptionShareDto })
   @ApiNotFoundResponse({ description: 'El enlace no existe' })
-  read(@Param('token') token: string): Promise<PublicPrescriptionShareDto> {
-    return this.service.readPublic(token);
+  read(
+    @Param('token') token: string,
+    @Ip() sourceIp?: string,
+    @Headers('user-agent') userAgent?: string,
+  ): Promise<PublicPrescriptionShareDto> {
+    return this.service.readPublic(token, { sourceIp, userAgent });
   }
 }
