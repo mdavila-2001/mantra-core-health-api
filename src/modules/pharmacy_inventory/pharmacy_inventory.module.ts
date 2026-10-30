@@ -9,6 +9,8 @@ import { ProfilesModule } from '../profiles/profiles.module';
 // `community` no importa este módulo.
 import { CommunityModule } from '../community/community.module';
 import { PHARMACY_ORDER_CHAT_PORT } from './application/ports/pharmacy-order-chat.port';
+import { EXTERNAL_PHARMACY_CATALOG_PORT } from './application/ports/external-pharmacy-catalog.port';
+import { HttpExternalPharmacyCatalogAdapter } from './infrastructure/adapters/http-external-pharmacy-catalog.adapter';
 import { CommunityPharmacyOrderChatAdapter } from './infrastructure/adapters/community-pharmacy-order-chat.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
 import { INSURANCE_PATIENT_SETTLEMENT_PORT } from './application/ports/insurance-patient-settlement.port';
@@ -33,6 +35,8 @@ import { ExpireInventoryReservationsUseCase } from './application/inventory-rese
 import { ReleaseConfirmedReservationLinesUseCase } from './application/inventory-reservations/release-confirmed-reservation-lines.use-case';
 import { CreateInventorySyncBatchUseCase } from './application/inventory-sync/create-inventory-sync-batch.use-case';
 import { ReconcileInventorySyncBatchUseCase } from './application/inventory-sync/reconcile-inventory-sync-batch.use-case';
+import { SyncExternalPharmacyCatalogUseCase } from './application/inventory-sync/sync-external-pharmacy-catalog.use-case';
+import { IntegrationReadService } from './application/inventory-sync/integration-read.service';
 import { TransferInventoryUseCase } from './application/inventory-transfers/transfer-inventory.use-case';
 import { DispenseMedicationUseCase } from './application/medication-dispensations/dispense-medication.use-case';
 import { ReverseMedicationDispensationUseCase } from './application/medication-dispensations/reverse-medication-dispensation.use-case';
@@ -50,6 +54,7 @@ import {
   PharmacyInventoryInternalController,
   PharmacyInventoryReadController,
   PharmacySiteAvailabilityController,
+  PharmacyIntegrationSyncController,
 } from './presentation/controllers';
 import {
   InventoryLocationsService,
@@ -82,6 +87,7 @@ import {
   SyncRepository,
   InventoryReadRepository,
   InventoryScopeRepository,
+  IntegrationReadRepository,
 } from './infrastructure/repositories';
 import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inventory-scope.policy';
 
@@ -116,6 +122,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     PharmacyInventoryInternalController,
     PharmacyInventoryReadController,
     PharmacySiteAvailabilityController,
+    PharmacyIntegrationSyncController,
   ],
   providers: [
     // Repositorios
@@ -136,6 +143,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     SyncRepository,
     InventoryReadRepository,
     InventoryScopeRepository,
+    IntegrationReadRepository,
     PharmacyInventoryScopePolicy,
     DirectoryTenantAdministrationAdapter,
     {
@@ -172,6 +180,12 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
       provide: PHARMACY_ORDER_CHAT_PORT,
       useExisting: CommunityPharmacyOrderChatAdapter,
     },
+    // FAR-07: el sistema de gestión de una farmacia externa, por HTTP.
+    HttpExternalPharmacyCatalogAdapter,
+    {
+      provide: EXTERNAL_PHARMACY_CATALOG_PORT,
+      useExisting: HttpExternalPharmacyCatalogAdapter,
+    },
     // Servicios
     InventoryLocationsService,
     OpenInventoryCountUseCase,
@@ -193,6 +207,8 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     PharmacyProcurementUseCases,
     SiteStockWriter,
     SetSiteProductAvailabilityUseCase,
+    SyncExternalPharmacyCatalogUseCase,
+    IntegrationReadService,
     PharmacyProcurementService,
     InventoryReservationsService,
     PharmacyOrdersService,
