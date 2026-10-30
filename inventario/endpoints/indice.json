@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1627,
+    "total": 1631,
     "porOrigen": {
       "CONTRATO": 1618,
-      "CONTRATO_AUSENTE": 9
+      "CONTRATO_AUSENTE": 13
     },
     "porRiesgo": {
-      "BAJO": 528,
-      "MEDIO": 899,
+      "BAJO": 531,
+      "MEDIO": 900,
       "ALTO": 200
     },
     "conTablas": 1565,
-    "sinTablasSinDeterminar": 1,
+    "sinTablasSinDeterminar": 5,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 940,
-    "conRequerimientos": 1627
+    "conPruebas": 944,
+    "conRequerimientos": 1631
   },
   "endpoints": [
     {
@@ -292,7 +292,9 @@
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN"
+        "SECURITY_ADMIN",
+        "ACCOUNTING_APPROVER",
+        "PRACTITIONER"
       ],
       "tablas": 4,
       "eventos": 0,
@@ -869,7 +871,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -941,7 +943,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -1031,7 +1033,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3773,7 +3775,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 10,
+      "tablas": 11,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -4466,7 +4468,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 27,
+      "tablas": 29,
       "eventos": 0,
       "pruebas": 8,
       "revision": "AUTO_DETECTADA"
@@ -19955,6 +19957,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PharmacyBulkController_bulkCategories",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/categories/bulk",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PharmacyController_createConnection",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -20126,6 +20147,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PharmacyBulkController_bulkPrices",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/prices/bulk",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PharmacyController_publishProduct",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -20178,6 +20218,25 @@
         "PHARMACY_STAFF"
       ],
       "tablas": 17,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyBulkController_bulkProducts",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/products/bulk",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 0,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20256,6 +20315,25 @@
       "tablas": 4,
       "eventos": 0,
       "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyBulkController_bulkSites",
+      "origen": "CONTRATO_AUSENTE",
+      "metodo": "POST",
+      "ruta": "/pharmacies/{pharmacyId}/sites/bulk",
+      "modulo": "pharmacy",
+      "bloque": "Farmacia",
+      "nombre": null,
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PHARMACY_STAFF"
+      ],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -25755,7 +25833,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 18,
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -25935,7 +26013,7 @@
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT"
       ],
-      "tablas": 38,
+      "tablas": 47,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25996,7 +26074,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -26009,14 +26087,14 @@
       "modulo": "scheduling",
       "bloque": "Práctica y Agenda",
       "nombre": "Marcar el estado de pago de una cita",
-      "riesgo": "BAJO",
+      "riesgo": "MEDIO",
       "publica": false,
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 11,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -26783,7 +26861,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 1,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"

@@ -2,7 +2,7 @@
 
 # Mapa de operaciones
 
-1627 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
+1631 operaciones: ruta, proceso, módulo, riesgo, autorización, quién la llama y señales. Equivale a la vista `/flows` de AtlasAdminPortal.
 
 «Quién la llama» sale del inventario de clientes del frontend (`docs/reports/generated/api-inventory.md`). Una operación sin cliente puede ser interna, móvil o deuda: la columna informa, no concluye.
 
@@ -24,7 +24,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/accounting/exchange-rates` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingExchangeRateController) | accounting | MEDIO | SYSTEM | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/accounting/fiscal-periods/{id}/lock` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingFiscalController) | accounting | MEDIO | SECURITY_ADMIN | AccountingClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | GET `/accounting/fiscal-years` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingCockpitController) | accounting | BAJO | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | AccountingClient | CON_DECISIONES |
-| POST `/accounting/fiscal-years` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingFiscalController) | accounting | MEDIO | SECURITY_ADMIN | — | ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/accounting/fiscal-years` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingFiscalController) | accounting | MEDIO | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | — | ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/accounting/general-ledger` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingLedgerController) | accounting | BAJO | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | AccountingClient | SIN_PRUEBAS · CON_DECISIONES |
 | GET `/accounting/income-statement` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingLedgerController) | accounting | BAJO | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | AccountingClient | SIN_PRUEBAS · CON_DECISIONES |
 | GET `/accounting/journal-transactions` | Módulo 16 — Accounting (Libro Mayor y Subledgers) (ctrl:AccountingLedgerController) | accounting | BAJO | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | AccountingClient | SIN_PRUEBAS · CON_DECISIONES |
@@ -1096,6 +1096,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/pharmacies/{pharmacyId}/categories` | Módulo Pharmacy (24) (P47 D8) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | DELETE `/pharmacies/{pharmacyId}/categories/{categoryId}` | Módulo Pharmacy (24) (ctrl:PharmacyController) | pharmacy | ALTO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | PATCH `/pharmacies/{pharmacyId}/categories/{categoryId}` | Módulo Pharmacy (24) (ctrl:PharmacyController) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/pharmacies/{pharmacyId}/categories/bulk` | Módulo Pharmacy (24) (ctrl:PharmacyBulkController) | pharmacy | BAJO | SECURITY_ADMIN · PHARMACY_STAFF | — | CONTRATO_AUSENTE · SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacies/{pharmacyId}/integration-connections` | Módulo Pharmacy (24) (UC-24-07) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings` | Módulo Pharmacy (24) (UC-24-08) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | PATCH `/pharmacies/{pharmacyId}/inventory` | Módulo Pharmacy (24) (P47 D7) | pharmacy | BAJO | SECURITY_ADMIN · PHARMACY_STAFF | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
@@ -1105,13 +1106,16 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | POST `/pharmacies/{pharmacyId}/price-lists` | Módulo Pharmacy (24) (UC-24-05) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacies/{pharmacyId}/price-lists/{priceListId}/close` | Módulo Pharmacy (24) (UC-24-10) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacies/{pharmacyId}/price-lists/{priceListId}/prices` | Módulo Pharmacy (24) (UC-24-06) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/pharmacies/{pharmacyId}/prices/bulk` | Módulo Pharmacy (24) (ctrl:PharmacyBulkController) | pharmacy | BAJO | SECURITY_ADMIN · PHARMACY_STAFF | — | CONTRATO_AUSENTE · SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacies/{pharmacyId}/products` | Módulo Pharmacy (24) (UC-24-04) | pharmacy | ALTO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | DELETE `/pharmacies/{pharmacyId}/products/{productId}` | Módulo Pharmacy (24) (UC-24-09) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | PATCH `/pharmacies/{pharmacyId}/products/{productId}` | Módulo Pharmacy (24) (P47 §2-5) | pharmacy | ALTO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
+| POST `/pharmacies/{pharmacyId}/products/bulk` | Módulo Pharmacy (24) (ctrl:PharmacyBulkController) | pharmacy | BAJO | SECURITY_ADMIN · PHARMACY_STAFF | — | CONTRATO_AUSENTE · SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacies/{pharmacyId}/projections` | Módulo Pharmacy (24) (UC-24-11) | pharmacy | BAJO | SECURITY_ADMIN · PHARMACY_STAFF | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacies/{pharmacyId}/sites` | Módulo Pharmacy (24) (UC-24-02) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts` | Módulo Pharmacy (24) (ctrl:PharmacyController) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | PUT `/pharmacies/{pharmacyId}/sites/{siteId}/open-24h` | Módulo Pharmacy (24) (ctrl:PharmacyController) | pharmacy | MEDIO | SECURITY_ADMIN · PHARMACY_STAFF | — | ESCRIBE · SIN_CONSUMIDOR_FRONT |
+| POST `/pharmacies/{pharmacyId}/sites/bulk` | Módulo Pharmacy (24) (ctrl:PharmacyBulkController) | pharmacy | BAJO | SECURITY_ADMIN · PHARMACY_STAFF | — | CONTRATO_AUSENTE · SIN_TABLAS · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/pharmacy/catalog-products` | Módulo Pharmacy (24) (ctrl:PharmacyReadController) | pharmacy | BAJO | Sesión sin roles | — | SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT |
 | GET `/pharmacy/pharmacies` | Módulo Pharmacy (24) (ctrl:PharmacyReadController) | pharmacy | BAJO | Sesión sin roles | PharmacyClient | SIN_PRUEBAS |
 | GET `/pharmacy/pharmacies/{id}` | Módulo Pharmacy (24) (ctrl:PharmacyReadController) | pharmacy | BAJO | Sesión sin roles | PharmacyClient | SIN_PRUEBAS · CON_DECISIONES |
@@ -1427,7 +1431,7 @@ Las señales se calculan de los datos del inventario: [hallazgos](hallazgos.md) 
 | GET `/scheduling/bookings/{id}/payment-receipts/{receiptId}/content` | Módulo 41 — Scheduling (agenda) (ctrl:SchedulingBookingsController) | scheduling | BAJO | PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/scheduling/bookings/{id}/payment-receipts/{receiptId}/reject` | Módulo 41 — Scheduling (agenda) (ctrl:SchedulingBookingsController) | scheduling | MEDIO | PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | — | ESCRIBE · SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | GET `/scheduling/bookings/{id}/payment-state` | Módulo 41 — Scheduling (agenda) (ctrl:SchedulingBookingsController) | scheduling | BAJO | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | — | SIN_PRUEBAS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
-| PUT `/scheduling/bookings/{id}/payment-state` | Módulo 41 — Scheduling (agenda) (ctrl:SchedulingBookingsController) | scheduling | BAJO | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | SchedulingClient | SIN_PRUEBAS · CON_DECISIONES |
+| PUT `/scheduling/bookings/{id}/payment-state` | Módulo 41 — Scheduling (agenda) (ctrl:SchedulingBookingsController) | scheduling | MEDIO | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | SchedulingClient | ESCRIBE · SIN_PRUEBAS · CON_DECISIONES |
 | POST `/scheduling/bookings/{id}/propose-schedule` | Módulo 41 — Scheduling (agenda) (ctrl:SchedulingBookingsController) | scheduling | MEDIO | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | — | ESCRIBE · SIN_PRUEBAS · MAQUINA_DE_ESTADOS · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |
 | POST `/scheduling/bookings/{id}/reject` | Módulo 41 — Scheduling (agenda) (ctrl:SchedulingBookingsController) | scheduling | MEDIO | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | SchedulingClient | ESCRIBE · SIN_PRUEBAS · MAQUINA_DE_ESTADOS · CON_DECISIONES |
 | POST `/scheduling/bookings/{id}/reminders` | Módulo 41 — Scheduling (agenda) (ctrl:SchedulingBookingsController) | scheduling | MEDIO | SCHEDULING_ADMIN · SCHEDULING_AGENT | — | ESCRIBE · SIN_INTEGRACION · SIN_CONSUMIDOR_FRONT · CON_DECISIONES |

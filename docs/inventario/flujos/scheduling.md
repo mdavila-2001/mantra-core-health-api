@@ -24,8 +24,8 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
 | `ctrl:SchedulingAgendaController` | Operaciones de SchedulingAgendaController que el README no asigna a un caso de uso | GET /scheduling/resources | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 6 |
-|  |  | GET /scheduling/slots | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 1 |
-| `ctrl:SchedulingBookingsController` | Operaciones de SchedulingBookingsController que el README no asigna a un caso de uso | GET /scheduling/bookings | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 18 |
+|  |  | GET /scheduling/slots | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 3 |
+| `ctrl:SchedulingBookingsController` | Operaciones de SchedulingBookingsController que el README no asigna a un caso de uso | GET /scheduling/bookings | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 19 |
 |  |  | GET /scheduling/bookings/{id} | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | BAJO | 10 |
 |  |  | POST /scheduling/bookings/{id}/accept | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 57 |
 |  |  | POST /scheduling/bookings/{id}/cancel | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT | MEDIO | 49 |
@@ -34,11 +34,11 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 |  |  | POST /scheduling/bookings/{id}/delay | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 36 |
 |  |  | GET /scheduling/bookings/{id}/payment-receipts | PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 9 |
 |  |  | POST /scheduling/bookings/{id}/payment-receipts | PATIENT | MEDIO | 40 |
-|  |  | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 38 |
+|  |  | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 47 |
 |  |  | GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content | PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | BAJO | 8 |
 |  |  | POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 37 |
-|  |  | GET /scheduling/bookings/{id}/payment-state | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 3 |
-|  |  | PUT /scheduling/bookings/{id}/payment-state | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 2 |
+|  |  | GET /scheduling/bookings/{id}/payment-state | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | BAJO | 4 |
+|  |  | PUT /scheduling/bookings/{id}/payment-state | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 11 |
 |  |  | POST /scheduling/bookings/{id}/propose-schedule | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 11 |
 |  |  | POST /scheduling/bookings/{id}/reject | SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER | MEDIO | 35 |
 |  |  | POST /scheduling/bookings/{id}/reminders | SCHEDULING_ADMIN · SCHEDULING_AGENT | MEDIO | 3 |
@@ -95,86 +95,91 @@ _Fuente: `src/modules/scheduling/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · PATIENT"]):::actor
-  a25(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER"]):::actor
-  a33(["SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
-  a40(["PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
-  a45(["PATIENT"]):::actor
-  a48(["PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
-  a71(["SCHEDULING_ADMIN"]):::actor
+  a26(["SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER"]):::actor
+  a34(["SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
+  a41(["PATIENT · PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
+  a46(["PATIENT"]):::actor
+  a49(["PRACTITIONER · SCHEDULING_ADMIN · SCHEDULING_AGENT"]):::actor
+  a76(["SCHEDULING_ADMIN"]):::actor
   t3[("common.addresses")]:::tabla
   t4[("practice.care_spaces")]:::tabla
   t5[("practice.practice_sites")]:::tabla
   t6[("practice.practices")]:::tabla
   t7[("practice.practitioner_role_assignments")]:::tabla
   t8[("scheduling.schedulable_resources")]:::tabla
-  t10[("scheduling.bookable_slots")]:::tabla
-  t12[("audit.appointment_bookings_history")]:::tabla
-  t13[("clinical.appointments")]:::tabla
-  t14[("clinical.encounters")]:::tabla
-  t15[("insurance.insurance_carriers")]:::tabla
-  t16[("insurance.insurance_claims")]:::tabla
-  t17[("insurance.insurance_plans")]:::tabla
-  t20[("profiles.patient_portal_proxies")]:::tabla
-  t21[("profiles.patient_profiles")]:::tabla
-  t22[("profiles.person_account_links")]:::tabla
-  t26[("common.file_versions")]:::tabla
-  t29[("community.conversation_participants")]:::tabla
-  t30[("community.conversations")]:::tabla
-  t34[("scheduling.appointment_bookings")]:::tabla
-  t41[("common.files")]:::tabla
-  t42[("iam.users")]:::tabla
-  t55[("scheduling.appointment_payment_states")]:::tabla
-  t60[("iam.authentication_credentials")]:::tabla
-  t61[("iam.devices")]:::tabla
-  t64[("scheduling.appointment_reminders")]:::tabla
-  t72[("scheduling.booking_confirmation_rules")]:::tabla
+  t10[("billing.service_catalog")]:::tabla
+  t11[("scheduling.bookable_slots")]:::tabla
+  t13[("audit.appointment_bookings_history")]:::tabla
+  t14[("billing.invoices")]:::tabla
+  t15[("clinical.appointments")]:::tabla
+  t16[("clinical.encounters")]:::tabla
+  t17[("insurance.insurance_carriers")]:::tabla
+  t18[("insurance.insurance_claims")]:::tabla
+  t21[("profiles.patient_portal_proxies")]:::tabla
+  t22[("profiles.patient_profiles")]:::tabla
+  t23[("profiles.person_account_links")]:::tabla
+  t27[("common.file_versions")]:::tabla
+  t30[("community.conversation_participants")]:::tabla
+  t31[("community.conversations")]:::tabla
+  t35[("scheduling.appointment_bookings")]:::tabla
+  t42[("common.files")]:::tabla
+  t43[("iam.users")]:::tabla
+  t50[("billing.invoice_lines")]:::tabla
+  t51[("billing.payments_received")]:::tabla
+  t52[("billing.receivable_payment_allocations")]:::tabla
+  t59[("scheduling.appointment_payment_states")]:::tabla
+  t65[("iam.authentication_credentials")]:::tabla
+  t66[("iam.devices")]:::tabla
+  t69[("scheduling.appointment_reminders")]:::tabla
+  t77[("scheduling.booking_confirmation_rules")]:::tabla
   subgraph s0["ctrl:SchedulingAgendaController · Operaciones de SchedulingAgendaController que…"]
     o1["GET /scheduling/resources"]:::op
     o9["GET /scheduling/slots"]:::op
   end
-  t18[("+12 tablas más")]
-  t23[("+4 tablas más")]
-  t27[("+51 tablas más")]
-  t31[("+43 tablas más")]
-  t36[("+20 tablas más")]
-  t38[("+30 tablas más")]
-  t43[("+3 tablas más")]
-  t46[("+34 tablas más")]
-  t49[("+32 tablas más")]
-  t51[("+2 tablas más")]
-  t53[("+31 tablas más")]
-  t58[("+5 tablas más")]
-  t62[("+29 tablas más")]
-  t67[("+38 tablas más")]
-  t69[("+2 tablas más")]
+  t19[("+13 tablas más")]
+  t24[("+4 tablas más")]
+  t28[("+51 tablas más")]
+  t32[("+43 tablas más")]
+  t37[("+20 tablas más")]
+  t39[("+30 tablas más")]
+  t44[("+3 tablas más")]
+  t47[("+34 tablas más")]
+  t53[("+41 tablas más")]
+  t55[("+2 tablas más")]
+  t57[("+31 tablas más")]
+  t61[("+5 tablas más")]
+  t63[("+5 tablas más")]
+  t67[("+29 tablas más")]
+  t72[("+38 tablas más")]
+  t74[("+2 tablas más")]
   subgraph s1["ctrl:SchedulingBookingsController · Operaciones de SchedulingBookingsController…"]
-    o11["GET /scheduling/bookings"]:::op
-    o19["GET /scheduling/bookings/{id}"]:::op
-    o24["POST /scheduling/bookings/{id}/accept"]:::op
-    o28["POST /scheduling/bookings/{id}/cancel"]:::op
-    o32["POST /scheduling/bookings/{id}/check-in"]:::op
-    o35["POST /scheduling/bookings/{id}/complete"]:::op
-    o37["POST /scheduling/bookings/{id}/delay"]:::op
-    o39["GET /scheduling/bookings/{id}/payment-receipts"]:::op
-    o44["POST /scheduling/bookings/{id}/payment-receipts"]:::op
-    o47["POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm"]:::op
-    o50["GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content"]:::op
-    o52["POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject"]:::op
-    o54["GET /scheduling/bookings/{id}/payment-state"]:::op
-    o56["PUT /scheduling/bookings/{id}/payment-state"]:::op
-    o57["POST /scheduling/bookings/{id}/propose-schedule"]:::op
-    o59["POST /scheduling/bookings/{id}/reject"]:::op
-    o63["POST /scheduling/bookings/{id}/reminders"]:::op
-    o65["POST /scheduling/bookings/{id}/request-info"]:::op
-    o66["POST /scheduling/bookings/{id}/reschedule"]:::op
-    o68["POST /scheduling/bookings/{id}/start"]:::op
+    o12["GET /scheduling/bookings"]:::op
+    o20["GET /scheduling/bookings/{id}"]:::op
+    o25["POST /scheduling/bookings/{id}/accept"]:::op
+    o29["POST /scheduling/bookings/{id}/cancel"]:::op
+    o33["POST /scheduling/bookings/{id}/check-in"]:::op
+    o36["POST /scheduling/bookings/{id}/complete"]:::op
+    o38["POST /scheduling/bookings/{id}/delay"]:::op
+    o40["GET /scheduling/bookings/{id}/payment-receipts"]:::op
+    o45["POST /scheduling/bookings/{id}/payment-receipts"]:::op
+    o48["POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm"]:::op
+    o54["GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content"]:::op
+    o56["POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject"]:::op
+    o58["GET /scheduling/bookings/{id}/payment-state"]:::op
+    o60["PUT /scheduling/bookings/{id}/payment-state"]:::op
+    o62["POST /scheduling/bookings/{id}/propose-schedule"]:::op
+    o64["POST /scheduling/bookings/{id}/reject"]:::op
+    o68["POST /scheduling/bookings/{id}/reminders"]:::op
+    o70["POST /scheduling/bookings/{id}/request-info"]:::op
+    o71["POST /scheduling/bookings/{id}/reschedule"]:::op
+    o73["POST /scheduling/bookings/{id}/start"]:::op
   end
   subgraph s2["ctrl:SchedulingConfirmationController · Operaciones de SchedulingConfirmationCo…"]
-    o70["GET /scheduling/confirmation-rules"]:::op
-    o73["POST /scheduling/confirmation-rules"]:::op
-    o74["POST /scheduling/confirmation-rules/{id}/activate"]:::op
-    o75["POST /scheduling/confirmation-rules/{id}/deactivate"]:::op
-    o76["POST /scheduling/confirmation-rules/evaluate"]:::op
+    o75["GET /scheduling/confirmation-rules"]:::op
+    o78["POST /scheduling/confirmation-rules"]:::op
+    o79["POST /scheduling/confirmation-rules/{id}/activate"]:::op
+    o80["POST /scheduling/confirmation-rules/{id}/deactivate"]:::op
+    o81["POST /scheduling/confirmation-rules/evaluate"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -185,162 +190,170 @@ flowchart LR
   o1 -->|"LEE"| t8
   a2 --> o9
   o9 -->|"LEE"| t10
-  a2 --> o11
-  o11 -->|"LEE"| t12
-  o11 -->|"LEE"| t13
-  o11 -->|"LEE"| t14
-  o11 -->|"LEE"| t15
-  o11 -->|"LEE"| t16
-  o11 -->|"LEE"| t17
-  o11 -.-> t18
-  a2 --> o19
-  o19 -->|"LEE"| t12
-  o19 -->|"LEE"| t13
-  o19 -->|"LEE"| t14
-  o19 -->|"LEE"| t20
-  o19 -->|"LEE"| t21
-  o19 -->|"LEE"| t22
-  o19 -.-> t23
-  a25 --> o24
-  o24 -->|"ACTUALIZA"| t12
-  o24 -->|"CREA"| t12
-  o24 -->|"LEE"| t12
-  o24 -->|"ACTUALIZA"| t13
-  o24 -->|"LEE"| t13
-  o24 -->|"LEE"| t26
-  o24 -.-> t27
-  a2 --> o28
-  o28 -->|"ACTUALIZA"| t12
-  o28 -->|"CREA"| t12
-  o28 -->|"LEE"| t12
-  o28 -->|"CREA"| t29
-  o28 -->|"LEE"| t29
-  o28 -->|"CREA"| t30
-  o28 -.-> t31
-  a33 --> o32
-  o32 -->|"ACTUALIZA"| t12
-  o32 -->|"CREA"| t12
-  o32 -->|"LEE"| t12
-  o32 -->|"ACTUALIZA"| t34
-  o32 -->|"LEE"| t34
-  a25 --> o35
-  o35 -->|"ACTUALIZA"| t12
-  o35 -->|"CREA"| t12
-  o35 -->|"LEE"| t12
-  o35 -->|"ACTUALIZA"| t13
-  o35 -->|"LEE"| t13
-  o35 -->|"ACTUALIZA"| t34
-  o35 -.-> t36
-  a25 --> o37
-  o37 -->|"ACTUALIZA"| t12
-  o37 -->|"CREA"| t12
-  o37 -->|"LEE"| t12
-  o37 -->|"CREA"| t29
-  o37 -->|"LEE"| t29
-  o37 -->|"CREA"| t30
-  o37 -.-> t38
-  a40 --> o39
-  o39 -->|"LEE"| t26
-  o39 -->|"LEE"| t41
-  o39 -->|"LEE"| t42
-  o39 -->|"LEE"| t20
-  o39 -->|"LEE"| t21
-  o39 -->|"LEE"| t22
-  o39 -.-> t43
-  a45 --> o44
-  o44 -->|"LEE"| t26
-  o44 -->|"LEE"| t41
-  o44 -->|"CREA"| t29
-  o44 -->|"LEE"| t29
-  o44 -->|"CREA"| t30
-  o44 -->|"LEE"| t30
-  o44 -.-> t46
-  a48 --> o47
-  o47 -->|"LEE"| t26
-  o47 -->|"LEE"| t41
-  o47 -->|"CREA"| t29
-  o47 -->|"LEE"| t29
-  o47 -->|"CREA"| t30
-  o47 -->|"LEE"| t30
-  o47 -.-> t49
-  a40 --> o50
-  o50 -->|"LEE"| t26
-  o50 -->|"LEE"| t41
-  o50 -->|"LEE"| t20
-  o50 -->|"LEE"| t21
-  o50 -->|"LEE"| t22
-  o50 -->|"LEE"| t34
-  o50 -.-> t51
-  a48 --> o52
-  o52 -->|"LEE"| t26
-  o52 -->|"LEE"| t41
-  o52 -->|"CREA"| t29
-  o52 -->|"LEE"| t29
-  o52 -->|"CREA"| t30
-  o52 -->|"LEE"| t30
-  o52 -.-> t53
-  a25 --> o54
-  o54 -->|"LEE"| t34
-  o54 -->|"LEE"| t55
-  o54 -->|"LEE"| t8
-  a25 --> o56
-  o56 -->|"LEE"| t34
-  o56 -->|"LEE"| t8
-  a25 --> o57
-  o57 -->|"ACTUALIZA"| t12
-  o57 -->|"CREA"| t12
-  o57 -->|"LEE"| t12
-  o57 -->|"ACTUALIZA"| t34
-  o57 -->|"LEE"| t34
-  o57 -->|"ACTUALIZA"| t10
-  o57 -.-> t58
-  a25 --> o59
-  o59 -->|"ACTUALIZA"| t12
-  o59 -->|"CREA"| t12
-  o59 -->|"LEE"| t12
-  o59 -->|"LEE"| t60
-  o59 -->|"ACTUALIZA"| t61
-  o59 -->|"LEE"| t61
-  o59 -.-> t62
-  a33 --> o63
-  o63 -->|"LEE"| t34
-  o63 -->|"CREA"| t64
-  o63 -->|"LEE"| t10
-  a25 --> o65
-  o65 -->|"ACTUALIZA"| t12
-  o65 -->|"CREA"| t12
-  o65 -->|"LEE"| t12
-  o65 -->|"ACTUALIZA"| t34
-  o65 -->|"LEE"| t34
-  o65 -->|"LEE"| t8
-  a2 --> o66
-  o66 -->|"ACTUALIZA"| t12
-  o66 -->|"CREA"| t12
-  o66 -->|"LEE"| t12
-  o66 -->|"CREA"| t29
-  o66 -->|"LEE"| t29
-  o66 -->|"CREA"| t30
-  o66 -.-> t67
-  a25 --> o68
-  o68 -->|"ACTUALIZA"| t12
-  o68 -->|"CREA"| t12
-  o68 -->|"LEE"| t12
-  o68 -->|"ACTUALIZA"| t13
-  o68 -->|"LEE"| t13
-  o68 -->|"ACTUALIZA"| t34
-  o68 -.-> t69
-  a71 --> o70
-  o70 -->|"LEE"| t72
-  a71 --> o73
-  o73 -->|"CREA"| t72
-  a71 --> o74
-  o74 -->|"ACTUALIZA"| t72
-  o74 -->|"LEE"| t72
-  a71 --> o75
-  o75 -->|"ACTUALIZA"| t72
-  o75 -->|"LEE"| t72
-  a71 --> o76
-  o76 -->|"LEE"| t72
+  o9 -->|"LEE"| t11
+  o9 -->|"LEE"| t8
+  a2 --> o12
+  o12 -->|"LEE"| t13
+  o12 -->|"LEE"| t14
+  o12 -->|"LEE"| t15
+  o12 -->|"LEE"| t16
+  o12 -->|"LEE"| t17
+  o12 -->|"LEE"| t18
+  o12 -.-> t19
+  a2 --> o20
+  o20 -->|"LEE"| t13
+  o20 -->|"LEE"| t15
+  o20 -->|"LEE"| t16
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t22
+  o20 -->|"LEE"| t23
+  o20 -.-> t24
+  a26 --> o25
+  o25 -->|"ACTUALIZA"| t13
+  o25 -->|"CREA"| t13
+  o25 -->|"LEE"| t13
+  o25 -->|"ACTUALIZA"| t15
+  o25 -->|"LEE"| t15
+  o25 -->|"LEE"| t27
+  o25 -.-> t28
+  a2 --> o29
+  o29 -->|"ACTUALIZA"| t13
+  o29 -->|"CREA"| t13
+  o29 -->|"LEE"| t13
+  o29 -->|"CREA"| t30
+  o29 -->|"LEE"| t30
+  o29 -->|"CREA"| t31
+  o29 -.-> t32
+  a34 --> o33
+  o33 -->|"ACTUALIZA"| t13
+  o33 -->|"CREA"| t13
+  o33 -->|"LEE"| t13
+  o33 -->|"ACTUALIZA"| t35
+  o33 -->|"LEE"| t35
+  a26 --> o36
+  o36 -->|"ACTUALIZA"| t13
+  o36 -->|"CREA"| t13
+  o36 -->|"LEE"| t13
+  o36 -->|"ACTUALIZA"| t15
+  o36 -->|"LEE"| t15
+  o36 -->|"ACTUALIZA"| t35
+  o36 -.-> t37
+  a26 --> o38
+  o38 -->|"ACTUALIZA"| t13
+  o38 -->|"CREA"| t13
+  o38 -->|"LEE"| t13
+  o38 -->|"CREA"| t30
+  o38 -->|"LEE"| t30
+  o38 -->|"CREA"| t31
+  o38 -.-> t39
+  a41 --> o40
+  o40 -->|"LEE"| t27
+  o40 -->|"LEE"| t42
+  o40 -->|"LEE"| t43
+  o40 -->|"LEE"| t21
+  o40 -->|"LEE"| t22
+  o40 -->|"LEE"| t23
+  o40 -.-> t44
+  a46 --> o45
+  o45 -->|"LEE"| t27
+  o45 -->|"LEE"| t42
+  o45 -->|"CREA"| t30
+  o45 -->|"LEE"| t30
+  o45 -->|"CREA"| t31
+  o45 -->|"LEE"| t31
+  o45 -.-> t47
+  a49 --> o48
+  o48 -->|"CREA"| t50
+  o48 -->|"CREA"| t14
+  o48 -->|"ACTUALIZA"| t14
+  o48 -->|"LEE"| t14
+  o48 -->|"CREA"| t51
+  o48 -->|"CREA"| t52
+  o48 -.-> t53
+  a41 --> o54
+  o54 -->|"LEE"| t27
+  o54 -->|"LEE"| t42
+  o54 -->|"LEE"| t21
+  o54 -->|"LEE"| t22
+  o54 -->|"LEE"| t23
+  o54 -->|"LEE"| t35
+  o54 -.-> t55
+  a49 --> o56
+  o56 -->|"LEE"| t27
+  o56 -->|"LEE"| t42
+  o56 -->|"CREA"| t30
+  o56 -->|"LEE"| t30
+  o56 -->|"CREA"| t31
+  o56 -->|"LEE"| t31
+  o56 -.-> t57
+  a26 --> o58
+  o58 -->|"LEE"| t14
+  o58 -->|"LEE"| t35
+  o58 -->|"LEE"| t59
+  o58 -->|"LEE"| t8
+  a26 --> o60
+  o60 -->|"CREA"| t50
+  o60 -->|"CREA"| t14
+  o60 -->|"ACTUALIZA"| t14
+  o60 -->|"LEE"| t14
+  o60 -->|"CREA"| t51
+  o60 -->|"CREA"| t52
+  o60 -.-> t61
+  a26 --> o62
+  o62 -->|"ACTUALIZA"| t13
+  o62 -->|"CREA"| t13
+  o62 -->|"LEE"| t13
+  o62 -->|"ACTUALIZA"| t35
+  o62 -->|"LEE"| t35
+  o62 -->|"ACTUALIZA"| t11
+  o62 -.-> t63
+  a26 --> o64
+  o64 -->|"ACTUALIZA"| t13
+  o64 -->|"CREA"| t13
+  o64 -->|"LEE"| t13
+  o64 -->|"LEE"| t65
+  o64 -->|"ACTUALIZA"| t66
+  o64 -->|"LEE"| t66
+  o64 -.-> t67
+  a34 --> o68
+  o68 -->|"LEE"| t35
+  o68 -->|"CREA"| t69
+  o68 -->|"LEE"| t11
+  a26 --> o70
+  o70 -->|"ACTUALIZA"| t13
+  o70 -->|"CREA"| t13
+  o70 -->|"LEE"| t13
+  o70 -->|"ACTUALIZA"| t35
+  o70 -->|"LEE"| t35
+  o70 -->|"LEE"| t8
+  a2 --> o71
+  o71 -->|"ACTUALIZA"| t13
+  o71 -->|"CREA"| t13
+  o71 -->|"LEE"| t13
+  o71 -->|"CREA"| t30
+  o71 -->|"LEE"| t30
+  o71 -->|"CREA"| t31
+  o71 -.-> t72
+  a26 --> o73
+  o73 -->|"ACTUALIZA"| t13
+  o73 -->|"CREA"| t13
+  o73 -->|"LEE"| t13
+  o73 -->|"ACTUALIZA"| t15
+  o73 -->|"LEE"| t15
+  o73 -->|"ACTUALIZA"| t35
+  o73 -.-> t74
+  a76 --> o75
+  o75 -->|"LEE"| t77
+  a76 --> o78
+  o78 -->|"CREA"| t77
+  a76 --> o79
+  o79 -->|"ACTUALIZA"| t77
+  o79 -->|"LEE"| t77
+  a76 --> o80
+  o80 -->|"ACTUALIZA"| t77
+  o80 -->|"LEE"| t77
+  a76 --> o81
+  o81 -->|"LEE"| t77
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -2217,8 +2230,9 @@ Confirmar un comprobante de pago
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella.; ForbiddenException: La agenda indicada pertenece a otra organización. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada; ResourceNotFoundException: Comprobante no encontrado |
 | 409 | `CONFLICT` | ConflictException: Ese comprobante ya se rechazó: no se puede confirmar. |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto pasa lo que falta pagar de la cita: {formatBs(invoice.balanceCents)}; PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe |
 
 ```mermaid
 flowchart TD
@@ -2288,36 +2302,88 @@ flowchart TD
   n31 --> n32
   n33[("LEE iam.users")]:::efecto
   n32 --> n33
-  n34{"STATES_WITHOUT_PAYMENT.includes(booking.statusConceptId)"}:::decision
+  n34{"payment"}:::decision
   n33 --> n34
-  n26 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar."]):::error
+  n35["Llama a BookingBillingBridge.bill"]:::llamada
   n34 -->|"sí"| n35
-  n36[("ACTUALIZA scheduling.appointment_payment_receipts · ACTUALIZA scheduling.appointment_payment_receipts · ACTUA…")]:::efecto
-  n34 -->|"no"| n36
-  n37["Llama a PaymentReceiptAccess.project"]:::llamada
+  n36["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n35 --> n36
+  n37[("LEE scheduling.schedulable_resources")]:::efecto
   n36 --> n37
-  n38["Llama a CommonPaymentReceiptFilesAdapter.describe"]:::llamada
+  n38{"invoice === null"}:::decision
   n37 --> n38
-  n39[("LEE common.files · LEE common.file_versions")]:::efecto
-  n38 --> n39
-  n40["Llama a SchedulingPaymentReceiptsRepository.findUserDisplayNames"]:::llamada
+  n39[("ACTUALIZA scheduling.appointment_payment_states")]:::efecto
+  n38 -->|"sí"| n39
+  n40{"amountCents › invoice.balanceCents"}:::decision
   n39 --> n40
-  n41[("LEE iam.users")]:::efecto
-  n40 --> n41
-  n42{"changed"}:::decision
-  n41 --> n42
-  n43["Llama a BookingChangeNotifier.notifyReceiptReviewed"]:::llamada
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED El monto pasa lo que falta pagar de la cita: {formatBs(invoice.balanceCents)}"]):::error
+  n40 -->|"sí"| n41
+  n42{"amountCents › 0"}:::decision
+  n40 -->|"no"| n42
+  n43["Llama a BillingBookingAdapter.receivePayment"]:::llamada
   n42 -->|"sí"| n43
-  n44["Transacción: safely(…)"]:::transaccion
+  n44{"invoice === null"}:::decision
   n43 --> n44
-  n45["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
-  n44 --> n45
-  n46[("LEE scheduling.appointment_bookings · LEE scheduling.bookable_slots")]:::efecto
-  n45 --> n46
-  n47(("200 Responde con éxito")):::ok
+  n45(["500 INTERNAL La factura {data.invoiceId} de la cita {data.bookingId} no existe"]):::error
+  n44 -->|"sí"| n45
+  n46[("ACTUALIZA billing.invoices · ACTUALIZA billing.invoices · ACTUALIZA billing.invoices · ACTUALIZA billing.invo…")]:::efecto
+  n44 -->|"no"| n46
+  n47{"STATES_WITHOUT_PAYMENT.includes(booking.statusConceptId)"}:::decision
   n46 --> n47
   n42 -->|"no"| n47
+  n34 -->|"no"| n47
+  n26 -->|"no"| n47
+  n48(["422 PRECONDITION_FAILED Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar."]):::error
+  n47 -->|"sí"| n48
+  n49[("ACTUALIZA scheduling.appointment_payment_receipts · ACTUALIZA scheduling.appointment_payment_receipts · ACTUA…")]:::efecto
+  n47 -->|"no"| n49
+  n50["Llama a BookingBillingBridge.bill"]:::llamada
+  n49 --> n50
+  n51["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n50 --> n51
+  n52[("LEE scheduling.schedulable_resources")]:::efecto
+  n51 --> n52
+  n53{"invoice === null"}:::decision
+  n52 --> n53
+  n54[("ACTUALIZA scheduling.appointment_payment_states")]:::efecto
+  n53 -->|"sí"| n54
+  n55{"amountCents › invoice.balanceCents"}:::decision
+  n54 --> n55
+  n53 -->|"no"| n55
+  n56(["422 PRECONDITION_FAILED El monto pasa lo que falta pagar de la cita: {formatBs(invoice.balanceCents)}"]):::error
+  n55 -->|"sí"| n56
+  n57{"amountCents › 0"}:::decision
+  n55 -->|"no"| n57
+  n58["Llama a BillingBookingAdapter.receivePayment"]:::llamada
+  n57 -->|"sí"| n58
+  n59{"invoice === null"}:::decision
+  n58 --> n59
+  n60(["500 INTERNAL La factura {data.invoiceId} de la cita {data.bookingId} no existe"]):::error
+  n59 -->|"sí"| n60
+  n61[("ACTUALIZA billing.invoices · ACTUALIZA billing.invoices · ACTUALIZA billing.invoices · ACTUALIZA billing.invo…")]:::efecto
+  n59 -->|"no"| n61
+  n62["Llama a PaymentReceiptAccess.project"]:::llamada
+  n61 --> n62
+  n57 -->|"no"| n62
+  n63["Llama a CommonPaymentReceiptFilesAdapter.describe"]:::llamada
+  n62 --> n63
+  n64[("LEE common.files · LEE common.file_versions")]:::efecto
+  n63 --> n64
+  n65["Llama a SchedulingPaymentReceiptsRepository.findUserDisplayNames"]:::llamada
+  n64 --> n65
+  n66[("LEE iam.users")]:::efecto
+  n65 --> n66
+  n67{"changed"}:::decision
+  n66 --> n67
+  n68["Llama a BookingChangeNotifier.notifyReceiptReviewed"]:::llamada
+  n67 -->|"sí"| n68
+  n69["Transacción: safely(…)"]:::transaccion
+  n68 --> n69
+  n70["Llama a SchedulingNoticeRepository.describeBooking"]:::llamada
+  n69 --> n70
+  n71["… el resto del árbol (2 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2560,8 +2626,9 @@ Marcar el estado de pago de una cita
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Esta cita es de otra agenda: solo la opera quien atiende en ella. |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Cita no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un monto recibido solo va con «pagada» o «pago parcial»: «pendiente» dice que todavía no se cobró.; PreconditionFailedException: Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar.; PreconditionFailedException: El monto pasa lo que falta pagar de la cita: {formatBs(invoice.balanceCents)} |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe |
 
 ```mermaid
 flowchart TD
@@ -2572,32 +2639,62 @@ flowchart TD
   n2 --> n3
   n4["Llama a SetPaymentStateUseCase.execute"]:::llamada
   n3 --> n4
-  n5["Transacción: transactional(…)"]:::transaccion
+  n5{"amountCents !== undefined && dto.state === 'PENDING'"}:::decision
   n4 --> n5
-  n6["Llama a BookingAccess.loadForOperation"]:::llamada
-  n5 --> n6
-  n7["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
-  n6 --> n7
-  n8[("LEE scheduling.appointment_bookings")]:::efecto
+  n6(["422 PRECONDITION_FAILED Un monto recibido solo va con «pagada» o «pago parcial»: «pendiente» dice que todavía…"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a BookingAccess.loadForOperation"]:::llamada
   n7 --> n8
-  n9{"!booking"}:::decision
+  n9["Llama a SchedulingBookingsRepository.findBookingByIdForUpdate"]:::llamada
   n8 --> n9
-  n10(["404 NOT_FOUND Cita no encontrada"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE scheduling.schedulable_resources")]:::efecto
-  n11 --> n12
-  n13{"!isOwnAgenda"}:::decision
-  n12 --> n13
-  n14(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
-  n13 -->|"sí"| n14
-  n15{"STATES_WITHOUT_PAYMENT.includes(booking.statusConceptId)"}:::decision
-  n13 -->|"no"| n15
-  n16(["422 PRECONDITION_FAILED Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar."]):::error
+  n10[("LEE scheduling.appointment_bookings")]:::efecto
+  n9 --> n10
+  n11{"!booking"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND Cita no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE scheduling.schedulable_resources")]:::efecto
+  n13 --> n14
+  n15{"!isOwnAgenda"}:::decision
+  n14 --> n15
+  n16(["403 FORBIDDEN Esta cita es de otra agenda: solo la opera quien atiende en ella."]):::error
   n15 -->|"sí"| n16
-  n17(("200 Responde con éxito")):::ok
+  n17{"STATES_WITHOUT_PAYMENT.includes(booking.statusConceptId)"}:::decision
   n15 -->|"no"| n17
+  n18(["422 PRECONDITION_FAILED Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar."]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a BookingBillingBridge.bill"]:::llamada
+  n17 -->|"no"| n19
+  n20["Llama a SchedulingCatalogRepository.findResourceById"]:::llamada
+  n19 --> n20
+  n21[("LEE scheduling.schedulable_resources")]:::efecto
+  n20 --> n21
+  n22{"invoice === null"}:::decision
+  n21 --> n22
+  n23[("ACTUALIZA scheduling.appointment_payment_states")]:::efecto
+  n22 -->|"sí"| n23
+  n24{"amountCents › invoice.balanceCents"}:::decision
+  n23 --> n24
+  n22 -->|"no"| n24
+  n25(["422 PRECONDITION_FAILED El monto pasa lo que falta pagar de la cita: {formatBs(invoice.balanceCents)}"]):::error
+  n24 -->|"sí"| n25
+  n26{"amountCents › 0"}:::decision
+  n24 -->|"no"| n26
+  n27["Llama a BillingBookingAdapter.receivePayment"]:::llamada
+  n26 -->|"sí"| n27
+  n28{"invoice === null"}:::decision
+  n27 --> n28
+  n29(["500 INTERNAL La factura {data.invoiceId} de la cita {data.bookingId} no existe"]):::error
+  n28 -->|"sí"| n29
+  n30[("ACTUALIZA billing.invoices · ACTUALIZA billing.invoices · ACTUALIZA billing.invoices · ACTUALIZA billing.invo…")]:::efecto
+  n28 -->|"no"| n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
+  n26 -->|"no"| n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5454,8 +5551,18 @@ flowchart TD
   n7 -->|"no"| n9
   n10[("LEE scheduling.bookable_slots")]:::efecto
   n9 --> n10
-  n11(("200 Responde con éxito")):::ok
+  n11["Llama a SchedulingAgendaService.slotPrices"]:::llamada
   n10 --> n11
+  n12["Llama a SchedulingAgendaRepository.findResourcePractices"]:::llamada
+  n11 --> n12
+  n13[("LEE scheduling.schedulable_resources")]:::efecto
+  n12 --> n13
+  n14["Llama a BillingBookingAdapter.findConsultationPrices"]:::llamada
+  n13 --> n14
+  n15[("LEE billing.service_catalog")]:::efecto
+  n14 --> n15
+  n16(("200 Responde con éxito")):::ok
+  n15 --> n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
