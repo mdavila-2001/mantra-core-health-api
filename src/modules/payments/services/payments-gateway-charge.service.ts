@@ -309,7 +309,7 @@ export class PaymentsGatewayChargeService {
     gatewayStatus: GatewayPaymentIntentStatus,
   ): Promise<string> {
     return this.em.transactional(async (tx) => {
-      const intent = await this.intentsRepo.findById(tx, intentId);
+      const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
       if (!intent) return LOCAL_INTENT_STATUS[gatewayStatus];
       if (
         intent.gatewayIntentRef &&
