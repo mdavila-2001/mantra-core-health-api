@@ -152,6 +152,12 @@ describe('PaymentsGatewayWebhookService', () => {
       ) => state.sessions.filter((s) => s.paymentIntentId === intentId),
       findDebtByIdForUpdate: async (_tx: unknown, id: string) =>
         state.debt && state.debt.id === id ? state.debt : null,
+      findOpenCheckoutSessionsByDebt: async (_tx: unknown, debtId: string) =>
+        state.sessions.filter(
+          (s) =>
+            s.paymentDebtId === debtId &&
+            s.statusConceptId === CONCEPTS.CHECKOUT_OPEN,
+        ),
     };
     const transactionsRepo = {
       findWebhookEventByRef: async (_tx: unknown, ref: string) =>
@@ -313,6 +319,113 @@ describe('PaymentsGatewayWebhookService', () => {
   });
 
   describe('límite', () => {
+    describe('M1: una intención de deuda SIN sesión de checkout no se da por aplicada', () => {
+      const debtIntent = { sourceRefType: 'payment_debt', sourceRefId: 'debt-1' };
+
+      it('succeeded: la intención se asienta, la deuda NO se toca y el evento queda para conciliar con su motivo', async () => {
+        const d = build(config(), { intent: debtIntent });
+        d.state.sessions = [];
+
+        const res = await d.service.receive(signed(body({})));
+
+        expect(res).toMatchObject({
+          applied: true,
+          reconciliationRequired: true,
+          decision: 'aplicar',
+        });
+        expect(d.state.intent?.statusConceptId).toBe(CONCEPTS.PI_SUCCEEDED);
+        expect(d.state.debt).toMatchObject({
+          outstandingAmount: '150.000000',
+          statusConceptId: CONCEPTS.DEBT_IN_CHECKOUT,
+        });
+        const archived = d.events.get(`pay-gateway:${EVENT_A}`);
+        expect(archived?.processed).toBe(false);
+        expect(archived?.payloadJson.reconciliation).toEqual({
+          reason: 'debt_without_checkout_session',
+        });
+        expect(JSON.stringify(d.logs)).toContain('debt_without_checkout_session');
+      });
+
+      it('la reentrega del mismo evento sigue marcada para conciliar', async () => {
+        const d = build(config(), { intent: debtIntent });
+        d.state.sessions = [];
+        const request = signed(body({}));
+        await d.service.receive(request);
+
+        const again = await d.service.receive(request);
+
+        expect(again).toMatchObject({
+          duplicate: true,
+          reconciliationRequired: true,
+        });
+      });
+
+      it('por propósito DEBT (aunque no traiga sourceRefType) también exige conciliar', async () => {
+        const d = build(config(), {
+          intent: { purposeConceptId: CONCEPTS.PAY_PURPOSE_DEBT },
+        });
+        d.state.sessions = [];
+        const res = await d.service.receive(signed(body({})));
+        expect(res.reconciliationRequired).toBe(true);
+      });
+
+      it('una intención que no es de deuda y no tiene sesión sigue sin requerir conciliación', async () => {
+        const d = build(config(), {
+          intent: {
+            sourceRefType: 'order',
+            sourceRefId: 'order-1',
+            purposeConceptId: CONCEPTS.PAY_PURPOSE_OTHER,
+          },
+        });
+        d.state.sessions = [];
+        const res = await d.service.receive(signed(body({})));
+        expect(res).toMatchObject({
+          applied: true,
+          reconciliationRequired: false,
+        });
+        expect(d.events.get(`pay-gateway:${EVENT_A}`)?.processed).toBe(true);
+        expect(d.events.get(`pay-gateway:${EVENT_A}`)?.payloadJson).not.toHaveProperty(
+          'reconciliation',
+        );
+      });
+
+      it('cobro que excede el saldo: conserva el motivo en el evento archivado', async () => {
+        const d = build(config(), { intent: debtIntent });
+        d.state.debt.outstandingAmount = '100.000000';
+        const res = await d.service.receive(signed(body({})));
+        expect(res.reconciliationRequired).toBe(true);
+        expect(
+          d.events.get(`pay-gateway:${EVENT_A}`)?.payloadJson.reconciliation,
+        ).toEqual({ reason: 'amount_exceeds_outstanding' });
+      });
+    });
+
+    describe('m6: liberar la deuda no pisa el checkout abierto de otra intención', () => {
+      it('failed de la intención 1: su sesión se cierra pero la deuda sigue IN_CHECKOUT porque la intención 2 tiene la suya abierta', async () => {
+        const d = build();
+        d.state.sessions.push({
+          id: 'session-2',
+          paymentDebtId: 'debt-1',
+          paymentIntentId: 'intent-2',
+          statusConceptId: CONCEPTS.CHECKOUT_OPEN,
+          completedAt: undefined,
+          updatedAt: new Date(0),
+        });
+
+        await d.service.receive(
+          signed(body({ type: 'payment_intent.failed' })),
+        );
+
+        expect(d.state.sessions[0].statusConceptId).toBe(
+          CONCEPTS.CHECKOUT_EXPIRED,
+        );
+        expect(d.state.sessions[1].statusConceptId).toBe(
+          CONCEPTS.CHECKOUT_OPEN,
+        );
+        expect(d.state.debt.statusConceptId).toBe(CONCEPTS.DEBT_IN_CHECKOUT);
+      });
+    });
+
     it('DUPLICADO: la reentrega del mismo webhook-id no repite el efecto (la deuda se descuenta una sola vez)', async () => {
       const d = build(config(), { intent: { amount: '100.00' } });
       const request = signed(body({ amountMinor: 10000 }));
@@ -741,7 +854,7 @@ describe('PaymentsGatewayWebhookService', () => {
       });
     });
 
-    it('sin cuerpo crudo (parser mal cableado): 500 y sin efecto — nunca se verifica contra un cuerpo reconstruido', async () => {
+    it('sin cuerpo crudo: 400 y sin efecto — nunca se verifica contra un cuerpo reconstruido', async () => {
       const d = build();
       await expect(
         d.service.receive({
@@ -749,9 +862,11 @@ describe('PaymentsGatewayWebhookService', () => {
           rawBody: undefined,
         }),
       ).rejects.toMatchObject({
-        status: 500,
+        status: 400,
         reason: PaymentsErrorReason.GATEWAY_WEBHOOK_RAW_BODY_MISSING,
       });
+      expect(d.calls.lookups).toBe(0);
+      expect(d.events.size).toBe(0);
     });
 
     it('no registra el cuerpo, las cabeceras de firma ni el secreto', async () => {

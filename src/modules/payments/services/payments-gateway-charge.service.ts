@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
+  ResourceNotFoundException,
   touch,
 } from '../../../common';
 import { PaymentIntentsRepository } from '../repositories';
@@ -283,6 +284,7 @@ export class PaymentsGatewayChargeService {
 
     const localStatusConceptId = await this.associate(
       intent.id,
+      intent.tenantId,
       created.intent.id,
       created.intent.status,
     );
@@ -305,12 +307,22 @@ export class PaymentsGatewayChargeService {
    */
   private async associate(
     intentId: string,
+    tenantId: string,
     gatewayIntentRef: string,
     gatewayStatus: GatewayPaymentIntentStatus,
   ): Promise<string> {
     return this.em.transactional(async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
       if (!intent) return LOCAL_INTENT_STATUS[gatewayStatus];
+      // Defensa en profundidad: la intención ya se acotó al tenant en la
+      // compuerta; una fila de otro tenant nunca se asocia a este cobro.
+      if (intent.tenantId !== tenantId) {
+        throw new ResourceNotFoundException(
+          'Intención de pago no encontrada',
+          undefined,
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
+      }
       if (
         intent.gatewayIntentRef &&
         intent.gatewayIntentRef !== gatewayIntentRef

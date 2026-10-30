@@ -8,6 +8,7 @@ import {
   ResourceNotFoundException,
   UnauthorizedException,
   canonicalJson,
+  requireTenantId,
   touch,
   verifySignature,
   type AuthenticatedUser,
@@ -29,6 +30,7 @@ import {
   CancellationResponseDto,
   type TransactionOperation,
 } from '../dto';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { resolveGatewayWebhookSecrets } from './webhook-secret.resolver';
 import {
   compareAmounts,
@@ -348,6 +350,9 @@ export class PaymentsTransactionsService {
     dto: ProcessTransactionDto,
     gateway: PaymentsGatewayChargeService,
   ): Promise<TransactionResponseDto> {
+    // El tenant sale del contexto verificado por el interceptor, nunca del
+    // cuerpo ni de la ruta: el UUID de la intención no prueba que sea del actor.
+    const tenantId = requireTenantId();
     if (dto.operation !== 'SALE') {
       throw new PreconditionFailedException(
         'La pasarela cobra en un solo paso: sólo admite la operación SALE',
@@ -357,14 +362,19 @@ export class PaymentsTransactionsService {
     }
 
     const intent = await this.em.transactional(async (tx) => {
-      const found = await this.intentsRepo.findByIdForUpdate(tx, intentId);
-      if (!found) {
-        throw new ResourceNotFoundException(
-          'Intención de pago no encontrada',
-          { intentId },
-          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
-        );
-      }
+      const loaded = await this.intentsRepo.findByIdForUpdate(tx, intentId);
+      // Una intención de otro tenant responde igual que una inexistente (mismo
+      // 404, mismo mensaje, sin `details`): el servicio no se apoya en RLS, que
+      // con `RLS_ENFORCE=false` no existe. Ver `assertResourceInTenant`.
+      const found = assertResourceInTenant(
+        loaded,
+        loaded?.tenantId,
+        tenantId,
+        {
+          message: 'Intención de pago no encontrada',
+          reason: PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        },
+      );
       this.assertIntentOpen(found, intentId);
       if (dto.amount && compareAmounts(dto.amount, found.amount) !== 0) {
         throw new PreconditionFailedException(
@@ -393,6 +403,7 @@ export class PaymentsTransactionsService {
       // La pasarela cobra el importe completo: si ya hay algo capturado por el
       // camino de siempre, excede el saldo y no se despacha (sobrecobro).
       await this.assertWithinBalance(tx, found, intentId, found.amount);
+      await this.assertDebtAllowsCharge(tx, found);
       return found;
     });
 
@@ -416,6 +427,98 @@ export class PaymentsTransactionsService {
         ...(charged.nextAction ? { nextAction: charged.nextAction } : {}),
       },
     };
+  }
+
+  /**
+   * Compuerta previa contra la deuda que la intención va a cobrar (M2). Sin ella
+   * dos intenciones con claves locales distintas sobre la misma deuda daban dos
+   * cobros (dos QR) y el sobrepago sólo se detectaba cuando el webhook ya había
+   * llegado, con el dinero movido.
+   *
+   * La deuda de la intención es la de su `sourceRef` (`payment_debt`) y las de
+   * sus sesiones de checkout. Para cada una, con la deuda bloqueada `FOR UPDATE`
+   * (serializa las compuertas concurrentes) y en aritmética decimal exacta:
+   *
+   * 1. tiene que existir, ser del mismo tenant y no estar saldada, en BOB;
+   * 2. ninguna OTRA intención del tenant puede tener un cobro en vuelo sobre ella
+   *    (con `pi_…` y todavía `PI_PENDING`/`PI_PROCESSING`);
+   * 3. el importe de la intención no puede exceder el saldo pendiente de la deuda.
+   *
+   * No se aplica a la intención que ya tiene su `gatewayIntentRef`: esa es el
+   * reintento con la misma clave (regla 11) y sale antes, hacia la consulta.
+   * Una intención sin deuda asociada (otro propósito) no tiene nada que medir.
+   */
+  private async assertDebtAllowsCharge(
+    tx: EntityManager,
+    intent: {
+      id: string;
+      tenantId: string;
+      amount: string;
+      sourceRefType?: string | null;
+      sourceRefId?: string | null;
+    },
+  ): Promise<void> {
+    const debtIds = new Set<string>();
+    if (intent.sourceRefType === 'payment_debt' && intent.sourceRefId) {
+      debtIds.add(intent.sourceRefId);
+    }
+    const sessions = await this.flowRepo.findCheckoutSessionsByIntentForUpdate(
+      tx,
+      intent.id,
+    );
+    for (const session of sessions) debtIds.add(session.paymentDebtId);
+
+    for (const paymentDebtId of debtIds) {
+      const debt = await this.flowRepo.findDebtByIdForUpdate(tx, paymentDebtId);
+      if (!debt || debt.tenantId !== intent.tenantId) {
+        throw new PreconditionFailedException(
+          'La deuda de la intención no existe',
+          { intentId: intent.id },
+          PaymentsErrorReason.PAYMENT_DEBT_NOT_FOUND,
+        );
+      }
+      if (debt.statusConceptId === CONCEPTS.DEBT_SETTLED) {
+        throw new PreconditionFailedException(
+          'La deuda ya está saldada',
+          { intentId: intent.id, paymentDebtId },
+          PaymentsErrorReason.PAYMENT_DEBT_ALREADY_SETTLED,
+        );
+      }
+      if (debt.currencyCode !== 'BOB') {
+        throw new PreconditionFailedException(
+          'La pasarela sólo cobra deudas en bolivianos (BOB)',
+          { intentId: intent.id, paymentDebtId },
+          PaymentsErrorReason.PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED,
+        );
+      }
+      const inFlight = await this.flowRepo.findInFlightGatewayIntentsOnDebt(
+        tx,
+        {
+          tenantId: intent.tenantId,
+          paymentDebtId,
+          excludeIntentId: intent.id,
+        },
+      );
+      if (inFlight.length > 0) {
+        throw new ConflictException(
+          'La deuda ya tiene otro cobro en curso en la pasarela',
+          { intentId: intent.id, paymentDebtId },
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+      }
+      if (compareAmounts(intent.amount, debt.outstandingAmount) > 0) {
+        throw new ConflictException(
+          'El importe excede el saldo pendiente de la deuda',
+          {
+            intentId: intent.id,
+            paymentDebtId,
+            amount: intent.amount,
+            outstanding: debt.outstandingAmount,
+          },
+          PaymentsErrorReason.PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT,
+        );
+      }
+    }
   }
 
   /**

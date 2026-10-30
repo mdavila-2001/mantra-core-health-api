@@ -18,6 +18,7 @@ import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
+  runWithTenant,
 } from '../../../common';
 import type { CreatePaymentIntentDto, ProcessTransactionDto } from '../dto';
 
@@ -38,6 +39,7 @@ const actor = { id: 'user-1', roles: ['PAYMENTS_ADMIN'] };
 const TENANT = '11111111-1111-1111-1111-111111111111';
 const GATEWAY_ID = '22222222-2222-2222-2222-222222222222';
 const DEBT_ID = '33333333-3333-3333-3333-333333333333';
+const OTHER_TENANT = '99999999-9999-9999-9999-999999999999';
 
 const dto = (
   over: Partial<CreatePaymentIntentDto> = {},
@@ -137,9 +139,55 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
       },
       findByIdForUpdate: async (_tx: unknown, id: string) => byId(id),
     };
+    // La deuda que cobra la intención (`sourceRef`): sin ella la compuerta de
+    // deuda no tiene contra qué medir. Saldo holgado por defecto; cada prueba de
+    // la compuerta fija el suyo.
+    const debts = new Map<string, Row>([
+      [
+        DEBT_ID,
+        {
+          id: DEBT_ID,
+          tenantId: TENANT,
+          currencyCode: 'BOB',
+          outstandingAmount: '1000.000000',
+          statusConceptId: CONCEPTS.DEBT_PENDING,
+        },
+      ],
+    ]);
+    const sessions: Row[] = [];
     const flowRepo = {
       findLatestRiskAssessment: async (_tx: unknown, intentId: string) =>
         risks.get(intentId) ?? null,
+      createRiskAssessment: (_tx: unknown, data: Row) => ({
+        id: randomUUID(),
+        ...data,
+      }),
+      findDebtByIdForUpdate: async (_tx: unknown, id: string) =>
+        debts.get(id) ?? null,
+      findCheckoutSessionsByIntentForUpdate: async (
+        _tx: unknown,
+        intentId: string,
+      ) => sessions.filter((x) => x.paymentIntentId === intentId),
+      findInFlightGatewayIntentsOnDebt: async (
+        _tx: unknown,
+        scope: { tenantId: string; paymentDebtId: string; excludeIntentId: string },
+      ) =>
+        [...store.values()].filter(
+          (r) =>
+            r.tenantId === scope.tenantId &&
+            r.id !== scope.excludeIntentId &&
+            !!r.gatewayIntentRef &&
+            [CONCEPTS.PI_PENDING, CONCEPTS.PI_PROCESSING].includes(
+              r.statusConceptId,
+            ) &&
+            ((r.sourceRefType === 'payment_debt' &&
+              r.sourceRefId === scope.paymentDebtId) ||
+              sessions.some(
+                (x) =>
+                  x.paymentDebtId === scope.paymentDebtId &&
+                  x.paymentIntentId === r.id,
+              )),
+        ),
     };
     const transactionsRepo = {
       findPendingByIntent: async () => open.op,
@@ -171,7 +219,7 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
       logger as never,
       withCharge ? charge : undefined,
     );
-    const transactions = new PaymentsTransactionsService(
+    const realTransactions = new PaymentsTransactionsService(
       em as never,
       intentsRepo as never,
       flowRepo as never,
@@ -179,6 +227,21 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
       logger as never,
       withCharge ? charge : undefined,
     );
+    // El `TenantContextInterceptor` fija el tenant del actor antes del servicio;
+    // aquí se hace lo mismo. `tenant = null` es una petición sin tenant resuelto.
+    const transactions = {
+      processTransaction: (
+        id: string,
+        body: ProcessTransactionDto,
+        who: typeof actor,
+        tenant: string | null = TENANT,
+      ) =>
+        tenant === null
+          ? realTransactions.processTransaction(id, body, who)
+          : runWithTenant(tenant, () =>
+              realTransactions.processTransaction(id, body, who),
+            ),
+    };
     const assess = (intentId: string, decision: Decision) =>
       risks.set(intentId, { decisionConceptId: DECISION[decision] });
     return {
@@ -189,6 +252,8 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
       assess,
       legacyTransactions,
       open,
+      debts,
+      sessions,
     };
   }
 
@@ -801,6 +866,358 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         1,
       );
       expect(double.createdCount).toBe(1);
+    });
+  });
+
+  describe('M3: un tenant no cobra la intención de otro (BOLA)', () => {
+    const approvedIntent = async (d: ReturnType<typeof build>) => {
+      const { row } = await created(d);
+      d.assess(row.id, 'APPROVE');
+      return row;
+    };
+
+    it('la intención de OTRO tenant responde EXACTAMENTE igual que una inexistente: 404, sin llamar a la pasarela ni tocar la fila', async () => {
+      const d = build(true);
+      const row = await approvedIntent(d);
+
+      const foreign = await d.transactions
+        .processTransaction(row.id, sale(), actor, OTHER_TENANT)
+        .catch((e: unknown) => e as any);
+      const missing = await d.transactions
+        .processTransaction(randomUUID(), sale(), actor, OTHER_TENANT)
+        .catch((e: unknown) => e as any);
+
+      expect(foreign).toMatchObject({
+        status: 404,
+        reason: PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+      });
+      expect(foreign.getResponse()).toEqual(missing.getResponse());
+      expect(foreign.details).toBeUndefined();
+      expect(double.calls).toHaveLength(0);
+      expect(row.gatewayIntentRef).toBeUndefined();
+      expect(row.statusConceptId).toBe(CONCEPTS.PI_PENDING);
+    });
+
+    it('tampoco la CONSULTA: la intención ajena ya despachada no devuelve su nextAction (QR, cuenta) a otro tenant', async () => {
+      const d = build(true);
+      const row = await approvedIntent(d);
+      await d.transactions.processTransaction(row.id, sale(), actor);
+      double.calls.length = 0;
+
+      await expect(
+        d.transactions.processTransaction(row.id, sale(), actor, OTHER_TENANT),
+      ).rejects.toMatchObject({ status: 404 });
+
+      expect(double.calls).toHaveLength(0);
+    });
+
+    it('sin tenant resuelto (p. ej. SUPERADMIN sin X-Tenant-Id): 412 TENANT_REQUIRED y cero llamadas — nunca «cualquier tenant»', async () => {
+      const d = build(true);
+      const row = await approvedIntent(d);
+
+      await expect(
+        d.transactions.processTransaction(row.id, sale(), actor, null),
+      ).rejects.toMatchObject({
+        status: 412,
+        details: { reason: 'TENANT_REQUIRED' },
+      });
+
+      expect(double.calls).toHaveLength(0);
+      expect(row.gatewayIntentRef).toBeUndefined();
+    });
+
+    it('el tenant dueño sí cobra (control)', async () => {
+      const d = build(true);
+      const row = await approvedIntent(d);
+      await d.transactions.processTransaction(row.id, sale(), actor, TENANT);
+      expect(double.postCalls).toHaveLength(1);
+    });
+  });
+
+  describe('M2: compuerta previa contra la deuda', () => {
+    const second = {
+      idempotencyKey: 'cobro-consulta-002',
+    };
+    async function pair(d: ReturnType<typeof build>) {
+      const a = (await created(d)).row;
+      d.assess(a.id, 'APPROVE');
+      await d.intents.createIntent(dto(second), actor);
+      const b = d.store.get(`${TENANT}|cobro-consulta-002`) as Row;
+      d.assess(b.id, 'APPROVE');
+      return { a, b };
+    }
+
+    it('DOS intenciones con claves distintas sobre la MISMA deuda: la segunda no se despacha (409) y no hay segundo QR', async () => {
+      const d = build(true);
+      const { a, b } = await pair(d);
+      await d.transactions.processTransaction(a.id, sale(), actor);
+      double.calls.length = 0;
+
+      await expect(
+        d.transactions.processTransaction(b.id, sale(), actor),
+      ).rejects.toMatchObject({
+        status: 409,
+        reason: PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+      });
+
+      expect(double.calls).toHaveLength(0);
+      expect(double.createdCount).toBe(1);
+      expect(b.gatewayIntentRef).toBeUndefined();
+    });
+
+    it('el reintento de la intención PROPIA ya despachada no se bloquea (regla 11): consulta, sin segundo cobro', async () => {
+      const d = build(true);
+      const { a } = await pair(d);
+      await d.transactions.processTransaction(a.id, sale(), actor);
+      double.calls.length = 0;
+
+      const again = await d.transactions.processTransaction(a.id, sale(), actor);
+
+      expect(double.calls.map((c) => c.method)).toEqual(['GET']);
+      expect(again.gateway?.paymentIntentId).toMatch(/^pi_/u);
+    });
+
+    it('el reintento tras un resultado AMBIGUO (sin pi_ asociado) tampoco se bloquea', async () => {
+      const d = build(true);
+      const { a } = await pair(d);
+      double.script = [
+        { kind: 'execute_then_status', status: 503 },
+        { kind: 'execute_then_status', status: 503 },
+        { kind: 'execute_then_status', status: 503 },
+      ];
+      await expect(
+        d.transactions.processTransaction(a.id, sale(), actor),
+      ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
+
+      await d.transactions.processTransaction(a.id, sale(), actor);
+
+      expect(double.createdCount).toBe(1);
+    });
+
+    it.each([
+      ['PI_FAILED', CONCEPTS.PI_FAILED],
+      ['PI_CANCELED', CONCEPTS.PI_CANCELED],
+    ])(
+      'si el cobro anterior terminó sin pagarse (%s) la deuda vuelve a poder cobrarse',
+      async (_name, terminal) => {
+        const d = build(true);
+        const { a, b } = await pair(d);
+        await d.transactions.processTransaction(a.id, sale(), actor);
+        a.statusConceptId = terminal;
+
+        await d.transactions.processTransaction(b.id, sale(), actor);
+
+        expect(double.createdCount).toBe(2);
+      },
+    );
+
+    it('otra intención ligada a la deuda sólo por una SESIÓN de checkout también cuenta', async () => {
+      const d = build(true);
+      const { a, b } = await pair(d);
+      // La intención A apunta a otra deuda por sourceRef y a ésta por su sesión.
+      a.sourceRefId = randomUUID();
+      d.debts.set(a.sourceRefId, { ...d.debts.get(DEBT_ID) });
+      d.debts.get(a.sourceRefId)!.id = a.sourceRefId;
+      d.sessions.push({ paymentIntentId: a.id, paymentDebtId: DEBT_ID });
+      await d.transactions.processTransaction(a.id, sale(), actor);
+      double.calls.length = 0;
+
+      await expect(
+        d.transactions.processTransaction(b.id, sale(), actor),
+      ).rejects.toMatchObject({
+        reason: PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+      });
+      expect(double.calls).toHaveLength(0);
+    });
+
+    it('una intención de otro tenant sobre la misma deuda no bloquea (el alcance es el tenant)', async () => {
+      const d = build(true);
+      const { a, b } = await pair(d);
+      await d.transactions.processTransaction(a.id, sale(), actor);
+      a.tenantId = OTHER_TENANT;
+
+      await d.transactions.processTransaction(b.id, sale(), actor);
+
+      expect(double.createdCount).toBe(2);
+    });
+
+    it('importe MAYOR que el saldo de la deuda: 409 y cero llamadas', async () => {
+      const d = build(true);
+      const { row } = await created(d);
+      d.assess(row.id, 'APPROVE');
+      d.debts.get(DEBT_ID)!.outstandingAmount = '100.000000';
+
+      await expect(
+        d.transactions.processTransaction(row.id, sale(), actor),
+      ).rejects.toMatchObject({
+        status: 409,
+        reason: PaymentsErrorReason.PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT,
+      });
+      expect(double.calls).toHaveLength(0);
+    });
+
+    it('el saldo se compara en decimal exacto: 149.999999 no alcanza para 150.00; 150.000000 sí', async () => {
+      const d = build(true);
+      const { row } = await created(d);
+      d.assess(row.id, 'APPROVE');
+      d.debts.get(DEBT_ID)!.outstandingAmount = '149.999999';
+      await expect(
+        d.transactions.processTransaction(row.id, sale(), actor),
+      ).rejects.toMatchObject({
+        reason: PaymentsErrorReason.PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT,
+      });
+
+      d.debts.get(DEBT_ID)!.outstandingAmount = '150.000000';
+      await d.transactions.processTransaction(row.id, sale(), actor);
+      expect(double.postCalls).toHaveLength(1);
+    });
+
+    it.each([
+      [
+        'saldada',
+        { statusConceptId: CONCEPTS.DEBT_SETTLED },
+        PaymentsErrorReason.PAYMENT_DEBT_ALREADY_SETTLED,
+      ],
+      [
+        'de otro tenant',
+        { tenantId: OTHER_TENANT },
+        PaymentsErrorReason.PAYMENT_DEBT_NOT_FOUND,
+      ],
+      [
+        'en otra moneda',
+        { currencyCode: 'USD' },
+        PaymentsErrorReason.PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED,
+      ],
+    ])(
+      'deuda %s: 422 y cero llamadas',
+      async (_name, patch, reason) => {
+        const d = build(true);
+        const { row } = await created(d);
+        d.assess(row.id, 'APPROVE');
+        Object.assign(d.debts.get(DEBT_ID)!, patch);
+
+        await expect(
+          d.transactions.processTransaction(row.id, sale(), actor),
+        ).rejects.toMatchObject({ status: 422, reason });
+        expect(double.calls).toHaveLength(0);
+      },
+    );
+
+    it('la deuda de la intención no existe: 422 PAYMENT_DEBT_NOT_FOUND (no se cobra algo que no se podrá saldar)', async () => {
+      const d = build(true);
+      const { row } = await created(d);
+      d.assess(row.id, 'APPROVE');
+      d.debts.clear();
+
+      await expect(
+        d.transactions.processTransaction(row.id, sale(), actor),
+      ).rejects.toMatchObject({
+        reason: PaymentsErrorReason.PAYMENT_DEBT_NOT_FOUND,
+      });
+      expect(double.calls).toHaveLength(0);
+    });
+
+    it('una intención que no cobra una deuda (otro propósito) no tiene nada que medir y se despacha', async () => {
+      const d = build(true);
+      const { row } = await created(d, {
+        purpose: 'OTHER',
+        sourceRefType: undefined,
+        sourceRefId: undefined,
+      });
+      d.assess(row.id, 'APPROVE');
+      d.debts.clear();
+
+      await d.transactions.processTransaction(row.id, sale(), actor);
+
+      expect(double.postCalls).toHaveLength(1);
+    });
+  });
+
+  describe('m5: una intención ya despachada no admite fx-lock, repartos ni un DECLINE', () => {
+    async function dispatched() {
+      const d = build(true);
+      const { row } = await created(d);
+      d.assess(row.id, 'APPROVE');
+      await d.transactions.processTransaction(row.id, sale(), actor);
+      return { d, row };
+    }
+
+    it('fx-lock: 409 PAYMENT_INTENT_VIA_GATEWAY y el importe/moneda con QR vivo no cambian', async () => {
+      const { d, row } = await dispatched();
+      const before = { amount: row.amount, currency: row.currencyConceptId };
+
+      await expect(
+        d.intents.lockFxRate(
+          row.id,
+          {
+            fromCurrency: 'BOB',
+            toCurrency: 'USD',
+            lockedRate: '0.1437',
+            expiresAt: new Date(Date.now() + 600_000).toISOString(),
+          } as never,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 409,
+        reason: PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
+      });
+
+      expect({ amount: row.amount, currency: row.currencyConceptId }).toEqual(
+        before,
+      );
+    });
+
+    it('risk-assessment DECLINE: 409 y la intención NO pasa a PI_FAILED', async () => {
+      const { d, row } = await dispatched();
+      const status = row.statusConceptId;
+
+      await expect(
+        d.intents.assessRisk(
+          row.id,
+          { riskScore: '99', decision: 'DECLINE' } as never,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 409,
+        reason: PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
+      });
+
+      expect(row.statusConceptId).toBe(status);
+      expect(row.statusConceptId).not.toBe(CONCEPTS.PI_FAILED);
+    });
+
+    it('risk-assessment APPROVE sobre la intención despachada no cambia su estado (no se rechaza: no muta nada)', async () => {
+      const { d, row } = await dispatched();
+      const status = row.statusConceptId;
+
+      await expect(
+        d.intents.assessRisk(
+          row.id,
+          { riskScore: '5', decision: 'APPROVE' } as never,
+          actor,
+        ),
+      ).resolves.toMatchObject({ decision: 'APPROVE' });
+
+      expect(row.statusConceptId).toBe(status);
+    });
+
+    it('splits: 409 PAYMENT_INTENT_VIA_GATEWAY', async () => {
+      const { d, row } = await dispatched();
+
+      await expect(
+        d.intents.addSplit(
+          row.id,
+          {
+            splitType: 'AMOUNT',
+            amount: '10.00',
+            payeeConnectedAccountId: randomUUID(),
+          } as never,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        status: 409,
+        reason: PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
+      });
     });
   });
 

@@ -10,7 +10,7 @@ import {
   PaymentDebts,
   PaymentIntents,
 } from '../entities';
-import { createdBy } from '../../../common';
+import { CONCEPTS, createdBy } from '../../../common';
 
 /**
  * Describe el contrato estructural de create fx lock data.
@@ -483,5 +483,59 @@ export class PaymentFlowRepository {
       { id },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Sesiones de checkout abiertas sobre una deuda, bloqueadas. Permite saber si
+   * otra intención conserva un cobro vivo antes de liberar la deuda.
+   */
+  findOpenCheckoutSessionsByDebt(
+    em: EntityManager,
+    paymentDebtId: string,
+  ): Promise<PaymentCheckoutSessions[]> {
+    return em.find(
+      PaymentCheckoutSessions,
+      { paymentDebtId, statusConceptId: CONCEPTS.CHECKOUT_OPEN },
+      { lockMode: LockMode.PESSIMISTIC_WRITE },
+    );
+  }
+
+  /**
+   * Otras intenciones del tenant con un cobro en vuelo en la pasarela sobre una
+   * deuda: tienen `gateway_intent_ref`, siguen `PI_PENDING`/`PI_PROCESSING` y
+   * apuntan a la deuda por su `sourceRef` o por una sesión de checkout.
+   */
+  async findInFlightGatewayIntentsOnDebt(
+    em: EntityManager,
+    scope: {
+      /** Tenant de la deuda. */
+      tenantId: string;
+      /** Deuda que se quiere cobrar. */
+      paymentDebtId: string;
+      /** Intención que consulta (no cuenta contra sí misma). */
+      excludeIntentId: string;
+    },
+  ): Promise<PaymentIntents[]> {
+    const sessions = await em.find(PaymentCheckoutSessions, {
+      tenantId: scope.tenantId,
+      paymentDebtId: scope.paymentDebtId,
+      paymentIntentId: { $ne: null },
+    });
+    const viaSession = sessions.flatMap((s) =>
+      s.paymentIntentId ? [s.paymentIntentId] : [],
+    );
+    return em.find(PaymentIntents, {
+      tenantId: scope.tenantId,
+      id: { $ne: scope.excludeIntentId },
+      gatewayIntentRef: { $ne: null },
+      statusConceptId: { $in: [CONCEPTS.PI_PENDING, CONCEPTS.PI_PROCESSING] },
+      $or: [
+        {
+          sourceRefType: 'payment_debt',
+          sourceRefId: scope.paymentDebtId,
+        },
+        ...(viaSession.length > 0 ? [{ id: { $in: viaSession } }] : []),
+      ],
+    });
   }
 }

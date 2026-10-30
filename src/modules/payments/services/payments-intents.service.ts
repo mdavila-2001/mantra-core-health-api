@@ -189,6 +189,7 @@ export class PaymentsIntentsService {
           PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
         );
       }
+      this.assertNotDispatched(intent, intentId);
       if (intent.statusConceptId !== CONCEPTS.PI_PENDING) {
         throw new PreconditionFailedException(
           'Solo se puede bloquear el cambio de una intención pendiente',
@@ -269,6 +270,10 @@ export class PaymentsIntentsService {
         );
       }
 
+      // Un DECLINE pasa la intención a `failed`; con el cobro ya creado en la
+      // pasarela eso dejaría un cobro vivo contra una intención dada por perdida.
+      if (dto.decision === 'DECLINE') this.assertNotDispatched(intent, intentId);
+
       const riskLevel = this.deriveRiskLevel(dto.riskScore);
       const assessment = this.flowRepo.createRiskAssessment(tx, {
         paymentIntentId: intentId,
@@ -348,6 +353,8 @@ export class PaymentsIntentsService {
         );
       }
 
+      this.assertNotDispatched(intent, intentId);
+
       const amount =
         dto.splitType === 'AMOUNT'
           ? (dto.amount as string)
@@ -399,6 +406,25 @@ export class PaymentsIntentsService {
         isPlatformFee: dto.isPlatformFee ?? false,
       };
     });
+  }
+
+  /**
+   * Una intención con cobro ya creado en la pasarela (`gatewayIntentRef`) no
+   * admite cambios que alteren lo cobrado —importe y moneda por un bloqueo de
+   * cambio, repartos— ni un `DECLINE` que la dé por fallada: el cobro de la
+   * pasarela seguiría vivo y el pago posterior terminaría en conciliación.
+   */
+  private assertNotDispatched(
+    intent: { gatewayIntentRef?: string | null },
+    intentId: string,
+  ): void {
+    if (intent.gatewayIntentRef) {
+      throw new ConflictException(
+        'La intención ya tiene un cobro en la pasarela; no admite este cambio',
+        { intentId },
+        PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
+      );
+    }
   }
 
   /**

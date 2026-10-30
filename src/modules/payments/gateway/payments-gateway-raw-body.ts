@@ -10,6 +10,18 @@ export interface RawBodyRequest extends IncomingMessage {
 }
 
 /**
+ * `true` si la URL es la del receptor, tal como la enruta Express: sin la
+ * query, sin distinguir mayúsculas y con o sin barra final (`strict routing` y
+ * `case sensitive` vienen apagados). Una igualdad exacta dejaba sin cuerpo
+ * crudo —y sin firma verificable— a toda entrega que la pasarela registrara con
+ * barra final.
+ */
+export function isGatewayWebhookPath(url: string | undefined): boolean {
+  const path = (url ?? '').split('?')[0].replace(/\/+$/u, '').toLowerCase();
+  return path === GATEWAY_WEBHOOK_PATH;
+}
+
+/**
  * Gancho `verify` del parser JSON global (`main.ts`): conserva los bytes crudos
  * únicamente de la ruta del webhook de la pasarela.
  *
@@ -28,8 +40,7 @@ export function captureGatewayWebhookRawBody(
   _res: unknown,
   buf: Buffer,
 ): void {
-  const path = (req.url ?? '').split('?')[0];
-  if (path === GATEWAY_WEBHOOK_PATH) {
+  if (isGatewayWebhookPath(req.url)) {
     (req as RawBodyRequest).rawBody = Buffer.from(buf);
   }
 }

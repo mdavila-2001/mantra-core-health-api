@@ -94,6 +94,10 @@ export enum PaymentsErrorReason {
   PAYMENT_GATEWAY_UNAVAILABLE = 'PAYMENT_GATEWAY_UNAVAILABLE',
   /** La respuesta de la pasarela no coincide con lo pedido (importe distinto): no se asocia al cobro. */
   PAYMENT_GATEWAY_RESPONSE_MISMATCH = 'PAYMENT_GATEWAY_RESPONSE_MISMATCH',
+  /** La deuda de la intención ya tiene otro cobro en vuelo en la pasarela: no se abre un segundo. */
+  PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE = 'PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE',
+  /** El importe de la intención excede el saldo pendiente de la deuda que cobra. */
+  PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT = 'PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT',
   /** Los webhooks de la pasarela están desactivados (`payments.via_gateway` apagado). */
   GATEWAY_WEBHOOKS_DISABLED = 'GATEWAY_WEBHOOKS_DISABLED',
   /** El webhook no trae el cuerpo crudo necesario para verificar la firma. */
