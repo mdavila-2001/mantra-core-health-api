@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { InventoryLocations, InventoryStockPositions } from '../../entities';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { siteProductAvailabilitySql } from '../../domain/site-product-availability';
 
 /**
  * Consultas de la cara de lectura del módulo 25 (carril E2): ubicaciones y
@@ -42,4 +43,40 @@ export class InventoryReadRepository {
       ...(productIds ? { pharmacyProductId: { $in: [...productIds] } } : {}),
     });
   }
+
+  /**
+   * Qué productos están **disponibles** en cada sede, con la regla única de
+   * existencias ({@link siteProductAvailabilitySql}): lotes si la sede los
+   * lleva, lo declarado en el catálogo si no. Sólo devuelve filas disponibles.
+   *
+   * @returns `availableQuantity` como texto numérico, o `null` si la sede no
+   *   lleva lotes y el producto se declaró sin conteo («hay / no hay»).
+   */
+  findSiteProductAvailability(
+    em: EntityManager,
+    siteIds: readonly string[],
+    productIds: readonly string[],
+  ): Promise<SiteProductAvailabilityRow[]> {
+    if (siteIds.length === 0 || productIds.length === 0) {
+      return Promise.resolve([]);
+    }
+    const availability = siteProductAvailabilitySql();
+    return em.getConnection().execute(
+      `SELECT av.site_id AS "siteId",
+              av.product_id AS "productId",
+              av.available_quantity::text AS "availableQuantity"
+         FROM (${availability.sql}) av
+        WHERE av.site_id IN (${siteIds.map(() => '?').join(', ')})
+          AND av.product_id IN (${productIds.map(() => '?').join(', ')})`,
+      [...availability.params, ...siteIds, ...productIds],
+      'all',
+    );
+  }
+}
+
+/** Una fila de {@link InventoryReadRepository.findSiteProductAvailability}. */
+export interface SiteProductAvailabilityRow {
+  readonly siteId: string;
+  readonly productId: string;
+  readonly availableQuantity: string | null;
 }

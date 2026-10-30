@@ -60,6 +60,8 @@ CREATE INDEX IF NOT EXISTS "ix_practice_sites_updated_by_user_id" ON "practice".
 
 CREATE INDEX IF NOT EXISTS "ix_practice_sites_bank_qr_file_id" ON "practice"."practice_sites" ("bank_qr_file_id");
 
+CREATE INDEX IF NOT EXISTS "ix_practice_sites_logo_file_id" ON "practice"."practice_sites" ("logo_file_id");
+
 CREATE INDEX IF NOT EXISTS "ix_clinical_units_practice_site_id" ON "practice"."clinical_units" ("practice_site_id");
 
 CREATE INDEX IF NOT EXISTS "ix_clinical_units_parent_unit_id" ON "practice"."clinical_units" ("parent_unit_id");
@@ -75,6 +77,8 @@ CREATE INDEX IF NOT EXISTS "ix_clinical_units_status_concept_id" ON "practice"."
 CREATE INDEX IF NOT EXISTS "ix_clinical_units_created_by_user_id" ON "practice"."clinical_units" ("created_by_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_clinical_units_updated_by_user_id" ON "practice"."clinical_units" ("updated_by_user_id");
+
+CREATE INDEX IF NOT EXISTS "ix_clinical_units_responsible_user_id" ON "practice"."clinical_units" ("responsible_user_id");
 
 CREATE INDEX IF NOT EXISTS "ix_care_spaces_practice_site_id" ON "practice"."care_spaces" ("practice_site_id");
 

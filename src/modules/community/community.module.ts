@@ -50,6 +50,7 @@ import {
   CommunityChatAutoReplyService,
   CommunityMessagingService,
   CommunityBookingChatService,
+  CommunityOrderChatService,
   CommunityModerationService,
   PartyRatingsService,
   PartyRatingsReadService,
@@ -202,6 +203,7 @@ import {
     CommunityChatAutoReplyService,
     CommunityMessagingService,
     CommunityBookingChatService,
+    CommunityOrderChatService,
     CommunityMessagingGateway,
     CommunityMessageNotificationsService,
     // F4.2 · presencia del chat sobre el Redis compartido del módulo.
@@ -254,6 +256,8 @@ import {
     CommunityMessagingService,
     // La agenda deja la confirmación de una cita en el chat (hilo profesional-paciente).
     CommunityBookingChatService,
+    // El pedido de farmacia abre el hilo paciente ↔ vitrina de la farmacia.
+    CommunityOrderChatService,
   ],
 })
 export class CommunityModule {}

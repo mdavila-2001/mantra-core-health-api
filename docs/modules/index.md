@@ -8,7 +8,7 @@
 | Módulo | Controllers | Services | Repositories | Entidades | DTO |
 |---|---:|---:|---:|---:|---:|
 | [`insurance`](insurance.md) | 19 | 27 | 14 | 31 | 23 |
-| [`community`](community.md) | 14 | 34 | 19 | 41 | 33 |
+| [`community`](community.md) | 14 | 36 | 19 | 41 | 33 |
 | [`pharma_lab`](pharma_lab.md) | 12 | 13 | 10 | 31 | 11 |
 | [`clinical`](clinical.md) | 11 | 20 | 18 | 24 | 18 |
 | [`consent`](consent.md) | 11 | 12 | 10 | 10 | 16 |
@@ -17,15 +17,15 @@
 | [`practice`](practice.md) | 9 | 15 | 12 | 11 | 21 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 9 | 12 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
+| [`pharmacy_inventory`](pharmacy_inventory.md) | 8 | 12 | 18 | 21 | 19 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`chart`](chart.md) | 7 | 9 | 4 | 11 | 6 |
 | [`diagnostics`](diagnostics.md) | 7 | 10 | 8 | 36 | 9 |
 | [`scheduling`](scheduling.md) | 7 | 14 | 7 | 18 | 8 |
-| [`terminology`](terminology.md) | 7 | 9 | 9 | 15 | 19 |
+| [`terminology`](terminology.md) | 7 | 9 | 9 | 16 | 19 |
 | [`audit`](audit.md) | 6 | 8 | 9 | 131 | 11 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
-| [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 17 | 21 | 17 |
 | [`billing`](billing.md) | 5 | 13 | 11 | 24 | 14 |
 | [`delegated_access`](delegated_access.md) | 5 | 6 | 8 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 9 | 12 | 10 | 13 |
@@ -36,10 +36,10 @@
 | [`integrations`](integrations.md) | 4 | 5 | 9 | 10 | 9 |
 | [`messaging`](messaging.md) | 4 | 4 | 4 | 22 | 3 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 6 | 6 | 8 |
+| [`pharmacy`](pharmacy.md) | 4 | 14 | 15 | 12 | 17 |
 | [`data_catalog`](data_catalog.md) | 3 | 7 | 3 | 13 | 4 |
 | [`directory`](directory.md) | 3 | 10 | 5 | 7 | 20 |
 | [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
-| [`pharmacy`](pharmacy.md) | 3 | 10 | 13 | 9 | 13 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
 | [`qa_lab`](qa_lab.md) | 3 | 4 | 2 | 13 | 1 |
 | [`read_models`](read_models.md) | 3 | 5 | 8 | 13 | 5 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **289** | **463** | **434** | **1274** | **535** |
+| **Total** | **292** | **470** | **437** | **1278** | **541** |

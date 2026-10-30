@@ -34,3 +34,5 @@ export * from './community-booking-chat.service';
 export * from './rating-parties.service';
 export * from './party-ratings.service';
 export * from './party-ratings-read.service';
+export * from './community-organization-staff.service';
+export * from './community-order-chat.service';
