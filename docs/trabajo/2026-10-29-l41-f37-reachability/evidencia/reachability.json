@@ -1,0 +1,210 @@
+{
+  "measuredAt": "2026-10-29T21:46:26.657Z",
+  "database": "mantra_redesa_health@localhost:5433",
+  "limitPercent": 15,
+  "total": 81326,
+  "withRelation": 62074,
+  "withFacet": 26659,
+  "orphans": 7984,
+  "orphansWithMap": 20,
+  "orphanPercent": 9.82,
+  "withinLimit": true,
+  "systemsOverLimit": [
+    "mantra-core-internal",
+    "SALUD_CORE",
+    "vademecum",
+    "CODE_SYSTEMS_01"
+  ],
+  "bySystem": [
+    {
+      "codeSystem": "mondo",
+      "total": 27695,
+      "withRelation": 23774,
+      "withFacet": 0,
+      "orphans": 3921,
+      "orphansWithMap": 20,
+      "orphanPercent": 14.16,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "mantra-core-internal",
+      "total": 9275,
+      "withRelation": 0,
+      "withFacet": 6460,
+      "orphans": 2815,
+      "orphansWithMap": 0,
+      "orphanPercent": 30.35,
+      "withinLimit": false
+    },
+    {
+      "codeSystem": "SALUD_CORE",
+      "total": 1636,
+      "withRelation": 16,
+      "withFacet": 874,
+      "orphans": 754,
+      "orphansWithMap": 0,
+      "orphanPercent": 46.09,
+      "withinLimit": false
+    },
+    {
+      "codeSystem": "vademecum",
+      "total": 483,
+      "withRelation": 0,
+      "withFacet": 0,
+      "orphans": 483,
+      "orphansWithMap": 0,
+      "orphanPercent": 100,
+      "withinLimit": false
+    },
+    {
+      "codeSystem": "CODE_SYSTEMS_01",
+      "total": 12,
+      "withRelation": 0,
+      "withFacet": 1,
+      "orphans": 11,
+      "orphansWithMap": 0,
+      "orphanPercent": 91.67,
+      "withinLimit": false
+    },
+    {
+      "codeSystem": "NNAC_BO",
+      "total": 3007,
+      "withRelation": 3007,
+      "withFacet": 0,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "cie10es-diagnosticos-2026",
+      "total": 12051,
+      "withRelation": 11963,
+      "withFacet": 12051,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "cima-vtm",
+      "total": 2380,
+      "withRelation": 740,
+      "withFacet": 2380,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "glossary-curated-es",
+      "total": 80,
+      "withRelation": 73,
+      "withFacet": 80,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "hpo",
+      "total": 19894,
+      "withRelation": 19894,
+      "withFacet": 0,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "inlasa-aranceles-2026",
+      "total": 287,
+      "withRelation": 13,
+      "withFacet": 287,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "medlineplus-es",
+      "total": 1016,
+      "withRelation": 1000,
+      "withFacet": 1016,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "medlineplus-es-lab",
+      "total": 302,
+      "withRelation": 7,
+      "withFacet": 302,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "wikidata-anatomia",
+      "total": 1904,
+      "withRelation": 283,
+      "withFacet": 1904,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "wikidata-especialidad",
+      "total": 104,
+      "withRelation": 104,
+      "withFacet": 104,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "wikidata-medicamento",
+      "total": 447,
+      "withRelation": 447,
+      "withFacet": 447,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "wikidata-prueba",
+      "total": 121,
+      "withRelation": 121,
+      "withFacet": 121,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "wikidata-sintoma",
+      "total": 315,
+      "withRelation": 315,
+      "withFacet": 315,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    },
+    {
+      "codeSystem": "wikidata-tratamiento",
+      "total": 317,
+      "withRelation": 317,
+      "withFacet": 317,
+      "orphans": 0,
+      "orphansWithMap": 0,
+      "orphanPercent": 0,
+      "withinLimit": true
+    }
+  ]
+}

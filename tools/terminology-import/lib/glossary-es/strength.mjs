@@ -20,7 +20,7 @@
 //  - T2 SIN frecuencia (p. ej. una ficha técnica CIMA que nombra el efecto
 //    adverso sin cuantificarlo) vale `T2_WITHOUT_FREQUENCY` = 0,5: por encima
 //    de lo colaborativo (T3) y por debajo de cualquier frecuencia «frecuente».
-//  - f(estadístico) para T4: F3.5 fija como medida el *lift* (umbral ≥ 2). Se
+//  - f(estadístico) para T4: F3.5 fija como medida el *lift* (umbral ≥ 3 tras revisar la muestra de 50 pares; la ficha proponía 2). Se
 //    usa 0,25·(1 − 1/lift): 0 cuando no hay asociación (lift 1), crece con el
 //    lift y se acerca a 0,25 sin alcanzarlo.
 // =============================================================================

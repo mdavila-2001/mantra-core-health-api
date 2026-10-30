@@ -157,7 +157,6 @@ function build() {
   };
   const catalog = {
     assertRegistrationCanRegister: mockFn().mockResolvedValue(undefined),
-    attachDefaultSatisfactionSurveys: mockFn().mockResolvedValue(undefined),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
   const service = new ProcedureImportService(
@@ -257,11 +256,6 @@ describe('ProcedureImportService.importProcedures', () => {
         defaultPrice: '0',
       }),
     );
-    // Misma garantía FT-31 que el alta individual: encuesta por servicio.
-    expect(d.catalog.attachDefaultSatisfactionSurveys).toHaveBeenCalledTimes(1);
-    expect(
-      d.catalog.attachDefaultSatisfactionSurveys.mock.calls[0][1],
-    ).toHaveLength(2);
     expect(d.tx.flush).toHaveBeenCalledTimes(1);
   });
 
@@ -299,7 +293,6 @@ describe('ProcedureImportService.importProcedures', () => {
 
     expect(res).toEqual({ created: 0, skipped: 2, total: 2 });
     expect(d.serviceCatalogRepo.create).not.toHaveBeenCalled();
-    expect(d.catalog.attachDefaultSatisfactionSurveys).not.toHaveBeenCalled();
   });
 
   it('sin coincidencias responde ceros y no abre transacción', async () => {
@@ -325,9 +318,8 @@ describe('ProcedureImportService.importProcedures', () => {
     );
 
     expect(res).toEqual({ created: 1200, skipped: 0, total: 1200 });
-    // 500 + 500 + 200: un flush y un lote de encuestas por tanda.
+    // 500 + 500 + 200: un flush por tanda.
     expect(d.tx.flush).toHaveBeenCalledTimes(3);
-    expect(d.catalog.attachDefaultSatisfactionSurveys).toHaveBeenCalledTimes(3);
     expect(d.tx.execute).toHaveBeenCalledWith(
       expect.stringContaining('pg_advisory_xact_lock'),
       [expect.stringContaining(PRACTICE)],
@@ -362,10 +354,6 @@ describe('ProcedureImportService.importProcedures', () => {
     expect(
       created.every(([, concept]: string[]) => concept !== undefined),
     ).toBe(true);
-    // Los servicios que recibe la encuesta automática son los mismos, con el concepto.
-    const surveyed =
-      d.catalog.attachDefaultSatisfactionSurveys.mock.calls[0][1];
-    expect(surveyed[0].serviceConceptId).toBe('concept-0');
   });
 
   it('un servicio saltado por idempotencia no se toca: el concepto sólo va en los nuevos', async () => {

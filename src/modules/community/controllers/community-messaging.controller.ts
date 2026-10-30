@@ -19,6 +19,7 @@ import {
   Audited,
   CurrentUser,
   ParseOptionalLimitPipe,
+  servedContentHeaders,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -261,14 +262,14 @@ export class CommunityMessagingController {
       profileId,
       actor,
     );
-    res.setHeader('Content-Type', content.mimeType);
-    if (content.originalName) {
-      // Codificado, igual que en `CommonFilesController`: un nombre de archivo
-      // con comillas o saltos de línea podría inyectar cabeceras.
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename*=UTF-8''${encodeURIComponent(content.originalName)}`,
-      );
+    // `servedContentHeaders` no confía en el `mimeType` persistido: una imagen
+    // rasterizada sale `inline` (el hilo la muestra y se puede abrir en otra
+    // pestaña); cualquier otro tipo sale `attachment`, y uno fuera de la lista
+    // cerrada (SVG, HTML…) como `application/octet-stream`. Siempre `nosniff`.
+    for (const [name, value] of Object.entries(
+      servedContentHeaders(content.mimeType, content.originalName),
+    )) {
+      res.setHeader(name, value);
     }
     res.send(content.buffer);
   }

@@ -10,9 +10,17 @@ import { BookingAccess } from '../support/booking-access';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Inject, Injectable } from '@nestjs/common';
 import { PAYMENT_STATE_CONCEPT } from '../../../domain/booking/payment-state';
-import { PaymentStateDto, SetPaymentStateDto } from '../../../presentation/dto';
+import {
+  SetPaymentStateDto,
+  SetPaymentStateResponseDto,
+} from '../../../presentation/dto';
 import { PinoLogger } from 'nestjs-pino';
 import { STATES_WITHOUT_PAYMENT } from '../../../domain/booking/booking-states';
+import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
+import {
+  BookingBillingBridge,
+  amountsOf,
+} from '../support/booking-billing-bridge';
 import { SchedulingBookingsRepository } from '../../../infrastructure/repositories';
 import { projectPaymentState } from '../support/booking-projections';
 import { writePaymentState } from '../support/payment-state-writer';
@@ -26,6 +34,7 @@ export class SetPaymentStateUseCase {
     private readonly access: BookingAccess,
     @Inject(BOOKING_HISTORY_PORT)
     private readonly history: BookingHistoryPort,
+    private readonly billing: BookingBillingBridge,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(SetPaymentStateUseCase.name);
@@ -65,22 +74,46 @@ export class SetPaymentStateUseCase {
    * @param bookingId - La cita que se marca.
    * @param dto - En qué estado queda y si se usó seguro.
    * @param actor - Quien marca; queda firmado en la fila.
-   * @returns El estado de pago tal como quedó.
-   * @throws PreconditionFailedException (422) si la cita está cancelada o rechazada.
+   * ## El monto llega a facturación (FAC-01)
+   *
+   * Si la marca trae `amountReceived`, en la misma transacción se crea (la
+   * primera vez) la cuenta por cobrar de la cita y se le asigna lo recibido.
+   * Si facturación falla, la marca tampoco queda. Sin monto, la marca se
+   * guarda como siempre y `billing` dice por qué no se facturó.
+   *
+   * @returns El estado de pago tal como quedó, con su facturación.
+   * @throws PreconditionFailedException (422) si la cita está cancelada o
+   *   rechazada, si el monto no es válido, si viene con «pendiente» o si pasa
+   *   lo que falta pagar.
    */
   async execute(
     bookingId: string,
     dto: SetPaymentStateDto,
     actor: AuthenticatedUser,
-  ): Promise<PaymentStateDto> {
+  ): Promise<SetPaymentStateResponseDto> {
     this.logger.info(
       {
         operation: 'scheduling.booking.set-payment-state',
         bookingId,
         state: dto.state,
+        withAmount: dto.amountReceived !== undefined,
       },
       'Marking booking payment state',
     );
+
+    // El monto se valida antes de abrir la transacción: un importe mal escrito
+    // no tiene por qué bloquear la fila de pago de nadie.
+    const amountCents =
+      dto.amountReceived === undefined
+        ? undefined
+        : BookingBillingBridge.amountCents(dto.amountReceived);
+    if (amountCents !== undefined && dto.state === 'PENDING') {
+      throw new PreconditionFailedException(
+        'Un monto recibido solo va con «pagada» o «pago parcial»: «pendiente» dice que todavía no se cobró.',
+        { bookingId, state: dto.state },
+        SchedulingErrorReason.PAYMENT_AMOUNT_WITHOUT_PAYMENT,
+      );
+    }
 
     return this.em.transactional(async (tx) => {
       const booking = await this.access.loadForOperation(tx, bookingId, actor);
@@ -107,7 +140,18 @@ export class SetPaymentStateUseCase {
         actor,
       );
 
-      return projectPaymentState(row);
+      const billing = await this.billing.bill(
+        tx,
+        booking,
+        row,
+        amountCents === undefined
+          ? undefined
+          : { amountCents, method: 'CASH', capAtBalance: false },
+        actor.id,
+      );
+      await tx.flush();
+
+      return { ...projectPaymentState(row), ...amountsOf(billing), billing };
     });
   }
 }

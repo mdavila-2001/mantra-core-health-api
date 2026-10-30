@@ -1,0 +1,41 @@
+            k            | count  
+-------------------------+--------
+ fks_no_validadas        |      0
+ evidencias              | 263873
+ relaciones              | 360255
+ rel_destino_inexistente |      0
+ rel_origen_inexistente  |      0
+ evid_sin_relacion       |      0
+(6 rows)
+
+       fuente       | evidencias 
+--------------------+------------
+ hpo-annotations    |     149252
+ orphadata-product4 |     109861
+(2 rows)
+
+                          ?column?                          
+------------------------------------------------------------
+ fiebre: enfermedades con la fiebre (HP:0001945) por fuerza
+(1 row)
+
+ERROR:  column des.is_preferred does not exist
+LINE 14: ...ncept_designations des on des.concept_id=d.id and des.is_pre...
+                                                              ^
+HINT:  Perhaps you meant to reference the column "des.preferred".
+ERROR:  column des.display does not exist
+LINE 2: select d.code, left(coalesce((select des.display from termin...
+                                             ^
+HINT:  Perhaps you meant to reference the column "d.display".
+     code      |                 enfermedad                 | fuerza |       tier        
+---------------+--------------------------------------------+--------+-------------------
+ MONDO:0975761 | immunodeficiency 126, susceptibility to    |   1.00 | CURATED_REFERENCE
+ MONDO:0010480 | anemia, nonspherocytic hemolytic, due to G |   1.00 | CURATED_REFERENCE
+ MONDO:0975796 | spastic paraplegia 93, autosomal recessive |   1.00 | CURATED_REFERENCE
+ MONDO:0968983 | proteasome-associated autoinflammatory syn |   1.00 | CURATED_REFERENCE
+ MONDO:0014472 | periodic fever-infantile enterocolitis-aut |   1.00 | CURATED_REFERENCE
+ MONDO:0030924 | proteasome-associated autoinflammatory syn |   1.00 | CURATED_REFERENCE
+ MONDO:0010600 | granulomatous disease, chronic, X-linked   |   1.00 | CURATED_REFERENCE
+ MONDO:0014334 | severe combined immunodeficiency due to LC |   1.00 | CURATED_REFERENCE
+(8 rows)
+

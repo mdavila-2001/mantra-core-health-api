@@ -14,10 +14,12 @@ import {
 import {
   BRANCH_TYPE_CONCEPT_BY_CODE,
   DIR,
+  MEDICAL_FACILITY_TENANT_TYPES,
   TERRITORIAL_TENANT_TYPES,
   type TenantTypeCode,
 } from '../directory.concepts';
 import { BranchesRepository } from '../repositories/branches.repository';
+import { TenantMedicalFacilitiesRepository } from '../repositories/tenant-medical-facilities.repository';
 import {
   LEGAL_ENTITY_TYPE_BY_CODE,
   LEGAL_ENTITY_COUNTRY_CONCEPT_BY_ISO,
@@ -27,6 +29,11 @@ import type {
   DiagnosticUnitProfileDto,
   PayerProfileDto,
 } from '../dto';
+import {
+  MEDICAL_FACILITY_HEADQUARTERS_DEFAULT_NAME,
+  MEDICAL_FACILITY_MAX_BRANCHES,
+  type MedicalFacilityDto,
+} from '../../../common/dto/medical-facility.dto';
 
 /** Los dos tipos de unidad diagnóstica que este alta puede declarar. */
 const DIAGNOSTIC_UNIT_TYPE_CONCEPTS: ReadonlySet<string> = new Set([
@@ -81,6 +88,13 @@ export interface TenantTypeProfileInput {
    * valida el DTO de `iam` y lo materializa `PharmacyProvisioningService`.
    */
   pharmacy?: object;
+  /**
+   * Datos del establecimiento de salud (NIT, registro sanitario, director
+   * médico, casa central y sucursales); sólo corresponde a los cinco tipos
+   * médicos (`MEDICAL_FACILITY_TENANT_TYPES`) y se persiste en la transacción
+   * del alta.
+   */
+  medicalFacility?: MedicalFacilityDto;
 }
 
 /**
@@ -108,6 +122,7 @@ export class TenantTypeProfileService {
    * @param conceptsRepo - Catálogo de terminología, para validar los `*ConceptId` declarados.
    * @param addressesRepo - Repositorio de `common.addresses`, para la casa matriz del PAYER.
    * @param branchesRepo - `directory.branches`, para las sucursales del laboratorio (P51).
+   * @param medicalFacilitiesRepo - El establecimiento médico declarado y sus sedes declaradas.
    */
   constructor(
     private readonly catalogRepo: CatalogRepository,
@@ -115,6 +130,7 @@ export class TenantTypeProfileService {
     private readonly diagnosticUnitProvisioning: DiagnosticUnitProvisioningService,
     private readonly addressesRepo: AddressesRepository,
     private readonly branchesRepo: BranchesRepository,
+    private readonly medicalFacilitiesRepo: TenantMedicalFacilitiesRepository,
   ) {}
 
   /**
@@ -207,6 +223,17 @@ export class TenantTypeProfileService {
       );
     }
 
+    if (input.medicalFacility) {
+      if (!MEDICAL_FACILITY_TENANT_TYPES.includes(tenantType)) {
+        throw new PreconditionFailedException(
+          'El bloque `medicalFacility` sólo corresponde a un tenant de tipo ' +
+            MEDICAL_FACILITY_TENANT_TYPES.join(', '),
+          { tenantType },
+        );
+      }
+      this.assertMedicalFacilityCoherence(input.medicalFacility);
+    }
+
     if (input.diagnosticUnit) {
       const unitTypeConceptId =
         input.diagnosticUnit.diagnosticUnitTypeConceptId;
@@ -244,6 +271,45 @@ export class TenantTypeProfileService {
           { invalidModalities },
         );
       }
+    }
+  }
+
+  /**
+   * Coherencia del bloque `medicalFacility` que el DTO ya valida, repetida acá
+   * porque `TenantTypeProfileService` es la puerta común de las altas: una
+   * sede con media coordenada, o más de 50 sucursales, violaría un CHECK de la
+   * base y saldría como 500 en vez de un 422 que dice qué está mal.
+   *
+   * @param facility - Bloque declarado.
+   * @throws PreconditionFailedException si una sede trae sólo una coordenada o
+   *   hay más sucursales de las que admite el modelo.
+   */
+  private assertMedicalFacilityCoherence(facility: MedicalFacilityDto): void {
+    const branches = facility.branches ?? [];
+    if (branches.length > MEDICAL_FACILITY_MAX_BRANCHES) {
+      throw new PreconditionFailedException(
+        `Un establecimiento admite hasta ${MEDICAL_FACILITY_MAX_BRANCHES} sucursales`,
+        { branches: branches.length },
+      );
+    }
+    const sites = [
+      ...(facility.headquarters
+        ? [{ label: 'headquarters', site: facility.headquarters }]
+        : []),
+      ...branches.map((site, index) => ({
+        label: `branches[${index}]`,
+        site,
+      })),
+    ];
+    const halfPoint = sites.find(
+      ({ site }) =>
+        (site.latitude === undefined) !== (site.longitude === undefined),
+    );
+    if (halfPoint) {
+      throw new PreconditionFailedException(
+        'La latitud y la longitud de una sede van juntas o no van',
+        { site: halfPoint.label },
+      );
     }
   }
 
@@ -402,9 +468,82 @@ export class TenantTypeProfileService {
       return provisioned.unitId;
     }
 
+    // Establecimiento médico: el NIT, el registro sanitario, el director y las
+    // sedes declaradas. No crea práctica ni sede operativa —eso es
+    // `medical-center-setup` tras la verificación—; son datos declarados para
+    // pre-llenar ese paso y para el equipo que verifica la organización.
+    if (input.medicalFacility) {
+      return this.materializeMedicalFacility(
+        tx,
+        tenantId,
+        input.medicalFacility,
+        actorUserId,
+      );
+    }
+
     // PROVIDER no tiene fila propia: su realidad operativa son las sedes y los
     // servicios de salud, que se crean después con su propio caso de uso.
     return undefined;
+  }
+
+  /**
+   * Persiste el establecimiento médico declarado y sus sedes.
+   *
+   * La fila del establecimiento se vuelca antes que las sedes: la FK
+   * `medical_facility_id` es una columna `uuid` plana y MikroORM no ordena los
+   * inserts entre entidades sin relación. La casa central lleva el ordinal 0
+   * y las sucursales 1..n en el orden en que el formulario las declaró.
+   *
+   * @param tx - Transacción del alta.
+   * @param tenantId - Tenant recién creado.
+   * @param facility - Bloque `medicalFacility` ya validado.
+   * @param actorUserId - Autor de las filas (el owner del alta).
+   * @returns Id de la fila del establecimiento.
+   */
+  private async materializeMedicalFacility(
+    tx: EntityManager,
+    tenantId: string,
+    facility: MedicalFacilityDto,
+    actorUserId: string,
+  ): Promise<string> {
+    const created = this.medicalFacilitiesRepo.create(tx, {
+      tenantId,
+      taxIdentifierNumber: facility.taxIdentifierNumber,
+      healthFacilityRegistrationNumber:
+        facility.healthFacilityRegistrationNumber,
+      medicalDirector: facility.medicalDirector,
+      actorUserId,
+    });
+    await tx.flush();
+
+    const addSite = (
+      siteKind: 'headquarters' | 'branch',
+      ordinal: number,
+      site: {
+        name?: string;
+        addressLines: string[];
+        latitude?: number;
+        longitude?: number;
+      },
+    ): void => {
+      this.medicalFacilitiesRepo.createSite(tx, {
+        tenantId,
+        medicalFacilityId: created.id,
+        siteKind,
+        ordinal,
+        name: site.name ?? MEDICAL_FACILITY_HEADQUARTERS_DEFAULT_NAME,
+        addressLines: site.addressLines,
+        latitude: site.latitude,
+        longitude: site.longitude,
+        actorUserId,
+      });
+    };
+    if (facility.headquarters)
+      addSite('headquarters', 0, facility.headquarters);
+    (facility.branches ?? []).forEach((branch, index) =>
+      addSite('branch', index + 1, branch),
+    );
+    return created.id;
   }
 
   /**

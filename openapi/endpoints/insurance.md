@@ -1456,7 +1456,7 @@ Ejemplo de error normalizado:
 
 ### Descripción de negocio
 
-Catálogo público de aseguradoras y sus planes de salud. Operación pública; no requiere JWT. Todas las respuestas de error usan el envelope ErrorResponse.
+Seguros públicos (seguridad social, SUS y cajas): siempre. Aseguradoras privadas: sólo las que tienen una cuenta registrada, es decir, un tenant activo con un OWNER o ADMIN vigente, usuario activo y credencial activa.
 
 Contexto declarado en el controlador: Aseguradoras privadas y públicas con sus planes de salud.
 

@@ -1,0 +1,31 @@
+### Evidencia por fuente y nivel
+   fuente    | evidencias | con_cita | con_enlace 
+-------------+------------+----------+------------
+ AEMPS_CIMA  |      71010 |    71010 |      71010
+ NLM_LACTMED |        588 |      588 |        588
+(2 rows)
+
+### Amoxicilina
+ relaciones_origen |      code       |             display             
+-------------------+-----------------+---------------------------------
+                43 | 27658006        | Amoxicilina
+                20 | 139431000140100 | Amoxicilina + bromhexina
+                 9 | 734844004       | Amoxicilina + ácido clavulánico
+(3 rows)
+
+   tipo_relacion    |        destino         |                                                                          cita                                                                          |                                                                                                                                        citation_locator                                                                                                                                         
+--------------------+------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ REL_ADVERSE_EFFECT | Alergia                | Reacciones alérgicas graves incluyendo edema angioneurótico, anafilaxia, enfermedad del suero y vasculitis por hipersensibilidad (ver sección 4.4).    | AEMPS. CIMA. Ficha técnica de CLAMOXYL 500 mg CAPSULAS DURAS (nº reg. 50239), sección 4.8, versión del 2025-06-06. https://cima.aemps.es/cima/dochtml/ft/50239/4.8/FichaTecnica.html · SOC: Trastornos del sistema inmunológico · frecuencia en la ficha: Muy raras · fila de tabla
+ REL_ADVERSE_EFFECT | Anafilaxia             | Reacciones alérgicas graves incluyendo edema angioneurótico, anafilaxia, enfermedad del suero y vasculitis por hipersensibilidad (ver sección 4.4).    | AEMPS. CIMA. Ficha técnica de CLAMOXYL 500 mg CAPSULAS DURAS (nº reg. 50239), sección 4.8, versión del 2025-06-06. https://cima.aemps.es/cima/dochtml/ft/50239/4.8/FichaTecnica.html · SOC: Trastornos del sistema inmunológico · frecuencia en la ficha: Muy raras · fila de tabla
+ REL_ADVERSE_EFFECT | Anemia hemolítica      | Leucopenia reversible (incluyendo neutropenia grave o agranulocitosis), trombocitopenia reversible y anemia hemolítica.                                | AEMPS. CIMA. Ficha técnica de CLAMOXYL 500 mg CAPSULAS DURAS (nº reg. 50239), sección 4.8, versión del 2025-06-06. https://cima.aemps.es/cima/dochtml/ft/50239/4.8/FichaTecnica.html · SOC: Trastornos de la sangre y del sistema linfático · frecuencia en la ficha: Muy raras · fila de tabla
+ REL_ADVERSE_EFFECT | Convulsiones           | Hiperquinesia, mareos y convulsiones (ver sección 4.4).                                                                                                | AEMPS. CIMA. Ficha técnica de CLAMOXYL 500 mg CAPSULAS DURAS (nº reg. 50239), sección 4.8, versión del 2025-06-06. https://cima.aemps.es/cima/dochtml/ft/50239/4.8/FichaTecnica.html · SOC: Trastornos del sistema nervioso · frecuencia en la ficha: Muy raras · fila de tabla
+ REL_ADVERSE_EFFECT | Dermatitis exfoliativa | Reacciones cutáneas tales como eritema multiforme, síndrome de Stevens-Johnson, necrólisis epidérmica tóxica, dermatitis exfoliativa y ampollosa, pust | AEMPS. CIMA. Ficha técnica de CLAMOXYL 500 mg CAPSULAS DURAS (nº reg. 50239), sección 4.8, versión del 2025-06-06. https://cima.aemps.es/cima/dochtml/ft/50239/4.8/FichaTecnica.html · SOC: Trastornos de la piel y del tejido subcutáneo · frecuencia en la ficha: Muy raras · fila de tabla
+ REL_ADVERSE_EFFECT | Diarrea                | Las reacciones adversas que se notificaron más frecuentemente fueron diarrea, náuseas y erupción cutánea.                                              | AEMPS. CIMA. Ficha técnica de CLAMOXYL 500 mg CAPSULAS DURAS (nº reg. 50239), sección 4.8, versión del 2025-06-06. https://cima.aemps.es/cima/dochtml/ft/50239/4.8/FichaTecnica.html
+(6 rows)
+
+### Citas con patron de dosis (mg/kg, mg cada, etc.) en la base
+ citas_con_patron_de_dosis 
+---------------------------
+                         0
+(1 row)
+

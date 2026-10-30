@@ -1302,7 +1302,7 @@ Subir el contenido de un archivo (multipart)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: El contenido no corresponde a ningún formato de archivo permitido; PreconditionFailedException: El formato del archivo no está permitido para esta categoría |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: No se recibió contenido en el campo "file"; PreconditionFailedException: El archivo excede el tamaño máximo permitido; PreconditionFailedException: Las fotos HEIC, HEIF o AVIF no se aceptan: enviala como JPEG, PNG, WEBP o GIF; PreconditionFailedException: El contenido no corresponde a ningún formato de archivo permitido; PreconditionFailedException: El formato del archivo no está permitido para esta categoría |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING; StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN; StorageLifecycleDenied: REMOTE_STATE_UNKNOWN; StorageLifecycleDenied: ADAPTER_DID_NOT_CONSUME_PERMIT; StorageLifecycleDenied: PUBLICATION_RESULT_REQUIRES_RELOAD; StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED; DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; StorageLifecycleDenied: REFERENCE_OBJECT_UNPROVEN; StorageLifecycleDenied: REFERENCE_METADATA_MISMATCH |
 
@@ -1323,104 +1323,108 @@ flowchart TD
   n6 -->|"sí"| n7
   n8{"!detectedMimeType"}:::decision
   n6 -->|"no"| n8
-  n9(["422 PRECONDITION_FAILED El contenido no corresponde a ningún formato de archivo permitido"]):::error
+  n9{"unsupportedImage"}:::decision
   n8 -->|"sí"| n9
-  n10{"!isMimeTypeAllowedForCategory(dto.category, detectedMimeType)"}:::decision
-  n8 -->|"no"| n10
-  n11(["422 PRECONDITION_FAILED El formato del archivo no está permitido para esta categoría"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a FileUploadService.persistBytes"]:::llamada
-  n10 -->|"no"| n12
-  n13{"this.publication"}:::decision
-  n12 --> n13
-  n14["Llama a FileUploadService.publishUpload"]:::llamada
-  n13 -->|"sí"| n14
-  n15{"!this.publication"}:::decision
+  n10(["422 PRECONDITION_FAILED Las fotos HEIC, HEIF o AVIF no se aceptan: enviala como JPEG, PNG, WEBP o GIF"]):::error
+  n9 -->|"sí"| n10
+  n11(["422 PRECONDITION_FAILED El contenido no corresponde a ningún formato de archivo permitido"]):::error
+  n9 -->|"no"| n11
+  n12{"!isMimeTypeAllowedForCategory(dto.category, detectedMimeType)"}:::decision
+  n8 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED El formato del archivo no está permitido para esta categoría"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a FileUploadService.persistBytes"]:::llamada
+  n12 -->|"no"| n14
+  n15{"this.publication"}:::decision
   n14 --> n15
-  n16(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n16["Llama a FileUploadService.publishUpload"]:::llamada
   n15 -->|"sí"| n16
-  n17["Llama a StoragePublicationService.publish"]:::llamada
-  n15 -->|"no"| n17
-  n18{"!plan || plan.identity.kind === 'UNKNOWN' || !this.storage.inspect"}:::decision
-  n17 --> n18
-  n19(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
-  n18 -->|"sí"| n19
-  n20["Intenta"]:::intento
-  n18 -->|"no"| n20
-  n21{"presence.state === 'UNKNOWN'"}:::decision
-  n20 --> n21
-  n22(["500 INTERNAL REMOTE_STATE_UNKNOWN"]):::error
-  n21 -->|"sí"| n22
-  n23{"presence.state === 'PRESENT'"}:::decision
-  n21 -->|"no"| n23
-  n24{"!attemptId"}:::decision
-  n23 -->|"no"| n24
-  n25(["500 INTERNAL ADAPTER_DID_NOT_CONSUME_PERMIT"]):::error
-  n24 -->|"sí"| n25
-  n26{"result.duplicate || result.result === undefined"}:::decision
-  n23 -->|"sí"| n26
-  n24 -->|"no"| n26
-  n27(["500 INTERNAL PUBLICATION_RESULT_REQUIRES_RELOAD"]):::error
+  n17{"!this.publication"}:::decision
+  n16 --> n17
+  n18(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a StoragePublicationService.publish"]:::llamada
+  n17 -->|"no"| n19
+  n20{"!plan || plan.identity.kind === 'UNKNOWN' || !this.storage.inspect"}:::decision
+  n19 --> n20
+  n21(["500 INTERNAL PHYSICAL_IDENTITY_UNKNOWN"]):::error
+  n20 -->|"sí"| n21
+  n22["Intenta"]:::intento
+  n20 -->|"no"| n22
+  n23{"presence.state === 'UNKNOWN'"}:::decision
+  n22 --> n23
+  n24(["500 INTERNAL REMOTE_STATE_UNKNOWN"]):::error
+  n23 -->|"sí"| n24
+  n25{"presence.state === 'PRESENT'"}:::decision
+  n23 -->|"no"| n25
+  n26{"!attemptId"}:::decision
+  n25 -->|"no"| n26
+  n27(["500 INTERNAL ADAPTER_DID_NOT_CONSUME_PERMIT"]):::error
   n26 -->|"sí"| n27
-  n28(["↩ (relanza el error capturado)"]):::error
-  n20 -->|"si falla"| n28
-  n29{"loadStorageEnv().lifecycleBinding"}:::decision
-  n26 -->|"no"| n29
-  n13 -->|"no"| n29
-  n30(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n29 -->|"sí"| n30
-  n31["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
-  n29 -->|"no"| n31
-  n32{"this.lifecycleBinding"}:::decision
-  n31 --> n32
-  n33{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
-  n32 -->|"sí"| n33
-  n34(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
-  n33 -->|"sí"| n34
-  n35["Llama a S3FileStorageAdapter.store"]:::llamada
-  n33 -->|"no"| n35
-  n32 -->|"no"| n35
-  n36["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
-  n35 --> n36
-  n37{"!this.env.s3.bucket"}:::decision
-  n36 --> n37
-  n38(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
-  n37 -->|"sí"| n38
-  n39{"this.env.lifecycleBinding"}:::decision
-  n37 -->|"no"| n39
-  n40{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
+  n28{"result.duplicate || result.result === undefined"}:::decision
+  n25 -->|"sí"| n28
+  n26 -->|"no"| n28
+  n29(["500 INTERNAL PUBLICATION_RESULT_REQUIRES_RELOAD"]):::error
+  n28 -->|"sí"| n29
+  n30(["↩ (relanza el error capturado)"]):::error
+  n22 -->|"si falla"| n30
+  n31{"loadStorageEnv().lifecycleBinding"}:::decision
+  n28 -->|"no"| n31
+  n15 -->|"no"| n31
+  n32(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a LocalDiskFileStorageAdapter.store"]:::llamada
+  n31 -->|"no"| n33
+  n34{"this.lifecycleBinding"}:::decision
+  n33 --> n34
+  n35{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
+  n34 -->|"sí"| n35
+  n36(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n35 -->|"sí"| n36
+  n37["Llama a S3FileStorageAdapter.store"]:::llamada
+  n35 -->|"no"| n37
+  n34 -->|"no"| n37
+  n38["Llama a S3FileStorageAdapter.assertConfigured"]:::llamada
+  n37 --> n38
+  n39{"!this.env.s3.bucket"}:::decision
+  n38 --> n39
+  n40(["500 INTERNAL {HttpStatus.SERVICE_UNAVAILABLE}"]):::error
   n39 -->|"sí"| n40
-  n41(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
-  n40 -->|"sí"| n41
-  n42["Llama a FilesService.createFile"]:::llamada
-  n40 -->|"no"| n42
-  n39 -->|"no"| n42
-  n43["Llama a FilesService.assertLifecycleWired"]:::llamada
-  n42 --> n43
-  n44{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
-  n43 --> n44
-  n45(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
-  n44 -->|"sí"| n45
-  n46["Llama a StoragePublicationService.guardLocator"]:::llamada
-  n44 -->|"no"| n46
-  n47{"!presence || presence.state !== 'PRESENT'"}:::decision
-  n46 --> n47
-  n48(["500 INTERNAL REFERENCE_OBJECT_UNPROVEN"]):::error
-  n47 -->|"sí"| n48
-  n49{"expected && (receipt.contentHash !== expected.contentHash || receipt.sizeBytes !== expected.sizeBytes)"}:::decision
-  n47 -->|"no"| n49
-  n50(["500 INTERNAL REFERENCE_METADATA_MISMATCH"]):::error
+  n41{"this.env.lifecycleBinding"}:::decision
+  n39 -->|"no"| n41
+  n42{"!permit || plan.identity.kind === 'UNKNOWN'"}:::decision
+  n41 -->|"sí"| n42
+  n43(["500 INTERNAL WRITE_RESERVATION_REQUIRED"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a FilesService.createFile"]:::llamada
+  n42 -->|"no"| n44
+  n41 -->|"no"| n44
+  n45["Llama a FilesService.assertLifecycleWired"]:::llamada
+  n44 --> n45
+  n46{"loadStorageEnv().lifecycleBinding && !this.publication"}:::decision
+  n45 --> n46
+  n47(["500 INTERNAL LIFECYCLE_WIRING_MISSING"]):::error
+  n46 -->|"sí"| n47
+  n48["Llama a StoragePublicationService.guardLocator"]:::llamada
+  n46 -->|"no"| n48
+  n49{"!presence || presence.state !== 'PRESENT'"}:::decision
+  n48 --> n49
+  n50(["500 INTERNAL REFERENCE_OBJECT_UNPROVEN"]):::error
   n49 -->|"sí"| n50
-  n51["Llama a FilesRepository.create"]:::llamada
+  n51{"expected && (receipt.contentHash !== expected.contentHash || receipt.sizeBytes !== expected.sizeBytes)"}:::decision
   n49 -->|"no"| n51
-  n52[("CREA common.files")]:::efecto
-  n51 --> n52
-  n53["Llama a FileVersionsRepository.create"]:::llamada
-  n52 --> n53
-  n54[("CREA common.file_versions")]:::efecto
+  n52(["500 INTERNAL REFERENCE_METADATA_MISMATCH"]):::error
+  n51 -->|"sí"| n52
+  n53["Llama a FilesRepository.create"]:::llamada
+  n51 -->|"no"| n53
+  n54[("CREA common.files")]:::efecto
   n53 --> n54
-  n55(("201 Responde con éxito")):::ok
+  n55["Llama a FileVersionsRepository.create"]:::llamada
   n54 --> n55
+  n56[("CREA common.file_versions")]:::efecto
+  n55 --> n56
+  n57(("201 Responde con éxito")):::ok
+  n56 --> n57
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

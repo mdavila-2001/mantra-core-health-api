@@ -192,7 +192,13 @@ function build() {
     retract: mockFn().mockResolvedValue(0),
     offeringOfSlot: mockFn().mockResolvedValue(null),
   };
+  // F3: el cierre de la atención avisa a `surveys` (por su puerto). Por omisión
+  // no hay nada que hacer.
+  const bookingCompleted = {
+    onBookingCompleted: mockFn().mockResolvedValue(undefined),
+  };
   const service = createBookingsService({
+    bookingCompleted,
     em,
     bookingsRepo,
     catalogRepo,
@@ -219,6 +225,8 @@ function build() {
       searchBookings(...args),
     )) as typeof service.searchBookings;
   return {
+    em,
+    bookingCompleted,
     searchIn: (tenantId: string, ...args: Parameters<typeof searchBookings>) =>
       runWithTenant(tenantId, () => searchBookings(...args)),
     searchWithoutTenant: searchBookings,
@@ -3038,6 +3046,50 @@ describe('SchedulingBookingsService', () => {
       );
     });
 
+    it('completar avisa a las encuestas DESPUÉS de confirmar la transacción y con el actor', async () => {
+      const d = build();
+      const booking = {
+        ...farFutureConfirmedBooking(),
+        statusConceptId: SCHED.BOOKING_IN_PROGRESS,
+      };
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+      d.appointmentsRepo.findById.mockResolvedValue({
+        id: 'appt-1',
+        statusConceptId: CLIN.APPOINTMENT_BOOKED,
+      });
+      let committed = false;
+      d.em.transactional.mockImplementation(async (cb: any) => {
+        const result = await cb(d.tx);
+        committed = true;
+        return result;
+      });
+      const committedWhenNotified: boolean[] = [];
+      d.bookingCompleted.onBookingCompleted.mockImplementation(async () => {
+        committedWhenNotified.push(committed);
+      });
+
+      await d.service.complete('booking-1', actor);
+
+      expect(d.bookingCompleted.onBookingCompleted).toHaveBeenCalledTimes(1);
+      expect(d.bookingCompleted.onBookingCompleted).toHaveBeenCalledWith(
+        'booking-1',
+        actor,
+      );
+      expect(committedWhenNotified).toEqual([true]);
+    });
+
+    it('si la transición no es válida no avisa a las encuestas', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        farFutureConfirmedBooking(),
+      );
+
+      await expect(
+        d.service.complete('booking-1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.bookingCompleted.onBookingCompleted).not.toHaveBeenCalled();
+    });
+
     it('no se completa una que nunca empezó', async () => {
       const d = build();
       d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
@@ -4492,6 +4544,52 @@ describe('SchedulingBookingsService · el estado de pago', () => {
         }),
       }),
     );
+  });
+
+  it('FAC-01 · un monto con «pendiente» es 422 y no abre la transacción', async () => {
+    const { service, em } = build();
+
+    await expect(
+      service.setPaymentState(
+        BOOKING,
+        { state: 'PENDING', amountReceived: 50 },
+        actor as any,
+      ),
+    ).rejects.toMatchObject({
+      reason: SchedulingErrorReason.PAYMENT_AMOUNT_WITHOUT_PAYMENT,
+    });
+    expect(em.transactional).not.toHaveBeenCalled();
+  });
+
+  it('FAC-01 · un monto mal escrito es 422 PAYMENT_AMOUNT_INVALID', async () => {
+    const { service } = build();
+
+    await expect(
+      service.setPaymentState(
+        BOOKING,
+        { state: 'PAID', amountReceived: 10.555 },
+        actor as any,
+      ),
+    ).rejects.toMatchObject({
+      reason: SchedulingErrorReason.PAYMENT_AMOUNT_INVALID,
+    });
+  });
+
+  it('FAC-01 · sin práctica la marca se guarda igual y dice por qué no se facturó', async () => {
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      bookingAt(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PAID', amountReceived: 150 },
+      actor as any,
+    );
+
+    expect(res.state).toBe('PAID');
+    expect(res.billing).toMatchObject({ linked: false, reason: 'NO_PRACTICE' });
+    expect(res.amountPaid).toBeUndefined();
   });
 
   it('sin marca previa, la lectura devuelve null y no «pendiente»', async () => {

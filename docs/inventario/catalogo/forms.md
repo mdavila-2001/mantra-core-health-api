@@ -11,7 +11,7 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [dynamic_field_definitions](#dynamic_field_definitions) | Define campos configurables con tipo y semántica para extender formularios sin alterar cada tabla de negocio. | 31 | 9 | 20 | DIVERGE |
-| [dynamic_field_sections](#dynamic_field_sections) | Agrupa campos dinámicos en secciones para configurar formularios usados por módulos del sistema médico. | 11 | 5 | 5 | COINCIDE |
+| [dynamic_field_sections](#dynamic_field_sections) | Agrupa campos dinámicos en secciones para configurar formularios usados por módulos del sistema médico. | 11 | 5 | 6 | COINCIDE |
 | [extension_target_policies](#extension_target_policies) | Restringe qué entidades pueden extenderse con campos dinámicos para mantener control sobre el modelo de datos. | 15 | 8 | 4 | COINCIDE |
 | [field_assignments](#field_assignments) | Asigna definiciones de campo a formularios, entidades o contextos donde deben capturarse. | 21 | 13 | 16 | COINCIDE |
 | [field_definition_localizations](#field_definition_localizations) | Conserva etiquetas y textos localizados de campos para presentar formularios en idiomas y regiones distintos. | 12 | 4 | 4 | COINCIDE |
@@ -334,7 +334,7 @@ Agrupa campos dinámicos en secciones para configurar formularios usados por mó
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: dynamic_field_sections`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `DynamicFieldSections` — `src/modules/forms/entities/dynamic_field_sections.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 4 entrantes · 5 operaciones
+- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 4 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -387,6 +387,7 @@ Agrupa campos dinámicos en secciones para configurar formularios usados por mó
 |---|---|---|
 | POST /charts/templates | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | GET /forms/assignments | LEE | DIRECTA |
 | POST /forms/assignments | CREA | DIRECTA |
 | GET /forms/definition-sets/{id} | LEE | DIRECTA |

@@ -10,7 +10,11 @@ export class VerifyCredentialDto {
    * Valor de decision mantenido por la instancia.
    */
   @ApiProperty({
-    description: 'Resultado de la verificación',
+    description:
+      'Resultado de la verificación. Mientras el profesional tenga una admisión abierta ' +
+      '(o esté pendiente), VERIFIED se rechaza con 412 ADMISSION_VERIFY_VIA_REVIEW: el título ' +
+      'se verifica desde `POST /admissions/:id/items/:itemId/review`, con la huella de lo que se ' +
+      'vio. REJECTED sigue valiendo para quien tomó la revisión.',
     enum: ['VERIFIED', 'REJECTED'],
   })
   @IsIn(['VERIFIED', 'REJECTED'])
@@ -32,6 +36,19 @@ export class VerifyCredentialDto {
   @IsString()
   @MaxLength(2000)
   verificationSourceUri?: string;
+
+  /**
+   * Por qué se rechazó. Opcional; si viene con REJECTED queda en la credencial
+   * (`rejection_reason_text`) y en la revisión de la admisión.
+   */
+  @ApiPropertyOptional({
+    maxLength: 500,
+    description: 'Motivo del rechazo; lo ve el profesional en su admisión.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
 }
 
 /** Respuesta de verificación de credencial. */
@@ -62,7 +79,8 @@ export class CredentialResponseDto {
    */
   @ApiProperty({
     description:
-      'true si al verificar quedó habilitado todo el perfil profesional',
+      'Siempre false desde v4.2.67: verificar una credencial ya no habilita el perfil; ' +
+      'eso lo resuelve la admisión (POST /admissions/:id/decision).',
   })
   practitionerVerified!: boolean;
 }

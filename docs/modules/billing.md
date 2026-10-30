@@ -9,7 +9,7 @@
 # Módulo `billing`
 
 **Fuente:** [`src/modules/billing/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/billing/README.md)
-· 6 controllers · 14 services · 12 repositories · 24 entidades · 15 DTO
+· 6 controllers · 15 services · 12 repositories · 24 entidades · 16 DTO
 
 ---
 
@@ -32,7 +32,7 @@ El módulo tiene **4 controllers, 22 rutas HTTP, 22 entidades y 12 servicios**. 
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
-Importa (`CommonModule`, `PracticeModule`, `SurveysModule`).
+Importa (`CommonModule`, `PracticeModule`).
 
 Entidades (`tableName`, 22 de 22 archivos `*.entity.ts`): `bill_lines`, `billing_document_links`, `bills`, `budget_lines`, `budgets`, `dunning_items`, `dunning_runs`, `financial_kpi_snapshots`, `invoice_lines`, `invoices`, `patient_statements`, `payable_payment_allocations`, `payments_made`, `payments_received`, `quotation_installments`, `quotations`, `receivable_payment_allocations`, `reimbursements`, `service_catalog`, `tax_codes`, `tax_periods`, `vendors`.
 
@@ -74,7 +74,7 @@ El módulo tiene **4 controllers, 22 rutas HTTP, 22 entidades y 12 servicios**. 
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
-Importa (`CommonModule`, `PracticeModule`, `SurveysModule`).
+Importa (`CommonModule`, `PracticeModule`).
 
 Entidades (`tableName`, 22 de 22 archivos `*.entity.ts`): `bill_lines`, `billing_document_links`, `bills`, `budget_lines`, `budgets`, `dunning_items`, `dunning_runs`, `financial_kpi_snapshots`, `invoice_lines`, `invoices`, `patient_statements`, `payable_payment_allocations`, `payments_made`, `payments_received`, `quotation_installments`, `quotations`, `receivable_payment_allocations`, `reimbursements`, `service_catalog`, `tax_codes`, `tax_periods`, `vendors`.
 

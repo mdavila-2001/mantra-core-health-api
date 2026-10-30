@@ -5,6 +5,7 @@ import { DirectoryModule } from '../directory/directory.module';
 import { PracticeModule } from '../practice/practice.module';
 import { CommonModule } from '../common/common.module';
 import {
+  PharmacyBulkController,
   PharmacyController,
   PharmacyPublicController,
   PharmacyReadController,
@@ -23,6 +24,11 @@ import {
   PharmacyCategoriesService,
   PharmacyOpeningHoursService,
   PharmacyProvisioningService,
+  PharmacyBulkService,
+  CategoriesBulkHandler,
+  ProductsBulkHandler,
+  PricesBulkHandler,
+  SitesBulkHandler,
 } from './services';
 import {
   PharmaciesRepository,
@@ -68,6 +74,7 @@ import {
     PharmacyController,
     PharmacyReadController,
     PharmacyPublicController,
+    PharmacyBulkController,
   ],
   providers: [
     // Repositorios
@@ -100,6 +107,12 @@ import {
     PharmacyCategoriesService,
     PharmacyOpeningHoursService,
     PharmacyProvisioningService,
+    // FAR-05: la carga masiva, una tabla por manejador.
+    PharmacyBulkService,
+    CategoriesBulkHandler,
+    ProductsBulkHandler,
+    PricesBulkHandler,
+    SitesBulkHandler,
   ],
   // La cara de lectura se exporta para que el inventario (módulo 25) componga
   // disponibilidad sin duplicar los finders de publicación y precios.

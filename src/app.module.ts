@@ -41,6 +41,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AuditTrailInterceptor } from './modules/audit/interceptors/audit-trail.interceptor';
 import { AudioAssetsModule } from './modules/audio_assets/audio-assets.module';
 import { audioEnvSchema } from './modules/audio_assets/audio.env';
+import { admissionsEnvSchema } from './modules/profiles/domain/admissions/admissions.config';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
 import { BillingModule } from './modules/billing/billing.module';
@@ -95,6 +96,7 @@ import { QaExecutionModule } from './modules/qa_execution/qa_execution.module';
 import { OpsConsoleModule } from './modules/ops_console/ops_console.module';
 import { TelemetryModule } from './modules/telemetry/telemetry.module';
 import { webAnalyticsEnvSchema } from './modules/telemetry/web-analytics.env';
+import { pharmacyErpEnvSchema } from './modules/pharmacy_inventory/infrastructure/adapters/pharmacy-erp.env';
 import { TrackingModule } from './modules/tracking/tracking.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TimeSeriesModule } from './modules/time_series/time_series.module';
@@ -128,8 +130,10 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
         .concat(audioEnvSchema)
+        .concat(admissionsEnvSchema)
         .concat(telemetryEnvSchema)
         .concat(webAnalyticsEnvSchema)
+        .concat(pharmacyErpEnvSchema)
         .concat(verificationBypassEnvSchema)
         .concat(seedBootEnvSchema),
     }),

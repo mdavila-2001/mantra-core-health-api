@@ -164,6 +164,8 @@ function build() {
       effectiveRoles.ensureRoleByCode(...args),
     ),
     managingTenantId: mockFn().mockResolvedValue(null),
+    // Sin cifras por defecto: nadie tiene cuenta ni reseñas.
+    directoryStats: mockFn().mockResolvedValue(new Map()),
   };
   // Por defecto el bypass está apagado: listPractitioners filtra por
   // verificado, igual que se comportaría un arranque sin
@@ -304,6 +306,23 @@ function build() {
     assertIsHealthFacility: mockFn(() => Promise.resolve()),
   };
 
+  const admissions = {
+    openForRegistration: mockFn(() => Promise.resolve({})),
+    recordCredentialReview: mockFn(() => Promise.resolve(false)),
+  };
+  const admissionsRead = {
+    verificationOf: mockFn((_em: unknown, ids: string[]) =>
+      Promise.resolve(
+        new Map(
+          ids.map((id) => [
+            id,
+            { status: 'UNVERIFIED', verifiedAt: null, validUntil: null },
+          ]),
+        ),
+      ),
+    ),
+  };
+
   const service = new ProfilesPractitionersService(
     em as any,
     personsRepo,
@@ -329,10 +348,16 @@ function build() {
     specialtyCatalog as any,
     administrativeAreas as any,
     healthFacilities as any,
+    // v4.2.67: la verificación del alta es de las admisiones. Por defecto no hay
+    // ninguna abierta y el estado visible sale vacío (UNVERIFIED).
+    admissions as any,
+    admissionsRead as any,
     logger as any,
   );
   return {
     service,
+    admissions,
+    admissionsRead,
     administrativeAreas,
     healthFacilities,
     specialtyCatalog,
@@ -821,7 +846,7 @@ describe('ProfilesPractitionersService', () => {
       );
     });
 
-    it('verifies the credential and activates the practitioner when none remain pending', async () => {
+    it('verifies the credential, records it in the admission and NEVER writes the practitioner profile (D-01)', async () => {
       const d = build();
       const credential = {
         id: 'c1',
@@ -830,8 +855,13 @@ describe('ProfilesPractitionersService', () => {
         updatedAt: new Date(),
       };
       d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+      // Antes: sin credenciales pendientes, esta ruta verificaba al profesional.
       d.credentialsRepo.countInStateExcept.mockResolvedValue(0);
-      const practitioner = { profileId: 'pp1', updatedAt: new Date() } as any;
+      const practitioner = {
+        profileId: 'pp1',
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        updatedAt: new Date(),
+      } as any;
       d.practitionersRepo.findById.mockResolvedValue(practitioner);
 
       const res = await d.service.verifyCredential(
@@ -852,13 +882,50 @@ describe('ProfilesPractitionersService', () => {
           'https://colegiomedico.example/registro/LIC-12345',
         verifiedByUserId: actor.id,
       });
+      // El perfil NO se toca: verificar es de la admisión (único escritor).
       expect(practitioner.verificationStatusConceptId).toBe(
-        PROF.PRACT_VERIF_VERIFIED,
+        PROF.PRACT_VERIF_PENDING,
       );
-      expect(res).toMatchObject({ id: 'c1', practitionerVerified: true });
+      expect(res).toMatchObject({ id: 'c1', practitionerVerified: false });
+      expect(d.admissions.recordCredentialReview).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          credentialId: 'c1',
+          practitionerProfileId: 'pp1',
+          decision: 'VERIFIED',
+          verificationSourceUri:
+            'https://colegiomedico.example/registro/LIC-12345',
+        }),
+      );
       expect(d.credentialsRepo.findByIdForUpdate).toHaveBeenCalledWith(
         d.tx,
         'c1',
+      );
+    });
+
+    it('guarda el motivo del rechazo en la credencial y en la admisión', async () => {
+      const d = build();
+      const credential = {
+        id: 'c1',
+        stateConceptId: PROF.CRED_PENDING,
+        practitionerProfileId: 'pp1',
+        updatedAt: new Date(),
+      } as any;
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+
+      await d.service.verifyCredential(
+        'c1',
+        { decision: 'REJECTED', reason: '  Documento ilegible ' } as any,
+        actor,
+      );
+
+      expect(credential.rejectionReasonText).toBe('Documento ilegible');
+      expect(d.admissions.recordCredentialReview).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          decision: 'REJECTED',
+          reason: '  Documento ilegible ',
+        }),
       );
     });
   });
@@ -2897,6 +2964,82 @@ describe('ProfilesPractitionersService', () => {
       expect(page.nextCursor).toBeNull();
     });
 
+    /**
+     * Lo que deja ordenar la guía por nota y por atenciones: cada fila trae sus
+     * cifras, pedidas en UN lote para la página entera.
+     */
+    it('suma la nota y la actividad de cada fila, en un solo lote', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([
+        row,
+        { ...row, profileId: 'per-2', practitionerCode: 'MED-2' },
+      ]);
+      d.practitionerContext.directoryStats.mockResolvedValue(
+        new Map([
+          [
+            'per-1',
+            {
+              activity: {
+                encounters: 120,
+                medicationRequests: 45,
+                clinicalNotes: 80,
+                documents: 3,
+              },
+              ratingAverage: 4.6,
+              ratingCount: 12,
+            },
+          ],
+        ]),
+      );
+
+      const page = await d.service.listPractitioners({ limit: 50 });
+
+      expect(d.practitionerContext.directoryStats).toHaveBeenCalledTimes(1);
+      expect(d.practitionerContext.directoryStats.mock.calls[0][1]).toEqual([
+        'per-1',
+        'per-2',
+      ]);
+      expect(page.items[0]).toMatchObject({
+        ratingAverage: 4.6,
+        ratingCount: 12,
+        activity: {
+          encounters: 120,
+          medicationRequests: 45,
+          clinicalNotes: 80,
+          documents: 3,
+        },
+      });
+      // Sin cifras: `null` de nota —no cero estrellas— y actividad en cero.
+      expect(page.items[1]).toMatchObject({
+        ratingAverage: null,
+        ratingCount: 0,
+        activity: {
+          encounters: 0,
+          medicationRequests: 0,
+          clinicalNotes: 0,
+          documents: 0,
+        },
+      });
+    });
+
+    /** Una lectura de cifras caída no tumba la guía: salen en cero. */
+    it('si las cifras no se pueden leer, lista igual con ceros', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([row]);
+      d.practitionerContext.directoryStats.mockRejectedValue(
+        new Error('relation does not exist'),
+      );
+
+      const page = await d.service.listPractitioners({ limit: 50 });
+
+      expect(page.items).toHaveLength(1);
+      expect(page.items[0]).toMatchObject({
+        ratingAverage: null,
+        ratingCount: 0,
+        activity: { encounters: 0 },
+      });
+    });
+
     /** La fila de más existe sólo para saber si hay página siguiente. */
     it('recorta la fila extra y devuelve cursor de continuación', async () => {
       const d = build();
@@ -2972,11 +3115,39 @@ describe('ProfilesPractitionersService', () => {
         ]),
       );
 
+      d.admissionsRead.verificationOf.mockResolvedValue(
+        new Map([
+          [
+            'per-1',
+            {
+              status: 'VERIFIED',
+              verifiedAt: '2026-10-01T00:00:00.000Z',
+              validUntil: '2029-10-01',
+            },
+          ],
+          [
+            'per-2',
+            { status: 'UNVERIFIED', verifiedAt: null, validUntil: null },
+          ],
+        ]) as never,
+      );
+
       const page = await d.service.listPractitioners({ limit: 50 });
 
       // El front no compara conceptos: el uuid del estado no viaja escrito en
-      // ningún cliente.
+      // ningún cliente. El check lo decide la admisión, no el estado del perfil.
       expect(page.items.map((i) => i.verified)).toEqual([true, false]);
+      expect(page.items[0].verification.status).toBe('VERIFIED');
+    });
+
+    it('un perfil que dice VERIFIED pero cuya admisión no está verificada NO muestra el check', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([row]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([['per-1', { id: 'per-1', displayName: 'Dra. Verificada' }]]),
+      );
+      const page = await d.service.listPractitioners({ limit: 50 });
+      expect(page.items[0].verified).toBe(false);
     });
 
     it('con el bypass activo no filtra por verificación', async () => {

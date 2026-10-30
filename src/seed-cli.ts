@@ -6,6 +6,10 @@ import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { SeedBootstrapService } from './common/seed/seed-bootstrap.service';
+import {
+  SeedCensusService,
+  formatSeedCensus,
+} from './common/seed/seed-census.service';
 import { seedExitCode } from './common/seed/seed-exit-code';
 import { SchemaIntegrityState } from './orm';
 
@@ -25,6 +29,11 @@ import { SchemaIntegrityState } from './orm';
  * inserta cero.
  */
 async function main(): Promise<void> {
+  if (process.argv.slice(2).includes('--help')) {
+    process.stdout.write(HELP);
+    process.exit(0);
+  }
+  const only = parseOnly(process.argv.slice(2));
   process.env.SEED_ON_BOOT = 'false';
   // Migración y seed son el uso legítimo del rol dueño (DDL, catálogos): el
   // guard de HZ-05 no debe tratarlo como un runtime que ignora RLS.
@@ -36,7 +45,7 @@ async function main(): Promise<void> {
   app.useLogger(app.get(Logger));
 
   try {
-    const summary = await app.get(SeedBootstrapService).run();
+    const summary = await app.get(SeedBootstrapService).run({ only });
     const integrity = app.get(SchemaIntegrityState);
     if (!integrity.isComplete()) {
       app
@@ -45,6 +54,21 @@ async function main(): Promise<void> {
           { blockingCount: integrity.current()?.blockingCount },
           'El esquema quedó con incidencias de integridad bloqueantes',
         );
+    }
+    // Censo de lo que dejó la carga: lo que HAY, no lo que insertó esta pasada.
+    // Un entorno con la misma carga da las mismas líneas, así que dos corridas
+    // se comparan con `diff`. Una falla del censo no cambia el código de salida.
+    try {
+      const census = await app.get(SeedCensusService).take();
+      process.stdout.write(`
+--- censo de la carga ---
+${formatSeedCensus(census)}
+`);
+      app
+        .get(Logger)
+        .log({ event: 'seed.census', census }, 'Censo de la carga');
+    } catch (error) {
+      app.get(Logger).warn(error, 'No se pudo tomar el censo de la carga');
     }
     await app.close();
     // El código de salida es el contrato con quien lo invoca: un seed omitido
@@ -60,6 +84,36 @@ async function main(): Promise<void> {
     await app.close();
     process.exit(1);
   }
+}
+
+const HELP = `Uso: node dist/src/seed-cli.js [--only=<id>,<id>] [--help]
+
+Siembra los datos estructurales una sola vez y termina.
+
+  --only=<id>,<id>  Corre solo esos pasos. Un id desconocido falla y lista los
+                    válidos. Pedir un paso por --only es intención explícita y
+                    lo habilita aunque su variable SEED_*_ENABLED esté apagada.
+                    El candado de las cuentas de demostración (SEED_DEMO_PASSWORD
+                    y SEED_DEMO_ALLOW_PRODUCTION=true) nunca se saltea.
+  --help            Muestra esta ayuda.
+
+Al terminar imprime el censo de la carga (paso<TAB>etiqueta<TAB>conteo).
+`;
+
+/**
+ * Lee `--only=<id>,<id>` de los argumentos.
+ *
+ * @param args - Argumentos del proceso, sin el intérprete ni el script.
+ * @returns Los ids pedidos, o `undefined` si no se pasó `--only`.
+ */
+function parseOnly(args: readonly string[]): string[] | undefined {
+  const flag = args.find((arg) => arg.startsWith('--only='));
+  if (!flag) return undefined;
+  return flag
+    .slice('--only='.length)
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean);
 }
 
 void main();

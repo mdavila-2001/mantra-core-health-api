@@ -14,7 +14,7 @@ const notice: AgendaNotice = {
   bodyText: 'Un paciente pidió cita para el lunes a las 09:00.',
   relatedResourceType: 'scheduling.appointment_bookings',
   relatedResourceId: 'booking-1',
-  payload: { route: '/schedule?vista=citas' },
+  payload: { route: '/schedule?vista=citas', bookingId: 'booking-1' },
 };
 
 function build() {
@@ -76,7 +76,11 @@ describe('SupportAdminNoticeAdapter (TAREA-15, P-15-1)', () => {
     const [conversationId, messageDto] = d.messaging.sendMessage.mock.calls[0];
     expect(conversationId).toBe('conv-1');
     expect(messageDto.senderProfileId).toBe('perfil-support-admin');
-    expect(messageDto.bodyText).toBe(notice.bodyText);
+    // La versión de chat: el cuerpo del aviso, con encabezado y enlace a la cita.
+    expect(messageDto.bodyText).toContain(notice.bodyText);
+    expect(messageDto.bodyText).toMatch(
+      /\/schedule\?vista=citas&turno=booking-1$/,
+    );
   });
 
   it('firma la conversación y el mensaje con la cuenta de SupportAdmin, no con el worker genérico', async () => {

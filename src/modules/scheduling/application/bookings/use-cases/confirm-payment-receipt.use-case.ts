@@ -19,6 +19,10 @@ import { STATES_WITHOUT_PAYMENT } from '../../../domain/booking/booking-states';
 import { SchedulingBookingsRepository } from '../../../infrastructure/repositories';
 import { projectPaymentState } from '../support/booking-projections';
 import { writePaymentState } from '../support/payment-state-writer';
+import {
+  BookingBillingBridge,
+  amountsOf,
+} from '../support/booking-billing-bridge';
 
 /** El médico confirma un comprobante: la cita queda pagada. */
 @Injectable()
@@ -30,6 +34,7 @@ export class ConfirmPaymentReceiptUseCase {
     @Inject(BOOKING_HISTORY_PORT)
     private readonly history: BookingHistoryPort,
     private readonly notifier: BookingChangeNotifier,
+    private readonly billing: BookingBillingBridge,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(ConfirmPaymentReceiptUseCase.name);
@@ -44,6 +49,11 @@ export class ConfirmPaymentReceiptUseCase {
    * comprobantes pendientes de la cita quedan como están.
    *
    * Volver a confirmar uno ya confirmado no escribe nada y devuelve lo mismo.
+   *
+   * **FAC-01.** El monto del comprobante llega a facturación como transferencia,
+   * recortado a lo que falta pagar de la cita (un comprobante por más no tumba
+   * la confirmación). Un comprobante sin monto confirma igual y `billing` dice
+   * `NO_AMOUNT`.
    *
    * @throws ResourceNotFoundException (404) si la cita o el comprobante no
    *   existen o son de otra agenda.
@@ -88,10 +98,22 @@ export class ConfirmPaymentReceiptUseCase {
         );
         const [projected] = await this.receipts.project(tx, [receipt]);
         if (payment) {
+          // Sin pago nuevo: devuelve el vínculo que ya tenga la cita.
+          const billing = await this.billing.bill(
+            tx,
+            booking,
+            payment,
+            undefined,
+            actor.id,
+          );
           return {
             response: {
               receipt: projected,
-              paymentState: projectPaymentState(payment),
+              paymentState: {
+                ...projectPaymentState(payment),
+                ...amountsOf(billing),
+              },
+              billing,
             },
             changed: false,
           };
@@ -119,13 +141,24 @@ export class ConfirmPaymentReceiptUseCase {
         { statusConceptId: SCHED.PAYMENT_PAID },
         actor,
       );
+      const billing = await this.billing.bill(
+        tx,
+        booking,
+        payment,
+        receiptPayment(receipt.amount),
+        actor.id,
+      );
       await tx.flush();
 
       const [projected] = await this.receipts.project(tx, [receipt]);
       return {
         response: {
           receipt: projected,
-          paymentState: projectPaymentState(payment),
+          paymentState: {
+            ...projectPaymentState(payment),
+            ...amountsOf(billing),
+          },
+          billing,
         },
         changed: true,
       };
@@ -136,4 +169,15 @@ export class ConfirmPaymentReceiptUseCase {
     }
     return response;
   }
+}
+
+/** El monto del comprobante como pago a facturar, o `undefined` si no trae uno usable. */
+function receiptPayment(amount: string | undefined) {
+  const value = amount === undefined ? NaN : Number(amount);
+  if (!(value > 0)) return undefined;
+  return {
+    amountCents: Math.round(value * 100),
+    method: 'TRANSFER' as const,
+    capAtBalance: true,
+  };
 }

@@ -9,7 +9,7 @@
 # Módulo `pharmacy`
 
 **Fuente:** [`src/modules/pharmacy/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/pharmacy/README.md)
-· 3 controllers · 13 services · 15 repositories · 12 entidades · 16 DTO
+· 4 controllers · 14 services · 15 repositories · 12 entidades · 17 DTO
 
 ---
 

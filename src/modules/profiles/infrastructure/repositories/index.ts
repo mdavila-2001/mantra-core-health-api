@@ -13,3 +13,5 @@ export * from './patient-merge-events.repository';
 export * from './related-persons.repository';
 export * from './patient-portal-proxies.repository';
 export * from './patient-primary-practitioners.repository';
+export * from './practitioner-admissions.repository';
+export * from './practitioner-admission-reviews.repository';

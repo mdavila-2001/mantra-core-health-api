@@ -15,6 +15,7 @@ import {
   SearchBookingsResponseDto,
 } from '../../../presentation/dto';
 import { BookingItemAssembler } from '../support/booking-item-assembler';
+import { BookingBillingBridge } from '../support/booking-billing-bridge';
 import {
   CLINICAL_APPOINTMENTS_PORT,
   type ClinicalAppointmentsPort,
@@ -60,6 +61,7 @@ export class SearchBookingsUseCase {
     @Inject(PATIENT_REPRESENTATION_PORT)
     private readonly representation: PatientRepresentationPort,
     private readonly assembler: BookingItemAssembler,
+    private readonly billing: BookingBillingBridge,
   ) {}
 
   /**
@@ -301,30 +303,33 @@ export class SearchBookingsUseCase {
       page.map(({ booking }) => booking),
     );
 
-    return {
-      items: page.map(({ booking, slot }) =>
-        this.assembler.toBookingItem(
-          booking,
-          slot,
-          reasons.get(booking.id),
-          delays.get(booking.id),
-          actor,
-          booking.resourceId ? agendaOwners.get(booking.resourceId) : undefined,
-          origins.get(booking.id),
-          names.get(booking.patientProfileId),
-          booking.appointmentId == null
-            ? undefined
-            : types.get(booking.appointmentId),
-          payments.get(booking.id),
-          carriers,
-          booking.appointmentId == null
-            ? undefined
-            : encounters.get(booking.appointmentId),
-          requests,
-          representedPatients,
-          followUps,
-        ),
+    const items = page.map(({ booking, slot }) =>
+      this.assembler.toBookingItem(
+        booking,
+        slot,
+        reasons.get(booking.id),
+        delays.get(booking.id),
+        actor,
+        booking.resourceId ? agendaOwners.get(booking.resourceId) : undefined,
+        origins.get(booking.id),
+        names.get(booking.patientProfileId),
+        booking.appointmentId == null
+          ? undefined
+          : types.get(booking.appointmentId),
+        payments.get(booking.id),
+        carriers,
+        booking.appointmentId == null
+          ? undefined
+          : encounters.get(booking.appointmentId),
+        requests,
+        representedPatients,
+        followUps,
       ),
+    );
+
+    return {
+      // FAC-01: lo cobrado de cada cita, en lote, desde su factura.
+      items: await this.billing.withAmountsPaid(em, items, payments),
       count: page.length,
       limit,
       truncated,

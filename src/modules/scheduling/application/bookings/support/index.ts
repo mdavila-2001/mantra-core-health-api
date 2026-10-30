@@ -1,4 +1,5 @@
 export { BookingAccess } from './booking-access';
+export { BookingBillingBridge } from './booking-billing-bridge';
 export { BookingChangeNotifier } from './booking-change-notifier';
 export { BookingItemAssembler } from './booking-item-assembler';
 export { BookingMaterializer } from './booking-materializer';
