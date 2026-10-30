@@ -159,11 +159,6 @@ describe('IamPractitionerSelfRegistrationService', () => {
       openForRegistration: fn().mockResolvedValue({ id: 'adm-1' }),
     };
 
-    // v4.2.67: la solicitud de admisión nace en la misma transacción del alta.
-    const admissions = {
-      openForRegistration: fn().mockResolvedValue({ id: 'adm-1' }),
-    };
-
     const service = new IamPractitionerSelfRegistrationService(
       em as never,
       tokenService as never,

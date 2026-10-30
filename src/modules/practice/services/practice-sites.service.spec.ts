@@ -753,6 +753,7 @@ describe('PracticeSitesService · alcance de tenant (PRAC-01)', () => {
       'p1',
       { code: 'S', name: 'Sede' } as any,
       actor,
+      TENANT_A,
     );
 
     expect(res.practiceId).toBe('p1');
@@ -763,12 +764,22 @@ describe('PracticeSitesService · alcance de tenant (PRAC-01)', () => {
     const d = build();
     d.practicesRepo.findById.mockResolvedValue(foreignPractice());
     const foreign = await expectOutOfScope(
-      d.service.createSite('p1', { code: 'S', name: 'Sede' } as any, actor),
+      d.service.createSite(
+        'p1',
+        { code: 'S', name: 'Sede' } as any,
+        actor,
+        TENANT_A,
+      ),
       'Práctica no encontrada',
     );
     d.practicesRepo.findById.mockResolvedValue(null);
     const missing = await expectOutOfScope(
-      d.service.createSite('p1', { code: 'S', name: 'Sede' } as any, actor),
+      d.service.createSite(
+        'p1',
+        { code: 'S', name: 'Sede' } as any,
+        actor,
+        TENANT_A,
+      ),
       'Práctica no encontrada',
     );
 
@@ -781,9 +792,15 @@ describe('PracticeSitesService · alcance de tenant (PRAC-01)', () => {
     const d = build();
 
     await expect(
-      d.raw.createSite('p1', { code: 'S', name: 'Sede' } as any, actor),
+      d.raw.createSite(
+        'p1',
+        { code: 'S', name: 'Sede' } as any,
+        actor,
+        undefined as any,
+      ),
     ).rejects.toThrow();
-    expect(d.practicesRepo.findById).not.toHaveBeenCalled();
+    expect(d.sitesRepo.create).not.toHaveBeenCalled();
+    expect(d.tx.flush).not.toHaveBeenCalled();
   });
 
   it('dar de baja una sede de otro tenant: 404 uniforme; la sede y sus hijos de B no cambian', async () => {

@@ -52,6 +52,40 @@ const KNOWN_READERS: Record<string, string> = {
     'Puerto del adaptador anterior (tipos).',
   'pharmacy_inventory/application/pharmacy-inventory-read/read-pharmacy-inventory.use-case.ts':
     'Consume el puerto de directorio de farmacias.',
+  'billing/repositories/patient-spending.repository.ts':
+    'SQL: une practice_sites con directory.tenants por managing_tenant_id para el gasto del paciente (cruza tenants). Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'clinical/repositories/procedure-centers-read.repository.ts':
+    'em.find(PracticeSites) para los centros de procedimientos. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'clinical/repositories/received-services.repository.ts':
+    'em.find(PracticeSites) por lista de ids de sede, sin filtro de tenant propio. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'clinical/services/performer-site-db.reader.ts':
+    'Lee la sede ejecutora de un procedimiento. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'clinical/services/procedure-centers.service.ts':
+    'Consume sedes de procedure-centers-read.repository (tipos y armado de la respuesta). Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'clinical/services/suggested-site-names.reader.ts':
+    'Lee nombres de sede para sugerir. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'directory/services/pharmacy-operating-requirements.service.ts':
+    'Consulta sedes al evaluar requisitos de operación de una farmacia. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'medical_centers/repositories/medical-center-offers.repository.ts':
+    'em.find(PracticeSites) para la oferta de un centro médico. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'organization_extensions/repositories/orgext-references.repository.ts':
+    'Comprueba que la sede pertenece a alguno de los tenants indicados (hereda el tenant de su práctica). Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'pharmacy/repositories/pharmacy-on-call-shifts.repository.ts':
+    'SQL: LEFT JOIN practice_sites (time_zone) en la búsqueda de farmacias de turno, que cruza tenants a propósito. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'pharmacy/repositories/pharmacy-references.repository.ts':
+    'Comprueba que la sede pertenece a una práctica del tenant (la sede sólo lleva practice_id). Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'pharmacy/services/bulk/sites.bulk-handler.ts':
+    'Carga masiva de sedes de farmacia vía PracticeSitesRepository, con el tenant de la farmacia. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'pharmacy/services/opening-hours.time.ts':
+    'Sólo documenta/usa practice_sites.time_zone para el huso horario (no consulta la tabla). Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'pharmacy/services/pharmacy-opening-hours.service.ts':
+    'Usa readRepo.findPracticeSites para el horario de apertura. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'pharmacy/services/pharmacy-provisioning.service.ts':
+    'Alta de la sede dispensadora: usa PracticeSitesRepository dentro de la transacción del llamador. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts':
+    'em.find(PracticeSites) por lista de ids para la admisión (sedes que pueden ser de otro tenant). Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
+  'public/infrastructure/repositories/public-pharmacy-branches.repository.ts':
+    'SQL público: sedes activas de farmacias verificadas de un tenant; en ruta pública sin contexto de tenant el RLS devuelve 0 sedes. Llegó con la fusión de origin/test; contexto de RLS pendiente de decidir.',
 };
 
 const MODULES = join(process.cwd(), 'src', 'modules');
