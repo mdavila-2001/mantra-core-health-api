@@ -142,6 +142,15 @@ export class PaymentsTransactionsService {
           PaymentsErrorReason.PAYMENT_INTENT_CANCELED,
         );
       }
+      // Una intención cobrada por la pasarela (`payments.via_gateway`) no abre un
+      // segundo camino contra el proveedor: su resultado llega por webhook firmado.
+      if (intent.gatewayIntentRef) {
+        throw new ConflictException(
+          'La intención se cobra a través de la pasarela; no admite una operación directa contra el proveedor',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
+        );
+      }
 
       // Una operación abierta impide otra que el proveedor pueda confirmar a la
       // vez: sería un segundo cobro. Sobre una autorización confirmada sólo cabe

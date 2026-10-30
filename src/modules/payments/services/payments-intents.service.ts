@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -26,6 +26,7 @@ import {
   type RiskDecision,
 } from '../dto';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import { PaymentsGatewayChargeService } from './payments-gateway-charge.service';
 import {
   addAmounts,
   compareAmounts,
@@ -67,12 +68,15 @@ export class PaymentsIntentsService {
    * @param intentsRepo - Valor de intents repo requerido por la operación.
    * @param flowRepo - Valor de flow repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param gatewayCharge - Cobro por la pasarela (flag `payments.via_gateway`).
+   *   Opcional: sin él, o con el flag apagado, el comportamiento es el previo.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly intentsRepo: PaymentIntentsRepository,
     private readonly flowRepo: PaymentFlowRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly gatewayCharge?: PaymentsGatewayChargeService,
   ) {
     this.logger.setContext(PaymentsIntentsService.name);
   }
@@ -90,6 +94,12 @@ export class PaymentsIntentsService {
     dto: CreatePaymentIntentDto,
     actor: AuthenticatedUser,
   ): Promise<PaymentIntentResponseDto> {
+    // `payments.via_gateway`: con el flag encendido el cobro se crea en la
+    // pasarela. Apagado (el defecto) se sigue el camino de siempre, sin tocarlo.
+    if (this.gatewayCharge?.enabled) {
+      return this.createIntentViaGateway(dto, actor, this.gatewayCharge);
+    }
+
     this.logger.info(
       {
         operation: 'payments.intent.create',
@@ -135,6 +145,84 @@ export class PaymentsIntentsService {
       });
       return this.toIntentResponse(intent, false);
     });
+  }
+
+  /**
+   * UC-42-01 con `payments.via_gateway=on` (carril INT, REQ-INT-1).
+   *
+   * 1. La intención local se persiste primero (con la misma idempotencia local
+   *    de siempre) y valida de paso que se pueda cobrar por la pasarela: si no
+   *    se puede, la transacción se revierte y no queda nada.
+   * 2. Se crea el cobro en la pasarela con una `Idempotency-Key` derivada de
+   *    datos persistidos. Nunca se llama al proveedor directo.
+   * 3. Un reintento con la misma `idempotencyKey` local retoma una intención
+   *    pendiente sin referencia (porque la llamada anterior quedó ambigua) con
+   *    la MISMA clave de la pasarela: no crea un segundo cobro.
+   */
+  private async createIntentViaGateway(
+    dto: CreatePaymentIntentDto,
+    actor: AuthenticatedUser,
+    gateway: PaymentsGatewayChargeService,
+  ): Promise<PaymentIntentResponseDto> {
+    this.logger.info(
+      {
+        operation: 'payments.intent.create',
+        tenantId: dto.tenantId,
+        gatewayId: dto.gatewayId,
+        viaGateway: true,
+      },
+      'Creating payment intent through gateway',
+    );
+
+    const existing = await this.intentsRepo.findByIdempotencyKey(
+      this.em,
+      dto.tenantId,
+      dto.idempotencyKey,
+    );
+    // Una intención que ya tiene su cobro en la pasarela, o que ya avanzó por
+    // otra vía, se devuelve tal cual: es el reintento idempotente de siempre.
+    if (
+      existing &&
+      (existing.gatewayIntentRef ||
+        existing.statusConceptId !== CONCEPTS.PI_PENDING)
+    ) {
+      return this.toIntentResponse(existing, true);
+    }
+
+    const intent =
+      existing ??
+      (await this.em.transactional(async (tx) => {
+        const created = this.intentsRepo.create(tx, {
+          tenantId: dto.tenantId,
+          practiceId: dto.practiceId,
+          gatewayId: dto.gatewayId,
+          gatewayConnectionId: dto.gatewayConnectionId,
+          purposeConceptId: PURPOSE_CONCEPT[dto.purpose],
+          invoiceId: dto.invoiceId,
+          sourceRefType: dto.sourceRefType,
+          sourceRefId: dto.sourceRefId,
+          amount: dto.amount,
+          currencyConceptId: CURRENCY_CONCEPT[dto.currency],
+          idempotencyKey: dto.idempotencyKey,
+          statusConceptId: CONCEPTS.PI_PENDING,
+          expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
+          actorUserId: actor.id,
+        });
+        // Si la pasarela no puede cobrarla, lanza y la transacción se revierte.
+        gateway.buildCreateRequest(created, dto.paymentMethodType);
+        return created;
+      }));
+
+    const charged = await gateway.dispatch(intent, dto.paymentMethodType);
+    return {
+      ...this.toIntentResponse(intent, existing !== null),
+      statusConceptId: intent.statusConceptId,
+      gateway: {
+        paymentIntentId: charged.gatewayIntentRef,
+        status: charged.gatewayStatus,
+        ...(charged.nextAction ? { nextAction: charged.nextAction } : {}),
+      },
+    };
   }
 
   /**
