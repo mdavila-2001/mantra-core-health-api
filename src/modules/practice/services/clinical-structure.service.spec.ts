@@ -11,7 +11,6 @@ import { ClinicalStructureService } from './clinical-structure.service';
 import { ForbiddenException } from '@nestjs/common';
 import { PRAC } from '../practice.concepts';
 import { AUD } from '../../audit/audit.concepts';
-import { ForbiddenException } from '@nestjs/common';
 import { UniqueConstraintViolationException } from '@mikro-orm/postgresql';
 import {
   ConflictException,
