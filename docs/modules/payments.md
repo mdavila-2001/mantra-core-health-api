@@ -225,6 +225,12 @@ La pasada dirigida del 2026-10-05 ejecutó 7 suites y 104 tests con:
 `corepack yarn test src/modules/payments --runInBand --silent`. Son pruebas unitarias; faltan
 integración con PostgreSQL, RLS, carreras e integración real con proveedor.
 
+La bandeja de webhooks de la pasarela y su concurrencia se prueban contra PostgreSQL real en
+`test/integration/payments-gateway-webhook.int-spec.ts`: crea y borra una base descartable en el
+Postgres del compose de desarrollo de la pasarela, aplica el DDL real de `database/SQL/42_payments`
+(sólo las tablas que el servicio toca, sin las claves foráneas hacia tablas que no crea) y no levanta
+`AppModule`. Se activa con `PAYMENTS_WEBHOOK_IT=local-throwaway-db`; sin él queda omitida.
+
 ## Límites conocidos
 
 El callback verifica HMAC por conexión, pero no consume la configuración de endpoint, ventana de
