@@ -17,10 +17,10 @@
 | [`practice`](practice.md) | 9 | 15 | 12 | 11 | 21 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 9 | 12 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
+| [`pharmacy_inventory`](pharmacy_inventory.md) | 8 | 12 | 18 | 21 | 19 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`chart`](chart.md) | 7 | 9 | 4 | 11 | 6 |
 | [`diagnostics`](diagnostics.md) | 7 | 10 | 8 | 36 | 9 |
-| [`pharmacy_inventory`](pharmacy_inventory.md) | 7 | 11 | 17 | 21 | 18 |
 | [`scheduling`](scheduling.md) | 7 | 14 | 7 | 18 | 8 |
 | [`terminology`](terminology.md) | 7 | 9 | 9 | 16 | 19 |
 | [`audit`](audit.md) | 6 | 8 | 9 | 131 | 11 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **291** | **469** | **436** | **1278** | **540** |
+| **Total** | **292** | **470** | **437** | **1278** | **541** |
