@@ -16,7 +16,6 @@
 //   la ficha ya está en CIMA.
 // =============================================================================
 
-import { textSha256 } from './literal.mjs';
 import { CIMA_SECTIONS } from './sections.mjs';
 
 export const EMA_PI_SOURCE = 'ema-product-information';
@@ -113,14 +112,16 @@ export const piMonographSections = (smpc) => [...smpc.sections].filter(([n, s]) 
 /** Clave de comparación entre fuentes: el texto sin ningún espacio en blanco. Sólo para medir, nunca se publica. */
 export const comparisonKey = (text) => String(text ?? '').replace(/\s+/g, '');
 
-/** Ficha de un medicamento EMA que no está en CIMA → filas de sección literales (castellano) con su procedencia. */
-export function emaPiSections(r, smpc, { url, retrievedAt, license }) {
-  return piMonographSections(smpc).map((s) => ({
-    key: s.key,
+export const EMA_PI_TEXT_WITHHELD =
+  'Texto no publicado: la extracción del PDF (pdftotext) no es literal en todos los casos. Medida contra la ficha de CIMA del mismo nº de registro, ' +
+  'pierde símbolos de fuentes sin mapa a Unicode (p. ej. Deferasirox Accord, 4.1: CIMA «(≥7 ml/kg/mes» → PDF «( 7 ml/kg/mes»; 705 de 1 397 PDF tienen alguna ' +
+  'fuente así) y no conserva la estructura de las tablas (4.8: 34 de 1 042 idénticas). Se guarda el puntero al documento oficial.';
+
+/** Ficha de un medicamento EMA que no está en CIMA → puntero citable al PDF oficial, sin texto. */
+export function emaPiPointer(r, smpc, { url, retrievedAt, license }) {
+  return {
     source: EMA_PI_SOURCE,
     sourceName: EMA_PI_SOURCE_NAME,
-    language: 'es',
-    audience: 'professional',
     document: {
       type: 'epar-product-information',
       id: r.productNumber,
@@ -132,17 +133,11 @@ export function emaPiSections(r, smpc, { url, retrievedAt, license }) {
       url,
       pageUrl: r.url,
     },
-    section: { number: s.number, title: s.title, url, apiUrl: url },
-    html: null,
-    text: s.text,
-    tables: [],
-    textSha256: textSha256(s.text),
-    extraction: 'pdftotext -layout (poppler) del PDF oficial: sólo se quitan números de página y espacios finales; las tablas quedan alineadas por columnas como en el PDF.',
-    retrievedAt,
+    sections: piMonographSections(smpc).map((s) => ({ number: s.number, key: s.key, title: s.title })),
+    atc5: r.atc5,
+    atcLinkRule: 'ATC 5 asignado por la EMA (informe «Medicines output»)',
+    textWithheld: EMA_PI_TEXT_WITHHELD,
     license,
-    citation:
-      `European Medicines Agency (EMA). ${r.name} (${r.productNumber}), EPAR — Información del producto, anexo I (ficha técnica), sección ${s.number} «${s.title}», ` +
-      `revisión ${r.revision ?? '?'}, actualizado el ${r.lastUpdated ?? '?'}. ${url} (consultado el ${retrievedAt.slice(0, 10)}).`,
-    selection: { criterion: 'Medicamento de autorización centralizada con ATC 5 asignado por la EMA cuyo nº de autorización EU no figura en CIMA.', group: { atc: r.atc5 } },
-  }));
+    retrievedAt,
+  };
 }

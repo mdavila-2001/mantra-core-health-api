@@ -22,7 +22,7 @@ import { cimaSafetyNotes, cimaSections, groupByAtc5, referenceDocuments } from '
 import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
 import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, rxnavIndex, uniiForCas } from './lib/gsrs.mjs';
 import { EMA_LICENSE, emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
-import { cimaNregCandidates, comparisonKey, emaPiSections, emaPiSlug, emaPiUrl, piMonographSections, piSmpcs } from './lib/ema-pi.mjs';
+import { cimaNregCandidates, comparisonKey, emaPiPointer, emaPiSlug, emaPiUrl, piMonographSections, piSmpcs } from './lib/ema-pi.mjs';
 import { dailyMedPointer } from './lib/dailymed.mjs';
 import { emlReference, isCurrentRecommendation } from './lib/eml.mjs';
 import { lactmedIdentity, lactmedSections } from './lib/lactmed.mjs';
@@ -342,11 +342,11 @@ async function main() {
     }
   }
 
-  // EMA, información de producto (PDF en castellano): sólo los medicamentos cuyo nº de autorización EU no está en
-  // CIMA (si está, es el mismo documento y ya entra por CIMA). Los que sí están sirven para medir la fidelidad
-  // de la extracción del PDF contra el texto de CIMA (misma ficha, por código).
-  const emaPiByAtc = new Map();
-  const emaPiStats = { medicines: 0, withoutPdf: 0, withoutAnnexI: 0, inCima: 0, notInCima: 0, sections: 0, fidelity: {} };
+  // EMA, información de producto (PDF en castellano). Si el nº de autorización EU está en CIMA, es el mismo
+  // documento y ya entra por CIMA: sirve para medir la fidelidad de la extracción del PDF contra el texto de CIMA.
+  // Si no está, entra como PUNTERO sin texto: la extracción no es literal en todos los casos (ver EMA_PI_TEXT_WITHHELD).
+  const emaPiPointers = new Map();
+  const emaPiStats = { medicines: 0, withoutPdf: 0, withoutAnnexI: 0, inCima: 0, notInCima: 0, pointers: 0, fidelity: {} };
   if (!NO_EMA_PI && emaRaw) {
     const cimaNregs = new Set(inputs.products.map((p) => String(p.nregistro)));
     for (const r of emaRecords(emaRaw.rows).filter((x) => isHumanAuthorised(x) && x.atc5.length)) {
@@ -383,11 +383,11 @@ async function main() {
       const url = emaPiUrl(slug);
       const retrievedAt = retrievedAtOf(emaPiPdfPath(slug));
       for (const sm of smpcs) {
-        for (const s of emaPiSections(r, sm, { url, retrievedAt, license: EMA_LICENSE })) {
-          for (const code of r.atc5) {
-            if (!emaPiByAtc.has(code)) emaPiByAtc.set(code, []);
-            emaPiByAtc.get(code).push(s);
-          }
+        const ptr = emaPiPointer(r, sm, { url, retrievedAt, license: EMA_LICENSE });
+        for (const code of r.atc5) {
+          if (!emaPiPointers.has(code)) emaPiPointers.set(code, []);
+          emaPiPointers.get(code).push(ptr);
+          emaPiStats.pointers++;
         }
       }
     }
@@ -461,16 +461,7 @@ async function main() {
     for (const s of emaByAtc.get(code) ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     for (const s of lactmedByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     for (const s of livertoxByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
-    // EMA (PDF): una sección cuyo texto, sin espacios, ya está en esta monografía con la misma clave no se repite.
-    const present = new Set(sections.map((s) => `${s.key}|${comparisonKey(s.text)}`));
-    for (const s of emaPiByAtc.get(code) ?? []) {
-      const k = `${s.key}|${comparisonKey(s.text)}`;
-      if (present.has(k) || !hasVersion(s)) continue;
-      present.add(k);
-      sections.push(assertSection(structuredClone(s)));
-      emaPiStats.sections++;
-    }
-    const externalDocuments = [...(fda.pointers.get(code) ?? []), ...(emlRefsByAtc.get(code) ?? [])];
+    const externalDocuments = [...(fda.pointers.get(code) ?? []), ...(emlRefsByAtc.get(code) ?? []), ...(emaPiPointers.get(code) ?? [])];
     if (cimaProducts.length === 0 && sections.length === 0 && externalDocuments.length === 0) {
       stats.skippedWithoutData++;
       continue;
