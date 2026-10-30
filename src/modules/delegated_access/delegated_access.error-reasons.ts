@@ -20,4 +20,12 @@ export enum DelegatedAccessErrorReason {
   DELEGATED_PATIENT_NOT_FOUND = 'DELEGATED_PATIENT_NOT_FOUND',
   /** El usuario evaluado no es el titular de la asignación del delegado (resultado de evaluación). */
   DELEGATED_SUBJECT_MISMATCH = 'DELEGATED_SUBJECT_MISMATCH',
+  /** El cuerpo no trae exactamente uno de `encounterId` o `medicationRequestId`. */
+  PRESCRIPTION_SHARE_TARGET_INVALID = 'PRESCRIPTION_SHARE_TARGET_INVALID',
+  /** La receta no tiene ningún ítem emitido y vigente que compartir. */
+  PRESCRIPTION_SHARE_NO_ACTIVE_ITEMS = 'PRESCRIPTION_SHARE_NO_ACTIVE_ITEMS',
+  /** El enlace venció, o la receta que comparte dejó de estar vigente. */
+  PRESCRIPTION_SHARE_EXPIRED = 'PRESCRIPTION_SHARE_EXPIRED',
+  /** El paciente o quien lo creó revocó el enlace. */
+  PRESCRIPTION_SHARE_REVOKED = 'PRESCRIPTION_SHARE_REVOKED',
 }

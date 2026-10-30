@@ -18,6 +18,7 @@ import type { Request, Response } from 'express';
 import { ErrorCode } from '../errors/error-codes';
 import { SystemErrorReason } from '../errors/system-error-reasons';
 import { SecretCipherError } from '../errors/secret-cipher.error';
+import { redactShareTokenInUrl } from '../../logging/pino-options';
 import {
   APP_ATTR,
   TracingService,
@@ -139,7 +140,9 @@ function toCorrelationId(value: unknown): string | undefined {
  * escritos en los logs y devueltos al cliente (y a cualquier proxy).
  */
 function pathOf(request: { url?: string }): string {
-  return (request.url ?? '').split('?')[0];
+  // El token de un enlace compartido de receta viaja en la ruta (S-6): sale
+  // del log y del cuerpo como `[token]`.
+  return redactShareTokenInUrl((request.url ?? '').split('?')[0]);
 }
 
 /**
@@ -218,8 +221,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       request.id ?? request.headers['x-request-id'],
     );
 
-    const { status, code, message, details, reason, internals } =
-      this.normalize(exception);
+    const {
+      status,
+      code,
+      message: rawMessage,
+      details,
+      reason,
+      internals,
+    } = this.normalize(exception);
+    // El 404 de una ruta no declarada dice `Cannot GET <ruta>`: si la ruta
+    // lleva el token de un enlace compartido de receta, sale como `[token]`.
+    const message = redactShareTokenInUrl(rawMessage);
 
     const body: ErrorResponseBody = {
       code,
@@ -322,7 +334,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       // span: se adjunta sólo su tipo y sus marcos.
       this.tracing.recordException(
         exception instanceof HttpException
-          ? exception
+          ? this.withoutShareToken(exception)
           : this.scrubbedForTrace(exception),
       );
       return;
@@ -331,6 +343,22 @@ export class AllExceptionsFilter implements ExceptionFilter {
       [APP_ATTR.ERROR_CODE]: code,
       'http.response.status_code': status,
     });
+  }
+
+  /**
+   * La excepción tal cual, o una copia con el token de un enlace compartido de
+   * receta cambiado por `[token]` en el mensaje y el stack, si lo trae.
+   */
+  private withoutShareToken(exception: HttpException): Error {
+    const message = redactShareTokenInUrl(exception.message);
+    const stack = exception.stack && redactShareTokenInUrl(exception.stack);
+    if (message === exception.message && stack === exception.stack) {
+      return exception;
+    }
+    const copy = new Error(message);
+    copy.name = exception.name;
+    copy.stack = stack;
+    return copy;
   }
 
   /** Copia de una excepción sin su mensaje: tipo y marcos del stack. */
