@@ -22,13 +22,13 @@
 | [`scheduling`](scheduling.md) | 8 | 16 | 8 | 19 | 10 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`chart`](chart.md) | 7 | 9 | 4 | 11 | 6 |
+| [`delegated_access`](delegated_access.md) | 7 | 7 | 9 | 9 | 13 |
 | [`diagnostics`](diagnostics.md) | 7 | 10 | 8 | 36 | 9 |
 | [`terminology`](terminology.md) | 7 | 9 | 9 | 16 | 19 |
 | [`audit`](audit.md) | 6 | 8 | 9 | 131 | 11 |
 | [`billing`](billing.md) | 6 | 15 | 12 | 24 | 16 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
-| [`delegated_access`](delegated_access.md) | 5 | 6 | 8 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 9 | 12 | 10 | 13 |
 | [`geo`](geo.md) | 5 | 5 | 6 | 6 | 14 |
 | [`payments`](payments.md) | 5 | 7 | 6 | 53 | 6 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **303** | **495** | **447** | **1287** | **556** |
+| **Total** | **305** | **496** | **448** | **1289** | **557** |
