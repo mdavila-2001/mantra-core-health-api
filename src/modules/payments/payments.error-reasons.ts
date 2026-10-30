@@ -70,6 +70,12 @@ export enum PaymentsErrorReason {
 
   /** La intención se cobra por la pasarela: no admite una operación directa contra el proveedor. */
   PAYMENT_INTENT_VIA_GATEWAY = 'PAYMENT_INTENT_VIA_GATEWAY',
+  /** La última evaluación de riesgo pide revisión humana: con la pasarela activa no se cobra hasta que se resuelva. */
+  PAYMENT_INTENT_RISK_REVIEW_PENDING = 'PAYMENT_INTENT_RISK_REVIEW_PENDING',
+  /** La pasarela sólo cobra con la operación SALE (autoriza y captura en un paso). */
+  PAYMENT_GATEWAY_OPERATION_NOT_SUPPORTED = 'PAYMENT_GATEWAY_OPERATION_NOT_SUPPORTED',
+  /** La pasarela cobra el importe completo de la intención; no admite un importe parcial. */
+  PAYMENT_GATEWAY_AMOUNT_MUST_MATCH_INTENT = 'PAYMENT_GATEWAY_AMOUNT_MUST_MATCH_INTENT',
   /** La pasarela sólo opera en bolivianos (D-06); la moneda de la intención no se puede enviar. */
   PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED = 'PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED',
   /** Con la pasarela activa, la intención exige `paymentMethodType`. */

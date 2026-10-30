@@ -13,6 +13,7 @@ import {
   captureGatewayWebhookRawBody,
 } from '../gateway/payments-gateway-raw-body';
 import {
+  TEST_API_KEY,
   TEST_WEBHOOK_SECRET,
   signTestWebhook,
 } from '../gateway/payments-gateway.double.testing';
@@ -40,7 +41,7 @@ const PAYLOAD =
 const cfg = (viaGateway: boolean): PaymentsGatewayConfig => ({
   viaGateway,
   baseUrl: 'https://sandbox.pay.example/v1',
-  apiKey: 'sk_test_unaClaveSinteticaDeCuarentaChars',
+  apiKey: TEST_API_KEY,
   mode: 'test',
   webhookSecrets: [TEST_WEBHOOK_SECRET],
   webhookPublicKeys: [],
