@@ -797,7 +797,7 @@ describe('PracticeSitesService · alcance de tenant (PRAC-01)', () => {
     d.sitesRepo.findById.mockResolvedValue(site);
 
     await expectOutOfScope(
-      d.service.decommissionSite('p1', 's1', actor),
+      d.service.decommissionSite('p1', 's1', actor, TENANT),
       'Práctica no encontrada',
     );
 

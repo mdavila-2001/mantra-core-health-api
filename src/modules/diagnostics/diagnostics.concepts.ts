@@ -432,9 +432,9 @@ export const PATIENT_PORTAL_CATEGORIES: readonly string[] = [
 /**
  * Las categorías que lista la ficha diagnóstica del paciente
  * (`GET /diagnostics/patients/:id/orders`): las diagnósticas, la orden de
- * análisis «otro» de C2 (P40) y los estudios que el formulario de la ficha
- * también pide —cardiológicos y de anatomía patológica—. Lista aparte de
- * {@link DIAGNOSTIC_CATEGORIES} por lo mismo que la del portal: esa alimenta
+ * análisis «otro» de C2 (P40) y lo que el formulario de la ficha también pide
+ * —estudios cardiológicos, de anatomía patológica y procedimientos—. Lista
+ * aparte de {@link DIAGNOSTIC_CATEGORIES} por lo mismo que la del portal: esa alimenta
  * colas y liquidaciones de laboratorio e imagen, y estas órdenes no son trabajo
  * de esos equipos.
  *
@@ -447,6 +447,7 @@ export const PATIENT_CHART_ORDER_CATEGORIES: readonly string[] = [
   CLIN.SERVICE_REQUEST_CATEGORY_IMAGING,
   CLIN.SERVICE_REQUEST_CATEGORY_CARDIO,
   CLIN.SERVICE_REQUEST_CATEGORY_PATHOLOGY,
+  CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
   CLIN.SERVICE_REQUEST_CATEGORY_OTHER,
 ];
 
