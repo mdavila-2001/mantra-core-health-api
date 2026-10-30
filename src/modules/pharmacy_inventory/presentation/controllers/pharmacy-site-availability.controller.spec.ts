@@ -1,0 +1,72 @@
+import { jest } from '@jest/globals';
+import { ParseUUIDPipe, RequestMethod } from '@nestjs/common';
+import {
+  METHOD_METADATA,
+  PATH_METADATA,
+  ROUTE_ARGS_METADATA,
+} from '@nestjs/common/constants';
+import { ROLES_KEY } from '../../../../common/auth/roles.decorator';
+import { PharmacySiteAvailabilityController } from './pharmacy-site-availability.controller';
+
+const handler = Object.getOwnPropertyDescriptor(
+  PharmacySiteAvailabilityController.prototype,
+  'setSiteAvailability',
+)!.value as object;
+
+describe('PharmacySiteAvailabilityController', () => {
+  it('hangs the PUT from /pharmacies with the route of the contract', () => {
+    expect(
+      Reflect.getMetadata(PATH_METADATA, PharmacySiteAvailabilityController),
+    ).toBe('pharmacies');
+    expect(Reflect.getMetadata(PATH_METADATA, handler)).toBe(
+      ':pharmacyId/sites/:siteId/products/:productId/availability',
+    );
+    expect(Reflect.getMetadata(METHOD_METADATA, handler)).toBe(
+      RequestMethod.PUT,
+    );
+  });
+
+  it('is open to the pharmacy staff and the platform only', () => {
+    expect(Reflect.getMetadata(ROLES_KEY, handler)).toEqual([
+      'SECURITY_ADMIN',
+      'PHARMACY_STAFF',
+    ]);
+  });
+
+  it('parses the three ids as UUIDs', () => {
+    const args = Reflect.getMetadata(
+      ROUTE_ARGS_METADATA,
+      PharmacySiteAvailabilityController,
+      'setSiteAvailability',
+    ) as Record<string, { data?: string; pipes?: unknown[] }>;
+    const params = Object.values(args).filter((arg) =>
+      ['pharmacyId', 'siteId', 'productId'].includes(arg.data ?? ''),
+    );
+    expect(params).toHaveLength(3);
+    for (const param of params) {
+      expect(param.pipes).toContain(ParseUUIDPipe);
+    }
+  });
+
+  it('passes the body as is to the use case', async () => {
+    const response = {
+      siteId: 's',
+      productId: 'p',
+      available: true,
+      quantity: 2,
+      stockUpdatedAt: '2026-10-30T00:00:00.000Z',
+    };
+    const useCase = { execute: jest.fn(async () => response) };
+    const controller = new PharmacySiteAvailabilityController(useCase as any);
+    const body = { available: true, quantity: 2 };
+    const actor = { id: 'user-1' } as any;
+    await expect(
+      controller.setSiteAvailability('f', 's', 'p', body, actor),
+    ).resolves.toBe(response);
+    expect(useCase.execute).toHaveBeenCalledWith(
+      { pharmacyId: 'f', siteId: 's', productId: 'p' },
+      body,
+      actor,
+    );
+  });
+});

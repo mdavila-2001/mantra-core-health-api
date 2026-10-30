@@ -192,7 +192,13 @@ function build() {
     retract: mockFn().mockResolvedValue(0),
     offeringOfSlot: mockFn().mockResolvedValue(null),
   };
+  // F3: el cierre de la atención avisa a `surveys` (por su puerto). Por omisión
+  // no hay nada que hacer.
+  const bookingCompleted = {
+    onBookingCompleted: mockFn().mockResolvedValue(undefined),
+  };
   const service = createBookingsService({
+    bookingCompleted,
     em,
     bookingsRepo,
     catalogRepo,
@@ -219,6 +225,8 @@ function build() {
       searchBookings(...args),
     )) as typeof service.searchBookings;
   return {
+    em,
+    bookingCompleted,
     searchIn: (tenantId: string, ...args: Parameters<typeof searchBookings>) =>
       runWithTenant(tenantId, () => searchBookings(...args)),
     searchWithoutTenant: searchBookings,
@@ -791,6 +799,69 @@ describe('SchedulingBookingsService', () => {
       await d.service.expireHolds(10);
 
       expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+    });
+
+    describe('v4.2.64 · plantilla mixta: la franja del cupo se ubica por día y hora', () => {
+      // Lunes de turnos fijos y martes flexible, en la misma plantilla.
+      const mixta = [
+        {
+          scheduleTemplateId: 'tpl-mixta',
+          dayOfWeek: 1,
+          startTime: '09:00:00',
+          endTime: '11:00:00',
+          flexibleHours: false,
+        },
+        {
+          scheduleTemplateId: 'tpl-mixta',
+          dayOfWeek: 2,
+          startTime: '09:00:00',
+          endTime: '11:00:00',
+          flexibleHours: true,
+        },
+      ];
+
+      function expiring(d: ReturnType<typeof build>, startAt: string) {
+        const slot = openSlot({
+          remainingCapacity: 0,
+          statusConceptId: CONCEPTS.SLOT_HELD,
+          scheduleTemplateId: 'tpl-mixta',
+          startAt: new Date(startAt),
+          endAt: new Date(new Date(startAt).getTime() + 20 * 60_000),
+        });
+        d.bookingsRepo.findExpiredHolds.mockResolvedValue([
+          { bookableSlotId: SLOT_ID, statusConceptId: CONCEPTS.HOLD_ACTIVE },
+        ]);
+        d.bookingsRepo.findSlotForUpdate.mockResolvedValue(slot);
+        d.catalogRepo.findTemplateById.mockResolvedValue({
+          id: 'tpl-mixta',
+          resourceId: 'res-1',
+          flexibleHours: false,
+        });
+        d.catalogRepo.findRulesByTemplates.mockResolvedValue(mixta);
+        d.catalogRepo.findResourceById.mockResolvedValue({
+          id: 'res-1',
+          timeZone: 'UTC',
+        });
+        return slot;
+      }
+
+      it('el cupo del martes (franja flexible) no se reofrece', async () => {
+        const d = build();
+        const slot = expiring(d, '2026-06-02T09:30:00Z');
+
+        await d.service.expireHolds(10);
+
+        expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_BLOCKED);
+      });
+
+      it('el cupo del lunes (franja fija) sí se reofrece', async () => {
+        const d = build();
+        const slot = expiring(d, '2026-06-01T09:40:00Z');
+
+        await d.service.expireHolds(10);
+
+        expect(slot.statusConceptId).toBe(CONCEPTS.SLOT_OPEN);
+      });
     });
 
     it('is a no-op when there is nothing expired', async () => {
@@ -2975,6 +3046,50 @@ describe('SchedulingBookingsService', () => {
       );
     });
 
+    it('completar avisa a las encuestas DESPUÉS de confirmar la transacción y con el actor', async () => {
+      const d = build();
+      const booking = {
+        ...farFutureConfirmedBooking(),
+        statusConceptId: SCHED.BOOKING_IN_PROGRESS,
+      };
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(booking);
+      d.appointmentsRepo.findById.mockResolvedValue({
+        id: 'appt-1',
+        statusConceptId: CLIN.APPOINTMENT_BOOKED,
+      });
+      let committed = false;
+      d.em.transactional.mockImplementation(async (cb: any) => {
+        const result = await cb(d.tx);
+        committed = true;
+        return result;
+      });
+      const committedWhenNotified: boolean[] = [];
+      d.bookingCompleted.onBookingCompleted.mockImplementation(async () => {
+        committedWhenNotified.push(committed);
+      });
+
+      await d.service.complete('booking-1', actor);
+
+      expect(d.bookingCompleted.onBookingCompleted).toHaveBeenCalledTimes(1);
+      expect(d.bookingCompleted.onBookingCompleted).toHaveBeenCalledWith(
+        'booking-1',
+        actor,
+      );
+      expect(committedWhenNotified).toEqual([true]);
+    });
+
+    it('si la transición no es válida no avisa a las encuestas', async () => {
+      const d = build();
+      d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+        farFutureConfirmedBooking(),
+      );
+
+      await expect(
+        d.service.complete('booking-1', actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.bookingCompleted.onBookingCompleted).not.toHaveBeenCalled();
+    });
+
     it('no se completa una que nunca empezó', async () => {
       const d = build();
       d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
@@ -4431,6 +4546,52 @@ describe('SchedulingBookingsService · el estado de pago', () => {
     );
   });
 
+  it('FAC-01 · un monto con «pendiente» es 422 y no abre la transacción', async () => {
+    const { service, em } = build();
+
+    await expect(
+      service.setPaymentState(
+        BOOKING,
+        { state: 'PENDING', amountReceived: 50 },
+        actor as any,
+      ),
+    ).rejects.toMatchObject({
+      reason: SchedulingErrorReason.PAYMENT_AMOUNT_WITHOUT_PAYMENT,
+    });
+    expect(em.transactional).not.toHaveBeenCalled();
+  });
+
+  it('FAC-01 · un monto mal escrito es 422 PAYMENT_AMOUNT_INVALID', async () => {
+    const { service } = build();
+
+    await expect(
+      service.setPaymentState(
+        BOOKING,
+        { state: 'PAID', amountReceived: 10.555 },
+        actor as any,
+      ),
+    ).rejects.toMatchObject({
+      reason: SchedulingErrorReason.PAYMENT_AMOUNT_INVALID,
+    });
+  });
+
+  it('FAC-01 · sin práctica la marca se guarda igual y dice por qué no se facturó', async () => {
+    const { service, bookingsRepo } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      bookingAt(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    const res = await service.setPaymentState(
+      BOOKING,
+      { state: 'PAID', amountReceived: 150 },
+      actor as any,
+    );
+
+    expect(res.state).toBe('PAID');
+    expect(res.billing).toMatchObject({ linked: false, reason: 'NO_PRACTICE' });
+    expect(res.amountPaid).toBeUndefined();
+  });
+
   it('sin marca previa, la lectura devuelve null y no «pendiente»', async () => {
     // No son lo mismo: «pendiente de pago» es una afirmación que alguien firmó;
     // la ausencia de fila es que del pago todavía no se dijo nada.
@@ -4442,6 +4603,23 @@ describe('SchedulingBookingsService · el estado de pago', () => {
     await expect(
       service.getPaymentState(BOOKING, actor as any),
     ).resolves.toBeNull();
+  });
+
+  it('la lectura carga la cita dentro de una transacción (lleva FOR UPDATE)', async () => {
+    // Fuera de una transacción MikroORM rechaza el bloqueo y la ruta
+    // respondía 500 siempre.
+    const { service, bookingsRepo, tx } = build();
+    bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+      bookingAt(CONCEPTS.BOOKING_CONFIRMED),
+    );
+
+    await service.getPaymentState(BOOKING, actor as any);
+
+    expect(bookingsRepo.findBookingByIdForUpdate).toHaveBeenCalledWith(
+      tx,
+      BOOKING,
+    );
+    expect(bookingsRepo.findPaymentState).toHaveBeenCalledWith(tx, BOOKING);
   });
 });
 

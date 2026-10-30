@@ -24,6 +24,10 @@ import {
   SOCIAL_OBJECT_CONCEPT_BY_CODE,
 } from '../community.concepts';
 import { CommunityVisibilityService } from './community-visibility.service';
+import {
+  CommunityOrganizationStaffService,
+  ORGANIZATION_PROFILE_TARGET_TYPES,
+} from './community-organization-staff.service';
 import { KIND_BY_TARGET_CONCEPT } from './community-public.service';
 import {
   CommunityEngagementService,
@@ -44,6 +48,7 @@ import type {
   FollowPageDto,
   BookmarkPageDto,
   BlockPageDto,
+  OrganizationShowcasesDto,
 } from '../dto';
 import type { Comments, SocialPosts } from '../entities';
 
@@ -79,6 +84,7 @@ export class CommunitySocialReadService {
    * @param engagement - Recuento de reacciones y comentarios de la página.
    * @param files - Bytes de un adjunto, una vez que este servicio autorizó verlo.
    * @param logger - Logger estructurado.
+   * @param organizationStaff - Quién atiende la vitrina de una organización.
    */
   constructor(
     private readonly em: EntityManager,
@@ -94,8 +100,65 @@ export class CommunitySocialReadService {
     private readonly engagement: CommunityEngagementService,
     private readonly files: FileUploadService,
     private readonly logger: PinoLogger,
+    private readonly organizationStaff: CommunityOrganizationStaffService,
   ) {
     this.logger.setContext(CommunitySocialReadService.name);
+  }
+
+  /**
+   * Las vitrinas de organización con las que la sesión puede atender la
+   * mensajería (`GET /community/profiles/organization-showcases/me`).
+   *
+   * ## Por qué hace falta
+   *
+   * El personal de una farmacia escribe como su vitrina, pero no tenía cómo
+   * encontrarla sin un pedido en la mano: el cliente adivinaba el slug
+   * `organization-<tenantId>`, que no es el de las farmacias sembradas
+   * (`farmacia-*`) ni resuelve una vitrina privada.
+   *
+   * ## La misma regla que `canAttend`
+   *
+   * Vitrinas **de tenant** (`target_id` = un tenant en el que el actor tiene
+   * membresía ACTIVA OWNER, ADMIN o STAFF), **activas**, de tipo organización,
+   * y las de farmacia sólo con `PHARMACY_STAFF`. Que la vitrina sea de tenant
+   * lo garantiza la construcción: los `target_id` buscados salen de
+   * `tenant_memberships.tenant_id`, FK a `directory.tenants`. La vitrina de
+   * SupportAdmin o de una unidad diagnóstica nunca entra.
+   *
+   * Dos consultas, sin importar cuántas organizaciones: membresías de la
+   * persona y vitrinas de esos tenants. Sólo lee; no expone nada que la
+   * sesión no pueda ya usar en la mensajería.
+   *
+   * @param actor - La sesión.
+   */
+  async listAttendableOrganizationShowcases(
+    actor: AuthenticatedUser,
+  ): Promise<OrganizationShowcasesDto> {
+    const em = this.em.fork();
+    const types = ORGANIZATION_PROFILE_TARGET_TYPES.filter((type) =>
+      this.organizationStaff.mayAttendTargetType(actor, type),
+    );
+    if (types.length === 0) return { items: [] };
+    const tenantIds = await this.organizationStaff.attendableTenantIds(
+      em,
+      actor,
+    );
+    const profiles = await this.profilesRepo.listByTargetsTypesAndStatus(em, {
+      targetIds: tenantIds,
+      targetTypeConceptIds: types,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+    return {
+      items: profiles.map((profile) => ({
+        profileId: profile.id,
+        slug: profile.slug,
+        displayName: profile.displayName,
+        avatarFileId: profile.avatarFileId ?? null,
+        targetTypeConceptId: profile.targetTypeConceptId,
+        kind:
+          KIND_BY_TARGET_CONCEPT[profile.targetTypeConceptId] ?? 'ORGANIZATION',
+      })),
+    };
   }
 
   /**

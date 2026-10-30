@@ -77,6 +77,7 @@ function memoryRepo() {
         accounts.filter((a) => a.practiceId === practiceId && a.seeded).length,
     ),
     createAccount: mockFn(make(accounts)),
+    lockAccountsOf: mockFn(async () => undefined),
     // Mismo contrato que el real: `ON CONFLICT (practice_id, code) DO NOTHING`.
     seedAccounts: mockFn(
       async (
@@ -187,7 +188,12 @@ function build() {
 
 /** Siembra las generales de la práctica y devuelve la cuenta por código. */
 async function seeded(ctx: ReturnType<typeof build>, practiceId = PRACTICE) {
-  await ctx.service.listAccounts(practiceId, actor);
+  if (practiceId === FOREIGN_PRACTICE) {
+    // Las filas ajenas ya existen en la base: el servicio no las siembra desde otro tenant.
+    await ctx.repo.seedAccounts(null, practiceId, GENERAL_ACCOUNTS, actor.id);
+  } else {
+    await ctx.service.listAccounts(practiceId, actor);
+  }
   const byCode = (code: string): Row =>
     ctx.repo.accounts.find(
       (a) => a.practiceId === practiceId && a.code === code,
@@ -439,6 +445,36 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
     });
   });
 
+  describe('alcance de tenant en las lecturas (ACC-01)', () => {
+    it('resumen, cuentas, registros y transacciones de una práctica de otro tenant → 404 «Práctica no encontrada», sin sembrar ni leer', async () => {
+      const ctx = build();
+      await seeded(ctx, FOREIGN_PRACTICE);
+      const before = ctx.repo.accounts.length;
+      ctx.repo.listAccounts.mockClear();
+      ctx.repo.listRecords.mockClear();
+      ctx.repo.listTransactions.mockClear();
+      ctx.repo.seedAccounts.mockClear();
+
+      const reads = [
+        ctx.service.summary(FOREIGN_PRACTICE, 'month', actor),
+        ctx.service.listAccounts(FOREIGN_PRACTICE, actor),
+        ctx.service.listRecords(FOREIGN_PRACTICE, undefined, actor),
+        ctx.service.listTransactions(FOREIGN_PRACTICE, actor),
+      ];
+      for (const read of reads) {
+        const error = await rejected(read);
+        expect(error).toBeInstanceOf(ResourceNotFoundException);
+        expect(error.message).toBe('Práctica no encontrada');
+        expect(JSON.stringify(error.getResponse())).not.toContain('details');
+      }
+      expect(ctx.repo.listAccounts).not.toHaveBeenCalled();
+      expect(ctx.repo.listRecords).not.toHaveBeenCalled();
+      expect(ctx.repo.listTransactions).not.toHaveBeenCalled();
+      expect(ctx.repo.seedAccounts).not.toHaveBeenCalled();
+      expect(ctx.repo.accounts).toHaveLength(before);
+    });
+  });
+
   describe('cuentas', () => {
     it('siembra las 26 generales en la primera lectura y no las repite', async () => {
       const ctx = build();
@@ -495,6 +531,21 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
         .filter((a) => a.accountClass === 'EXPENSE')
         .map((a) => a.code);
       expect(codes.slice(-2)).toEqual(['5.9', '5.10']);
+    });
+
+    it('el alta toma el lock de la práctica antes de leer las cuentas y calcular el código', async () => {
+      const ctx = build();
+      await ctx.service.createAccount(
+        { practiceId: PRACTICE, name: 'Capacitación', accountClass: 'EXPENSE' },
+        actor,
+      );
+      expect(ctx.repo.lockAccountsOf).toHaveBeenCalledWith(
+        expect.anything(),
+        PRACTICE,
+      );
+      expect(ctx.repo.lockAccountsOf.mock.invocationCallOrder[0]).toBeLessThan(
+        ctx.repo.listAccounts.mock.invocationCallOrder[0],
+      );
     });
 
     it('crea una cuenta propia, no sembrada, con el código siguiente de su clase', async () => {
@@ -598,6 +649,24 @@ describe('PractitionerSimpleAccountingService (P49)', () => {
         AccountingErrorReason.SIMPLE_ACCOUNT_SEEDED,
       );
       expect(caja.accountClass).toBe('ASSET');
+    });
+
+    it('el renombre comprueba el nombre bajo el cerrojo de la práctica (#995)', async () => {
+      const ctx = build();
+      const byCode = await seeded(ctx);
+      ctx.repo.lockAccountsOf.mockClear();
+      ctx.repo.listAccounts.mockClear();
+
+      await ctx.service.updateAccount(
+        byCode('5.8').id,
+        { name: 'Marketing' },
+        actor,
+      );
+
+      expect(ctx.repo.lockAccountsOf).toHaveBeenCalledWith(ctx.em, PRACTICE);
+      expect(
+        ctx.repo.lockAccountsOf.mock.invocationCallOrder[0],
+      ).toBeLessThan(ctx.repo.listAccounts.mock.invocationCallOrder[0]);
     });
 
     it('sin accountClass en el cuerpo conserva la clase', async () => {

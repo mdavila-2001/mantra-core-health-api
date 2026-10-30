@@ -28,10 +28,14 @@ import {
 } from '../../../common';
 import {
   BillingServiceCatalogService,
+  ProcedureImportService,
   ProcedureNomenclatureService,
 } from '../services';
 import {
   CreateServiceCatalogItemDto,
+  ImportProceduresDto,
+  ImportProceduresResponseDto,
+  MyProcedureSpecialtiesResponseDto,
   ProcedureNomenclatureResponseDto,
   ProcedureSpecialtiesResponseDto,
   SearchServiceCatalogResponseDto,
@@ -61,6 +65,7 @@ export class BillingServiceCatalogController {
   constructor(
     private readonly serviceCatalogService: BillingServiceCatalogService,
     private readonly nomenclature: ProcedureNomenclatureService,
+    private readonly procedureImport: ProcedureImportService,
   ) {}
 
   /**
@@ -176,6 +181,38 @@ export class BillingServiceCatalogController {
   }
 
   /**
+   * Importa en lote al catálogo de una práctica los procedimientos del arancel.
+   *
+   * Mismo `@Roles` y mismo alcance que el alta individual: la administración en
+   * cualquier práctica de su organización, un profesional sólo en su consultorio
+   * propio, y 404 en cualquier otra. Declarada antes de `:id` junto con el resto
+   * de las rutas estáticas.
+   *
+   * @param dto - Práctica y filtro (especialidades, códigos y/o texto).
+   * @param actor - Usuario autenticado que ejecuta la operación.
+   * @returns Cuántos se crearon, cuántos se saltaron y cuántos coincidían.
+   */
+  @Audited({
+    action: 'BILLING_SERVICE_IMPORTED',
+    entity: 'service_catalog',
+    entityId: 'body.practiceId',
+  })
+  @Post('import-procedures')
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER', 'CLINICIAN')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Importar en lote procedimientos del arancel al catálogo',
+    description:
+      'Crea en el catálogo de la práctica todos los procedimientos del arancel que cumplan el filtro (especialidades, códigos y/o texto, combinados con Y; al menos uno). Idempotente: salta los códigos que la práctica ya tiene. Tope de 5000 coincidencias (400 si lo excede).',
+  })
+  importProcedures(
+    @Body() dto: ImportProceduresDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ImportProceduresResponseDto> {
+    return this.procedureImport.importProcedures(dto, actor);
+  }
+
+  /**
    * Corrige un servicio del catálogo de una práctica propia.
    *
    * Los roles son más anchos que los del alta a propósito: quien atiende pone el
@@ -230,6 +267,27 @@ export class BillingServiceCatalogController {
   }
 
   /**
+   * Las especialidades del arancel que corresponden al médico autenticado.
+   *
+   * Sale de las especialidades que el profesional cargó en su perfil, cruzadas
+   * con las del arancel sin tildes ni mayúsculas. Vacío si no tiene ninguna
+   * cargada o el usuario no es profesional. Declarada antes de `:id`.
+   *
+   * @param actor - Usuario autenticado.
+   * @returns Las especialidades del arancel con su recuento.
+   */
+  @Get('procedure-specialties/mine')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Listar las especialidades del arancel que corresponden al médico',
+  })
+  listMyProcedureSpecialties(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MyProcedureSpecialtiesResponseDto> {
+    return this.procedureImport.listMySpecialties(actor);
+  }
+
+  /**
    * El nomenclador de procedimientos, por cursor.
    *
    * @param specialty - Especialidad exacta del arancel.
@@ -251,7 +309,8 @@ export class BillingServiceCatalogController {
   @ApiQuery({
     name: 'q',
     required: false,
-    description: 'Texto a buscar en el nombre del procedimiento',
+    description:
+      'Palabras a buscar (todas deben aparecer), sin distinguir tildes ni mayúsculas, en el nombre, el código, el grupo o la especialidad',
   })
   @ApiQuery({
     name: 'cursor',

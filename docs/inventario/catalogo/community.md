@@ -16,8 +16,8 @@
 | [comments](#comments) | Almacena comentarios sobre publicaciones o conversaciones comunitarias para habilitar diálogo público. | 20 | 11 | 23 | COINCIDE |
 | [content_hashtags](#content_hashtags) | Asocia etiquetas a contenidos para habilitar clasificación y búsqueda temática. | 9 | 4 | 2 | COINCIDE |
 | [content_reports](#content_reports) | Registra reportes de contenido para solicitar evaluación de publicaciones potencialmente inadecuadas. | 11 | 5 | 4 | COINCIDE |
-| [conversation_participants](#conversation_participants) | Relaciona usuarios con conversaciones para controlar participantes y acceso a mensajes. | 17 | 8 | 38 | COINCIDE |
-| [conversations](#conversations) | Representa conversaciones comunitarias entre usuarios para habilitar comunicación fuera del expediente clínico. | 13 | 8 | 36 | COINCIDE |
+| [conversation_participants](#conversation_participants) | Relaciona usuarios con conversaciones para controlar participantes y acceso a mensajes. | 17 | 8 | 46 | COINCIDE |
+| [conversations](#conversations) | Representa conversaciones comunitarias entre usuarios para habilitar comunicación fuera del expediente clínico. | 13 | 8 | 44 | COINCIDE |
 | [direct_messages](#direct_messages) | Conserva mensajes directos entre usuarios para la comunicación privada del producto, separados de las notas clínicas. | 16 | 9 | 13 | COINCIDE |
 | [feed_items](#feed_items) | Compone elementos del feed para presentar publicaciones relevantes a cada usuario. | 15 | 6 | 6 | COINCIDE |
 | [feedback_ticket_comments](#feedback_ticket_comments) | Conserva intercambios y observaciones asociados a tickets de feedback para documentar su atención. | 11 | 3 | 0 | COINCIDE |
@@ -40,17 +40,17 @@
 | [post_shares](#post_shares) | Registra compartidos de publicaciones para conocer cómo circula contenido público entre usuarios. | 11 | 6 | 0 | COINCIDE |
 | [prestige_awards](#prestige_awards) | Registra reconocimientos otorgados a perfiles para comunicar logros o contribuciones comunitarias. | 17 | 6 | 0 | COINCIDE |
 | [prestige_scores](#prestige_scores) | Mantiene puntajes de reputación o participación asociados a perfiles según reglas del producto. | 16 | 4 | 2 | COINCIDE |
-| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 150 | COINCIDE |
+| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 189 | COINCIDE |
 | [reactions](#reactions) | Registra reacciones de usuarios a contenido comunitario para expresar interacción social. | 10 | 6 | 16 | COINCIDE |
 | [review_dimension_scores](#review_dimension_scores) | Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de atención. | 5 | 2 | 4 | COINCIDE |
 | [review_responses](#review_responses) | Conserva respuestas de prestadores a reseñas para sostener interacción y gestión de reputación. | 11 | 5 | 4 | COINCIDE |
-| [service_reviews](#service_reviews) | Registra reseñas sobre prestadores y servicios, con verificación de experiencia cuando corresponde y sin publicar identificadores de encuentros. | 17 | 11 | 23 | COINCIDE |
+| [service_reviews](#service_reviews) | Registra reseñas sobre prestadores y servicios, con verificación de experiencia cuando corresponde y sin publicar identificadores de encuentros. | 17 | 11 | 25 | COINCIDE |
 | [social_follows](#social_follows) | Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actualizaciones públicas. | 11 | 7 | 17 | COINCIDE |
 | [social_notifications](#social_notifications) | Genera avisos sobre interacciones sociales para que usuarios conozcan menciones, respuestas o actividad relevante. | 16 | 8 | 1 | COINCIDE |
 | [social_posts](#social_posts) | Conserva publicaciones públicas de profesionales y organizaciones para informar y facilitar su descubrimiento, sin incorporarlas a la historia clínica. | 16 | 10 | 24 | COINCIDE |
 | [topics](#topics) | Define temas comunitarios para clasificar contenido y espacios de conversación. | 12 | 7 | 2 | COINCIDE |
-| [user_blocks](#user_blocks) | Registra bloqueos entre usuarios para controlar interacciones y seguridad en espacios comunitarios. | 10 | 6 | 32 | COINCIDE |
-| [verified_badges](#verified_badges) | Representa insignias de verificación pública para indicar atributos revisados de perfiles sanitarios. | 15 | 7 | 46 | COINCIDE |
+| [user_blocks](#user_blocks) | Registra bloqueos entre usuarios para controlar interacciones y seguridad en espacios comunitarios. | 10 | 6 | 36 | COINCIDE |
+| [verified_badges](#verified_badges) | Representa insignias de verificación pública para indicar atributos revisados de perfiles sanitarios. | 15 | 7 | 56 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -931,7 +931,7 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: conversation_participants`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ConversationParticipants` — `src/modules/community/entities/conversation_participants.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 7 FK salientes · 0 entrantes · 38 operaciones
+- **Resumen:** 17 columnas · 8 índices · 7 FK salientes · 0 entrantes · 46 operaciones
 
 #### Columnas
 
@@ -1001,6 +1001,8 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 | POST /community/conversations/{conversationId}/read | LEE | DIRECTA |
 | POST /insurance/patients/conversation | CREA | DIRECTA |
 | POST /insurance/patients/conversation | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | CREA | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
 | POST /scheduling/appointments/direct | CREA | DIRECTA |
 | POST /scheduling/appointments/direct | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
@@ -1010,6 +1012,12 @@ Relaciona usuarios con conversaciones para controlar participantes y acceso a me
 | POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/request | CREA | DIRECTA |
@@ -1046,7 +1054,7 @@ Representa conversaciones comunitarias entre usuarios para habilitar comunicaci�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: conversations`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `Conversations` — `src/modules/community/entities/conversations.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 3 entrantes · 36 operaciones
+- **Resumen:** 13 columnas · 8 índices · 7 FK salientes · 3 entrantes · 44 operaciones
 
 #### Columnas
 
@@ -1113,6 +1121,8 @@ Representa conversaciones comunitarias entre usuarios para habilitar comunicaci�
 | POST /community/conversations/{conversationId}/read | LEE | DIRECTA |
 | POST /insurance/patients/conversation | CREA | DIRECTA |
 | POST /insurance/patients/conversation | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | CREA | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
 | POST /scheduling/appointments/direct | CREA | DIRECTA |
 | POST /scheduling/appointments/direct | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/accept | CREA | DIRECTA |
@@ -1122,6 +1132,12 @@ Representa conversaciones comunitarias entre usuarios para habilitar comunicaci�
 | POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/request | CREA | DIRECTA |
@@ -2876,7 +2892,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: public_profiles; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `PublicProfiles` — `src/modules/community/entities/public_profiles.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 150 operaciones
+- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 189 operaciones
 
 #### Columnas
 
@@ -2955,12 +2971,12 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 |---|---|---|---|
 | `uq_public_profiles_slug` | sí | slug | Garantiza que no se repita la combinación (slug) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «slug», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_tenant_id` | no | tenant_id | Soporta la clave foránea fk_public_profiles_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_public_profiles_target_type_concept_id` | no | target_type_concept_id | Soporta la clave foránea fk_public_profiles_target_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «target_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_public_profiles_target_type_concept_id` | no | target_type_concept_id | Soporta la clave foránea fk_public_profiles_target_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «target_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_avatar_file_id` | no | avatar_file_id | Soporta la clave foránea fk_public_profiles_avatar_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_cover_file_id` | no | cover_file_id | Soporta la clave foránea fk_public_profiles_cover_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_public_profiles_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_visibility_concept_id` | no | visibility_concept_id | Soporta la clave foránea fk_public_profiles_visibility_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «visibility_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_public_profiles_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_public_profiles_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_public_profiles_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_public_profiles_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_public_profiles_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_public_profiles_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_public_profiles_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_public_profiles_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -3032,6 +3048,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | PUT /community/profiles/me | CREA | DIRECTA |
 | PUT /community/profiles/me | LEE | DIRECTA |
 | GET /community/profiles/me/stats | LEE | DIRECTA |
+| GET /community/profiles/organization-showcases/me | LEE | DIRECTA |
 | POST /community/public-profiles | CREA | DIRECTA |
 | PUT /community/reactions | LEE | DIRECTA |
 | GET /f/{slug} | LEE | DIRECTA |
@@ -3046,6 +3063,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | GET /l/{slug} | LEE | DIRECTA |
 | GET /o/{slug} | LEE | DIRECTA |
 | GET /p/{slug} | LEE | DIRECTA |
+| GET /patients/me/reviewable-care | LEE | DIRECTA |
 | POST /patients/me/reviews | LEE | DIRECTA |
 | GET /public/comments/{commentId}/replies | LEE | POR_SQL |
 | GET /public/media/{id} | LEE | DIRECTA |
@@ -3063,6 +3081,9 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | GET /public/search/pharmacies | LEE | DIRECTA |
 | GET /public/search/practitioners | LEE | DIRECTA |
 | GET /s/{slug} | LEE | DIRECTA |
+| POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
+| POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | ACTUALIZA | POR_TIPO |
 | POST /diagnostic-units/{id}/verify-and-publish | CREA | DIRECTA |
 | POST /diagnostic-units/{id}/verify-and-publish | LEE | DIRECTA |
@@ -3093,7 +3114,32 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | POST /pharma-labs/{pharmaLabId}/visitor-posts/{submissionId}/decision | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
+| GET /public/pharmacies/open-now | LEE | POR_SQL |
+| GET /pharmacy/orders | LEE | DIRECTA |
+| POST /pharmacy/orders | LEE | DIRECTA |
+| GET /pharmacy/orders/{id} | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/accept-substitutions | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/cancel | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/dispense | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/prefer-original | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/ready | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
+| GET /pharmacy/orders/me | LEE | DIRECTA |
 | GET /practitioners/me/role-assignments | LEE | DIRECTA |
+| POST /admissions/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/expire-sweep | ACTUALIZA | POR_TIPO |
+| POST /admissions/expire-sweep | LEE | DIRECTA |
+| GET /profiles/practitioners | LEE | POR_SQL |
+| POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
+| GET /public/profiles/f/{slug}/branches | LEE | POR_SQL |
 | GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
 | GET /public/profiles/o/{slug}/services | LEE | POR_SQL |
 | POST /scheduling/appointments/direct | ACTUALIZA | POR_TIPO |
@@ -3108,6 +3154,15 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | POST /scheduling/bookings/{id}/delay | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/delay | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/payment-receipts | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | ACTUALIZA | POR_TIPO |
 | POST /scheduling/bookings/{id}/reschedule | CREA | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
@@ -3366,7 +3421,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: service_reviews; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ServiceReviews` — `src/modules/community/entities/service_reviews.entity.ts`
-- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 3 entrantes · 23 operaciones
+- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 3 entrantes · 25 operaciones
 
 #### Columnas
 
@@ -3416,7 +3471,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 | `ix_service_reviews_verified_encounter_id` | no | verified_encounter_id | Soporta la clave foránea fk_service_reviews_verified_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «verified_encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_reviews_reviewer_display_mode_concept_id` | no | reviewer_display_mode_concept_id | Soporta la clave foránea fk_service_reviews_reviewer_display_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_reviews_verification_status_concept_id` | no | verification_status_concept_id | Soporta la clave foránea fk_service_reviews_verification_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_service_reviews_moderation_status_concept_id` | no | moderation_status_concept_id | Soporta la clave foránea fk_service_reviews_moderation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «moderation_status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_service_reviews_moderation_status_concept_id` | no | moderation_status_concept_id | Soporta la clave foránea fk_service_reviews_moderation_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «moderation_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_reviews_publication_status_concept_id` | no | publication_status_concept_id | Soporta la clave foránea fk_service_reviews_publication_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «publication_status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_reviews_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_service_reviews_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_reviews_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_service_reviews_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -3442,6 +3497,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 | GET /l/{slug} | LEE | POR_SQL |
 | GET /o/{slug} | LEE | POR_SQL |
 | GET /p/{slug} | LEE | POR_SQL |
+| GET /patients/me/reviewable-care | LEE | DIRECTA |
 | POST /patients/me/reviews | CREA | DIRECTA |
 | POST /patients/me/reviews | LEE | DIRECTA |
 | GET /public/nearby | LEE | POR_SQL |
@@ -3456,6 +3512,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 | GET /public/search/practitioners | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
 | GET /diagnostic-units/search | LEE | DIRECTA |
+| GET /profiles/practitioners | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -3839,7 +3896,7 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: user_blocks`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `UserBlocks` — `src/modules/community/entities/user_blocks.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 6 FK salientes · 0 entrantes · 32 operaciones
+- **Resumen:** 10 columnas · 6 índices · 6 FK salientes · 0 entrantes · 36 operaciones
 
 #### Columnas
 
@@ -3904,10 +3961,14 @@ Registra bloqueos entre usuarios para controlar interacciones y seguridad en esp
 | GET /community/profiles/{profileId}/posts | LEE | DIRECTA |
 | GET /community/profiles/by-slug/{slug} | LEE | DIRECTA |
 | POST /insurance/patients/conversation | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
 | POST /scheduling/appointments/direct | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/cancel | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/delay | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/reschedule | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | POST /scheduling/internal/dispatch-reminders | LEE | DIRECTA |
@@ -3938,7 +3999,7 @@ Representa insignias de verificación pública para indicar atributos revisados 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: verified_badges`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `VerifiedBadges` — `src/modules/community/entities/verified_badges.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 7 FK salientes · 1 entrantes · 46 operaciones
+- **Resumen:** 15 columnas · 7 índices · 7 FK salientes · 1 entrantes · 56 operaciones
 
 #### Columnas
 
@@ -4035,6 +4096,16 @@ Representa insignias de verificación pública para indicar atributos revisados 
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| POST /admissions/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/decision | CREA | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/reinstate | CREA | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/expire-sweep | ACTUALIZA | POR_TIPO |
+| POST /admissions/expire-sweep | LEE | DIRECTA |
 
 #### Gobierno
 

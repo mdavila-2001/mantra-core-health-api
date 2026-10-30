@@ -171,6 +171,18 @@ function build() {
     activeClaimForDispensation: mockFn(async () => undefined),
   };
   const tenantAdministration = { canAdminister: mockFn(async () => false) };
+  // El chat del pedido (community), doblado: por defecto ninguna farmacia
+  // tiene vitrina y abrir el hilo devuelve uno fijo.
+  const orderChat = {
+    findPharmacyShowcases: mockFn(async () => new Map()),
+    openOrderConversation: mockFn(async () => ({
+      conversationId: 'conv-1',
+      pharmacyProfileId: 'vitrina-1',
+    })),
+  };
+  const accountLinks = {
+    findActiveByPerson: mockFn(async () => ({ userId: 'user-1' })),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const useCases = new PharmacyOrdersUseCases(
     em as any,
@@ -188,10 +200,16 @@ function build() {
     logger as any,
     settlements as any,
     tenantAdministration as any,
+    orderChat as any,
+    accountLinks as any,
+    // El alta del pedido no se ejercita acá: el guard de receta no se usa.
+    {} as any,
   );
   const service = new PharmacyOrdersService(useCases, logger as any);
   return {
     service,
+    orderChat,
+    accountLinks,
     settlements,
     tenantAdministration,
     tx,

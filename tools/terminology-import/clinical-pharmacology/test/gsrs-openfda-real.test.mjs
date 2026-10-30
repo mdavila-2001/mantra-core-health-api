@@ -237,3 +237,57 @@ test('LiverTox real: CAS → UNII por el CAS PRIMARY del GSRS; sólo secciones h
   assert.match(rows[0].disclaimer, /not meant as a substitute for FDA approved product labeling/);
   assert.deepEqual(livertoxIdentity(xml('Salicylates')).cas, [], 'ficha de clase sin CAS: no se enlaza');
 });
+
+// --- EMA, información de producto: texto real de `pdftotext -layout` del PDF en castellano de Desloratadina Teva ------
+import { annexI, cimaNregCandidates, comparisonKey, piLines, piMonographSections, piSmpcs } from '../lib/ema-pi.mjs';
+
+test('EMA PDF real: anexo I por números QRD, sin números de página, nº EU → nº de registro de CIMA', () => {
+  const text = readRaw(join(HERE, 'fixtures', 'ema-pi', 'desloratadine-teva_es.txt'), 'utf8');
+  const smpcs = piSmpcs(text);
+  assert.equal(smpcs.length, 1, 'el anexo III (etiquetado) también dice «NOMBRE DEL MEDICAMENTO» y no cuenta');
+  const rows = piMonographSections(smpcs[0]);
+  assert.deepEqual(rows.map((r) => r.number), ['2', '3', '4.1', '4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8', '4.9', '5.1', '5.2', '5.3', '6.1', '6.2']);
+  assert.equal(
+    rows.find((r) => r.number === '4.1').text,
+    'Desloratadina Teva está indicada en adultos y adolescentes a partir de 12 años de edad para el alivio\nde los síntomas asociados con:\n- rinitis alérgica (ver sección 5.1)\n- urticaria (ver sección 5.1)',
+  );
+  assert.ok(piLines(text).every((l) => !/\f/.test(l)), 'sin saltos de página');
+  assert.ok(annexI(piLines(text)).length > 0);
+  assert.equal(smpcs[0].euNumbers[0], 'EU/1/11/732/001');
+  assert.deepEqual(cimaNregCandidates('EU/1/11/732/004'), ['11732004', '111732004'], 'las dos formas que usa CIMA');
+  assert.deepEqual(cimaNregCandidates('EU/1/04/0299/001'), ['04299001', '104299001'], 'sin el cero inicial del nº de producto');
+  assert.equal(comparisonKey('a  b\n c'), 'abc');
+});
+
+// --- EMA, extractor verificado: salida real de py/ema_pi_extract.py para Desloratadina Teva ------------------------
+import { extractorsAgree, fidelityKey, isVerifiedSection, keyDiff, piSmpcsFromRows } from '../lib/ema-pi.mjs';
+
+test('EMA PDF verificado: filas del extractor → secciones; sólo se publican las verificadas (sin tablas ni glifos sin resolver)', () => {
+  const doc = JSON.parse(readRaw(join(HERE, 'fixtures', 'ema-pi', 'desloratadine-teva_es.rows.json'), 'utf8'));
+  const smpcs = piSmpcsFromRows(doc);
+  assert.equal(smpcs.length, 1);
+  assert.equal(smpcs[0].euNumbers[0], 'EU/1/11/732/001');
+  const rows = piMonographSections(smpcs[0]);
+  assert.equal(
+    rows.find((r) => r.number === '4.1').text,
+    'Desloratadina Teva está indicada en adultos y adolescentes a partir de 12 años de edad para el alivio\nde los síntomas asociados con:\n-\trinitis alérgica (ver sección 5.1)\n-\turticaria (ver sección 5.1)',
+  );
+  const r48 = rows.find((r) => r.number === '4.8');
+  assert.equal(r48.table, true, 'la 4.8 trae la tabla de reacciones adversas');
+  assert.equal(isVerifiedSection(r48), false, 'una sección con tabla no se publica');
+  assert.ok(rows.filter((r) => r.number !== '4.8').every(isVerifiedSection));
+  assert.equal(isVerifiedSection({ text: 'ferritina > 1 000 �g/l', table: false, unresolved: 1 }), false, 'un glifo sin resolver invalida la sección');
+  // Clave de fidelidad (sólo para medir contra CIMA): NFKC, sin espacios, sin «•» ni el marcador de lista del extractor.
+  assert.equal(fidelityKey('• rinitis alérgica\n• 1 000 µg/l'), fidelityKey('-\trinitis alérgica\n-\t1 000 μg/l'));
+  assert.deepEqual(keyDiff('abcXYdef', 'abcZdef'), { at: 3, a: 'XY', b: 'Z' });
+});
+
+test('EMA PDF: consenso de dos extractores (pdfminer verificado y pdftotext) — casos reales de la medición', () => {
+  // Deferasirox Accord 4.1: pdftotext deja en blanco el «≥» de SymbolMT; pdfminer lo resuelve con la tabla de Adobe.
+  assert.equal(extractorsAgree('frecuentes (≥ 7 ml/kg/mes de concentrado', 'frecuentes ( 7 ml/kg/mes de concentrado'), true);
+  // Emtricitabina/Tenofovir Mylan 4.1: el ToUnicode da un espacio donde el PDF dibuja un guion; pdftotext lee «VIH-1».
+  assert.equal(extractorsAgree('infectados por VIH 1 con resistencia', 'infectados por VIH-1 con resistencia'), false);
+  assert.equal(extractorsAgree('ferritina > 1 000 μg/l', 'ferritina > 1 000 µg/l'), true, 'µ y μ: mismo carácter en NFKC');
+  assert.equal(extractorsAgree('(≥ 7', '(³ 7'), false, 'una lectura distinta del símbolo no es «perderlo»');
+  assert.equal(extractorsAgree('clase 2', 'clase ≥ 2'), false, 'pdfminer no puede perder lo que pdftotext tiene');
+});

@@ -199,5 +199,9 @@ interface RawSiatResponse {
   codigoEstado: number;
   codigoDescripcion: string;
   codigoRecepcion?: string | null;
-  mensajesList?: Array<{ codigo: number; descripcion: string; advertencia: boolean }>;
+  mensajesList?: Array<{
+    codigo: number;
+    descripcion: string;
+    advertencia: boolean;
+  }>;
 }

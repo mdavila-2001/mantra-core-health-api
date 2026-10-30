@@ -14,6 +14,7 @@ import {
 } from '../../entities';
 import { createdBy, touch } from '../../../../common';
 import { bookableStart } from '../../domain/time/scheduling-time';
+import { isFlexibleBand } from '../../domain/catalog/flexible-band';
 
 /**
  * Describe el contrato estructural de create resource data.
@@ -199,6 +200,8 @@ export interface CreateRuleData {
   bookingModeConceptId?: string;
   /** La franja atiende también por telemedicina. Ausente ≡ `false`. */
   telemedicineEnabled?: boolean;
+  /** Horario flexible de la franja (v4.2.64). Ausente ≡ `false`. */
+  flexibleHours?: boolean;
   /**
    * Identificador asociado a actor user.
    */
@@ -492,6 +495,7 @@ export class SchedulingCatalogRepository {
         gapMinutes: data.gapMinutes,
         bookingModeConceptId: data.bookingModeConceptId,
         telemedicineEnabled: data.telemedicineEnabled === true,
+        flexibleHours: data.flexibleHours === true,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -513,11 +517,14 @@ export class SchedulingCatalogRepository {
   }
 
   /**
-   * Las plantillas publicadas de horario flexible de un recurso (P36), con sus
-   * franjas.
+   * Las plantillas publicadas de un recurso que tienen **al menos una** franja
+   * de horario flexible (P36, por franja desde v4.2.64), cada una con sus
+   * franjas flexibles.
    *
    * Es lo que lee la disponibilidad flexible: qué ratos declaró el médico sin
-   * cortarlos en turnos. Una plantilla retirada no ofrece nada.
+   * cortarlos en turnos. Una plantilla flexible trae todas sus franjas; una de
+   * turnos fijos, sólo las que se declararon flexibles —las fijas las ofrece
+   * la grilla de `generate-slots`—. Una plantilla retirada no ofrece nada.
    */
   async findFlexibleTemplatesOfResource(
     em: EntityManager,
@@ -527,16 +534,21 @@ export class SchedulingCatalogRepository {
     const templates = await em.find(ScheduleTemplates, {
       resourceId,
       statusConceptId: publishedStatusConceptId,
-      flexibleHours: true,
     });
     if (templates.length === 0) return [];
     const rules = await em.find(ScheduleRules, {
       scheduleTemplateId: { $in: templates.map((template) => template.id) },
     });
-    return templates.map((template) => ({
-      template,
-      rules: rules.filter((rule) => rule.scheduleTemplateId === template.id),
-    }));
+    return templates
+      .map((template) => ({
+        template,
+        rules: rules.filter(
+          (rule) =>
+            rule.scheduleTemplateId === template.id &&
+            isFlexibleBand(template.flexibleHours === true, rule),
+        ),
+      }))
+      .filter(({ rules: flexibleRules }) => flexibleRules.length > 0);
   }
 
   /**

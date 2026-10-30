@@ -30,6 +30,7 @@ import {
   DiagnosticUnitProfileDto,
   PayerProfileDto,
 } from '../../../../common/dto/tenant-type-profile.dto';
+import { MedicalFacilityDto } from '../../../../common/dto/medical-facility.dto';
 
 /**
  * Los cinco documentos legales de afiliación en PDF (subtarea 1.2), ya
@@ -54,7 +55,7 @@ export class RegisterOrganizationLegalDocumentsDto {
   @ApiPropertyOptional({
     format: 'uuid',
     description:
-      'Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL, que no la tiene; el servicio responde 422 nombrando el documento faltante',
+      'Escritura de constitución (fileId de POST /iam/auth/upload-registration-document). Obligatoria salvo para UNIPERSONAL y PROFESIONAL_INDEPENDIENTE (personas naturales), que no la tienen; el servicio responde 422 nombrando el documento faltante',
   })
   @IsOptional()
   @IsUUID()
@@ -73,12 +74,14 @@ export class RegisterOrganizationLegalDocumentsDto {
   /**
    * Registro mercantil — la matrícula de comercio SEPREC en Bolivia (1.3).
    */
-  @ApiProperty({
+  @ApiPropertyOptional({
     format: 'uuid',
-    description: 'Registro mercantil (matrícula SEPREC en Bolivia)',
+    description:
+      'Registro mercantil (matrícula SEPREC en Bolivia). Obligatorio salvo para PROFESIONAL_INDEPENDIENTE, que ejerce con su NIT personal sin matrícula de comercio; el servicio responde 422 nombrando el documento faltante',
   })
+  @IsOptional()
   @IsUUID()
-  commerceRegistryFileId!: string;
+  commerceRegistryFileId?: string;
 
   /**
    * Licencia de funcionamiento municipal (1.4).
@@ -653,6 +656,28 @@ export class RegisterOrganizationDetailsDto {
   diagnosticUnit?: DiagnosticUnitProfileDto;
 
   /**
+   * Datos propios de un establecimiento de salud: NIT, número de registro
+   * ante la autoridad sanitaria, director médico, casa central y sucursales.
+   * Sólo corresponde a los cinco tipos médicos (`HOSPITAL`, `CLINIC`,
+   * `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`); con cualquier otro es un 422
+   * (`TenantTypeProfileService.assertProfileMatchesType`).
+   *
+   * Opcional en el contrato y obligatorio en el formulario, mismo criterio que
+   * `legalRepresentative` y `executives`. El alta lo persiste en su propia
+   * transacción; la práctica y la sede operativas no nacen acá, sino en
+   * `medical-center-setup` tras la verificación.
+   */
+  @ApiPropertyOptional({
+    type: MedicalFacilityDto,
+    description:
+      'Sólo para HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING y HEALTH_OTHER: NIT, registro sanitario, director médico, casa central y sucursales',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => MedicalFacilityDto)
+  medicalFacility?: MedicalFacilityDto;
+
+  /**
    * País de la organización. Obligatorio para `PROVIDER`.
    */
   @ApiPropertyOptional({ format: 'uuid' })
@@ -912,4 +937,15 @@ export class RegisterOrganizationResponseDto {
     example: 4,
   })
   representativesRegistered?: number;
+
+  /**
+   * Si el bloque `medicalFacility` quedó persistido con el alta. Sólo
+   * presente cuando `tenantType` es uno de los cinco tipos médicos: `true` si
+   * el alta lo declaró, `false` si no.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Si los datos del establecimiento médico quedaron registrados (sólo HOSPITAL, CLINIC, MEDICAL_OFFICE, NURSING y HEALTH_OTHER)',
+  })
+  medicalFacilityRegistered?: boolean;
 }

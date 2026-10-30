@@ -9,7 +9,16 @@ import { MessagingModule } from '../messaging/messaging.module';
 // El vínculo persona ↔ cuenta, para resolver a qué usuario avisarle. Se provee
 // el repositorio suelto y no se importa `ProfilesModule`, por lo mismo que hace
 // `clinical`: es una clase sin estado que recibe el `EntityManager`.
-import { PersonAccountLinksRepository } from '../profiles/infrastructure/repositories';
+import {
+  PersonAccountLinksRepository,
+  PractitionerAdmissionsRepository,
+} from '../profiles/infrastructure/repositories';
+// El sello de verificación del profesional que aparece junto al nombre de cada
+// participante de una conversación: la MISMA proyección que la Guía y el
+// buscador de profesionales (`verificationOf`), sin la lectura completa de
+// admisiones. Mismo motivo que arriba para proveerla suelta: sólo depende de
+// un repositorio sin estado.
+import { PractitionerVerificationReader } from '../profiles/application/services/practitioner-verification-reader.service';
 // El filtro por especialidad del directorio público valida contra el value set
 // `VS_MEDICAL_SPECIALTY` con **el mismo servicio** que el alta de profesional.
 // Se provee la clase suelta y no se importa `ProfilesModule` por el mismo
@@ -28,6 +37,11 @@ import { TerminologyModule } from '../terminology/terminology.module';
 import { ClinicalModule } from '../clinical/clinical.module';
 import { SearchPlatformModule } from '../search_platform/search_platform.module';
 import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
+// Membresías de tenant: quién atiende la bandeja de una vitrina de
+// organización. Es el módulo de autorización suelto de `directory`, sin
+// imports propios, así que no cierra el ciclo con `DirectoryModule` (que sí
+// importa a `community`).
+import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { WsJwtGuard } from '../../common';
 import {
   CommunitySocialController,
@@ -55,6 +69,7 @@ import {
   PartyRatingsReadService,
   RatingPartiesService,
   CommunityReviewsService,
+  CommunityReviewableCareService,
   CommunityGroupsService,
   CommunityGroupWallService,
   CommunityGroupAccessService,
@@ -80,6 +95,8 @@ import {
   CommunitySearchIndexService,
   CommunityVerificationService,
   CommunityProfileStatsService,
+  CommunityOrganizationStaffService,
+  CommunityOrderChatService,
 } from './services';
 import { CommunityMessagingGateway } from './gateways';
 import {
@@ -136,6 +153,7 @@ import {
     RedisRuntimeModule,
     MessagingModule,
     TerminologyModule,
+    DirectoryAuthorizationModule,
   ],
   controllers: [
     CommunitySocialController,
@@ -181,6 +199,8 @@ import {
     PublicSearchRepository,
     VerifiedBadgesRepository,
     PersonAccountLinksRepository,
+    PractitionerAdmissionsRepository,
+    PractitionerVerificationReader,
     // La regla de «qué uuid es una especialidad médica», compartida con el alta
     // de profesional. Ver la nota del import.
     MedicalSpecialtyCatalogService,
@@ -202,12 +222,15 @@ import {
     CommunityChatAutoReplyService,
     CommunityMessagingService,
     CommunityBookingChatService,
+    CommunityOrganizationStaffService,
+    CommunityOrderChatService,
     CommunityMessagingGateway,
     CommunityMessageNotificationsService,
     // F4.2 · presencia del chat sobre el Redis compartido del módulo.
     CommunityPresenceService,
     CommunityModerationService,
     CommunityReviewsService,
+    CommunityReviewableCareService,
     RatingPartiesService,
     PartyRatingsService,
     PartyRatingsReadService,
@@ -254,6 +277,12 @@ import {
     CommunityMessagingService,
     // La agenda deja la confirmación de una cita en el chat (hilo profesional-paciente).
     CommunityBookingChatService,
+    // El pedido de farmacia abre el hilo paciente ↔ vitrina de la farmacia.
+    CommunityOrderChatService,
+    // Los seeds crean la vitrina de un profesional por el mismo caso de uso que la API.
+    CommunitySocialService,
+    // El reindexado del buscador al final de la carga.
+    CommunitySearchIndexService,
   ],
 })
 export class CommunityModule {}

@@ -18,17 +18,17 @@
 | [dunning_items](#dunning_items) | Detalla cuentas o documentos tratados en una ejecución de cobranza para seguir acciones por saldo. | 12 | 9 | 2 | COINCIDE |
 | [dunning_runs](#dunning_runs) | Registra ejecuciones de gestión de cobranza para seguir procesos de notificación de saldos vencidos. | 9 | 7 | 6 | COINCIDE |
 | [financial_kpi_snapshots](#financial_kpi_snapshots) | Preserva snapshots de indicadores financieros para analizar evolución económica de servicios y organizaciones de salud. | 9 | 4 | 2 | COINCIDE |
-| [invoice_lines](#invoice_lines) | Detalla servicios, cantidades y montos que componen una factura para explicar su total y vínculo con la prestación. | 19 | 9 | 16 | DIVERGE |
-| [invoices](#invoices) | Representa facturas emitidas por servicios de salud para administrar cuentas por cobrar y comprobantes del paciente o pagador. | 25 | 14 | 29 | COINCIDE |
+| [invoice_lines](#invoice_lines) | Detalla servicios, cantidades y montos que componen una factura para explicar su total y vínculo con la prestación. | 19 | 9 | 19 | DIVERGE |
+| [invoices](#invoices) | Representa facturas emitidas por servicios de salud para administrar cuentas por cobrar y comprobantes del paciente o pagador. | 25 | 14 | 39 | COINCIDE |
 | [patient_statements](#patient_statements) | Consolida movimientos y saldos comunicables al paciente para informarle cargos, pagos y obligaciones pendientes. | 15 | 5 | 3 | COINCIDE |
 | [payable_payment_allocations](#payable_payment_allocations) | Distribuye pagos efectuados entre facturas de proveedores para mantener conciliación de cuentas por pagar. | 11 | 7 | 1 | COINCIDE |
 | [payments_made](#payments_made) | Registra pagos realizados a proveedores para mantener trazabilidad de egresos institucionales. | 17 | 11 | 4 | COINCIDE |
-| [payments_received](#payments_received) | Registra pagos recibidos contra facturas o cuentas de pacientes y organizaciones. | 18 | 12 | 13 | COINCIDE |
+| [payments_received](#payments_received) | Registra pagos recibidos contra facturas o cuentas de pacientes y organizaciones. | 18 | 12 | 15 | COINCIDE |
 | [quotation_installments](#quotation_installments) | Desglosa una cotización en cuotas numeradas, vinculadas a su cotización de atención, para planificar los vencimientos y montos que afronta el paciente o la práctica. | 8 | 1 | 3 | COINCIDE |
 | [quotations](#quotations) | Representa cotizaciones de prestaciones ligadas a una práctica y a una persona paciente, para informar y acordar costos antes de la atención. | 20 | 9 | 3 | COINCIDE |
-| [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 10 | COINCIDE |
+| [receivable_payment_allocations](#receivable_payment_allocations) | Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se cancelaron obligaciones. | 11 | 7 | 12 | COINCIDE |
 | [reimbursements](#reimbursements) | Conserva reembolsos vinculados a pacientes, prestadores o transacciones de servicios de salud. | 11 | 5 | 2 | COINCIDE |
-| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 17 | 8 | 38 | DIVERGE |
+| [service_catalog](#service_catalog) | Define prestaciones médicas y servicios facturables para mantener un catálogo común entre atención y cobro. | 17 | 8 | 51 | DIVERGE |
 | [tax_codes](#tax_codes) | Cataloga códigos tributarios usados para calcular impuestos en documentos financieros del sistema médico. | 14 | 6 | 0 | COINCIDE |
 | [tax_periods](#tax_periods) | Define períodos tributarios para agrupar obligaciones y reportes fiscales de la organización sanitaria. | 13 | 4 | 0 | COINCIDE |
 | [vendors](#vendors) | Cataloga proveedores a quienes la organización sanitaria compra bienes o servicios. | 14 | 6 | 2 | COINCIDE |
@@ -877,7 +877,7 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: invoice_lines`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `InvoiceLines` — `src/modules/billing/entities/invoice_lines.entity.ts`
-- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 16 operaciones
+- **Resumen:** 19 columnas · 9 índices · 8 FK salientes · 1 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -948,9 +948,12 @@ Detalla servicios, cantidades y montos que componen una factura para explicar su
 | POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| GET /patient-spending/me | LEE | POR_SQL |
 | GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | CREA | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | CREA | DIRECTA |
+| PUT /scheduling/bookings/{id}/payment-state | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -975,7 +978,7 @@ Representa facturas emitidas por servicios de salud para administrar cuentas por
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: invoices`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `Invoices` — `src/modules/billing/entities/invoices.entity.ts`
-- **Resumen:** 25 columnas · 14 índices · 12 FK salientes · 13 entrantes · 29 operaciones
+- **Resumen:** 25 columnas · 14 índices · 12 FK salientes · 13 entrantes · 39 operaciones
 
 #### Columnas
 
@@ -1043,8 +1046,8 @@ Representa facturas emitidas por servicios de salud para administrar cuentas por
 |---|---|---|---|
 | `uq_invoices_invoice_number` | sí | invoice_number | Garantiza que no se repita la combinación (invoice_number) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «invoice_number», la primera columna del índice _(CONSULTA)_ |
 | `ix_invoices_practice_id` | no | practice_id | Soporta la clave foránea fk_invoices_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_invoices_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_invoices_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_invoices_encounter_id` | no | encounter_id | Soporta la clave foránea fk_invoices_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_invoices_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_invoices_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_invoices_encounter_id` | no | encounter_id | Soporta la clave foránea fk_invoices_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_invoices_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_invoices_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_invoices_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_invoices_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_invoices_customer_business_partner_id` | no | customer_business_partner_id | Soporta la clave foránea fk_invoices_customer_business_partner_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1093,8 +1096,18 @@ Representa facturas emitidas por servicios de salud para administrar cuentas por
 | POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| GET /patient-spending/me | LEE | POR_SQL |
+| POST /clinical/encounters/check-in | ACTUALIZA | DIRECTA |
 | GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | CREA | DIRECTA |
+| GET /scheduling/bookings | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | CREA | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | ACTUALIZA | POR_TIPO |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| GET /scheduling/bookings/{id}/payment-state | LEE | DIRECTA |
+| PUT /scheduling/bookings/{id}/payment-state | CREA | DIRECTA |
+| PUT /scheduling/bookings/{id}/payment-state | ACTUALIZA | POR_TIPO |
+| PUT /scheduling/bookings/{id}/payment-state | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1356,7 +1369,7 @@ Registra pagos recibidos contra facturas o cuentas de pacientes y organizaciones
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: payments_received`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `PaymentsReceived` — `src/modules/billing/entities/payments_received.entity.ts`
-- **Resumen:** 18 columnas · 12 índices · 11 FK salientes · 1 entrantes · 13 operaciones
+- **Resumen:** 18 columnas · 12 índices · 11 FK salientes · 1 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -1432,6 +1445,8 @@ Registra pagos recibidos contra facturas o cuentas de pacientes y organizaciones
 | POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | CREA | DIRECTA |
+| PUT /scheduling/bookings/{id}/payment-state | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -1531,13 +1546,13 @@ Representa cotizaciones de prestaciones ligadas a una práctica y a una persona 
 | 3 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
 | 4 | `created_by_practitioner_profile_id` | `uuid` | Clave foránea → profiles.health_practitioner_profiles.profile_id; Obligatoria | Identificador del profesional que arma la cotización. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:33`)_ | coincide |
 | 5 | `attention_date` | `date` | Obligatoria | Fecha de atención sobre la que se cotiza. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:39`)_ | coincide |
-| 6 | `appointment_id` | `uuid` | Opcional | Sin <<FK>> a propósito: no tiene destino canónico en lo mergeado (evita un anillo scheduling↔billing). Ver la nota FK homónima en gen_ddl.py — queda sin forzar, temperatura-0. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_17_billing.puml:474`)_ | coincide |
+| 6 | `appointment_id` | `uuid` | Opcional | Sin <<FK>> a propósito: no tiene destino canónico en lo mergeado (evita un anillo scheduling↔billing). Ver la nota FK homónima en gen_ddl.py — queda sin forzar, temperatura-0. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_17_billing.puml:544`)_ | coincide |
 | 7 | `service_catalog_id` | `uuid` | Clave foránea → billing.service_catalog.id; Obligatoria | Servicio del catálogo cotizado. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:53`)_ | coincide |
 | 8 | `service_name_snapshot` | `varchar` | Obligatoria | Nombre del servicio, copiado del catálogo al momento de crear la cotización (snapshot para trazabilidad). _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:60`)_ | coincide |
 | 9 | `offered_price` | `numeric` | Obligatoria | Precio ofrecido al paciente; editable respecto del precio de catálogo. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:66`)_ | coincide |
 | 10 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 11 | `payment_plan_installment_count` | `integer` | Obligatoria | Cantidad de cuotas del plan de pagos ofrecido. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:78`)_ | coincide |
-| 12 | `down_payment_amount` | `numeric` | Obligatoria | v4.2.18 — plan de pagos flexible, SIN interés: la tasa y el método de amortización (FLAT/FRENCH) salen del modelo; entra lo que se paga el día de la atención y la frecuencia con que se armó el cronograma (sólo punto de partida: cada cuota guarda su propia fecha y monto). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_17_billing.puml:483`)_ | coincide |
+| 12 | `down_payment_amount` | `numeric` | Obligatoria | v4.2.18 — plan de pagos flexible, SIN interés: la tasa y el método de amortización (FLAT/FRENCH) salen del modelo; entra lo que se paga el día de la atención y la frecuencia con que se armó el cronograma (sólo punto de partida: cada cuota guarda su propia fecha y monto). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_17_billing.puml:553`)_ | coincide |
 | 13 | `payment_frequency` | `varchar` | Obligatoria | Frecuencia con que se armó el cronograma: `WEEKLY`, `BIWEEKLY` o `MONTHLY`. Sólo el punto de partida: cada cuota guarda su propia fecha. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:90`)_ | coincide |
 | 14 | `valid_until` | `date` | Obligatoria | Fecha hasta la que la oferta es válida. _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:96`)_ | coincide |
 | 15 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | Estado de la cotización (reusa los conceptos `STATE_*` de terminology). _(JSDOC_ENTIDAD, `src/modules/billing/entities/quotations.entity.ts:102`)_ | coincide |
@@ -1614,7 +1629,7 @@ Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: receivable_payment_allocations`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ReceivablePaymentAllocations` — `src/modules/billing/entities/receivable_payment_allocations.entity.ts`
-- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 10 operaciones
+- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -1675,6 +1690,8 @@ Asocia pagos recibidos con saldos y facturas por cobrar para explicar cómo se c
 | POST /billing/simulated/invoices/{invoiceId}/annulment | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | CREA | DIRECTA |
+| PUT /scheduling/bookings/{id}/payment-state | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -1766,7 +1783,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_17_billing.puml: service_catalog`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_17_billing.puml` · **DDL:** `SQL/17_billing/02_tables.sql`
 - **Entidad del ORM:** `ServiceCatalog` — `src/modules/billing/entities/service_catalog.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 38 operaciones
+- **Resumen:** 17 columnas · 8 índices · 8 FK salientes · 4 entrantes · 51 operaciones
 
 #### Columnas
 
@@ -1811,7 +1828,7 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_service_catalog_practice_id` | no | practice_id | Soporta la clave foránea fk_service_catalog_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_service_catalog_practice_id` | no | practice_id | Soporta la clave foránea fk_service_catalog_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_service_catalog_image_file_id` | no | image_file_id | Soporta la clave foránea fk_service_catalog_image_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_service_catalog_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_service_catalog_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_service_catalog_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1830,6 +1847,8 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | PATCH /billing/service-catalog/{id} | ACTUALIZA | POR_TIPO |
 | PATCH /billing/service-catalog/{id} | LEE | DIRECTA |
 | GET /billing/service-catalog/{id}/image | LEE | DIRECTA |
+| POST /billing/service-catalog/import-procedures | CREA | DIRECTA |
+| POST /billing/service-catalog/import-procedures | LEE | DIRECTA |
 | GET /billing/simulated/charges | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/invoices | LEE | POR_SQL |
@@ -1839,6 +1858,10 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | LEE | POR_SQL |
 | POST /billing/simulated/invoices/{invoiceId}/email | LEE | POR_SQL |
 | POST /clinical/service-requests | LEE | DIRECTA |
+| GET /referrals | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/me | LEE | DIRECTA |
+| GET /referrals/target-services | LEE | DIRECTA |
 | GET /medical-centers/search | LEE | DIRECTA |
 | GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
 | GET /medical-groups | LEE | DIRECTA |
@@ -1855,6 +1878,8 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
 | GET /public/profiles/o/{slug}/services | LEE | POR_SQL |
 | POST /quotations | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| PUT /scheduling/bookings/{id}/payment-state | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/confirm | LEE | DIRECTA |
 | POST /scheduling/holds/{holdToken}/request | LEE | DIRECTA |
 | GET /scheduling/service-availability | LEE | DIRECTA |
@@ -1862,6 +1887,11 @@ Define prestaciones médicas y servicios facturables para mantener un catálogo 
 | POST /scheduling/service-offerings | LEE | DIRECTA |
 | PATCH /scheduling/service-offerings/{id} | LEE | DIRECTA |
 | POST /scheduling/service-offerings/{id}/holds | LEE | DIRECTA |
+| GET /scheduling/slots | LEE | DIRECTA |
+| POST /surveys/assignments | LEE | DIRECTA |
+| GET /surveys/me/invitations | LEE | POR_SQL |
+| GET /surveys/me/invitations/{id} | LEE | POR_SQL |
+| GET /surveys/templates/{id} | LEE | DIRECTA |
 
 #### Gobierno
 

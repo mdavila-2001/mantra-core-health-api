@@ -39,6 +39,9 @@ x-app-env: &app-env
   # Producción usa manifiestos propios, no este archivo.
   NODE_ENV: ${NODE_ENV:-development}
   PORT: "3000"
+  # Barrido de vencimientos de las admisiones de profesionales (worker-profiles).
+  ADMISSIONS_EXPIRE_SWEEP_ENABLED: ${ADMISSIONS_EXPIRE_SWEEP_ENABLED:-true}
+  ADMISSIONS_EXPIRE_SWEEP_CRON: "${ADMISSIONS_EXPIRE_SWEEP_CRON:-0 * * * *}"
   # Conexión a datos: se lee del `.env` del host, con los nombres de servicio
   # del compose como default. Así el mismo archivo sirve para las dos formas
   # de correr: contra Postgres/Mongo gestionados (Neon, Atlas — el `.env`
@@ -1027,6 +1030,31 @@ services:
     healthcheck: *worker-healthcheck
     # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s), igual que el resto: el
     # fan-out en vuelo tiene que terminar antes de que Docker mande SIGKILL.
+    stop_grace_period: 45s
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mantra-redesa-network
+
+  # Barrido de vencimientos y abandonos de las admisiones de profesionales.
+  # Cadencia: ADMISSIONS_EXPIRE_SWEEP_CRON (por defecto, cada hora en punto);
+  # apagarlo: ADMISSIONS_EXPIRE_SWEEP_ENABLED=false. Dos réplicas son inocuas: el
+  # cerrojo está en la API (`POST /admissions/expire-sweep`).
+  worker-profiles:
+    image: mantra-redesa-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    command: ["node", "dist/src/worker-profiles.js"]
+    environment:
+      <<: *app-env
+    deploy:
+      resources: *worker-resources
+    healthcheck: *worker-healthcheck
+    # Por encima de WORKER_SHUTDOWN_TIMEOUT_MS (30 s), igual que el resto: un
+    # barrido en vuelo termina antes de que Docker mande SIGKILL.
     stop_grace_period: 45s
     depends_on:
       api:

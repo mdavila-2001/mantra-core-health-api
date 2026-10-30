@@ -107,7 +107,10 @@ export class IamAssistedRegistrationService {
     return this.em.transactional(async (tx) => {
       // Evitar duplicados: si el identificador verificado ya tiene una credencial
       // viva (activa o pendiente), NO se crea otra cuenta; se sugiere invitar.
-      const existing = await this.credentialsRepo.findLivePasswordBySubject(
+      // El correo no distingue mayúsculas, y el cerrojo pone en cola a dos
+      // altas simultáneas del mismo buzón (#1000).
+      await this.credentialsRepo.lockEmailForRegistration(tx, dto.email);
+      const existing = await this.credentialsRepo.findLivePasswordByEmail(
         tx,
         dto.email,
       );

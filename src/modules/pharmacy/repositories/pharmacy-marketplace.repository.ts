@@ -35,12 +35,12 @@ export interface PublishedOffer {
   price: string;
   /** Código de moneda. */
   currency: string;
-  /** Unidades disponibles hoy (0 si la sede no lleva lotes y no declaró conteo). */
+  /** Unidades disponibles hoy (0 si no tiene posición y no se declaró conteo). */
   availableQuantity: number;
   /**
    * Si la sede lo tiene hoy, según la regla única de existencias
-   * (`siteProductAvailabilitySql`): lotes si la sede los lleva, lo declarado
-   * en el catálogo si no, nunca lo marcado «no tengo».
+   * (`siteProductAvailabilitySql`): lotes si el producto tiene posición en la
+   * sede, lo declarado en el catálogo si no, nunca lo marcado «no tengo».
    */
   inStock: boolean;
   /** La sede entrega a domicilio. */
@@ -185,8 +185,8 @@ export class PharmacyMarketplaceRepository {
                  ORDER BY d.preferred DESC
                  LIMIT 1
               ) es ON true
-    -- La regla única de disponibilidad por sede (A1): lotes si la sede los
-    -- lleva, lo declarado en el catálogo si no.
+    -- La regla única de disponibilidad por sede (A1): lotes si el producto
+    -- tiene posición en la sede, lo declarado en el catálogo si no.
     LEFT JOIN (${availability.sql}) av
            ON av.site_id = site.id
           AND av.product_id = prod.id

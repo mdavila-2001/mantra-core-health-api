@@ -84,8 +84,10 @@ export class CreateReviewDto {
    * Valor de display mode mantenido por la instancia.
    */
   @ApiPropertyOptional({
-    description: 'Modo de visualización del reviewer',
+    description:
+      'Modo de visualización del reviewer. Si no se envía, la reseña es ANONYMOUS (privacidad por defecto); el nombre real se muestra sólo si se pide REAL_NAME',
     enum: ['REAL_NAME', 'ANONYMOUS'],
+    default: 'ANONYMOUS',
   })
   @IsOptional()
   @IsIn(['REAL_NAME', 'ANONYMOUS'])

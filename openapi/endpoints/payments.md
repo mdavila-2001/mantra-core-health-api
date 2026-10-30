@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `payments`
 
-Referencia exhaustiva de 14 operación(es) del módulo `payments`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 18 operación(es) del módulo `payments`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `payments`, `payments-intents`, `payments-transactions`
-- **Controladores:** `PaymentsIntentsController`, `PaymentsOperationsController`, `PaymentsTransactionsController`
+- **Etiquetas OpenAPI:** `payments`, `payments-gateway-dispatches`, `payments-gateway-webhooks`, `payments-intents`, `payments-transactions`
+- **Controladores:** `PaymentsGatewayDispatchesController`, `PaymentsGatewayWebhooksController`, `PaymentsIntentsController`, `PaymentsOperationsController`, `PaymentsTransactionsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -14,17 +14,21 @@ Referencia exhaustiva de 14 operación(es) del módulo `payments`, derivada del 
 1. [POST /payments/callbacks/{callbackPath}](#1-post-payments-callbacks-callbackpath) — Recibir el callback/webhook del gateway (idempotente)
 2. [POST /payments/checkout-sessions](#2-post-payments-checkout-sessions) — Abrir una sesión de checkout con contexto de cajero
 3. [POST /payments/fee-schedules](#3-post-payments-fee-schedules) — Publicar una versión del tarifario
-4. [POST /payments/intents](#4-post-payments-intents) — Crear una intención de pago idempotente
-5. [POST /payments/intents/{id}/fx-lock](#5-post-payments-intents-id-fx-lock) — Bloquear el tipo de cambio de la intención
-6. [POST /payments/intents/{id}/risk-assessment](#6-post-payments-intents-id-risk-assessment) — Registrar la evaluación de riesgo y 3-D Secure
-7. [POST /payments/intents/{id}/splits](#7-post-payments-intents-id-splits) — Repartir el cobro entre cuentas conectadas
-8. [POST /payments/intents/{id}/transactions](#8-post-payments-intents-id-transactions) — Procesar la transacción contra el gateway (authorize/capture)
-9. [POST /payments/payouts](#9-post-payments-payouts) — Ejecutar un payout a una cuenta conectada
-10. [POST /payments/reconciliation-runs](#10-post-payments-reconciliation-runs) — Conciliar gateway contra ledger y abrir excepciones
-11. [POST /payments/settlements/import](#11-post-payments-settlements-import) — Importar la liquidación del gateway
-12. [POST /payments/transactions/{id}/cancellation-requests](#12-post-payments-transactions-id-cancellation-requests) — Solicitar la anulación del cobro
-13. [POST /payments/transactions/{id}/refunds](#13-post-payments-transactions-id-refunds) — Emitir un reembolso total o parcial
-14. [POST /payments/transactions/{id}/status-inquiry](#14-post-payments-transactions-id-status-inquiry) — Consultar el estado de la transacción en el gateway
+4. [POST /payments/gateway-dispatches/{intentId}/close](#4-post-payments-gateway-dispatches-intentid-close) — Cerrar a mano una reserva de despacho
+5. [POST /payments/gateway-dispatches/{intentId}/reconcile](#5-post-payments-gateway-dispatches-intentid-reconcile) — Conciliar una reserva de despacho con la pasarela
+6. [GET /payments/gateway-dispatches/pending-reconciliation](#6-get-payments-gateway-dispatches-pending-reconciliation) — Reservas de despacho que requieren conciliación
+7. [POST /payments/gateway-webhooks](#7-post-payments-gateway-webhooks) — Recibir un webhook de la pasarela de pagos (idempotente)
+8. [POST /payments/intents](#8-post-payments-intents) — Crear una intención de pago idempotente
+9. [POST /payments/intents/{id}/fx-lock](#9-post-payments-intents-id-fx-lock) — Bloquear el tipo de cambio de la intención
+10. [POST /payments/intents/{id}/risk-assessment](#10-post-payments-intents-id-risk-assessment) — Registrar la evaluación de riesgo y 3-D Secure
+11. [POST /payments/intents/{id}/splits](#11-post-payments-intents-id-splits) — Repartir el cobro entre cuentas conectadas
+12. [POST /payments/intents/{id}/transactions](#12-post-payments-intents-id-transactions) — Procesar la transacción contra el gateway (authorize/capture)
+13. [POST /payments/payouts](#13-post-payments-payouts) — Ejecutar un payout a una cuenta conectada
+14. [POST /payments/reconciliation-runs](#14-post-payments-reconciliation-runs) — Conciliar gateway contra ledger y abrir excepciones
+15. [POST /payments/settlements/import](#15-post-payments-settlements-import) — Importar la liquidación del gateway
+16. [POST /payments/transactions/{id}/cancellation-requests](#16-post-payments-transactions-id-cancellation-requests) — Solicitar la anulación del cobro
+17. [POST /payments/transactions/{id}/refunds](#17-post-payments-transactions-id-refunds) — Emitir un reembolso total o parcial
+18. [POST /payments/transactions/{id}/status-inquiry](#18-post-payments-transactions-id-status-inquiry) — Consultar el estado de la transacción en el gateway
 
 ---
 
@@ -480,7 +484,515 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. POST /payments/intents
+## 4. POST /payments/gateway-dispatches/{intentId}/close
+
+- **Módulo:** `payments`
+- **Etiqueta OpenAPI:** `payments-gateway-dispatches`
+- **Nombre:** Cerrar a mano una reserva de despacho
+- **Operation ID:** `PaymentsGatewayDispatchesController_close`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PaymentsGatewayDispatchesController.close](../../src/modules/payments/controllers/payments-gateway-dispatches.controller.ts)
+
+### Descripción de negocio
+
+No reenvía nada a la pasarela: cancela la intención y libera la deuda. Solo si la reserva ya requiere conciliación. El motivo es obligatorio.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /payments/gateway-dispatches/{intentId}/close` en `PaymentsGatewayDispatchesController_close`. El controlador delega en `PaymentsTransactionsService.closeGatewayDispatch`. Valida el body como `CloseGatewayDispatchDto` y consume `application/json`. El tipo de retorno estático es `Promise<ClosedGatewayDispatchDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `intentId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CloseGatewayDispatchDto`; los campos opcionales se omiten.
+
+```http
+POST /payments/gateway-dispatches/00000000-0000-4000-8000-000000000001/close HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PAYMENTS_ADMIN`.
+- Deben ser UUID válidos: `intentId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 10; longitud máxima 300; patrón runtime `REASON_PATTERN` | Motivo del cierre, obligatorio: qué se comprobó contra la pasarela. Sin datos personales ni de pacientes. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /payments/gateway-dispatches/00000000-0000-4000-8000-000000000001/close HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ClosedGatewayDispatchDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ClosedGatewayDispatchDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "paymentIntentId": "00000000-0000-4000-8000-000000000001",
+  "statusConceptId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `paymentIntentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | La intención no tiene una reserva de despacho que cerrar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La reserva de esta intención ya fue cerrada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La reserva puede seguir en vuelo: cerrarla ahora podría permitir un segundo cobro. Esperá a que requiera conciliación y no tenga actividad reciente | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/payments/gateway-dispatches/{intentId}/close"
+}
+```
+
+---
+
+## 5. POST /payments/gateway-dispatches/{intentId}/reconcile
+
+- **Módulo:** `payments`
+- **Etiqueta OpenAPI:** `payments-gateway-dispatches`
+- **Nombre:** Conciliar una reserva de despacho con la pasarela
+- **Operation ID:** `PaymentsGatewayDispatchesController_reconcile`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PaymentsGatewayDispatchesController.reconcile](../../src/modules/payments/controllers/payments-gateway-dispatches.controller.ts)
+
+### Descripción de negocio
+
+Reenvía la MISMA creación con la MISMA Idempotency-Key: asocia el cobro que la pasarela ya tenía, o crea el de esta intención una sola vez. Pasadas 23 h no reenvía (409): se cierra a mano. Exige riesgo aprobado.
+
+
+### Descripción del sistema
+
+NestJS resuelve `POST /payments/gateway-dispatches/{intentId}/reconcile` en `PaymentsGatewayDispatchesController_reconcile`. El controlador delega en `PaymentsTransactionsService.reconcileGatewayDispatch`. Valida el body como `ReconcileGatewayDispatchDto` y consume `application/json`. El tipo de retorno estático es `Promise<TransactionResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `intentId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReconcileGatewayDispatchDto`; los campos opcionales se omiten.
+
+```http
+POST /payments/gateway-dispatches/00000000-0000-4000-8000-000000000001/reconcile HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "paymentMethodType": "qr"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PAYMENTS_ADMIN`.
+- Deben ser UUID válidos: `intentId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `paymentMethodType` | Sí | `string` | valores: `qr`, `card`, `bank_transfer`, `wallet` | El MISMO medio de pago con el que se intentó el cobro la primera vez (no se persiste): con otro, la pasarela contesta `idempotency_key_reused`. | `qr` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /payments/gateway-dispatches/00000000-0000-4000-8000-000000000001/reconcile HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "paymentMethodType": "qr"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<TransactionResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `TransactionResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "paymentIntentId": "00000000-0000-4000-8000-000000000001",
+  "amount": 150,
+  "statusConceptId": "00000000-0000-4000-8000-000000000001",
+  "gatewayTransactionRef": "valor-ejemplo",
+  "gateway": {
+    "paymentIntentId": "00000000-0000-4000-8000-000000000001",
+    "status": {},
+    "nextAction": {}
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `paymentIntentId` | Sí | `string` | formato `uuid` | Identificador asociado a payment intent. | `00000000-0000-4000-8000-000000000001` |
+| `amount` | Sí | `string` | Sin restricción adicional declarada | Valor de amount mantenido por la instancia. | `150` |
+| `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
+| `gatewayTransactionRef` | No | `string` | Sin restricción adicional declarada | Valor de gateway transaction ref mantenido por la instancia. | `valor-ejemplo` |
+| `gateway` | No | `PaymentIntentGatewayDto` | Sin restricción adicional declarada | Cobro en la pasarela (sólo con `payments.via_gateway`). En ese caso no hay transacción local: `id` es el de la intención y `gatewayTransactionRef` el `pi_…` de la pasarela; el resultado llega por webhook. | `{"paymentIntentId":"00000000-0000-4000-8000-000000000001","status":{},"nextAction":{}}` |
+| `gateway.paymentIntentId` | No | `string` | Sin restricción adicional declarada | Identificador del cobro en la pasarela (`pi_…`) | `00000000-0000-4000-8000-000000000001` |
+| `gateway.status` | No | `object` | valores: `requires_action`, `processing`, `succeeded`, `failed`, `canceled`, `expired` | Estado del cobro en la pasarela | `{}` |
+| `gateway.nextAction` | No | `object` | Sin restricción adicional declarada | Qué tiene que hacer el pagador: mostrar el QR, transferir con una referencia o ir al formulario del banco | `{}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | La pasarela no está activa: no hay despachos que conciliar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La intención no tiene un despacho pendiente de conciliar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La reserva de este cobro es más vieja que la memoria de la clave en la pasarela: reenviar podría crear un segundo cobro. Concilialo a mano contra la pasarela | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La intención ya está en proceso y no tiene un cobro en la pasarela | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La intención ya fue cobrada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La intención tiene una operación abierta en el gateway | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | El importe excede el saldo pendiente de la intención | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La deuda ya tiene otro cobro en curso en la pasarela | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | El importe excede el saldo pendiente de la deuda | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La pasarela cobra en un solo paso: sólo admite la operación SALE | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La pasarela cobra el importe completo de la intención | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La intención está cancelada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La intención requiere evaluación de riesgo antes de cobrar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | El motor de riesgo rechazó la intención | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La evaluación de riesgo pide revisión humana antes de cobrar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | El importe a procesar debe ser mayor que cero | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La intención parece cobrar una deuda pero no se puede saber cuál: indicá sourceRefType "payment_debt" con el id de la deuda, o abrí una sesión de checkout | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La deuda de la intención no existe | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La deuda ya está saldada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La pasarela sólo cobra deudas en bolivianos (BOB) | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/payments/gateway-dispatches/{intentId}/reconcile"
+}
+```
+
+---
+
+## 6. GET /payments/gateway-dispatches/pending-reconciliation
+
+- **Módulo:** `payments`
+- **Etiqueta OpenAPI:** `payments-gateway-dispatches`
+- **Nombre:** Reservas de despacho que requieren conciliación
+- **Operation ID:** `PaymentsGatewayDispatchesController_listPending`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PaymentsGatewayDispatchesController.listPending](../../src/modules/payments/controllers/payments-gateway-dispatches.controller.ts)
+
+### Descripción de negocio
+
+Intenciones con una reserva sin `pi_…` más vieja que el plazo (o con fecha ilegible). Bloquean la deuda hasta que se concilian o se cierran.
+
+
+### Descripción del sistema
+
+NestJS resuelve `GET /payments/gateway-dispatches/pending-reconciliation` en `PaymentsGatewayDispatchesController_listPending`. El controlador delega en `PaymentsTransactionsService.listGatewayDispatchesRequiringReconciliation`. No recibe body. El tipo de retorno estático es `Promise<PendingGatewayDispatchDto[]>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /payments/gateway-dispatches/pending-reconciliation HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PAYMENTS_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /payments/gateway-dispatches/pending-reconciliation HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PendingGatewayDispatchDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PendingGatewayDispatchDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PendingGatewayDispatchDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PendingGatewayDispatchDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PendingGatewayDispatchDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PendingGatewayDispatchDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PendingGatewayDispatchDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PendingGatewayDispatchDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "paymentIntentId": "00000000-0000-4000-8000-000000000001",
+    "ageMs": 1,
+    "canReconcile": true
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/payments/gateway-dispatches/pending-reconciliation"
+}
+```
+
+---
+
+## 7. POST /payments/gateway-webhooks
+
+- **Módulo:** `payments`
+- **Etiqueta OpenAPI:** `payments-gateway-webhooks`
+- **Nombre:** Recibir un webhook de la pasarela de pagos (idempotente)
+- **Operation ID:** `PaymentsGatewayWebhooksController_receive`
+- **Autenticación:** Pública
+- **Implementación:** [PaymentsGatewayWebhooksController.receive](../../src/modules/payments/controllers/payments-gateway-webhooks.controller.ts)
+
+### Descripción de negocio
+
+Verifica la firma Standard Webhooks y la marca de tiempo, aplica `payment_intent.*` una sola vez (inbox por `webhook-id`) y responde 2xx solo cuando el efecto quedó persistido. Con `payments.via_gateway` apagado responde 503 sin efecto.
+
+Contexto declarado en el controlador: REQ-INT-2.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /payments/gateway-webhooks` en `PaymentsGatewayWebhooksController_receive`. El controlador delega en `PaymentsGatewayWebhookService.receive`. No recibe body. El tipo de retorno estático es `Promise<GatewayWebhookResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /payments/gateway-webhooks HTTP/1.1
+Host: localhost:3000
+```
+
+### Restricciones a considerar
+
+- Endpoint público: no exige JWT según el contrato y `@Public()` del código.
+- Rate limit particular: `Throttle({ default: { limit: 600, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /payments/gateway-webhooks HTTP/1.1
+Host: localhost:3000
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GatewayWebhookResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GatewayWebhookResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GatewayWebhookResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GatewayWebhookResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GatewayWebhookResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GatewayWebhookResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GatewayWebhookResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GatewayWebhookResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "received": {},
+  "eventId": "00000000-0000-4000-8000-000000000001",
+  "applied": true,
+  "duplicate": true,
+  "ignored": true,
+  "reconciliationRequired": true,
+  "decision": "aplicar"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `received` | Sí | `object` | Sin restricción adicional declarada | Siempre `true`: el evento se verificó y se procesó (o se ignoró a propósito). | `{}` |
+| `eventId` | Sí | `string` | formato `uuid` | Id del evento (`webhook-id`). | `00000000-0000-4000-8000-000000000001` |
+| `applied` | Sí | `boolean` | Sin restricción adicional declarada | `true` si el evento cambió el estado local. | `true` |
+| `duplicate` | Sí | `boolean` | Sin restricción adicional declarada | `true` si el evento ya estaba archivado: la reentrega no repite el efecto. | `true` |
+| `ignored` | Sí | `boolean` | Sin restricción adicional declarada | `true` si el evento no corresponde a esta API (otro tipo de evento o un cobro desconocido no terminal). | `true` |
+| `reconciliationRequired` | Sí | `boolean` | Sin restricción adicional declarada | `true` si el evento quedó archivado sin procesar para conciliación humana. | `true` |
+| `decision` | No | `string` | valores: `aplicar`, `duplicado`, `obsoleto`, `contradiccion` | Cómo se interpretó el evento contra el estado local. | `aplicar` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | outsideWindow           ? 'La marca de tiempo del webhook está fuera de la ventana permitida'           : 'Firma del webhook inválida' | Excepción explícita en src/modules/payments/services/payments-gateway-webhook.service.ts |
+| 404 | `NOT_FOUND` | No hay una intención asociada al cobro informado | Excepción explícita en src/modules/payments/services/payments-gateway-webhook.service.ts |
+| 409 | `CONFLICT` | La referencia del cobro de la pasarela corresponde a más de una intención | Excepción explícita en src/modules/payments/repositories/payment-intents.repository.ts |
+| 422 | `PRECONDITION_FAILED` | El evento es de otro modo (test/live) que la clave configurada | Excepción explícita en src/modules/payments/services/payments-gateway-webhook.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 600, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "outsideWindow\n          ? 'La marca de tiempo del webhook está fuera de la ventana permitida'\n          : 'Firma del webhook inválida'",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/payments/gateway-webhooks"
+}
+```
+
+---
+
+## 8. POST /payments/intents
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -620,6 +1132,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN, CASHIER. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La pasarela sólo cobra en bolivianos (BOB) | Excepción explícita en src/modules/payments/services/payments-gateway-charge.service.ts |
+| 422 | `PRECONDITION_FAILED` | El importe no se puede expresar en centavos enteros positivos | Excepción explícita en src/modules/payments/services/payments-gateway-charge.service.ts |
+| 422 | `PRECONDITION_FAILED` | La pasarela admite cobros que vencen entre 60 segundos y 24 horas | Excepción explícita en src/modules/payments/services/payments-gateway-charge.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -637,7 +1152,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /payments/intents/{id}/fx-lock
+## 9. POST /payments/intents/{id}/fx-lock
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -762,6 +1277,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Intención de pago no encontrada | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
 | 409 | `CONFLICT` | La intención ya tiene un bloqueo de cambio vigente | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
+| 409 | `CONFLICT` | La intención ya tiene un cobro en la pasarela; no admite este cambio | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | El bloqueo de cambio exige monedas distintas | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
 | 422 | `PRECONDITION_FAILED` | Solo se puede bloquear el cambio de una intención pendiente | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
@@ -782,7 +1298,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /payments/intents/{id}/risk-assessment
+## 10. POST /payments/intents/{id}/risk-assessment
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -904,6 +1420,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Intención de pago no encontrada | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
+| 409 | `CONFLICT` | La intención ya tiene un cobro en la pasarela; no admite este cambio | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -922,7 +1439,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /payments/intents/{id}/splits
+## 11. POST /payments/intents/{id}/splits
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -1047,6 +1564,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Intención de pago no encontrada | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
 | 409 | `CONFLICT` | Los repartos superan el importe de la intención | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
+| 409 | `CONFLICT` | La intención ya tiene un cobro en la pasarela; no admite este cambio | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un reparto por importe exige `amount` | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un reparto por porcentaje exige `percentage` | Excepción explícita en src/modules/payments/services/payments-intents.service.ts |
@@ -1068,7 +1586,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. POST /payments/intents/{id}/transactions
+## 12. POST /payments/intents/{id}/transactions
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-intents`
@@ -1122,6 +1640,7 @@ Content-Type: application/json
 | `amount` | No | `string` | patrón runtime `POSITIVE_MONEY_REGEX` | Importe a procesar. Si se omite se toma el del intent. | `150.00` |
 | `gatewayTransactionRef` | No | `string` | longitud máxima 200 | Referencia devuelta por el gateway | `valor-ejemplo` |
 | `authorizationCode` | No | `string` | longitud máxima 100 | Código de autorización del emisor | `CODIGO_EJEMPLO` |
+| `paymentMethodType` | No | `string` | valores: `qr`, `card`, `bank_transfer`, `wallet` | Medio de pago en la pasarela. Obligatorio sólo con `payments.via_gateway` encendido; sin el flag se ignora. | `qr` |
 
 ### Payload completo de ejemplo
 
@@ -1137,7 +1656,8 @@ Content-Type: application/json
   "operation": "AUTHORIZE",
   "amount": "150.00",
   "gatewayTransactionRef": "valor-ejemplo",
-  "authorizationCode": "CODIGO_EJEMPLO"
+  "authorizationCode": "CODIGO_EJEMPLO",
+  "paymentMethodType": "qr"
 }
 ```
 
@@ -1165,7 +1685,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "paymentIntentId": "00000000-0000-4000-8000-000000000001",
   "amount": 150,
   "statusConceptId": "00000000-0000-4000-8000-000000000001",
-  "gatewayTransactionRef": "valor-ejemplo"
+  "gatewayTransactionRef": "valor-ejemplo",
+  "gateway": {
+    "paymentIntentId": "00000000-0000-4000-8000-000000000001",
+    "status": {},
+    "nextAction": {}
+  }
 }
 ```
 
@@ -1178,6 +1703,10 @@ Campos de la respuesta:
 | `amount` | Sí | `string` | Sin restricción adicional declarada | Valor de amount mantenido por la instancia. | `150` |
 | `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 | `gatewayTransactionRef` | No | `string` | Sin restricción adicional declarada | Valor de gateway transaction ref mantenido por la instancia. | `valor-ejemplo` |
+| `gateway` | No | `PaymentIntentGatewayDto` | Sin restricción adicional declarada | Cobro en la pasarela (sólo con `payments.via_gateway`). En ese caso no hay transacción local: `id` es el de la intención y `gatewayTransactionRef` el `pi_…` de la pasarela; el resultado llega por webhook. | `{"paymentIntentId":"00000000-0000-4000-8000-000000000001","status":{},"nextAction":{}}` |
+| `gateway.paymentIntentId` | No | `string` | Sin restricción adicional declarada | Identificador del cobro en la pasarela (`pi_…`) | `00000000-0000-4000-8000-000000000001` |
+| `gateway.status` | No | `object` | valores: `requires_action`, `processing`, `succeeded`, `failed`, `canceled`, `expired` | Estado del cobro en la pasarela | `{}` |
+| `gateway.nextAction` | No | `object` | Sin restricción adicional declarada | Qué tiene que hacer el pagador: mostrar el QR, transferir con una referencia o ir al formulario del banco | `{}` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1189,15 +1718,28 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PAYMENTS_ADMIN, CASHIER. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Intención de pago no encontrada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La intención se cobra a través de la pasarela; no admite una operación directa contra el proveedor | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La captura excede el importe autorizado | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La intención no tiene un despacho pendiente de conciliar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La reserva de este cobro es más vieja que la memoria de la clave en la pasarela: reenviar podría crear un segundo cobro. Concilialo a mano contra la pasarela | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La intención ya está en proceso y no tiene un cobro en la pasarela | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 409 | `CONFLICT` | La intención ya fue cobrada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 409 | `CONFLICT` | La intención tiene una operación abierta en el gateway | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 409 | `CONFLICT` | El importe excede el saldo pendiente de la intención | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
-| 409 | `CONFLICT` | La captura excede el importe autorizado | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | La deuda ya tiene otro cobro en curso en la pasarela | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 409 | `CONFLICT` | El importe excede el saldo pendiente de la deuda | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La pasarela cobra en un solo paso: sólo admite la operación SALE | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La pasarela cobra el importe completo de la intención | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 422 | `PRECONDITION_FAILED` | La intención está cancelada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 422 | `PRECONDITION_FAILED` | La intención requiere evaluación de riesgo antes de cobrar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 422 | `PRECONDITION_FAILED` | El motor de riesgo rechazó la intención | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La evaluación de riesgo pide revisión humana antes de cobrar | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 422 | `PRECONDITION_FAILED` | El importe a procesar debe ser mayor que cero | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La intención parece cobrar una deuda pero no se puede saber cuál: indicá sourceRefType "payment_debt" con el id de la deuda, o abrí una sesión de checkout | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La deuda de la intención no existe | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La deuda ya está saldada | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
+| 422 | `PRECONDITION_FAILED` | La pasarela sólo cobra deudas en bolivianos (BOB) | Excepción explícita en src/modules/payments/services/payments-transactions.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1215,7 +1757,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /payments/payouts
+## 13. POST /payments/payouts
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments`
@@ -1378,7 +1920,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /payments/reconciliation-runs
+## 14. POST /payments/reconciliation-runs
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments`
@@ -1545,7 +2087,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /payments/settlements/import
+## 15. POST /payments/settlements/import
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments`
@@ -1708,7 +2250,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /payments/transactions/{id}/cancellation-requests
+## 16. POST /payments/transactions/{id}/cancellation-requests
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-transactions`
@@ -1846,7 +2388,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /payments/transactions/{id}/refunds
+## 17. POST /payments/transactions/{id}/refunds
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-transactions`
@@ -1984,7 +2526,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. POST /payments/transactions/{id}/status-inquiry
+## 18. POST /payments/transactions/{id}/status-inquiry
 
 - **Módulo:** `payments`
 - **Etiqueta OpenAPI:** `payments-transactions`

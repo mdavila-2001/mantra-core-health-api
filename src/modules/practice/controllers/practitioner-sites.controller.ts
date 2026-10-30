@@ -27,6 +27,7 @@ import {
   CreateOwnSiteDto,
   SetSiteBankQrDto,
   SetSiteContactPhoneDto,
+  SetSiteLogoDto,
   UpdateOwnSiteDto,
   PractitionerSiteDto,
   PractitionerSitesResponseDto,
@@ -183,6 +184,33 @@ export class PractitionerSitesController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<PractitionerSiteDto> {
     return this.sitesService.setSiteBankQr(actor, siteId, dto.fileId);
+  }
+
+  /**
+   * El logo del consultorio propio, el que sale en el membrete de sus PDF.
+   *
+   * A diferencia del QR, sólo alcanza al consultorio **propio**: una sede de
+   * otra organización responde 404. El archivo ya entró por
+   * `POST /common/files/upload` y se valida como el logo de una organización.
+   */
+  @Audited({
+    action: 'PRACTICE_SITE_LOGO_SET',
+    entity: 'practice_site',
+    entityId: 'param:siteId',
+  })
+  @Put('me/sites/:siteId/logo')
+  @Roles('PRACTITIONER', 'CLINICIAN')
+  @ApiOperation({
+    summary: 'Fijar o quitar el logo del consultorio propio',
+    description:
+      'Asocia una imagen ya subida (png, jpeg o webp, NORMAL, hasta 2 MB) como logo del consultorio. `fileId: null` lo quita. 404 si la sede no es un consultorio propio; 422 si el archivo no sirve como logo.',
+  })
+  setSiteLogo(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Body() dto: SetSiteLogoDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<PractitionerSiteDto> {
+    return this.sitesService.setSiteLogo(actor, siteId, dto.fileId);
   }
 
   /** El contacto del profesional en una sede con vinculación activa. */

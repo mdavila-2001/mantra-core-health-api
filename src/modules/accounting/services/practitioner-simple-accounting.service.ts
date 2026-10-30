@@ -92,15 +92,21 @@ export class PractitionerSimpleAccountingService {
   ) {}
 
   /**
-   * Práctica de una escritura: el profesional está vinculado a ella (misma regla
-   * que sus hermanos) y es del tenant activo (ACC-01, como `createOwnLiability`).
+   * Práctica de una operación por `practiceId`, de lectura o de escritura: el
+   * profesional está vinculado a ella (misma regla que sus hermanos) y es del
+   * tenant activo (ACC-01, como `createOwnLiability`). Lo ajeno responde idéntico
+   * a lo inexistente: 404, mismo mensaje y `reason`, sin `details`.
+   *
+   * @returns El perfil profesional del actor.
    */
-  private async ownPracticeForWrite(
+  private async ownPractice(
     actor: AuthenticatedUser,
     practiceId: string,
-  ): Promise<void> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+  ): Promise<string> {
+    const practitionerProfileId =
+      await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
     await this.scope.practice(practiceId);
+    return practitionerProfileId;
   }
 
   /**
@@ -144,8 +150,7 @@ export class PractitionerSimpleAccountingService {
     period: SimpleSummaryPeriod | undefined,
     actor: AuthenticatedUser,
   ): Promise<SimplePractitionerSummaryDto> {
-    const practitionerProfileId =
-      await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+    const practitionerProfileId = await this.ownPractice(actor, practiceId);
     const range = summaryRange(period, new Date());
     const em = this.em.fork();
 
@@ -291,7 +296,7 @@ export class PractitionerSimpleAccountingService {
     practiceId: string,
     actor: AuthenticatedUser,
   ): Promise<SimpleAccountsResponseDto> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+    await this.ownPractice(actor, practiceId);
     const em = this.em.fork();
     await this.ensureGeneralAccounts(em, practiceId, actor.id);
     const rows = await this.repo.listAccounts(em, practiceId);
@@ -306,11 +311,14 @@ export class PractitionerSimpleAccountingService {
     dto: CreateSimpleAccountDto,
     actor: AuthenticatedUser,
   ): Promise<SimpleAccountDto> {
-    await this.ownPracticeForWrite(actor, dto.practiceId);
+    await this.ownPractice(actor, dto.practiceId);
     const name = this.validName(dto.name);
     const accountClass = this.validClass(dto.accountClass);
     const em = this.em.fork();
     return em.transactional(async (tx) => {
+      // El código sale de leer-y-sumar: se serializa por práctica para que dos
+      // altas simultáneas no calculen el mismo.
+      await this.repo.lockAccountsOf(tx, dto.practiceId);
       await this.ensureGeneralAccounts(tx, dto.practiceId, actor.id);
       const all = await this.repo.listAccounts(tx, dto.practiceId);
       this.assertNameFree(all, accountClass, name, undefined);
@@ -333,35 +341,40 @@ export class PractitionerSimpleAccountingService {
     actor: AuthenticatedUser,
   ): Promise<SimpleAccountDto> {
     const em = this.em.fork();
-    const account = await this.requireAccount(em, id, actor);
-    const name = this.validName(dto.name);
-    const accountClass =
-      dto.accountClass === undefined
-        ? (account.accountClass as SimpleAccountClass)
-        : this.validClass(dto.accountClass);
+    return em.transactional(async (tx) => {
+      const account = await this.requireAccount(tx, id, actor);
+      const name = this.validName(dto.name);
+      const accountClass =
+        dto.accountClass === undefined
+          ? (account.accountClass as SimpleAccountClass)
+          : this.validClass(dto.accountClass);
 
-    if (accountClass !== account.accountClass) {
-      if (
-        account.seeded ||
-        (await this.repo.countAccountUsage(em, account.id)) > 0
-      ) {
-        throw new ConflictException(
-          'No se puede cambiar la clase de una cuenta general o que ya se usa.',
-          { accountId: id },
-          account.seeded
-            ? AccountingErrorReason.SIMPLE_ACCOUNT_SEEDED
-            : AccountingErrorReason.SIMPLE_ACCOUNT_IN_USE,
-        );
+      if (accountClass !== account.accountClass) {
+        if (
+          account.seeded ||
+          (await this.repo.countAccountUsage(tx, account.id)) > 0
+        ) {
+          throw new ConflictException(
+            'No se puede cambiar la clase de una cuenta general o que ya se usa.',
+            { accountId: id },
+            account.seeded
+              ? AccountingErrorReason.SIMPLE_ACCOUNT_SEEDED
+              : AccountingErrorReason.SIMPLE_ACCOUNT_IN_USE,
+          );
+        }
       }
-    }
-    const all = await this.repo.listAccounts(em, account.practiceId);
-    this.assertNameFree(all, accountClass, name, account.id);
+      // El mismo cerrojo que el alta: dos renombres simultáneos al mismo
+      // nombre no pasan los dos la comprobación.
+      await this.repo.lockAccountsOf(tx, account.practiceId);
+      const all = await this.repo.listAccounts(tx, account.practiceId);
+      this.assertNameFree(all, accountClass, name, account.id);
 
-    account.name = name;
-    account.accountClass = accountClass;
-    touch(account, actor.id);
-    await em.flush();
-    return toAccountDto(account);
+      account.name = name;
+      account.accountClass = accountClass;
+      touch(account, actor.id);
+      await tx.flush();
+      return toAccountDto(account);
+    });
   }
 
   async deleteAccount(id: string, actor: AuthenticatedUser): Promise<void> {
@@ -458,7 +471,7 @@ export class PractitionerSimpleAccountingService {
     kind: SimpleRecordKind | undefined,
     actor: AuthenticatedUser,
   ): Promise<SimpleRecordsResponseDto> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+    await this.ownPractice(actor, practiceId);
     const em = this.em.fork();
     const rows = await this.repo.listRecords(em, practiceId, kind);
     return { items: rows.map(toRecordDto) };
@@ -468,7 +481,7 @@ export class PractitionerSimpleAccountingService {
     dto: CreateSimpleRecordDto,
     actor: AuthenticatedUser,
   ): Promise<SimpleRecordDto> {
-    await this.ownPracticeForWrite(actor, dto.practiceId);
+    await this.ownPractice(actor, dto.practiceId);
     if (!isRecordKind(dto.kind))
       this.invalid('Falta qué es: gasto, activo o deuda.');
     const kind = dto.kind;
@@ -553,7 +566,7 @@ export class PractitionerSimpleAccountingService {
     practiceId: string,
     actor: AuthenticatedUser,
   ): Promise<SimpleTransactionsResponseDto> {
-    await this.practitionerAccounting.assertOwnsPractice(actor, practiceId);
+    await this.ownPractice(actor, practiceId);
     const em = this.em.fork();
     const rows = await this.repo.listTransactions(em, practiceId);
     return { items: rows.map(toTransactionDto) };
@@ -563,7 +576,7 @@ export class PractitionerSimpleAccountingService {
     dto: CreateSimpleTransactionDto,
     actor: AuthenticatedUser,
   ): Promise<SimpleTransactionDto> {
-    await this.ownPracticeForWrite(actor, dto.practiceId);
+    await this.ownPractice(actor, dto.practiceId);
     const em = this.em.fork();
     await this.assertTransactionContent(em, dto, dto.practiceId);
     const created = this.repo.createTransaction(em, {

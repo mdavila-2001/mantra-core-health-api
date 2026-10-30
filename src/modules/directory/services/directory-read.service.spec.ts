@@ -52,6 +52,8 @@ function build() {
   const legalRepo = {
     listLegalRepsByTenant: mockFn(() => Promise.resolve([])),
     findPersonsByIds: mockFn(() => Promise.resolve(new Map())),
+    // Por defecto la carpeta legal está vacía; los tests de la carpeta la llenan.
+    listAffiliationDocsByTenant: mockFn(() => Promise.resolve([])),
   };
   const identifiersRepo = {
     findByIds: mockFn(() => Promise.resolve(new Map())),
@@ -63,9 +65,18 @@ function build() {
   const concepts = {
     resolve: mockFn(() =>
       Promise.resolve({
-        documentType: new Map(),
+        documentType: new Map([
+          ['ESCRITURA_CONSTITUCION', 'ct-doc-constitucion'],
+          ['NIT_EXHIBICION', 'ct-doc-nit'],
+          ['MATRICULA_SEPREC', 'ct-doc-seprec'],
+          ['PODER_REPRESENTANTE_LEGAL', 'ct-doc-poder'],
+        ]),
         issuingAuthority: new Map(),
-        verificationStatus: new Map(),
+        verificationStatus: new Map([
+          ['PENDIENTE', 'ct-ver-pendiente'],
+          ['VERIFICADO', 'ct-ver-verificado'],
+          ['RECHAZADO', 'ct-ver-rechazado'],
+        ]),
         representativeRole: new Map([
           ['REPRESENTANTE_LEGAL', 'ct-representante'],
           ['GERENTE_GENERAL', 'ct-general'],
@@ -497,6 +508,91 @@ describe('DirectoryReadService.listMemberships', () => {
      * Una membresía viva contra una organización que ya no está no es culpa de
      * quien pregunta: se omite en vez de romperle el panel.
      */
+    describe('carpeta legal', () => {
+      const conTenant = (d: ReturnType<typeof build>) => {
+        d.membershipsRepo.findActiveByUser.mockResolvedValue([
+          { tenantId: 'ten-1', tenantRoleConceptId: DIR.ROLE_OWNER },
+        ]);
+        d.tenantsRepo.findById.mockResolvedValue({
+          ...tenantRow('ten-1', 'LAB-1'),
+          legalEntityTypeConceptId: CONCEPTS.LEGAL_ENTITY_SRL,
+        });
+      };
+      const doc = (overrides: Record<string, unknown>) => ({
+        documentTypeConceptId: 'ct-doc-nit',
+        verificationStatusConceptId: 'ct-ver-pendiente',
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        createdAt: new Date('2026-05-01T00:00:00Z'),
+        ...overrides,
+      });
+
+      it('publica la forma societaria por su código, no por el concepto', async () => {
+        const d = build();
+        conTenant(d);
+
+        const output = await d.service.listMyTenants(actor);
+
+        expect(output.items[0].legalEntityType).toBe('SRL');
+        expect(output.items[0]).not.toHaveProperty('legalDocuments');
+        expect(output.items[0]).not.toHaveProperty('taxIdentifier');
+      });
+
+      it('lista los papeles en orden canónico con su estado, y saca el NIT de su documento', async () => {
+        const d = build();
+        conTenant(d);
+        d.legalRepo.listAffiliationDocsByTenant.mockResolvedValue([
+          doc({
+            documentTypeConceptId: 'ct-doc-poder',
+            verificationStatusConceptId: 'ct-ver-verificado',
+          }),
+          doc({
+            documentNumber: '1020304050',
+            registeredAt: new Date('2026-05-01'),
+          }),
+          doc({ documentTypeConceptId: 'ct-doc-constitucion' }),
+        ]);
+
+        const output = await d.service.listMyTenants(actor);
+
+        expect(output.items[0].legalDocuments).toEqual([
+          { role: 'CONSTITUTION_DOC', verificationStatus: 'PENDIENTE' },
+          {
+            role: 'TAX_IDENTIFIER_DOC',
+            verificationStatus: 'PENDIENTE',
+            documentNumber: '1020304050',
+            registeredAt: new Date('2026-05-01'),
+          },
+          { role: 'POWER_OF_ATTORNEY_DOC', verificationStatus: 'VERIFICADO' },
+        ]);
+        expect(output.items[0].taxIdentifier).toBe('1020304050');
+      });
+
+      it('ante dos filas del mismo papel gana la más reciente, y las dadas de baja no cuentan', async () => {
+        const d = build();
+        conTenant(d);
+        d.legalRepo.listAffiliationDocsByTenant.mockResolvedValue([
+          doc({
+            documentTypeConceptId: 'ct-doc-seprec',
+            verificationStatusConceptId: 'ct-ver-rechazado',
+            createdAt: new Date('2026-04-01T00:00:00Z'),
+          }),
+          doc({
+            documentTypeConceptId: 'ct-doc-seprec',
+            createdAt: new Date('2026-06-01T00:00:00Z'),
+          }),
+          doc({ statusConceptId: 'baja' }),
+          doc({ documentTypeConceptId: 'ct-desconocido' }),
+        ]);
+
+        const output = await d.service.listMyTenants(actor);
+
+        expect(output.items[0].legalDocuments).toEqual([
+          { role: 'COMMERCE_REGISTRY_DOC', verificationStatus: 'PENDIENTE' },
+        ]);
+        expect(output.items[0]).not.toHaveProperty('taxIdentifier');
+      });
+    });
+
     it('una organización que ya no existe se omite en vez de fallar', async () => {
       const d = build();
       d.membershipsRepo.findActiveByUser.mockResolvedValue([

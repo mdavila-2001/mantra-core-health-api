@@ -2,97 +2,97 @@
   "AdminPortalController_arbol": {
     "operacion": "GET /admin/portal/operaciones/:id/arbol",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_deriva": {
     "operacion": "GET /admin/portal/catalogo/deriva",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_detalleDeHallazgo": {
     "operacion": "GET /admin/portal/flujos/hallazgos/:id",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_detalleDeOperacion": {
     "operacion": "GET /admin/portal/operaciones/:id",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_detalleDeProceso": {
     "operacion": "GET /admin/portal/flujos/:codigo",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_fichaDeTabla": {
     "operacion": "GET /admin/portal/catalogo/tablas/:schema/:tabla",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_glosario": {
     "operacion": "GET /admin/portal/glosario",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_grafo": {
     "operacion": "GET /admin/portal/flujos/:codigo/grafo",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_hallazgos": {
     "operacion": "GET /admin/portal/flujos/hallazgos",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_linaje": {
     "operacion": "GET /admin/portal/linaje",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_linajeDeTabla": {
     "operacion": "GET /admin/portal/linaje/tablas/:schema/:tabla",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_listarOperaciones": {
     "operacion": "GET /admin/portal/operaciones",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_listarProcesos": {
     "operacion": "GET /admin/portal/flujos",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_listarTablas": {
     "operacion": "GET /admin/portal/catalogo/tablas",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_mapa": {
     "operacion": "GET /admin/portal/flujos/mapa",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AdminPortalController_version": {
     "operacion": "GET /admin/portal/version",
     "motivo": "Lee los JSON del inventario generado (`inventario/`), cargados en memoria por `InventoryRepository`; no consulta la base de datos.",
-    "fuente": "src/modules/data_catalog/inventory/inventory.repository.ts:44",
+    "fuente": "src/modules/data_catalog/infrastructure/repositories/inventory.repository.ts:44",
     "revision": "manual, 2026-10-21"
   },
   "AppController_getHello": {
@@ -155,6 +155,36 @@
     "fuente": "src/modules/iam/application/services/iam-onboarding-drafts.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
+  "PharmacyBulkController_bulkCategories": {
+    "operacion": "POST /pharmacies/:pharmacyId/categories/bulk",
+    "motivo": "El controlador delega en `PharmacyBulkService.run` pasando el manejador como argumento y el generador no sigue esa llamada. Sí escribe: las categorías por `PharmacyCategoriesService.create`, las mismas tablas que la ruta unitaria.",
+    "fuente": "src/modules/pharmacy/services/bulk/categories.bulk-handler.ts",
+    "revision": "manual, 2026-10-30"
+  },
+  "PharmacyBulkController_bulkPrices": {
+    "operacion": "POST /pharmacies/:pharmacyId/prices/bulk",
+    "motivo": "El controlador delega en `PharmacyBulkService.run` pasando el manejador como argumento y el generador no sigue esa llamada. Sí escribe: los precios del producto por `PharmacyProductsService.updateProduct`, las mismas tablas que la ruta unitaria.",
+    "fuente": "src/modules/pharmacy/services/bulk/prices.bulk-handler.ts",
+    "revision": "manual, 2026-10-30"
+  },
+  "PharmacyBulkController_bulkProducts": {
+    "operacion": "POST /pharmacies/:pharmacyId/products/bulk",
+    "motivo": "El controlador delega en `PharmacyBulkService.run` pasando el manejador como argumento y el generador no sigue esa llamada. Sí escribe: los productos por `PharmacyProductsService.updateProduct` (y sus precios por el manejador de precios), las mismas tablas que la ruta unitaria.",
+    "fuente": "src/modules/pharmacy/services/bulk/products.bulk-handler.ts",
+    "revision": "manual, 2026-10-30"
+  },
+  "PharmacyBulkController_bulkSites": {
+    "operacion": "POST /pharmacies/:pharmacyId/sites/bulk",
+    "motivo": "El controlador delega en `PharmacyBulkService.run` pasando el manejador como argumento y el generador no sigue esa llamada. Sí escribe: las sedes por `PharmacySitesService.updateSite` y el alta de sede por `PharmacyProvisioningService`, las mismas tablas que la ruta unitaria.",
+    "fuente": "src/modules/pharmacy/services/bulk/sites.bulk-handler.ts",
+    "revision": "manual, 2026-10-30"
+  },
+  "ReverseGeocodingController_reverse": {
+    "operacion": "POST /public/geo/reverse",
+    "motivo": "Traduce un punto del mapa a calle consultando el geocodificador externo (Nominatim, con Photon de respaldo) y guarda la respuesta en una caché en memoria; no consulta la base de datos.",
+    "fuente": "src/modules/geo/reverse-geocoding/reverse-geocoding.service.ts:193",
+    "revision": "manual, 2026-10-30"
+  },
   "SchedulingController_listActivityTypes": {
     "operacion": "GET /scheduling/activity-types",
     "motivo": "Devuelve el catálogo de tipologías de actividad, que vive en constantes del código (ACTIVITY_TYPES y sus etiquetas); no accede a datos.",
@@ -176,19 +206,19 @@
   "TelemetryOnboardingAnalyticsController_getFunnelReport": {
     "operacion": "GET /admin/analytics/onboarding/funnel",
     "motivo": "Calcula el embudo sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.",
-    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "fuente": "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
   "TelemetryOnboardingAnalyticsController_getHeatmapReport": {
     "operacion": "GET /admin/analytics/onboarding/heatmap",
     "motivo": "Calcula el mapa de calor sobre los eventos de alta que el proceso acumula en memoria (`events`); no consulta la base de datos.",
-    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "fuente": "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
   "TelemetryOnboardingAnalyticsController_recordEvents": {
     "operacion": "POST /telemetry/onboarding-events",
     "motivo": "Los eventos del embudo de alta se acumulan sólo en la memoria del proceso (`events`); no hay fila en Postgres.",
-    "fuente": "src/modules/telemetry/services/telemetry-onboarding-analytics.service.ts:19",
+    "fuente": "src/modules/telemetry/application/services/telemetry-onboarding-analytics.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
   "TerminologyImportTemplateController_descargarPlantilla": {

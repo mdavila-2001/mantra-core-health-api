@@ -20,9 +20,9 @@
 | [agents_history](#agents_history) | Preserva versiones o estados históricos de agents para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [allergy_intolerances_history](#allergy_intolerances_history) | Preserva versiones o estados históricos de allergy intolerances para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [analytics_governance_log](#analytics_governance_log) | Registra cambios de gobierno analítico para conservar trazabilidad de decisiones que afectan el uso secundario de datos de salud. | 9 | 5 | 4 | COINCIDE |
-| [appointment_bookings_history](#appointment_bookings_history) | Preserva versiones o estados históricos de appointment bookings para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 53 | COINCIDE |
+| [appointment_bookings_history](#appointment_bookings_history) | Preserva versiones o estados históricos de appointment bookings para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 6 | 50 | COINCIDE |
 | [assets_history](#assets_history) | Preserva versiones o estados históricos de assets para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 14 | 8 | 201 | COINCIDE |
+| [audit_log](#audit_log) | Conserva eventos de auditoría de acciones del sistema para reconstruir quién realizó operaciones y cuándo. | 14 | 8 | 204 | COINCIDE |
 | [automated_rules_history](#automated_rules_history) | Preserva versiones o estados históricos de automated rules para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [bills_history](#bills_history) | Preserva versiones o estados históricos de bills para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [booking_policies_history](#booking_policies_history) | Preserva versiones o estados históricos de booking policies para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -49,7 +49,7 @@
 | [crm_accounts_history](#crm_accounts_history) | Preserva versiones o estados históricos de crm accounts para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [custom_audiences_history](#custom_audiences_history) | Preserva versiones o estados históricos de custom audiences para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [custom_conversions_history](#custom_conversions_history) | Preserva versiones o estados históricos de custom conversions para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [data_access_log](#data_access_log) | Registra accesos a datos para respaldar trazabilidad de consultas y revisiones de privacidad. | 11 | 9 | 14 | COINCIDE |
+| [data_access_log](#data_access_log) | Registra accesos a datos para respaldar trazabilidad de consultas y revisiones de privacidad. | 11 | 9 | 15 | COINCIDE |
 | [delegated_access_audit_log](#delegated_access_audit_log) | Conserva evidencia de acciones realizadas mediante acceso delegado para identificar actor, alcance y contexto. | 10 | 9 | 1 | COINCIDE |
 | [departments_history](#departments_history) | Preserva versiones o estados históricos de departments para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [diagnostic_reports_history](#diagnostic_reports_history) | Preserva versiones o estados históricos de diagnostic reports para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -137,7 +137,7 @@
 | [topics_history](#topics_history) | Preserva versiones o estados históricos de topics para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [trackable_subjects_history](#trackable_subjects_history) | Preserva versiones o estados históricos de trackable subjects para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [users_history](#users_history) | Preserva versiones o estados históricos de users para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
-| [verified_badges_history](#verified_badges_history) | Preserva versiones o estados históricos de verified badges para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 8 | COINCIDE |
+| [verified_badges_history](#verified_badges_history) | Preserva versiones o estados históricos de verified badges para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 12 | COINCIDE |
 | [visit_requests_history](#visit_requests_history) | Conserva revisiones de solicitudes de visita médica y su operación, para auditar cambios en la coordinación entre representantes y profesionales de salud. | 10 | 5 | 0 | COINCIDE |
 | [wallets_history](#wallets_history) | Preserva versiones o estados históricos de wallets para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
 | [workflows_history](#workflows_history) | Preserva versiones o estados históricos de workflows para reconstruir cambios, atribuirlos y sostener auditoría del sistema médico. | 10 | 5 | 0 | COINCIDE |
@@ -791,7 +791,7 @@ Preserva versiones o estados históricos de appointment bookings para reconstrui
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: appointment_bookings_history`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `AppointmentBookingsHistory` — `src/modules/audit/entities/appointment_bookings_history.entity.ts`
-- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 53 operaciones
+- **Resumen:** 10 columnas · 6 índices · 4 FK salientes · 0 entrantes · 50 operaciones
 
 #### Columnas
 
@@ -855,9 +855,6 @@ Preserva versiones o estados históricos de appointment bookings para reconstrui
 | POST /scheduling/bookings/{id}/delay | ACTUALIZA | POR_REGISTRO |
 | POST /scheduling/bookings/{id}/delay | CREA | POR_REGISTRO |
 | POST /scheduling/bookings/{id}/delay | LEE | POR_REGISTRO |
-| PUT /scheduling/bookings/{id}/payment-state | ACTUALIZA | POR_REGISTRO |
-| PUT /scheduling/bookings/{id}/payment-state | CREA | POR_REGISTRO |
-| PUT /scheduling/bookings/{id}/payment-state | LEE | POR_REGISTRO |
 | POST /scheduling/bookings/{id}/propose-schedule | ACTUALIZA | POR_REGISTRO |
 | POST /scheduling/bookings/{id}/propose-schedule | CREA | POR_REGISTRO |
 | POST /scheduling/bookings/{id}/propose-schedule | LEE | POR_REGISTRO |
@@ -972,7 +969,7 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: audit_log`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `AuditLog` — `src/modules/audit/entities/audit_log.entity.ts`
-- **Resumen:** 14 columnas · 8 índices · 6 FK salientes · 0 entrantes · 201 operaciones
+- **Resumen:** 14 columnas · 8 índices · 6 FK salientes · 0 entrantes · 204 operaciones
 
 #### Columnas
 
@@ -1074,6 +1071,8 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 | POST /clinical/conditions/{id}/change-status | LEE | DIRECTA |
 | POST /clinical/conditions/{id}/verification | CREA | DIRECTA |
 | POST /clinical/conditions/{id}/verification | LEE | DIRECTA |
+| POST /clinical/encounters/check-in | CREA | DIRECTA |
+| POST /clinical/encounters/check-in | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/invalidate | CREA | DIRECTA |
 | POST /clinical/medication-requests/{id}/invalidate | LEE | DIRECTA |
 | POST /clinical/medication-requests/{id}/issue | CREA | DIRECTA |
@@ -1214,6 +1213,7 @@ Conserva eventos de auditoría de acciones del sistema para reconstruir quién r
 | POST /visit-surveys/labs/{pharmaLabId}/{surveyId}/close | LEE | DIRECTA |
 | POST /visit-surveys/responses/{responseId} | CREA | DIRECTA |
 | POST /visit-surveys/responses/{responseId} | LEE | DIRECTA |
+| GET /pharmacy/pharmacies/{id}/summary | LEE | POR_SQL |
 | POST /dental-procedures | CREA | DIRECTA |
 | POST /dental-procedures | LEE | DIRECTA |
 | POST /procedure-cases/{id}/confirm | CREA | DIRECTA |
@@ -2899,7 +2899,7 @@ Registra accesos a datos para respaldar trazabilidad de consultas y revisiones d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: data_access_log`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `DataAccessLog` — `src/modules/audit/entities/data_access_log.entity.ts`
-- **Resumen:** 11 columnas · 9 índices · 6 FK salientes · 0 entrantes · 14 operaciones
+- **Resumen:** 11 columnas · 9 índices · 6 FK salientes · 0 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -2960,6 +2960,7 @@ Registra accesos a datos para respaldar trazabilidad de consultas y revisiones d
 | POST /insurance/patients/conversation | CREA | DIRECTA |
 | POST /insurance/patients/search | CREA | DIRECTA |
 | POST /insurance/portability/export | CREA | DIRECTA |
+| GET /pharmacy/prescription-shares/{token} | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -8557,7 +8558,7 @@ Preserva versiones o estados históricos de verified badges para reconstruir cam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_10_audit.puml: verified_badges_history`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_10_audit.puml` · **DDL:** `SQL/10_audit/02_tables.sql`
 - **Entidad del ORM:** `VerifiedBadgesHistory` — `src/modules/audit/entities/verified_badges_history.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 8 operaciones
+- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 12 operaciones
 
 #### Columnas
 
@@ -8605,6 +8606,10 @@ Preserva versiones o estados históricos de verified badges para reconstruir cam
 | POST /identity/manual-review/{id}/decision | CREA | DIRECTA |
 | POST /identity/verification-cases/expire-sweep | CREA | DIRECTA |
 | POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
+| POST /admissions/{id}/decision | CREA | DIRECTA |
+| POST /admissions/{id}/reinstate | CREA | DIRECTA |
+| POST /admissions/{id}/suspend | CREA | DIRECTA |
+| POST /admissions/expire-sweep | CREA | DIRECTA |
 
 #### Gobierno
 

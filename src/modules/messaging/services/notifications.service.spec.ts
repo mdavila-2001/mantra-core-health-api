@@ -227,6 +227,68 @@ describe('NotificationsService', () => {
       expect(d.logger.warn).toHaveBeenCalled();
     });
 
+    describe('mandatory (avisos críticos de otros módulos)', () => {
+      it('un aviso crítico se entrega aunque la categoría esté silenciada', async () => {
+        const d = build();
+        d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
+        d.notificationsRepo.findPreferences.mockResolvedValue([
+          { categoryConceptId: CATEGORY, optedIn: false },
+        ]);
+
+        const res = await d.service.createRequest(dto, actor, {
+          mandatory: true,
+        });
+
+        expect(res.suppressed).toBe(false);
+        expect(res.statusConceptId).toBe(CONCEPTS.NOTIF_PENDING);
+      });
+
+      it('sin mandatory, la misma categoría silenciada sí suprime (no es el comportamiento por defecto)', async () => {
+        const d = build();
+        d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
+        d.notificationsRepo.findPreferences.mockResolvedValue([
+          { categoryConceptId: CATEGORY, optedIn: false },
+        ]);
+
+        expect((await d.service.createRequest(dto, actor)).suppressed).toBe(
+          true,
+        );
+        expect(
+          (await d.service.createRequest(dto, actor, { mandatory: false }))
+            .suppressed,
+        ).toBe(true);
+      });
+
+      it('mandatory no pasa por encima de la negativa del canal entero', async () => {
+        const d = build();
+        d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
+        d.notificationsRepo.findPreferences.mockResolvedValue([
+          { categoryConceptId: undefined, optedIn: false },
+        ]);
+
+        const res = await d.service.createRequest(dto, actor, {
+          mandatory: true,
+        });
+
+        expect(res.suppressed).toBe(true);
+      });
+
+      it('el DTO HTTP no puede pedirlo: un campo mandatory en el cuerpo se ignora', async () => {
+        const d = build();
+        d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());
+        d.notificationsRepo.findPreferences.mockResolvedValue([
+          { categoryConceptId: CATEGORY, optedIn: false },
+        ]);
+
+        const res = await d.service.createRequest(
+          { ...dto, mandatory: true },
+          actor,
+        );
+
+        expect(res.suppressed).toBe(true);
+      });
+    });
+
     it('suppresses inside the recipient quiet hours', async () => {
       const d = build();
       d.notificationsRepo.findChannelById.mockResolvedValue(activeChannel());

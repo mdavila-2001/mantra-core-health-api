@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `directory`.
- * 49 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 60 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const directoryIndexes: readonly IndexTuple[] = [
@@ -53,6 +53,17 @@ export const directoryIndexes: readonly IndexTuple[] = [
   ['tenant_memberships', 'ix_tenant_memberships_created_by_user_id', ['created_by_user_id'], false, 'btree'],
   ['tenant_memberships', 'ix_tenant_memberships_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['tenant_memberships', 'ix_tenant_memberships_tenant_id_status_concept_id', ['tenant_id', 'status_concept_id', 'updated_at desc'], false, 'btree'],
+  ['tenant_medical_facilities', 'uk_tenant_medical_facilities_tenant', ['tenant_id'], true, 'btree'],
+  ['tenant_medical_facilities', 'ix_tenant_medical_facilities_registration_number', ['health_facility_registration_number'], false, 'btree'],
+  ['tenant_medical_facilities', 'ix_tenant_medical_facilities_tax_identifier_number', ['tax_identifier_number'], false, 'btree'],
+  ['tenant_medical_facilities', 'ix_tenant_medical_facilities_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['tenant_medical_facilities', 'ix_tenant_medical_facilities_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['tenant_medical_facility_sites', 'ix_tenant_medical_facility_sites_tenant_id', ['tenant_id'], false, 'btree'],
+  ['tenant_medical_facility_sites', 'ix_tenant_medical_facility_sites_medical_facility_id', ['medical_facility_id'], false, 'btree'],
+  ['tenant_medical_facility_sites', 'ux_tenant_medical_facility_sites_facility_ordinal', ['medical_facility_id', 'ordinal'], true, 'btree'],
+  ['tenant_medical_facility_sites', 'ux_tenant_medical_facility_sites_one_headquarters', ['medical_facility_id'], true, 'btree', 'site_kind = \'headquarters\''],
+  ['tenant_medical_facility_sites', 'ix_tenant_medical_facility_sites_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['tenant_medical_facility_sites', 'ix_tenant_medical_facility_sites_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['tenant_web_configs', 'uk_tenant_web_configs_domain', ['domain'], true, 'btree'],
   ['tenant_web_configs', 'ix_tenant_web_configs_tenant_id', ['tenant_id'], false, 'btree'],
   ['tenant_web_configs', 'ix_tenant_web_configs_primary_language_concept_id', ['primary_language_concept_id'], false, 'btree'],

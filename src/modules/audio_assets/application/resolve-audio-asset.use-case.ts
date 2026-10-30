@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   ResourceNotFoundException,
   getCurrentTenantId,
@@ -14,12 +14,21 @@ import { InvalidDynamicAudioValueError } from '../domain/dynamic-value-normalize
 import { renderAudioTemplate } from '../domain/template-renderer';
 import type { AudioGenerationMode } from '../domain/audio.types';
 import type { AudioTemplates } from '../entities';
-import { AudioValueCipherService } from '../infrastructure/audio-value-cipher.service';
-import { AudioJobQueueAdapter } from '../infrastructure/audio-job-queue.adapter';
-import { AudioMetricsService } from '../infrastructure/audio-metrics.service';
 import { TracingService } from '../../../observability/tracing.service';
-import { AudioAssetsRepository } from '../repositories/audio-assets.repository';
+import { AudioAssetsRepository } from '../infrastructure/repositories/audio-assets.repository';
 import { AudioBudgetPolicy } from './audio-budget.policy';
+import {
+  AUDIO_JOB_QUEUE_PORT,
+  type AudioJobQueuePort,
+} from './ports/audio-job-queue.port';
+import {
+  AUDIO_METRICS_PORT,
+  type AudioMetricsPort,
+} from './ports/audio-metrics.port';
+import {
+  AUDIO_VALUE_CIPHER_PORT,
+  type AudioValueCipherPort,
+} from './ports/audio-value-cipher.port';
 import { recordAudioResolutionEvent } from './audio-resolution-events';
 import {
   buildAudioSynthesisProfile,
@@ -43,9 +52,10 @@ export class ResolveAudioAssetUseCase {
   constructor(
     private readonly repository: AudioAssetsRepository,
     private readonly budget: AudioBudgetPolicy,
-    private readonly cipher: AudioValueCipherService,
-    private readonly queue: AudioJobQueueAdapter,
-    private readonly metrics: AudioMetricsService,
+    @Inject(AUDIO_VALUE_CIPHER_PORT)
+    private readonly cipher: AudioValueCipherPort,
+    @Inject(AUDIO_JOB_QUEUE_PORT) private readonly queue: AudioJobQueuePort,
+    @Inject(AUDIO_METRICS_PORT) private readonly metrics: AudioMetricsPort,
     private readonly tracing: TracingService,
   ) {}
 

@@ -78,6 +78,15 @@ const LIVE_REQUEST_STATES: readonly string[] = [
 ];
 
 const DEFAULT_PRIORITY = 5;
+
+/** Opciones de `createRequest` que sólo otros módulos pueden pedir (nunca el cliente HTTP). */
+export interface CreateRequestOptions {
+  /**
+   * El aviso es crítico: se entrega aunque el destinatario haya silenciado su
+   * categoría. Sigue respetando el opt-out del canal entero.
+   */
+  readonly mandatory?: boolean;
+}
 /** Cuántas notificaciones trae la bandeja si nadie pide un tope. */
 const DEFAULT_INBOX_PAGE = 20;
 /** Tope de filas que marca de una vez «marcar todas como leídas». */
@@ -123,10 +132,16 @@ export class NotificationsService implements InAppNotificationEmitter {
    * Sin consentimiento o sin opt-in **no se entrega, pero sí se registra** como
    * suprimida: dejar de escribir la fila haría imposible demostrar después que
    * se respetó la preferencia del destinatario.
+   *
+   * `options.mandatory` es sólo para otros módulos que llaman al servicio: lo
+   * pide el emisor de avisos críticos (rechazo, suspensión…) para que silenciar
+   * la **categoría** no los detenga. No está en el DTO a propósito: ninguna
+   * petición HTTP puede saltarse la preferencia de nadie.
    */
   async createRequest(
     dto: CreateNotificationRequestDto,
     actor: AuthenticatedUser,
+    options: CreateRequestOptions = {},
   ): Promise<NotificationRequestResponseDto> {
     this.logger.info(
       { operation: 'messaging.notification.request', channelId: dto.channelId },
@@ -213,7 +228,10 @@ export class NotificationsService implements InAppNotificationEmitter {
         }
       }
 
-      const suppression = await this.evaluateSuppression(tx, dto);
+      const suppression = await this.evaluateSuppression(tx, {
+        ...dto,
+        ignoreCategoryOptOut: options.mandatory === true,
+      });
       const statusConceptId = suppression
         ? CONCEPTS.NOTIF_SUPPRESSED
         : CONCEPTS.NOTIF_PENDING;
@@ -1071,6 +1089,12 @@ export class NotificationsService implements InAppNotificationEmitter {
        * aplazado llegaría igual y sonaría el teléfono.
        */
       ignoreQuietHours?: boolean;
+      /**
+       * Entregar aunque la categoría esté silenciada (aviso crítico). No pasa
+       * por encima del opt-out del **canal** entero, que es una negativa más
+       * amplia que ninguna categoría.
+       */
+      ignoreCategoryOptOut?: boolean;
     },
   ): Promise<string | undefined> {
     if (!dto.recipientUserId) return undefined;
@@ -1095,7 +1119,7 @@ export class NotificationsService implements InAppNotificationEmitter {
       (preference) => !preference.categoryConceptId,
     );
 
-    if (ofCategory?.optedIn === false) {
+    if (ofCategory?.optedIn === false && !dto.ignoreCategoryOptOut) {
       return 'El destinatario no acepta este canal para esta categoría';
     }
     if (ofChannel?.optedIn === false) {

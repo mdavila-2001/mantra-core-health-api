@@ -157,6 +157,72 @@ describe('DirectoryTenantsService', () => {
       );
     });
 
+    it('un proceso interno puede fijar el id del tenant y de su membresía owner', async () => {
+      const d = build();
+      d.tenantsRepo.findByCode.mockResolvedValue(null);
+      d.tenantsRepo.create.mockReturnValue({
+        id: 'fijo-1',
+        code: 'ACME',
+        legalName: 'Acme',
+        statusConceptId: DIR.TENANT_PENDING,
+        verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
+        createdAt: new Date('2026-01-01'),
+      });
+
+      await d.service.provision(
+        {
+          tenantType: 'PROVIDER' as const,
+          countryConceptId: 'c1',
+          jurisdictionConceptId: 'j1',
+          code: 'ACME',
+          legalName: 'Acme',
+          ownerUserId: 'u1',
+        },
+        actor,
+        { tenantId: 'fijo-1', ownerMembershipId: 'fijo-m1' },
+      );
+
+      expect(d.tenantsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ id: 'fijo-1' }),
+      );
+      expect(d.membershipsRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ id: 'fijo-m1', tenantId: 'fijo-1' }),
+      );
+    });
+
+    it('sin ids fijos deja que la entidad genere los suyos', async () => {
+      const d = build();
+      d.tenantsRepo.findByCode.mockResolvedValue(null);
+      d.tenantsRepo.create.mockReturnValue({
+        id: 't1',
+        code: 'ACME',
+        legalName: 'Acme',
+        statusConceptId: DIR.TENANT_PENDING,
+        verificationStatusConceptId: DIR.TENANT_UNVERIFIED,
+        createdAt: new Date('2026-01-01'),
+      });
+
+      await d.service.provision(
+        {
+          tenantType: 'PROVIDER' as const,
+          countryConceptId: 'c1',
+          jurisdictionConceptId: 'j1',
+          code: 'ACME',
+          legalName: 'Acme',
+          ownerUserId: 'u1',
+        },
+        actor,
+      );
+
+      const [, data] = d.tenantsRepo.create.mock.calls[0] as unknown as [
+        unknown,
+        { id?: string },
+      ];
+      expect(data.id).toBeUndefined();
+    });
+
     it('rejects when the code already exists (conflict)', async () => {
       const d = build();
       d.tenantsRepo.findByCode.mockResolvedValue({ id: 'x' });

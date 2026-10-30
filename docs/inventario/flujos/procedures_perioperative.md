@@ -3,7 +3,7 @@
 # Flujos del módulo `procedures_perioperative`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 32 (28 con decisiones propias, 4 sin ellas)
+- **Operaciones:** 32 (29 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [procedures_perioperative](../endpoints/procedures_perioperative.md)
 
 ## Proceso: Módulo 53 — Procedimientos y Perioperatorio
@@ -64,8 +64,8 @@ _Fuente: `src/modules/procedures_perioperative/README.md:117`_
 | `UC-53-12` | Recuperación | POST /procedure-cases/{id}/pacu-stays | PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 3 |
 | `UC-53-13` | Cancelar y liberar quirófano | POST /procedure-cases/{id}/cancel | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 3 |
 | `UC-53-14` | Cargos y utilización | POST /procedure-cases/{id}/charge-items/post | PERIOP_ADMIN · BILLING | MEDIO | 3 |
-| `ctrl:DentalController` | Operaciones de DentalController que el README no asigna a un caso de uso | GET /dental-procedures | CLINICIAN · PRACTITIONER | BAJO | 2 |
-|  |  | POST /dental-procedures | CLINICIAN · PRACTITIONER | MEDIO | 8 |
+| `ctrl:DentalController` | Operaciones de DentalController que el README no asigna a un caso de uso | GET /dental-procedures | CLINICIAN · PRACTITIONER | BAJO | 20 |
+|  |  | POST /dental-procedures | CLINICIAN · PRACTITIONER | MEDIO | 24 |
 |  |  | GET /dental-procedures/catalog | CLINICIAN · PRACTITIONER | BAJO | 0 |
 | `ctrl:PeriopController` | Operaciones de PeriopController que el README no asigna a un caso de uso | POST /pacu-stays/{stayId}/assessments | PERIOP_NURSE · ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 2 |
 |  |  | POST /pacu-stays/{stayId}/discharge | ANESTHESIOLOGIST · PERIOP_ADMIN | MEDIO | 6 |
@@ -76,7 +76,7 @@ _Fuente: `src/modules/procedures_perioperative/README.md:117`_
 |  |  | POST /procedure-cases/{id}/confirm | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 9 |
 |  |  | POST /procedure-cases/{id}/findings | SURGEON · PERIOP_ADMIN | MEDIO | 4 |
 |  |  | POST /procedure-cases/{id}/operative-reports/{reportId}/sign | SURGEON · PERIOP_ADMIN | MEDIO | 7 |
-|  |  | POST /procedure-cases/{id}/preoperative-orders | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 28 |
+|  |  | POST /procedure-cases/{id}/preoperative-orders | ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN | MEDIO | 30 |
 |  |  | POST /procedure-cases/{id}/specimens | SURGEON · PERIOP_NURSE · PERIOP_ADMIN | MEDIO | 2 |
 |  |  | GET /procedure-cases/{id}/team-members | SURGEON · ANESTHESIOLOGIST · PERIOP_NURSE · SURGERY_SCHEDULER · PERIOP_ADMIN | BAJO | 2 |
 |  |  | POST /procedure-cases/{id}/team-members | SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN | MEDIO | 8 |
@@ -129,8 +129,12 @@ flowchart LR
   t53[("procedures_perioperative.procedure_case_locations")]:::tabla
   t55[("procedures_perioperative.procedure_cancellations")]:::tabla
   t58[("procedures_perioperative.procedure_charge_items")]:::tabla
-  t61[("procedures_perioperative.procedure_body_sites")]:::tabla
-  t63[("iam.sessions")]:::tabla
+  t61[("authz.access_policies")]:::tabla
+  t62[("authz.care_relationships")]:::tabla
+  t63[("authz.clinical_access_grants")]:::tabla
+  t64[("authz.field_permissions")]:::tabla
+  t65[("authz.patient_legal_representations")]:::tabla
+  t66[("authz.permissions")]:::tabla
   subgraph s0["UC-53-01 · Programar caso y reservar quirófano"]
     o1["POST /procedure-cases"]:::op
   end
@@ -176,11 +180,12 @@ flowchart LR
   subgraph s13["UC-53-14 · Cargos y utilización"]
     o56["POST /procedure-cases/{id}/charge-items/post"]:::op
   end
-  t64[("+2 tablas más")]
+  t67[("+14 tablas más")]
+  t69[("+18 tablas más")]
   subgraph s14["ctrl:DentalController · Operaciones de DentalController que el README no asigna…"]
     o59["GET /dental-procedures"]:::op
-    o62["POST /dental-procedures"]:::op
-    o65["GET /dental-procedures/catalog"]:::op
+    o68["POST /dental-procedures"]:::op
+    o70["GET /dental-procedures/catalog"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -258,17 +263,22 @@ flowchart LR
   o56 -->|"CREA"| t58
   o56 -->|"LEE"| t58
   a60 --> o59
-  o59 -->|"LEE"| t46
   o59 -->|"LEE"| t61
-  a60 --> o62
-  o62 -->|"CREA"| t10
-  o62 -->|"LEE"| t10
-  o62 -->|"CREA"| t46
-  o62 -->|"CREA"| t47
-  o62 -->|"LEE"| t47
-  o62 -->|"LEE"| t63
-  o62 -.-> t64
-  a60 --> o65
+  o59 -->|"LEE"| t62
+  o59 -->|"LEE"| t63
+  o59 -->|"LEE"| t64
+  o59 -->|"LEE"| t65
+  o59 -->|"LEE"| t66
+  o59 -.-> t67
+  a60 --> o68
+  o68 -->|"CREA"| t10
+  o68 -->|"LEE"| t10
+  o68 -->|"LEE"| t61
+  o68 -->|"LEE"| t62
+  o68 -->|"LEE"| t63
+  o68 -->|"LEE"| t64
+  o68 -.-> t69
+  a60 --> o70
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -285,7 +295,7 @@ flowchart LR
   a22(["SURGERY_SCHEDULER · SURGEON · PERIOP_ADMIN"]):::actor
   a38(["SURGEON · PERIOP_ADMIN"]):::actor
   a49(["ANESTHESIOLOGIST · SURGEON · PERIOP_ADMIN"]):::actor
-  a58(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
+  a59(["SURGEON · PERIOP_NURSE · PERIOP_ADMIN"]):::actor
   t3[("procedures_perioperative.pacu_assessments")]:::tabla
   t4[("procedures_perioperative.pacu_stays")]:::tabla
   t7[("procedures_perioperative.postoperative_followups")]:::tabla
@@ -316,21 +326,22 @@ flowchart LR
   t45[("procedures_perioperative.operative_reports")]:::tabla
   t46[("procedures_perioperative.procedure_case_milestones")]:::tabla
   t50[("billing.service_catalog")]:::tabla
-  t51[("clinical.diagnostic_reports")]:::tabla
-  t52[("clinical.encounters")]:::tabla
-  t53[("clinical.service_requests")]:::tabla
-  t54[("diagnostics.diagnostic_report_versions")]:::tabla
-  e56>"ServiceRequestPlaced"]:::evento
-  t59[("procedures_perioperative.procedure_specimens")]:::tabla
-  t64[("profiles.professional_credentials")]:::tabla
-  e67>"periop.case.team_participation_declined"]:::evento
+  t51[("chart.clinical_note_headers")]:::tabla
+  t52[("clinical.diagnostic_reports")]:::tabla
+  t53[("clinical.encounters")]:::tabla
+  t54[("clinical.service_request_notes")]:::tabla
+  t55[("clinical.service_requests")]:::tabla
+  e57>"ServiceRequestPlaced"]:::evento
+  t60[("procedures_perioperative.procedure_specimens")]:::tabla
+  t65[("profiles.professional_credentials")]:::tabla
+  e68>"periop.case.team_participation_declined"]:::evento
   t20[("+24 tablas más")]
   t28[("+2 tablas más")]
   t35[("+3 tablas más")]
   t47[("+1 tablas más")]
-  t55[("+22 tablas más")]
-  t62[("+2 tablas más")]
-  t66[("+1 tablas más")]
+  t56[("+24 tablas más")]
+  t63[("+2 tablas más")]
+  t67[("+1 tablas más")]
   subgraph s0["ctrl:PeriopController · Operaciones de PeriopController que el README no asigna…"]
     o1["POST /pacu-stays/{stayId}/assessments"]:::op
     o5["POST /pacu-stays/{stayId}/discharge"]:::op
@@ -342,11 +353,11 @@ flowchart LR
     o37["POST /procedure-cases/{id}/findings"]:::op
     o42["POST /procedure-cases/{id}/operative-reports/{reportId}/sign"]:::op
     o48["POST /procedure-cases/{id}/preoperative-orders"]:::op
-    o57["POST /procedure-cases/{id}/specimens"]:::op
-    o60["GET /procedure-cases/{id}/team-members"]:::op
-    o61["POST /procedure-cases/{id}/team-members"]:::op
-    o63["POST /procedure-cases/{id}/team-members/{memberId}/accept"]:::op
-    o65["POST /procedure-cases/{id}/team-members/{memberId}/respond"]:::op
+    o58["POST /procedure-cases/{id}/specimens"]:::op
+    o61["GET /procedure-cases/{id}/team-members"]:::op
+    o62["POST /procedure-cases/{id}/team-members"]:::op
+    o64["POST /procedure-cases/{id}/team-members/{memberId}/accept"]:::op
+    o66["POST /procedure-cases/{id}/team-members/{memberId}/respond"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -406,38 +417,38 @@ flowchart LR
   o48 -->|"LEE"| t50
   o48 -->|"LEE"| t51
   o48 -->|"LEE"| t52
-  o48 -->|"CREA"| t53
   o48 -->|"LEE"| t53
-  o48 -->|"LEE"| t54
-  o48 -.-> t55
-  o48 -->|"evento"| e56
-  a58 --> o57
-  o57 -->|"LEE"| t40
-  o57 -->|"CREA"| t59
-  a11 --> o60
-  o60 -->|"LEE"| t27
-  o60 -->|"LEE"| t12
-  a22 --> o61
-  o61 -->|"CREA"| t23
-  o61 -->|"CREA"| t24
-  o61 -->|"LEE"| t24
-  o61 -->|"CREA"| t26
-  o61 -->|"ACTUALIZA"| t27
-  o61 -->|"CREA"| t27
-  o61 -.-> t62
-  o61 -->|"evento"| e29
-  a11 --> o63
-  o63 -->|"LEE"| t27
-  o63 -->|"LEE"| t64
-  a11 --> o65
-  o65 -->|"CREA"| t33
-  o65 -->|"LEE"| t33
-  o65 -->|"LEE"| t34
-  o65 -->|"CREA"| t23
-  o65 -->|"CREA"| t24
-  o65 -->|"LEE"| t24
-  o65 -.-> t66
-  o65 -->|"evento"| e67
+  o48 -->|"CREA"| t54
+  o48 -->|"CREA"| t55
+  o48 -.-> t56
+  o48 -->|"evento"| e57
+  a59 --> o58
+  o58 -->|"LEE"| t40
+  o58 -->|"CREA"| t60
+  a11 --> o61
+  o61 -->|"LEE"| t27
+  o61 -->|"LEE"| t12
+  a22 --> o62
+  o62 -->|"CREA"| t23
+  o62 -->|"CREA"| t24
+  o62 -->|"LEE"| t24
+  o62 -->|"CREA"| t26
+  o62 -->|"ACTUALIZA"| t27
+  o62 -->|"CREA"| t27
+  o62 -.-> t63
+  o62 -->|"evento"| e29
+  a11 --> o64
+  o64 -->|"LEE"| t27
+  o64 -->|"LEE"| t65
+  a11 --> o66
+  o66 -->|"CREA"| t33
+  o66 -->|"LEE"| t33
+  o66 -->|"LEE"| t34
+  o66 -->|"CREA"| t23
+  o66 -->|"CREA"| t24
+  o66 -->|"LEE"| t24
+  o66 -.-> t67
+  o66 -->|"evento"| e68
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -450,7 +461,95 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /dental-procedures
+#### 1. GET /dental-procedures
+
+Histórico odontológico del paciente
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PeriopDentalService.listByPatient"]:::llamada
+  n2 --> n3
+  n4["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
+  n3 --> n4
+  n5{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n4 --> n5
+  n6["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n5 -->|"sí"| n6
+  n7["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n6 --> n7
+  n8[("LEE profiles.person_account_links")]:::efecto
+  n7 --> n8
+  n9["Llama a PatientProfilesRepository.findById"]:::llamada
+  n8 --> n9
+  n10[("LEE profiles.patient_profiles")]:::efecto
+  n9 --> n10
+  n11{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n10 --> n11
+  n12(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n11 -->|"no"| n13
+  n5 -->|"no"| n13
+  n14[("LEE profiles.person_account_links")]:::efecto
+  n13 --> n14
+  n15["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n15 --> n16
+  n17["Llama a ClinicalReadService.isAttending"]:::llamada
+  n16 --> n17
+  n18["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n17 --> n18
+  n19[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n18 --> n19
+  n20["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n19 --> n20
+  n21["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n20 --> n21
+  n22[("LEE profiles.person_account_links")]:::efecto
+  n21 --> n22
+  n23["Llama a PatientProfilesRepository.findById"]:::llamada
+  n22 --> n23
+  n24[("LEE profiles.patient_profiles")]:::efecto
+  n23 --> n24
+  n25{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n24 --> n25
+  n26(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a PeriopDentalRepository.findByPatient"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE clinical.procedures")]:::efecto
+  n27 --> n28
+  n29["Llama a PeriopDentalRepository.countByPatient"]:::llamada
+  n28 --> n29
+  n30[("LEE clinical.procedures")]:::efecto
+  n29 --> n30
+  n31["Llama a PeriopDentalRepository.findSitesByProcedures"]:::llamada
+  n30 --> n31
+  n32[("LEE procedures_perioperative.procedure_body_sites")]:::efecto
+  n31 --> n32
+  n33(("200 Responde con éxito")):::ok
+  n32 --> n33
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. POST /dental-procedures
 
 Registrar un procedimiento odontológico
 
@@ -459,7 +558,7 @@ Registrar un procedimiento odontológico
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El sitio tiene que ser una pieza dentaria o un cuadrante del catálogo odontológico; PreconditionFailedException: No se puede precisar la cara tratada sin decir sobre qué pieza |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -478,53 +577,73 @@ flowchart TD
   n4 -->|"no"| n6
   n7(["422 PRECONDITION_FAILED No se puede precisar la cara tratada sin decir sobre qué pieza"]):::error
   n6 -->|"sí"| n7
-  n8["Transacción: transactional(…)"]:::transaccion
+  n8["Llama a ClinicalReadService.assertCanWriteHistory"]:::llamada
   n6 -->|"no"| n8
-  n9["Llama a PeriopDentalRepository.createProcedure"]:::llamada
+  n9{"actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
   n8 --> n9
-  n10[("CREA clinical.procedures")]:::efecto
-  n9 --> n10
-  n11["Llama a ReceivedServicesProjector.projectProcedure"]:::llamada
+  n10["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n9 -->|"sí"| n10
+  n11[("LEE profiles.person_account_links")]:::efecto
   n10 --> n11
-  n12["Llama a ReceivedServicesRepository.findCaseByPrimaryProcedure"]:::llamada
+  n12["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
   n11 --> n12
-  n13[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n13[("LEE profiles.health_practitioner_profiles")]:::efecto
   n12 --> n13
-  n14["Llama a ReceivedServicesRepository.upsert"]:::llamada
+  n14["Llama a ClinicalReadService.isAttending"]:::llamada
   n13 --> n14
-  n15["Llama a ReceivedServicesRepository.findBySourceProcedure"]:::llamada
+  n15["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
   n14 --> n15
-  n16[("LEE clinical.received_services")]:::efecto
+  n16[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
   n15 --> n16
-  n17["Llama a ReceivedServicesRepository.findBySourceImmunization"]:::llamada
+  n17(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
   n16 --> n17
-  n18[("LEE clinical.received_services")]:::efecto
-  n17 --> n18
-  n19["Llama a ReceivedServicesRepository.findByProcedureCase"]:::llamada
+  n9 -->|"no"| n17
+  n18["Transacción: transactional(…)"]:::transaccion
+  n19["Llama a PeriopDentalRepository.createProcedure"]:::llamada
   n18 --> n19
-  n20[("LEE clinical.received_services")]:::efecto
+  n20[("CREA clinical.procedures")]:::efecto
   n19 --> n20
-  n21[("CREA clinical.received_services")]:::efecto
+  n21["Llama a ReceivedServicesProjector.projectProcedure"]:::llamada
   n20 --> n21
-  n22{"dto.toothSiteConceptId !== undefined"}:::decision
+  n22["Llama a ReceivedServicesRepository.findCaseByPrimaryProcedure"]:::llamada
   n21 --> n22
-  n23["Llama a PeriopDentalRepository.createSite"]:::llamada
-  n22 -->|"sí"| n23
-  n24[("CREA procedures_perioperative.procedure_body_sites")]:::efecto
+  n23[("LEE procedures_perioperative.procedure_cases")]:::efecto
+  n22 --> n23
+  n24["Llama a ReceivedServicesRepository.upsert"]:::llamada
   n23 --> n24
-  n25["Llama a AuditTrailService.record"]:::llamada
+  n25["Llama a ReceivedServicesRepository.findBySourceProcedure"]:::llamada
   n24 --> n25
-  n22 -->|"no"| n25
-  n26["Llama a AuditLogRepository.append"]:::llamada
+  n26[("LEE clinical.received_services")]:::efecto
   n25 --> n26
-  n27["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n27["Llama a ReceivedServicesRepository.findBySourceImmunization"]:::llamada
   n26 --> n27
-  n28[("LEE audit.audit_log")]:::efecto
+  n28[("LEE clinical.received_services")]:::efecto
   n27 --> n28
-  n29[("CREA audit.audit_log")]:::efecto
+  n29["Llama a ReceivedServicesRepository.findByProcedureCase"]:::llamada
   n28 --> n29
-  n30(("201 Responde con éxito")):::ok
+  n30[("LEE clinical.received_services")]:::efecto
   n29 --> n30
+  n31[("CREA clinical.received_services")]:::efecto
+  n30 --> n31
+  n32{"dto.toothSiteConceptId !== undefined"}:::decision
+  n31 --> n32
+  n33["Llama a PeriopDentalRepository.createSite"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("CREA procedures_perioperative.procedure_body_sites")]:::efecto
+  n33 --> n34
+  n35["Llama a AuditTrailService.record"]:::llamada
+  n34 --> n35
+  n32 -->|"no"| n35
+  n36["Llama a AuditLogRepository.append"]:::llamada
+  n35 --> n36
+  n37["Llama a AuditLogRepository.findChainTip"]:::llamada
+  n36 --> n37
+  n38[("LEE audit.audit_log")]:::efecto
+  n37 --> n38
+  n39[("CREA audit.audit_log")]:::efecto
+  n38 --> n39
+  n40(("201 Responde con éxito")):::ok
+  n39 --> n40
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -533,7 +652,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. POST /pacu-stays/{stayId}/assessments
+#### 3. POST /pacu-stays/{stayId}/assessments
 
 Registrar una valoración de recuperación
 
@@ -591,7 +710,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /pacu-stays/{stayId}/discharge
+#### 4. POST /pacu-stays/{stayId}/discharge
 
 Dar el alta de recuperación
 
@@ -683,7 +802,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /procedure-cases
+#### 5. POST /procedure-cases
 
 Programar un caso quirúrgico y reservar el quirófano
 
@@ -766,7 +885,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. GET /procedure-cases/{id}
+#### 6. GET /procedure-cases/{id}
 
 Detalle completo del caso quirúrgico
 
@@ -885,7 +1004,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. PATCH /procedure-cases/{id}
+#### 7. PATCH /procedure-cases/{id}
 
 Modificar el caso quirúrgico
 
@@ -978,7 +1097,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /procedure-cases/{id}/anesthesia-events
+#### 8. POST /procedure-cases/{id}/anesthesia-events
 
 Anotar un evento intraoperatorio de anestesia
 
@@ -1054,7 +1173,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /procedure-cases/{id}/anesthesia-plans
+#### 9. POST /procedure-cases/{id}/anesthesia-plans
 
 Registrar el plan de anestesia y la valoración de vía aérea
 
@@ -1111,7 +1230,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve
+#### 10. POST /procedure-cases/{id}/anesthesia-plans/{planId}/approve
 
 Aprobar el plan de anestesia
 
@@ -1167,7 +1286,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /procedure-cases/{id}/cancel
+#### 11. POST /procedure-cases/{id}/cancel
 
 Cancelar el caso quirúrgico
 
@@ -1223,7 +1342,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /procedure-cases/{id}/charge-items/post
+#### 12. POST /procedure-cases/{id}/charge-items/post
 
 Generar los cargos y consolidar el uso del quirófano
 
@@ -1289,7 +1408,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /procedure-cases/{id}/confirm
+#### 13. POST /procedure-cases/{id}/confirm
 
 Confirmar la intervención verificando las credenciales del equipo
 
@@ -1400,7 +1519,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /procedure-cases/{id}/diagnoses
+#### 14. POST /procedure-cases/{id}/diagnoses
 
 Registrar los diagnósticos del caso
 
@@ -1511,7 +1630,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /procedure-cases/{id}/findings
+#### 15. POST /procedure-cases/{id}/findings
 
 Registrar un hallazgo operatorio
 
@@ -1587,7 +1706,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /procedure-cases/{id}/implants
+#### 16. POST /procedure-cases/{id}/implants
 
 Registrar un implante con su trazabilidad UDI, lote o serie
 
@@ -1637,7 +1756,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /procedure-cases/{id}/medication-uses
+#### 17. POST /procedure-cases/{id}/medication-uses
 
 Registrar el uso de un medicamento en la intervención
 
@@ -1690,7 +1809,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /procedure-cases/{id}/operative-reports
+#### 18. POST /procedure-cases/{id}/operative-reports
 
 Redactar el reporte operatorio
 
@@ -1780,7 +1899,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /procedure-cases/{id}/operative-reports/{reportId}/sign
+#### 19. POST /procedure-cases/{id}/operative-reports/{reportId}/sign
 
 Firmar el reporte operatorio
 
@@ -1877,7 +1996,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /procedure-cases/{id}/operative-steps
+#### 20. POST /procedure-cases/{id}/operative-steps
 
 Registrar un paso operatorio
 
@@ -1923,7 +2042,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /procedure-cases/{id}/pacu-stays
+#### 21. POST /procedure-cases/{id}/pacu-stays
 
 Admitir al paciente en recuperación
 
@@ -1976,7 +2095,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /procedure-cases/{id}/preoperative-assessments
+#### 22. POST /procedure-cases/{id}/preoperative-assessments
 
 Registrar la valoración preoperatoria y sus puntuaciones de riesgo
 
@@ -2068,7 +2187,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /procedure-cases/{id}/preoperative-orders
+#### 23. POST /procedure-cases/{id}/preoperative-orders
 
 Indicar una orden preoperatoria para el caso
 
@@ -2079,7 +2198,7 @@ Indicar una orden preoperatoria para el caso
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique la orden por `serviceRequestId` o por `serviceRequestCodeConceptId`; PreconditionFailedException: El caso está cancelado; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2101,137 +2220,137 @@ flowchart TD
   n7 -->|"sí"| n8
   n9["Llama a ServiceRequestsService.create"]:::llamada
   n7 -->|"no"| n9
-  n10["Transacción: transactional(…)"]:::transaccion
+  n10["Llama a ServiceRequestsService.resolveCategoryConceptId"]:::llamada
   n9 --> n10
-  n11["Llama a ServiceRequestsService.assertEncounterBelongsToPatient"]:::llamada
+  n11{"analysisCategoryOf(dto.categoryConceptId) !== dto.category"}:::decision
   n10 --> n11
-  n12["Llama a EncountersRepository.findById"]:::llamada
-  n11 --> n12
-  n13[("LEE clinical.encounters")]:::efecto
-  n12 --> n13
-  n14{"!encounter || encounter.patientProfileId !== dto.patientProfileId || encounter.tenantId !== dto.custodianTena…"}:::decision
+  n12(["422 PRECONDITION_FAILED La categoría indicada no corresponde al concepto de categoría"]):::error
+  n11 -->|"sí"| n12
+  n13["Transacción: transactional(…)"]:::transaccion
+  n11 -->|"no"| n13
+  n14["Llama a ServiceRequestsService.assertEncounterBelongsToPatient"]:::llamada
   n13 --> n14
-  n15(["404 NOT_FOUND Encuentro no encontrado"]):::error
-  n14 -->|"sí"| n15
-  n16{"dto.formInstanceId !== undefined"}:::decision
-  n14 -->|"no"| n16
-  n17["Llama a FormInstanceOriginValidator.assertUsableOrigin"]:::llamada
-  n16 -->|"sí"| n17
-  n18[("LEE forms.form_instances")]:::efecto
-  n17 --> n18
-  n19{"!instance"}:::decision
-  n18 --> n19
-  n20(["↩ (relanza el error capturado)"]):::error
+  n15["Llama a EncountersRepository.findById"]:::llamada
+  n14 --> n15
+  n16[("LEE clinical.encounters")]:::efecto
+  n15 --> n16
+  n17{"!encounter || encounter.patientProfileId !== dto.patientProfileId || encounter.tenantId !== dto.custodianTena…"}:::decision
+  n16 --> n17
+  n18(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n17 -->|"sí"| n18
+  n19{"basedOnNoteIds.length › 0"}:::decision
+  n17 -->|"no"| n19
+  n20["Llama a ServiceRequestNotesService.assertUsable"]:::llamada
   n19 -->|"sí"| n20
-  n21{"instance.stateConceptId !== FORMS.INSTANCE_CLOSED"}:::decision
-  n19 -->|"no"| n21
-  n22(["↩ (relanza el error capturado)"]):::error
-  n21 -->|"sí"| n22
-  n23{"encounterId && instance.resourceId !== encounterId"}:::decision
-  n21 -->|"no"| n23
-  n24(["↩ (relanza el error capturado)"]):::error
+  n21[("LEE chart.clinical_note_headers · LEE clinical.encounters")]:::efecto
+  n20 --> n21
+  n22["Repite: por cada const noteId de noteIds"]:::bucle
+  n21 --> n22
+  n23{"!usable"}:::decision
+  n22 -->|"cada elemento"| n23
+  n24(["422 PRECONDITION_FAILED La nota médica citada no está disponible como motivo de esta orden"]):::error
   n23 -->|"sí"| n24
-  n25["Llama a PerformerSelectionValidator.resolve"]:::llamada
+  n25{"encounterId && note.encounterId !== encounterId"}:::decision
   n23 -->|"no"| n25
-  n16 -->|"no"| n25
-  n26{"!mode"}:::decision
-  n25 --> n26
-  n27(["422 PRECONDITION_FAILED El modo de ejecutor no es válido"]):::error
-  n26 -->|"sí"| n27
-  n28{"mode === 'PATIENT_CHOICE'"}:::decision
-  n26 -->|"no"| n28
-  n29{"doctor !== undefined || suggestedPracticeSiteId !== undefined"}:::decision
-  n28 -->|"sí"| n29
-  n30(["422 PRECONDITION_FAILED Si elige el paciente, la orden no lleva médico ni sede sugeridos"]):::error
-  n29 -->|"sí"| n30
-  n31{"suggestedPracticeSiteId === undefined"}:::decision
-  n29 -->|"no"| n31
-  n28 -->|"no"| n31
-  n32(["422 PRECONDITION_FAILED La orden necesita la sede sugerida"]):::error
-  n31 -->|"sí"| n32
-  n33{"mode === 'ORGANIZATION'"}:::decision
-  n31 -->|"no"| n33
-  n34{"doctor !== undefined"}:::decision
-  n33 -->|"sí"| n34
-  n35(["422 PRECONDITION_FAILED Si se recomienda un centro, la orden no lleva médico ejecutor"]):::error
+  n26(["422 PRECONDITION_FAILED La nota médica citada pertenece a otra consulta"]):::error
+  n25 -->|"sí"| n26
+  n27{"dto.formInstanceId !== undefined"}:::decision
+  n25 -->|"no"| n27
+  n22 -->|"al terminar"| n27
+  n19 -->|"no"| n27
+  n28["Llama a FormInstanceOriginValidator.assertUsableOrigin"]:::llamada
+  n27 -->|"sí"| n28
+  n29[("LEE forms.form_instances")]:::efecto
+  n28 --> n29
+  n30{"!instance"}:::decision
+  n29 --> n30
+  n31(["↩ (relanza el error capturado)"]):::error
+  n30 -->|"sí"| n31
+  n32{"instance.stateConceptId !== FORMS.INSTANCE_CLOSED"}:::decision
+  n30 -->|"no"| n32
+  n33(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"sí"| n33
+  n34{"encounterId && instance.resourceId !== encounterId"}:::decision
+  n32 -->|"no"| n34
+  n35(["↩ (relanza el error capturado)"]):::error
   n34 -->|"sí"| n35
-  n36{"doctor === undefined"}:::decision
-  n33 -->|"no"| n36
-  n37(["422 PRECONDITION_FAILED Si lo hace el médico, la orden necesita el médico ejecutor"]):::error
-  n36 -->|"sí"| n37
-  n38{"input.requesterProfileId === undefined || doctor !== input.requesterProfileId"}:::decision
-  n36 -->|"no"| n38
-  n39(["422 PRECONDITION_FAILED El médico ejecutor debe ser quien pide la orden"]):::error
-  n38 -->|"sí"| n39
-  n40["Llama a PerformerSiteDbReader.offersProcedureWithPrice"]:::llamada
-  n34 -->|"no"| n40
-  n38 -->|"no"| n40
-  n41[("LEE practice.practice_sites · LEE practice.healthcare_services · LEE billing.service_catalog")]:::efecto
-  n40 --> n41
-  n42{"!offered"}:::decision
-  n41 --> n42
-  n43(["422 PRECONDITION_FAILED La sede sugerida no ofrece ese procedimiento con precio"]):::error
+  n36["Llama a PerformerSelectionValidator.resolve"]:::llamada
+  n34 -->|"no"| n36
+  n27 -->|"no"| n36
+  n37{"!mode"}:::decision
+  n36 --> n37
+  n38(["422 PRECONDITION_FAILED El modo de ejecutor no es válido"]):::error
+  n37 -->|"sí"| n38
+  n39{"mode === 'PATIENT_CHOICE'"}:::decision
+  n37 -->|"no"| n39
+  n40{"doctor !== undefined || suggestedPracticeSiteId !== undefined"}:::decision
+  n39 -->|"sí"| n40
+  n41(["422 PRECONDITION_FAILED Si elige el paciente, la orden no lleva médico ni sede sugeridos"]):::error
+  n40 -->|"sí"| n41
+  n42{"suggestedPracticeSiteId === undefined"}:::decision
+  n40 -->|"no"| n42
+  n39 -->|"no"| n42
+  n43(["422 PRECONDITION_FAILED La orden necesita la sede sugerida"]):::error
   n42 -->|"sí"| n43
-  n44{"mode === 'SELF'"}:::decision
+  n44{"mode === 'ORGANIZATION'"}:::decision
   n42 -->|"no"| n44
-  n45["Llama a PerformerSiteDbReader.isActivelyAffiliated"]:::llamada
+  n45{"doctor !== undefined"}:::decision
   n44 -->|"sí"| n45
-  n46[("LEE practice.practitioner_role_assignments · LEE practice.healthcare_services")]:::efecto
-  n45 --> n46
-  n47{"!affiliated"}:::decision
-  n46 --> n47
-  n48(["422 PRECONDITION_FAILED El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida"]):::error
+  n46(["422 PRECONDITION_FAILED Si se recomienda un centro, la orden no lleva médico ejecutor"]):::error
+  n45 -->|"sí"| n46
+  n47{"doctor === undefined"}:::decision
+  n44 -->|"no"| n47
+  n48(["422 PRECONDITION_FAILED Si lo hace el médico, la orden necesita el médico ejecutor"]):::error
   n47 -->|"sí"| n48
-  n49["Llama a ServiceRequestsService.resolveDuplicateDecision"]:::llamada
+  n49{"input.requesterProfileId === undefined || doctor !== input.requesterProfileId"}:::decision
   n47 -->|"no"| n49
-  n44 -->|"no"| n49
-  n50["Llama a DuplicateStudyDetector.findDuplicate"]:::llamada
-  n49 --> n50
-  n51[("LEE clinical.diagnostic_reports · LEE diagnostics.diagnostic_report_versions · LEE clinical.service_requests…")]:::efecto
-  n50 --> n51
-  n52{"match"}:::decision
+  n50(["422 PRECONDITION_FAILED El médico ejecutor debe ser quien pide la orden"]):::error
+  n49 -->|"sí"| n50
+  n51["Llama a PerformerSiteDbReader.offersProcedureWithPrice"]:::llamada
+  n45 -->|"no"| n51
+  n49 -->|"no"| n51
+  n52[("LEE practice.practice_sites · LEE practice.healthcare_services · LEE billing.service_catalog")]:::efecto
   n51 --> n52
-  n53{"!dto.previousDiagnosticReportId"}:::decision
-  n52 -->|"sí"| n53
-  n54(["422 PRECONDITION_FAILED El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el info…"]):::error
+  n53{"!offered"}:::decision
+  n52 --> n53
+  n54(["422 PRECONDITION_FAILED La sede sugerida no ofrece ese procedimiento con precio"]):::error
   n53 -->|"sí"| n54
-  n55{"dto.previousDiagnosticReportId !== match.report.id"}:::decision
+  n55{"mode === 'SELF'"}:::decision
   n53 -->|"no"| n55
-  n56(["422 PRECONDITION_FAILED El informe previo indicado no coincide con el duplicado detectado"]):::error
+  n56["Llama a PerformerSiteDbReader.isActivelyAffiliated"]:::llamada
   n55 -->|"sí"| n56
-  n57{"!dto.previousDiagnosticReportId"}:::decision
-  n55 -->|"no"| n57
-  n52 -->|"no"| n57
-  n58["Llama a DuplicateStudyDetector.findActiveOrderWithoutReport"]:::llamada
-  n57 -->|"sí"| n58
-  n59[("LEE clinical.service_requests · LEE clinical.diagnostic_reports")]:::efecto
-  n58 --> n59
-  n60{"activa"}:::decision
-  n59 --> n60
-  n61{"dto.reusePreviousReport === true || dto.duplicateOverrideReason === undefined"}:::decision
-  n60 -->|"sí"| n61
-  n62(["422 PRECONDITION_FAILED El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justif…"]):::error
-  n61 -->|"sí"| n62
-  n63{"dto.previousDiagnosticReportId"}:::decision
-  n61 -->|"no"| n63
-  n60 -->|"no"| n63
-  n57 -->|"no"| n63
-  n64(["422 PRECONDITION_FAILED No se detectó ningún estudio duplicado para justificar"]):::error
+  n57[("LEE practice.practitioner_role_assignments · LEE practice.healthcare_services")]:::efecto
+  n56 --> n57
+  n58{"!affiliated"}:::decision
+  n57 --> n58
+  n59(["422 PRECONDITION_FAILED El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida"]):::error
+  n58 -->|"sí"| n59
+  n60["Llama a ServiceRequestsService.resolveDuplicateDecision"]:::llamada
+  n58 -->|"no"| n60
+  n55 -->|"no"| n60
+  n61["Llama a DuplicateStudyDetector.findDuplicate"]:::llamada
+  n60 --> n61
+  n62[("LEE clinical.diagnostic_reports · LEE diagnostics.diagnostic_report_versions · LEE clinical.service_requests…")]:::efecto
+  n61 --> n62
+  n63{"match"}:::decision
+  n62 --> n63
+  n64{"!dto.previousDiagnosticReportId"}:::decision
   n63 -->|"sí"| n64
-  n65["Llama a ServiceRequestsRepository.create"]:::llamada
-  n63 -->|"no"| n65
-  n66[("CREA clinical.service_requests")]:::efecto
-  n65 --> n66
-  n67["Llama a OutboxService.publishDomainEvent"]:::llamada
-  n66 --> n67
-  n68["Llama a MessagingTraceService.runInProducerSpan"]:::llamada
-  n67 --> n68
-  n69["Transacción: startActiveSpan(…)"]:::transaccion
-  n68 --> n69
-  n70["Intenta"]:::intento
+  n65(["422 PRECONDITION_FAILED El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el info…"]):::error
+  n64 -->|"sí"| n65
+  n66{"dto.previousDiagnosticReportId !== match.report.id"}:::decision
+  n64 -->|"no"| n66
+  n67(["422 PRECONDITION_FAILED El informe previo indicado no coincide con el duplicado detectado"]):::error
+  n66 -->|"sí"| n67
+  n68{"!dto.previousDiagnosticReportId"}:::decision
+  n66 -->|"no"| n68
+  n63 -->|"no"| n68
+  n69["Llama a DuplicateStudyDetector.findActiveOrderWithoutReport"]:::llamada
+  n68 -->|"sí"| n69
+  n70[("LEE clinical.service_requests · LEE clinical.diagnostic_reports")]:::efecto
   n69 --> n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
-  n70 -->|"si falla"| n71
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2240,7 +2359,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /procedure-cases/{id}/preoperative-orders/verify
+#### 24. POST /procedure-cases/{id}/preoperative-orders/verify
 
 Verificar las órdenes preoperatorias
 
@@ -2295,7 +2414,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses
+#### 25. POST /procedure-cases/{id}/safety-checklists/{checklistId}/responses
 
 Responder una fase del checklist quirúrgico
 
@@ -2416,7 +2535,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /procedure-cases/{id}/specimens
+#### 26. POST /procedure-cases/{id}/specimens
 
 Registrar una muestra tomada en la intervención
 
@@ -2469,7 +2588,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /procedure-cases/{id}/team-members
+#### 27. POST /procedure-cases/{id}/team-members
 
 Asignar un miembro al equipo quirúrgico
 
@@ -2546,7 +2665,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /procedure-cases/{id}/team-members/{memberId}/accept
+#### 28. POST /procedure-cases/{id}/team-members/{memberId}/accept
 
 Aceptar la participación en el equipo quirúrgico
 
@@ -2603,7 +2722,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /procedure-cases/{id}/team-members/{memberId}/respond
+#### 29. POST /procedure-cases/{id}/team-members/{memberId}/respond
 
 Rechazar, pedir cambios o informar indisponibilidad
 
@@ -2694,7 +2813,6 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
-| GET /dental-procedures | 200, 400, 401, 403, 429 | 2 |
 | GET /dental-procedures/catalog | 200, 401, 403, 429 | 0 |
 | GET /procedure-cases | 200, 401, 403, 429 | 1 |
 | GET /procedure-cases/{id}/team-members | 200, 400, 401, 403, 429 | 2 |

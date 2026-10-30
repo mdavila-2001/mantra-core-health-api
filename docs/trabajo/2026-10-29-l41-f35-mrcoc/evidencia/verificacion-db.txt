@@ -1,0 +1,26 @@
+ enfermedad | hp | sintoma | fuerza | fuentes 
+------------+----+---------+--------+---------
+(0 rows)
+
+    k    | count 
+---------+-------
+ solo_T4 | 10004
+(1 row)
+
+      ?column?      | round 
+--------------------+-------
+ max_fuerza_solo_T4 | 0.250
+(1 row)
+
+           enfermedad           |     hp     |         sintoma          |    lift    | fuerza 
+--------------------------------+------------+--------------------------+------------+--------
+ glucagonoma                    | HP:0031181 | Eritema migratorio necro | 30967.5702 |   0.75
+ Holmes-Adie syndrome           | HP:0012074 | Pupila tónica            | 22457.3304 |      1
+ renal tubular transport diseas | HP:0002150 | Hipercalciuria           |  6355.4029 |   0.25
+(3 rows)
+
+          k          | max  
+---------------------+------
+ max_strength_exacta | 0.25
+(1 row)
+

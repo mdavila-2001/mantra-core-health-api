@@ -14,14 +14,16 @@
 // Uso: node tools/terminology-import/clinical-pharmacology/build-monographs.mjs [--granularity route|product]
 // =============================================================================
 
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { readNdjson, writeJson, writeNdjson } from '../lib/glossary-es/common.mjs';
 import { cimaSafetyNotes, cimaSections, groupByAtc5, referenceDocuments } from './lib/cima.mjs';
+import { CIMA_SECTIONS } from './lib/sections.mjs';
 import { listJson, parseArgs, readJsonIfExists, retrievedAtOf } from './lib/cli.mjs';
 import { buildGsrsIndex, combineLinks, gsrsDisplayFor, linkUniiSet, moietiesOf, rxnavIndex, uniiForCas } from './lib/gsrs.mjs';
-import { emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
+import { EMA_LICENSE, emaIndicationSection, emaRecords, isHumanAuthorised } from './lib/ema.mjs';
+import { cimaNregCandidates, comparisonKey, emaPiPointer, emaPiSection, emaPiSlug, emaPiUrl, extractorsAgree, fidelityKey, isVerifiedSection, keyDiff, piMonographSections, piSmpcs, piSmpcsFromRows } from './lib/ema-pi.mjs';
 import { dailyMedPointer } from './lib/dailymed.mjs';
 import { emlReference, isCurrentRecommendation } from './lib/eml.mjs';
 import { lactmedIdentity, lactmedSections } from './lib/lactmed.mjs';
@@ -30,7 +32,7 @@ import { readAllInputs, readBridge, readDailyMedIdentities, readEma, readEml, re
 import { zipResults } from './lib/json-stream.mjs';
 import { assertSection, atcNameIndex, buildMonograph, hasVersion } from './lib/monograph.mjs';
 import { labelIdentity, openFdaPharmClasses, openFdaSections, referenceLabels } from './lib/openfda.mjs';
-import { cpOut, ftPath, ftSectionPath, monographsOutputs, notesPath, openFdaDir } from './lib/paths.mjs';
+import { cpOut, emaPiPdfPath, emaPiRowsPath, emaPiTextPath, ftPath, ftSectionPath, monographsOutputs, notesPath, openFdaDir } from './lib/paths.mjs';
 
 const { opt, has } = parseArgs();
 const GRANULARITY = opt('--granularity', 'route');
@@ -48,6 +50,8 @@ const NO_DAILYMED = has('--no-dailymed');
 const NO_LACTMED = has('--no-lactmed');
 /** `--no-livertox`: arma sin LiverTox (medición por pasada). */
 const NO_LIVERTOX = has('--no-livertox');
+/** `--no-ema-pi`: arma sin la información de producto de la EMA en PDF (medición por pasada). */
+const NO_EMA_PI = has('--no-ema-pi');
 
 /** Ficha completa + secciones sueltas de respaldo, en ese orden (la completa gana). */
 function readCimaDoc(nreg) {
@@ -339,6 +343,103 @@ async function main() {
     }
   }
 
+  // EMA, información de producto (PDF en castellano), leída con el extractor verificado (py/ema_pi_extract.py).
+  // Si el nº EU está en CIMA, es el mismo documento y ya entra por CIMA: sirve para medir la fidelidad de la
+  // extracción contra CIMA. Si no está, se publican las secciones verificadas y el resto queda en el puntero.
+  const emaPiPointers = new Map();
+  const emaPiByAtc = new Map();
+  const emaPiStats = { medicines: 0, withoutPdf: 0, extractError: 0, withoutAnnexI: 0, inCima: 0, notInCima: 0, pointers: 0, verifiedSections: 0, withheldSections: 0, consensus: { compared: 0, agree: 0 }, fidelity: {}, smallDiffs: [] };
+  if (!NO_EMA_PI && emaRaw) {
+    const cimaNregs = new Set(inputs.products.map((p) => String(p.nregistro)));
+    for (const r of emaRecords(emaRaw.rows).filter((x) => isHumanAuthorised(x) && x.atc5.length)) {
+      emaPiStats.medicines++;
+      const slug = emaPiSlug(r.url);
+      const rowsPath = slug ? emaPiRowsPath(slug) : null;
+      if (!rowsPath || !existsSync(rowsPath)) {
+        emaPiStats.withoutPdf++;
+        continue;
+      }
+      const rows = JSON.parse(readFileSync(rowsPath, 'utf8'));
+      if (rows.error) {
+        emaPiStats.extractError++;
+        continue;
+      }
+      const smpcs = piSmpcsFromRows(rows);
+      if (smpcs.length === 0) {
+        emaPiStats.withoutAnnexI++;
+        continue;
+      }
+      // Consenso con un extractor independiente (pdftotext, misma ficha y misma sección): sin él, la sección no se publica.
+      const txtPath = emaPiTextPath(slug);
+      const other = existsSync(txtPath) ? piSmpcs(readFileSync(txtPath, 'utf8')) : [];
+      smpcs.forEach((sm, idx) => {
+        const twin = other.length === smpcs.length ? other[idx] : null;
+        for (const [n, sec] of sm.sections) {
+          const o = twin?.sections.get(n);
+          sec.consensus = Boolean(o?.text) && extractorsAgree(sec.text, o.text);
+          if (CIMA_SECTIONS[n] && sec.text) {
+            emaPiStats.consensus.compared++;
+            if (sec.consensus) emaPiStats.consensus.agree++;
+          }
+        }
+      });
+      const inCima = smpcs.flatMap((sm) => sm.euNumbers.flatMap(cimaNregCandidates)).filter((n) => cimaNregs.has(n));
+      if (inCima.length) {
+        emaPiStats.inCima++;
+        // Fidelidad: cada sección del PDF frente a la misma sección de la ficha de CIMA de ese nº de registro.
+        const nreg = inCima.find((n) => existsSync(ftPath(n)));
+        const doc = nreg ? readCimaDoc(nreg) : null;
+        if (!doc) continue;
+        const cimaText = new Map(cimaSections(doc.doc, { product: { nregistro: nreg } }, doc.retrievedAt).map((s) => [s.section.number, fidelityKey(s.text)]));
+        const sm = smpcs.find((x) => x.euNumbers.some((eu) => cimaNregCandidates(eu).includes(nreg))) ?? smpcs[0];
+        for (const s of piMonographSections(sm)) {
+          if (!cimaText.has(s.number)) continue;
+          const f = (emaPiStats.fidelity[s.number] ??= { compared: 0, identical: 0, verified: 0, verifiedIdentical: 0 });
+          const same = cimaText.get(s.number) === fidelityKey(s.text);
+          f.compared++;
+          if (same) f.identical++;
+          if (!isVerifiedSection(s)) continue;
+          f.verified++;
+          if (same) {
+            f.verifiedIdentical++;
+            continue;
+          }
+          // Diferencia de pocos caracteres en una sección verificada: candidata a error de extracción, se lista para revisarla.
+          const d = keyDiff(cimaText.get(s.number), fidelityKey(s.text));
+          if (d.a.length <= 4 && d.b.length <= 4) {
+            const k = fidelityKey(s.text);
+            emaPiStats.smallDiffs.push({
+              medicine: r.name,
+              slug,
+              nregistro: nreg,
+              section: s.number,
+              cima: d.a,
+              pdf: d.b,
+              cimaWindow: cimaText.get(s.number).slice(Math.max(0, d.at - 20), d.at + d.a.length + 20),
+              pdfWindow: k.slice(Math.max(0, d.at - 20), d.at + d.b.length + 20),
+            });
+          }
+        }
+        continue;
+      }
+      emaPiStats.notInCima++;
+      const url = emaPiUrl(slug);
+      const retrievedAt = retrievedAtOf(emaPiPdfPath(slug));
+      for (const sm of smpcs) {
+        const ptr = emaPiPointer(r, sm, { url, retrievedAt, license: EMA_LICENSE });
+        const verified = piMonographSections(sm).filter(isVerifiedSection);
+        emaPiStats.withheldSections += piMonographSections(sm).length - verified.length;
+        for (const code of r.atc5) {
+          if (!emaPiPointers.has(code)) emaPiPointers.set(code, []);
+          emaPiPointers.get(code).push(ptr);
+          emaPiStats.pointers++;
+          if (!emaPiByAtc.has(code)) emaPiByAtc.set(code, []);
+          for (const s of verified) emaPiByAtc.get(code).push(emaPiSection(r, sm, s, { url, retrievedAt, license: EMA_LICENSE }));
+        }
+      }
+    }
+  }
+
   const stats = { cimaDocsMissing: 0, cimaSectionsWithoutVersion: 0, cimaSectionsVersionUnpublished: 0, cimaDuplicateSections: 0, skippedWithoutData: 0, uniiWithoutLabel: 0, fdaRefsWithoutLabel: 0, fdaRefsWithoutMappedSections: 0, fdaSectionsWithoutVersion: 0 };
   const out = [];
   for (const [code, origin] of universe) {
@@ -407,7 +508,16 @@ async function main() {
     for (const s of emaByAtc.get(code) ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     for (const s of lactmedByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
     for (const s of livertoxByAtc.get(code)?.values() ?? []) if (hasVersion(s)) sections.push(assertSection(s));
-    const externalDocuments = [...(fda.pointers.get(code) ?? []), ...(emlRefsByAtc.get(code) ?? [])];
+    // EMA (PDF verificado): una sección cuyo texto, sin espacios, ya está en esta monografía con la misma clave no se repite.
+    const present = new Set(sections.map((s) => `${s.key}|${comparisonKey(s.text)}`));
+    for (const s of emaPiByAtc.get(code) ?? []) {
+      const k = `${s.key}|${comparisonKey(s.text)}`;
+      if (present.has(k) || !hasVersion(s)) continue;
+      present.add(k);
+      sections.push(assertSection(structuredClone(s)));
+      emaPiStats.verifiedSections++;
+    }
+    const externalDocuments = [...(fda.pointers.get(code) ?? []), ...(emlRefsByAtc.get(code) ?? []), ...(emaPiPointers.get(code) ?? [])];
     if (cimaProducts.length === 0 && sections.length === 0 && externalDocuments.length === 0) {
       stats.skippedWithoutData++;
       continue;
@@ -421,11 +531,12 @@ async function main() {
   const meta = {
     generatedAt: new Date().toISOString(),
     granularity: GRANULARITY,
-    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', NO_EML ? 'sin eEML' : 'eEML', NO_DAILYMED ? 'sin DailyMed' : 'DailyMed', NO_LACTMED ? 'sin LactMed' : 'LactMed', NO_LIVERTOX ? 'sin LiverTox' : 'LiverTox', 'openFDA', 'GSRS', 'RxNav'].join(', '),
+    sources: [NO_CIMA ? 'sin CIMA' : 'CIMA', NO_EMA ? 'sin EMA' : 'EMA', NO_EML ? 'sin eEML' : 'eEML', NO_DAILYMED ? 'sin DailyMed' : 'DailyMed', NO_LACTMED ? 'sin LactMed' : 'LactMed', NO_LIVERTOX ? 'sin LiverTox' : 'LiverTox', NO_EMA_PI ? 'sin EMA PDF' : 'EMA PDF', 'openFDA', 'GSRS', 'RxNav'].join(', '),
     ema: emaStats,
     eml: emlStats,
     lactmed: lactmedStats,
     livertox: livertoxStats,
+    emaPi: emaPiStats,
     universe: universe.size,
     monographs: out.length,
     sections: out.reduce((n, m) => n + m.sections.length, 0),

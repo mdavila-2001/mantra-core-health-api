@@ -21,6 +21,7 @@ import {
   RescheduleResponseDto,
   SearchBookingsResponseDto,
   SetPaymentStateDto,
+  SetPaymentStateResponseDto,
   WorkerBatchResultDto,
 } from '../../presentation/dto';
 import { AcceptBookingUseCase } from './use-cases/accept-booking.use-case';
@@ -144,7 +145,7 @@ export class SchedulingBookingsService {
     bookingId: string,
     dto: SetPaymentStateDto,
     actor: AuthenticatedUser,
-  ): Promise<PaymentStateDto> {
+  ): Promise<SetPaymentStateResponseDto> {
     return this.setPaymentStateUseCase.execute(bookingId, dto, actor);
   }
 

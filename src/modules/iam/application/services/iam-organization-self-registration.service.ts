@@ -17,6 +17,7 @@ import { IamErrorReason } from '../../iam.error-reasons';
 import {
   BRANCH_TYPE_CONCEPT_BY_CODE,
   DIR,
+  MEDICAL_FACILITY_TENANT_TYPES,
   TENANT_TYPE_CONCEPT_BY_CODE,
 } from '../../../directory/directory.concepts';
 import {
@@ -57,12 +58,27 @@ const PHARMACY_HEADQUARTERS_NAME = 'Casa central';
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 
 /**
+ * Las formas de persona natural: no tienen escritura de constitución. El
+ * profesional independiente, además, ejerce con su NIT personal y sin
+ * matrícula de comercio (`terminology-designations.es.ts`). Decisión del
+ * propietario del 28/10/2026 para el alta de organización médica.
+ */
+const WITHOUT_CONSTITUTION: ReadonlySet<string> = new Set([
+  'UNIPERSONAL',
+  'PROFESIONAL_INDEPENDIENTE',
+]);
+const WITHOUT_COMMERCE_REGISTRY: ReadonlySet<string> = new Set([
+  'PROFESIONAL_INDEPENDIENTE',
+]);
+
+/**
  * Los documentos que exige el tipo societario, comprobados **antes** de crear
  * nada (CL-43).
  *
- * El DTO deja opcionales la escritura de constitución y el poder del
- * representante porque una empresa unipersonal no tiene ni una ni otro; el
- * resto de las formas (SRL, S.A., ...) los exige. Vive acá y no en un
+ * El DTO deja opcionales la escritura de constitución, la matrícula de
+ * comercio y el poder del representante porque las personas naturales no los
+ * tienen (ver {@link WITHOUT_CONSTITUTION} y {@link WITHOUT_COMMERCE_REGISTRY});
+ * el resto de las formas (SRL, S.A., ...) los exige. Vive acá y no en un
  * `@ValidateIf` del DTO porque el bloque `legalDocuments` no ve el
  * `legalEntityType`, que está un nivel más arriba. Responde 422 nombrando el
  * documento faltante y, al correr antes de cualquier escritura, no queda
@@ -71,13 +87,25 @@ const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 function assertLegalDocumentsForEntityType(
   organization: RegisterOrganizationDto['organization'],
 ): void {
+  const entityType = organization.legalEntityType ?? '';
+  if (
+    organization.legalDocuments &&
+    organization.legalDocuments.commerceRegistryFileId === undefined &&
+    !WITHOUT_COMMERCE_REGISTRY.has(entityType)
+  ) {
+    throw new PreconditionFailedException(
+      'Falta la matrícula de comercio: sólo un profesional independiente puede omitirla',
+      { document: 'commerceRegistryFileId' },
+    );
+  }
   if (organization.legalEntityType === 'UNIPERSONAL') return;
   if (
     organization.legalDocuments &&
-    organization.legalDocuments.constitutionFileId === undefined
+    organization.legalDocuments.constitutionFileId === undefined &&
+    !WITHOUT_CONSTITUTION.has(entityType)
   ) {
     throw new PreconditionFailedException(
-      'Falta la escritura de constitución: sólo una empresa unipersonal puede omitirla',
+      'Falta la escritura de constitución: sólo una empresa unipersonal o un profesional independiente pueden omitirla',
       { document: 'constitutionFileId' },
     );
   }
@@ -232,11 +260,9 @@ export class IamOrganizationSelfRegistrationService {
       // Cerrojo por correo antes de comprobarlo, como el alta de paciente: sin
       // él, dos altas simultáneas con el mismo correo pasan las dos la lectura y
       // la segunda choca con el índice único como un 409 genérico.
-      await this.credentialsRepo.lockSubjectForRegistration(
-        tx,
-        dto.owner.email,
-      );
-      const emailClash = await this.credentialsRepo.findLivePasswordBySubject(
+      // Sin distinguir mayúsculas: «Ana@…» y «ana@…» son el mismo buzón (#1000).
+      await this.credentialsRepo.lockEmailForRegistration(tx, dto.owner.email);
+      const emailClash = await this.credentialsRepo.findLivePasswordByEmail(
         tx,
         dto.owner.email,
       );
@@ -330,6 +356,16 @@ export class IamOrganizationSelfRegistrationService {
         user.id,
       );
 
+      // Establecimiento médico: `materializeProfile` ya persistió el NIT, el
+      // registro sanitario, el director y las sedes declaradas. La respuesta lo
+      // informa sólo para los cinco tipos médicos: `true` si el alta trajo el
+      // bloque, `false` si no.
+      const medicalFacilityRegistered = MEDICAL_FACILITY_TENANT_TYPES.includes(
+        dto.organization.tenantType,
+      )
+        ? dto.organization.medicalFacility !== undefined
+        : undefined;
+
       // 2b) Farmacia (P50): la fila de `pharmacy.pharmacies` en borrador, su
       // práctica propia y la casa central y cada sucursal como sede física y
       // sede dispensadora, con la central enlazada. Las sucursales además se
@@ -395,7 +431,8 @@ export class IamOrganizationSelfRegistrationService {
             legalEntityType: dto.organization.legalEntityType,
             taxIdentifier:
               dto.organization.taxIdentifier ??
-              dto.organization.payer?.regulatorIdentifier,
+              dto.organization.payer?.regulatorIdentifier ??
+              dto.organization.medicalFacility?.taxIdentifierNumber,
             documents: {
               CONSTITUTION_DOC:
                 dto.organization.legalDocuments.constitutionFileId,
@@ -462,6 +499,7 @@ export class IamOrganizationSelfRegistrationService {
           ...(representativesRegistered === undefined
             ? {}
             : { representatives: representativesRegistered }),
+          ...(medicalFacilityRegistered ? { medicalFacility: true } : {}),
         },
       });
 
@@ -484,6 +522,7 @@ export class IamOrganizationSelfRegistrationService {
         pharmacyId,
         legalDocumentsRegistered: legalDocumentIds?.length,
         representativesRegistered,
+        medicalFacilityRegistered,
       };
     });
 
@@ -519,6 +558,7 @@ export class IamOrganizationSelfRegistrationService {
       pharmacyId: created.pharmacyId,
       legalDocumentsRegistered: created.legalDocumentsRegistered,
       representativesRegistered: created.representativesRegistered,
+      medicalFacilityRegistered: created.medicalFacilityRegistered,
     };
   }
 

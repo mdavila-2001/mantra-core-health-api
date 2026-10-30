@@ -69,7 +69,8 @@ describe('IamPractitionerSelfRegistrationService', () => {
     };
     const usersRepo = { create: fn(() => ({ id: 'user-1' })) };
     const credentialsRepo = {
-      findLivePasswordBySubject: fn().mockResolvedValue(null),
+      lockEmailForRegistration: fn().mockResolvedValue(undefined),
+      findLivePasswordByEmail: fn().mockResolvedValue(null),
       createPassword: fn(),
       // El alta administrativa reserva el login sin secreto: la contraseña la
       // fija el titular al consumir el token de activación.
@@ -153,6 +154,11 @@ describe('IamPractitionerSelfRegistrationService', () => {
       notify: fn().mockResolvedValue(undefined),
     };
 
+    // v4.2.67: la solicitud de admisión nace en la misma transacción del alta.
+    const admissions = {
+      openForRegistration: fn().mockResolvedValue({ id: 'adm-1' }),
+    };
+
     const service = new IamPractitionerSelfRegistrationService(
       em as never,
       tokenService as never,
@@ -173,6 +179,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
         languages: languagesRepo,
         accountLinks: accountLinksRepo,
         administrativeAreas,
+        admissions,
       }),
       commonRecords({
         identifiers: identifiersRepo,
@@ -195,6 +202,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
     return {
       service,
       em,
+      admissions,
       effectiveRoles,
       specialtiesRepo,
       specialtyCatalog,
@@ -399,6 +407,57 @@ describe('IamPractitionerSelfRegistrationService', () => {
       await d.service.registerPractitioner(dto);
 
       expect(d.specialtiesRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('la solicitud de admisión nace con el alta (verificación del alta de doctor)', () => {
+    it('abre la admisión del perfil recién creado dentro de LA MISMA transacción, a nombre de la cuenta', async () => {
+      const d = build();
+      await d.service.registerPractitioner(dto);
+      expect(d.admissions.openForRegistration).toHaveBeenCalledTimes(1);
+      const [txUsed, data] = d.admissions.openForRegistration.mock.calls[0];
+      expect(txUsed).toBe(d.tx);
+      expect(data).toMatchObject({
+        practitionerProfileId: 'person-1',
+        actorUserId: 'user-1',
+      });
+      expect(data.attestation).toBeUndefined();
+    });
+
+    it('si no se puede abrir, el alta entera falla: no queda un profesional pendiente que nadie ve', async () => {
+      const d = build();
+      d.admissions.openForRegistration.mockRejectedValue(
+        new Error('base caída'),
+      );
+      await expect(d.service.registerPractitioner(dto)).rejects.toThrow(
+        'base caída',
+      );
+      // Lo que va después de la admisión (verificación del correo) no se alcanzó.
+      expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+      expect(d.notificationsService.createRequest).not.toHaveBeenCalled();
+    });
+
+    it('la atestación aceptada se guarda con la versión del texto que se aceptó', async () => {
+      const d = build();
+      await d.service.registerPractitioner({
+        ...dto,
+        attestationAccepted: true,
+        attestationTextVersion: 'v1',
+      } as RegisterPractitionerDto);
+      const [, data] = d.admissions.openForRegistration.mock.calls[0];
+      expect(data.attestation).toMatchObject({ textVersion: 'v1' });
+      expect(data.attestation.acceptedAt).toBeInstanceOf(Date);
+    });
+
+    it('aceptar la atestación sin decir qué texto se aceptó se rechaza antes de abrir nada', async () => {
+      const d = build();
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          attestationAccepted: true,
+        } as RegisterPractitionerDto),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.admissions.openForRegistration).not.toHaveBeenCalled();
     });
   });
 
@@ -1459,7 +1518,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
 
   it('rejects an email that already has a live credential', async () => {
     const d = build();
-    d.credentialsRepo.findLivePasswordBySubject.mockResolvedValue({
+    d.credentialsRepo.findLivePasswordByEmail.mockResolvedValue({
       id: 'cred-existing',
     });
 
@@ -1467,6 +1526,21 @@ describe('IamPractitionerSelfRegistrationService', () => {
       ConflictException,
     );
     expect(d.usersRepo.create).not.toHaveBeenCalled();
+  });
+
+  // #1000: cerrojo por correo antes de comprobarlo, sin distinguir mayúsculas.
+  it('locks the email before checking it case-insensitively', async () => {
+    const d = build();
+
+    await d.service.registerPractitioner(dto);
+
+    const lock = d.credentialsRepo.lockEmailForRegistration;
+    const check = d.credentialsRepo.findLivePasswordByEmail;
+    expect(lock).toHaveBeenCalledWith(expect.anything(), dto.email);
+    expect(check).toHaveBeenCalledWith(expect.anything(), dto.email);
+    expect(lock.mock.invocationCallOrder[0]).toBeLessThan(
+      check.mock.invocationCallOrder[0],
+    );
   });
 
   it('registers the practitioner even if the verification email cannot be queued', async () => {
@@ -1865,6 +1939,89 @@ describe('IamPractitionerSelfRegistrationService', () => {
       expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
       expect(d.eventsRepo.record).not.toHaveBeenCalled();
       expect(d.notificationsService.createRequest).not.toHaveBeenCalled();
+    });
+
+    it('con logo: lo reclama en la transacción del alta, como imagen, antes de la persona', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockResolvedValue({
+        file: { sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL },
+        version: { sizeBytes: String(1024 * 1024) },
+      });
+      const conLogo = {
+        name: 'Consultorio Rojas',
+        logoFileId: 'file-logo',
+      } as never;
+
+      await d.service.registerPractitioner({ ...dto, ownSite: conLogo });
+
+      expect(d.attachableFileService.claimAnonymousUpload).toHaveBeenCalledWith(
+        d.tx,
+        'file-logo',
+        { ownerUserId: 'user-1', tenantId: SEED.tenantId },
+        expect.objectContaining({
+          allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+          allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        }),
+        expect.anything(),
+      );
+      const claimOrder = d.attachableFileService.claimAnonymousUpload.mock
+        .invocationCallOrder as number[];
+      expect(claimOrder[claimOrder.length - 1]).toBeLessThan(
+        d.personsRepo.create.mock.invocationCallOrder[0],
+      );
+      expect(d.ownSiteProvisioning.provision).toHaveBeenCalledWith(
+        d.tx,
+        expect.anything(),
+        conLogo,
+        'user-1',
+      );
+    });
+
+    it.each([
+      ['PHI', { sensitivityConceptId: CONCEPTS.SENSITIVITY_PHI }, '1024'],
+      [
+        'de 3 MB',
+        { sensitivityConceptId: CONCEPTS.SENSITIVITY_NORMAL },
+        String(3 * 1024 * 1024),
+      ],
+    ])(
+      'con un logo %s: 422, sin sede, y nada después del punto de fallo',
+      async (_label, file, sizeBytes) => {
+        const d = build();
+        d.attachableFileService.claimAnonymousUpload.mockResolvedValue({
+          file,
+          version: { sizeBytes },
+        });
+
+        await expect(
+          d.service.registerPractitioner({
+            ...dto,
+            ownSite: { name: 'Consultorio Rojas', logoFileId: 'file-logo' },
+          } as never),
+        ).rejects.toBeInstanceOf(PreconditionFailedException);
+
+        // La transacción se aborta en el reclamo: ni la persona, ni la sede,
+        // ni nada de lo que viene después llega a escribirse.
+        expect(d.personsRepo.create).not.toHaveBeenCalled();
+        expect(d.ownSiteProvisioning.provision).not.toHaveBeenCalled();
+        expect(d.emailVerificationsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.record).not.toHaveBeenCalled();
+      },
+    );
+
+    it('si el reclamo del logo falla, el error sale del alta y no se provisiona', async () => {
+      const d = build();
+      d.attachableFileService.claimAnonymousUpload.mockRejectedValue(
+        new PreconditionFailedException('no corresponde'),
+      );
+
+      await expect(
+        d.service.registerPractitioner({
+          ...dto,
+          ownSite: { name: 'Consultorio Rojas', logoFileId: 'file-logo' },
+        } as never),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.ownSiteProvisioning.provision).not.toHaveBeenCalled();
     });
 
     it('en el alta asistida, el autor de las filas es el administrador (C-18)', async () => {

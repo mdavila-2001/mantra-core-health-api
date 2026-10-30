@@ -79,6 +79,32 @@ describe('OwnSiteProvisioningService', () => {
       );
     });
 
+    it('assigns the logo already validated by the caller to the site', async () => {
+      const d = build();
+
+      const { site } = await d.service.provision(
+        d.tx as any,
+        OWNER,
+        { name: 'Mi consultorio', logoFileId: 'file-logo' } as any,
+        OWNER.userId,
+      );
+
+      expect(site.logoFileId).toBe('file-logo');
+    });
+
+    it('leaves the site without logo when none was declared', async () => {
+      const d = build();
+
+      const { site } = await d.service.provision(
+        d.tx as any,
+        OWNER,
+        { name: 'Mi consultorio' } as any,
+        OWNER.userId,
+      );
+
+      expect(site.logoFileId).toBeUndefined();
+    });
+
     it('creates a new personal practice, the site and the active role assignment', async () => {
       const d = build();
 

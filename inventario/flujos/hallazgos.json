@@ -19,7 +19,7 @@
         "ruta": "/audio-assets/{assetId}/content",
         "modulo": "audio_assets",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:44"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48"
       },
       {
         "operacion": "AudioAssetsController_resolve",
@@ -27,7 +27,7 @@
         "ruta": "/audio-assets/resolve",
         "modulo": "audio_assets",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:28"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32"
       },
       {
         "operacion": "BillingSimulatedController_issue",
@@ -171,7 +171,7 @@
         "ruta": "/community/blocks",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:301"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:325"
       },
       {
         "operacion": "CommunitySocialController_block",
@@ -179,7 +179,7 @@
         "ruta": "/community/blocks",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:248"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:272"
       },
       {
         "operacion": "CommunitySocialController_unbookmark",
@@ -187,7 +187,7 @@
         "ruta": "/community/bookmarks",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:286"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:310"
       },
       {
         "operacion": "CommunitySocialController_bookmark",
@@ -195,7 +195,7 @@
         "ruta": "/community/bookmarks",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:216"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:240"
       },
       {
         "operacion": "CommunitySocialController_createComment",
@@ -203,7 +203,7 @@
         "ruta": "/community/comments",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:183"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:207"
       },
       {
         "operacion": "CommunityMessagingController_createConversation",
@@ -211,7 +211,7 @@
         "ruta": "/community/conversations",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:69"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:70"
       },
       {
         "operacion": "CommunityMessagingController_sendMessage",
@@ -219,7 +219,7 @@
         "ruta": "/community/conversations/{conversationId}/messages",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:85"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:86"
       },
       {
         "operacion": "CommunityMessagingController_deleteMessage",
@@ -227,7 +227,7 @@
         "ruta": "/community/conversations/{conversationId}/messages/{messageId}",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:120"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:121"
       },
       {
         "operacion": "CommunityMessagingController_editMessage",
@@ -235,7 +235,7 @@
         "ruta": "/community/conversations/{conversationId}/messages/{messageId}",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:102"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:103"
       },
       {
         "operacion": "CommunityMessagingController_unpinMessage",
@@ -243,7 +243,7 @@
         "ruta": "/community/conversations/{conversationId}/pin",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:196"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:197"
       },
       {
         "operacion": "CommunityMessagingController_pinMessage",
@@ -251,7 +251,7 @@
         "ruta": "/community/conversations/{conversationId}/pin",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:179"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:180"
       },
       {
         "operacion": "CommunityMessagingController_markRead",
@@ -259,7 +259,7 @@
         "ruta": "/community/conversations/{conversationId}/read",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:143"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:144"
       },
       {
         "operacion": "CommunitySocialController_unfollow",
@@ -267,7 +267,7 @@
         "ruta": "/community/follows",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:271"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:295"
       },
       {
         "operacion": "CommunitySocialController_follow",
@@ -275,7 +275,7 @@
         "ruta": "/community/follows",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:232"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:256"
       },
       {
         "operacion": "CommunityGroupsController_createGroup",
@@ -347,7 +347,7 @@
         "ruta": "/community/profiles/{profileId}/posts",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:166"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:190"
       },
       {
         "operacion": "CommunityReviewsController_publishReview",
@@ -371,7 +371,7 @@
         "ruta": "/community/profiles/me",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:126"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:127"
       },
       {
         "operacion": "PartyRatingsController_rate",
@@ -387,7 +387,7 @@
         "ruta": "/community/reactions",
         "modulo": "community",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:199"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:223"
       },
       {
         "operacion": "CommunityModerationController_report",
@@ -475,7 +475,15 @@
         "ruta": "/tenants/{tenantId}",
         "modulo": "directory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:123"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:129"
+      },
+      {
+        "operacion": "TenantsController_completeAffiliationDocuments",
+        "metodo": "POST",
+        "ruta": "/tenants/{tenantId}/affiliation-documents",
+        "modulo": "directory",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:151"
       },
       {
         "operacion": "TenantsController_createBranch",
@@ -483,7 +491,7 @@
         "ruta": "/tenants/{tenantId}/branches",
         "modulo": "directory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:234"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:300"
       },
       {
         "operacion": "TenantsController_updateBranch",
@@ -491,7 +499,7 @@
         "ruta": "/tenants/{tenantId}/branches/{branchId}",
         "modulo": "directory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:253"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:319"
       },
       {
         "operacion": "OrganizationLogoController_set",
@@ -507,7 +515,7 @@
         "ruta": "/tenants/{tenantId}/memberships",
         "modulo": "directory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:270"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:336"
       },
       {
         "operacion": "TenantsController_assignBranch",
@@ -515,7 +523,7 @@
         "ruta": "/tenants/{tenantId}/memberships/{membershipId}/branch-assignments",
         "modulo": "directory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:287"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:353"
       },
       {
         "operacion": "TenantsController_offboard",
@@ -523,7 +531,7 @@
         "ruta": "/tenants/{tenantId}/memberships/{membershipId}/offboard",
         "modulo": "directory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:351"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:417"
       },
       {
         "operacion": "TenantsController_changeRole",
@@ -531,7 +539,7 @@
         "ruta": "/tenants/{tenantId}/memberships/{membershipId}/role",
         "modulo": "directory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:328"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:394"
       },
       {
         "operacion": "TenantsController_transfer",
@@ -539,7 +547,7 @@
         "ruta": "/tenants/{tenantId}/memberships/{membershipId}/transfer",
         "modulo": "directory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:310"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:376"
       },
       {
         "operacion": "IamAccountSecurityController_changePassword",
@@ -555,7 +563,7 @@
         "ruta": "/iam/auth/logout",
         "modulo": "iam",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:445"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:477"
       },
       {
         "operacion": "IamAuthController_logoutAll",
@@ -563,7 +571,7 @@
         "ruta": "/iam/auth/logout-all",
         "modulo": "iam",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:469"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:501"
       },
       {
         "operacion": "IamAccountSecurityController_revokeSession",
@@ -579,7 +587,7 @@
         "ruta": "/iam/users/{id}/devices",
         "modulo": "iam",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/iam/presentation/controllers/iam-users.controller.ts:349"
+        "fuente": "src/modules/iam/presentation/controllers/iam-users.controller.ts:402"
       },
       {
         "operacion": "IamUsersController_mfaFactor",
@@ -587,7 +595,7 @@
         "ruta": "/iam/users/{id}/mfa-factors",
         "modulo": "iam",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/iam/presentation/controllers/iam-users.controller.ts:332"
+        "fuente": "src/modules/iam/presentation/controllers/iam-users.controller.ts:385"
       },
       {
         "operacion": "IdentitySelfServiceController_requestPatientIdentity",
@@ -859,7 +867,15 @@
         "ruta": "/pharmacy/orders/{id}",
         "modulo": "pharmacy_inventory",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:135"
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:136"
+      },
+      {
+        "operacion": "PharmacyOrdersController_openConversation",
+        "metodo": "POST",
+        "ruta": "/pharmacy/orders/{id}/conversation",
+        "modulo": "pharmacy_inventory",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156"
       },
       {
         "operacion": "PracticesController_publishHealthcareService",
@@ -867,7 +883,7 @@
         "ruta": "/practices/{practiceId}/healthcare-services",
         "modulo": "practice",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/practice/controllers/practices.controller.ts:304"
+        "fuente": "src/modules/practice/controllers/practices.controller.ts:287"
       },
       {
         "operacion": "PracticesController_updateHealthcareService",
@@ -875,7 +891,7 @@
         "ruta": "/practices/{practiceId}/healthcare-services/{id}",
         "modulo": "practice",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/practice/controllers/practices.controller.ts:349"
+        "fuente": "src/modules/practice/controllers/practices.controller.ts:332"
       },
       {
         "operacion": "PracticeInvitationsController_invite",
@@ -910,6 +926,22 @@
         "fuente": "src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:147"
       },
       {
+        "operacion": "PatientAddressBookController_remove",
+        "metodo": "DELETE",
+        "ruta": "/profiles/patients/me/addresses/{id}",
+        "modulo": "profiles",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86"
+      },
+      {
+        "operacion": "PatientAddressBookController_update",
+        "metodo": "PATCH",
+        "ruta": "/profiles/patients/me/addresses/{id}",
+        "modulo": "profiles",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68"
+      },
+      {
         "operacion": "ProfilesDependentRequestsController_requestDependentLink",
         "metodo": "POST",
         "ruta": "/profiles/patients/me/dependent-requests",
@@ -942,12 +974,36 @@
         "fuente": "src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:250"
       },
       {
+        "operacion": "PrimaryPractitionerController_removeOwn",
+        "metodo": "DELETE",
+        "ruta": "/profiles/patients/me/primary-practitioner",
+        "modulo": "profiles",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67"
+      },
+      {
+        "operacion": "PrimaryPractitionerController_setOwn",
+        "metodo": "PUT",
+        "ruta": "/profiles/patients/me/primary-practitioner",
+        "modulo": "profiles",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48"
+      },
+      {
+        "operacion": "ProfilesPractitionersController_updatePractitionerProfile",
+        "metodo": "PATCH",
+        "ruta": "/profiles/practitioners/{profileId}",
+        "modulo": "profiles",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:264"
+      },
+      {
         "operacion": "ProfilesPractitionersController_addJurisdictionAuthorization",
         "metodo": "POST",
         "ruta": "/profiles/practitioners/{profileId}/jurisdiction-authorizations",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:335"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372"
       },
       {
         "operacion": "ProfilesPractitionersController_removePractitionerPhoto",
@@ -955,7 +1011,7 @@
         "ruta": "/profiles/practitioners/{profileId}/photo",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:301"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338"
       },
       {
         "operacion": "ProfilesPractitionersController_setPractitionerPhoto",
@@ -963,7 +1019,7 @@
         "ruta": "/profiles/practitioners/{profileId}/photo",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:271"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308"
       },
       {
         "operacion": "ProfilesPractitionersController_addSpecialty",
@@ -971,7 +1027,7 @@
         "ruta": "/profiles/practitioners/{profileId}/specialties",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:609"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646"
       },
       {
         "operacion": "ProfilesPractitionersController_updateOwnPractitionerProfile",
@@ -982,12 +1038,28 @@
         "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237"
       },
       {
+        "operacion": "OwnAdmissionController_resubmit",
+        "metodo": "POST",
+        "ruta": "/profiles/practitioners/me/admission/resubmit",
+        "modulo": "profiles",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/profiles/presentation/controllers/own-admission.controller.ts:56"
+      },
+      {
+        "operacion": "OwnAdmissionController_withdraw",
+        "metodo": "POST",
+        "ruta": "/profiles/practitioners/me/admission/withdraw",
+        "modulo": "profiles",
+        "detalle": "escribe y el controlador no declara roles",
+        "fuente": "src/modules/profiles/presentation/controllers/own-admission.controller.ts:78"
+      },
+      {
         "operacion": "ProfilesPractitionersController_addOwnAffiliation",
         "metodo": "POST",
         "ruta": "/profiles/practitioners/me/affiliations",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:420"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:457"
       },
       {
         "operacion": "ProfilesPractitionersController_removeOwnAffiliation",
@@ -995,7 +1067,7 @@
         "ruta": "/profiles/practitioners/me/affiliations/{affiliationId}",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:471"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508"
       },
       {
         "operacion": "ProfilesPractitionersController_updateOwnAffiliation",
@@ -1003,7 +1075,7 @@
         "ruta": "/profiles/practitioners/me/affiliations/{affiliationId}",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:445"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482"
       },
       {
         "operacion": "ProfilesPractitionersController_addOwnCredential",
@@ -1011,7 +1083,7 @@
         "ruta": "/profiles/practitioners/me/credentials",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:498"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:535"
       },
       {
         "operacion": "ProfilesPractitionersController_removeOwnCredential",
@@ -1019,7 +1091,7 @@
         "ruta": "/profiles/practitioners/me/credentials/{credentialId}",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595"
       },
       {
         "operacion": "ProfilesPractitionersController_updateOwnCredential",
@@ -1027,7 +1099,7 @@
         "ruta": "/profiles/practitioners/me/credentials/{credentialId}",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:521"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558"
       },
       {
         "operacion": "ProfilesPractitionersController_removeOwnLicense",
@@ -1035,7 +1107,7 @@
         "ruta": "/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:724"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761"
       },
       {
         "operacion": "PractitionerSignatureAssetsController_setOwn",
@@ -1051,7 +1123,7 @@
         "ruta": "/profiles/practitioners/me/specialties/{specialtyId}",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:681"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718"
       },
       {
         "operacion": "ProfilesPractitionersController_updateOwnSpecialty",
@@ -1059,7 +1131,7 @@
         "ruta": "/profiles/practitioners/me/specialties/{specialtyId}",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:655"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692"
       },
       {
         "operacion": "ProfilesPractitionersController_setOwnPrimarySpecialty",
@@ -1067,7 +1139,7 @@
         "ruta": "/profiles/practitioners/me/specialties/{specialtyId}/primary",
         "modulo": "profiles",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:631"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668"
       },
       {
         "operacion": "TenantPractitionerRequestsController_approve",
@@ -1115,7 +1187,7 @@
         "ruta": "/telemetry/activity-events",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:45"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45"
       },
       {
         "operacion": "TelemetryEventsController_captureClientContext",
@@ -1123,7 +1195,7 @@
         "ruta": "/telemetry/client-contexts",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:62"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:62"
       },
       {
         "operacion": "TelemetryEventsController_recordConversion",
@@ -1131,7 +1203,7 @@
         "ruta": "/telemetry/conversion-events",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:97"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:97"
       },
       {
         "operacion": "TelemetryConsentController_acceptDisclosure",
@@ -1139,7 +1211,7 @@
         "ruta": "/telemetry/disclosure-acceptances",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:46"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:46"
       },
       {
         "operacion": "TelemetryEventsController_closeJourney",
@@ -1147,7 +1219,7 @@
         "ruta": "/telemetry/session-journeys/{id}/close",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:113"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:113"
       },
       {
         "operacion": "TelemetryConsentController_grantConsent",
@@ -1155,7 +1227,7 @@
         "ruta": "/telemetry/tracking-consents",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:64"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:64"
       },
       {
         "operacion": "TelemetryConsentController_withdrawConsent",
@@ -1163,7 +1235,7 @@
         "ruta": "/telemetry/tracking-consents/{id}/withdraw",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:106"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:106"
       },
       {
         "operacion": "TelemetryEventsController_recordWebVitals",
@@ -1171,7 +1243,7 @@
         "ruta": "/telemetry/web-vitals",
         "modulo": "telemetry",
         "detalle": "escribe y el controlador no declara roles",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:80"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:80"
       },
       {
         "operacion": "TerminologyFhirController_translate",
@@ -1182,7 +1254,7 @@
         "fuente": "src/modules/terminology/controllers/terminology-fhir.controller.ts:97"
       }
     ],
-    "cuenta": 146
+    "cuenta": 155
   },
   {
     "id": "FLU-03",
@@ -1191,12 +1263,20 @@
     "queHacer": "Verificar que la autenticación alternativa (firma, token de un solo uso) esté en el handler. Una ruta pública que escribe es la superficie más expuesta.",
     "items": [
       {
+        "operacion": "PrescriptionSharesPublicController_read",
+        "metodo": "GET",
+        "ruta": "/public/prescription-shares/{token}",
+        "modulo": "delegated_access",
+        "detalle": "CREA delegated_access.shared_access_link_uses",
+        "fuente": "src/modules/delegated_access/controllers/prescription-shares-public.controller.ts:39"
+      },
+      {
         "operacion": "IamAuthController_activate",
         "metodo": "POST",
         "ruta": "/iam/auth/activate",
         "modulo": "iam",
         "detalle": "ACTUALIZA iam.account_activations, ACTUALIZA iam.authentication_credentials, CREA iam.security_events, ACTUALIZA iam.users",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:300"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:332"
       },
       {
         "operacion": "IamAuthController_forgotPassword",
@@ -1204,7 +1284,7 @@
         "ruta": "/iam/auth/forgot-password",
         "modulo": "iam",
         "detalle": "ACTUALIZA iam.password_resets, CREA iam.password_resets, CREA iam.security_events, CREA messaging.notification_requests",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:352"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:384"
       },
       {
         "operacion": "IamAuthController_login",
@@ -1212,14 +1292,14 @@
         "ruta": "/iam/auth/login",
         "modulo": "iam",
         "detalle": "ACTUALIZA iam.account_lockouts, CREA iam.account_lockouts, ACTUALIZA iam.refresh_tokens, CREA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions, CREA iam.sessions, ACTUALIZA iam.users",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:319"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:351"
       },
       {
         "operacion": "IamAuthController_registerOrganization",
         "metodo": "POST",
         "ruta": "/iam/auth/register-organization",
         "modulo": "iam",
-        "detalle": "CREA common.addresses, ACTUALIZA common.files, CREA diagnostic_units.diagnostic_study_offerings, CREA diagnostic_units.diagnostic_unit_sites, CREA diagnostic_units.diagnostic_units, CREA directory.branches, CREA directory.tenant_affiliation_documents, CREA directory.tenant_legal_representatives, CREA directory.tenant_memberships, CREA directory.tenants, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA insurance.insurance_brokers, CREA insurance.insurance_carriers, CREA messaging.notification_requests, CREA pharmacy.pharmacies, CREA practice.practice_sites, CREA practice.practices",
+        "detalle": "CREA common.addresses, ACTUALIZA common.files, CREA diagnostic_units.diagnostic_study_offerings, CREA diagnostic_units.diagnostic_unit_sites, CREA diagnostic_units.diagnostic_units, CREA directory.branches, CREA directory.tenant_affiliation_documents, CREA directory.tenant_legal_representatives, CREA directory.tenant_medical_facilities, CREA directory.tenant_medical_facility_sites, CREA directory.tenant_memberships, CREA directory.tenants, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA insurance.insurance_brokers, CREA insurance.insurance_carriers, CREA messaging.notification_requests, CREA pharmacy.pharmacies, CREA pharmacy.pharmacy_product_categories, CREA pharmacy.pharmacy_sites, CREA practice.practice_sites, CREA practice.practices",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:134"
       },
       {
@@ -1235,8 +1315,8 @@
         "metodo": "POST",
         "ruta": "/iam/auth/register-practitioner",
         "modulo": "iam",
-        "detalle": "CREA authz.user_role_assignments, CREA common.addresses, CREA common.contact_points, CREA common.file_versions, CREA common.files, ACTUALIZA common.files, CREA common.identifiers, CREA directory.tenant_memberships, CREA iam.account_activations, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA messaging.notification_requests, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs, CREA practice.practice_sites, CREA practice.practices, CREA practice.practitioner_role_assignments, CREA profiles.health_practitioner_profiles, CREA profiles.jurisdiction_authorizations, CREA profiles.person_account_links, CREA profiles.person_profiles, CREA profiles.persons, CREA profiles.practitioner_languages, CREA profiles.practitioner_specialties, CREA profiles.professional_credentials",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:234"
+        "detalle": "CREA authz.user_role_assignments, CREA common.addresses, CREA common.contact_points, CREA common.file_versions, CREA common.files, ACTUALIZA common.files, CREA common.identifiers, CREA directory.tenant_memberships, CREA iam.account_activations, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA messaging.notification_requests, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs, CREA practice.practice_sites, CREA practice.practices, CREA practice.practitioner_role_assignments, CREA profiles.health_practitioner_profiles, CREA profiles.jurisdiction_authorizations, ACTUALIZA profiles.jurisdiction_authorizations, CREA profiles.person_account_links, CREA profiles.person_profiles, CREA profiles.persons, CREA profiles.practitioner_admission_events, BORRA profiles.practitioner_admission_reviews, CREA profiles.practitioner_admission_reviews, ACTUALIZA profiles.practitioner_admission_reviews, CREA profiles.practitioner_admissions, CREA profiles.practitioner_languages, CREA profiles.practitioner_specialties, ACTUALIZA profiles.practitioner_specialties, CREA profiles.professional_credentials, ACTUALIZA profiles.professional_credentials",
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:266"
       },
       {
         "operacion": "IamAuthController_resendVerification",
@@ -1244,7 +1324,7 @@
         "ruta": "/iam/auth/resend-verification",
         "modulo": "iam",
         "detalle": "CREA iam.email_verifications, CREA messaging.notification_requests",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:267"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:299"
       },
       {
         "operacion": "IamAuthController_resetPassword",
@@ -1252,7 +1332,7 @@
         "ruta": "/iam/auth/reset-password",
         "modulo": "iam",
         "detalle": "ACTUALIZA iam.authentication_credentials, ACTUALIZA iam.password_resets, ACTUALIZA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:373"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:405"
       },
       {
         "operacion": "IamAuthController_refresh",
@@ -1260,7 +1340,7 @@
         "ruta": "/iam/auth/token/refresh",
         "modulo": "iam",
         "detalle": "ACTUALIZA iam.refresh_tokens, CREA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:389"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:421"
       },
       {
         "operacion": "IamAuthController_uploadRegistrationDocument",
@@ -1268,7 +1348,15 @@
         "ruta": "/iam/auth/upload-registration-document",
         "modulo": "iam",
         "detalle": "CREA common.file_versions, CREA common.files, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:199"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:231"
+      },
+      {
+        "operacion": "IamAuthController_uploadRegistrationLogo",
+        "metodo": "POST",
+        "ruta": "/iam/auth/upload-registration-logo",
+        "modulo": "iam",
+        "detalle": "CREA common.file_versions, CREA common.files, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs",
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:184"
       },
       {
         "operacion": "IamAuthController_uploadRegistrationSignatureImage",
@@ -1284,7 +1372,7 @@
         "ruta": "/iam/auth/verify-email",
         "modulo": "iam",
         "detalle": "ACTUALIZA iam.email_verifications, ACTUALIZA iam.users",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:284"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:316"
       },
       {
         "operacion": "IntegrationsWebhooksController_receiveInbound",
@@ -1319,6 +1407,14 @@
         "fuente": "src/modules/payments/controllers/payments-operations.controller.ts:95"
       },
       {
+        "operacion": "PaymentsGatewayWebhooksController_receive",
+        "metodo": "POST",
+        "ruta": "/payments/gateway-webhooks",
+        "modulo": "payments",
+        "detalle": "ACTUALIZA payments.payment_checkout_sessions, ACTUALIZA payments.payment_debts, ACTUALIZA payments.payment_intents, CREA payments.payment_webhook_events",
+        "fuente": "src/modules/payments/controllers/payments-gateway-webhooks.controller.ts:32"
+      },
+      {
         "operacion": "TrackingController_ingestCarrierWebhook",
         "metodo": "POST",
         "ruta": "/tracking/webhooks/carriers/{carrierCode}",
@@ -1327,7 +1423,7 @@
         "fuente": "src/modules/tracking/controllers/tracking.controller.ts:150"
       }
     ],
-    "cuenta": 17
+    "cuenta": 20
   },
   {
     "id": "FLU-04",
@@ -1365,7 +1461,7 @@
         "ruta": "/audio-assets/{assetId}/content",
         "modulo": "audio_assets",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:44"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48"
       },
       {
         "operacion": "AudioAssetsController_resolve",
@@ -1373,7 +1469,7 @@
         "ruta": "/audio-assets/resolve",
         "modulo": "audio_assets",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:28"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32"
       },
       {
         "operacion": "AuditController_applyRetention",
@@ -1485,7 +1581,7 @@
         "ruta": "/community/blocks",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:301"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:325"
       },
       {
         "operacion": "CommunitySocialController_unbookmark",
@@ -1493,7 +1589,7 @@
         "ruta": "/community/bookmarks",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:286"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:310"
       },
       {
         "operacion": "CommunitySocialController_bookmark",
@@ -1501,7 +1597,7 @@
         "ruta": "/community/bookmarks",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:216"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:240"
       },
       {
         "operacion": "CommunityMessagingController_deleteMessage",
@@ -1509,7 +1605,7 @@
         "ruta": "/community/conversations/{conversationId}/messages/{messageId}",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:120"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:121"
       },
       {
         "operacion": "CommunityMessagingController_editMessage",
@@ -1517,7 +1613,7 @@
         "ruta": "/community/conversations/{conversationId}/messages/{messageId}",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:102"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:103"
       },
       {
         "operacion": "CommunityMessagingController_unpinMessage",
@@ -1525,7 +1621,7 @@
         "ruta": "/community/conversations/{conversationId}/pin",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:196"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:197"
       },
       {
         "operacion": "CommunityMessagingController_pinMessage",
@@ -1533,7 +1629,7 @@
         "ruta": "/community/conversations/{conversationId}/pin",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:179"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:180"
       },
       {
         "operacion": "CommunitySocialController_unfollow",
@@ -1541,7 +1637,7 @@
         "ruta": "/community/follows",
         "modulo": "community",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:271"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:295"
       },
       {
         "operacion": "CommunityGroupsController_createGroup",
@@ -1648,6 +1744,14 @@
         "fuente": "src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81"
       },
       {
+        "operacion": "PrescriptionSharesPublicController_read",
+        "metodo": "GET",
+        "ruta": "/public/prescription-shares/{token}",
+        "modulo": "delegated_access",
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/delegated_access/controllers/prescription-shares-public.controller.ts:39"
+      },
+      {
         "operacion": "DiagnosticsLabController_createAnalyzerRun",
         "metodo": "POST",
         "ruta": "/diagnostics/analyzer-runs",
@@ -1701,7 +1805,7 @@
         "ruta": "/tenants/{tenantId}",
         "modulo": "directory",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:123"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:129"
       },
       {
         "operacion": "TenantsController_createBranch",
@@ -1709,7 +1813,7 @@
         "ruta": "/tenants/{tenantId}/branches",
         "modulo": "directory",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:234"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:300"
       },
       {
         "operacion": "TenantsController_updateBranch",
@@ -1717,7 +1821,7 @@
         "ruta": "/tenants/{tenantId}/branches/{branchId}",
         "modulo": "directory",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:253"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:319"
       },
       {
         "operacion": "OrganizationLogoController_set",
@@ -1733,7 +1837,7 @@
         "ruta": "/tenants/{tenantId}/memberships",
         "modulo": "directory",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:270"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:336"
       },
       {
         "operacion": "TenantsController_assignBranch",
@@ -1741,7 +1845,7 @@
         "ruta": "/tenants/{tenantId}/memberships/{membershipId}/branch-assignments",
         "modulo": "directory",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:287"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:353"
       },
       {
         "operacion": "TenantsController_offboard",
@@ -1749,7 +1853,7 @@
         "ruta": "/tenants/{tenantId}/memberships/{membershipId}/offboard",
         "modulo": "directory",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:351"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:417"
       },
       {
         "operacion": "TenantsController_changeRole",
@@ -1757,7 +1861,7 @@
         "ruta": "/tenants/{tenantId}/memberships/{membershipId}/role",
         "modulo": "directory",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:328"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:394"
       },
       {
         "operacion": "TenantsController_transfer",
@@ -1765,7 +1869,7 @@
         "ruta": "/tenants/{tenantId}/memberships/{membershipId}/transfer",
         "modulo": "directory",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/directory/controllers/tenants.controller.ts:310"
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:376"
       },
       {
         "operacion": "GraphQueryController_detectCommunities",
@@ -1805,7 +1909,7 @@
         "ruta": "/iam/auth/activate",
         "modulo": "iam",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:300"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:332"
       },
       {
         "operacion": "IamAccountSecurityController_changePassword",
@@ -1821,7 +1925,7 @@
         "ruta": "/iam/auth/forgot-password",
         "modulo": "iam",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:352"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:384"
       },
       {
         "operacion": "IamAuthController_resendVerification",
@@ -1829,7 +1933,7 @@
         "ruta": "/iam/auth/resend-verification",
         "modulo": "iam",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:267"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:299"
       },
       {
         "operacion": "IamAuthController_resetPassword",
@@ -1837,7 +1941,15 @@
         "ruta": "/iam/auth/reset-password",
         "modulo": "iam",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:373"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:405"
+      },
+      {
+        "operacion": "IamAuthController_uploadRegistrationLogo",
+        "metodo": "POST",
+        "ruta": "/iam/auth/upload-registration-logo",
+        "modulo": "iam",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:184"
       },
       {
         "operacion": "IamAuthController_verifyEmail",
@@ -1845,7 +1957,7 @@
         "ruta": "/iam/auth/verify-email",
         "modulo": "iam",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:284"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:316"
       },
       {
         "operacion": "IamAccountSecurityController_revokeSession",
@@ -1856,12 +1968,12 @@
         "fuente": "src/modules/iam/presentation/controllers/iam-account-security.controller.ts:71"
       },
       {
-        "operacion": "IdentitySelfServiceController_requestPractitionerIdentity",
+        "operacion": "IdentityChecksController_recordResult",
         "metodo": "POST",
-        "ruta": "/identity/me/practitioner/identity-verification",
+        "ruta": "/identity/checks/{id}/results",
         "modulo": "identity_assurance",
-        "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/identity_assurance/controllers/identity-self-service.controller.ts:60"
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/identity_assurance/controllers/identity-checks.controller.ts:58"
       },
       {
         "operacion": "IdentitySelfServiceController_requestPractitionerLicense",
@@ -2040,6 +2152,14 @@
         "fuente": "src/modules/messaging/controllers/provider-webhooks.controller.ts:33"
       },
       {
+        "operacion": "PaymentsGatewayWebhooksController_receive",
+        "metodo": "POST",
+        "ruta": "/payments/gateway-webhooks",
+        "modulo": "payments",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/payments/controllers/payments-gateway-webhooks.controller.ts:32"
+      },
+      {
         "operacion": "MedicalVisitorsController_create",
         "metodo": "POST",
         "ruta": "/pharma-labs/{pharmaLabId}/medical-visitors",
@@ -2088,12 +2208,116 @@
         "fuente": "src/modules/pharma_lab/controllers/visit-agenda.controller.ts:44"
       },
       {
+        "operacion": "PharmacyController_deleteCategory",
+        "metodo": "DELETE",
+        "ruta": "/pharmacies/{pharmacyId}/categories/{categoryId}",
+        "modulo": "pharmacy",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/pharmacy/controllers/pharmacy.controller.ts:162"
+      },
+      {
+        "operacion": "PharmacyController_publishProduct",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/products",
+        "modulo": "pharmacy",
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/pharmacy/controllers/pharmacy.controller.ts:342"
+      },
+      {
+        "operacion": "PharmacyController_updateProduct",
+        "metodo": "PATCH",
+        "ruta": "/pharmacies/{pharmacyId}/products/{productId}",
+        "modulo": "pharmacy",
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/pharmacy/controllers/pharmacy.controller.ts:361"
+      },
+      {
+        "operacion": "PharmacyOrdersController_openConversation",
+        "metodo": "POST",
+        "ruta": "/pharmacy/orders/{id}/conversation",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156"
+      },
+      {
+        "operacion": "AdmissionsController_claim",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/claim",
+        "modulo": "profiles",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/profiles/presentation/controllers/admissions.controller.ts:167"
+      },
+      {
+        "operacion": "AdmissionsController_decide",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/decision",
+        "modulo": "profiles",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/profiles/presentation/controllers/admissions.controller.ts:286"
+      },
+      {
+        "operacion": "AdmissionsController_reassign",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/reassign",
+        "modulo": "profiles",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/profiles/presentation/controllers/admissions.controller.ts:213"
+      },
+      {
+        "operacion": "AdmissionsController_requestInfo",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/request-info",
+        "modulo": "profiles",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/profiles/presentation/controllers/admissions.controller.ts:237"
+      },
+      {
+        "operacion": "ProfilesPractitionersController_verifyCredential",
+        "metodo": "POST",
+        "ruta": "/profiles/credentials/{credentialId}/verify",
+        "modulo": "profiles",
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813"
+      },
+      {
+        "operacion": "PatientAddressBookController_remove",
+        "metodo": "DELETE",
+        "ruta": "/profiles/patients/me/addresses/{id}",
+        "modulo": "profiles",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86"
+      },
+      {
+        "operacion": "PatientAddressBookController_update",
+        "metodo": "PATCH",
+        "ruta": "/profiles/patients/me/addresses/{id}",
+        "modulo": "profiles",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68"
+      },
+      {
+        "operacion": "PrimaryPractitionerController_removeOwn",
+        "metodo": "DELETE",
+        "ruta": "/profiles/patients/me/primary-practitioner",
+        "modulo": "profiles",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67"
+      },
+      {
+        "operacion": "PrimaryPractitionerController_setOwn",
+        "metodo": "PUT",
+        "ruta": "/profiles/patients/me/primary-practitioner",
+        "modulo": "profiles",
+        "detalle": "ninguna prueba la menciona",
+        "fuente": "src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:48"
+      },
+      {
         "operacion": "ProfilesPractitionersController_addJurisdictionAuthorization",
         "metodo": "POST",
         "ruta": "/profiles/practitioners/{profileId}/jurisdiction-authorizations",
         "modulo": "profiles",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:335"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:372"
       },
       {
         "operacion": "ProfilesPractitionersController_removePractitionerPhoto",
@@ -2101,7 +2325,7 @@
         "ruta": "/profiles/practitioners/{profileId}/photo",
         "modulo": "profiles",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:301"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338"
       },
       {
         "operacion": "ProfilesPractitionersController_setPractitionerPhoto",
@@ -2109,7 +2333,7 @@
         "ruta": "/profiles/practitioners/{profileId}/photo",
         "modulo": "profiles",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:271"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308"
       },
       {
         "operacion": "ProfilesPractitionersController_addSpecialty",
@@ -2117,7 +2341,23 @@
         "ruta": "/profiles/practitioners/{profileId}/specialties",
         "modulo": "profiles",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:609"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646"
+      },
+      {
+        "operacion": "OwnAdmissionController_resubmit",
+        "metodo": "POST",
+        "ruta": "/profiles/practitioners/me/admission/resubmit",
+        "modulo": "profiles",
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/profiles/presentation/controllers/own-admission.controller.ts:56"
+      },
+      {
+        "operacion": "OwnAdmissionController_withdraw",
+        "metodo": "POST",
+        "ruta": "/profiles/practitioners/me/admission/withdraw",
+        "modulo": "profiles",
+        "detalle": "sólo prueba de controlador",
+        "fuente": "src/modules/profiles/presentation/controllers/own-admission.controller.ts:78"
       },
       {
         "operacion": "ProfilesPractitionersController_removeOwnAffiliation",
@@ -2125,7 +2365,7 @@
         "ruta": "/profiles/practitioners/me/affiliations/{affiliationId}",
         "modulo": "profiles",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:471"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508"
       },
       {
         "operacion": "ProfilesPractitionersController_updateOwnAffiliation",
@@ -2133,7 +2373,7 @@
         "ruta": "/profiles/practitioners/me/affiliations/{affiliationId}",
         "modulo": "profiles",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:445"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482"
       },
       {
         "operacion": "ProfilesPractitionersController_removeOwnCredential",
@@ -2141,7 +2381,7 @@
         "ruta": "/profiles/practitioners/me/credentials/{credentialId}",
         "modulo": "profiles",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:558"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595"
       },
       {
         "operacion": "ProfilesPractitionersController_removeOwnLicense",
@@ -2149,7 +2389,7 @@
         "ruta": "/profiles/practitioners/me/jurisdiction-authorizations/{licenseId}",
         "modulo": "profiles",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:724"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:761"
       },
       {
         "operacion": "PractitionerSignatureAssetsController_setOwn",
@@ -2165,7 +2405,7 @@
         "ruta": "/profiles/practitioners/me/specialties/{specialtyId}",
         "modulo": "profiles",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:681"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:718"
       },
       {
         "operacion": "ProfilesPractitionersController_updateOwnSpecialty",
@@ -2173,7 +2413,7 @@
         "ruta": "/profiles/practitioners/me/specialties/{specialtyId}",
         "modulo": "profiles",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:655"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:692"
       },
       {
         "operacion": "ProfilesPractitionersController_setOwnPrimarySpecialty",
@@ -2181,7 +2421,7 @@
         "ruta": "/profiles/practitioners/me/specialties/{specialtyId}/primary",
         "modulo": "profiles",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:631"
+        "fuente": "src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:668"
       },
       {
         "operacion": "TenantPractitionerRequestsController_reject",
@@ -2253,7 +2493,7 @@
         "ruta": "/telemetry/activity-events",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:45"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45"
       },
       {
         "operacion": "TelemetryEventsController_captureClientContext",
@@ -2261,7 +2501,7 @@
         "ruta": "/telemetry/client-contexts",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:62"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:62"
       },
       {
         "operacion": "TelemetryEventsController_recordConversion",
@@ -2269,7 +2509,7 @@
         "ruta": "/telemetry/conversion-events",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:97"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:97"
       },
       {
         "operacion": "TelemetryConsentController_acceptDisclosure",
@@ -2277,7 +2517,7 @@
         "ruta": "/telemetry/disclosure-acceptances",
         "modulo": "telemetry",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:46"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:46"
       },
       {
         "operacion": "TelemetryEventsController_closeJourney",
@@ -2285,7 +2525,7 @@
         "ruta": "/telemetry/session-journeys/{id}/close",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:113"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:113"
       },
       {
         "operacion": "TelemetryConsentController_grantConsent",
@@ -2293,7 +2533,7 @@
         "ruta": "/telemetry/tracking-consents",
         "modulo": "telemetry",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:64"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:64"
       },
       {
         "operacion": "TelemetryConsentController_withdrawConsent",
@@ -2301,7 +2541,7 @@
         "ruta": "/telemetry/tracking-consents/{id}/withdraw",
         "modulo": "telemetry",
         "detalle": "sólo prueba de controlador",
-        "fuente": "src/modules/telemetry/controllers/telemetry-consent.controller.ts:106"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:106"
       },
       {
         "operacion": "TelemetryEventsController_recordWebVitals",
@@ -2309,7 +2549,7 @@
         "ruta": "/telemetry/web-vitals",
         "modulo": "telemetry",
         "detalle": "ninguna prueba la menciona",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:80"
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:80"
       },
       {
         "operacion": "TerminologyFhirController_translate",
@@ -2344,7 +2584,7 @@
         "fuente": "src/modules/vector_rag/controllers/vector-runtime.controller.ts:189"
       }
     ],
-    "cuenta": 126
+    "cuenta": 144
   },
   {
     "id": "FLU-05",
@@ -3585,6 +3825,22 @@
         "fuente": null
       },
       {
+        "operacion": "BillingServiceCatalogController_importProcedures",
+        "metodo": "POST",
+        "ruta": "/billing/service-catalog/import-procedures",
+        "modulo": "billing",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "BillingServiceCatalogController_listMyProcedureSpecialties",
+        "metodo": "GET",
+        "ruta": "/billing/service-catalog/procedure-specialties/mine",
+        "modulo": "billing",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "BillingSimulatedController_catalogs",
         "metodo": "GET",
         "ruta": "/billing/simulated/catalogs",
@@ -3684,6 +3940,14 @@
         "operacion": "BillingSimulatedController_status",
         "metodo": "GET",
         "ruta": "/billing/simulated/status",
+        "modulo": "billing",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PatientSpendingController_listMine",
+        "metodo": "GET",
+        "ruta": "/patient-spending/me",
         "modulo": "billing",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -4121,6 +4385,30 @@
         "fuente": null
       },
       {
+        "operacion": "ReferralsController_get",
+        "metodo": "GET",
+        "ruta": "/referrals/{id}",
+        "modulo": "clinical_ext",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "ReferralsController_cancel",
+        "metodo": "PATCH",
+        "ruta": "/referrals/{id}/cancel",
+        "modulo": "clinical_ext",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "ReferralsController_counterReferral",
+        "metodo": "PATCH",
+        "ruta": "/referrals/{id}/counter-referral",
+        "modulo": "clinical_ext",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "ReferralsController_respond",
         "metodo": "PATCH",
         "ruta": "/referrals/{id}/respond",
@@ -4132,6 +4420,22 @@
         "operacion": "ReferralsController_listMine",
         "metodo": "GET",
         "ruta": "/referrals/me",
+        "modulo": "clinical_ext",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "ReferralsController_listTargetServices",
+        "metodo": "GET",
+        "ruta": "/referrals/target-services",
+        "modulo": "clinical_ext",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "ReferralsController_searchTargets",
+        "metodo": "GET",
+        "ruta": "/referrals/targets",
         "modulo": "clinical_ext",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -4377,6 +4681,14 @@
         "fuente": null
       },
       {
+        "operacion": "CommunitySocialController_listOwnOrganizationShowcases",
+        "metodo": "GET",
+        "ruta": "/community/profiles/organization-showcases/me",
+        "modulo": "community",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "CommunitySocialController_createProfile",
         "metodo": "POST",
         "ruta": "/community/public-profiles",
@@ -4516,6 +4828,14 @@
         "operacion": "CommunityPublicController_getPractitioner",
         "metodo": "GET",
         "ruta": "/p/{slug}",
+        "modulo": "community",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PatientReviewsController_getReviewableCare",
+        "metodo": "GET",
+        "ruta": "/patients/me/reviewable-care",
         "modulo": "community",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -4753,9 +5073,49 @@
         "fuente": null
       },
       {
+        "operacion": "TreatmentInformedConsentsController_list",
+        "metodo": "GET",
+        "ruta": "/consent/treatment-informed-consents",
+        "modulo": "consent",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "TreatmentInformedConsentsController_sign",
         "metodo": "POST",
         "ruta": "/consent/treatment-informed-consents",
+        "modulo": "consent",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "TreatmentInformedConsentsController_get",
+        "metodo": "GET",
+        "ruta": "/consent/treatment-informed-consents/{id}",
+        "modulo": "consent",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "TreatmentInformedConsentsController_recordEvidence",
+        "metodo": "POST",
+        "ruta": "/consent/treatment-informed-consents/{id}/evidence",
+        "modulo": "consent",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "TreatmentInformedConsentsController_postEmergencyInformation",
+        "metodo": "PATCH",
+        "ruta": "/consent/treatment-informed-consents/{id}/post-emergency-information",
+        "modulo": "consent",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "TreatmentInformedConsentsController_withdraw",
+        "metodo": "PATCH",
+        "ruta": "/consent/treatment-informed-consents/{id}/withdraw",
         "modulo": "consent",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -5209,9 +5569,49 @@
         "fuente": null
       },
       {
+        "operacion": "PrescriptionSharesController_list",
+        "metodo": "GET",
+        "ruta": "/clinical/prescription-shares",
+        "modulo": "delegated_access",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PrescriptionSharesController_create",
+        "metodo": "POST",
+        "ruta": "/clinical/prescription-shares",
+        "modulo": "delegated_access",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PrescriptionSharesController_revoke",
+        "metodo": "POST",
+        "ruta": "/clinical/prescription-shares/{shareId}/revoke",
+        "modulo": "delegated_access",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PrescriptionSharesController_resolveOwnership",
+        "metodo": "GET",
+        "ruta": "/clinical/prescription-shares/by-token/{token}",
+        "modulo": "delegated_access",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "DelegatedPermissionSetsController_list",
         "metodo": "GET",
         "ruta": "/delegated-permission-sets",
+        "modulo": "delegated_access",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PrescriptionSharesPublicController_read",
+        "metodo": "GET",
+        "ruta": "/public/prescription-shares/{token}",
         "modulo": "delegated_access",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -5489,9 +5889,25 @@
         "fuente": null
       },
       {
+        "operacion": "TenantsController_completeAffiliationDocuments",
+        "metodo": "POST",
+        "ruta": "/tenants/{tenantId}/affiliation-documents",
+        "modulo": "directory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "TenantsController_updateBranch",
         "metodo": "PATCH",
         "ruta": "/tenants/{tenantId}/branches/{branchId}",
+        "modulo": "directory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "TenantsController_getLaboratoryReadiness",
+        "metodo": "GET",
+        "ruta": "/tenants/{tenantId}/laboratory-readiness",
         "modulo": "directory",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -5540,6 +5956,14 @@
         "operacion": "TenantsController_transfer",
         "metodo": "POST",
         "ruta": "/tenants/{tenantId}/memberships/{membershipId}/transfer",
+        "modulo": "directory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "TenantsController_getPharmacyReadiness",
+        "metodo": "GET",
+        "ruta": "/tenants/{tenantId}/pharmacy-readiness",
         "modulo": "directory",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -5921,6 +6345,14 @@
         "fuente": null
       },
       {
+        "operacion": "ReverseGeocodingController_reverse",
+        "metodo": "POST",
+        "ruta": "/public/geo/reverse",
+        "modulo": "geo",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "GraphQueryController_defineAccessScope",
         "metodo": "POST",
         "ruta": "/graph/access-scopes",
@@ -6209,6 +6641,14 @@
         "fuente": null
       },
       {
+        "operacion": "IamAuthController_uploadRegistrationLogo",
+        "metodo": "POST",
+        "ruta": "/iam/auth/upload-registration-logo",
+        "modulo": "iam",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "IamAuthController_uploadRegistrationSignatureImage",
         "metodo": "POST",
         "ruta": "/iam/auth/upload-registration-signature-image",
@@ -6364,6 +6804,14 @@
         "operacion": "IamUsersController_assistedPractitionerRegistration",
         "metodo": "POST",
         "ruta": "/iam/users/assisted-practitioner-registration",
+        "modulo": "iam",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "IamUsersController_searchUsersByBody",
+        "metodo": "POST",
+        "ruta": "/iam/users/search",
         "modulo": "iam",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -6724,6 +7172,14 @@
         "operacion": "CoverageController_enroll",
         "metodo": "POST",
         "ruta": "/patient-coverages",
+        "modulo": "insurance",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "CoverageController_listForPatient",
+        "metodo": "GET",
+        "ruta": "/patient-coverages/by-patient/{patientProfileId}",
         "modulo": "insurance",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -7729,6 +8185,38 @@
         "fuente": null
       },
       {
+        "operacion": "PaymentsGatewayDispatchesController_close",
+        "metodo": "POST",
+        "ruta": "/payments/gateway-dispatches/{intentId}/close",
+        "modulo": "payments",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PaymentsGatewayDispatchesController_reconcile",
+        "metodo": "POST",
+        "ruta": "/payments/gateway-dispatches/{intentId}/reconcile",
+        "modulo": "payments",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PaymentsGatewayDispatchesController_listPending",
+        "metodo": "GET",
+        "ruta": "/payments/gateway-dispatches/pending-reconciliation",
+        "modulo": "payments",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PaymentsGatewayWebhooksController_receive",
+        "metodo": "POST",
+        "ruta": "/payments/gateway-webhooks",
+        "modulo": "payments",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "PaymentsIntentsController_createIntent",
         "metodo": "POST",
         "ruta": "/payments/intents",
@@ -8265,6 +8753,38 @@
         "fuente": null
       },
       {
+        "operacion": "PharmacyController_createCategory",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/categories",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyController_deleteCategory",
+        "metodo": "DELETE",
+        "ruta": "/pharmacies/{pharmacyId}/categories/{categoryId}",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyController_renameCategory",
+        "metodo": "PATCH",
+        "ruta": "/pharmacies/{pharmacyId}/categories/{categoryId}",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyBulkController_bulkCategories",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/categories/bulk",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "PharmacyController_createConnection",
         "metodo": "POST",
         "ruta": "/pharmacies/{pharmacyId}/integration-connections",
@@ -8275,7 +8795,15 @@
       {
         "operacion": "PharmacyController_mapProduct",
         "metodo": "POST",
-        "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings",
+        "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyController_updateInventory",
+        "metodo": "PATCH",
+        "ruta": "/pharmacies/{pharmacyId}/inventory",
         "modulo": "pharmacy",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -8284,6 +8812,22 @@
         "operacion": "PharmacyController_verifyLicense",
         "metodo": "POST",
         "ruta": "/pharmacies/{pharmacyId}/licenses/{licenseId}/verify",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyController_cancelOnCallShift",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyController_getOpeningHours",
+        "metodo": "GET",
+        "ruta": "/pharmacies/{pharmacyId}/opening-hours",
         "modulo": "pharmacy",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -8313,6 +8857,14 @@
         "fuente": null
       },
       {
+        "operacion": "PharmacyBulkController_bulkPrices",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/prices/bulk",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "PharmacyController_publishProduct",
         "metodo": "POST",
         "ruta": "/pharmacies/{pharmacyId}/products",
@@ -8337,6 +8889,14 @@
         "fuente": null
       },
       {
+        "operacion": "PharmacyBulkController_bulkProducts",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/products/bulk",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "PharmacyController_projectCatalog",
         "metodo": "POST",
         "ruta": "/pharmacies/{pharmacyId}/projections",
@@ -8348,6 +8908,30 @@
         "operacion": "PharmacyController_createSite",
         "metodo": "POST",
         "ruta": "/pharmacies/{pharmacyId}/sites",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyController_createOnCallShift",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyController_setOpen24h",
+        "metodo": "PUT",
+        "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/open-24h",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyBulkController_bulkSites",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/sites/bulk",
         "modulo": "pharmacy",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -8385,6 +8969,14 @@
         "fuente": null
       },
       {
+        "operacion": "PharmacyPublicController_openNow",
+        "metodo": "GET",
+        "ruta": "/public/pharmacies/open-now",
+        "modulo": "pharmacy",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "PharmacyInventoryInternalController_createSyncBatch",
         "metodo": "POST",
         "ruta": "/internal/inventory-sync-batches",
@@ -8404,6 +8996,54 @@
         "operacion": "PharmacyInventoryInternalController_expireReservations",
         "metodo": "POST",
         "ruta": "/internal/reservations/expire",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyIntegrationSyncController_listConnections",
+        "metodo": "GET",
+        "ruta": "/pharmacies/{pharmacyId}/integration-connections",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyIntegrationSyncController_listExternalProducts",
+        "metodo": "GET",
+        "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyIntegrationSyncController_listMappings",
+        "metodo": "GET",
+        "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyIntegrationSyncController_syncNow",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyIntegrationSyncController_listSyncBatches",
+        "metodo": "GET",
+        "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacySiteAvailabilityController_setSiteAvailability",
+        "metodo": "PUT",
+        "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability",
         "modulo": "pharmacy_inventory",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -8529,6 +9169,14 @@
         "fuente": null
       },
       {
+        "operacion": "PharmacyOrdersController_openConversation",
+        "metodo": "POST",
+        "ruta": "/pharmacy/orders/{id}/conversation",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "PharmacyOrdersController_dispense",
         "metodo": "POST",
         "ruta": "/pharmacy/orders/{id}/dispense",
@@ -8564,6 +9212,14 @@
         "operacion": "PharmacyOrdersController_openReview",
         "metodo": "POST",
         "ruta": "/pharmacy/orders/{id}/review",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PharmacyPrescriptionSharesController_open",
+        "metodo": "GET",
+        "ruta": "/pharmacy/prescription-shares/{token}",
         "modulo": "pharmacy_inventory",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -8969,6 +9625,14 @@
         "fuente": null
       },
       {
+        "operacion": "PractitionerSitesController_setSiteLogo",
+        "metodo": "PUT",
+        "ruta": "/practitioners/me/sites/{siteId}/logo",
+        "modulo": "practice",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "RoleAssignmentsController_approve",
         "metodo": "POST",
         "ruta": "/role-assignments/{roleId}/approve",
@@ -9233,6 +9897,126 @@
         "fuente": null
       },
       {
+        "operacion": "AdmissionsController_caller",
+        "metodo": "DESCONOCIDO",
+        "ruta": "/admissions",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_list",
+        "metodo": "GET",
+        "ruta": "/admissions",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_detail",
+        "metodo": "GET",
+        "ruta": "/admissions/{id}",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_claim",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/claim",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_decide",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/decision",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_documentContent",
+        "metodo": "GET",
+        "ruta": "/admissions/{id}/documents/{fileId}/content",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_documentUrl",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/documents/{fileId}/download-url",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_reviewItem",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/items/{itemId}/review",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_reassign",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/reassign",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_reinstate",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/reinstate",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_release",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/release",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_requestInfo",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/request-info",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_suspend",
+        "metodo": "POST",
+        "ruta": "/admissions/{id}/suspend",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_expireSweep",
+        "metodo": "POST",
+        "ruta": "/admissions/expire-sweep",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "AdmissionsController_search",
+        "metodo": "POST",
+        "ruta": "/admissions/search",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "ProfilesPractitionersController_listPendingCredentials",
         "metodo": "GET",
         "ruta": "/profiles/credentials",
@@ -9260,6 +10044,46 @@
         "operacion": "ProfilesPatientsController_grantPortalProxy",
         "metodo": "POST",
         "ruta": "/profiles/patients/{profileId}/portal-proxies",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PatientAddressBookController_list",
+        "metodo": "GET",
+        "ruta": "/profiles/patients/me/addresses",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PatientAddressBookController_create",
+        "metodo": "POST",
+        "ruta": "/profiles/patients/me/addresses",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PatientAddressBookController_remove",
+        "metodo": "DELETE",
+        "ruta": "/profiles/patients/me/addresses/{id}",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PatientAddressBookController_update",
+        "metodo": "PATCH",
+        "ruta": "/profiles/patients/me/addresses/{id}",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PatientAddressBookController_prefer",
+        "metodo": "PUT",
+        "ruta": "/profiles/patients/me/addresses/{id}/preferred",
         "modulo": "profiles",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -9305,6 +10129,30 @@
         "fuente": null
       },
       {
+        "operacion": "PrimaryPractitionerController_removeOwn",
+        "metodo": "DELETE",
+        "ruta": "/profiles/patients/me/primary-practitioner",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PrimaryPractitionerController_getOwn",
+        "metodo": "GET",
+        "ruta": "/profiles/patients/me/primary-practitioner",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PrimaryPractitionerController_setOwn",
+        "metodo": "PUT",
+        "ruta": "/profiles/patients/me/primary-practitioner",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "ProfilesPatientsController_searchPatientsByBody",
         "metodo": "POST",
         "ruta": "/profiles/patients/search",
@@ -9321,6 +10169,14 @@
         "fuente": null
       },
       {
+        "operacion": "ProfilesPractitionersController_updatePractitionerProfile",
+        "metodo": "PATCH",
+        "ruta": "/profiles/practitioners/{profileId}",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "ProfilesPractitionersController_addAffiliationFor",
         "metodo": "POST",
         "ruta": "/profiles/practitioners/{profileId}/affiliations",
@@ -9332,6 +10188,38 @@
         "operacion": "ProfilesPractitionersController_removePractitionerPhoto",
         "metodo": "DELETE",
         "ruta": "/profiles/practitioners/{profileId}/photo",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "OwnAdmissionController_get",
+        "metodo": "GET",
+        "ruta": "/profiles/practitioners/me/admission",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "OwnAdmissionController_resubmit",
+        "metodo": "POST",
+        "ruta": "/profiles/practitioners/me/admission/resubmit",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "OwnAdmissionController_withdraw",
+        "metodo": "POST",
+        "ruta": "/profiles/practitioners/me/admission/withdraw",
+        "modulo": "profiles",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PrimaryPractitionerController_listOwnPatients",
+        "metodo": "GET",
+        "ruta": "/profiles/practitioners/me/primary-patients",
         "modulo": "profiles",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
@@ -9493,6 +10381,22 @@
         "metodo": "POST",
         "ruta": "/referrals/{id}/qualify",
         "modulo": "promotions",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PublicCatalogController_pharmacyBranchAvailability",
+        "metodo": "POST",
+        "ruta": "/public/profiles/f/{slug}/branch-availability",
+        "modulo": "public",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "PublicCatalogController_pharmacyBranches",
+        "metodo": "GET",
+        "ruta": "/public/profiles/f/{slug}/branches",
+        "modulo": "public",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
       },
@@ -9921,6 +10825,46 @@
         "fuente": null
       },
       {
+        "operacion": "SchedulingBookingsController_listPaymentReceipts",
+        "metodo": "GET",
+        "ruta": "/scheduling/bookings/{id}/payment-receipts",
+        "modulo": "scheduling",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "SchedulingBookingsController_uploadPaymentReceipt",
+        "metodo": "POST",
+        "ruta": "/scheduling/bookings/{id}/payment-receipts",
+        "modulo": "scheduling",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "SchedulingBookingsController_confirmPaymentReceipt",
+        "metodo": "POST",
+        "ruta": "/scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm",
+        "modulo": "scheduling",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "SchedulingBookingsController_paymentReceiptContent",
+        "metodo": "GET",
+        "ruta": "/scheduling/bookings/{id}/payment-receipts/{receiptId}/content",
+        "modulo": "scheduling",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "SchedulingBookingsController_rejectPaymentReceipt",
+        "metodo": "POST",
+        "ruta": "/scheduling/bookings/{id}/payment-receipts/{receiptId}/reject",
+        "modulo": "scheduling",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "SchedulingBookingsController_getPaymentState",
         "metodo": "GET",
         "ruta": "/scheduling/bookings/{id}/payment-state",
@@ -10033,6 +10977,22 @@
         "fuente": null
       },
       {
+        "operacion": "SchedulingFlexibleController_availability",
+        "metodo": "GET",
+        "ruta": "/scheduling/resources/{id}/flexible-availability",
+        "modulo": "scheduling",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "SchedulingFlexibleController_placeHold",
+        "metodo": "POST",
+        "ruta": "/scheduling/resources/{id}/flexible-holds",
+        "modulo": "scheduling",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
         "operacion": "SchedulingController_getResourceAgenda",
         "metodo": "GET",
         "ruta": "/scheduling/resources/{id}/slots",
@@ -10133,6 +11093,14 @@
         "metodo": "DELETE",
         "ruta": "/search/{index}/documents/{id}",
         "modulo": "search_platform",
+        "detalle": "ningún cliente del frontend la declara",
+        "fuente": null
+      },
+      {
+        "operacion": "SurveysInsightsController_getInsights",
+        "metodo": "GET",
+        "ruta": "/surveys/insights",
+        "modulo": "surveys",
         "detalle": "ningún cliente del frontend la declara",
         "fuente": null
       },
@@ -11105,7 +12073,7 @@
         "fuente": null
       }
     ],
-    "cuenta": 1078
+    "cuenta": 1169
   },
   {
     "id": "FLU-08",
@@ -11151,7 +12119,7 @@
         "ruta": "/iam/auth",
         "modulo": "iam",
         "detalle": "handler sin operación en openapi.json",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:428"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:460"
       },
       {
         "operacion": "WebPushController_assertKnownPushService",
@@ -11160,6 +12128,14 @@
         "modulo": "messaging",
         "detalle": "handler sin operación en openapi.json",
         "fuente": "src/modules/messaging/controllers/web-push.controller.ts:78"
+      },
+      {
+        "operacion": "AdmissionsController_caller",
+        "metodo": "DESCONOCIDO",
+        "ruta": "/admissions",
+        "modulo": "profiles",
+        "detalle": "handler sin operación en openapi.json",
+        "fuente": "src/modules/profiles/presentation/controllers/admissions.controller.ts:86"
       },
       {
         "operacion": "LoyaltyController_requireTenant",
@@ -11186,7 +12162,7 @@
         "fuente": "src/modules/search_platform/controllers/search-platform.controller.ts:114"
       }
     ],
-    "cuenta": 9
+    "cuenta": 10
   },
   {
     "id": "FLU-09",
@@ -11224,31 +12200,31 @@
         "ruta": "/audio-assets/{assetId}/content",
         "modulo": "audio_assets",
         "detalle": "DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:44"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48"
       },
       {
         "operacion": "AudioAssetsController_resolve",
         "metodo": "POST",
         "ruta": "/audio-assets/resolve",
         "modulo": "audio_assets",
-        "detalle": "Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/repositories/audio-assets.repository.ts:127) | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets.controller.ts:28"
+        "detalle": "Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:118) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:127) | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:118)",
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32"
       },
       {
         "operacion": "AudioAssetsInternalController_generated",
         "metodo": "POST",
         "ruta": "/internal/audio-assets/{assetId}/generated",
         "modulo": "audio_assets",
-        "detalle": "StorageLifecycleDenied: PUBLICATION_PROOF_REQUIRED (src/modules/audio_assets/application/audio-generation.use-case.ts:122) | StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/repositories/audio-assets.repository.ts:235) | StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/repositories/audio-assets.repository.ts:235)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:108"
+        "detalle": "StorageLifecycleDenied: PUBLICATION_PROOF_REQUIRED (src/modules/audio_assets/application/audio-generation.use-case.ts:126) | StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:235) | StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:235)",
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:108"
       },
       {
         "operacion": "AudioAssetsInternalController_prepare",
         "metodo": "POST",
         "ruta": "/internal/audio-assets/{assetId}/prepare-generation",
         "modulo": "audio_assets",
-        "detalle": "Error: Payload cifrado de audio inválido (src/modules/audio_assets/infrastructure/audio-value-cipher.service.ts:38)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:97"
+        "detalle": "Error: Payload cifrado de audio inválido (src/modules/audio_assets/infrastructure/adapters/audio-value-cipher.service.ts:39)",
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:97"
       },
       {
         "operacion": "AudioAssetsInternalController_garbageCollect",
@@ -11256,15 +12232,15 @@
         "ruta": "/internal/audio-assets/garbage-collect",
         "modulo": "audio_assets",
         "detalle": "StorageLifecycleDenied: DELETE_PERMIT_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:212) | StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/local-disk-file-storage.adapter.ts:215) | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:71"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:71"
       },
       {
         "operacion": "AudioAssetsInternalController_pregenerateAssets",
         "metodo": "POST",
         "ruta": "/internal/audio-assets/pregenerate",
         "modulo": "audio_assets",
-        "detalle": "Error: La plantilla enumerada excede {MAX_ENUMERATED_COMBINATIONS} combinaciones (src/modules/audio_assets/application/pregenerate-audio-assets.use-case.ts:89) | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/repositories/audio-assets.repository.ts:127)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:46"
+        "detalle": "Error: La plantilla enumerada excede {MAX_ENUMERATED_COMBINATIONS} combinaciones (src/modules/audio_assets/application/pregenerate-audio-assets.use-case.ts:89) | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:118) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:127)",
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:46"
       },
       {
         "operacion": "AudioAssetsInternalController_verify",
@@ -11272,7 +12248,7 @@
         "ruta": "/internal/audio-assets/verify",
         "modulo": "audio_assets",
         "detalle": "DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:61"
+        "fuente": "src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:61"
       },
       {
         "operacion": "AuditController_verifyIntegrity",
@@ -11336,7 +12312,7 @@
         "ruta": "/billing/service-catalog/{id}/image",
         "modulo": "billing",
         "detalle": "Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/billing/controllers/billing-service-catalog.controller.ts:131"
+        "fuente": "src/modules/billing/controllers/billing-service-catalog.controller.ts:136"
       },
       {
         "operacion": "ChartDocumentsController_getDocumentFileContent",
@@ -11551,7 +12527,7 @@
         "metodo": "POST",
         "ruta": "/common/files/upload",
         "modulo": "common",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) | StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) | StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) | StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90)",
         "fuente": "src/modules/common/controllers/common-files.controller.ts:73"
       },
       {
@@ -11592,7 +12568,7 @@
         "ruta": "/community/comments/media/{fileId}/content",
         "modulo": "community",
         "detalle": "DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/community/controllers/community-social.controller.ts:444"
+        "fuente": "src/modules/community/controllers/community-social.controller.ts:468"
       },
       {
         "operacion": "CommunityMessagingController_getAttachmentContent",
@@ -11600,7 +12576,7 @@
         "ruta": "/community/conversations/{conversationId}/attachments/{fileId}/content",
         "modulo": "community",
         "detalle": "Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229)",
-        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:245"
+        "fuente": "src/modules/community/controllers/community-messaging.controller.ts:246"
       },
       {
         "operacion": "CommunitySearchIndexController_health",
@@ -11647,7 +12623,7 @@
         "metodo": "POST",
         "ruta": "/admin/content-packs/{code}/apply",
         "modulo": "content_packs",
-        "detalle": "Error: El catálogo del glosario declara el slug \"{term.slug}\" más de una vez (src/common/seed/glossary-seed.service.ts:344) | Error: El directorio declara el código \"{facility.code}\" más de una vez (src/common/seed/bolivia-facilities-seed.service.ts:184) | Error: El catálogo geográfico declara la sigla \"{department.code}\" más de una vez (src/common/seed/bo-geography-seed.service.ts:247)",
+        "detalle": "Error: El catálogo del glosario declara el slug \"{term.slug}\" más de una vez (src/common/seed/glossary-seed.service.ts:372) | Error: El directorio declara el código \"{facility.code}\" más de una vez (src/common/seed/bolivia-facilities-seed.service.ts:187) | Error: El catálogo geográfico declara la sigla \"{department.code}\" más de una vez (src/common/seed/bo-geography-seed.service.ts:247)",
         "fuente": "src/modules/content_packs/content-packs.controller.ts:69"
       },
       {
@@ -11655,40 +12631,40 @@
         "metodo": "POST",
         "ruta": "/admin/catalog/annotations/{id}/review",
         "modulo": "data_catalog",
-        "detalle": "DomainException: {403} (src/modules/data_catalog/services/catalog-governance.service.ts:264) | DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:270)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:282"
+        "detalle": "DomainException: {403} (src/modules/data_catalog/application/catalog-governance.service.ts:264) | DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:270)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:282"
       },
       {
         "operacion": "AdminCatalogController_saveColumnAnnotation",
         "metodo": "PUT",
         "ruta": "/admin/catalog/columns/{id}/annotation",
         "modulo": "data_catalog",
-        "detalle": "DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:120)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:252"
+        "detalle": "DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:120)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252"
       },
       {
         "operacion": "AdminCatalogController_saveAnnotation",
         "metodo": "PUT",
         "ruta": "/admin/catalog/objects/{id}/annotation",
         "modulo": "data_catalog",
-        "detalle": "DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:120)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:224"
+        "detalle": "DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:120)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:224"
       },
       {
         "operacion": "AdminCatalogController_requestScan",
         "metodo": "POST",
         "ruta": "/admin/catalog/scans",
         "modulo": "data_catalog",
-        "detalle": "ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) | ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234)",
-        "fuente": "src/modules/data_catalog/controllers/admin-catalog.controller.ts:375"
+        "detalle": "ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) | ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:375"
       },
       {
         "operacion": "InternalCatalogScansController_runNext",
         "metodo": "POST",
         "ruta": "/internal/catalog/scans/run-next",
         "modulo": "data_catalog",
-        "detalle": "ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) | ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234)",
-        "fuente": "src/modules/data_catalog/controllers/internal-catalog.controller.ts:30"
+        "detalle": "ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) | ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234)",
+        "fuente": "src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30"
       },
       {
         "operacion": "DelegatedAccessAuthzController_evaluate",
@@ -11747,6 +12723,14 @@
         "fuente": "src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:173"
       },
       {
+        "operacion": "TenantsController_completeAffiliationDocuments",
+        "metodo": "POST",
+        "ruta": "/tenants/{tenantId}/affiliation-documents",
+        "modulo": "directory",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226)",
+        "fuente": "src/modules/directory/controllers/tenants.controller.ts:151"
+      },
+      {
         "operacion": "OrganizationLogoController_content",
         "metodo": "GET",
         "ruta": "/tenants/{tenantId}/logo/content",
@@ -11776,22 +12760,30 @@
         "ruta": "/iam/auth/register-practitioner",
         "modulo": "iam",
         "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226)",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:234"
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:266"
       },
       {
         "operacion": "IamAuthController_uploadRegistrationDocument",
         "metodo": "POST",
         "ruta": "/iam/auth/upload-registration-document",
         "modulo": "iam",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
-        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:199"
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:424) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:231"
+      },
+      {
+        "operacion": "IamAuthController_uploadRegistrationLogo",
+        "metodo": "POST",
+        "ruta": "/iam/auth/upload-registration-logo",
+        "modulo": "iam",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:424) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
+        "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:184"
       },
       {
         "operacion": "IamAuthController_uploadRegistrationSignatureImage",
         "metodo": "POST",
         "ruta": "/iam/auth/upload-registration-signature-image",
         "modulo": "iam",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:424) | StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149)",
         "fuente": "src/modules/iam/presentation/controllers/iam-auth.controller.ts:154"
       },
       {
@@ -11808,7 +12800,7 @@
         "ruta": "/iam/users/assisted-practitioner-registration",
         "modulo": "iam",
         "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226)",
-        "fuente": "src/modules/iam/presentation/controllers/iam-users.controller.ts:254"
+        "fuente": "src/modules/iam/presentation/controllers/iam-users.controller.ts:307"
       },
       {
         "operacion": "IdentitySelfServiceController_requestPatientIdentity",
@@ -11871,7 +12863,7 @@
         "metodo": "POST",
         "ruta": "/insurance/portability/export",
         "modulo": "insurance",
-        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:260)",
+        "detalle": "StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:276)",
         "fuente": "src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:58"
       },
       {
@@ -11915,12 +12907,100 @@
         "fuente": "src/modules/ops_console/presentation/controllers/ops-console.controller.ts:102"
       },
       {
+        "operacion": "PaymentsGatewayDispatchesController_close",
+        "metodo": "POST",
+        "ruta": "/payments/gateway-dispatches/{intentId}/close",
+        "modulo": "payments",
+        "detalle": "PaymentsGatewayBusyException: {intentId} (src/modules/payments/services/payments-gateway-charge.service.ts:185)",
+        "fuente": "src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:74"
+      },
+      {
+        "operacion": "PaymentsGatewayWebhooksController_receive",
+        "metodo": "POST",
+        "ruta": "/payments/gateway-webhooks",
+        "modulo": "payments",
+        "detalle": "DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/modules/payments/services/payments-gateway-webhook.service.ts:135) | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/payments/services/payments-gateway-webhook.service.ts:153)",
+        "fuente": "src/modules/payments/controllers/payments-gateway-webhooks.controller.ts:32"
+      },
+      {
+        "operacion": "PharmacyBulkController_bulkCategories",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/categories/bulk",
+        "modulo": "pharmacy",
+        "detalle": "DryRunRollback: {{ outcome: 'UNCHANGED', id }} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:173) | DryRunRollback: {outcome} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:177)",
+        "fuente": "src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:52"
+      },
+      {
+        "operacion": "PharmacyBulkController_bulkPrices",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/prices/bulk",
+        "modulo": "pharmacy",
+        "detalle": "DryRunRollback: {{ outcome: 'UNCHANGED', id }} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:173) | DryRunRollback: {outcome} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:177)",
+        "fuente": "src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:86"
+      },
+      {
+        "operacion": "PharmacyBulkController_bulkProducts",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/products/bulk",
+        "modulo": "pharmacy",
+        "detalle": "DryRunRollback: {{ outcome: 'UNCHANGED', id }} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:173) | DryRunRollback: {outcome} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:177)",
+        "fuente": "src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:69"
+      },
+      {
+        "operacion": "PharmacyBulkController_bulkSites",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/sites/bulk",
+        "modulo": "pharmacy",
+        "detalle": "DryRunRollback: {{ outcome: 'UNCHANGED', id }} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:173) | DryRunRollback: {outcome} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:177)",
+        "fuente": "src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:105"
+      },
+      {
+        "operacion": "PharmacyIntegrationSyncController_listExternalProducts",
+        "metodo": "GET",
+        "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ExternalCatalogUnavailableError: not configured (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:78) | ExternalCatalogUnavailableError: GET {path} → {status} (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:87) | ExternalCatalogUnavailableError: invalid product (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:45)",
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:92"
+      },
+      {
+        "operacion": "PharmacyIntegrationSyncController_syncNow",
+        "metodo": "POST",
+        "ruta": "/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync",
+        "modulo": "pharmacy_inventory",
+        "detalle": "ExternalCatalogUnavailableError: not configured (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:78) | ExternalCatalogUnavailableError: GET {path} → {status} (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:87) | ExternalCatalogUnavailableError: invalid product (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:45)",
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52"
+      },
+      {
+        "operacion": "PharmacySiteAvailabilityController_setSiteAvailability",
+        "metodo": "PUT",
+        "ruta": "/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability",
+        "modulo": "pharmacy_inventory",
+        "detalle": "DomainException: {HttpStatus.BAD_REQUEST} (src/modules/pharmacy_inventory/application/site-availability/set-site-product-availability.use-case.ts:76)",
+        "fuente": "src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40"
+      },
+      {
         "operacion": "PeriopController_addDiagnoses",
         "metodo": "POST",
         "ruta": "/procedure-cases/{id}/diagnoses",
         "modulo": "procedures_perioperative",
         "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161)",
         "fuente": "src/modules/procedures_perioperative/controllers/periop.controller.ts:211"
+      },
+      {
+        "operacion": "PatientAddressBookController_create",
+        "metodo": "POST",
+        "ruta": "/profiles/patients/me/addresses",
+        "modulo": "profiles",
+        "detalle": "Error: createSavedAddress no creó fila con municipio declarado (src/modules/profiles/infrastructure/adapters/patient-address-book.adapter.ts:54)",
+        "fuente": "src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57"
+      },
+      {
+        "operacion": "PatientAddressBookController_update",
+        "metodo": "PATCH",
+        "ruta": "/profiles/patients/me/addresses/{id}",
+        "modulo": "profiles",
+        "detalle": "Error: createSavedAddress no creó fila con municipio declarado (src/modules/profiles/infrastructure/adapters/patient-address-book.adapter.ts:54)",
+        "fuente": "src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68"
       },
       {
         "operacion": "QaExecutionController_approve",
@@ -11936,15 +13016,23 @@
         "ruta": "/scheduling/bookings/{id}/delay",
         "modulo": "scheduling",
         "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:413"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:546"
+      },
+      {
+        "operacion": "SchedulingBookingsController_confirmPaymentReceipt",
+        "metodo": "POST",
+        "ruta": "/scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm",
+        "modulo": "scheduling",
+        "detalle": "Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133)",
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:385"
       },
       {
         "operacion": "SchedulingBookingsController_setPaymentState",
         "metodo": "PUT",
         "ruta": "/scheduling/bookings/{id}/payment-state",
         "modulo": "scheduling",
-        "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:255"
+        "detalle": "Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133)",
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:267"
       },
       {
         "operacion": "SchedulingBookingsController_reschedule",
@@ -11952,7 +13040,7 @@
         "ruta": "/scheduling/bookings/{id}/reschedule",
         "modulo": "scheduling",
         "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161)",
-        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:347"
+        "fuente": "src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:480"
       },
       {
         "operacion": "SchedulingController_delayResource",
@@ -11961,6 +13049,14 @@
         "modulo": "scheduling",
         "detalle": "Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161)",
         "fuente": "src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841"
+      },
+      {
+        "operacion": "SurveysAssignmentsController_issueInvitations",
+        "metodo": "POST",
+        "ruta": "/surveys/invitations",
+        "modulo": "surveys",
+        "detalle": "Error: La encuesta base {kind} del tenant no quedó materializada (plantilla {ids.templateId}) (src/modules/surveys/services/surveys-system-templates.service.ts:142)",
+        "fuente": "src/modules/surveys/controllers/surveys-assignments.controller.ts:55"
       },
       {
         "operacion": "SystemContextController_createContext",
@@ -11991,56 +13087,56 @@
         "metodo": "GET",
         "ruta": "/admin/analytics/funnels/{funnelId}/report",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:156"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:156"
       },
       {
         "operacion": "TelemetryAnalyticsController_overview",
         "metodo": "GET",
         "ruta": "/admin/analytics/overview",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:121"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:121"
       },
       {
         "operacion": "TelemetryAnalyticsController_pipelineHealth",
         "metodo": "GET",
         "ruta": "/admin/analytics/pipeline-health",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:169"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:169"
       },
       {
         "operacion": "TelemetryAnalyticsController_listSessions",
         "metodo": "GET",
         "ruta": "/admin/analytics/sessions",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:179"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:179"
       },
       {
         "operacion": "TelemetryAnalyticsController_timeseries",
         "metodo": "GET",
         "ruta": "/admin/analytics/timeseries",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:130"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:130"
       },
       {
         "operacion": "TelemetryAnalyticsController_webVitals",
         "metodo": "GET",
         "ruta": "/admin/analytics/web-vitals",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-analytics.controller.ts:139"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:139"
       },
       {
         "operacion": "TelemetryEventsController_captureActivityEvents",
         "metodo": "POST",
         "ruta": "/telemetry/activity-events",
         "modulo": "telemetry",
-        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-events.service.ts:682)",
-        "fuente": "src/modules/telemetry/controllers/telemetry-events.controller.ts:45"
+        "detalle": "DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-events.service.ts:682)",
+        "fuente": "src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45"
       },
       {
         "operacion": "TerminologyImportTemplateController_descargarPlantilla",
@@ -12075,6 +13171,6 @@
         "fuente": "src/modules/workflow/controllers/workflow-transitions.controller.ts:73"
       }
     ],
-    "cuenta": 109
+    "cuenta": 124
   }
 ]

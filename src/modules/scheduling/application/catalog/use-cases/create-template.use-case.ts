@@ -21,6 +21,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
 import { assertFirstSlotFits } from '../support/assert-first-slot-fits';
 import { assertFlexibleRules } from '../support/assert-flexible-rules';
+import { isFlexibleBand } from '../../../domain/catalog/flexible-band';
 
 /** UC-41-02: publica una plantilla con franjas semanales. */
 @Injectable()
@@ -47,8 +48,16 @@ export class CreateTemplateUseCase {
     );
 
     const flexible = dto.flexibleHours === true;
-    if (flexible) {
-      assertFlexibleRules(dto.rules, dto.slotMinutes ?? DEFAULT_SLOT_MINUTES);
+    // Con la plantilla flexible, todas sus franjas lo son; si no, cada franja
+    // dice el suyo (v4.2.64). Las flexibles se validan igual que siempre.
+    const flexibleRules = dto.rules.filter((rule) =>
+      isFlexibleBand(flexible, rule),
+    );
+    if (flexibleRules.length > 0) {
+      assertFlexibleRules(
+        flexibleRules,
+        dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
+      );
     }
 
     for (const rule of dto.rules) {
@@ -68,7 +77,7 @@ export class CreateTemplateUseCase {
       // En horario flexible no hay redondeo hacia adelante: la consulta tiene
       // que caber entera dentro de la franja, y eso ya lo exigió
       // `assertFlexibleRules`. Lo de acá mide el primer turno de una grilla.
-      if (!flexible) {
+      if (!isFlexibleBand(flexible, rule)) {
         assertFirstSlotFits(
           rule,
           dto.rules,
@@ -116,6 +125,7 @@ export class CreateTemplateUseCase {
       await tx.flush();
 
       for (const rule of dto.rules) {
+        const flexibleBand = isFlexibleBand(flexible, rule);
         this.catalogRepo.createRule(tx, {
           scheduleTemplateId: template.id,
           dayOfWeek: rule.dayOfWeek,
@@ -124,10 +134,10 @@ export class CreateTemplateUseCase {
           // Horario flexible: la franja no tiene turnos que medir ni contar.
           // Lo que dura cada consulta vive en la plantilla (`slotMinutes`) y
           // escribirlo también acá serían dos fuentes para el mismo número.
-          slotMinutes: flexible
+          slotMinutes: flexibleBand
             ? undefined
             : (rule.slotMinutes ?? dto.slotMinutes ?? DEFAULT_SLOT_MINUTES),
-          capacityPerSlot: flexible
+          capacityPerSlot: flexibleBand
             ? undefined
             : (rule.capacityPerSlot ?? DEFAULT_SLOT_CAPACITY),
           // Sin `?? 0`: la columna es anulable a propósito y ausente se lee
@@ -136,6 +146,7 @@ export class CreateTemplateUseCase {
           gapMinutes: rule.gapMinutes,
           bookingModeConceptId: bandMode(rule.bookingMode),
           telemedicineEnabled: rule.telemedicineEnabled === true,
+          flexibleHours: flexibleBand,
           actorUserId: actor.id,
         });
       }

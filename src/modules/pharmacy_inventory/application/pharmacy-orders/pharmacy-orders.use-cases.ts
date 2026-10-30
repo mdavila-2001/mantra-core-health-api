@@ -8,7 +8,9 @@ import {
   PreconditionFailedException,
   ResourceNotFoundException,
   deterministicId,
+  getCurrentTenantId,
   requireTenantId,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../../common';
@@ -35,6 +37,7 @@ import {
   DispensationsRepository,
   PharmacyOrderSubstitutionsRepository,
 } from '../../infrastructure/repositories';
+import { PrescriptionOrderGuard } from './prescription-order-guard';
 import { addressText } from '../../domain/address-text';
 import { isRetailList } from '../../domain/pricing/is-retail-list';
 import {
@@ -50,6 +53,7 @@ import type {
   ConfirmPharmacyOrderDto,
   CreatePharmacyOrderDto,
   DispensePharmacyOrderDto,
+  PharmacyOrderConversationDto,
   PharmacyOrderDto,
   PharmacyOrderPrescriberDto,
   PharmacyOrderLineDto,
@@ -74,6 +78,14 @@ import {
   DOMAIN_EVENT_PUBLISHER_PORT,
   type DomainEventPublisherPort,
 } from '../ports/domain-event-publisher.port';
+import {
+  PHARMACY_ORDER_CHAT_PORT,
+  type PharmacyOrderChatPort,
+} from '../ports/pharmacy-order-chat.port';
+import {
+  PERSON_ACCOUNT_LINKS_PORT,
+  type PersonAccountLinksPort,
+} from '../ports/person-account-links.port';
 import { unavailableSettlement } from '../../domain/order-settlement';
 import { ORDER_STATUS_IDS } from '../../domain/order-status-ids';
 
@@ -188,6 +200,13 @@ export const ORDER_STAFF_TRANSITIONS: ReadonlyMap<
     new Set([PINV.ORDER_LISTO_PARA_RETIRO, PINV.ORDER_RECHAZADO]),
   ],
 ]);
+
+/**
+ * Rol que habla por la farmacia en el chat del pedido. A diferencia de
+ * {@link STAFF_READ_ROLES}, `SECURITY_ADMIN` no está: leer un pedido es
+ * soporte; escribirle al paciente como la farmacia no lo es.
+ */
+const CHAT_STAFF_ROLE = 'PHARMACY_STAFF';
 
 /** Tope de la bandeja cuando la consulta no acota. */
 const DEFAULT_INBOX_LIMIT = 100;
@@ -308,6 +327,8 @@ export class PharmacyOrdersUseCases {
    * @param outbox - Publicación transaccional de eventos de dominio.
    * @param orderNotifications - La campana del paciente, post-commit (FAR-E2).
    * @param logger - Logger estructurado (ids y conteos; nunca datos clínicos).
+   * @param orderChat - El hilo paciente ↔ vitrina de la farmacia (community).
+   * @param accountLinks - La cuenta del paciente titular, para el chat.
    */
   constructor(
     private readonly em: EntityManager,
@@ -329,6 +350,11 @@ export class PharmacyOrdersUseCases {
     private readonly settlements: InsurancePatientSettlementPort,
     @Inject(DIRECTORY_TENANT_ADMINISTRATION_PORT)
     private readonly tenantAdministration: DirectoryTenantAdministrationPort,
+    @Inject(PHARMACY_ORDER_CHAT_PORT)
+    private readonly orderChat: PharmacyOrderChatPort,
+    @Inject(PERSON_ACCOUNT_LINKS_PORT)
+    private readonly accountLinks: PersonAccountLinksPort,
+    private readonly prescriptionGuard: PrescriptionOrderGuard,
   ) {
     this.logger.setContext('PharmacyOrdersService');
   }
@@ -375,18 +401,21 @@ export class PharmacyOrdersUseCases {
         });
       }
 
-      if (dto.medicationRequestId) {
-        const request = await this.ordersRepo.findOwnMedicationRequest(
-          tx,
-          dto.medicationRequestId,
-          patientProfileId,
-        );
-        // Receta inexistente y receta ajena: el mismo 404.
-        if (!request) {
-          throw new ResourceNotFoundException('Receta no encontrada', {
-            medicationRequestId: dto.medicationRequestId,
-          });
-        }
+      // Receta con lock y un solo instante por pedido (FAR-03).
+      const now = new Date();
+      const request = dto.medicationRequestId
+        ? await this.prescriptionGuard.lockOwnRequest(
+            tx,
+            dto.medicationRequestId,
+            patientProfileId,
+            now,
+          )
+        : null;
+      // Receta inexistente y receta ajena: el mismo 404.
+      if (dto.medicationRequestId && !request) {
+        throw new ResourceNotFoundException('Receta no encontrada', {
+          medicationRequestId: dto.medicationRequestId,
+        });
       }
 
       const productIds = dto.lines.map((line) => line.productId);
@@ -409,6 +438,14 @@ export class PharmacyOrdersUseCases {
           { productIds: unknown },
         );
       }
+
+      // El pedido respeta la receta (FAR-03), antes de reservar nada.
+      await this.prescriptionGuard.assertOrderRespectsPrescription(
+        tx,
+        request,
+        products,
+        dto.lines,
+      );
 
       // El precio se CONGELA acá, al crear (v4.2.1): lo que el paciente vio
       // al pedir es lo que el comprobante va a decir, aunque la lista cambie
@@ -592,6 +629,95 @@ export class PharmacyOrdersUseCases {
       return { ...dto, ...(settlements.get(id) ?? unavailableSettlement()) };
     }
     return dto;
+  }
+
+  /**
+   * El chat del pedido: abre o reutiliza el hilo directo entre el paciente
+   * titular y la vitrina pública de la farmacia del pedido. Idempotente.
+   *
+   * Lo pueden pedir **el titular** (claim `pid`) o **el personal de la
+   * farmacia del pedido** (`PHARMACY_STAFF`, con la farmacia dentro del tenant
+   * activo del request; `community` vuelve a exigir membresía activa en la
+   * base al escribir como la vitrina). Cualquier otro —otro paciente, otra
+   * farmacia, la plataforma sin membresía— recibe el mismo 404 que un pedido
+   * inexistente.
+   *
+   * No crea ni publica la vitrina del paciente: si no tiene perfil comunitario
+   * responde 422 `PATIENT_CHAT_PROFILE_MISSING`.
+   */
+  async openConversation(
+    id: string,
+    actor: AuthenticatedUser,
+  ): Promise<PharmacyOrderConversationDto> {
+    const em = this.em.fork();
+    const order = await this.ordersRepo.findOrderById(em, id, ORDER_STATUS_IDS);
+    if (!order) throw orderNotFound(id);
+
+    const isOwner =
+      actor.patientProfileId !== undefined &&
+      order.patientProfileId === actor.patientProfileId;
+    // El rol se evalúa con su ámbito (la regla del `RolesGuard`): un
+    // PHARMACY_STAFF concedido en otra organización no atiende en esta. El
+    // tenant se lee sin exigirlo: exigirlo antes del 404 diría a un tercero
+    // sin tenant si el pedido existe.
+    const isPharmacyStaff = roleAuthorizesInTenant(
+      actor,
+      CHAT_STAFF_ROLE,
+      getCurrentTenantId(),
+    );
+    if (!isOwner && !isPharmacyStaff) throw orderNotFound(id);
+
+    // El titular ve su pedido desde cualquier organización; el personal, sólo
+    // si la farmacia del pedido es del tenant activo de su request.
+    const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
+      em,
+      isOwner ? undefined : requireTenantId(),
+      [order.pharmacyId],
+    );
+    if (!pharmacy) throw orderNotFound(id);
+
+    let patientUserId: string | undefined;
+    if (isOwner) {
+      patientUserId = actor.id;
+    } else if (order.patientProfileId) {
+      // `patient_profiles.profile_id` es la persona: su cuenta sale del vínculo.
+      const link = await this.accountLinks.findActiveByPerson(
+        em,
+        order.patientProfileId,
+      );
+      patientUserId = link?.userId;
+    }
+    if (!patientUserId) {
+      throw new PreconditionFailedException(
+        'El paciente todavía no tiene un perfil con el que conversar',
+        { id },
+        'PATIENT_CHAT_PROFILE_MISSING',
+      );
+    }
+
+    const thread = await this.orderChat.openOrderConversation(
+      {
+        pharmacy: {
+          tenantId: pharmacy.tenantId,
+          publicProfileId: pharmacy.publicProfileId ?? null,
+        },
+        patientUserId,
+        openedBy: isOwner ? 'PATIENT' : 'PHARMACY_STAFF',
+      },
+      actor,
+    );
+    this.logger.info(
+      {
+        operation: 'pharmacy_inventory.order.conversation',
+        orderId: id,
+        conversationId: thread.conversationId,
+      },
+      'Pharmacy order conversation opened or reused',
+    );
+    return {
+      conversationId: thread.conversationId,
+      pharmacyProfileId: thread.pharmacyProfileId,
+    };
   }
 
   /**
@@ -2380,6 +2506,19 @@ export class PharmacyOrdersUseCases {
     const addressById = new Map(
       deliveryAddresses.map((address) => [address.id, address]),
     );
+    // La vitrina de la farmacia, para que el titular abra el chat del pedido.
+    // Sólo en la vista del titular: el mostrador no la necesita.
+    const showcaseByPharmacy =
+      viewer === 'owner'
+        ? await this.orderChat.findPharmacyShowcases(
+            em,
+            pharmacies.map((pharmacy) => ({
+              pharmacyId: pharmacy.id,
+              tenantId: pharmacy.tenantId,
+              publicProfileId: pharmacy.publicProfileId ?? null,
+            })),
+          )
+        : undefined;
     const prescriberOf = (
       order: InventoryReservations,
     ): PharmacyOrderPrescriberDto | null => {
@@ -2404,26 +2543,34 @@ export class PharmacyOrdersUseCases {
       const deliveryAddress = order.deliveryAddressId
         ? addressById.get(order.deliveryAddressId)
         : undefined;
-      items.push(
-        toOrderDto(
-          order,
-          pharmacy,
-          site,
-          linesByOrder.get(order.id) ?? [],
-          substitutionsByOrder.get(order.id) ?? [],
-          productById,
-          conceptById,
-          order.patientProfileId
-            ? (personNames.get(order.patientProfileId) ?? null)
+      const showcase = showcaseByPharmacy?.get(pharmacy.id);
+      const dto = toOrderDto(
+        order,
+        pharmacy,
+        site,
+        linesByOrder.get(order.id) ?? [],
+        substitutionsByOrder.get(order.id) ?? [],
+        productById,
+        conceptById,
+        order.patientProfileId
+          ? (personNames.get(order.patientProfileId) ?? null)
+          : null,
+        viewer,
+        {
+          prescriber: prescriberOf(order),
+          deliveryAddressText: deliveryAddress
+            ? addressText(deliveryAddress)
             : null,
-          viewer,
-          {
-            prescriber: prescriberOf(order),
-            deliveryAddressText: deliveryAddress
-              ? addressText(deliveryAddress)
-              : null,
-          },
-        ),
+        },
+      );
+      items.push(
+        showcaseByPharmacy
+          ? {
+              ...dto,
+              pharmacyPublicProfileId: showcase?.profileId ?? null,
+              pharmacyPublicSlug: showcase?.slug ?? null,
+            }
+          : dto,
       );
     }
     return items;
