@@ -70,6 +70,8 @@ export enum PaymentsErrorReason {
 
   /** La intención se cobra por la pasarela: no admite una operación directa contra el proveedor. */
   PAYMENT_INTENT_VIA_GATEWAY = 'PAYMENT_INTENT_VIA_GATEWAY',
+  /** La intención está en proceso por el camino de siempre y no tiene un cobro en la pasarela: no se despacha otro. */
+  PAYMENT_INTENT_ALREADY_PROCESSING = 'PAYMENT_INTENT_ALREADY_PROCESSING',
   /** La última evaluación de riesgo pide revisión humana: con la pasarela activa no se cobra hasta que se resuelva. */
   PAYMENT_INTENT_RISK_REVIEW_PENDING = 'PAYMENT_INTENT_RISK_REVIEW_PENDING',
   /** La pasarela sólo cobra con la operación SALE (autoriza y captura en un paso). */

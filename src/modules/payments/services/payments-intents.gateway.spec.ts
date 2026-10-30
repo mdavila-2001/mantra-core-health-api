@@ -102,6 +102,7 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
     const store = new Map<string, Row>();
     const risks = new Map<string, Row>();
     const legacyTransactions: Row[] = [];
+    const open: { op: Row | null } = { op: null };
     let staged: Row[] = [];
     const em = {
       transactional: async (cb: (tx: unknown) => Promise<unknown>) => {
@@ -141,7 +142,7 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         risks.get(intentId) ?? null,
     };
     const transactionsRepo = {
-      findPendingByIntent: async () => null,
+      findPendingByIntent: async () => open.op,
       findByIntent: async () => legacyTransactions,
       create: (_tx: unknown, data: Row) => {
         const row = { id: randomUUID(), ...data };
@@ -180,7 +181,15 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
     );
     const assess = (intentId: string, decision: Decision) =>
       risks.set(intentId, { decisionConceptId: DECISION[decision] });
-    return { intents, transactions, charge, store, assess, legacyTransactions };
+    return {
+      intents,
+      transactions,
+      charge,
+      store,
+      assess,
+      legacyTransactions,
+      open,
+    };
   }
 
   async function created(d: ReturnType<typeof build>, over = {}) {
@@ -608,6 +617,190 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         expect(error).toBeInstanceOf(PaymentsGatewayUnavailableException);
         expect(JSON.stringify(error)).not.toContain(TEST_API_KEY);
       });
+    });
+  });
+
+  describe('COMPUERTAS DE DOBLE COBRO y SOBRECOBRO: ambos caminos del flag', () => {
+    describe.each([
+      ['flag ENCENDIDO', true],
+      ['flag APAGADO', false],
+    ])('%s', (_label, viaGateway) => {
+      const dispatches = (d: ReturnType<typeof build>) =>
+        viaGateway ? double.postCalls.length : d.legacyTransactions.length;
+      const approvedIntent = async (d: ReturnType<typeof build>) => {
+        const { row } = await created(d);
+        d.assess(row.id, 'APPROVE');
+        return row;
+      };
+      const captured = (d: ReturnType<typeof build>, amount: string) =>
+        d.legacyTransactions.push({
+          id: randomUUID(),
+          amount,
+          statusConceptId: CONCEPTS.TXN_CAPTURED,
+        });
+
+      it('una operación ABIERTA en el gateway bloquea: 409 y cero cobros nuevos (camino de siempre: findPendingByIntent)', async () => {
+        const d = build(viaGateway);
+        const row = await approvedIntent(d);
+        d.open.op = {
+          id: randomUUID(),
+          amount: '150.00',
+          statusConceptId: CONCEPTS.TXN_PROCESSING,
+        };
+        const before = d.legacyTransactions.length;
+
+        await expect(
+          d.transactions.processTransaction(row.id, sale(), actor),
+        ).rejects.toBeInstanceOf(ConflictException);
+
+        expect(double.calls).toHaveLength(0);
+        expect(d.legacyTransactions).toHaveLength(before);
+        expect(row.gatewayIntentRef).toBeUndefined();
+      });
+
+      it('una autorización abierta tampoco deja una VENTA nueva (otra venta duplicaría el cargo)', async () => {
+        const d = build(viaGateway);
+        const row = await approvedIntent(d);
+        d.open.op = {
+          id: randomUUID(),
+          amount: '150.00',
+          statusConceptId: CONCEPTS.TXN_AUTHORIZED,
+        };
+        await expect(
+          d.transactions.processTransaction(row.id, sale(), actor),
+        ).rejects.toBeInstanceOf(ConflictException);
+        expect(dispatches(d)).toBe(0);
+      });
+
+      it('YA CAPTURADO por completo: no se cobra de nuevo', async () => {
+        const d = build(viaGateway);
+        const row = await approvedIntent(d);
+        captured(d, '150.00');
+        const before = d.legacyTransactions.length;
+
+        await expect(
+          d.transactions.processTransaction(row.id, sale(), actor),
+        ).rejects.toBeDefined();
+
+        expect(double.calls).toHaveLength(0);
+        expect(d.legacyTransactions).toHaveLength(before);
+      });
+
+      it('un importe explícito que excede el saldo (algo ya capturado) se rechaza', async () => {
+        const d = build(viaGateway);
+        const row = await approvedIntent(d);
+        captured(d, '50.00');
+        const before = d.legacyTransactions.length;
+
+        await expect(
+          d.transactions.processTransaction(
+            row.id,
+            sale({ amount: '150.00' }),
+            actor,
+          ),
+        ).rejects.toMatchObject({ status: 409 });
+
+        expect(double.calls).toHaveLength(0);
+        expect(d.legacyTransactions).toHaveLength(before);
+      });
+    });
+
+    it('PARCIALMENTE capturado: la pasarela (importe completo) NO cobra; el camino de siempre cobra sólo el saldo, como antes', async () => {
+      const on = build(true);
+      const { row } = await created(on);
+      on.assess(row.id, 'APPROVE');
+      on.legacyTransactions.push({
+        id: randomUUID(),
+        amount: '50.00',
+        statusConceptId: CONCEPTS.TXN_CAPTURED,
+      });
+      await expect(
+        on.transactions.processTransaction(row.id, sale(), actor),
+      ).rejects.toMatchObject({
+        status: 409,
+        details: expect.objectContaining({
+          captured: '50.00',
+          balance: '100.00',
+        }),
+      });
+      expect(double.calls).toHaveLength(0);
+
+      const off = build(false);
+      const created2 = await created(off);
+      off.assess(created2.row.id, 'APPROVE');
+      off.legacyTransactions.push({
+        id: randomUUID(),
+        amount: '50.00',
+        statusConceptId: CONCEPTS.TXN_CAPTURED,
+      });
+      const res = await off.transactions.processTransaction(
+        created2.row.id,
+        { operation: 'SALE' },
+        actor,
+      );
+      expect(res.amount).toBe('100.00');
+    });
+
+    it('PI_PROCESSING sin cobro en la pasarela no se re-despacha: 409 PAYMENT_INTENT_ALREADY_PROCESSING y cero llamadas', async () => {
+      const d = build(true);
+      const { row } = await created(d);
+      d.assess(row.id, 'APPROVE');
+      row.statusConceptId = CONCEPTS.PI_PROCESSING;
+
+      await expect(
+        d.transactions.processTransaction(row.id, sale(), actor),
+      ).rejects.toMatchObject({
+        reason: PaymentsErrorReason.PAYMENT_INTENT_ALREADY_PROCESSING,
+      });
+      expect(double.calls).toHaveLength(0);
+    });
+
+    it('PI_PROCESSING CON cobro en la pasarela es el reintento: consulta (GET), sin segundo POST ni segunda clave', async () => {
+      const d = build(true);
+      const { row } = await created(d);
+      d.assess(row.id, 'APPROVE');
+      const first = await d.transactions.processTransaction(
+        row.id,
+        sale(),
+        actor,
+      );
+      row.statusConceptId = CONCEPTS.PI_PROCESSING; // lo que dejaría el webhook `processing`
+      double.calls.length = 0;
+
+      const again = await d.transactions.processTransaction(
+        row.id,
+        sale(),
+        actor,
+      );
+
+      expect(double.postCalls).toHaveLength(0);
+      expect(double.calls.map((c) => c.method)).toEqual(['GET']);
+      expect(again.gateway?.paymentIntentId).toBe(
+        first.gateway?.paymentIntentId,
+      );
+      expect(double.createdCount).toBe(1);
+      expect(again.statusConceptId).toBe(CONCEPTS.PI_PROCESSING);
+    });
+
+    it('el reintento ambiguo CON la intención aún pendiente sigue usando la MISMA Idempotency-Key (no lo bloquean las compuertas nuevas)', async () => {
+      const d = build(true);
+      const { row } = await created(d);
+      d.assess(row.id, 'APPROVE');
+      double.script = [
+        { kind: 'execute_then_status', status: 503 },
+        { kind: 'execute_then_status', status: 503 },
+        { kind: 'execute_then_status', status: 503 },
+      ];
+      await expect(
+        d.transactions.processTransaction(row.id, sale(), actor),
+      ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
+
+      await d.transactions.processTransaction(row.id, sale(), actor);
+
+      expect(new Set(double.postCalls.map((c) => c.idempotencyKey)).size).toBe(
+        1,
+      );
+      expect(double.createdCount).toBe(1);
     });
   });
 
