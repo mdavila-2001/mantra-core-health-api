@@ -39,7 +39,7 @@
 | 25 | PATCH | `/referrals/{id}/counter-referral` | Registrar la contrarreferencia de una derivación | MEDIO | 20 | CLINICIAN, PRACTITIONER |
 | 26 | PATCH | `/referrals/{id}/respond` | Responder / aceptar una referencia inter-tenant | MEDIO | 3 | CLINICIAN, PRACTITIONER |
 | 27 | GET | `/referrals/me` | Mis derivaciones | BAJO | 6 | CLINICIAN, PRACTITIONER, PATIENT |
-| 28 | GET | `/referrals/target-services` | Servicios activos de un destino de derivación | BAJO | 4 | CLINICIAN, PRACTITIONER |
+| 28 | GET | `/referrals/target-services` | Servicios activos de un destino de derivación | BAJO | 6 | CLINICIAN, PRACTITIONER |
 | 29 | GET | `/referrals/targets` | Buscar destinos de derivación | BAJO | 5 | CLINICIAN, PRACTITIONER |
 | 30 | POST | `/virtual-encounters` | Iniciar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
 | 31 | PATCH | `/virtual-encounters/{id}/end` | Finalizar una sesión de telesalud | MEDIO | 4 | CLINICIAN, PRACTITIONER |
@@ -2998,7 +2998,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /referrals/target-services` la atiende `ReferralsController.listTargetServices` (src/modules/clinical_ext/controllers/referrals.controller.ts:97). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listTargetServices`. Lee billing.service_catalog, practice.practices, scheduling.practitioner_service_offerings, terminology.catalog_concepts.
+`GET /referrals/target-services` la atiende `ReferralsController.listTargetServices` (src/modules/clinical_ext/controllers/referrals.controller.ts:97). Exige sesión con alguno de los roles CLINICIAN, PRACTITIONER. Delega en `ReferralsService.listTargetServices`. Lee billing.service_catalog, directory.tenants, practice.practices, profiles.health_practitioner_profiles, scheduling.practitioner_service_offerings, terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -3014,7 +3014,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | ReferralsController.listTargetServices → ReferralsService.listTargetServices → SchedulingOfferingsRepository.findCatalogItems | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:116` |
+| `directory.tenants` | LEE | LEE | POR_SQL | ReferralsController.listTargetServices → ReferralsService.listTargetServices → ReferralTargetsRepository.isActiveTenant | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:217` |
 | `practice.practices` | LEE | LEE | DIRECTA | ReferralsController.listTargetServices → ReferralsService.listTargetServices → PracticesRepository.findByTenant | `src/modules/practice/repositories/practices.repository.ts:69` |
+| `profiles.health_practitioner_profiles` | LEE | LEE | POR_SQL | ReferralsController.listTargetServices → ReferralsService.listTargetServices → ReferralTargetsRepository.isListablePractitioner | `src/modules/clinical_ext/repositories/referral-targets.repository.ts:191` |
 | `scheduling.practitioner_service_offerings` | LEE | LEE | DIRECTA | ReferralsController.listTargetServices → ReferralsService.listTargetServices → SchedulingOfferingsRepository.listOfferings | `src/modules/scheduling/infrastructure/repositories/scheduling-offerings.repository.ts:74` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | ReferralsController.listTargetServices → ReferralsService.listTargetServices → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
 
@@ -3050,6 +3052,7 @@ La operación no recibe cuerpo.
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Destino no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique targetProfileId o targetTenantId. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

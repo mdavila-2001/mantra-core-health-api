@@ -67,16 +67,16 @@ _Fuente: `src/modules/accounting/README.md:3`_
 |  |  | POST /accounting/practitioner/liabilities/{id}/progress | PRACTITIONER | MEDIO | 16 |
 |  |  | GET /accounting/practitioner/liabilities/{id}/schedule | PRACTITIONER | BAJO | 5 |
 |  |  | GET /accounting/practitioner/paid-consultations | PRACTITIONER | BAJO | 4 |
-| `ctrl:AccountingPractitionerSimpleController` | Operaciones de AccountingPractitionerSimpleController que el README no asigna a un caso de uso | GET /accounting/practitioner/simple/accounts | PRACTITIONER | MEDIO | 3 |
+| `ctrl:AccountingPractitionerSimpleController` | Operaciones de AccountingPractitionerSimpleController que el README no asigna a un caso de uso | GET /accounting/practitioner/simple/accounts | PRACTITIONER | MEDIO | 4 |
 |  |  | POST /accounting/practitioner/simple/accounts | PRACTITIONER | MEDIO | 4 |
 |  |  | DELETE /accounting/practitioner/simple/accounts/{id} | PRACTITIONER | ALTO | 6 |
 |  |  | PUT /accounting/practitioner/simple/accounts/{id} | PRACTITIONER | MEDIO | 6 |
-|  |  | GET /accounting/practitioner/simple/records | PRACTITIONER | BAJO | 2 |
+|  |  | GET /accounting/practitioner/simple/records | PRACTITIONER | BAJO | 3 |
 |  |  | POST /accounting/practitioner/simple/records | PRACTITIONER | MEDIO | 4 |
 |  |  | DELETE /accounting/practitioner/simple/records/{id} | PRACTITIONER | ALTO | 4 |
 |  |  | PUT /accounting/practitioner/simple/records/{id} | PRACTITIONER | MEDIO | 5 |
 |  |  | GET /accounting/practitioner/simple/summary | PRACTITIONER | BAJO | 7 |
-|  |  | GET /accounting/practitioner/simple/transactions | PRACTITIONER | BAJO | 2 |
+|  |  | GET /accounting/practitioner/simple/transactions | PRACTITIONER | BAJO | 3 |
 |  |  | POST /accounting/practitioner/simple/transactions | PRACTITIONER | MEDIO | 4 |
 |  |  | DELETE /accounting/practitioner/simple/transactions/{id} | PRACTITIONER | ALTO | 4 |
 |  |  | PUT /accounting/practitioner/simple/transactions/{id} | PRACTITIONER | MEDIO | 5 |
@@ -564,6 +564,7 @@ flowchart LR
   a2 --> o41
   o41 -->|"CREA"| t42
   o41 -->|"LEE"| t42
+  o41 -->|"LEE"| t14
   o41 -->|"LEE"| t5
   a2 --> o43
   o43 -->|"CREA"| t42
@@ -586,6 +587,7 @@ flowchart LR
   o47 -->|"LEE"| t5
   a2 --> o48
   o48 -->|"LEE"| t45
+  o48 -->|"LEE"| t14
   o48 -->|"LEE"| t5
   a2 --> o49
   o49 -->|"LEE"| t42
@@ -613,6 +615,7 @@ flowchart LR
   o52 -.-> t55
   a2 --> o56
   o56 -->|"LEE"| t46
+  o56 -->|"LEE"| t14
   o56 -->|"LEE"| t5
   a2 --> o57
   o57 -->|"LEE"| t42
@@ -4379,45 +4382,41 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerSimpleAccountingService.listAccounts"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n4["Llama a PractitionerSimpleAccountingService.ownPractice"]:::llamada
   n3 --> n4
-  n5{"!actor.practitionerProfileId"}:::decision
+  n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
-  n5 -->|"no"| n7
-  n8["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
-  n7 --> n8
-  n9[("LEE practice.practitioner_role_assignments")]:::efecto
-  n8 --> n9
-  n10{"!practiceIds.includes(practiceId)"}:::decision
-  n9 --> n10
-  n11(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a PractitionerSimpleAccountingService.ensureGeneralAccounts"]:::llamada
-  n10 -->|"no"| n12
-  n13["Llama a PractitionerSimpleAccountingRepository.countSeededAccounts"]:::llamada
+  n6{"!actor.practitionerProfileId"}:::decision
+  n5 --> n6
+  n7(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n6 -->|"sí"| n7
+  n8{"!practiceIds.includes(practiceId)"}:::decision
+  n6 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PractitionerSimpleAccountingService.ensureGeneralAccounts"]:::llamada
+  n8 -->|"no"| n10
+  n11["Llama a PractitionerSimpleAccountingRepository.countSeededAccounts"]:::llamada
+  n10 --> n11
+  n12[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n11 --> n12
+  n13{"(await this.repo.countSeededAccounts(em, practiceId)) › 0"}:::decision
   n12 --> n13
-  n14[("LEE accounting.practitioner_simple_accounts")]:::efecto
-  n13 --> n14
-  n15{"(await this.repo.countSeededAccounts(em, practiceId)) › 0"}:::decision
+  n14["Llama a PractitionerSimpleAccountingRepository.countSeededAccounts"]:::llamada
+  n13 -->|"sí"| n14
+  n15[("LEE accounting.practitioner_simple_accounts")]:::efecto
   n14 --> n15
-  n16["Llama a PractitionerSimpleAccountingRepository.countSeededAccounts"]:::llamada
-  n15 -->|"sí"| n16
-  n17[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n16["Llama a PractitionerSimpleAccountingRepository.seedAccounts"]:::llamada
+  n15 --> n16
+  n13 -->|"no"| n16
+  n17[("CREA accounting.practitioner_simple_accounts")]:::efecto
   n16 --> n17
-  n18["Llama a PractitionerSimpleAccountingRepository.seedAccounts"]:::llamada
+  n18["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
   n17 --> n18
-  n15 -->|"no"| n18
-  n19[("CREA accounting.practitioner_simple_accounts")]:::efecto
+  n19[("LEE accounting.practitioner_simple_accounts")]:::efecto
   n18 --> n19
-  n20["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
+  n20(("200 Responde con éxito")):::ok
   n19 --> n20
-  n21[("LEE accounting.practitioner_simple_accounts")]:::efecto
-  n20 --> n21
-  n22(("200 Responde con éxito")):::ok
-  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4447,7 +4446,7 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerSimpleAccountingService.createAccount"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerSimpleAccountingService.ownPracticeForWrite"]:::llamada
+  n4["Llama a PractitionerSimpleAccountingService.ownPractice"]:::llamada
   n3 --> n4
   n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
   n4 --> n5
@@ -4608,71 +4607,73 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerSimpleAccountingService.updateAccount"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerSimpleAccountingService.requireAccount"]:::llamada
+  n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
+  n5["Llama a PractitionerSimpleAccountingService.requireAccount"]:::llamada
   n4 --> n5
-  n6[("LEE accounting.practitioner_simple_accounts")]:::efecto
+  n6["Llama a PractitionerSimpleAccountingRepository.findAccount"]:::llamada
   n5 --> n6
-  n7["Llama a PractitionerSimpleAccountingService.ownRow"]:::llamada
+  n7[("LEE accounting.practitioner_simple_accounts")]:::efecto
   n6 --> n7
-  n8["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n8["Llama a PractitionerSimpleAccountingService.ownRow"]:::llamada
   n7 --> n8
-  n9{"!actor.practitionerProfileId"}:::decision
+  n9["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
   n8 --> n9
-  n10(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
-  n9 -->|"sí"| n10
-  n11{"!practiceIds.includes(practiceId)"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a PractitionerSimpleAccountingService.validName"]:::llamada
-  n11 -->|"no"| n13
-  n14["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
-  n13 --> n14
-  n15(["422 PRECONDITION_FAILED {message}"]):::error
+  n10{"!actor.practitionerProfileId"}:::decision
+  n9 --> n10
+  n11(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n10 -->|"sí"| n11
+  n12{"!practiceIds.includes(practiceId)"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PractitionerSimpleAccountingService.validName"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
   n14 --> n15
-  n16{"problem"}:::decision
-  n17["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
-  n16 -->|"sí"| n17
-  n18(["422 PRECONDITION_FAILED {message}"]):::error
-  n17 --> n18
-  n19["Llama a PractitionerSimpleAccountingService.validClass"]:::llamada
-  n16 -->|"no"| n19
-  n20["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
-  n19 --> n20
-  n21(["422 PRECONDITION_FAILED {message}"]):::error
+  n16(["422 PRECONDITION_FAILED {message}"]):::error
+  n15 --> n16
+  n17{"problem"}:::decision
+  n18["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n17 -->|"sí"| n18
+  n19(["422 PRECONDITION_FAILED {message}"]):::error
+  n18 --> n19
+  n20["Llama a PractitionerSimpleAccountingService.validClass"]:::llamada
+  n17 -->|"no"| n20
+  n21["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
   n20 --> n21
-  n22{"!isAccountClass(value)"}:::decision
-  n23["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
-  n22 -->|"sí"| n23
-  n24(["422 PRECONDITION_FAILED {message}"]):::error
-  n23 --> n24
-  n25{"accountClass !== account.accountClass"}:::decision
-  n22 -->|"no"| n25
-  n26["Llama a PractitionerSimpleAccountingRepository.countAccountUsage"]:::llamada
-  n25 -->|"sí"| n26
-  n27[("LEE accounting.practitioner_simple_records · LEE accounting.practitioner_simple_transactions")]:::efecto
-  n26 --> n27
-  n28{"account.seeded || (await this.repo.countAccountUsage(em, account.id)) › 0"}:::decision
+  n22(["422 PRECONDITION_FAILED {message}"]):::error
+  n21 --> n22
+  n23{"!isAccountClass(value)"}:::decision
+  n24["Llama a PractitionerSimpleAccountingService.invalid"]:::llamada
+  n23 -->|"sí"| n24
+  n25(["422 PRECONDITION_FAILED {message}"]):::error
+  n24 --> n25
+  n26{"accountClass !== account.accountClass"}:::decision
+  n23 -->|"no"| n26
+  n27["Llama a PractitionerSimpleAccountingRepository.countAccountUsage"]:::llamada
+  n26 -->|"sí"| n27
+  n28[("LEE accounting.practitioner_simple_records · LEE accounting.practitioner_simple_transactions")]:::efecto
   n27 --> n28
-  n29(["409 CONFLICT No se puede cambiar la clase de una cuenta general o que ya se usa."]):::error
-  n28 -->|"sí"| n29
-  n30["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
-  n28 -->|"no"| n30
-  n25 -->|"no"| n30
-  n31[("LEE accounting.practitioner_simple_accounts")]:::efecto
-  n30 --> n31
-  n32["Llama a PractitionerSimpleAccountingService.assertNameFree"]:::llamada
+  n29{"account.seeded || (await this.repo.countAccountUsage(tx, account.id)) › 0"}:::decision
+  n28 --> n29
+  n30(["409 CONFLICT No se puede cambiar la clase de una cuenta general o que ya se usa."]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a PractitionerSimpleAccountingRepository.listAccounts"]:::llamada
+  n29 -->|"no"| n31
+  n26 -->|"no"| n31
+  n32[("LEE accounting.practitioner_simple_accounts")]:::efecto
   n31 --> n32
-  n33{"taken"}:::decision
+  n33["Llama a PractitionerSimpleAccountingService.assertNameFree"]:::llamada
   n32 --> n33
-  n34(["409 CONFLICT Ya tiene una cuenta con ese nombre en esa clase."]):::error
-  n33 -->|"sí"| n34
-  n35[("ACTUALIZA accounting.practitioner_simple_accounts · ACTUALIZA accounting.practitioner_simple_accounts")]:::efecto
-  n33 -->|"no"| n35
-  n36(("200 Responde con éxito")):::ok
-  n35 --> n36
+  n34{"taken"}:::decision
+  n33 --> n34
+  n35(["409 CONFLICT Ya tiene una cuenta con ese nombre en esa clase."]):::error
+  n34 -->|"sí"| n35
+  n36[("ACTUALIZA accounting.practitioner_simple_accounts · ACTUALIZA accounting.practitioner_simple_accounts")]:::efecto
+  n34 -->|"no"| n36
+  n37(("200 Responde con éxito")):::ok
+  n36 --> n37
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4701,28 +4702,24 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerSimpleAccountingService.listRecords"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n4["Llama a PractitionerSimpleAccountingService.ownPractice"]:::llamada
   n3 --> n4
-  n5{"!actor.practitionerProfileId"}:::decision
+  n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
-  n5 -->|"no"| n7
-  n8["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
-  n7 --> n8
-  n9[("LEE practice.practitioner_role_assignments")]:::efecto
-  n8 --> n9
-  n10{"!practiceIds.includes(practiceId)"}:::decision
-  n9 --> n10
-  n11(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a PractitionerSimpleAccountingRepository.listRecords"]:::llamada
-  n10 -->|"no"| n12
-  n13[("LEE accounting.practitioner_simple_records")]:::efecto
-  n12 --> n13
-  n14(("200 Responde con éxito")):::ok
-  n13 --> n14
+  n6{"!actor.practitionerProfileId"}:::decision
+  n5 --> n6
+  n7(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n6 -->|"sí"| n7
+  n8{"!practiceIds.includes(practiceId)"}:::decision
+  n6 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PractitionerSimpleAccountingRepository.listRecords"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE accounting.practitioner_simple_records")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4751,7 +4748,7 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerSimpleAccountingService.createRecord"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerSimpleAccountingService.ownPracticeForWrite"]:::llamada
+  n4["Llama a PractitionerSimpleAccountingService.ownPractice"]:::llamada
   n3 --> n4
   n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
   n4 --> n5
@@ -4957,44 +4954,40 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerSimpleAccountingService.summary"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n4["Llama a PractitionerSimpleAccountingService.ownPractice"]:::llamada
   n3 --> n4
-  n5{"!actor.practitionerProfileId"}:::decision
+  n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
-  n5 -->|"no"| n7
-  n8["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
-  n7 --> n8
-  n9[("LEE practice.practitioner_role_assignments")]:::efecto
-  n8 --> n9
-  n10{"!practiceIds.includes(practiceId)"}:::decision
-  n9 --> n10
-  n11(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a PracticeTenantLookupService.findTenantOfPractice"]:::llamada
-  n10 -->|"no"| n12
-  n13["Llama a PracticesRepository.findById"]:::llamada
+  n6{"!actor.practitionerProfileId"}:::decision
+  n5 --> n6
+  n7(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n6 -->|"sí"| n7
+  n8{"!practiceIds.includes(practiceId)"}:::decision
+  n6 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PracticeTenantLookupService.findTenantOfPractice"]:::llamada
+  n8 -->|"no"| n10
+  n11["Llama a PracticesRepository.findById"]:::llamada
+  n10 --> n11
+  n12[("LEE practice.practices")]:::efecto
+  n11 --> n12
+  n13[("LEE clinical.appointments")]:::efecto
   n12 --> n13
-  n14[("LEE practice.practices")]:::efecto
+  n14["Llama a PractitionerSimpleAccountingService.ownEncounterIds"]:::llamada
   n13 --> n14
-  n15[("LEE clinical.appointments")]:::efecto
+  n15[("LEE clinical.encounters")]:::efecto
   n14 --> n15
-  n16["Llama a PractitionerSimpleAccountingService.ownEncounterIds"]:::llamada
+  n16["Llama a PractitionerSimpleAccountingService.collectedCents"]:::llamada
   n15 --> n16
-  n17[("LEE clinical.encounters")]:::efecto
+  n17[("LEE billing.invoices")]:::efecto
   n16 --> n17
-  n18["Llama a PractitionerSimpleAccountingService.collectedCents"]:::llamada
+  n18["Llama a PractitionerSimpleAccountingService.pendingFromInsurers"]:::llamada
   n17 --> n18
-  n19[("LEE billing.invoices")]:::efecto
+  n19[("LEE insurance.insurance_claims · LEE insurance.claim_adjudication_versions")]:::efecto
   n18 --> n19
-  n20["Llama a PractitionerSimpleAccountingService.pendingFromInsurers"]:::llamada
+  n20(("200 Responde con éxito")):::ok
   n19 --> n20
-  n21[("LEE insurance.insurance_claims · LEE insurance.claim_adjudication_versions")]:::efecto
-  n20 --> n21
-  n22(("200 Responde con éxito")):::ok
-  n21 --> n22
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5023,28 +5016,24 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerSimpleAccountingService.listTransactions"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
+  n4["Llama a PractitionerSimpleAccountingService.ownPractice"]:::llamada
   n3 --> n4
-  n5{"!actor.practitionerProfileId"}:::decision
+  n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
   n4 --> n5
-  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
-  n5 -->|"sí"| n6
-  n7["Llama a PracticeTenantLookupService.findActivePracticeIdsForPractitioner"]:::llamada
-  n5 -->|"no"| n7
-  n8["Llama a PractitionerRoleAssignmentsRepository.findActiveByPractitioner"]:::llamada
-  n7 --> n8
-  n9[("LEE practice.practitioner_role_assignments")]:::efecto
-  n8 --> n9
-  n10{"!practiceIds.includes(practiceId)"}:::decision
-  n9 --> n10
-  n11(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
-  n10 -->|"sí"| n11
-  n12["Llama a PractitionerSimpleAccountingRepository.listTransactions"]:::llamada
-  n10 -->|"no"| n12
-  n13[("LEE accounting.practitioner_simple_transactions")]:::efecto
-  n12 --> n13
-  n14(("200 Responde con éxito")):::ok
-  n13 --> n14
+  n6{"!actor.practitionerProfileId"}:::decision
+  n5 --> n6
+  n7(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n6 -->|"sí"| n7
+  n8{"!practiceIds.includes(practiceId)"}:::decision
+  n6 -->|"no"| n8
+  n9(["422 PRECONDITION_FAILED El profesional no tiene una vinculación activa con esa práctica"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PractitionerSimpleAccountingRepository.listTransactions"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE accounting.practitioner_simple_transactions")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5073,7 +5062,7 @@ flowchart TD
   n1 --> n2
   n3["Llama a PractitionerSimpleAccountingService.createTransaction"]:::llamada
   n2 --> n3
-  n4["Llama a PractitionerSimpleAccountingService.ownPracticeForWrite"]:::llamada
+  n4["Llama a PractitionerSimpleAccountingService.ownPractice"]:::llamada
   n3 --> n4
   n5["Llama a PractitionerAccountingService.assertOwnsPractice"]:::llamada
   n4 --> n5

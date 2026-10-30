@@ -1052,7 +1052,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /public/geo/reverse` la atiende `ReverseGeocodingController.reverse` (src/modules/geo/reverse-geocoding/reverse-geocoding.controller.ts:111). Es una ruta pública: no exige token. Valida el cuerpo como `ReverseGeocodingRequestDto` (2 campos, 2 obligatorios). Delega en `ReverseGeocodingService.reverse`. No se determinaron tablas para esta operación.
+`POST /public/geo/reverse` la atiende `ReverseGeocodingController.reverse` (src/modules/geo/reverse-geocoding/reverse-geocoding.controller.ts:111). Es una ruta pública: no exige token. Valida el cuerpo como `ReverseGeocodingRequestDto` (2 campos, 2 obligatorios). Delega en `ReverseGeocodingService.reverse`. No toca tablas relacionales: Traduce un punto del mapa a calle consultando el geocodificador externo (Nominatim, con Photon de respaldo) y guarda la respuesta en una caché en memoria; no consulta la base de datos..
 
 ### Requerimientos
 
@@ -1065,7 +1065,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Tablas que afecta
 
-No se determinaron tablas para esta operación (**SIN_DETERMINAR**).
+No toca tablas relacionales: Traduce un punto del mapa a calle consultando el geocodificador externo (Nominatim, con Photon de respaldo) y guarda la respuesta en una caché en memoria; no consulta la base de datos.. _(manual, 2026-10-30; fuente: `src/modules/geo/reverse-geocoding/reverse-geocoding.service.ts:193`)_
 
 ### Cuerpo — DTO `ReverseGeocodingRequestDto` · `application/json`
 

@@ -10,15 +10,15 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [pharmacies](#pharmacies) | Representa organizaciones farmacéuticas integradas al sistema médico para identificar prestadores y operadores de farmacia. | 16 | 13 | 57 | COINCIDE |
-| [pharmacy_external_product_mappings](#pharmacy_external_product_mappings) | Mapea productos internos a referencias externas para intercambiar información farmacéutica entre sistemas. | 12 | 5 | 4 | COINCIDE |
+| [pharmacies](#pharmacies) | Representa organizaciones farmacéuticas integradas al sistema médico para identificar prestadores y operadores de farmacia. | 16 | 13 | 67 | DIVERGE |
+| [pharmacy_external_product_mappings](#pharmacy_external_product_mappings) | Mapea productos internos a referencias externas para intercambiar información farmacéutica entre sistemas. | 12 | 5 | 6 | COINCIDE |
 | [pharmacy_integration_connections](#pharmacy_integration_connections) | Configura conexiones de farmacia con sistemas externos para sincronizar catálogos u operaciones autorizadas. | 17 | 8 | 5 | COINCIDE |
 | [pharmacy_licenses](#pharmacy_licenses) | Registra licencias de farmacias para documentar habilitaciones vinculadas a su operación. | 16 | 9 | 4 | COINCIDE |
-| [pharmacy_price_lists](#pharmacy_price_lists) | Define listas de precios de farmacia para organizar precios por vigencia, sede o contexto comercial. | 16 | 10 | 12 | COINCIDE |
+| [pharmacy_price_lists](#pharmacy_price_lists) | Define listas de precios de farmacia para organizar precios por vigencia, sede o contexto comercial. | 16 | 10 | 19 | COINCIDE |
 | [pharmacy_product_identifiers](#pharmacy_product_identifiers) | Mantiene identificadores alternativos de productos farmacéuticos para reconciliar códigos propios y externos. | 10 | 5 | 1 | COINCIDE |
-| [pharmacy_product_prices](#pharmacy_product_prices) | Asocia productos con precios concretos para soportar consulta y operación económica farmacéutica. | 14 | 5 | 15 | COINCIDE |
-| [pharmacy_products](#pharmacy_products) | Cataloga productos comercializados o gestionados por farmacias, incluidos los medicamentos que pueden relacionarse con prescripciones. | 21 | 11 | 53 | COINCIDE |
-| [pharmacy_sites](#pharmacy_sites) | Identifica sucursales y ubicaciones de farmacias para asociar productos, precios e integraciones con cada sitio. | 16 | 9 | 37 | COINCIDE |
+| [pharmacy_product_prices](#pharmacy_product_prices) | Asocia productos con precios concretos para soportar consulta y operación económica farmacéutica. | 14 | 5 | 24 | COINCIDE |
+| [pharmacy_products](#pharmacy_products) | Cataloga productos comercializados o gestionados por farmacias, incluidos los medicamentos que pueden relacionarse con prescripciones. | 21 | 11 | 60 | DIVERGE |
+| [pharmacy_sites](#pharmacy_sites) | Identifica sucursales y ubicaciones de farmacias para asociar productos, precios e integraciones con cada sitio. | 16 | 9 | 45 | DIVERGE |
 
 ## Diagrama entidad-relación
 
@@ -137,7 +137,7 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacies`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `Pharmacies` — `src/modules/pharmacy/entities/pharmacies.entity.ts`
-- **Resumen:** 16 columnas · 13 índices · 9 FK salientes · 13 entrantes · 57 operaciones
+- **Resumen:** 16 columnas · 13 índices · 9 FK salientes · 13 entrantes · 67 operaciones
 
 #### Columnas
 
@@ -154,11 +154,11 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 | 9 | `default_currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 10 | `verification_status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 11 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacies.entity.ts:90`)_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacies.entity.ts:96`)_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacies.entity.ts:101`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacies.entity.ts:107`)_ | coincide |
 | 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy/entities/pharmacies.entity.ts:114`)_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy/entities/pharmacies.entity.ts:125`)_ | coincide |
 
 #### Relaciones
 
@@ -191,9 +191,9 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_pharmacies_tenant_id` | sí | tenant_id | Garantiza que no se repita la combinación (tenant_id) _(DOCUMENTO)_; Soporta la clave foránea fk_pharmacies_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_pharmacies_tenant_id` | sí | tenant_id | Garantiza que no se repita la combinación (tenant_id) _(DOCUMENTO)_; Soporta la clave foránea fk_pharmacies_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `uq_pharmacies_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
-| `ix_pharmacies_tenant_id` | no | tenant_id | Soporta la clave foránea fk_pharmacies_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_pharmacies_tenant_id` | no | tenant_id | Soporta la clave foránea fk_pharmacies_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharmacies_pharmacy_type_concept_id` | no | pharmacy_type_concept_id | Soporta la clave foránea fk_pharmacies_pharmacy_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacies_ownership_type_concept_id` | no | ownership_type_concept_id | Soporta la clave foránea fk_pharmacies_ownership_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacies_public_profile_id` | no | public_profile_id | Soporta la clave foránea fk_pharmacies_public_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -219,7 +219,12 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | ACTUALIZA | POR_TIPO |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
+| GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
+| GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | POST /insurance-claims | LEE | DIRECTA |
 | POST /insurance-claims/{id}/adjudications | LEE | DIRECTA |
 | POST /insurance-claims/{id}/eob | LEE | DIRECTA |
@@ -232,7 +237,8 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 | POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
 | POST /pharmacies | CREA | DIRECTA |
 | POST /pharmacies | LEE | DIRECTA |
-| GET /pharmacies/{pharmacyId}/categories | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | LEE | POR_SQL |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | POR_SQL |
 | GET /pharmacy/pharmacies | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
@@ -243,6 +249,7 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 | GET /pharmacy/sites/{siteId}/prices | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
+| GET /public/pharmacies/open-now | LEE | POR_SQL |
 | POST /internal/inventory-sync-batches | LEE | DIRECTA |
 | POST /internal/inventory-sync/{batchId}/reconcile | LEE | DIRECTA |
 | POST /internal/reservations/expire | LEE | DIRECTA |
@@ -264,6 +271,7 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 | POST /pharmacy/orders/{id}/accept-substitutions | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/cancel | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
+| POST /pharmacy/orders/{id}/conversation | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/dispense | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/prefer-original | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/ready | LEE | DIRECTA |
@@ -272,6 +280,8 @@ Representa organizaciones farmacéuticas integradas al sistema médico para iden
 | GET /pharmacy/orders/me | LEE | DIRECTA |
 | POST /pharmacy/recall-holds | LEE | DIRECTA |
 | POST /pharmacy/recall-holds/{id}/release | LEE | DIRECTA |
+| POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
+| GET /public/profiles/f/{slug}/branches | LEE | POR_SQL |
 | GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
 
 #### Gobierno
@@ -297,7 +307,7 @@ Mapea productos internos a referencias externas para intercambiar información f
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_external_product_mappings`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacyExternalProductMappings` — `src/modules/pharmacy/entities/pharmacy_external_product_mappings.entity.ts`
-- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -344,6 +354,8 @@ Mapea productos internos a referencias externas para intercambiar información f
 | POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings | LEE | DIRECTA |
 | DELETE /pharmacies/{pharmacyId}/products/{productId} | ACTUALIZA | POR_TIPO |
 | DELETE /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | ACTUALIZA | POR_TIPO |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -537,7 +549,7 @@ Define listas de precios de farmacia para organizar precios por vigencia, sede o
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_price_lists`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacyPriceLists` — `src/modules/pharmacy/entities/pharmacy_price_lists.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 8 FK salientes · 1 entrantes · 12 operaciones
+- **Resumen:** 16 columnas · 10 índices · 8 FK salientes · 1 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -578,12 +590,12 @@ Define listas de precios de farmacia para organizar precios por vigencia, sede o
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_pharmacy_price_lists_pharmacy_id` | no | pharmacy_id | Soporta la clave foránea fk_pharmacy_price_lists_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_pharmacy_price_lists_pharmacy_id` | no | pharmacy_id | Soporta la clave foránea fk_pharmacy_price_lists_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharmacy_price_lists_pharmacy_site_id` | no | pharmacy_site_id | Soporta la clave foránea fk_pharmacy_price_lists_pharmacy_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_price_lists_price_list_type_concept_id` | no | price_list_type_concept_id | Soporta la clave foránea fk_pharmacy_price_lists_price_list_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_price_lists_insurer_tenant_id` | no | insurer_tenant_id | Soporta la clave foránea fk_pharmacy_price_lists_insurer_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «insurer_tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharmacy_price_lists_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_pharmacy_price_lists_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_pharmacy_price_lists_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_pharmacy_price_lists_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_pharmacy_price_lists_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_pharmacy_price_lists_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharmacy_price_lists_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_pharmacy_price_lists_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_price_lists_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_pharmacy_price_lists_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `gin_pharmacy_price_lists_search` | no | (to_tsvector('simple', (coalesce(code, '')))) | GIN para búsqueda textual gobernada _(DOCUMENTO)_ |
@@ -598,12 +610,19 @@ Define listas de precios de farmacia para organizar precios por vigencia, sede o
 | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close | ACTUALIZA | POR_TIPO |
 | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close | LEE | DIRECTA |
 | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | CREA | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | LEE | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | CREA | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
+| GET /pharmacy/pharmacies/{id}/summary | LEE | POR_SQL |
+| GET /pharmacy/products | LEE | POR_SQL |
 | GET /pharmacy/sites/{siteId}/prices | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | POST /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
+| POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
 | GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
 
 #### Gobierno
@@ -695,7 +714,7 @@ Asocia productos con precios concretos para soportar consulta y operación econ�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_product_prices`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacyProductPrices` — `src/modules/pharmacy/entities/pharmacy_product_prices.entity.ts`
-- **Resumen:** 14 columnas · 5 índices · 4 FK salientes · 1 entrantes · 15 operaciones
+- **Resumen:** 14 columnas · 5 índices · 4 FK salientes · 1 entrantes · 24 operaciones
 
 #### Columnas
 
@@ -751,15 +770,24 @@ Asocia productos con precios concretos para soportar consulta y operación econ�
 | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices | ACTUALIZA | POR_TIPO |
 | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices | CREA | DIRECTA |
 | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | ACTUALIZA | POR_TIPO |
+| POST /pharmacies/{pharmacyId}/products | CREA | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | LEE | DIRECTA |
 | DELETE /pharmacies/{pharmacyId}/products/{productId} | ACTUALIZA | POR_TIPO |
 | DELETE /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | ACTUALIZA | POR_TIPO |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | CREA | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
 | POST /pharmacies/{pharmacyId}/projections | LEE | DIRECTA |
+| GET /pharmacy/pharmacies/{id}/summary | LEE | POR_SQL |
+| GET /pharmacy/products | LEE | POR_SQL |
 | GET /pharmacy/sites/{siteId}/prices | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | POST /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/confirm | LEE | DIRECTA |
+| POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
 | GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
 
 #### Gobierno
@@ -785,7 +813,7 @@ Cataloga productos comercializados o gestionados por farmacias, incluidos los me
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_products`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacyProducts` — `src/modules/pharmacy/entities/pharmacy_products.entity.ts`
-- **Resumen:** 21 columnas · 11 índices · 9 FK salientes · 16 entrantes · 53 operaciones
+- **Resumen:** 21 columnas · 11 índices · 9 FK salientes · 16 entrantes · 60 operaciones
 
 #### Columnas
 
@@ -807,11 +835,11 @@ Cataloga productos comercializados o gestionados por farmacias, incluidos los me
 | 14 | `catalog_product_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 15 | `catalog_presentation_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 16 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 17 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacy_products.entity.ts:146`)_ | coincide |
-| 18 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacy_products.entity.ts:152`)_ | coincide |
+| 17 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacy_products.entity.ts:177`)_ | coincide |
+| 18 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacy_products.entity.ts:183`)_ | coincide |
 | 19 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 20 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 21 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy/entities/pharmacy_products.entity.ts:170`)_ | coincide |
+| 21 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy/entities/pharmacy_products.entity.ts:201`)_ | coincide |
 
 #### Relaciones
 
@@ -847,15 +875,15 @@ Cataloga productos comercializados o gestionados por farmacias, incluidos los me
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_pharmacy_products_pharmacy_id` | no | pharmacy_id | Soporta la clave foránea fk_pharmacy_products_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_pharmacy_products_pharmacy_id` | no | pharmacy_id | Soporta la clave foránea fk_pharmacy_products_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 10 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharmacy_products_medication_concept_id` | no | medication_concept_id | Soporta la clave foránea fk_pharmacy_products_medication_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_products_inventory_item_concept_id` | no | inventory_item_concept_id | Soporta la clave foránea fk_pharmacy_products_inventory_item_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_products_manufacturer_tenant_id` | no | manufacturer_tenant_id | Soporta la clave foránea fk_pharmacy_products_manufacturer_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_products_dosage_form_concept_id` | no | dosage_form_concept_id | Soporta la clave foránea fk_pharmacy_products_dosage_form_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_products_catalog_product_concept_id` | no | catalog_product_concept_id | Soporta la clave foránea fk_pharmacy_products_catalog_product_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «catalog_product_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `uq_pharmacy_products_catalog_presentation` | sí | pharmacy_id, catalog_product_concept_id, catalog_presentation_code donde WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NOT NULL | Garantiza que no se repita la combinación (pharmacy_id, catalog_product_concept_id, catalog_presentation_code) _(DOCUMENTO)_; Soporta la clave foránea fk_pharmacy_products_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NOT NULL _(ESTRUCTURAL)_; 7 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
-| `uq_pharmacy_products_catalog_no_presentation` | sí | pharmacy_id, catalog_product_concept_id donde WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NULL | Garantiza que no se repita la combinación (pharmacy_id, catalog_product_concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_pharmacy_products_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NULL _(ESTRUCTURAL)_; 7 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_pharmacy_products_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_pharmacy_products_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_pharmacy_products_catalog_presentation` | sí | pharmacy_id, catalog_product_concept_id, catalog_presentation_code donde WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NOT NULL | Garantiza que no se repita la combinación (pharmacy_id, catalog_product_concept_id, catalog_presentation_code) _(DOCUMENTO)_; Soporta la clave foránea fk_pharmacy_products_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NOT NULL _(ESTRUCTURAL)_; 10 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_pharmacy_products_catalog_no_presentation` | sí | pharmacy_id, catalog_product_concept_id donde WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NULL | Garantiza que no se repita la combinación (pharmacy_id, catalog_product_concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_pharmacy_products_pharmacy_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE catalog_product_concept_id IS NOT NULL AND catalog_presentation_code IS NULL _(ESTRUCTURAL)_; 10 consulta(s) de repositorio filtran u ordenan por «pharmacy_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_pharmacy_products_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_pharmacy_products_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_pharmacy_products_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_pharmacy_products_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_pharmacy_products_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_pharmacy_products_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -881,9 +909,15 @@ Cataloga productos comercializados o gestionados por farmacias, incluidos los me
 | GET /prior-authorization-requests/{id} | LEE | DIRECTA |
 | POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
 | GET /prior-authorization-requests/inbox | LEE | DIRECTA |
+| GET /pharmacies/{pharmacyId}/categories | LEE | DIRECTA |
+| DELETE /pharmacies/{pharmacyId}/categories/{categoryId} | ACTUALIZA | POR_SQL |
+| DELETE /pharmacies/{pharmacyId}/categories/{categoryId} | LEE | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/categories/{categoryId} | LEE | DIRECTA |
 | POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings | LEE | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/inventory | LEE | DIRECTA |
 | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices | LEE | DIRECTA |
 | POST /pharmacies/{pharmacyId}/products | CREA | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | ACTUALIZA | POR_TIPO |
 | POST /pharmacies/{pharmacyId}/products | LEE | DIRECTA |
 | DELETE /pharmacies/{pharmacyId}/products/{productId} | ACTUALIZA | POR_TIPO |
 | DELETE /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
@@ -922,6 +956,7 @@ Cataloga productos comercializados o gestionados por farmacias, incluidos los me
 | GET /pharmacy/orders/me | LEE | DIRECTA |
 | POST /pharmacy/recall-holds | LEE | DIRECTA |
 | POST /pharmacy/recall-holds/{id}/release | LEE | DIRECTA |
+| POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
 | GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
 
 #### Gobierno
@@ -947,7 +982,7 @@ Identifica sucursales y ubicaciones de farmacias para asociar productos, precios
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_24_pharmacy.puml: pharmacy_sites`
 - **Dominio:** Farmacia · **Diagrama:** `Mantra Core Health Context/modules/diagram_24_pharmacy.puml` · **DDL:** `SQL/24_pharmacy/02_tables.sql`
 - **Entidad del ORM:** `PharmacySites` — `src/modules/pharmacy/entities/pharmacy_sites.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 10 entrantes · 37 operaciones
+- **Resumen:** 16 columnas · 9 índices · 8 FK salientes · 10 entrantes · 45 operaciones
 
 #### Columnas
 
@@ -964,11 +999,11 @@ Identifica sucursales y ubicaciones de farmacias para asociar productos, precios
 | 9 | `home_delivery_available` | `boolean` | Opcional | _sin dato_ | coincide |
 | 10 | `pickup_available` | `boolean` | Opcional | _sin dato_ | coincide |
 | 11 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacy_sites.entity.ts:94`)_ | coincide |
-| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacy_sites.entity.ts:100`)_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacy_sites.entity.ts:100`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/pharmacy/entities/pharmacy_sites.entity.ts:106`)_ | coincide |
 | 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy/entities/pharmacy_sites.entity.ts:118`)_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/pharmacy/entities/pharmacy_sites.entity.ts:124`)_ | coincide |
 
 #### Relaciones
 
@@ -1011,10 +1046,16 @@ Identifica sucursales y ubicaciones de farmacias para asociar productos, precios
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /pharmacies/{pharmacyId}/integration-connections | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel | LEE | DIRECTA |
+| GET /pharmacies/{pharmacyId}/opening-hours | LEE | DIRECTA |
 | POST /pharmacies/{pharmacyId}/price-lists | LEE | DIRECTA |
 | POST /pharmacies/{pharmacyId}/sites | CREA | DIRECTA |
 | POST /pharmacies/{pharmacyId}/sites | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts | LEE | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h | ACTUALIZA | POR_TIPO |
+| PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h | LEE | DIRECTA |
 | GET /pharmacy/pharmacies | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/licenses | LEE | DIRECTA |
@@ -1022,6 +1063,7 @@ Identifica sucursales y ubicaciones de farmacias para asociar productos, precios
 | GET /pharmacy/sites/{siteId}/prices | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
+| GET /public/pharmacies/open-now | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
 | POST /pharmacy/{pharmacyId}/dispensations | LEE | DIRECTA |
@@ -1047,7 +1089,8 @@ Identifica sucursales y ubicaciones de farmacias para asociar productos, precios
 | GET /pharmacy/orders/me | LEE | DIRECTA |
 | POST /pharmacy/recall-holds | LEE | DIRECTA |
 | POST /pharmacy/recall-holds/{id}/release | LEE | DIRECTA |
-| GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
+| POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
+| GET /public/profiles/f/{slug}/branches | LEE | POR_SQL |
 
 #### Gobierno
 

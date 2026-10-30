@@ -11,9 +11,9 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [survey_answers](#survey_answers) | Conserva respuestas por pregunta para permitir análisis de experiencia sin mezclar resultados con reseñas públicas. | 12 | 2 | 2 | COINCIDE |
-| [survey_assignments](#survey_assignments) | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. | 11 | 2 | 4 | COINCIDE |
+| [survey_assignments](#survey_assignments) | Asocia versiones de encuestas a profesionales o tipos de atención que deben utilizarlas. | 11 | 2 | 5 | COINCIDE |
 | [survey_invitations](#survey_invitations) | Emite invitaciones para responder una encuesta a un paciente después de una atención y controla su vigencia. | 15 | 5 | 7 | COINCIDE |
-| [survey_questions](#survey_questions) | Define preguntas que componen cada versión de un cuestionario post-visita. | 14 | 1 | 14 | COINCIDE |
+| [survey_questions](#survey_questions) | Define preguntas que componen cada versión de un cuestionario post-visita. | 14 | 1 | 15 | COINCIDE |
 | [survey_responses](#survey_responses) | Registra respuestas privadas de pacientes a encuestas post-visita sin alimentar la calificación pública de prestadores. | 11 | 4 | 2 | COINCIDE |
 | [survey_templates](#survey_templates) | Define cuestionarios post-atención que profesionales pueden usar para consultar la experiencia del paciente. | 11 | 2 | 21 | COINCIDE |
 | [survey_versions](#survey_versions) | Preserva versiones inmutables de cuestionarios para conocer qué preguntas se presentaron en cada atención. | 13 | 1 | 20 | COINCIDE |
@@ -169,7 +169,7 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_assignments`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyAssignments` — `src/modules/surveys/entities/survey_assignments.entity.ts`
-- **Resumen:** 11 columnas · 2 índices · 5 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 11 columnas · 2 índices · 5 FK salientes · 1 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -210,6 +210,7 @@ Asocia versiones de encuestas a profesionales o tipos de atención que deben uti
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /billing/service-catalog | CREA | DIRECTA |
+| POST /billing/service-catalog/import-procedures | CREA | DIRECTA |
 | POST /surveys/assignments | CREA | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
@@ -318,7 +319,7 @@ Define preguntas que componen cada versión de un cuestionario post-visita.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_65_surveys.puml: survey_questions`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_65_surveys.puml` · **DDL:** `SQL/65_surveys/02_tables.sql`
 - **Entidad del ORM:** `SurveyQuestions` — `src/modules/surveys/entities/survey_questions.entity.ts`
-- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 1 entrantes · 14 operaciones
+- **Resumen:** 14 columnas · 1 índices · 4 FK salientes · 1 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -360,6 +361,7 @@ Define preguntas que componen cada versión de un cuestionario post-visita.
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /billing/service-catalog | CREA | DIRECTA |
+| POST /billing/service-catalog/import-procedures | CREA | DIRECTA |
 | GET /surveys/me/invitations/{id} | LEE | DIRECTA |
 | POST /surveys/me/invitations/{id}/responses | LEE | DIRECTA |
 | GET /surveys/templates | LEE | DIRECTA |
@@ -506,8 +508,8 @@ Define cuestionarios post-atención que profesionales pueden usar para consultar
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /billing/service-catalog | ACTUALIZA | POR_TIPO |
 | POST /billing/service-catalog | CREA | DIRECTA |
+| POST /billing/service-catalog/import-procedures | CREA | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
 | GET /surveys/me/invitations | LEE | DIRECTA |
@@ -594,8 +596,8 @@ Preserva versiones inmutables de cuestionarios para conocer qué preguntas se pr
 
 | Operación | Efecto | Confianza |
 |---|---|---|
-| POST /billing/service-catalog | ACTUALIZA | POR_TIPO |
 | POST /billing/service-catalog | CREA | DIRECTA |
+| POST /billing/service-catalog/import-procedures | CREA | DIRECTA |
 | POST /surveys/assignments | LEE | DIRECTA |
 | POST /surveys/invitations | LEE | DIRECTA |
 | GET /surveys/me/invitations | LEE | DIRECTA |

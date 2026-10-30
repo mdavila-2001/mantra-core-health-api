@@ -3,12 +3,12 @@
 # Flujos del módulo `pharmacy_inventory`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 29 (28 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 30 (29 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [pharmacy_inventory](../endpoints/pharmacy_inventory.md)
 
 ## Proceso: src / modules / pharmacy inventory
 
-- **Código:** `pharmacy_inventory` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 29
+- **Código:** `pharmacy_inventory` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 30
 - **Actores:** Cualquier sesión válida · PATIENT · PHARMACY_STAFF · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/pharmacy_inventory/README.md`
@@ -37,18 +37,19 @@ _Fuente: `src/modules/pharmacy_inventory/README.md:3`_
 |  |  | POST /internal/reservations/expire | SYSTEM · SECURITY_ADMIN | MEDIO | 24 |
 | `ctrl:PharmacyInventoryReadController` | Operaciones de PharmacyInventoryReadController que el README no asigna a un caso de uso | GET /pharmacy-inventory/availability | Cualquier sesión válida | BAJO | 10 |
 |  |  | GET /pharmacy-inventory/sites/{siteId}/stock | Cualquier sesión válida | BAJO | 6 |
-| `ctrl:PharmacyOrdersController` | Operaciones de PharmacyOrdersController que el README no asigna a un caso de uso | GET /pharmacy/orders | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 32 |
-|  |  | POST /pharmacy/orders | PATIENT | MEDIO | 25 |
-|  |  | GET /pharmacy/orders/{id} | Cualquier sesión válida | ALTO | 47 |
-|  |  | POST /pharmacy/orders/{id}/accept-substitutions | PATIENT | MEDIO | 24 |
-|  |  | POST /pharmacy/orders/{id}/cancel | PATIENT | MEDIO | 21 |
-|  |  | POST /pharmacy/orders/{id}/confirm | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 35 |
-|  |  | POST /pharmacy/orders/{id}/dispense | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 35 |
-|  |  | POST /pharmacy/orders/{id}/prefer-original | PATIENT | MEDIO | 17 |
-|  |  | POST /pharmacy/orders/{id}/ready | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 27 |
-|  |  | POST /pharmacy/orders/{id}/reject | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 32 |
-|  |  | POST /pharmacy/orders/{id}/review | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 27 |
-|  |  | GET /pharmacy/orders/me | PATIENT | MEDIO | 46 |
+| `ctrl:PharmacyOrdersController` | Operaciones de PharmacyOrdersController que el README no asigna a un caso de uso | GET /pharmacy/orders | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 34 |
+|  |  | POST /pharmacy/orders | PATIENT | MEDIO | 27 |
+|  |  | GET /pharmacy/orders/{id} | Cualquier sesión válida | ALTO | 49 |
+|  |  | POST /pharmacy/orders/{id}/accept-substitutions | PATIENT | MEDIO | 26 |
+|  |  | POST /pharmacy/orders/{id}/cancel | PATIENT | MEDIO | 23 |
+|  |  | POST /pharmacy/orders/{id}/confirm | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 37 |
+|  |  | POST /pharmacy/orders/{id}/conversation | Cualquier sesión válida | ALTO | 11 |
+|  |  | POST /pharmacy/orders/{id}/dispense | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 37 |
+|  |  | POST /pharmacy/orders/{id}/prefer-original | PATIENT | MEDIO | 19 |
+|  |  | POST /pharmacy/orders/{id}/ready | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 29 |
+|  |  | POST /pharmacy/orders/{id}/reject | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 34 |
+|  |  | POST /pharmacy/orders/{id}/review | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 29 |
+|  |  | GET /pharmacy/orders/me | PATIENT | MEDIO | 48 |
 | `ctrl:PharmacyProcurementController` | Operaciones de PharmacyProcurementController que el README no asigna a un caso de uso | POST /pharmacy/{pharmacyId}/goods-receipts | SECURITY_ADMIN | MEDIO | 19 |
 |  |  | POST /pharmacy/{pharmacyId}/purchase-orders | SECURITY_ADMIN | MEDIO | 8 |
 |  |  | POST /pharmacy/{pharmacyId}/suppliers | SECURITY_ADMIN | MEDIO | 2 |
@@ -60,8 +61,6 @@ flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a38(["SYSTEM · SECURITY_ADMIN"]):::actor
   a45(["Cualquier sesión válida"]):::actor
-  a54(["SECURITY_ADMIN · PHARMACY_STAFF"]):::actor
-  a57(["PATIENT"]):::actor
   t3[("clinical.medication_requests")]:::tabla
   t4[("pharmacy_inventory.inventory_ledger_entries")]:::tabla
   t5[("pharmacy_inventory.inventory_locations")]:::tabla
@@ -86,12 +85,6 @@ flowchart LR
   t48[("pharmacy.pharmacy_product_prices")]:::tabla
   t51[("pharmacy.pharmacy_products")]:::tabla
   t52[("terminology.catalog_concepts")]:::tabla
-  t58[("messaging.outbox_messages")]:::tabla
-  t61[("clinical.service_requests")]:::tabla
-  t62[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t63[("diagnostic_units.diagnostic_units")]:::tabla
-  t64[("directory.tenant_memberships")]:::tabla
-  t73[("insurance.insurance_claims")]:::tabla
   t8[("+13 tablas más")]
   t12[("+4 tablas más")]
   subgraph s0["ctrl:PharmacyDispensingController · Operaciones de PharmacyDispensingController…"]
@@ -124,32 +117,6 @@ flowchart LR
   subgraph s3["ctrl:PharmacyInventoryReadController · Operaciones de PharmacyInventoryReadCont…"]
     o44["GET /pharmacy-inventory/availability"]:::op
     o50["GET /pharmacy-inventory/sites/{siteId}/stock"]:::op
-  end
-  t55[("+26 tablas más")]
-  t59[("+19 tablas más")]
-  t65[("+41 tablas más")]
-  t67[("+18 tablas más")]
-  t69[("+15 tablas más")]
-  t71[("+29 tablas más")]
-  t74[("+29 tablas más")]
-  t76[("+11 tablas más")]
-  t78[("+21 tablas más")]
-  t80[("+26 tablas más")]
-  t82[("+21 tablas más")]
-  t84[("+40 tablas más")]
-  subgraph s4["ctrl:PharmacyOrdersController · Operaciones de PharmacyOrdersController que el…"]
-    o53["GET /pharmacy/orders"]:::op
-    o56["POST /pharmacy/orders"]:::op
-    o60["GET /pharmacy/orders/{id}"]:::op
-    o66["POST /pharmacy/orders/{id}/accept-substitutions"]:::op
-    o68["POST /pharmacy/orders/{id}/cancel"]:::op
-    o70["POST /pharmacy/orders/{id}/confirm"]:::op
-    o72["POST /pharmacy/orders/{id}/dispense"]:::op
-    o75["POST /pharmacy/orders/{id}/prefer-original"]:::op
-    o77["POST /pharmacy/orders/{id}/ready"]:::op
-    o79["POST /pharmacy/orders/{id}/reject"]:::op
-    o81["POST /pharmacy/orders/{id}/review"]:::op
-    o83["GET /pharmacy/orders/me"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -259,159 +226,212 @@ flowchart LR
   o50 -->|"LEE"| t51
   o50 -->|"LEE"| t23
   o50 -->|"LEE"| t52
-  a54 --> o53
-  o53 -->|"LEE"| t3
-  o53 -->|"LEE"| t46
-  o53 -->|"ACTUALIZA"| t39
-  o53 -->|"LEE"| t39
-  o53 -->|"CREA"| t40
-  o53 -->|"CREA"| t41
-  o53 -.-> t55
-  o53 -->|"evento"| e43
-  a57 --> o56
-  o56 -->|"LEE"| t3
-  o56 -->|"LEE"| t46
-  o56 -->|"CREA"| t40
-  o56 -->|"CREA"| t58
-  o56 -->|"LEE"| t58
-  o56 -->|"CREA"| t4
-  o56 -.-> t59
-  o56 -->|"evento"| e43
-  a45 --> o60
-  o60 -->|"LEE"| t3
-  o60 -->|"LEE"| t61
-  o60 -->|"LEE"| t46
-  o60 -->|"LEE"| t62
-  o60 -->|"LEE"| t63
-  o60 -->|"LEE"| t64
-  o60 -.-> t65
-  o60 -->|"evento"| e43
-  a57 --> o66
-  o66 -->|"LEE"| t3
-  o66 -->|"LEE"| t46
-  o66 -->|"CREA"| t40
-  o66 -->|"CREA"| t58
-  o66 -->|"LEE"| t58
-  o66 -->|"CREA"| t4
-  o66 -.-> t67
-  o66 -->|"evento"| e43
-  a57 --> o68
-  o68 -->|"LEE"| t3
-  o68 -->|"LEE"| t46
-  o68 -->|"CREA"| t40
-  o68 -->|"CREA"| t58
-  o68 -->|"LEE"| t58
-  o68 -->|"CREA"| t4
-  o68 -.-> t69
-  o68 -->|"evento"| e43
-  a54 --> o70
-  o70 -->|"LEE"| t3
-  o70 -->|"LEE"| t46
-  o70 -->|"ACTUALIZA"| t39
-  o70 -->|"LEE"| t39
-  o70 -->|"CREA"| t40
-  o70 -->|"CREA"| t41
-  o70 -.-> t71
-  o70 -->|"evento"| e43
-  a54 --> o72
-  o72 -->|"LEE"| t3
-  o72 -->|"LEE"| t46
-  o72 -->|"ACTUALIZA"| t39
-  o72 -->|"LEE"| t39
-  o72 -->|"LEE"| t73
-  o72 -->|"CREA"| t40
-  o72 -.-> t74
-  o72 -->|"evento"| e43
-  a57 --> o75
-  o75 -->|"LEE"| t3
-  o75 -->|"LEE"| t46
-  o75 -->|"CREA"| t40
-  o75 -->|"CREA"| t58
-  o75 -->|"LEE"| t58
-  o75 -->|"LEE"| t7
-  o75 -.-> t76
-  o75 -->|"evento"| e43
-  a54 --> o77
-  o77 -->|"LEE"| t3
-  o77 -->|"LEE"| t46
-  o77 -->|"ACTUALIZA"| t39
-  o77 -->|"LEE"| t39
-  o77 -->|"CREA"| t40
-  o77 -->|"CREA"| t41
-  o77 -.-> t78
-  o77 -->|"evento"| e43
-  a54 --> o79
-  o79 -->|"LEE"| t3
-  o79 -->|"LEE"| t46
-  o79 -->|"ACTUALIZA"| t39
-  o79 -->|"LEE"| t39
-  o79 -->|"CREA"| t40
-  o79 -->|"CREA"| t41
-  o79 -.-> t80
-  o79 -->|"evento"| e43
-  a54 --> o81
-  o81 -->|"LEE"| t3
-  o81 -->|"LEE"| t46
-  o81 -->|"ACTUALIZA"| t39
-  o81 -->|"LEE"| t39
-  o81 -->|"CREA"| t40
-  o81 -->|"CREA"| t41
-  o81 -.-> t82
-  o81 -->|"evento"| e43
-  a57 --> o83
-  o83 -->|"LEE"| t3
-  o83 -->|"LEE"| t61
-  o83 -->|"LEE"| t46
-  o83 -->|"LEE"| t62
-  o83 -->|"LEE"| t63
-  o83 -->|"ACTUALIZA"| t39
-  o83 -.-> t84
-  o83 -->|"evento"| e43
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:PharmacyProcurementController`
+### Diagrama 2 de 2 — etapas `ctrl:PharmacyOrdersController`, `ctrl:PharmacyProcurementController`
 
 ```mermaid
 flowchart LR
-  a2(["SECURITY_ADMIN"]):::actor
-  t3[("pharmacy_inventory.inventory_ledger_entries")]:::tabla
-  t4[("pharmacy_inventory.inventory_locations")]:::tabla
-  t5[("pharmacy_inventory.inventory_lots")]:::tabla
-  t6[("pharmacy_inventory.inventory_stock_positions")]:::tabla
-  t9[("pharmacy_inventory.pharmacy_purchase_order_lines")]:::tabla
-  t10[("pharmacy_inventory.pharmacy_purchase_orders")]:::tabla
-  t11[("pharmacy_inventory.pharmacy_suppliers")]:::tabla
-  t12[("pharmacy.pharmacies")]:::tabla
-  t7[("+13 tablas más")]
-  t13[("+2 tablas más")]
-  subgraph s0["ctrl:PharmacyProcurementController · Operaciones de PharmacyProcurementControll…"]
-    o1["POST /pharmacy/{pharmacyId}/goods-receipts"]:::op
-    o8["POST /pharmacy/{pharmacyId}/purchase-orders"]:::op
-    o14["POST /pharmacy/{pharmacyId}/suppliers"]:::op
+  a2(["SECURITY_ADMIN · PHARMACY_STAFF"]):::actor
+  a11(["PATIENT"]):::actor
+  a16(["Cualquier sesión válida"]):::actor
+  a45(["SECURITY_ADMIN"]):::actor
+  t3[("clinical.medication_requests")]:::tabla
+  t4[("common.addresses")]:::tabla
+  t5[("community.public_profiles")]:::tabla
+  t6[("directory.tenants")]:::tabla
+  t7[("iam.devices")]:::tabla
+  e9>"~null"]:::evento
+  t12[("messaging.domain_events")]:::tabla
+  t13[("messaging.outbox_messages")]:::tabla
+  t17[("clinical.service_requests")]:::tabla
+  t18[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t19[("diagnostic_units.diagnostic_units")]:::tabla
+  t28[("community.conversation_participants")]:::tabla
+  t29[("community.conversations")]:::tabla
+  t30[("community.user_blocks")]:::tabla
+  t46[("pharmacy_inventory.inventory_ledger_entries")]:::tabla
+  t47[("pharmacy_inventory.inventory_locations")]:::tabla
+  t48[("pharmacy_inventory.inventory_lots")]:::tabla
+  t49[("pharmacy_inventory.inventory_stock_positions")]:::tabla
+  t52[("pharmacy_inventory.pharmacy_purchase_order_lines")]:::tabla
+  t53[("pharmacy_inventory.pharmacy_purchase_orders")]:::tabla
+  t54[("pharmacy_inventory.pharmacy_suppliers")]:::tabla
+  t55[("pharmacy.pharmacies")]:::tabla
+  t8[("+28 tablas más")]
+  t14[("+21 tablas más")]
+  t20[("+43 tablas más")]
+  t22[("+20 tablas más")]
+  t24[("+17 tablas más")]
+  t26[("+31 tablas más")]
+  t31[("+5 tablas más")]
+  t33[("+31 tablas más")]
+  t35[("+13 tablas más")]
+  t37[("+23 tablas más")]
+  t39[("+28 tablas más")]
+  t41[("+23 tablas más")]
+  t43[("+42 tablas más")]
+  subgraph s0["ctrl:PharmacyOrdersController · Operaciones de PharmacyOrdersController que el…"]
+    o1["GET /pharmacy/orders"]:::op
+    o10["POST /pharmacy/orders"]:::op
+    o15["GET /pharmacy/orders/{id}"]:::op
+    o21["POST /pharmacy/orders/{id}/accept-substitutions"]:::op
+    o23["POST /pharmacy/orders/{id}/cancel"]:::op
+    o25["POST /pharmacy/orders/{id}/confirm"]:::op
+    o27["POST /pharmacy/orders/{id}/conversation"]:::op
+    o32["POST /pharmacy/orders/{id}/dispense"]:::op
+    o34["POST /pharmacy/orders/{id}/prefer-original"]:::op
+    o36["POST /pharmacy/orders/{id}/ready"]:::op
+    o38["POST /pharmacy/orders/{id}/reject"]:::op
+    o40["POST /pharmacy/orders/{id}/review"]:::op
+    o42["GET /pharmacy/orders/me"]:::op
+  end
+  t50[("+13 tablas más")]
+  t56[("+2 tablas más")]
+  subgraph s1["ctrl:PharmacyProcurementController · Operaciones de PharmacyProcurementControll…"]
+    o44["POST /pharmacy/{pharmacyId}/goods-receipts"]:::op
+    o51["POST /pharmacy/{pharmacyId}/purchase-orders"]:::op
+    o57["POST /pharmacy/{pharmacyId}/suppliers"]:::op
   end
   a2 --> o1
-  o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
-  o1 -->|"CREA"| t5
   o1 -->|"LEE"| t5
-  o1 -->|"ACTUALIZA"| t6
-  o1 -.-> t7
-  a2 --> o8
-  o8 -->|"CREA"| t9
-  o8 -->|"LEE"| t9
-  o8 -->|"CREA"| t10
-  o8 -->|"LEE"| t10
-  o8 -->|"LEE"| t11
-  o8 -->|"LEE"| t12
-  o8 -.-> t13
-  a2 --> o14
-  o14 -->|"CREA"| t11
-  o14 -->|"LEE"| t12
+  o1 -->|"LEE"| t6
+  o1 -->|"ACTUALIZA"| t7
+  o1 -->|"LEE"| t7
+  o1 -.-> t8
+  o1 -->|"evento"| e9
+  a11 --> o10
+  o10 -->|"LEE"| t3
+  o10 -->|"LEE"| t4
+  o10 -->|"LEE"| t5
+  o10 -->|"LEE"| t6
+  o10 -->|"CREA"| t12
+  o10 -->|"CREA"| t13
+  o10 -.-> t14
+  o10 -->|"evento"| e9
+  a16 --> o15
+  o15 -->|"LEE"| t3
+  o15 -->|"LEE"| t17
+  o15 -->|"LEE"| t4
+  o15 -->|"LEE"| t5
+  o15 -->|"LEE"| t18
+  o15 -->|"LEE"| t19
+  o15 -.-> t20
+  o15 -->|"evento"| e9
+  a11 --> o21
+  o21 -->|"LEE"| t3
+  o21 -->|"LEE"| t4
+  o21 -->|"LEE"| t5
+  o21 -->|"LEE"| t6
+  o21 -->|"CREA"| t12
+  o21 -->|"CREA"| t13
+  o21 -.-> t22
+  o21 -->|"evento"| e9
+  a11 --> o23
+  o23 -->|"LEE"| t3
+  o23 -->|"LEE"| t4
+  o23 -->|"LEE"| t5
+  o23 -->|"LEE"| t6
+  o23 -->|"CREA"| t12
+  o23 -->|"CREA"| t13
+  o23 -.-> t24
+  o23 -->|"evento"| e9
+  a2 --> o25
+  o25 -->|"LEE"| t3
+  o25 -->|"LEE"| t4
+  o25 -->|"LEE"| t5
+  o25 -->|"LEE"| t6
+  o25 -->|"ACTUALIZA"| t7
+  o25 -->|"LEE"| t7
+  o25 -.-> t26
+  o25 -->|"evento"| e9
+  a16 --> o27
+  o27 -->|"CREA"| t28
+  o27 -->|"LEE"| t28
+  o27 -->|"CREA"| t29
+  o27 -->|"LEE"| t29
+  o27 -->|"LEE"| t5
+  o27 -->|"LEE"| t30
+  o27 -.-> t31
+  a2 --> o32
+  o32 -->|"LEE"| t3
+  o32 -->|"LEE"| t4
+  o32 -->|"LEE"| t5
+  o32 -->|"LEE"| t6
+  o32 -->|"ACTUALIZA"| t7
+  o32 -->|"LEE"| t7
+  o32 -.-> t33
+  o32 -->|"evento"| e9
+  a11 --> o34
+  o34 -->|"LEE"| t3
+  o34 -->|"LEE"| t4
+  o34 -->|"LEE"| t5
+  o34 -->|"LEE"| t6
+  o34 -->|"CREA"| t12
+  o34 -->|"CREA"| t13
+  o34 -.-> t35
+  o34 -->|"evento"| e9
+  a2 --> o36
+  o36 -->|"LEE"| t3
+  o36 -->|"LEE"| t4
+  o36 -->|"LEE"| t5
+  o36 -->|"LEE"| t6
+  o36 -->|"ACTUALIZA"| t7
+  o36 -->|"LEE"| t7
+  o36 -.-> t37
+  o36 -->|"evento"| e9
+  a2 --> o38
+  o38 -->|"LEE"| t3
+  o38 -->|"LEE"| t4
+  o38 -->|"LEE"| t5
+  o38 -->|"LEE"| t6
+  o38 -->|"ACTUALIZA"| t7
+  o38 -->|"LEE"| t7
+  o38 -.-> t39
+  o38 -->|"evento"| e9
+  a2 --> o40
+  o40 -->|"LEE"| t3
+  o40 -->|"LEE"| t4
+  o40 -->|"LEE"| t5
+  o40 -->|"LEE"| t6
+  o40 -->|"ACTUALIZA"| t7
+  o40 -->|"LEE"| t7
+  o40 -.-> t41
+  o40 -->|"evento"| e9
+  a11 --> o42
+  o42 -->|"LEE"| t3
+  o42 -->|"LEE"| t17
+  o42 -->|"LEE"| t4
+  o42 -->|"LEE"| t5
+  o42 -->|"LEE"| t18
+  o42 -->|"LEE"| t19
+  o42 -.-> t43
+  o42 -->|"evento"| e9
+  a45 --> o44
+  o44 -->|"CREA"| t46
+  o44 -->|"LEE"| t46
+  o44 -->|"LEE"| t47
+  o44 -->|"CREA"| t48
+  o44 -->|"LEE"| t48
+  o44 -->|"ACTUALIZA"| t49
+  o44 -.-> t50
+  a45 --> o51
+  o51 -->|"CREA"| t52
+  o51 -->|"LEE"| t52
+  o51 -->|"CREA"| t53
+  o51 -->|"LEE"| t53
+  o51 -->|"LEE"| t54
+  o51 -->|"LEE"| t55
+  o51 -.-> t56
+  a45 --> o57
+  o57 -->|"CREA"| t54
+  o57 -->|"LEE"| t55
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -422,7 +442,7 @@ flowchart LR
 
 ### Máquina de estados `ORDER_STAFF_TRANSITIONS`
 
-Declarada en `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:160`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+Declarada en `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:171`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
 
 ```mermaid
 stateDiagram-v2
@@ -2876,7 +2896,87 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /pharmacy/orders/{id}/dispense
+#### 21. POST /pharmacy/orders/{id}/conversation
+
+Abrir el chat del pedido con la farmacia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El paciente todavía no tiene un perfil con el que conversar; PreconditionFailedException: La farmacia no tiene una vitrina activa con la que conversar |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PharmacyOrdersService.openConversation"]:::llamada
+  n2 --> n3
+  n4["Llama a PharmacyOrdersUseCases.openConversation"]:::llamada
+  n3 --> n4
+  n5["Llama a PharmacyOrdersRepository.findOrderById"]:::llamada
+  n4 --> n5
+  n6[("LEE pharmacy_inventory.inventory_reservations")]:::efecto
+  n5 --> n6
+  n7{"!order"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9{"!isOwner && !isPharmacyStaff"}:::decision
+  n7 -->|"no"| n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PharmacyOrdersRepository.findPharmaciesByIdsInTenant"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE pharmacy.pharmacies")]:::efecto
+  n11 --> n12
+  n13{"!pharmacy"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"isOwner"}:::decision
+  n13 -->|"no"| n15
+  n16{"order.patientProfileId"}:::decision
+  n15 -->|"no"| n16
+  n17["Llama a ProfilesPersonAccountLinksAdapter.findActiveByPerson"]:::llamada
+  n16 -->|"sí"| n17
+  n18["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
+  n17 --> n18
+  n19[("LEE profiles.person_account_links")]:::efecto
+  n18 --> n19
+  n20{"!patientUserId"}:::decision
+  n15 -->|"sí"| n20
+  n19 --> n20
+  n16 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED El paciente todavía no tiene un perfil con el que conversar"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a CommunityPharmacyOrderChatAdapter.openOrderConversation"]:::llamada
+  n20 -->|"no"| n22
+  n23["Llama a CommunityOrderChatService.openOrderConversation"]:::llamada
+  n22 --> n23
+  n24{"!organization"}:::decision
+  n23 --> n24
+  n25(["422 PRECONDITION_FAILED La farmacia no tiene una vitrina activa con la que conversar"]):::error
+  n24 -->|"sí"| n25
+  n26{"!patientProfile || patientProfile.statusConceptId !== CONCEPTS.STATE_ACTIVE || this.organizationStaff.isOrgan…"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED El paciente todavía no tiene un perfil con el que conversar"]):::error
+  n26 -->|"sí"| n27
+  n28(("200 Responde con éxito")):::ok
+  n26 -->|"no"| n28
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 22. POST /pharmacy/orders/{id}/dispense
 
 Dispensar el pedido en el mostrador (FAR-E3)
 
@@ -3026,7 +3126,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /pharmacy/orders/{id}/prefer-original
+#### 23. POST /pharmacy/orders/{id}/prefer-original
 
 Preferir los productos originales (paciente)
 
@@ -3135,7 +3235,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /pharmacy/orders/{id}/ready
+#### 24. POST /pharmacy/orders/{id}/ready
 
 Marcar el pedido listo para retiro (FAR-E2/E3)
 
@@ -3245,7 +3345,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /pharmacy/orders/{id}/reject
+#### 25. POST /pharmacy/orders/{id}/reject
 
 Rechazar el pedido (FAR-E2)
 
@@ -3346,7 +3446,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /pharmacy/orders/{id}/review
+#### 26. POST /pharmacy/orders/{id}/review
 
 Abrir revisión del pedido (FAR-E2)
 
@@ -3426,7 +3526,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. GET /pharmacy/orders/me
+#### 27. GET /pharmacy/orders/me
 
 Mis pedidos de farmacia, más nuevos primero (FAR-E1)
 
@@ -3547,7 +3647,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /pharmacy/recall-holds
+#### 28. POST /pharmacy/recall-holds
 
 Aplicar retiro/recall de lote (UC-25-08)
 
@@ -3647,7 +3747,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /pharmacy/recall-holds/{id}/release
+#### 29. POST /pharmacy/recall-holds/{id}/release
 
 Liberar recall y reactivar lote (UC-25-09)
 

@@ -254,7 +254,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: mantra-core-technologies/mantra-core-health-model
-          ref: 33c01919039ea98cc8bbb9e2d6b91d3bffc7b359
+          ref: de23cafd1f2c8f57173b88276dac0f31d781cb41
           path: _modelo
           persist-credentials: false
 
@@ -265,7 +265,7 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           repository: mdavila-2001/mantra-core-health
-          ref: 4afab7a30e6d48077078e7b9b38c88ee2f59b69b
+          ref: 844b60c50d90dfcbe538fb7afd6a4456b1c1a632
           path: _frontend
           persist-credentials: false
           sparse-checkout: |

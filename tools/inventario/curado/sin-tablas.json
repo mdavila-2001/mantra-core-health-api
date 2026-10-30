@@ -155,6 +155,12 @@
     "fuente": "src/modules/iam/application/services/iam-onboarding-drafts.service.ts:19",
     "revision": "manual, 2026-10-25"
   },
+  "ReverseGeocodingController_reverse": {
+    "operacion": "POST /public/geo/reverse",
+    "motivo": "Traduce un punto del mapa a calle consultando el geocodificador externo (Nominatim, con Photon de respaldo) y guarda la respuesta en una caché en memoria; no consulta la base de datos.",
+    "fuente": "src/modules/geo/reverse-geocoding/reverse-geocoding.service.ts:193",
+    "revision": "manual, 2026-10-30"
+  },
   "SchedulingController_listActivityTypes": {
     "operacion": "GET /scheduling/activity-types",
     "motivo": "Devuelve el catálogo de tipologías de actividad, que vive en constantes del código (ACTIVITY_TYPES y sus etiquetas); no accede a datos.",

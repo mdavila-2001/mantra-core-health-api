@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1621,
+    "total": 1625,
     "porOrigen": {
-      "CONTRATO": 1612,
+      "CONTRATO": 1616,
       "CONTRATO_AUSENTE": 9
     },
     "porRiesgo": {
-      "BAJO": 524,
-      "MEDIO": 898,
-      "ALTO": 199
+      "BAJO": 526,
+      "MEDIO": 899,
+      "ALTO": 200
     },
-    "conTablas": 1559,
-    "sinTablasSinDeterminar": 1,
+    "conTablas": 1563,
+    "sinTablasSinDeterminar": 0,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 935,
-    "conRequerimientos": 1621
+    "conPruebas": 939,
+    "conRequerimientos": 1625
   },
   "endpoints": [
     {
@@ -869,7 +869,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -941,7 +941,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -1031,7 +1031,7 @@
       "roles": [
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3443,7 +3443,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 12,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3485,6 +3485,26 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "BillingServiceCatalogController_importProcedures",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/billing/service-catalog/import-procedures",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Importar en lote procedimientos del arancel al catálogo",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "BillingServiceCatalogController_listProcedureSpecialties",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -3496,6 +3516,22 @@
       "publica": false,
       "roles": [],
       "tablas": 1,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingServiceCatalogController_listMyProcedureSpecialties",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/billing/service-catalog/procedure-specialties/mine",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Listar las especialidades del arancel que corresponden al médico",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5474,7 +5510,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5957,7 +5993,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -5973,7 +6009,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -5989,7 +6025,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -6005,7 +6041,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6021,7 +6057,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -6037,7 +6073,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6053,7 +6089,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -6069,7 +6105,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -6085,9 +6121,9 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -6101,9 +6137,9 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 8,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -6117,7 +6153,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6133,9 +6169,9 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 7,
       "eventos": 0,
-      "pruebas": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -6149,9 +6185,9 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 23,
+      "tablas": 25,
       "eventos": 0,
-      "pruebas": 2,
+      "pruebas": 3,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -6165,7 +6201,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6181,7 +6217,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6197,7 +6233,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6213,7 +6249,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6229,7 +6265,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6245,7 +6281,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6261,7 +6297,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -6277,7 +6313,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6293,7 +6329,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6309,7 +6345,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6325,7 +6361,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -6341,7 +6377,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -6389,7 +6425,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6405,7 +6441,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6421,7 +6457,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 9,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6437,7 +6473,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6453,7 +6489,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 12,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6469,7 +6505,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6555,7 +6591,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6571,7 +6607,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6623,7 +6659,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6639,7 +6675,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -6655,7 +6691,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 10,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6671,7 +6707,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 10,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6687,7 +6723,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6703,7 +6739,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6719,7 +6755,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6735,7 +6771,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6751,7 +6787,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -6767,7 +6803,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -6783,7 +6819,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6799,7 +6835,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 10,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -6847,7 +6883,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6863,7 +6899,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -6897,7 +6933,7 @@
       "roles": [],
       "tablas": 4,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -6914,6 +6950,22 @@
       "tablas": 1,
       "eventos": 0,
       "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CommunitySocialController_listOwnOrganizationShowcases",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/community/profiles/organization-showcases/me",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Vitrinas de organización que la sesión puede atender en el chat",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -7009,7 +7061,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -10801,7 +10853,7 @@
       ],
       "tablas": 16,
       "eventos": 0,
-      "pruebas": 4,
+      "pruebas": 5,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13438,7 +13490,7 @@
       "roles": [],
       "tablas": 23,
       "eventos": 0,
-      "pruebas": 61,
+      "pruebas": 62,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13486,7 +13538,7 @@
       "roles": [],
       "tablas": 38,
       "eventos": 0,
-      "pruebas": 22,
+      "pruebas": 23,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13502,7 +13554,7 @@
       "roles": [],
       "tablas": 21,
       "eventos": 0,
-      "pruebas": 36,
+      "pruebas": 37,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -15377,7 +15429,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20661,7 +20713,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 32,
+      "tablas": 34,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20679,7 +20731,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 25,
+      "tablas": 27,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20695,7 +20747,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 47,
+      "tablas": 49,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20713,7 +20765,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 24,
+      "tablas": 26,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20731,7 +20783,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 21,
+      "tablas": 23,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20750,8 +20802,24 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 35,
+      "tablas": 37,
       "eventos": 1,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PharmacyOrdersController_openConversation",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/pharmacy/orders/{id}/conversation",
+      "modulo": "pharmacy_inventory",
+      "bloque": "Farmacia",
+      "nombre": "Abrir el chat del pedido con la farmacia",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
@@ -20769,7 +20837,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 35,
+      "tablas": 37,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20787,7 +20855,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 17,
+      "tablas": 19,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20806,7 +20874,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 27,
+      "tablas": 29,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20825,7 +20893,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 32,
+      "tablas": 34,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20844,7 +20912,7 @@
         "SECURITY_ADMIN",
         "PHARMACY_STAFF"
       ],
-      "tablas": 27,
+      "tablas": 29,
       "eventos": 1,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20862,7 +20930,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 46,
+      "tablas": 48,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21530,7 +21598,7 @@
       "roles": [],
       "tablas": 3,
       "eventos": 0,
-      "pruebas": 1,
+      "pruebas": 2,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -22164,7 +22232,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -22183,7 +22251,7 @@
         "CLINICIAN",
         "PRACTITIONER"
       ],
-      "tablas": 8,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -25609,7 +25677,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 47,
+      "tablas": 49,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -25710,7 +25778,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 55,
+      "tablas": 57,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -25731,7 +25799,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 47,
+      "tablas": 49,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -25790,7 +25858,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 34,
+      "tablas": 36,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -25829,7 +25897,7 @@
       "roles": [
         "PATIENT"
       ],
-      "tablas": 38,
+      "tablas": 40,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25849,7 +25917,7 @@
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT"
       ],
-      "tablas": 36,
+      "tablas": 38,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25890,7 +25958,7 @@
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT"
       ],
-      "tablas": 35,
+      "tablas": 37,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -26030,7 +26098,7 @@
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 42,
+      "tablas": 44,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -26238,7 +26306,7 @@
         "SCHEDULING_AGENT",
         "PATIENT"
       ],
-      "tablas": 44,
+      "tablas": 46,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -26257,7 +26325,7 @@
         "SYSTEM",
         "SYSTEM_WORKER"
       ],
-      "tablas": 33,
+      "tablas": 35,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -26295,7 +26363,7 @@
         "SYSTEM",
         "SYSTEM_WORKER"
       ],
-      "tablas": 31,
+      "tablas": 33,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -26393,7 +26461,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 33,
+      "tablas": 35,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -26493,7 +26561,7 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 32,
+      "tablas": 34,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"

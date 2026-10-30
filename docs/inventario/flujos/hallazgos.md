@@ -7,12 +7,12 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | ID | Severidad | Hallazgo | Cuenta |
 |---|---|---|---|
 | [FLU-01](#flu-01) | ALTA | Operaciones sin proceso asignado | 0 |
-| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 152 |
+| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 153 |
 | [FLU-03](#flu-03) | ALTA | Ruta pública que escribe en la base | 18 |
-| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 133 |
+| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 134 |
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
-| [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 10 |
-| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1223 |
+| [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 4 |
+| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1129 |
 | [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 9 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 0 |
 | [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 112 |
@@ -27,7 +27,7 @@ _Ninguno._
 
 ## FLU-02
 
-**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 152 caso(s).
+**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 153 caso(s).
 
 **Qué hacer:** Confirmar que la regla de acceso vive en el servicio o declarar los roles en el controlador. Hoy la API no las distingue de una sesión cualquiera.
 
@@ -52,20 +52,20 @@ _Ninguno._
 | POST /common/files/{id}/versions | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-files.controller.ts:169` |
 | POST /common/files/{id}/versions/{vid}/derivatives | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-files.controller.ts:186` |
 | POST /common/files/upload | common | escribe y el controlador no declara roles | `src/modules/common/controllers/common-files.controller.ts:73` |
-| DELETE /community/blocks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:301` |
-| POST /community/blocks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:248` |
-| DELETE /community/bookmarks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:286` |
-| POST /community/bookmarks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:216` |
-| POST /community/comments | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:183` |
-| POST /community/conversations | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:69` |
-| POST /community/conversations/{conversationId}/messages | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:85` |
-| DELETE /community/conversations/{conversationId}/messages/{messageId} | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:120` |
-| PATCH /community/conversations/{conversationId}/messages/{messageId} | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:102` |
-| DELETE /community/conversations/{conversationId}/pin | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:196` |
-| POST /community/conversations/{conversationId}/pin | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:179` |
-| POST /community/conversations/{conversationId}/read | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:143` |
-| DELETE /community/follows | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:271` |
-| POST /community/follows | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:232` |
+| DELETE /community/blocks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:325` |
+| POST /community/blocks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:272` |
+| DELETE /community/bookmarks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:310` |
+| POST /community/bookmarks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:240` |
+| POST /community/comments | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:207` |
+| POST /community/conversations | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:70` |
+| POST /community/conversations/{conversationId}/messages | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:86` |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:121` |
+| PATCH /community/conversations/{conversationId}/messages/{messageId} | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:103` |
+| DELETE /community/conversations/{conversationId}/pin | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:197` |
+| POST /community/conversations/{conversationId}/pin | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:180` |
+| POST /community/conversations/{conversationId}/read | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:144` |
+| DELETE /community/follows | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:295` |
+| POST /community/follows | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:256` |
 | POST /community/groups | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-groups.controller.ts:78` |
 | POST /community/groups/{groupId}/members | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-groups.controller.ts:94` |
 | DELETE /community/groups/{groupId}/members/{member} | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-groups.controller.ts:143` |
@@ -74,12 +74,12 @@ _Ninguno._
 | POST /community/moderation/decisions/{decisionId}/appeal | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-moderation.controller.ts:95` |
 | POST /community/polls/{pollId}/votes | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-polls.controller.ts:57` |
 | POST /community/posts/{postId}/polls | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-polls.controller.ts:40` |
-| POST /community/profiles/{profileId}/posts | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:166` |
+| POST /community/profiles/{profileId}/posts | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:190` |
 | POST /community/profiles/{profileId}/reviews | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-reviews.controller.ts:51` |
 | POST /community/profiles/{profileId}/reviews/{reviewId}/responses | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-reviews.controller.ts:93` |
-| PUT /community/profiles/me | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:126` |
+| PUT /community/profiles/me | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:127` |
 | PUT /community/ratings | community | escribe y el controlador no declara roles | `src/modules/community/controllers/party-ratings.controller.ts:45` |
-| PUT /community/reactions | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:199` |
+| PUT /community/reactions | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:223` |
 | POST /community/reports | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-moderation.controller.ts:61` |
 | POST /diagnostics/accessions | diagnostics | escribe y el controlador no declara roles | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:104` |
 | POST /diagnostics/analyzer-runs | diagnostics | escribe y el controlador no declara roles | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:91` |
@@ -139,7 +139,8 @@ _Ninguno._
 | POST /practitioner-settlement-batches | insurance | escribe y el controlador no declara roles | `src/modules/insurance/presentation/controllers/practitioner-settlement-batches.controller.ts:49` |
 | POST /integrations/messages:outbound | integrations | escribe y el controlador no declara roles | `src/modules/integrations/controllers/integrations-messages.controller.ts:53` |
 | POST /pharma-labs/notices/{noticeId}/read | pharma_lab | escribe y el controlador no declara roles | `src/modules/pharma_lab/controllers/pharma-lab-notices.controller.ts:50` |
-| GET /pharmacy/orders/{id} | pharmacy_inventory | escribe y el controlador no declara roles | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:135` |
+| GET /pharmacy/orders/{id} | pharmacy_inventory | escribe y el controlador no declara roles | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:136` |
+| POST /pharmacy/orders/{id}/conversation | pharmacy_inventory | escribe y el controlador no declara roles | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156` |
 | POST /practices/{practiceId}/healthcare-services | practice | escribe y el controlador no declara roles | `src/modules/practice/controllers/practices.controller.ts:287` |
 | PATCH /practices/{practiceId}/healthcare-services/{id} | practice | escribe y el controlador no declara roles | `src/modules/practice/controllers/practices.controller.ts:332` |
 | POST /practices/{practiceId}/role-assignments/invitations | practice | escribe y el controlador no declara roles | `src/modules/practice/controllers/practice-invitations.controller.ts:39` |
@@ -215,7 +216,7 @@ _Ninguno._
 
 ## FLU-04
 
-**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 133 caso(s).
+**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 134 caso(s).
 
 **Qué hacer:** Escribir la prueba de integración contra PostgreSQL real (regla 80.2.4). Las sin prueba alguna van primero.
 
@@ -239,14 +240,14 @@ _Ninguno._
 | PUT /clinical/me/medical-aspects | clinical | ninguna prueba la menciona | `src/modules/clinical/controllers/clinical-medical-aspects.controller.ts:53` |
 | POST /prescription-favorites | clinical_ext | ninguna prueba la menciona | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:57` |
 | DELETE /prescription-favorites/{id} | clinical_ext | ninguna prueba la menciona | `src/modules/clinical_ext/controllers/prescription-favorites.controller.ts:73` |
-| DELETE /community/blocks | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:301` |
-| DELETE /community/bookmarks | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:286` |
-| POST /community/bookmarks | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:216` |
-| DELETE /community/conversations/{conversationId}/messages/{messageId} | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:120` |
-| PATCH /community/conversations/{conversationId}/messages/{messageId} | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:102` |
-| DELETE /community/conversations/{conversationId}/pin | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:196` |
-| POST /community/conversations/{conversationId}/pin | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:179` |
-| DELETE /community/follows | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:271` |
+| DELETE /community/blocks | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:325` |
+| DELETE /community/bookmarks | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:310` |
+| POST /community/bookmarks | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:240` |
+| DELETE /community/conversations/{conversationId}/messages/{messageId} | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:121` |
+| PATCH /community/conversations/{conversationId}/messages/{messageId} | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:103` |
+| DELETE /community/conversations/{conversationId}/pin | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:197` |
+| POST /community/conversations/{conversationId}/pin | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:180` |
+| DELETE /community/follows | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:295` |
 | POST /community/groups | community | sólo prueba de controlador | `src/modules/community/controllers/community-groups.controller.ts:78` |
 | POST /community/groups/{groupId}/members | community | sólo prueba de controlador | `src/modules/community/controllers/community-groups.controller.ts:94` |
 | DELETE /community/groups/{groupId}/members/{member} | community | sólo prueba de controlador | `src/modules/community/controllers/community-groups.controller.ts:143` |
@@ -318,6 +319,7 @@ _Ninguno._
 | DELETE /pharmacies/{pharmacyId}/categories/{categoryId} | pharmacy | ninguna prueba la menciona | `src/modules/pharmacy/controllers/pharmacy.controller.ts:162` |
 | POST /pharmacies/{pharmacyId}/products | pharmacy | sólo prueba de controlador | `src/modules/pharmacy/controllers/pharmacy.controller.ts:342` |
 | PATCH /pharmacies/{pharmacyId}/products/{productId} | pharmacy | sólo prueba de controlador | `src/modules/pharmacy/controllers/pharmacy.controller.ts:361` |
+| POST /pharmacy/orders/{id}/conversation | pharmacy_inventory | ninguna prueba la menciona | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156` |
 | DELETE /profiles/patients/me/addresses/{id} | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
 | PATCH /profiles/patients/me/addresses/{id} | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
 | DELETE /profiles/patients/me/primary-practitioner | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67` |
@@ -379,64 +381,40 @@ _Ninguno._
 
 ## FLU-06
 
-**Operaciones que el frontend llama y la API no tiene** — severidad ALTA — 10 caso(s).
+**Operaciones que el frontend llama y la API no tiene** — severidad ALTA — 4 caso(s).
 
 **Qué hacer:** Cada fila es una pantalla que hoy falla (404) o depende de un mock. Decidir: implementar en la API, o retirar del cliente. No se corrige aquí.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
-| POST /quotations/simulate | — | cliente QuotationsClient | `src/app/core/data-access/quotations/quotations.client.ts` |
+| POST /accounting/journal-transactions/:transactionId/:action | — | cliente AccountingClient | `src/app/core/data-access/accounting/accounting.client.ts` |
+| GET /community/conversations/:conversationId | — | cliente CommunityClient | `src/app/core/data-access/community/community.client.ts` |
+| GET /public/profiles/f/:slug/branch-availability | — | cliente PublicCatalogClient | `src/app/core/data-access/public-catalog/public-catalog.client.ts` |
 | POST /scheduling/bookings/:bookingId/:accion | — | cliente SchedulingClient | `src/app/core/data-access/scheduling/scheduling.client.ts` |
-| GET assets | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| POST assets | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| PATCH assets/:assetId/automation | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| POST assets/:assetId/progress | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| GET liabilities | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| POST liabilities | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| PATCH liabilities/:liabilityId/automation | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| POST liabilities/:liabilityId/progress | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
 
 ## FLU-07
 
-**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1223 caso(s).
+**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1129 caso(s).
 
 **Qué hacer:** Informativo: pueden ser internas (workers), de otros consumidores (móvil, integraciones) o deuda. Confirmar con el responsable antes de retirar nada.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
 | POST /accounting/accounts | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/accrual-objects | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/accrual-objects | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/accruals/run | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/assets | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/assets/capitalize | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/clearing-documents | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/depreciation/run | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/dimensions | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/exchange-rates | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/fiscal-periods/{id}/lock | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/fiscal-years | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/fiscal-years | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/approve | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/classify | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/journal-transactions/{id}/document-flow | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/files | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/post | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/reverse | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/submit-review | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/liabilities/{id}/payments | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/open-items | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/open-items | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/postings/determine-accounts | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/practitioner/assets | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/practitioner/assets | accounting | ningún cliente del frontend la declara | — |
-| PATCH /accounting/practitioner/assets/{id}/automation | accounting | ningún cliente del frontend la declara | — |
 | GET /accounting/practitioner/assets/{id}/depreciations | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/practitioner/assets/{id}/progress | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/practitioner/liabilities | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/practitioner/liabilities | accounting | ningún cliente del frontend la declara | — |
-| PATCH /accounting/practitioner/liabilities/{id}/automation | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/practitioner/liabilities/{id}/progress | accounting | ningún cliente del frontend la declara | — |
 | GET /accounting/practitioner/liabilities/{id}/schedule | accounting | ningún cliente del frontend la declara | — |
 | GET /accounting/practitioner/simple/accounts | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/practitioner/simple/accounts | accounting | ningún cliente del frontend la declara | — |
@@ -560,6 +538,8 @@ _Ninguno._
 | POST /billing/reconciliation:clear | billing | ningún cliente del frontend la declara | — |
 | POST /billing/reimbursements:link | billing | ningún cliente del frontend la declara | — |
 | GET /billing/service-catalog/{id}/image | billing | ningún cliente del frontend la declara | — |
+| POST /billing/service-catalog/import-procedures | billing | ningún cliente del frontend la declara | — |
+| GET /billing/service-catalog/procedure-specialties/mine | billing | ningún cliente del frontend la declara | — |
 | GET /billing/simulated/catalogs | billing | ningún cliente del frontend la declara | — |
 | GET /billing/simulated/charges | billing | ningún cliente del frontend la declara | — |
 | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | billing | ningún cliente del frontend la declara | — |
@@ -597,15 +577,31 @@ _Ninguno._
 | GET /clinical/me/procedure-centers | clinical | ningún cliente del frontend la declara | — |
 | POST /clinical/medication-records | clinical | ningún cliente del frontend la declara | — |
 | GET /clinical/medication-requests/{id}/attachments | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/medication-requests/{id}/edit | clinical | ningún cliente del frontend la declara | — |
 | POST /clinical/medication-requests/{id}/invalidate | clinical | ningún cliente del frontend la declara | — |
 | POST /clinical/medication-requests/{id}/renew | clinical | ningún cliente del frontend la declara | — |
 | POST /clinical/medication-requests/{id}/replace | clinical | ningún cliente del frontend la declara | — |
 | PATCH /clinical/observations/{id}/amend | clinical | ningún cliente del frontend la declara | — |
 | GET /clinical/patients/{patientProfileId}/received-services | clinical | ningún cliente del frontend la declara | — |
 | GET /clinical/prescription-signature-policies | clinical | ningún cliente del frontend la declara | — |
+| POST /clinical/prescription-signature-policies | clinical | ningún cliente del frontend la declara | — |
+| POST /clinical/prescription-signature-policies/{id}/deactivate | clinical | ningún cliente del frontend la declara | — |
+| POST /clinical/procedures | clinical | ningún cliente del frontend la declara | — |
+| GET /public/prescriptions/{id}/verify | clinical | ningún cliente del frontend la declara | — |
+| PATCH /care-gaps/{id}/close | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /care-gaps/recompute | clinical_ext | ningún cliente del frontend la declara | — |
+| GET /care-teams | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /care-teams | clinical_ext | ningún cliente del frontend la declara | — |
+| PATCH /care-teams/{id}/members/{memberId}/set-responsible | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /cds-rules | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /cds-rules/{id}/versions/publish | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /cds-rules/{id}/versions/rollback | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /cds/evaluate | clinical_ext | ningún cliente del frontend la declara | — |
+| PATCH /clinical-alerts/{id}/acknowledge | clinical_ext | ningún cliente del frontend la declara | — |
+| PATCH /clinical-alerts/{id}/override | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /drug-interactions | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /immunization-schedules | clinical_ext | ningún cliente del frontend la declara | — |
 
-_Se muestran 200 de 1223; la lista completa está en `inventario/flujos/hallazgos.json`._
+_Se muestran 200 de 1129; la lista completa está en `inventario/flujos/hallazgos.json`._
 
 ## FLU-08
 
@@ -657,7 +653,7 @@ _Ninguno._
 | POST /authz/patients/{patientProfileId}/break-the-glass | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:61` |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:40` |
 | POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute | automation | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/automation/services/record-automation.service.ts:276) | `src/modules/automation/controllers/automation-orchestration.controller.ts:235` |
-| GET /billing/service-catalog/{id}/image | billing | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:131` |
+| GET /billing/service-catalog/{id}/image | billing | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:136` |
 | GET /charts/documents/{documentId}/files/{fileId}/content | chart | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/chart/controllers/chart-documents.controller.ts:79` |
 | GET /charts/me/documents/{documentId}/files/{fileId}/content | chart | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/chart/controllers/chart-me.controller.ts:87` |
 | POST /clinical/allergy-intolerances/{id}/attachments | clinical | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/files.service.ts:609) \| StorageLifecycleDenied: {identity.reasonCode} (src/common/storage/storage-publication.service.ts:142) \| StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) | `src/modules/clinical/controllers/clinical-records.controller.ts:192` |
@@ -684,13 +680,13 @@ _Ninguno._
 | POST /common/files/{id}/links | common | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/files.service.ts:609) \| StorageLifecycleDenied: {identity.reasonCode} (src/common/storage/storage-publication.service.ts:142) \| StorageLifecycleDenied: TRANSACTION_REQUIRED (src/common/storage/storage-lifecycle-coordinator.service.ts:60) | `src/modules/common/controllers/common-files.controller.ts:210` |
 | POST /common/files/{id}/versions | common | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/files.service.ts:609) \| StorageLifecycleDenied: {identity.reasonCode} (src/common/storage/storage-publication.service.ts:142) \| StorageLifecycleDenied: TRANSACTION_REQUIRED (src/common/storage/storage-lifecycle-coordinator.service.ts:60) | `src/modules/common/controllers/common-files.controller.ts:169` |
 | POST /common/files/{id}/versions/{vid}/derivatives | common | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/files.service.ts:609) \| StorageLifecycleDenied: {identity.reasonCode} (src/common/storage/storage-publication.service.ts:142) \| StorageLifecycleDenied: TRANSACTION_REQUIRED (src/common/storage/storage-lifecycle-coordinator.service.ts:60) | `src/modules/common/controllers/common-files.controller.ts:186` |
-| POST /common/files/upload | common | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) \| StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90) | `src/modules/common/controllers/common-files.controller.ts:73` |
+| POST /common/files/upload | common | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:76) \| StorageLifecycleDenied: REMOTE_STATE_UNKNOWN (src/common/storage/storage-publication.service.ts:90) | `src/modules/common/controllers/common-files.controller.ts:73` |
 | POST /internal/storage-lifecycle/audio/{assetId}/abort | common | StorageLifecycleDenied: RESERVATION_MISSING (src/common/storage/storage-lifecycle-coordinator.service.ts:649) \| StorageLifecycleDenied: PRODUCER_OWNERSHIP_UNKNOWN (src/common/storage/storage-worker-publication.service.ts:180) | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:49` |
 | POST /internal/storage-lifecycle/audio/{assetId}/begin | common | StorageLifecycleDenied: PRODUCER_OWNERSHIP_UNKNOWN (src/common/storage/storage-worker-publication.service.ts:65) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-worker-publication.service.ts:70) \| StorageLifecycleDenied: TRANSACTION_REQUIRED (src/common/storage/storage-lifecycle-coordinator.service.ts:60) | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:21` |
 | POST /internal/storage-lifecycle/audio/{assetId}/dispatch | common | StorageLifecycleDenied: RESERVATION_MISSING (src/common/storage/storage-lifecycle-coordinator.service.ts:649) \| StorageLifecycleDenied: PRODUCER_OWNERSHIP_UNKNOWN (src/common/storage/storage-worker-publication.service.ts:180) \| StorageLifecycleDenied: DISPATCH_REPLAY (src/common/storage/storage-lifecycle-coordinator.service.ts:135) | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:36` |
 | POST /internal/storage-lifecycle/recover | common | StorageLifecycleDenied: TRANSACTION_REQUIRED (src/common/storage/storage-lifecycle-coordinator.service.ts:702) \| StorageLifecycleDenied: GLOBAL_RESERVATION_VISIBILITY_UNPROVEN (src/common/storage/storage-lifecycle-coordinator.service.ts:714) \| StorageLifecycleDenied: INTENT_ENVELOPE_UNKNOWN (src/common/storage/storage-lifecycle-coordinator.service.ts:696) | `src/modules/common/controllers/internal-storage-lifecycle.controller.ts:62` |
-| GET /community/comments/media/{fileId}/content | community | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/community/controllers/community-social.controller.ts:444` |
-| GET /community/conversations/{conversationId}/attachments/{fileId}/content | community | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/community/controllers/community-messaging.controller.ts:245` |
+| GET /community/comments/media/{fileId}/content | community | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/community/controllers/community-social.controller.ts:468` |
+| GET /community/conversations/{conversationId}/attachments/{fileId}/content | community | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/community/controllers/community-messaging.controller.ts:246` |
 | GET /internal/community/search/health | community | Error: OpenSearch está en estado red (src/modules/search_platform/services/search-index.service.ts:174) | `src/modules/community/controllers/community-search-index.controller.ts:76` |
 | GET /public/media/{id} | community | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/community/controllers/community-public.controller.ts:501` |
 | POST /consent/consents | consent | DomainException: {HttpStatus.FORBIDDEN} (src/modules/consent/services/consent-scope.service.ts:56) | `src/modules/consent/controllers/consents.controller.ts:43` |
@@ -714,9 +710,9 @@ _Ninguno._
 | POST /graph/paths | graph_intelligence | DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:126` |
 | POST /graph/traverse | graph_intelligence | DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:101` |
 | POST /iam/auth/register-practitioner | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:266` |
-| POST /iam/auth/upload-registration-document | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:231` |
-| POST /iam/auth/upload-registration-logo | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:184` |
-| POST /iam/auth/upload-registration-signature-image | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:154` |
+| POST /iam/auth/upload-registration-document | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:424) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:231` |
+| POST /iam/auth/upload-registration-logo | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:424) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:184` |
+| POST /iam/auth/upload-registration-signature-image | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:466) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:424) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:154` |
 | PUT /iam/onboarding-drafts/{formType}/{draftId} | iam | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:372) \| DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:379) \| DomainException: {HttpStatus.TOO_MANY_REQUESTS} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:333) | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66` |
 | POST /iam/users/assisted-practitioner-registration | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:307` |
 | POST /identity/me/identity-verification | identity_assurance | StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) \| StorageLifecycleDenied: VERSION_UNKNOWN (src/common/storage/storage-publication.service.ts:192) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:199) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:42` |
@@ -726,7 +722,7 @@ _Ninguno._
 | POST /identity/verification-cases/{id}/evidence | identity_assurance | StorageLifecycleDenied: {identity.reasonCode} (src/common/storage/storage-publication.service.ts:142) \| StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) \| StorageLifecycleDenied: VERSION_UNKNOWN (src/common/storage/storage-publication.service.ts:192) | `src/modules/identity_assurance/controllers/identity-cases.controller.ts:140` |
 | POST /internal/identity/evidence/lifecycle-scan | identity_assurance | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/identity_assurance/controllers/identity-worker.controller.ts:92) \| StorageLifecycleDenied: MISSING_CONFIGURATION (src/modules/identity_assurance/identity-evidence-lifecycle.config.ts:128) \| StorageLifecycleDenied: MISSING_OR_DUPLICATE_BINDING (src/modules/identity_assurance/identity-evidence-lifecycle.config.ts:136) | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79` |
 | POST /internal/identity/evidence/storage-purge-review | identity_assurance | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/identity_assurance/controllers/identity-worker.controller.ts:75) \| StorageLifecycleDenied: PURGE_INTENT_UNKNOWN (src/common/storage/storage-lifecycle-coordinator.service.ts:461) \| StorageLifecycleDenied: TRANSACTION_REQUIRED (src/common/storage/storage-lifecycle-coordinator.service.ts:60) | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:63` |
-| POST /insurance/portability/export | insurance | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:260) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:58` |
+| POST /insurance/portability/export | insurance | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:276) | `src/modules/insurance/presentation/controllers/insurance-portability.controller.ts:58` |
 | POST /object-storage/objects/{manifestId}/versions | object_storage | ObjectContentUnavailableError: BACKEND_UNSUPPORTED (src/modules/object_storage/ports/s3-object-content.reader.ts:112) \| ObjectContentUnavailableError: SIZE_UNKNOWN (src/modules/object_storage/ports/s3-object-content.reader.ts:46) \| ObjectContentUnavailableError: PROVIDER_ERROR (src/modules/object_storage/ports/s3-object-content.reader.ts:56) | `src/modules/object_storage/controllers/object-storage.controller.ts:119` |
 | POST /object-storage/uploads/{id}/complete | object_storage | ObjectContentUnavailableError: BACKEND_UNSUPPORTED (src/modules/object_storage/ports/s3-object-content.reader.ts:112) \| ObjectContentUnavailableError: SIZE_UNKNOWN (src/modules/object_storage/ports/s3-object-content.reader.ts:46) \| ObjectContentUnavailableError: PROVIDER_ERROR (src/modules/object_storage/ports/s3-object-content.reader.ts:56) | `src/modules/object_storage/controllers/object-storage.controller.ts:99` |
 | GET /object-storage/versions/{versionId}/content/{token} | object_storage | ObjectContentUnavailableError: BODY_UNREADABLE (src/modules/object_storage/ports/s3-object-content.reader.ts:98) \| ObjectContentUnavailableError: NOT_FOUND / PROVIDER_ERROR (src/modules/object_storage/ports/s3-object-content.reader.ts:103) | `src/modules/object_storage/controllers/object-storage.controller.ts:273` |

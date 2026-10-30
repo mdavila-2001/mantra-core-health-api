@@ -3,12 +3,12 @@
 # Flujos del módulo `billing`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 36 (34 con decisiones propias, 2 sin ellas)
+- **Operaciones:** 38 (35 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [billing](../endpoints/billing.md)
 
 ## Proceso: Módulo Billing (17)
 
-- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 36
+- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 38
 - **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/billing/README.md`
@@ -40,10 +40,12 @@ _Fuente: `src/modules/billing/README.md:3`_
 |  |  | GET /billing/invoices/{id} | SECURITY_ADMIN | BAJO | 3 |
 |  |  | GET /billing/patient-statements | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:BillingServiceCatalogController` | Operaciones de BillingServiceCatalogController que el README no asigna a un caso de uso | GET /billing/service-catalog | Cualquier sesión válida | BAJO | 1 |
-|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 12 |
+|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 10 |
 |  |  | PATCH /billing/service-catalog/{id} | PRACTITIONER · CLINICIAN · SECURITY_ADMIN | MEDIO | 4 |
 |  |  | GET /billing/service-catalog/{id}/image | Cualquier sesión válida | BAJO | 4 |
+|  |  | POST /billing/service-catalog/import-procedures | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 10 |
 |  |  | GET /billing/service-catalog/procedure-specialties | Cualquier sesión válida | BAJO | 1 |
+|  |  | GET /billing/service-catalog/procedure-specialties/mine | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /billing/service-catalog/procedures | Cualquier sesión válida | BAJO | 2 |
 | `ctrl:BillingSimulatedController` | Operaciones de BillingSimulatedController que el README no asigna a un caso de uso | GET /billing/simulated/catalogs | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /billing/simulated/charges | Cualquier sesión válida | BAJO | 11 |
@@ -225,62 +227,68 @@ flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a5(["SECURITY_ADMIN · PRACTITIONER · CLINICIAN"]):::actor
   a12(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
-  a49(["PATIENT"]):::actor
+  a55(["PATIENT"]):::actor
   t3[("billing.service_catalog")]:::tabla
   t6[("common.file_versions")]:::tabla
   t7[("common.files")]:::tabla
   t8[("practice.practices")]:::tabla
   t9[("practice.practitioner_role_assignments")]:::tabla
-  t15[("terminology.concept_properties")]:::tabla
-  t17[("terminology.catalog_concepts")]:::tabla
-  t20[("billing.invoice_lines")]:::tabla
-  t21[("billing.invoices")]:::tabla
-  t22[("billing.payments_received")]:::tabla
-  t23[("billing.receivable_payment_allocations")]:::tabla
-  t24[("billing.siat_simulated_invoices")]:::tabla
-  t31[("billing.billing_document_links")]:::tabla
-  t42[("clinical.encounters")]:::tabla
-  t43[("profiles.persons")]:::tabla
-  t46[("billing.siat_simulated_outbox")]:::tabla
-  t50[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t51[("directory.tenants")]:::tabla
-  t52[("insurance.insurance_claim_lines")]:::tabla
-  t53[("insurance.insurance_claims")]:::tabla
-  t10[("+6 tablas más")]
+  t15[("surveys.survey_assignments")]:::tabla
+  t16[("surveys.survey_questions")]:::tabla
+  t19[("terminology.concept_properties")]:::tabla
+  t21[("profiles.practitioner_specialties")]:::tabla
+  t22[("terminology.catalog_concepts")]:::tabla
+  t26[("billing.invoice_lines")]:::tabla
+  t27[("billing.invoices")]:::tabla
+  t28[("billing.payments_received")]:::tabla
+  t29[("billing.receivable_payment_allocations")]:::tabla
+  t30[("billing.siat_simulated_invoices")]:::tabla
+  t37[("billing.billing_document_links")]:::tabla
+  t48[("clinical.encounters")]:::tabla
+  t49[("profiles.persons")]:::tabla
+  t52[("billing.siat_simulated_outbox")]:::tabla
+  t56[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t57[("directory.tenants")]:::tabla
+  t58[("insurance.insurance_claim_lines")]:::tabla
+  t59[("insurance.insurance_claims")]:::tabla
+  t10[("+4 tablas más")]
+  t17[("+4 tablas más")]
   subgraph s0["ctrl:BillingServiceCatalogController · Operaciones de BillingServiceCatalogCont…"]
     o1["GET /billing/service-catalog"]:::op
     o4["POST /billing/service-catalog"]:::op
     o11["PATCH /billing/service-catalog/{id}"]:::op
     o13["GET /billing/service-catalog/{id}/image"]:::op
-    o14["GET /billing/service-catalog/procedure-specialties"]:::op
-    o16["GET /billing/service-catalog/procedures"]:::op
+    o14["POST /billing/service-catalog/import-procedures"]:::op
+    o18["GET /billing/service-catalog/procedure-specialties"]:::op
+    o20["GET /billing/service-catalog/procedure-specialties/mine"]:::op
+    o23["GET /billing/service-catalog/procedures"]:::op
   end
-  t25[("+5 tablas más")]
-  t27[("+5 tablas más")]
-  t29[("+6 tablas más")]
-  t32[("+12 tablas más")]
-  t34[("+5 tablas más")]
-  t36[("+6 tablas más")]
-  t38[("+6 tablas más")]
-  t40[("+7 tablas más")]
+  t31[("+5 tablas más")]
+  t33[("+5 tablas más")]
+  t35[("+6 tablas más")]
+  t38[("+12 tablas más")]
+  t40[("+5 tablas más")]
+  t42[("+6 tablas más")]
+  t44[("+6 tablas más")]
+  t46[("+7 tablas más")]
   subgraph s1["ctrl:BillingSimulatedController · Operaciones de BillingSimulatedController que…"]
-    o18["GET /billing/simulated/catalogs"]:::op
-    o19["GET /billing/simulated/charges"]:::op
-    o26["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
-    o28["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
-    o30["POST /billing/simulated/charges/{chargeId}/payment"]:::op
-    o33["GET /billing/simulated/invoices/{invoiceId}"]:::op
-    o35["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
-    o37["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
-    o39["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
-    o41["GET /billing/simulated/my-invoices"]:::op
-    o44["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
-    o45["GET /billing/simulated/outbox"]:::op
-    o47["GET /billing/simulated/status"]:::op
+    o24["GET /billing/simulated/catalogs"]:::op
+    o25["GET /billing/simulated/charges"]:::op
+    o32["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
+    o34["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
+    o36["POST /billing/simulated/charges/{chargeId}/payment"]:::op
+    o39["GET /billing/simulated/invoices/{invoiceId}"]:::op
+    o41["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
+    o43["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
+    o45["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
+    o47["GET /billing/simulated/my-invoices"]:::op
+    o50["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
+    o51["GET /billing/simulated/outbox"]:::op
+    o53["GET /billing/simulated/status"]:::op
   end
-  t54[("+4 tablas más")]
+  t60[("+4 tablas más")]
   subgraph s2["ctrl:PatientSpendingController · Operaciones de PatientSpendingController que e…"]
-    o48["GET /patient-spending/me"]:::op
+    o54["GET /patient-spending/me"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -302,101 +310,113 @@ flowchart LR
   o13 -->|"LEE"| t6
   o13 -->|"LEE"| t7
   o13 -->|"LEE"| t8
-  a2 --> o14
-  o14 -->|"LEE"| t15
-  a2 --> o16
-  o16 -->|"LEE"| t17
-  o16 -->|"LEE"| t15
+  a5 --> o14
+  o14 -->|"CREA"| t3
+  o14 -->|"LEE"| t3
+  o14 -->|"LEE"| t8
+  o14 -->|"LEE"| t9
+  o14 -->|"CREA"| t15
+  o14 -->|"CREA"| t16
+  o14 -.-> t17
   a2 --> o18
-  a2 --> o19
-  o19 -->|"LEE"| t20
-  o19 -->|"LEE"| t21
-  o19 -->|"LEE"| t22
-  o19 -->|"LEE"| t23
-  o19 -->|"LEE"| t3
-  o19 -->|"LEE"| t24
-  o19 -.-> t25
-  a2 --> o26
-  o26 -->|"LEE"| t20
-  o26 -->|"LEE"| t21
-  o26 -->|"LEE"| t22
-  o26 -->|"LEE"| t23
-  o26 -->|"LEE"| t3
-  o26 -->|"LEE"| t24
-  o26 -.-> t27
-  a2 --> o28
-  o28 -->|"LEE"| t20
-  o28 -->|"LEE"| t21
-  o28 -->|"LEE"| t22
-  o28 -->|"LEE"| t23
-  o28 -->|"LEE"| t3
-  o28 -->|"CREA"| t24
-  o28 -.-> t29
-  a2 --> o30
-  o30 -->|"CREA"| t31
-  o30 -->|"CREA"| t20
-  o30 -->|"LEE"| t20
-  o30 -->|"CREA"| t21
-  o30 -->|"LEE"| t21
-  o30 -->|"CREA"| t22
-  o30 -.-> t32
-  a2 --> o33
-  o33 -->|"LEE"| t20
-  o33 -->|"LEE"| t21
-  o33 -->|"LEE"| t22
-  o33 -->|"LEE"| t23
-  o33 -->|"LEE"| t3
-  o33 -->|"LEE"| t24
-  o33 -.-> t34
-  a2 --> o35
-  o35 -->|"LEE"| t20
-  o35 -->|"LEE"| t21
-  o35 -->|"LEE"| t22
-  o35 -->|"LEE"| t23
-  o35 -->|"LEE"| t3
-  o35 -->|"ACTUALIZA"| t24
-  o35 -.-> t36
-  a2 --> o37
-  o37 -->|"LEE"| t20
-  o37 -->|"LEE"| t21
-  o37 -->|"LEE"| t22
-  o37 -->|"LEE"| t23
-  o37 -->|"LEE"| t3
-  o37 -->|"ACTUALIZA"| t24
-  o37 -.-> t38
+  o18 -->|"LEE"| t19
+  a2 --> o20
+  o20 -->|"LEE"| t21
+  o20 -->|"LEE"| t22
+  o20 -->|"LEE"| t19
+  a2 --> o23
+  o23 -->|"LEE"| t22
+  o23 -->|"LEE"| t19
+  a2 --> o24
+  a2 --> o25
+  o25 -->|"LEE"| t26
+  o25 -->|"LEE"| t27
+  o25 -->|"LEE"| t28
+  o25 -->|"LEE"| t29
+  o25 -->|"LEE"| t3
+  o25 -->|"LEE"| t30
+  o25 -.-> t31
+  a2 --> o32
+  o32 -->|"LEE"| t26
+  o32 -->|"LEE"| t27
+  o32 -->|"LEE"| t28
+  o32 -->|"LEE"| t29
+  o32 -->|"LEE"| t3
+  o32 -->|"LEE"| t30
+  o32 -.-> t33
+  a2 --> o34
+  o34 -->|"LEE"| t26
+  o34 -->|"LEE"| t27
+  o34 -->|"LEE"| t28
+  o34 -->|"LEE"| t29
+  o34 -->|"LEE"| t3
+  o34 -->|"CREA"| t30
+  o34 -.-> t35
+  a2 --> o36
+  o36 -->|"CREA"| t37
+  o36 -->|"CREA"| t26
+  o36 -->|"LEE"| t26
+  o36 -->|"CREA"| t27
+  o36 -->|"LEE"| t27
+  o36 -->|"CREA"| t28
+  o36 -.-> t38
   a2 --> o39
-  o39 -->|"LEE"| t20
-  o39 -->|"LEE"| t21
-  o39 -->|"LEE"| t22
-  o39 -->|"LEE"| t23
+  o39 -->|"LEE"| t26
+  o39 -->|"LEE"| t27
+  o39 -->|"LEE"| t28
+  o39 -->|"LEE"| t29
   o39 -->|"LEE"| t3
-  o39 -->|"ACTUALIZA"| t24
+  o39 -->|"LEE"| t30
   o39 -.-> t40
   a2 --> o41
-  o41 -->|"LEE"| t24
-  o41 -->|"LEE"| t42
-  o41 -->|"LEE"| t8
-  o41 -->|"LEE"| t43
-  a2 --> o44
-  o44 -->|"LEE"| t24
-  o44 -->|"LEE"| t42
-  o44 -->|"LEE"| t8
-  o44 -->|"LEE"| t43
+  o41 -->|"LEE"| t26
+  o41 -->|"LEE"| t27
+  o41 -->|"LEE"| t28
+  o41 -->|"LEE"| t29
+  o41 -->|"LEE"| t3
+  o41 -->|"ACTUALIZA"| t30
+  o41 -.-> t42
+  a2 --> o43
+  o43 -->|"LEE"| t26
+  o43 -->|"LEE"| t27
+  o43 -->|"LEE"| t28
+  o43 -->|"LEE"| t29
+  o43 -->|"LEE"| t3
+  o43 -->|"ACTUALIZA"| t30
+  o43 -.-> t44
   a2 --> o45
-  o45 -->|"LEE"| t24
-  o45 -->|"LEE"| t46
-  o45 -->|"LEE"| t42
+  o45 -->|"LEE"| t26
+  o45 -->|"LEE"| t27
+  o45 -->|"LEE"| t28
+  o45 -->|"LEE"| t29
+  o45 -->|"LEE"| t3
+  o45 -->|"ACTUALIZA"| t30
+  o45 -.-> t46
   a2 --> o47
-  o47 -->|"LEE"| t42
+  o47 -->|"LEE"| t30
+  o47 -->|"LEE"| t48
   o47 -->|"LEE"| t8
-  a49 --> o48
-  o48 -->|"LEE"| t20
-  o48 -->|"LEE"| t21
-  o48 -->|"LEE"| t50
-  o48 -->|"LEE"| t51
-  o48 -->|"LEE"| t52
-  o48 -->|"LEE"| t53
-  o48 -.-> t54
+  o47 -->|"LEE"| t49
+  a2 --> o50
+  o50 -->|"LEE"| t30
+  o50 -->|"LEE"| t48
+  o50 -->|"LEE"| t8
+  o50 -->|"LEE"| t49
+  a2 --> o51
+  o51 -->|"LEE"| t30
+  o51 -->|"LEE"| t52
+  o51 -->|"LEE"| t48
+  a2 --> o53
+  o53 -->|"LEE"| t48
+  o53 -->|"LEE"| t8
+  a55 --> o54
+  o54 -->|"LEE"| t26
+  o54 -->|"LEE"| t27
+  o54 -->|"LEE"| t56
+  o54 -->|"LEE"| t57
+  o54 -->|"LEE"| t58
+  o54 -->|"LEE"| t59
+  o54 -.-> t60
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1512,32 +1532,42 @@ flowchart TD
   n38 -->|"no"| n40
   n41[("CREA billing.service_catalog")]:::efecto
   n40 --> n41
-  n42["Llama a BillingServiceCatalogService.attachDefaultSatisfactionSurvey"]:::llamada
+  n42["Llama a BillingServiceCatalogService.attachDefaultSatisfactionSurveys"]:::llamada
   n41 --> n42
-  n43["Llama a BillingServiceCatalogService.findDefaultSurveyOwner"]:::llamada
+  n43["Repite: por cada const item de items"]:::bucle
   n42 --> n43
-  n44[("LEE practice.practitioner_role_assignments")]:::efecto
-  n43 --> n44
-  n45["Llama a TemplatesRepository.createTemplate"]:::llamada
-  n44 --> n45
-  n46[("CREA surveys.survey_templates")]:::efecto
+  n44{"owner === undefined"}:::decision
+  n43 -->|"cada elemento"| n44
+  n45["Llama a BillingServiceCatalogService.findDefaultSurveyOwner"]:::llamada
+  n44 -->|"sí"| n45
+  n46[("LEE practice.practitioner_role_assignments")]:::efecto
   n45 --> n46
-  n47["Llama a TemplatesRepository.createVersion"]:::llamada
+  n47["Llama a TemplatesRepository.createTemplate"]:::llamada
   n46 --> n47
-  n48[("CREA surveys.survey_versions")]:::efecto
+  n44 -->|"no"| n47
+  n43 -->|"al terminar"| n47
+  n48[("CREA surveys.survey_templates")]:::efecto
   n47 --> n48
-  n49["Llama a TemplatesRepository.createQuestion"]:::llamada
+  n49["Llama a TemplatesRepository.createVersion"]:::llamada
   n48 --> n49
-  n50[("CREA surveys.survey_questions")]:::efecto
+  n50[("CREA surveys.survey_versions")]:::efecto
   n49 --> n50
-  n51[("ACTUALIZA surveys.survey_versions · ACTUALIZA surveys.survey_versions · ACTUALIZA surveys.survey_versions · A…")]:::efecto
+  n51["Repite: por cada const version de versions"]:::bucle
   n50 --> n51
-  n52["Llama a AssignmentsRepository.create"]:::llamada
-  n51 --> n52
-  n53[("CREA surveys.survey_assignments")]:::efecto
+  n52["Llama a TemplatesRepository.createQuestion"]:::llamada
+  n51 -->|"cada elemento"| n52
+  n53[("CREA surveys.survey_questions")]:::efecto
   n52 --> n53
-  n54(("201 Responde con éxito")):::ok
+  n54["Repite: forEach(…)"]:::bucle
   n53 --> n54
+  n51 -->|"al terminar"| n54
+  n55["Llama a AssignmentsRepository.create"]:::llamada
+  n54 -->|"cada elemento"| n55
+  n56[("CREA surveys.survey_assignments")]:::efecto
+  n55 --> n56
+  n57(("201 Responde con éxito")):::ok
+  n56 --> n57
+  n54 -->|"al terminar"| n57
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1761,7 +1791,109 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. GET /billing/service-catalog/procedures
+#### 20. POST /billing/service-catalog/import-procedures
+
+Importar en lote procedimientos del arancel al catálogo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: El filtro abarca más de {PROCEDURE_IMPORT_MAX} procedimientos; acotalo por especialidad o texto |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ProcedureImportService.importProcedures"]:::llamada
+  n2 --> n3
+  n4["Llama a BillingServiceCatalogService.assertRegistrationCanRegister"]:::llamada
+  n3 --> n4
+  n5["Llama a PracticeTenantLookupService.isOwnOffice"]:::llamada
+  n4 --> n5
+  n6["Llama a PracticesRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE practice.practices")]:::efecto
+  n6 --> n7
+  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n7 --> n8
+  n9["Llama a ProcedureImportService.select"]:::llamada
+  n10{"filter.specialties.length › 0"}:::decision
+  n9 --> n10
+  n11[("LEE terminology.concept_properties")]:::efecto
+  n10 -->|"sí"| n11
+  n12[("LEE terminology.concept_properties · LEE terminology.catalog_concepts")]:::efecto
+  n11 --> n12
+  n10 -->|"no"| n12
+  n13{"result.length › PROCEDURE_IMPORT_MAX"}:::decision
+  n12 --> n13
+  n14(["400 VALIDATION_FAILED El filtro abarca más de {PROCEDURE_IMPORT_MAX} procedimientos; acotalo por especialidad…"]):::error
+  n13 -->|"sí"| n14
+  n15["Transacción: transactional(…)"]:::transaccion
+  n13 -->|"no"| n15
+  n16["Repite: ciclo for"]:::bucle
+  n15 --> n16
+  n17["Llama a ServiceCatalogRepository.findExistingCodes"]:::llamada
+  n16 -->|"cada elemento"| n17
+  n18[("LEE billing.service_catalog")]:::efecto
+  n17 --> n18
+  n19["Repite: ciclo for"]:::bucle
+  n18 --> n19
+  n16 -->|"al terminar"| n19
+  n20["Llama a ServiceCatalogRepository.create"]:::llamada
+  n19 -->|"cada elemento"| n20
+  n21[("CREA billing.service_catalog")]:::efecto
+  n20 --> n21
+  n22["Llama a BillingServiceCatalogService.attachDefaultSatisfactionSurveys"]:::llamada
+  n21 --> n22
+  n23["Repite: por cada const item de items"]:::bucle
+  n22 --> n23
+  n24{"owner === undefined"}:::decision
+  n23 -->|"cada elemento"| n24
+  n25["Llama a BillingServiceCatalogService.findDefaultSurveyOwner"]:::llamada
+  n24 -->|"sí"| n25
+  n26[("LEE practice.practitioner_role_assignments")]:::efecto
+  n25 --> n26
+  n27["Llama a TemplatesRepository.createTemplate"]:::llamada
+  n26 --> n27
+  n24 -->|"no"| n27
+  n23 -->|"al terminar"| n27
+  n28[("CREA surveys.survey_templates")]:::efecto
+  n27 --> n28
+  n29["Llama a TemplatesRepository.createVersion"]:::llamada
+  n28 --> n29
+  n30[("CREA surveys.survey_versions")]:::efecto
+  n29 --> n30
+  n31["Repite: por cada const version de versions"]:::bucle
+  n30 --> n31
+  n32["Llama a TemplatesRepository.createQuestion"]:::llamada
+  n31 -->|"cada elemento"| n32
+  n33[("CREA surveys.survey_questions")]:::efecto
+  n32 --> n33
+  n34["Repite: forEach(…)"]:::bucle
+  n33 --> n34
+  n31 -->|"al terminar"| n34
+  n35["Llama a AssignmentsRepository.create"]:::llamada
+  n34 -->|"cada elemento"| n35
+  n36[("CREA surveys.survey_assignments")]:::efecto
+  n35 --> n36
+  n37(("201 Responde con éxito")):::ok
+  n36 --> n37
+  n34 -->|"al terminar"| n37
+  n19 -->|"al terminar"| n37
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 21. GET /billing/service-catalog/procedures
 
 Listar el nomenclador de procedimientos (arancel de referencia)
 
@@ -1779,19 +1911,24 @@ flowchart TD
   n1 --> n2
   n3["Llama a ProcedureNomenclatureService.search"]:::llamada
   n2 --> n3
-  n4{"options.specialty !== undefined && options.specialty !== ''"}:::decision
+  n4{"specialties.length › 0"}:::decision
   n3 --> n4
   n5[("LEE terminology.concept_properties")]:::efecto
   n4 -->|"sí"| n5
-  n6[("LEE terminology.catalog_concepts")]:::efecto
+  n6["Repite: por cada const token de searchTokens(options.query ?? '')"]:::bucle
   n5 --> n6
   n4 -->|"no"| n6
-  n7["Llama a ProcedureNomenclatureService.properties"]:::llamada
-  n6 --> n7
-  n8[("LEE terminology.concept_properties")]:::efecto
+  n7[("LEE terminology.concept_properties")]:::efecto
+  n6 -->|"cada elemento"| n7
+  n8[("LEE terminology.catalog_concepts")]:::efecto
   n7 --> n8
-  n9(("200 Responde con éxito")):::ok
+  n6 -->|"al terminar"| n8
+  n9["Llama a ProcedureNomenclatureService.properties"]:::llamada
   n8 --> n9
+  n10[("LEE terminology.concept_properties")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1800,7 +1937,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /billing/simulated/catalogs
+#### 22. GET /billing/simulated/catalogs
 
 Catálogos paramétricos del SIAT simulado
 
@@ -1835,7 +1972,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /billing/simulated/charges
+#### 23. GET /billing/simulated/charges
 
 Cobros de consultas (opcionalmente de una persona)
 
@@ -1881,7 +2018,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+#### 24. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
 
@@ -1939,7 +2076,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /billing/simulated/charges/{chargeId}/invoices
+#### 25. POST /billing/simulated/charges/{chargeId}/invoices
 
 Emitir la factura SIAT simulada de un cobro pagado
 
@@ -2027,7 +2164,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /billing/simulated/charges/{chargeId}/payment
+#### 26. POST /billing/simulated/charges/{chargeId}/payment
 
 Registrar el pago real de un cobro
 
@@ -2199,7 +2336,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. GET /billing/simulated/invoices/{invoiceId}
+#### 27. GET /billing/simulated/invoices/{invoiceId}
 
 Una factura simulada, dentro del alcance de quien la pide
 
@@ -2284,7 +2421,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /billing/simulated/invoices/{invoiceId}/annulment
+#### 28. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 Anular la factura (sólo administración)
 
@@ -2370,7 +2507,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+#### 29. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 Revertir la anulación (sólo administración)
 
@@ -2471,7 +2608,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /billing/simulated/invoices/{invoiceId}/email
+#### 30. POST /billing/simulated/invoices/{invoiceId}/email
 
 Encolar el envío (simulado, no se envía) de la factura
 
@@ -2567,7 +2704,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. GET /billing/simulated/my-invoices
+#### 31. GET /billing/simulated/my-invoices
 
 Mis facturas: recibidas (paciente) o emitidas (quien factura)
 
@@ -2606,7 +2743,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /billing/simulated/my-invoices/{invoiceId}
+#### 32. GET /billing/simulated/my-invoices/{invoiceId}
 
 Una de mis facturas
 
@@ -2653,7 +2790,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /billing/simulated/outbox
+#### 33. GET /billing/simulated/outbox
 
 Bandeja de correo simulada (sólo administración)
 
@@ -2702,7 +2839,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /billing/simulated/status
+#### 34. GET /billing/simulated/status
 
 Estado fiscal simulado: emisores y credenciales sintéticas
 
@@ -2752,7 +2889,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. GET /patient-spending/me
+#### 35. GET /patient-spending/me
 
 Mis gastos de salud
 
@@ -2798,3 +2935,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 |---|---|---|
 | GET /billing/service-catalog | 200, 400, 401, 403, 429 | 1 |
 | GET /billing/service-catalog/procedure-specialties | 200, 401, 403, 429 | 1 |
+| GET /billing/service-catalog/procedure-specialties/mine | 200, 401, 403, 429 | 3 |

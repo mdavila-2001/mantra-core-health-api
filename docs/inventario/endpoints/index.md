@@ -2,11 +2,11 @@
 
 # Inventario de endpoints
 
-Se inventarían **1621 operaciones HTTP** en **72 módulos**: 1612 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
+Se inventarían **1625 operaciones HTTP** en **72 módulos**: 1616 publicadas en el contrato OpenAPI y 9 que existen sólo en el código.
 
-- Con al menos una tabla identificada: 1559
-- Riesgo ALTO 199 · MEDIO 898 · BAJO 524
-- Mencionadas por al menos una prueba: 935
+- Con al menos una tabla identificada: 1563
+- Riesgo ALTO 200 · MEDIO 899 · BAJO 526
+- Mencionadas por al menos una prueba: 939
 
 Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [README del inventario](../README.md).
 
@@ -20,12 +20,12 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `auth_providers` | 12 | 1 | [auth_providers.md](auth_providers.md) |
 | `authz` | 32 | 0 | [authz.md](authz.md) |
 | `automation` | 17 | 0 | [automation.md](automation.md) |
-| `billing` | 36 | 5 | [billing.md](billing.md) |
+| `billing` | 38 | 5 | [billing.md](billing.md) |
 | `chart` | 23 | 3 | [chart.md](chart.md) |
 | `clinical` | 42 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 32 | 2 | [clinical_ext.md](clinical_ext.md) |
 | `common` | 19 | 6 | [common.md](common.md) |
-| `community` | 102 | 29 | [community.md](community.md) |
+| `community` | 103 | 29 | [community.md](community.md) |
 | `consent` | 27 | 0 | [consent.md](consent.md) |
 | `content_packs` | 2 | 1 | [content_packs.md](content_packs.md) |
 | `crm` | 16 | 0 | [crm.md](crm.md) |
@@ -59,7 +59,7 @@ Cómo se obtiene cada dato, qué significa su `confianza` y qué no se afirma: [
 | `payments` | 14 | 1 | [payments.md](payments.md) |
 | `pharma_lab` | 76 | 6 | [pharma_lab.md](pharma_lab.md) |
 | `pharmacy` | 33 | 3 | [pharmacy.md](pharmacy.md) |
-| `pharmacy_inventory` | 29 | 1 | [pharmacy_inventory.md](pharmacy_inventory.md) |
+| `pharmacy_inventory` | 30 | 2 | [pharmacy_inventory.md](pharmacy_inventory.md) |
 | `platform_ops` | 15 | 0 | [platform_ops.md](platform_ops.md) |
 | `polyglot_storage` | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |
 | `practice` | 37 | 4 | [practice.md](practice.md) |

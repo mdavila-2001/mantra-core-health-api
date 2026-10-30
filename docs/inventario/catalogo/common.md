@@ -10,13 +10,13 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 20 | 8 | 63 | COINCIDE |
-| [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 26 | COINCIDE |
+| [addresses](#addresses) | Representa domicilios y direcciones de personas, sedes y organizaciones utilizadas por procesos del sistema médico. | 20 | 8 | 81 | DIVERGE |
+| [contact_points](#contact_points) | Conserva medios de contacto de personas y organizaciones para comunicación asistencial y administrativa. | 15 | 5 | 29 | COINCIDE |
 | [file_derivatives](#file_derivatives) | Cataloga derivados de archivos —como representaciones o vistas procesadas— asociados al original. | 7 | 4 | 5 | COINCIDE |
 | [file_links](#file_links) | Vincula archivos con registros de negocio para reutilizar documentos sin duplicar su identidad. | 13 | 6 | 10 | COINCIDE |
-| [file_versions](#file_versions) | Preserva versiones de archivos para mantener trazabilidad e integridad del contenido documental. | 22 | 10 | 65 | COINCIDE |
-| [files](#files) | Cataloga archivos compartidos por los dominios, separando metadata del almacenamiento de contenido. | 15 | 9 | 74 | COINCIDE |
-| [identifiers](#identifiers) | Centraliza identificadores de personas y entidades para mantener referencias reutilizables entre módulos médicos. | 19 | 10 | 36 | COINCIDE |
+| [file_versions](#file_versions) | Preserva versiones de archivos para mantener trazabilidad e integridad del contenido documental. | 22 | 10 | 76 | COINCIDE |
+| [files](#files) | Cataloga archivos compartidos por los dominios, separando metadata del almacenamiento de contenido. | 15 | 9 | 86 | COINCIDE |
+| [identifiers](#identifiers) | Centraliza identificadores de personas y entidades para mantener referencias reutilizables entre módulos médicos. | 19 | 10 | 38 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -84,7 +84,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: addresses`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Addresses` — `src/modules/common/entities/addresses.entity.ts`
-- **Resumen:** 20 columnas · 8 índices · 8 FK salientes · 7 entrantes · 63 operaciones
+- **Resumen:** 20 columnas · 8 índices · 8 FK salientes · 7 entrantes · 81 operaciones
 
 #### Columnas
 
@@ -98,18 +98,18 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | 6 | `lines` | `varchar` | Opcional | _sin dato_ | coincide |
 | 7 | `city` | `varchar` | Opcional | _sin dato_ | coincide |
 | 8 | `administrative_area_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 9 | `municipality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.1.5 — municipio. `administrative_area_concept_id` sigue siendo el departamento; éste es el nivel de detalle que `city` (texto libre) no puede garantizar consistente. Value set: vs_bo_municipality (340 municipios). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_02_common.puml:86`)_ | coincide |
+| 9 | `municipality_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.1.5 — municipio. `administrative_area_concept_id` sigue siendo el departamento; éste es el nivel de detalle que `city` (texto libre) no puede garantizar consistente. Value set: vs_bo_municipality (340 municipios). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_02_common.puml:90`)_ | coincide |
 | 10 | `postal_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 11 | `country_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 12 | `latitude` | `numeric` | Opcional | _sin dato_ | coincide |
 | 13 | `longitude` | `numeric` | Opcional | _sin dato_ | coincide |
 | 14 | `valid_from` | `date` | Opcional | _sin dato_ | coincide |
 | 15 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
-| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/common/entities/addresses.entity.ts:112`)_ | coincide |
-| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/common/entities/addresses.entity.ts:118`)_ | coincide |
+| 16 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/common/entities/addresses.entity.ts:152`)_ | coincide |
+| 17 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/common/entities/addresses.entity.ts:158`)_ | coincide |
 | 18 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 19 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/common/entities/addresses.entity.ts:136`)_ | coincide |
+| 20 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/common/entities/addresses.entity.ts:176`)_ | coincide |
 
 #### Relaciones
 
@@ -136,7 +136,7 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
 | `ix_addresses_owner_type_concept_id` | no | owner_type_concept_id | Soporta la clave foránea fk_addresses_owner_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_addresses_use_concept_id` | no | use_concept_id | Soporta la clave foránea fk_addresses_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «use_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_addresses_use_concept_id` | no | use_concept_id | Soporta la clave foránea fk_addresses_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «use_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_addresses_type_concept_id` | no | type_concept_id | Soporta la clave foránea fk_addresses_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_addresses_administrative_area_concept_id` | no | administrative_area_concept_id | Soporta la clave foránea fk_addresses_administrative_area_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_addresses_municipality_concept_id` | no | municipality_concept_id | Soporta la clave foránea fk_addresses_municipality_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -168,17 +168,24 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | GET /diagnostic-units/{id} | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
+| POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |
+| GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
+| GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /medical-centers/search | LEE | DIRECTA |
 | GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
 | GET /pharmacy/sites | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
+| GET /public/pharmacies/open-now | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders | LEE | DIRECTA |
@@ -199,17 +206,28 @@ Representa domicilios y direcciones de personas, sedes y organizaciones utilizad
 | PATCH /practitioners/me/sites/{siteId} | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/bank-qr | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/contact-phone | LEE | DIRECTA |
+| PUT /practitioners/me/sites/{siteId}/logo | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practices | CREA | DIRECTA |
 | GET /profiles/patients/me | LEE | DIRECTA |
 | PATCH /profiles/patients/me | ACTUALIZA | POR_TIPO |
 | PATCH /profiles/patients/me | LEE | DIRECTA |
+| GET /profiles/patients/me/addresses | LEE | DIRECTA |
+| POST /profiles/patients/me/addresses | LEE | DIRECTA |
+| DELETE /profiles/patients/me/addresses/{id} | ACTUALIZA | POR_TIPO |
+| DELETE /profiles/patients/me/addresses/{id} | LEE | DIRECTA |
+| PATCH /profiles/patients/me/addresses/{id} | ACTUALIZA | POR_TIPO |
+| PATCH /profiles/patients/me/addresses/{id} | LEE | DIRECTA |
+| PUT /profiles/patients/me/addresses/{id}/preferred | LEE | DIRECTA |
 | DELETE /profiles/patients/me/photo | LEE | DIRECTA |
 | PUT /profiles/patients/me/photo | LEE | DIRECTA |
+| PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | GET /profiles/practitioners/{profileId}/summary | LEE | DIRECTA |
 | PATCH /profiles/practitioners/me | LEE | DIRECTA |
 | GET /profiles/practitioners/me/summary | LEE | DIRECTA |
+| POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
+| GET /public/profiles/f/{slug}/branches | LEE | POR_SQL |
 | GET /scheduling/resources | LEE | DIRECTA |
 
 #### Gobierno
@@ -235,7 +253,7 @@ Conserva medios de contacto de personas y organizaciones para comunicación asis
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: contact_points`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `ContactPoints` — `src/modules/common/entities/contact_points.entity.ts`
-- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 0 entrantes · 26 operaciones
+- **Resumen:** 15 columnas · 5 índices · 5 FK salientes · 0 entrantes · 29 operaciones
 
 #### Columnas
 
@@ -300,6 +318,9 @@ Conserva medios de contacto de personas y organizaciones para comunicación asis
 | PATCH /profiles/patients/me | LEE | DIRECTA |
 | DELETE /profiles/patients/me/photo | LEE | DIRECTA |
 | PUT /profiles/patients/me/photo | LEE | DIRECTA |
+| PATCH /profiles/practitioners/{profileId} | ACTUALIZA | POR_TIPO |
+| PATCH /profiles/practitioners/{profileId} | CREA | DIRECTA |
+| PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | GET /profiles/practitioners/{profileId}/summary | LEE | DIRECTA |
@@ -476,7 +497,7 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: file_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `FileVersions` — `src/modules/common/entities/file_versions.entity.ts`
-- **Resumen:** 22 columnas · 10 índices · 8 FK salientes · 3 entrantes · 65 operaciones
+- **Resumen:** 22 columnas · 10 índices · 8 FK salientes · 3 entrantes · 76 operaciones
 
 #### Columnas
 
@@ -581,12 +602,14 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 | PUT /community/profiles/me | LEE | DIRECTA |
 | GET /public/media/{id} | LEE | DIRECTA |
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | LEE | DIRECTA |
+| POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | PUT /tenants/{tenantId}/logo | LEE | DIRECTA |
 | GET /tenants/{tenantId}/logo/content | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-document | CREA | DIRECTA |
+| POST /iam/auth/upload-registration-logo | CREA | DIRECTA |
 | POST /iam/auth/upload-registration-signature-image | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
@@ -601,6 +624,10 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 | GET /insurance/portability/certificates/{certificateId}/json | LEE | DIRECTA |
 | GET /insurance/portability/certificates/{certificateId}/pdf | LEE | DIRECTA |
 | POST /insurance/portability/export | CREA | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | LEE | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
+| POST /practitioners/me/sites | LEE | DIRECTA |
+| PUT /practitioners/me/sites/{siteId}/logo | LEE | DIRECTA |
 | PUT /profiles/patients/me/photo | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/jurisdiction-authorizations | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
@@ -609,6 +636,11 @@ Preserva versiones de archivos para mantener trazabilidad e integridad del conte
 | PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
 | PUT /profiles/practitioners/me/signature-assets | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| GET /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | BORRA | POR_SQL |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
 
@@ -635,7 +667,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: files`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Files` — `src/modules/common/entities/files.entity.ts`
-- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 85 entrantes · 74 operaciones
+- **Resumen:** 15 columnas · 9 índices · 8 FK salientes · 85 entrantes · 86 operaciones
 
 #### Columnas
 
@@ -810,6 +842,8 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | POST /diagnostics/analyzer-runs/{id}/messages | LEE | DIRECTA |
 | POST /diagnostics/clinical-media | LEE | DIRECTA |
 | POST /diagnostics/reports/{reportId}/versions | LEE | DIRECTA |
+| POST /tenants/{tenantId}/affiliation-documents | ACTUALIZA | POR_TIPO |
+| POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
 | PUT /tenants/{tenantId}/logo | LEE | DIRECTA |
 | GET /tenants/{tenantId}/logo/content | LEE | DIRECTA |
 | POST /fhir/r5/$export | LEE | DIRECTA |
@@ -820,6 +854,7 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | POST /iam/auth/register-practitioner | ACTUALIZA | POR_TIPO |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/auth/upload-registration-document | CREA | DIRECTA |
+| POST /iam/auth/upload-registration-logo | CREA | DIRECTA |
 | POST /iam/auth/upload-registration-signature-image | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | ACTUALIZA | POR_TIPO |
@@ -836,6 +871,10 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | GET /insurance/portability/certificates/{certificateId}/pdf | LEE | DIRECTA |
 | POST /insurance/portability/export | CREA | DIRECTA |
 | POST /orgext/facility-licenses | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/products | LEE | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
+| POST /practitioners/me/sites | LEE | DIRECTA |
+| PUT /practitioners/me/sites/{siteId}/logo | LEE | DIRECTA |
 | PUT /profiles/patients/me/photo | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/jurisdiction-authorizations | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
@@ -844,6 +883,11 @@ Cataloga archivos compartidos por los dominios, separando metadata del almacenam
 | PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId} | LEE | DIRECTA |
 | PUT /profiles/practitioners/me/signature-assets | LEE | DIRECTA |
 | POST /scheduling/bookings/{id}/accept | LEE | DIRECTA |
+| GET /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | DIRECTA |
+| GET /scheduling/bookings/{id}/payment-receipts/{receiptId}/content | LEE | DIRECTA |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | BORRA | POR_SQL |
 | POST /internal/governance/retention-executions/run | ACTUALIZA | POR_SQL |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
@@ -871,7 +915,7 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_02_common.puml: identifiers`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_02_common.puml` · **DDL:** `SQL/02_common/02_tables.sql`
 - **Entidad del ORM:** `Identifiers` — `src/modules/common/entities/identifiers.entity.ts`
-- **Resumen:** 19 columnas · 10 índices · 9 FK salientes · 2 entrantes · 36 operaciones
+- **Resumen:** 19 columnas · 10 índices · 9 FK salientes · 2 entrantes · 38 operaciones
 
 #### Columnas
 
@@ -962,6 +1006,8 @@ Centraliza identificadores de personas y entidades para mantener referencias reu
 | DELETE /profiles/patients/me/photo | LEE | DIRECTA |
 | PUT /profiles/patients/me/photo | LEE | DIRECTA |
 | POST /profiles/patients/search | LEE | POR_SQL |
+| PATCH /profiles/practitioners/{profileId} | CREA | DIRECTA |
+| PATCH /profiles/practitioners/{profileId} | LEE | DIRECTA |
 | DELETE /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | PUT /profiles/practitioners/{profileId}/photo | LEE | DIRECTA |
 | GET /profiles/practitioners/{profileId}/summary | LEE | DIRECTA |

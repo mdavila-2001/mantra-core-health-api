@@ -17,9 +17,9 @@
 | [inventory_movements](#inventory_movements) | Registra entradas, salidas y ajustes de inventario de una práctica para preservar trazabilidad de existencias. | 9 | 4 | 1 | COINCIDE |
 | [practice_accreditations](#practice_accreditations) | Conserva acreditaciones de una práctica sanitaria para documentar reconocimientos o certificaciones institucionales. | 16 | 8 | 3 | COINCIDE |
 | [practice_settings](#practice_settings) | Almacena opciones operativas de una práctica para adaptar su funcionamiento dentro del sistema médico. | 10 | 4 | 3 | COINCIDE |
-| [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 18 | 11 | 68 | COINCIDE |
-| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 8 | 165 | COINCIDE |
-| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 95 | COINCIDE |
+| [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 18 | 11 | 85 | DIVERGE |
+| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 8 | 178 | COINCIDE |
+| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 98 | COINCIDE |
 | [practitioner_support_assignments](#practitioner_support_assignments) | Vincula personal de apoyo con profesionales o ámbitos de práctica para coordinar tareas de atención y gestión. | 13 | 8 | 1 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -730,7 +730,7 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practice_sites`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PracticeSites` — `src/modules/practice/entities/practice_sites.entity.ts`
-- **Resumen:** 18 columnas · 11 índices · 11 FK salientes · 19 entrantes · 68 operaciones
+- **Resumen:** 18 columnas · 11 índices · 11 FK salientes · 19 entrantes · 85 operaciones
 
 #### Columnas
 
@@ -749,11 +749,11 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | 11 | `managing_tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
 | 12 | `bank_qr_file_id` | `uuid` | Clave foránea → common.files.id; Opcional | Archivo del QR de cobro bancario de la sede, en `common.files`. Nulo si la sede no cobra por QR. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practice_sites.entity.ts:87`)_ | coincide |
 | 13 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:99`)_ | coincide |
-| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:105`)_ | coincide |
+| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:105`)_ | coincide |
+| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:111`)_ | coincide |
 | 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practice_sites.entity.ts:123`)_ | coincide |
+| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practice_sites.entity.ts:129`)_ | coincide |
 
 #### Relaciones
 
@@ -810,6 +810,7 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /patient-spending/me | LEE | POR_SQL |
 | GET /clinical/me/procedure-centers | LEE | DIRECTA |
 | GET /clinical/patients/{patientProfileId}/received-services | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
@@ -826,23 +827,34 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | GET /diagnostics/patients/{patientProfileId}/orders | LEE | DIRECTA |
 | POST /admin/tenants | CREA | DIRECTA |
 | POST /admin/tenants | LEE | DIRECTA |
+| POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | CREA | DIRECTA |
 | POST /tenants/{tenantId}/child-tenants | LEE | DIRECTA |
+| GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
+| GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
 | POST /iam/auth/register-organization | CREA | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /medical-centers/search | LEE | DIRECTA |
 | GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
 | POST /orgext/affiliations | LEE | DIRECTA |
 | POST /orgext/facility-licenses | LEE | DIRECTA |
 | POST /orgext/hospitals/{id}/activate | LEE | DIRECTA |
 | POST /orgext/hospitals/{id}/service-lines | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel | LEE | DIRECTA |
+| GET /pharmacies/{pharmacyId}/opening-hours | LEE | DIRECTA |
 | POST /pharmacies/{pharmacyId}/sites | LEE | DIRECTA |
+| POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts | LEE | DIRECTA |
+| PUT /pharmacies/{pharmacyId}/sites/{siteId}/open-24h | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id} | LEE | DIRECTA |
 | GET /pharmacy/sites | LEE | DIRECTA |
+| GET /public/pharmacies/open-now | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
 | POST /practices/{practiceId}/accreditations | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
@@ -862,6 +874,8 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | PATCH /practitioners/me/sites/{siteId} | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/bank-qr | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/contact-phone | LEE | DIRECTA |
+| PUT /practitioners/me/sites/{siteId}/logo | ACTUALIZA | POR_TIPO |
+| PUT /practitioners/me/sites/{siteId}/logo | LEE | DIRECTA |
 | GET /sites/{siteId}/care-spaces | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practices | CREA | DIRECTA |
 | POST /tenants/{tenantId}/practices | LEE | DIRECTA |
@@ -872,11 +886,14 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | LEE | DIRECTA |
+| POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
+| GET /public/profiles/f/{slug}/branches | LEE | POR_SQL |
 | POST /scheduling/appointments/direct | LEE | POR_SQL |
 | POST /scheduling/appointments/walk-in | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/accept | LEE | POR_SQL |
 | GET /scheduling/resources | LEE | DIRECTA |
 | POST /scheduling/resources | LEE | POR_SQL |
+| POST /scheduling/resources/{id}/flexible-holds | LEE | POR_SQL |
 | POST /scheduling/service-offerings/{id}/holds | LEE | POR_SQL |
 
 #### Gobierno
@@ -902,7 +919,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practices`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `Practices` — `src/modules/practice/entities/practices.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 50 entrantes · 165 operaciones
+- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 50 entrantes · 178 operaciones
 
 #### Columnas
 
@@ -1043,13 +1060,16 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | PATCH /accounting/practitioner/liabilities/{id}/automation | LEE | DIRECTA |
 | POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 | GET /accounting/practitioner/liabilities/{id}/schedule | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/accounts | LEE | DIRECTA |
 | POST /accounting/practitioner/simple/accounts | LEE | DIRECTA |
 | DELETE /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
 | PUT /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/records | LEE | DIRECTA |
 | POST /accounting/practitioner/simple/records | LEE | DIRECTA |
 | DELETE /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
 | PUT /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
 | GET /accounting/practitioner/simple/summary | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/transactions | LEE | DIRECTA |
 | POST /accounting/practitioner/simple/transactions | LEE | DIRECTA |
 | DELETE /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
 | PUT /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
@@ -1061,6 +1081,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | POST /billing/service-catalog | LEE | DIRECTA |
 | PATCH /billing/service-catalog/{id} | LEE | DIRECTA |
 | GET /billing/service-catalog/{id}/image | LEE | DIRECTA |
+| POST /billing/service-catalog/import-procedures | LEE | DIRECTA |
 | GET /billing/simulated/charges | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | LEE | POR_SQL |
 | POST /billing/simulated/charges/{chargeId}/invoices | LEE | POR_SQL |
@@ -1072,7 +1093,11 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | GET /billing/simulated/my-invoices | LEE | POR_SQL |
 | GET /billing/simulated/my-invoices/{invoiceId} | LEE | POR_SQL |
 | GET /billing/simulated/status | LEE | POR_SQL |
+| GET /patient-spending/me | LEE | POR_SQL |
 | GET /clinical/me/procedure-centers | LEE | DIRECTA |
+| POST /referrals | LEE | DIRECTA |
+| GET /referrals/target-services | LEE | DIRECTA |
+| GET /referrals/targets | LEE | POR_SQL |
 | GET /community/ratings | LEE | DIRECTA |
 | PUT /community/ratings | LEE | DIRECTA |
 | GET /community/ratings/mine | LEE | DIRECTA |
@@ -1140,6 +1165,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | PATCH /practitioners/me/sites/{siteId} | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/bank-qr | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/contact-phone | LEE | DIRECTA |
+| PUT /practitioners/me/sites/{siteId}/logo | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/approve | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/end | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/reject | LEE | DIRECTA |
@@ -1157,6 +1183,9 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | POST /scheduling/bookings/{id}/accept | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/cancel | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/delay | LEE | POR_SQL |
+| POST /scheduling/bookings/{id}/payment-receipts | LEE | POR_SQL |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | LEE | POR_SQL |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/reject | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/reject | LEE | POR_SQL |
 | POST /scheduling/bookings/{id}/reschedule | LEE | POR_SQL |
 | POST /scheduling/holds/{holdToken}/request | LEE | POR_SQL |
@@ -1165,6 +1194,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | POST /scheduling/resources | LEE | POR_SQL |
 | POST /scheduling/resources/{id}/close-slots | LEE | POR_SQL |
 | POST /scheduling/resources/{id}/exceptions | LEE | POR_SQL |
+| POST /scheduling/resources/{id}/flexible-holds | LEE | POR_SQL |
 | POST /scheduling/resources/{id}/shift-slots | LEE | POR_SQL |
 | POST /scheduling/service-offerings/{id}/holds | LEE | POR_SQL |
 | DELETE /scheduling/templates/{id} | LEE | POR_SQL |
@@ -1192,7 +1222,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practitioner_role_assignments`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PractitionerRoleAssignments` — `src/modules/practice/entities/practitioner_role_assignments.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 7 entrantes · 95 operaciones
+- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 7 entrantes · 98 operaciones
 
 #### Columnas
 
@@ -1308,7 +1338,9 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | GET /accounting/trial-balance | LEE | DIRECTA |
 | POST /billing/service-catalog | LEE | DIRECTA |
 | PATCH /billing/service-catalog/{id} | LEE | DIRECTA |
+| POST /billing/service-catalog/import-procedures | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
+| GET /referrals/targets | LEE | POR_SQL |
 | PUT /community/ratings | LEE | DIRECTA |
 | GET /f/{slug} | LEE | POR_SQL |
 | GET /l/{slug} | LEE | POR_SQL |
@@ -1347,6 +1379,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | PUT /practitioners/me/sites/{siteId}/bank-qr | LEE | DIRECTA |
 | PUT /practitioners/me/sites/{siteId}/contact-phone | ACTUALIZA | POR_TIPO |
 | PUT /practitioners/me/sites/{siteId}/contact-phone | LEE | DIRECTA |
+| PUT /practitioners/me/sites/{siteId}/logo | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/approve | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/end | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/reject | LEE | DIRECTA |

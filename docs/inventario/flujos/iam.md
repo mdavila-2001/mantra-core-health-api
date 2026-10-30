@@ -896,7 +896,7 @@ flowchart TD
   n8 --> n9
   n10(["409 CONFLICT El código de organización ya existe"]):::error
   n9 -->|"sí"| n10
-  n11["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n11["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n9 -->|"no"| n11
   n12[("LEE iam.authentication_credentials")]:::efecto
   n11 --> n12
@@ -1213,7 +1213,7 @@ flowchart TD
   n24["Transacción: transactional(…)"]:::transaccion
   n21 --> n24
   n22 -->|"no"| n24
-  n25["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n25["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n24 --> n25
   n26[("LEE iam.authentication_credentials")]:::efecto
   n25 --> n26
@@ -2110,7 +2110,7 @@ Crear un usuario con credencial de contraseña y rol inicial
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: El email ya tiene una credencial de contraseña activa |
+| 409 | `CONFLICT` | ConflictException: El email ya tiene una credencial de contraseña |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2122,13 +2122,13 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CredentialsRepository.findActivePasswordBySubject"]:::llamada
+  n5["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n4 --> n5
   n6[("LEE iam.authentication_credentials")]:::efecto
   n5 --> n6
   n7{"clash"}:::decision
   n6 --> n7
-  n8(["409 CONFLICT El email ya tiene una credencial de contraseña activa"]):::error
+  n8(["409 CONFLICT El email ya tiene una credencial de contraseña"]):::error
   n7 -->|"sí"| n8
   n9["Llama a UsersRepository.create"]:::llamada
   n7 -->|"no"| n9
@@ -2956,7 +2956,7 @@ flowchart TD
   n24["Transacción: transactional(…)"]:::transaccion
   n21 --> n24
   n22 -->|"no"| n24
-  n25["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n25["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n24 --> n25
   n26[("LEE iam.authentication_credentials")]:::efecto
   n25 --> n26
@@ -3082,7 +3082,7 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a CredentialsRepository.findLivePasswordBySubject"]:::llamada
+  n5["Llama a CredentialsRepository.findLivePasswordByEmail"]:::llamada
   n4 --> n5
   n6[("LEE iam.authentication_credentials")]:::efecto
   n5 --> n6
