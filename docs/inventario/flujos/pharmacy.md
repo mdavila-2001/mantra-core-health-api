@@ -3,12 +3,12 @@
 # Flujos del módulo `pharmacy`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 33 (27 con decisiones propias, 6 sin ellas)
+- **Operaciones:** 37 (31 con decisiones propias, 6 sin ellas)
 - Inventario de endpoints del módulo: [pharmacy](../endpoints/pharmacy.md)
 
 ## Proceso: Módulo Pharmacy (24)
 
-- **Código:** `pharmacy` · **Agrupación:** MIXTO · **Operaciones:** 33
+- **Código:** `pharmacy` · **Agrupación:** MIXTO · **Operaciones:** 37
 - **Actores:** Cualquier sesión válida · PHARMACY_STAFF · Público (sin sesión) · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/pharmacy/README.md`
@@ -37,6 +37,10 @@ _Fuente: `src/modules/pharmacy/README.md:3`_
 | `UC-24-09` | Retirar (soft-delete) producto en cascada | DELETE /pharmacies/{pharmacyId}/products/{productId} | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 6 |
 | `UC-24-10` | Cerrar/expirar lista de precios | POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 4 |
 | `UC-24-11` | Proyectar catálogo y precios a read-model | POST /pharmacies/{pharmacyId}/projections | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 2 |
+| `ctrl:PharmacyBulkController` | Operaciones de PharmacyBulkController que el README no asigna a un caso de uso | POST /pharmacies/{pharmacyId}/categories/bulk | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 0 |
+|  |  | POST /pharmacies/{pharmacyId}/prices/bulk | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 0 |
+|  |  | POST /pharmacies/{pharmacyId}/products/bulk | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 0 |
+|  |  | POST /pharmacies/{pharmacyId}/sites/bulk | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 0 |
 | `ctrl:PharmacyController` | Operaciones de PharmacyController que el README no asigna a un caso de uso | GET /pharmacies/{pharmacyId}/categories | SECURITY_ADMIN · PHARMACY_STAFF | BAJO | 2 |
 |  |  | DELETE /pharmacies/{pharmacyId}/categories/{categoryId} | SECURITY_ADMIN · PHARMACY_STAFF | ALTO | 4 |
 |  |  | PATCH /pharmacies/{pharmacyId}/categories/{categoryId} | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 3 |
@@ -120,6 +124,12 @@ flowchart LR
   subgraph s13["UC-24-11 · Proyectar catálogo y precios a read-model"]
     o31["POST /pharmacies/{pharmacyId}/projections"]:::op
   end
+  subgraph s14["ctrl:PharmacyBulkController · Operaciones de PharmacyBulkController que el READ…"]
+    o32["POST /pharmacies/{pharmacyId}/categories/bulk"]:::op
+    o33["POST /pharmacies/{pharmacyId}/prices/bulk"]:::op
+    o34["POST /pharmacies/{pharmacyId}/products/bulk"]:::op
+    o35["POST /pharmacies/{pharmacyId}/sites/bulk"]:::op
+  end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
@@ -189,6 +199,10 @@ flowchart LR
   a2 --> o31
   o31 -->|"LEE"| t25
   o31 -->|"LEE"| t10
+  a2 --> o32
+  a2 --> o33
+  a2 --> o34
+  a2 --> o35
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -601,7 +615,70 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /pharmacies/{pharmacyId}/integration-connections
+#### 5. POST /pharmacies/{pharmacyId}/categories/bulk
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DryRunRollback: {{ outcome: 'UNCHANGED', id }}; DryRunRollback: {outcome} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PharmacyBulkService.run"]:::llamada
+  n2 --> n3
+  n4{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n4 -->|"sí"| n5
+  n6["Repite: por cada const [index, raw] de body.rows.entries()"]:::bucle
+  n4 -->|"no"| n6
+  n7["Llama a PharmacyBulkService.runRow"]:::llamada
+  n6 -->|"cada elemento"| n7
+  n8["Intenta"]:::intento
+  n7 --> n8
+  n9["Transacción: transactional(…)"]:::transaccion
+  n8 --> n9
+  n10{"existing === null"}:::decision
+  n9 --> n10
+  n11{"mode === 'UPDATE'"}:::decision
+  n10 -->|"sí"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"mode === 'CREATE'"}:::decision
+  n10 -->|"no"| n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"!changed"}:::decision
+  n13 -->|"no"| n15
+  n16(["500 INTERNAL {{ outcome: 'UNCHANGED', id }}"]):::error
+  n15 -->|"sí"| n16
+  n17{"dryRun"}:::decision
+  n11 -->|"no"| n17
+  n15 -->|"no"| n17
+  n18(["500 INTERNAL {outcome}"]):::error
+  n17 -->|"sí"| n18
+  n19(("200 Responde con éxito")):::ok
+  n17 -->|"no"| n19
+  n6 -->|"al terminar"| n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. POST /pharmacies/{pharmacyId}/integration-connections
 
 Establecer conexión de integración externa
 
@@ -660,7 +737,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings
+#### 7. POST /pharmacies/{pharmacyId}/integration-connections/{connId}/product-mappings
 
 Mapear producto a código de proveedor externo
 
@@ -734,7 +811,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. PATCH /pharmacies/{pharmacyId}/inventory
+#### 8. PATCH /pharmacies/{pharmacyId}/inventory
 
 Guardar el inventario declarado de varios productos (todo o nada)
 
@@ -772,7 +849,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify
+#### 9. POST /pharmacies/{pharmacyId}/licenses/{licenseId}/verify
 
 Verificar licencia y aprobar farmacia
 
@@ -831,7 +908,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel
+#### 10. POST /pharmacies/{pharmacyId}/on-call-shifts/{shiftId}/cancel
 
 Cancelar un turno de guardia (deja de publicarse)
 
@@ -881,7 +958,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /pharmacies/{pharmacyId}/price-lists
+#### 11. POST /pharmacies/{pharmacyId}/price-lists
 
 Crear lista de precios (pública / por aseguradora)
 
@@ -948,7 +1025,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close
+#### 12. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/close
 
 Cerrar/expirar lista de precios
 
@@ -1004,7 +1081,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices
+#### 13. POST /pharmacies/{pharmacyId}/price-lists/{priceListId}/prices
 
 Fijar/versionar precio de producto
 
@@ -1078,7 +1155,70 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /pharmacies/{pharmacyId}/products
+#### 14. POST /pharmacies/{pharmacyId}/prices/bulk
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DryRunRollback: {{ outcome: 'UNCHANGED', id }}; DryRunRollback: {outcome} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PharmacyBulkService.run"]:::llamada
+  n2 --> n3
+  n4{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n4 -->|"sí"| n5
+  n6["Repite: por cada const [index, raw] de body.rows.entries()"]:::bucle
+  n4 -->|"no"| n6
+  n7["Llama a PharmacyBulkService.runRow"]:::llamada
+  n6 -->|"cada elemento"| n7
+  n8["Intenta"]:::intento
+  n7 --> n8
+  n9["Transacción: transactional(…)"]:::transaccion
+  n8 --> n9
+  n10{"existing === null"}:::decision
+  n9 --> n10
+  n11{"mode === 'UPDATE'"}:::decision
+  n10 -->|"sí"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"mode === 'CREATE'"}:::decision
+  n10 -->|"no"| n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"!changed"}:::decision
+  n13 -->|"no"| n15
+  n16(["500 INTERNAL {{ outcome: 'UNCHANGED', id }}"]):::error
+  n15 -->|"sí"| n16
+  n17{"dryRun"}:::decision
+  n11 -->|"no"| n17
+  n15 -->|"no"| n17
+  n18(["500 INTERNAL {outcome}"]):::error
+  n17 -->|"sí"| n18
+  n19(("200 Responde con éxito")):::ok
+  n17 -->|"no"| n19
+  n6 -->|"al terminar"| n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. POST /pharmacies/{pharmacyId}/products
 
 Publicar producto en catálogo con identificadores
 
@@ -1251,7 +1391,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. DELETE /pharmacies/{pharmacyId}/products/{productId}
+#### 16. DELETE /pharmacies/{pharmacyId}/products/{productId}
 
 Retirar (soft-delete) producto del catálogo
 
@@ -1318,7 +1458,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. PATCH /pharmacies/{pharmacyId}/products/{productId}
+#### 17. PATCH /pharmacies/{pharmacyId}/products/{productId}
 
 Editar un producto del catálogo de la farmacia
 
@@ -1496,7 +1636,70 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /pharmacies/{pharmacyId}/projections
+#### 18. POST /pharmacies/{pharmacyId}/products/bulk
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DryRunRollback: {{ outcome: 'UNCHANGED', id }}; DryRunRollback: {outcome} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PharmacyBulkService.run"]:::llamada
+  n2 --> n3
+  n4{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n4 -->|"sí"| n5
+  n6["Repite: por cada const [index, raw] de body.rows.entries()"]:::bucle
+  n4 -->|"no"| n6
+  n7["Llama a PharmacyBulkService.runRow"]:::llamada
+  n6 -->|"cada elemento"| n7
+  n8["Intenta"]:::intento
+  n7 --> n8
+  n9["Transacción: transactional(…)"]:::transaccion
+  n8 --> n9
+  n10{"existing === null"}:::decision
+  n9 --> n10
+  n11{"mode === 'UPDATE'"}:::decision
+  n10 -->|"sí"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"mode === 'CREATE'"}:::decision
+  n10 -->|"no"| n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"!changed"}:::decision
+  n13 -->|"no"| n15
+  n16(["500 INTERNAL {{ outcome: 'UNCHANGED', id }}"]):::error
+  n15 -->|"sí"| n16
+  n17{"dryRun"}:::decision
+  n11 -->|"no"| n17
+  n15 -->|"no"| n17
+  n18(["500 INTERNAL {outcome}"]):::error
+  n17 -->|"sí"| n18
+  n19(("200 Responde con éxito")):::ok
+  n17 -->|"no"| n19
+  n6 -->|"al terminar"| n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 19. POST /pharmacies/{pharmacyId}/projections
 
 Proyectar catálogo y precios a read-model
 
@@ -1536,7 +1739,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /pharmacies/{pharmacyId}/sites
+#### 20. POST /pharmacies/{pharmacyId}/sites
 
 Registrar sede dispensadora
 
@@ -1589,7 +1792,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts
+#### 21. POST /pharmacies/{pharmacyId}/sites/{siteId}/on-call-shifts
 
 Registrar un turno de guardia de la sede
 
@@ -1661,7 +1864,70 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /pharmacy/pharmacies/{id}
+#### 22. POST /pharmacies/{pharmacyId}/sites/bulk
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La farmacia no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DryRunRollback: {{ outcome: 'UNCHANGED', id }}; DryRunRollback: {outcome} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PharmacyBulkService.run"]:::llamada
+  n2 --> n3
+  n4{"pharmacy.statusConceptId !== PHARM.PHARMACY_ACTIVE"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La farmacia no está activa"]):::error
+  n4 -->|"sí"| n5
+  n6["Repite: por cada const [index, raw] de body.rows.entries()"]:::bucle
+  n4 -->|"no"| n6
+  n7["Llama a PharmacyBulkService.runRow"]:::llamada
+  n6 -->|"cada elemento"| n7
+  n8["Intenta"]:::intento
+  n7 --> n8
+  n9["Transacción: transactional(…)"]:::transaccion
+  n8 --> n9
+  n10{"existing === null"}:::decision
+  n9 --> n10
+  n11{"mode === 'UPDATE'"}:::decision
+  n10 -->|"sí"| n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13{"mode === 'CREATE'"}:::decision
+  n10 -->|"no"| n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"!changed"}:::decision
+  n13 -->|"no"| n15
+  n16(["500 INTERNAL {{ outcome: 'UNCHANGED', id }}"]):::error
+  n15 -->|"sí"| n16
+  n17{"dryRun"}:::decision
+  n11 -->|"no"| n17
+  n15 -->|"no"| n17
+  n18(["500 INTERNAL {outcome}"]):::error
+  n17 -->|"sí"| n18
+  n19(("200 Responde con éxito")):::ok
+  n17 -->|"no"| n19
+  n6 -->|"al terminar"| n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 23. GET /pharmacy/pharmacies/{id}
 
 Consultar el perfil de una farmacia
 
@@ -1746,7 +2012,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. GET /pharmacy/pharmacies/{id}/contacts
+#### 24. GET /pharmacy/pharmacies/{id}/contacts
 
 Representante legal y gerencias de la farmacia (sólo su personal)
 
@@ -1824,7 +2090,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /pharmacy/pharmacies/{id}/licenses
+#### 25. GET /pharmacy/pharmacies/{id}/licenses
 
 Licencias de la farmacia (sólo su personal)
 
@@ -1886,7 +2152,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /pharmacy/pharmacies/{id}/summary
+#### 26. GET /pharmacy/pharmacies/{id}/summary
 
 Resumen del catálogo de la farmacia (sólo su personal)
 
@@ -1950,7 +2216,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /pharmacy/products
+#### 27. GET /pharmacy/products
 
 Buscar productos publicados por texto, medicamento o farmacia
 
@@ -2061,7 +2327,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. GET /pharmacy/sites
+#### 28. GET /pharmacy/sites
 
 Listar sedes publicadas, sueltas
 
@@ -2124,7 +2390,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. GET /pharmacy/sites/{siteId}/prices
+#### 29. GET /pharmacy/sites/{siteId}/prices
 
 Consultar los precios públicos vigentes de una sede
 
@@ -2182,7 +2448,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. GET /public/medications/{conceptId}/availability
+#### 30. GET /public/medications/{conceptId}/availability
 
 Farmacias que publican un medicamento, con precio y distancia
 
@@ -2219,7 +2485,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. GET /public/pharmacies/open-now
+#### 31. GET /public/pharmacies/open-now
 
 Farmacias abiertas ahora: 24 h o de turno vigente
 

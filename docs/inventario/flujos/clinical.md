@@ -27,7 +27,7 @@ _Fuente: `src/modules/clinical/README.md:3`_
 |  |  | GET /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 22 |
 |  |  | POST /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 21 |
 |  |  | POST /clinical/encounters/{id}/close | CLINICIAN · PRACTITIONER | MEDIO | 40 |
-|  |  | POST /clinical/encounters/check-in | CLINICIAN · PRACTITIONER | MEDIO | 27 |
+|  |  | POST /clinical/encounters/check-in | CLINICIAN · PRACTITIONER | MEDIO | 29 |
 | `ctrl:ClinicalMedicalAspectsController` | Operaciones de ClinicalMedicalAspectsController que el README no asigna a un caso de uso | GET /clinical/me/medical-aspects | Cualquier sesión válida | BAJO | 3 |
 |  |  | PUT /clinical/me/medical-aspects | Cualquier sesión válida | ALTO | 4 |
 | `ctrl:ClinicalObservationsController` | Operaciones de ClinicalObservationsController que el README no asigna a un caso de uso | POST /clinical/observations | CLINICIAN · PRACTITIONER | MEDIO | 7 |
@@ -72,11 +72,11 @@ _Fuente: `src/modules/clinical/README.md:3`_
 flowchart LR
   a2(["CLINICIAN · PRACTITIONER"]):::actor
   a5(["CLINICIAN · PRACTITIONER · PATIENT"]):::actor
-  a22(["Cualquier sesión válida"]):::actor
-  a51(["SYSTEM · SYSTEM_WORKER"]):::actor
-  a58(["CLINICIAN · SECURITY_ADMIN"]):::actor
-  a65(["Público (sin sesión)"]):::actor
-  a68(["PATIENT"]):::actor
+  a23(["Cualquier sesión válida"]):::actor
+  a52(["SYSTEM · SYSTEM_WORKER"]):::actor
+  a59(["CLINICIAN · SECURITY_ADMIN"]):::actor
+  a66(["Público (sin sesión)"]):::actor
+  a69(["PATIENT"]):::actor
   t3[("clinical.care_episodes")]:::tabla
   t6[("authz.access_policies")]:::tabla
   t7[("authz.care_relationships")]:::tabla
@@ -85,34 +85,34 @@ flowchart LR
   t10[("authz.patient_legal_representations")]:::tabla
   t11[("authz.permissions")]:::tabla
   t18[("audit.audit_log")]:::tabla
-  t19[("clinical.appointments")]:::tabla
-  t23[("clinical.patient_reported_health_statements")]:::tabla
-  t24[("profiles.patient_profiles")]:::tabla
-  t25[("profiles.person_account_links")]:::tabla
-  t28[("clinical.encounters")]:::tabla
-  t29[("clinical.observation_components")]:::tabla
-  t30[("clinical.observation_notes")]:::tabla
-  t31[("clinical.observation_performers")]:::tabla
-  t32[("clinical.observation_reference_ranges")]:::tabla
-  t33[("clinical.observations")]:::tabla
-  t38[("clinical.diagnostic_reports")]:::tabla
-  t39[("clinical.service_requests")]:::tabla
-  t43[("billing.service_catalog")]:::tabla
-  t44[("chart.clinical_note_headers")]:::tabla
-  t45[("clinical.service_request_notes")]:::tabla
-  e47>"ServiceRequestPlaced"]:::evento
-  t52[("clinical.medication_requests")]:::tabla
-  t53[("iam.devices")]:::tabla
-  t54[("messaging.in_app_notifications")]:::tabla
-  t55[("messaging.message_channels")]:::tabla
-  t59[("clinical.prescription_signature_policies")]:::tabla
-  t66[("profiles.jurisdiction_authorizations")]:::tabla
-  t69[("common.addresses")]:::tabla
-  t70[("practice.healthcare_services")]:::tabla
-  t71[("practice.practice_sites")]:::tabla
-  t72[("practice.practices")]:::tabla
-  t75[("billing.invoice_lines")]:::tabla
-  t76[("billing.invoices")]:::tabla
+  t19[("billing.invoices")]:::tabla
+  t20[("clinical.appointments")]:::tabla
+  t24[("clinical.patient_reported_health_statements")]:::tabla
+  t25[("profiles.patient_profiles")]:::tabla
+  t26[("profiles.person_account_links")]:::tabla
+  t29[("clinical.encounters")]:::tabla
+  t30[("clinical.observation_components")]:::tabla
+  t31[("clinical.observation_notes")]:::tabla
+  t32[("clinical.observation_performers")]:::tabla
+  t33[("clinical.observation_reference_ranges")]:::tabla
+  t34[("clinical.observations")]:::tabla
+  t39[("clinical.diagnostic_reports")]:::tabla
+  t40[("clinical.service_requests")]:::tabla
+  t44[("billing.service_catalog")]:::tabla
+  t45[("chart.clinical_note_headers")]:::tabla
+  t46[("clinical.service_request_notes")]:::tabla
+  e48>"ServiceRequestPlaced"]:::evento
+  t53[("clinical.medication_requests")]:::tabla
+  t54[("iam.devices")]:::tabla
+  t55[("messaging.in_app_notifications")]:::tabla
+  t56[("messaging.message_channels")]:::tabla
+  t60[("clinical.prescription_signature_policies")]:::tabla
+  t67[("profiles.jurisdiction_authorizations")]:::tabla
+  t70[("common.addresses")]:::tabla
+  t71[("practice.healthcare_services")]:::tabla
+  t72[("practice.practice_sites")]:::tabla
+  t73[("practice.practices")]:::tabla
+  t76[("billing.invoice_lines")]:::tabla
   t77[("clinical.received_services")]:::tabla
   t78[("procedures_perioperative.procedure_cases")]:::tabla
   t79[("procedures_perioperative.procedure_charge_items")]:::tabla
@@ -124,7 +124,7 @@ flowchart LR
   t12[("+16 tablas más")]
   t14[("+15 tablas más")]
   t16[("+34 tablas más")]
-  t20[("+21 tablas más")]
+  t21[("+23 tablas más")]
   subgraph s0["ctrl:ClinicalEncountersController · Operaciones de ClinicalEncountersController…"]
     o1["POST /clinical/care-episodes"]:::op
     o4["GET /clinical/encounters/{id}/attachments"]:::op
@@ -133,47 +133,47 @@ flowchart LR
     o17["POST /clinical/encounters/check-in"]:::op
   end
   subgraph s1["ctrl:ClinicalMedicalAspectsController · Operaciones de ClinicalMedicalAspectsCo…"]
-    o21["GET /clinical/me/medical-aspects"]:::op
-    o26["PUT /clinical/me/medical-aspects"]:::op
+    o22["GET /clinical/me/medical-aspects"]:::op
+    o27["PUT /clinical/me/medical-aspects"]:::op
   end
-  t34[("+1 tablas más")]
-  t36[("+14 tablas más")]
+  t35[("+1 tablas más")]
+  t37[("+14 tablas más")]
   subgraph s2["ctrl:ClinicalObservationsController · Operaciones de ClinicalObservationsContro…"]
-    o27["POST /clinical/observations"]:::op
-    o35["PATCH /clinical/observations/{id}/amend"]:::op
+    o28["POST /clinical/observations"]:::op
+    o36["PATCH /clinical/observations/{id}/amend"]:::op
   end
-  t41[("+11 tablas más")]
-  t46[("+23 tablas más")]
-  t49[("+20 tablas más")]
+  t42[("+11 tablas más")]
+  t47[("+23 tablas más")]
+  t50[("+20 tablas más")]
   subgraph s3["ctrl:ClinicalOrdersController · Operaciones de ClinicalOrdersController que el…"]
-    o37["POST /clinical/diagnostic-reports"]:::op
-    o40["POST /clinical/diagnostic-reports/{id}/release"]:::op
-    o42["POST /clinical/service-requests"]:::op
-    o48["POST /clinical/service-requests/duplicate-check"]:::op
+    o38["POST /clinical/diagnostic-reports"]:::op
+    o41["POST /clinical/diagnostic-reports/{id}/release"]:::op
+    o43["POST /clinical/service-requests"]:::op
+    o49["POST /clinical/service-requests/duplicate-check"]:::op
   end
-  t56[("+7 tablas más")]
+  t57[("+7 tablas más")]
   subgraph s4["ctrl:ClinicalPrescriptionExpiryController · Operaciones de ClinicalPrescription…"]
-    o50["POST /clinical/internal/prescription-expiry-notices"]:::op
+    o51["POST /clinical/internal/prescription-expiry-notices"]:::op
   end
   subgraph s5["ctrl:ClinicalPrescriptionPoliciesController · Operaciones de ClinicalPrescripti…"]
-    o57["GET /clinical/prescription-signature-policies"]:::op
-    o60["POST /clinical/prescription-signature-policies"]:::op
-    o61["POST /clinical/prescription-signature-policies/{id}/deactivate"]:::op
+    o58["GET /clinical/prescription-signature-policies"]:::op
+    o61["POST /clinical/prescription-signature-policies"]:::op
+    o62["POST /clinical/prescription-signature-policies/{id}/deactivate"]:::op
   end
-  t63[("+24 tablas más")]
+  t64[("+24 tablas más")]
   subgraph s6["ctrl:ClinicalPrescriptionsController · Operaciones de ClinicalPrescriptionsCont…"]
-    o62["GET /clinical/prescriptions/{id}/pdf"]:::op
+    o63["GET /clinical/prescriptions/{id}/pdf"]:::op
   end
   subgraph s7["ctrl:ClinicalPrescriptionsPublicController · Operaciones de ClinicalPrescriptio…"]
-    o64["GET /public/prescriptions/{id}/verify"]:::op
+    o65["GET /public/prescriptions/{id}/verify"]:::op
   end
-  t73[("+1 tablas más")]
+  t74[("+1 tablas más")]
   subgraph s8["ctrl:ClinicalProcedureCentersController · Operaciones de ClinicalProcedureCente…"]
-    o67["GET /clinical/me/procedure-centers"]:::op
+    o68["GET /clinical/me/procedure-centers"]:::op
   end
   t86[("+3 tablas más")]
   subgraph s9["ctrl:ClinicalReadController · Operaciones de ClinicalReadController que el READ…"]
-    o74["GET /clinical/patients/{patientProfileId}/received-services"]:::op
+    o75["GET /clinical/patients/{patientProfileId}/received-services"]:::op
     o80["GET /clinical/patients/{patientProfileId}/summary"]:::op
   end
   a2 --> o1
@@ -208,104 +208,104 @@ flowchart LR
   o17 -->|"LEE"| t18
   o17 -->|"CREA"| t7
   o17 -->|"LEE"| t7
-  o17 -->|"LEE"| t19
-  o17 -->|"LEE"| t3
-  o17 -.-> t20
-  a22 --> o21
-  o21 -->|"LEE"| t23
-  o21 -->|"LEE"| t24
-  o21 -->|"LEE"| t25
-  a22 --> o26
-  o26 -->|"CREA"| t23
-  o26 -->|"LEE"| t23
-  o26 -->|"LEE"| t24
-  o26 -->|"LEE"| t25
-  a2 --> o27
-  o27 -->|"LEE"| t28
-  o27 -->|"CREA"| t29
-  o27 -->|"CREA"| t30
-  o27 -->|"CREA"| t31
-  o27 -->|"CREA"| t32
-  o27 -->|"CREA"| t33
-  o27 -.-> t34
-  a2 --> o35
-  o35 -->|"LEE"| t6
-  o35 -->|"LEE"| t7
-  o35 -->|"LEE"| t8
-  o35 -->|"LEE"| t9
-  o35 -->|"LEE"| t10
-  o35 -->|"LEE"| t11
-  o35 -.-> t36
-  a2 --> o37
-  o37 -->|"CREA"| t38
-  o37 -->|"ACTUALIZA"| t39
-  o37 -->|"LEE"| t39
-  a2 --> o40
-  o40 -->|"LEE"| t6
-  o40 -->|"LEE"| t7
-  o40 -->|"LEE"| t8
-  o40 -->|"LEE"| t9
-  o40 -->|"LEE"| t10
-  o40 -->|"LEE"| t11
-  o40 -.-> t41
-  a2 --> o42
-  o42 -->|"LEE"| t43
-  o42 -->|"LEE"| t44
-  o42 -->|"LEE"| t38
-  o42 -->|"LEE"| t28
-  o42 -->|"CREA"| t45
-  o42 -->|"CREA"| t39
-  o42 -.-> t46
-  o42 -->|"evento"| e47
-  a2 --> o48
-  o48 -->|"LEE"| t6
-  o48 -->|"LEE"| t7
-  o48 -->|"LEE"| t8
-  o48 -->|"LEE"| t9
-  o48 -->|"LEE"| t10
-  o48 -->|"LEE"| t11
-  o48 -.-> t49
-  a51 --> o50
-  o50 -->|"LEE"| t52
-  o50 -->|"ACTUALIZA"| t53
-  o50 -->|"LEE"| t53
-  o50 -->|"CREA"| t54
-  o50 -->|"LEE"| t54
-  o50 -->|"LEE"| t55
-  o50 -.-> t56
-  a58 --> o57
-  o57 -->|"LEE"| t59
-  a58 --> o60
-  o60 -->|"CREA"| t59
-  a58 --> o61
-  o61 -->|"ACTUALIZA"| t59
-  o61 -->|"LEE"| t59
-  a5 --> o62
-  o62 -->|"LEE"| t6
-  o62 -->|"LEE"| t7
-  o62 -->|"LEE"| t8
-  o62 -->|"LEE"| t9
-  o62 -->|"LEE"| t10
-  o62 -->|"LEE"| t11
-  o62 -.-> t63
-  a65 --> o64
-  o64 -->|"LEE"| t52
-  o64 -->|"LEE"| t66
-  a68 --> o67
-  o67 -->|"LEE"| t39
-  o67 -->|"LEE"| t69
-  o67 -->|"LEE"| t70
-  o67 -->|"LEE"| t71
-  o67 -->|"LEE"| t72
-  o67 -->|"LEE"| t24
-  o67 -.-> t73
-  a5 --> o74
-  o74 -->|"LEE"| t75
-  o74 -->|"LEE"| t76
-  o74 -->|"LEE"| t77
-  o74 -->|"LEE"| t71
-  o74 -->|"LEE"| t78
-  o74 -->|"LEE"| t79
+  o17 -->|"ACTUALIZA"| t19
+  o17 -->|"LEE"| t20
+  o17 -.-> t21
+  a23 --> o22
+  o22 -->|"LEE"| t24
+  o22 -->|"LEE"| t25
+  o22 -->|"LEE"| t26
+  a23 --> o27
+  o27 -->|"CREA"| t24
+  o27 -->|"LEE"| t24
+  o27 -->|"LEE"| t25
+  o27 -->|"LEE"| t26
+  a2 --> o28
+  o28 -->|"LEE"| t29
+  o28 -->|"CREA"| t30
+  o28 -->|"CREA"| t31
+  o28 -->|"CREA"| t32
+  o28 -->|"CREA"| t33
+  o28 -->|"CREA"| t34
+  o28 -.-> t35
+  a2 --> o36
+  o36 -->|"LEE"| t6
+  o36 -->|"LEE"| t7
+  o36 -->|"LEE"| t8
+  o36 -->|"LEE"| t9
+  o36 -->|"LEE"| t10
+  o36 -->|"LEE"| t11
+  o36 -.-> t37
+  a2 --> o38
+  o38 -->|"CREA"| t39
+  o38 -->|"ACTUALIZA"| t40
+  o38 -->|"LEE"| t40
+  a2 --> o41
+  o41 -->|"LEE"| t6
+  o41 -->|"LEE"| t7
+  o41 -->|"LEE"| t8
+  o41 -->|"LEE"| t9
+  o41 -->|"LEE"| t10
+  o41 -->|"LEE"| t11
+  o41 -.-> t42
+  a2 --> o43
+  o43 -->|"LEE"| t44
+  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t39
+  o43 -->|"LEE"| t29
+  o43 -->|"CREA"| t46
+  o43 -->|"CREA"| t40
+  o43 -.-> t47
+  o43 -->|"evento"| e48
+  a2 --> o49
+  o49 -->|"LEE"| t6
+  o49 -->|"LEE"| t7
+  o49 -->|"LEE"| t8
+  o49 -->|"LEE"| t9
+  o49 -->|"LEE"| t10
+  o49 -->|"LEE"| t11
+  o49 -.-> t50
+  a52 --> o51
+  o51 -->|"LEE"| t53
+  o51 -->|"ACTUALIZA"| t54
+  o51 -->|"LEE"| t54
+  o51 -->|"CREA"| t55
+  o51 -->|"LEE"| t55
+  o51 -->|"LEE"| t56
+  o51 -.-> t57
+  a59 --> o58
+  o58 -->|"LEE"| t60
+  a59 --> o61
+  o61 -->|"CREA"| t60
+  a59 --> o62
+  o62 -->|"ACTUALIZA"| t60
+  o62 -->|"LEE"| t60
+  a5 --> o63
+  o63 -->|"LEE"| t6
+  o63 -->|"LEE"| t7
+  o63 -->|"LEE"| t8
+  o63 -->|"LEE"| t9
+  o63 -->|"LEE"| t10
+  o63 -->|"LEE"| t11
+  o63 -.-> t64
+  a66 --> o65
+  o65 -->|"LEE"| t53
+  o65 -->|"LEE"| t67
+  a69 --> o68
+  o68 -->|"LEE"| t40
+  o68 -->|"LEE"| t70
+  o68 -->|"LEE"| t71
+  o68 -->|"LEE"| t72
+  o68 -->|"LEE"| t73
+  o68 -->|"LEE"| t25
+  o68 -.-> t74
+  a5 --> o75
+  o75 -->|"LEE"| t76
+  o75 -->|"LEE"| t19
+  o75 -->|"LEE"| t77
+  o75 -->|"LEE"| t72
+  o75 -->|"LEE"| t78
+  o75 -->|"LEE"| t79
   a5 --> o80
   o80 -->|"LEE"| t81
   o80 -->|"CREA"| t82
@@ -1919,42 +1919,55 @@ flowchart TD
   n28 -->|"sí"| n29
   n30[("CREA clinical.encounter_locations")]:::efecto
   n29 --> n30
-  n31["Llama a AuthzCareRelationshipsService.recordEncounterCareRelationships"]:::llamada
+  n31{"dto.appointmentId"}:::decision
   n30 --> n31
   n28 -->|"no"| n31
-  n32["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
-  n31 --> n32
-  n33["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
+  n32["Llama a SchedulingBookingsRepository.linkPaymentInvoiceToEncounter"]:::llamada
+  n31 -->|"sí"| n32
+  n33[("LEE scheduling.appointment_bookings")]:::efecto
   n32 --> n33
-  n34[("LEE profiles.patient_profiles")]:::efecto
+  n34["Llama a SchedulingBookingsRepository.findPaymentState"]:::llamada
   n33 --> n34
-  n35["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
+  n35[("LEE scheduling.appointment_payment_states")]:::efecto
   n34 --> n35
-  n36[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
+  n36[("ACTUALIZA billing.invoices")]:::efecto
   n35 --> n36
-  n37["Repite: por cada const practitionerProfileId de practitioners"]:::bucle
+  n37["Llama a AuthzCareRelationshipsService.recordEncounterCareRelationships"]:::llamada
   n36 --> n37
-  n38["Llama a CareRelationshipsRepository.findActiveInTenant"]:::llamada
-  n37 -->|"cada elemento"| n38
-  n39[("LEE authz.care_relationships")]:::efecto
+  n31 -->|"no"| n37
+  n38["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
+  n37 --> n38
+  n39["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
   n38 --> n39
-  n40["Llama a CareRelationshipsRepository.findPendingInTenant"]:::llamada
+  n40[("LEE profiles.patient_profiles")]:::efecto
   n39 --> n40
-  n41[("LEE authz.care_relationships")]:::efecto
+  n41["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
   n40 --> n41
-  n42["Llama a CareRelationshipsRepository.create"]:::llamada
+  n42[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
   n41 --> n42
-  n43[("CREA authz.care_relationships")]:::efecto
+  n43["Repite: por cada const practitionerProfileId de practitioners"]:::bucle
   n42 --> n43
-  n44["Llama a AuditTrailService.record"]:::llamada
-  n43 --> n44
-  n45["Llama a AuditLogRepository.append"]:::llamada
+  n44["Llama a CareRelationshipsRepository.findActiveInTenant"]:::llamada
+  n43 -->|"cada elemento"| n44
+  n45[("LEE authz.care_relationships")]:::efecto
   n44 --> n45
-  n46[("CREA audit.audit_log")]:::efecto
+  n46["Llama a CareRelationshipsRepository.findPendingInTenant"]:::llamada
   n45 --> n46
-  n47(("201 Responde con éxito")):::ok
+  n47[("LEE authz.care_relationships")]:::efecto
   n46 --> n47
-  n37 -->|"al terminar"| n47
+  n48["Llama a CareRelationshipsRepository.create"]:::llamada
+  n47 --> n48
+  n49[("CREA authz.care_relationships")]:::efecto
+  n48 --> n49
+  n50["Llama a AuditTrailService.record"]:::llamada
+  n49 --> n50
+  n51["Llama a AuditLogRepository.append"]:::llamada
+  n50 --> n51
+  n52[("CREA audit.audit_log")]:::efecto
+  n51 --> n52
+  n53(("201 Responde con éxito")):::ok
+  n52 --> n53
+  n43 -->|"al terminar"| n53
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

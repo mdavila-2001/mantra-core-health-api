@@ -2,9 +2,9 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1627 árboles de decisión**.
+**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1631 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1469 · sin ellas: 158
+- Operaciones con decisiones propias: 1473 · sin ellas: 158
 - Operaciones sin proceso asignado: 0
 - Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
 
@@ -58,7 +58,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `organization_extensions` | 1 | 9 | 0 | [organization_extensions.md](organization_extensions.md) |
 | `payments` | 1 | 14 | 1 | [payments.md](payments.md) |
 | `pharma_lab` | 1 | 76 | 3 | [pharma_lab.md](pharma_lab.md) |
-| `pharmacy` | 1 | 33 | 0 | [pharmacy.md](pharmacy.md) |
+| `pharmacy` | 1 | 37 | 0 | [pharmacy.md](pharmacy.md) |
 | `pharmacy_inventory` | 1 | 30 | 1 | [pharmacy_inventory.md](pharmacy_inventory.md) |
 | `platform_ops` | 1 | 15 | 0 | [platform_ops.md](platform_ops.md) |
 | `polyglot_storage` | 1 | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |

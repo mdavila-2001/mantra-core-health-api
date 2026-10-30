@@ -26,7 +26,7 @@
 | 12 | POST | `/accounting/exchange-rates` | Registrar tipo de cambio para conversión | MEDIO | 3 | SYSTEM |
 | 13 | POST | `/accounting/fiscal-periods/{id}/lock` | Cerrar/bloquear un periodo fiscal | MEDIO | 4 | SECURITY_ADMIN |
 | 14 | GET | `/accounting/fiscal-years` | Ejercicio fiscal vigente de una práctica | BAJO | 4 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
-| 15 | POST | `/accounting/fiscal-years` | Abrir un ejercicio fiscal y sus periodos | MEDIO | 4 | SECURITY_ADMIN |
+| 15 | POST | `/accounting/fiscal-years` | Abrir un ejercicio fiscal y sus periodos | MEDIO | 4 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
 | 16 | GET | `/accounting/general-ledger` | Libro mayor de una cuenta (movimientos posteados, con saldo corrido) | BAJO | 5 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
 | 17 | GET | `/accounting/income-statement` | Estado de resultados de una práctica | BAJO | 5 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
 | 18 | GET | `/accounting/journal-transactions` | Libro diario de una práctica | BAJO | 3 | SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER |
@@ -57,16 +57,16 @@
 | 43 | POST | `/accounting/practitioner/liabilities/{id}/progress` | Registrar el avance (pago de cuota) de un pasivo | MEDIO | 16 | PRACTITIONER |
 | 44 | GET | `/accounting/practitioner/liabilities/{id}/schedule` | Cronograma de cuotas de un pasivo propio | BAJO | 5 | PRACTITIONER |
 | 45 | GET | `/accounting/practitioner/paid-consultations` | Consultas pagadas sin registrar contablemente | BAJO | 4 | PRACTITIONER |
-| 46 | GET | `/accounting/practitioner/simple/accounts` | Cuentas de la contabilidad simple de una práctica | MEDIO | 3 | PRACTITIONER |
+| 46 | GET | `/accounting/practitioner/simple/accounts` | Cuentas de la contabilidad simple de una práctica | MEDIO | 4 | PRACTITIONER |
 | 47 | POST | `/accounting/practitioner/simple/accounts` | Crear una cuenta (o un tipo de gasto, activo o deuda) | MEDIO | 4 | PRACTITIONER |
 | 48 | DELETE | `/accounting/practitioner/simple/accounts/{id}` | Borrar una cuenta propia | ALTO | 6 | PRACTITIONER |
 | 49 | PUT | `/accounting/practitioner/simple/accounts/{id}` | Renombrar una cuenta | MEDIO | 6 | PRACTITIONER |
-| 50 | GET | `/accounting/practitioner/simple/records` | Gastos, activos y deudas de una práctica | BAJO | 2 | PRACTITIONER |
+| 50 | GET | `/accounting/practitioner/simple/records` | Gastos, activos y deudas de una práctica | BAJO | 3 | PRACTITIONER |
 | 51 | POST | `/accounting/practitioner/simple/records` | Registrar un gasto, un activo o una deuda | MEDIO | 4 | PRACTITIONER |
 | 52 | DELETE | `/accounting/practitioner/simple/records/{id}` | Borrar un gasto, un activo o una deuda | ALTO | 4 | PRACTITIONER |
 | 53 | PUT | `/accounting/practitioner/simple/records/{id}` | Editar un gasto, un activo o una deuda | MEDIO | 5 | PRACTITIONER |
 | 54 | GET | `/accounting/practitioner/simple/summary` | Pacientes atendidos, cobrado y esperado de las aseguradoras | BAJO | 7 | PRACTITIONER |
-| 55 | GET | `/accounting/practitioner/simple/transactions` | Transacciones debe/haber de una práctica | BAJO | 2 | PRACTITIONER |
+| 55 | GET | `/accounting/practitioner/simple/transactions` | Transacciones debe/haber de una práctica | BAJO | 3 | PRACTITIONER |
 | 56 | POST | `/accounting/practitioner/simple/transactions` | Registrar una transacción debe/haber | MEDIO | 4 | PRACTITIONER |
 | 57 | DELETE | `/accounting/practitioner/simple/transactions/{id}` | Borrar una transacción debe/haber | ALTO | 4 | PRACTITIONER |
 | 58 | PUT | `/accounting/practitioner/simple/transactions/{id}` | Editar una transacción debe/haber | MEDIO | 5 | PRACTITIONER |
@@ -1435,7 +1435,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AccountingFiscalController.lockPeriod` — `src/modules/accounting/controllers/accounting-fiscal.controller.ts:55`
+- **Implementación:** `AccountingFiscalController.lockPeriod` — `src/modules/accounting/controllers/accounting-fiscal.controller.ts:59`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1445,16 +1445,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/fiscal-periods/{id}/lock` la atiende `AccountingFiscalController.lockPeriod` (src/modules/accounting/controllers/accounting-fiscal.controller.ts:55). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LockPeriodDto` (1 campo, 0 obligatorios). Delega en `FiscalService.lockPeriod`. Actualiza accounting.fiscal_periods. Lee accounting.fiscal_periods, accounting.fiscal_years, practice.practices.
+`POST /accounting/fiscal-periods/{id}/lock` la atiende `AccountingFiscalController.lockPeriod` (src/modules/accounting/controllers/accounting-fiscal.controller.ts:59). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LockPeriodDto` (1 campo, 0 obligatorios). Delega en `FiscalService.lockPeriod`. Actualiza accounting.fiscal_periods. Lee accounting.fiscal_periods, accounting.fiscal_years, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-fiscal.controller.ts:55` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-fiscal.controller.ts:59` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-fiscal.controller.ts:55` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/accounting/controllers/accounting-fiscal.controller.ts:59` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
@@ -1463,7 +1463,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.fiscal_periods` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod | `src/modules/accounting/services/fiscal.service.ts:136` |
+| `accounting.fiscal_periods` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod | `src/modules/accounting/services/fiscal.service.ts:175` |
 | `accounting.fiscal_periods` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → AccountingScopeService.periodInTenant → AccountingScopeService.periodAndYear → FiscalRepository.findPeriodById | `src/modules/accounting/repositories/fiscal.repository.ts:175` |
 | `accounting.fiscal_years` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → AccountingScopeService.periodInTenant → AccountingScopeService.periodAndYear → FiscalRepository.findYearById | `src/modules/accounting/repositories/fiscal.repository.ts:17` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingFiscalController.lockPeriod → FiscalService.lockPeriod → AccountingScopeService.periodInTenant → AccountingScopeService.byPractice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
@@ -1626,7 +1626,7 @@ El árbol de decisión completo está en [flujos](../flujos/accounting.md).
 - **Bloque:** Financiero y ERP
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `AccountingFiscalController.openFiscalYear` — `src/modules/accounting/controllers/accounting-fiscal.controller.ts:38`
+- **Implementación:** `AccountingFiscalController.openFiscalYear` — `src/modules/accounting/controllers/accounting-fiscal.controller.ts:42`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1636,14 +1636,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /accounting/fiscal-years` la atiende `AccountingFiscalController.openFiscalYear` (src/modules/accounting/controllers/accounting-fiscal.controller.ts:38). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFiscalYearDto` (8 campos, 8 obligatorios). Delega en `FiscalService.openFiscalYear`. Crea filas en accounting.fiscal_periods, accounting.fiscal_years. Lee accounting.fiscal_years, practice.practices.
+`POST /accounting/fiscal-years` la atiende `AccountingFiscalController.openFiscalYear` (src/modules/accounting/controllers/accounting-fiscal.controller.ts:42). Exige sesión con alguno de los roles SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER. Valida el cuerpo como `CreateFiscalYearDto` (8 campos, 8 obligatorios). Delega en `FiscalService.openFiscalYear`. Crea filas en accounting.fiscal_periods, accounting.fiscal_years. Lee accounting.fiscal_years, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/accounting/controllers/accounting-fiscal.controller.ts:38` |
+| ROL | Alguno de: SECURITY_ADMIN, ACCOUNTING_APPROVER, PRACTITIONER | `src/modules/accounting/controllers/accounting-fiscal.controller.ts:42` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
@@ -1725,7 +1725,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Solo la administración de la práctica o el médico titular de su consultorio pueden abrir el ejercicio fiscal |
 | 409 | `CONFLICT` | ConflictException: El ejercicio ya existe en la práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -5141,7 +5141,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /accounting/practitioner/simple/accounts` la atiende `AccountingPractitionerSimpleController.listAccounts` (src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:78). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PractitionerSimpleAccountingService.listAccounts`. Crea filas en accounting.practitioner_simple_accounts. Lee accounting.practitioner_simple_accounts, practice.practitioner_role_assignments.
+`GET /accounting/practitioner/simple/accounts` la atiende `AccountingPractitionerSimpleController.listAccounts` (src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:78). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PractitionerSimpleAccountingService.listAccounts`. Crea filas en accounting.practitioner_simple_accounts. Lee accounting.practitioner_simple_accounts, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -5157,9 +5157,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_accounts` | ESCRIBE | CREA | POR_SQL | AccountingPractitionerSimpleController.listAccounts → PractitionerSimpleAccountingService.listAccounts → PractitionerSimpleAccountingService.ensureGeneralAccounts → PractitionerSimpleAccountingRepository.seedAccounts | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:130` |
+| `accounting.practitioner_simple_accounts` | ESCRIBE | CREA | POR_SQL | AccountingPractitionerSimpleController.listAccounts → PractitionerSimpleAccountingService.listAccounts → PractitionerSimpleAccountingService.ensureGeneralAccounts → PractitionerSimpleAccountingRepository.seedAccounts | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:142` |
 | `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listAccounts → PractitionerSimpleAccountingService.listAccounts → PractitionerSimpleAccountingRepository.listAccounts | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:58` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listAccounts → PractitionerSimpleAccountingService.listAccounts → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listAccounts → PractitionerSimpleAccountingService.listAccounts → PractitionerSimpleAccountingService.ownPractice → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listAccounts → PractitionerSimpleAccountingService.listAccounts → PractitionerSimpleAccountingService.ownPractice → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
 
@@ -5241,10 +5242,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_accounts` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerSimpleController.createAccount → PractitionerSimpleAccountingService.createAccount → PractitionerSimpleAccountingRepository.createAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:77` |
+| `accounting.practitioner_simple_accounts` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerSimpleController.createAccount → PractitionerSimpleAccountingService.createAccount → PractitionerSimpleAccountingRepository.createAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:89` |
 | `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createAccount → PractitionerSimpleAccountingService.createAccount → PractitionerSimpleAccountingRepository.listAccounts | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:58` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createAccount → PractitionerSimpleAccountingService.createAccount → PractitionerSimpleAccountingService.ownPracticeForWrite → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createAccount → PractitionerSimpleAccountingService.createAccount → PractitionerSimpleAccountingService.ownPracticeForWrite → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createAccount → PractitionerSimpleAccountingService.createAccount → PractitionerSimpleAccountingService.ownPractice → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createAccount → PractitionerSimpleAccountingService.createAccount → PractitionerSimpleAccountingService.ownPractice → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Cuerpo — DTO `CreateSimpleAccountDto` · `application/json`
 
@@ -5345,10 +5346,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_accounts` | BORRA | BORRA | POR_TIPO | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:385` |
-| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount → PractitionerSimpleAccountingService.requireAccount → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:65` |
-| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount → PractitionerSimpleAccountingRepository.countAccountUsage | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:147` |
-| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount → PractitionerSimpleAccountingRepository.countAccountUsage | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:148` |
+| `accounting.practitioner_simple_accounts` | BORRA | BORRA | POR_TIPO | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:393` |
+| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount → PractitionerSimpleAccountingService.requireAccount → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:77` |
+| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount → PractitionerSimpleAccountingRepository.countAccountUsage | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:159` |
+| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount → PractitionerSimpleAccountingRepository.countAccountUsage | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:160` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount → PractitionerSimpleAccountingService.requireAccount → PractitionerSimpleAccountingService.ownRow → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteAccount → PractitionerSimpleAccountingService.deleteAccount → PractitionerSimpleAccountingService.requireAccount → PractitionerSimpleAccountingService.ownRow → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
@@ -5427,10 +5428,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_accounts` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerSimpleController.updateAccount → PractitionerSimpleAccountingService.updateAccount | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:360` |
+| `accounting.practitioner_simple_accounts` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerSimpleController.updateAccount → PractitionerSimpleAccountingService.updateAccount | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:368` |
 | `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateAccount → PractitionerSimpleAccountingService.updateAccount → PractitionerSimpleAccountingRepository.listAccounts | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:58` |
-| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateAccount → PractitionerSimpleAccountingService.updateAccount → PractitionerSimpleAccountingRepository.countAccountUsage | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:147` |
-| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateAccount → PractitionerSimpleAccountingService.updateAccount → PractitionerSimpleAccountingRepository.countAccountUsage | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:148` |
+| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateAccount → PractitionerSimpleAccountingService.updateAccount → PractitionerSimpleAccountingRepository.countAccountUsage | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:159` |
+| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateAccount → PractitionerSimpleAccountingService.updateAccount → PractitionerSimpleAccountingRepository.countAccountUsage | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:160` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateAccount → PractitionerSimpleAccountingService.updateAccount → PractitionerSimpleAccountingService.requireAccount → PractitionerSimpleAccountingService.ownRow → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateAccount → PractitionerSimpleAccountingService.updateAccount → PractitionerSimpleAccountingService.requireAccount → PractitionerSimpleAccountingService.ownRow → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
@@ -5520,7 +5521,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /accounting/practitioner/simple/records` la atiende `AccountingPractitionerSimpleController.listRecords` (src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:154). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PractitionerSimpleAccountingService.listRecords`. Lee accounting.practitioner_simple_records, practice.practitioner_role_assignments.
+`GET /accounting/practitioner/simple/records` la atiende `AccountingPractitionerSimpleController.listRecords` (src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:154). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PractitionerSimpleAccountingService.listRecords`. Lee accounting.practitioner_simple_records, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -5536,8 +5537,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listRecords → PractitionerSimpleAccountingService.listRecords → PractitionerSimpleAccountingRepository.listRecords | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:162` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listRecords → PractitionerSimpleAccountingService.listRecords → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listRecords → PractitionerSimpleAccountingService.listRecords → PractitionerSimpleAccountingRepository.listRecords | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:174` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listRecords → PractitionerSimpleAccountingService.listRecords → PractitionerSimpleAccountingService.ownPractice → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listRecords → PractitionerSimpleAccountingService.listRecords → PractitionerSimpleAccountingService.ownPractice → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
 
@@ -5621,10 +5623,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createRecord → PractitionerSimpleAccountingService.createRecord → PractitionerSimpleAccountingService.assertRecordContent → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:65` |
-| `accounting.practitioner_simple_records` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerSimpleController.createRecord → PractitionerSimpleAccountingService.createRecord → PractitionerSimpleAccountingRepository.createRecord | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:180` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createRecord → PractitionerSimpleAccountingService.createRecord → PractitionerSimpleAccountingService.ownPracticeForWrite → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createRecord → PractitionerSimpleAccountingService.createRecord → PractitionerSimpleAccountingService.ownPracticeForWrite → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createRecord → PractitionerSimpleAccountingService.createRecord → PractitionerSimpleAccountingService.assertRecordContent → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:77` |
+| `accounting.practitioner_simple_records` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerSimpleController.createRecord → PractitionerSimpleAccountingService.createRecord → PractitionerSimpleAccountingRepository.createRecord | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:192` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createRecord → PractitionerSimpleAccountingService.createRecord → PractitionerSimpleAccountingService.ownPractice → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createRecord → PractitionerSimpleAccountingService.createRecord → PractitionerSimpleAccountingService.ownPractice → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Cuerpo — DTO `CreateSimpleRecordDto` · `application/json`
 
@@ -5734,8 +5736,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_records` | BORRA | BORRA | POR_TIPO | AccountingPractitionerSimpleController.deleteRecord → PractitionerSimpleAccountingService.deleteRecord | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:512` |
-| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteRecord → PractitionerSimpleAccountingService.deleteRecord → PractitionerSimpleAccountingService.requireRecord → PractitionerSimpleAccountingRepository.findRecord | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:173` |
+| `accounting.practitioner_simple_records` | BORRA | BORRA | POR_TIPO | AccountingPractitionerSimpleController.deleteRecord → PractitionerSimpleAccountingService.deleteRecord | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:520` |
+| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteRecord → PractitionerSimpleAccountingService.deleteRecord → PractitionerSimpleAccountingService.requireRecord → PractitionerSimpleAccountingRepository.findRecord | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:185` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteRecord → PractitionerSimpleAccountingService.deleteRecord → PractitionerSimpleAccountingService.requireRecord → PractitionerSimpleAccountingService.ownRow → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteRecord → PractitionerSimpleAccountingService.deleteRecord → PractitionerSimpleAccountingService.requireRecord → PractitionerSimpleAccountingService.ownRow → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
@@ -5813,9 +5815,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateRecord → PractitionerSimpleAccountingService.updateRecord → PractitionerSimpleAccountingService.assertRecordContent → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:65` |
-| `accounting.practitioner_simple_records` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerSimpleController.updateRecord → PractitionerSimpleAccountingService.updateRecord | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:500` |
-| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateRecord → PractitionerSimpleAccountingService.updateRecord → PractitionerSimpleAccountingService.requireRecord → PractitionerSimpleAccountingRepository.findRecord | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:173` |
+| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateRecord → PractitionerSimpleAccountingService.updateRecord → PractitionerSimpleAccountingService.assertRecordContent → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:77` |
+| `accounting.practitioner_simple_records` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerSimpleController.updateRecord → PractitionerSimpleAccountingService.updateRecord | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:508` |
+| `accounting.practitioner_simple_records` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateRecord → PractitionerSimpleAccountingService.updateRecord → PractitionerSimpleAccountingService.requireRecord → PractitionerSimpleAccountingRepository.findRecord | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:185` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateRecord → PractitionerSimpleAccountingService.updateRecord → PractitionerSimpleAccountingService.requireRecord → PractitionerSimpleAccountingService.ownRow → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateRecord → PractitionerSimpleAccountingService.updateRecord → PractitionerSimpleAccountingService.requireRecord → PractitionerSimpleAccountingService.ownRow → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
@@ -5930,13 +5932,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.invoices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerSimpleAccountingService.collectedCents | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:221` |
-| `clinical.appointments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:156` |
-| `clinical.encounters` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerSimpleAccountingService.ownEncounterIds | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:202` |
-| `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerSimpleAccountingService.pendingFromInsurers | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:253` |
-| `insurance.insurance_claims` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerSimpleAccountingService.pendingFromInsurers | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:240` |
+| `billing.invoices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerSimpleAccountingService.collectedCents | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:226` |
+| `clinical.appointments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:161` |
+| `clinical.encounters` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerSimpleAccountingService.ownEncounterIds | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:207` |
+| `insurance.claim_adjudication_versions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerSimpleAccountingService.pendingFromInsurers | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:258` |
+| `insurance.insurance_claims` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerSimpleAccountingService.pendingFromInsurers | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:245` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.summary → PractitionerSimpleAccountingService.summary → PractitionerSimpleAccountingService.ownPractice → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
 
@@ -6004,7 +6006,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /accounting/practitioner/simple/transactions` la atiende `AccountingPractitionerSimpleController.listTransactions` (src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:222). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PractitionerSimpleAccountingService.listTransactions`. Lee accounting.practitioner_simple_transactions, practice.practitioner_role_assignments.
+`GET /accounting/practitioner/simple/transactions` la atiende `AccountingPractitionerSimpleController.listTransactions` (src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:222). Exige sesión con alguno de los roles PRACTITIONER. Delega en `PractitionerSimpleAccountingService.listTransactions`. Lee accounting.practitioner_simple_transactions, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -6020,8 +6022,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listTransactions → PractitionerSimpleAccountingService.listTransactions → PractitionerSimpleAccountingRepository.listTransactions | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:201` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listTransactions → PractitionerSimpleAccountingService.listTransactions → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listTransactions → PractitionerSimpleAccountingService.listTransactions → PractitionerSimpleAccountingRepository.listTransactions | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:213` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listTransactions → PractitionerSimpleAccountingService.listTransactions → PractitionerSimpleAccountingService.ownPractice → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.listTransactions → PractitionerSimpleAccountingService.listTransactions → PractitionerSimpleAccountingService.ownPractice → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Parámetros
 
@@ -6104,10 +6107,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createTransaction → PractitionerSimpleAccountingService.createTransaction → PractitionerSimpleAccountingService.assertTransactionContent → PractitionerSimpleAccountingService.assertOwnAccount → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:65` |
-| `accounting.practitioner_simple_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerSimpleController.createTransaction → PractitionerSimpleAccountingService.createTransaction → PractitionerSimpleAccountingRepository.createTransaction | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:219` |
-| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createTransaction → PractitionerSimpleAccountingService.createTransaction → PractitionerSimpleAccountingService.ownPracticeForWrite → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
-| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createTransaction → PractitionerSimpleAccountingService.createTransaction → PractitionerSimpleAccountingService.ownPracticeForWrite → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
+| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createTransaction → PractitionerSimpleAccountingService.createTransaction → PractitionerSimpleAccountingService.assertTransactionContent → PractitionerSimpleAccountingService.assertOwnAccount → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:77` |
+| `accounting.practitioner_simple_transactions` | ESCRIBE | CREA | DIRECTA | AccountingPractitionerSimpleController.createTransaction → PractitionerSimpleAccountingService.createTransaction → PractitionerSimpleAccountingRepository.createTransaction | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:231` |
+| `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createTransaction → PractitionerSimpleAccountingService.createTransaction → PractitionerSimpleAccountingService.ownPractice → AccountingScopeService.practice → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.createTransaction → PractitionerSimpleAccountingService.createTransaction → PractitionerSimpleAccountingService.ownPractice → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
 ### Cuerpo — DTO `CreateSimpleTransactionDto` · `application/json`
 
@@ -6217,8 +6220,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_transactions` | BORRA | BORRA | POR_TIPO | AccountingPractitionerSimpleController.deleteTransaction → PractitionerSimpleAccountingService.deleteTransaction | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:603` |
-| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteTransaction → PractitionerSimpleAccountingService.deleteTransaction → PractitionerSimpleAccountingService.requireTransaction → PractitionerSimpleAccountingRepository.findTransaction | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:212` |
+| `accounting.practitioner_simple_transactions` | BORRA | BORRA | POR_TIPO | AccountingPractitionerSimpleController.deleteTransaction → PractitionerSimpleAccountingService.deleteTransaction | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:611` |
+| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteTransaction → PractitionerSimpleAccountingService.deleteTransaction → PractitionerSimpleAccountingService.requireTransaction → PractitionerSimpleAccountingRepository.findTransaction | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:224` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteTransaction → PractitionerSimpleAccountingService.deleteTransaction → PractitionerSimpleAccountingService.requireTransaction → PractitionerSimpleAccountingService.ownRow → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.deleteTransaction → PractitionerSimpleAccountingService.deleteTransaction → PractitionerSimpleAccountingService.requireTransaction → PractitionerSimpleAccountingService.ownRow → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
@@ -6296,9 +6299,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateTransaction → PractitionerSimpleAccountingService.updateTransaction → PractitionerSimpleAccountingService.assertTransactionContent → PractitionerSimpleAccountingService.assertOwnAccount → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:65` |
-| `accounting.practitioner_simple_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerSimpleController.updateTransaction → PractitionerSimpleAccountingService.updateTransaction | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:590` |
-| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateTransaction → PractitionerSimpleAccountingService.updateTransaction → PractitionerSimpleAccountingService.requireTransaction → PractitionerSimpleAccountingRepository.findTransaction | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:212` |
+| `accounting.practitioner_simple_accounts` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateTransaction → PractitionerSimpleAccountingService.updateTransaction → PractitionerSimpleAccountingService.assertTransactionContent → PractitionerSimpleAccountingService.assertOwnAccount → PractitionerSimpleAccountingRepository.findAccount | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:77` |
+| `accounting.practitioner_simple_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | AccountingPractitionerSimpleController.updateTransaction → PractitionerSimpleAccountingService.updateTransaction | `src/modules/accounting/services/practitioner-simple-accounting.service.ts:598` |
+| `accounting.practitioner_simple_transactions` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateTransaction → PractitionerSimpleAccountingService.updateTransaction → PractitionerSimpleAccountingService.requireTransaction → PractitionerSimpleAccountingRepository.findTransaction | `src/modules/accounting/repositories/practitioner-simple-accounting.repository.ts:224` |
 | `practice.practices` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateTransaction → PractitionerSimpleAccountingService.updateTransaction → PractitionerSimpleAccountingService.requireTransaction → PractitionerSimpleAccountingService.ownRow → PracticeTenantLookupService.findTenantOfPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | AccountingPractitionerSimpleController.updateTransaction → PractitionerSimpleAccountingService.updateTransaction → PractitionerSimpleAccountingService.requireTransaction → PractitionerSimpleAccountingService.ownRow → PractitionerAccountingService.assertOwnsPractice → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 

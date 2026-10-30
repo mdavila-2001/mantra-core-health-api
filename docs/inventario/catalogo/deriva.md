@@ -14,7 +14,7 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 | Columnas del DDL ausentes en su entidad | 1 |
 | Columnas con nulabilidad divergente | 26 |
 | Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 89 |
+| Columnas de la entidad que el DDL no tiene | 90 |
 
 ## Entidades del ORM sin tabla en el DDL
 
