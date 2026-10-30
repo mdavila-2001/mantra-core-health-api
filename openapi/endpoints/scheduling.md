@@ -781,7 +781,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
         "conceptId": "00000000-0000-4000-8000-000000000001",
         "insuranceUsed": true,
         "markedByUserId": "00000000-0000-4000-8000-000000000001",
-        "markedAt": "2026-07-31T12:00:00.000Z"
+        "markedAt": "2026-07-31T12:00:00.000Z",
+        "amountPaid": 1,
+        "currencyCode": "BOB"
       },
       "id": "00000000-0000-4000-8000-000000000001",
       "patientProfileId": "00000000-0000-4000-8000-000000000001",
@@ -848,14 +850,16 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<BookingItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"paymentState":{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"},"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","bookableSlotId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","bookingChannelConceptId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","confirmedAt":"2026-07-31T12:00:00.000Z","checkedInAt":"2026-07-31T12:00:00.000Z","reasonText":"Texto descriptivo de ejemplo","patientName":"Nombre de ejemplo","insuranceCarrierName":"Nombre de ejemplo","insuranceClaim":{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","statusCode":"CLAIM_SUBMITTED","statusDisplay":"Reclamo enviado","submittedAt":"2026-07-31T12:00:00.000Z"},"followUpOf":{"bookingId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","formInstanceId":"00000000-0000-4000-8000-000000000001"},"followUpBookingId":"00000000-0000-4000-8000-000000000001","service":{"offeringId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","price":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","minDurationMinutes":1,"maxDurationMinutes":1,"requiresApproval":true},"rescheduledFrom":"2026-07-31T12:00:00.000Z","statusReason":{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"},"delayNotice":{"delayMinutes":1,"message":"valor-ejemplo","announcedAt":"2026-07-31T12:00:00.000Z"},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
-| `items[].paymentState` | No | `PaymentStateDto` | Sin restricción adicional declarada | El estado de pago, si alguien lo marcó (TAREA-13 punto 5). **Se omite cuando no hay marca**, y no viaja como «pendiente de pago»: pendiente es una afirmación que alguien firmó, la ausencia es que del pago todavía no se dijo nada. Comprobalo con `if (item.paymentState)`. Viene en la misma consulta que la página, no una por fila. | `{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"}` |
+| `items` | Sí | `array<BookingItemDto>` | Sin restricción adicional declarada | Valor de items mantenido por la instancia. | `[{"paymentState":{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z","amountPaid":1,"currencyCode":"BOB"},"id":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","bookableSlotId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","bookingChannelConceptId":"00000000-0000-4000-8000-000000000001","typeConceptId":"00000000-0000-4000-8000-000000000001","confirmedAt":"2026-07-31T12:00:00.000Z","checkedInAt":"2026-07-31T12:00:00.000Z","reasonText":"Texto descriptivo de ejemplo","patientName":"Nombre de ejemplo","insuranceCarrierName":"Nombre de ejemplo","insuranceClaim":{"id":"00000000-0000-4000-8000-000000000001","claimIdentifier":"valor-ejemplo","statusCode":"CLAIM_SUBMITTED","statusDisplay":"Reclamo enviado","submittedAt":"2026-07-31T12:00:00.000Z"},"followUpOf":{"bookingId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","formInstanceId":"00000000-0000-4000-8000-000000000001"},"followUpBookingId":"00000000-0000-4000-8000-000000000001","service":{"offeringId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","price":"valor-ejemplo","currencyConceptId":"00000000-0000-4000-8000-000000000001","minDurationMinutes":1,"maxDurationMinutes":1,"requiresApproval":true},"rescheduledFrom":"2026-07-31T12:00:00.000Z","statusReason":{"reasonText":"Texto descriptivo de ejemplo","actorKind":"PATIENT","toStateConceptId":"00000000-0000-4000-8000-000000000001","changedAt":"2026-07-31T12:00:00.000Z"},"delayNotice":{"delayMinutes":1,"message":"valor-ejemplo","announcedAt":"2026-07-31T12:00:00.000Z"},"createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].paymentState` | No | `PaymentStateDto` | Sin restricción adicional declarada | El estado de pago, si alguien lo marcó (TAREA-13 punto 5). **Se omite cuando no hay marca**, y no viaja como «pendiente de pago»: pendiente es una afirmación que alguien firmó, la ausencia es que del pago todavía no se dijo nada. Comprobalo con `if (item.paymentState)`. Viene en la misma consulta que la página, no una por fila. | `{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z","amountPaid":1,"currencyCode":"BOB"}` |
 | `items[].paymentState.state` | No | `string` | valores: `PENDING`, `PARTIALLY_PAID`, `PAID` | Clave estable del estado. | `PENDING` |
 | `items[].paymentState.label` | No | `string` | Sin restricción adicional declarada | Cómo se llama en pantalla, en castellano. | `Parcialmente pagada` |
 | `items[].paymentState.conceptId` | No | `string` | formato `uuid` | El concepto real detrás, por si el cliente lo necesita. | `00000000-0000-4000-8000-000000000001` |
 | `items[].paymentState.insuranceUsed` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `items[].paymentState.markedByUserId` | No | `string` | formato `uuid` | Quién la dejó en este estado. | `00000000-0000-4000-8000-000000000001` |
 | `items[].paymentState.markedAt` | No | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+| `items[].paymentState.amountPaid` | No | `number` | admite null | Lo recibido por la cita, si llegó a facturación (CONTRATO §2). | `1` |
+| `items[].paymentState.currencyCode` | No | `string` | valores: `BOB`; admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `items[].patientProfileId` | No | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
 | `items[].resourceId` | No | `string` | formato `uuid` | Identificador asociado a resource. | `00000000-0000-4000-8000-000000000001` |
@@ -1016,7 +1020,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "conceptId": "00000000-0000-4000-8000-000000000001",
     "insuranceUsed": true,
     "markedByUserId": "00000000-0000-4000-8000-000000000001",
-    "markedAt": "2026-07-31T12:00:00.000Z"
+    "markedAt": "2026-07-31T12:00:00.000Z",
+    "amountPaid": 1,
+    "currencyCode": "BOB"
   },
   "id": "00000000-0000-4000-8000-000000000001",
   "patientProfileId": "00000000-0000-4000-8000-000000000001",
@@ -1078,13 +1084,15 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `paymentState` | No | `PaymentStateDto` | Sin restricción adicional declarada | El estado de pago, si alguien lo marcó (TAREA-13 punto 5). **Se omite cuando no hay marca**, y no viaja como «pendiente de pago»: pendiente es una afirmación que alguien firmó, la ausencia es que del pago todavía no se dijo nada. Comprobalo con `if (item.paymentState)`. Viene en la misma consulta que la página, no una por fila. | `{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"}` |
+| `paymentState` | No | `PaymentStateDto` | Sin restricción adicional declarada | El estado de pago, si alguien lo marcó (TAREA-13 punto 5). **Se omite cuando no hay marca**, y no viaja como «pendiente de pago»: pendiente es una afirmación que alguien firmó, la ausencia es que del pago todavía no se dijo nada. Comprobalo con `if (item.paymentState)`. Viene en la misma consulta que la página, no una por fila. | `{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z","amountPaid":1,"currencyCode":"BOB"}` |
 | `paymentState.state` | No | `string` | valores: `PENDING`, `PARTIALLY_PAID`, `PAID` | Clave estable del estado. | `PENDING` |
 | `paymentState.label` | No | `string` | Sin restricción adicional declarada | Cómo se llama en pantalla, en castellano. | `Parcialmente pagada` |
 | `paymentState.conceptId` | No | `string` | formato `uuid` | El concepto real detrás, por si el cliente lo necesita. | `00000000-0000-4000-8000-000000000001` |
 | `paymentState.insuranceUsed` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `paymentState.markedByUserId` | No | `string` | formato `uuid` | Quién la dejó en este estado. | `00000000-0000-4000-8000-000000000001` |
 | `paymentState.markedAt` | No | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+| `paymentState.amountPaid` | No | `number` | admite null | Lo recibido por la cita, si llegó a facturación (CONTRATO §2). | `1` |
+| `paymentState.currencyCode` | No | `string` | valores: `BOB`; admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `patientProfileId` | No | `string` | formato `uuid` | Identificador asociado a patient profile. | `00000000-0000-4000-8000-000000000001` |
 | `resourceId` | No | `string` | formato `uuid` | Identificador asociado a resource. | `00000000-0000-4000-8000-000000000001` |
@@ -2213,7 +2221,17 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "conceptId": "00000000-0000-4000-8000-000000000001",
     "insuranceUsed": true,
     "markedByUserId": "00000000-0000-4000-8000-000000000001",
-    "markedAt": "2026-07-31T12:00:00.000Z"
+    "markedAt": "2026-07-31T12:00:00.000Z",
+    "amountPaid": 1,
+    "currencyCode": "BOB"
+  },
+  "billing": {
+    "linked": true,
+    "invoiceId": "00000000-0000-4000-8000-000000000001",
+    "amountBilled": 1,
+    "amountPaid": 1,
+    "currencyCode": "BOB",
+    "reason": {}
   }
 }
 ```
@@ -2241,13 +2259,22 @@ Campos de la respuesta:
 | `receipt.reviewedBy.userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 | `receipt.reviewedBy.displayName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Ana Pérez` |
 | `receipt.rejectionReason` | Sí | `string` | admite null | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
-| `paymentState` | Sí | `PaymentStateDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z"}` |
+| `paymentState` | Sí | `PaymentStateDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"state":"PENDING","label":"Parcialmente pagada","conceptId":"00000000-0000-4000-8000-000000000001","insuranceUsed":true,"markedByUserId":"00000000-0000-4000-8000-000000000001","markedAt":"2026-07-31T12:00:00.000Z","amountPaid":1,"currencyCode":"BOB"}` |
 | `paymentState.state` | Sí | `string` | valores: `PENDING`, `PARTIALLY_PAID`, `PAID` | Clave estable del estado. | `PENDING` |
 | `paymentState.label` | Sí | `string` | Sin restricción adicional declarada | Cómo se llama en pantalla, en castellano. | `Parcialmente pagada` |
 | `paymentState.conceptId` | Sí | `string` | formato `uuid` | El concepto real detrás, por si el cliente lo necesita. | `00000000-0000-4000-8000-000000000001` |
 | `paymentState.insuranceUsed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `paymentState.markedByUserId` | Sí | `string` | formato `uuid` | Quién la dejó en este estado. | `00000000-0000-4000-8000-000000000001` |
 | `paymentState.markedAt` | Sí | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+| `paymentState.amountPaid` | No | `number` | admite null | Lo recibido por la cita, si llegó a facturación (CONTRATO §2). | `1` |
+| `paymentState.currencyCode` | No | `string` | valores: `BOB`; admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `billing` | Sí | `BookingBillingLinkDto` | Sin restricción adicional declarada | La facturación del pago que confirma el comprobante (FAC-01). | `{"linked":true,"invoiceId":"00000000-0000-4000-8000-000000000001","amountBilled":1,"amountPaid":1,"currencyCode":"BOB","reason":{}}` |
+| `billing.linked` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `billing.invoiceId` | Sí | `string` | formato `uuid`; admite null | La cuenta por cobrar de la cita (`appointment_payment_states.invoice_id`). | `00000000-0000-4000-8000-000000000001` |
+| `billing.amountBilled` | Sí | `number` | admite null | Lo facturado: el precio de S-4. | `1` |
+| `billing.amountPaid` | Sí | `number` | admite null | La suma de lo recibido por esta cita. | `1` |
+| `billing.currencyCode` | Sí | `string` | valores: `BOB`; admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `billing.reason` | Sí | `object` | Sin restricción adicional declarada | Solo cuando `linked=false`. | `{}` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2264,6 +2291,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 404 | `NOT_FOUND` | Comprobante no encontrado | Excepción explícita en src/modules/scheduling/application/bookings/support/payment-receipt-access.ts |
 | 409 | `CONFLICT` | Ese comprobante ya se rechazó: no se puede confirmar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/confirm-payment-receipt.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/confirm-payment-receipt.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | El monto pasa lo que falta pagar de la cita: ${formatBs(invoice.balanceCents)} | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-billing-bridge.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -2627,7 +2655,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "conceptId": "00000000-0000-4000-8000-000000000001",
   "insuranceUsed": true,
   "markedByUserId": "00000000-0000-4000-8000-000000000001",
-  "markedAt": "2026-07-31T12:00:00.000Z"
+  "markedAt": "2026-07-31T12:00:00.000Z",
+  "amountPaid": 1,
+  "currencyCode": "BOB"
 }
 ```
 
@@ -2641,6 +2671,8 @@ Campos de la respuesta:
 | `insuranceUsed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 | `markedByUserId` | Sí | `string` | formato `uuid` | Quién la dejó en este estado. | `00000000-0000-4000-8000-000000000001` |
 | `markedAt` | Sí | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+| `amountPaid` | No | `number` | admite null | Lo recibido por la cita, si llegó a facturación (CONTRATO §2). | `1` |
+| `currencyCode` | No | `string` | valores: `BOB`; admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2687,7 +2719,7 @@ Contexto declarado en el controlador: Marca el estado de pago de la cita — TAR
 
 ### Descripción del sistema
 
-NestJS resuelve `PUT /scheduling/bookings/{id}/payment-state` en `SchedulingBookingsController_setPaymentState`. El controlador delega en `SchedulingBookingsService.setPaymentState`. Valida el body como `SetPaymentStateDto` y consume `application/json`. El tipo de retorno estático es `Promise<PaymentStateDto>`.
+NestJS resuelve `PUT /scheduling/bookings/{id}/payment-state` en `SchedulingBookingsController_setPaymentState`. El controlador delega en `SchedulingBookingsService.setPaymentState`. Valida el body como `SetPaymentStateDto` y consume `application/json`. El tipo de retorno estático es `Promise<SetPaymentStateResponseDto>`.
 
 ### Parámetros
 
@@ -2723,6 +2755,7 @@ Content-Type: application/json
 |---|:---:|---|---|---|---|
 | `state` | Sí | `string` | valores: `PENDING`, `PARTIALLY_PAID`, `PAID` | Estado de pago de la cita | `PENDING` |
 | `insuranceUsed` | No | `boolean` | Sin restricción adicional declarada | Marca de que la cita se cubrió con seguro | `false` |
+| `amountReceived` | No | `number` | Sin restricción adicional declarada | Monto recibido en Bs (> 0, hasta dos decimales) | `150` |
 
 ### Payload completo de ejemplo
 
@@ -2736,7 +2769,8 @@ Content-Type: application/json
 
 {
   "state": "PENDING",
-  "insuranceUsed": false
+  "insuranceUsed": false,
+  "amountReceived": 150
 }
 ```
 
@@ -2744,28 +2778,30 @@ Content-Type: application/json
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 400 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 404 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 409 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 413 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 422 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 429 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 500 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
-| 504 | Operación completada correctamente. | `Promise<PaymentStateDto>` | No |
+| 200 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SetPaymentStateResponseDto>` | No |
 
-Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PaymentStateDto`. Ejemplo completo derivado de ese DTO:
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SetPaymentStateResponseDto`. Ejemplo completo derivado de ese DTO:
 
 ```json
 {
-  "state": "PENDING",
-  "label": "Parcialmente pagada",
-  "conceptId": "00000000-0000-4000-8000-000000000001",
-  "insuranceUsed": true,
-  "markedByUserId": "00000000-0000-4000-8000-000000000001",
-  "markedAt": "2026-07-31T12:00:00.000Z"
+  "billing": {
+    "linked": true,
+    "invoiceId": "00000000-0000-4000-8000-000000000001",
+    "amountBilled": 1,
+    "amountPaid": 1,
+    "currencyCode": "BOB",
+    "reason": {}
+  }
 }
 ```
 
@@ -2773,12 +2809,13 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `state` | Sí | `string` | valores: `PENDING`, `PARTIALLY_PAID`, `PAID` | Clave estable del estado. | `PENDING` |
-| `label` | Sí | `string` | Sin restricción adicional declarada | Cómo se llama en pantalla, en castellano. | `Parcialmente pagada` |
-| `conceptId` | Sí | `string` | formato `uuid` | El concepto real detrás, por si el cliente lo necesita. | `00000000-0000-4000-8000-000000000001` |
-| `insuranceUsed` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
-| `markedByUserId` | Sí | `string` | formato `uuid` | Quién la dejó en este estado. | `00000000-0000-4000-8000-000000000001` |
-| `markedAt` | Sí | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+| `billing` | Sí | `BookingBillingLinkDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"linked":true,"invoiceId":"00000000-0000-4000-8000-000000000001","amountBilled":1,"amountPaid":1,"currencyCode":"BOB","reason":{}}` |
+| `billing.linked` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `billing.invoiceId` | Sí | `string` | formato `uuid`; admite null | La cuenta por cobrar de la cita (`appointment_payment_states.invoice_id`). | `00000000-0000-4000-8000-000000000001` |
+| `billing.amountBilled` | Sí | `number` | admite null | Lo facturado: el precio de S-4. | `1` |
+| `billing.amountPaid` | Sí | `number` | admite null | La suma de lo recibido por esta cita. | `1` |
+| `billing.currencyCode` | Sí | `string` | valores: `BOB`; admite null | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `billing.reason` | Sí | `object` | Sin restricción adicional declarada | Solo cuando `linked=false`. | `{}` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2792,7 +2829,9 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Esta cita es de otra agenda: solo la opera quien atiende en ella. | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 404 | `NOT_FOUND` | Cita no encontrada | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-access.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Un monto recibido solo va con «pagada» o «pago parcial»: «pendiente» dice que todavía no se cobró. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/set-payment-state.use-case.ts |
 | 422 | `PRECONDITION_FAILED` | Una cita cancelada o rechazada no lleva estado de pago: no hubo atención que cobrar. | Excepción explícita en src/modules/scheduling/application/bookings/use-cases/set-payment-state.use-case.ts |
+| 422 | `PRECONDITION_FAILED` | El monto pasa lo que falta pagar de la cita: ${formatBs(invoice.balanceCents)} | Excepción explícita en src/modules/scheduling/application/bookings/support/booking-billing-bridge.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -8159,7 +8198,11 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "capacity": 1,
       "remainingCapacity": 1,
       "statusConceptId": "00000000-0000-4000-8000-000000000001",
-      "serviceConceptId": "00000000-0000-4000-8000-000000000001"
+      "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+      "price": {
+        "amount": 1,
+        "currencyCode": "BOB"
+      }
     }
   ],
   "count": 1,
@@ -8172,7 +8215,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<SlotListItemDto>` | Sin restricción adicional declarada | Cupos de esta página, del más próximo al más lejano. | `[{"id":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","scheduleTemplateId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","capacity":1,"remainingCapacity":1,"statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items` | Sí | `array<SlotListItemDto>` | Sin restricción adicional declarada | Cupos de esta página, del más próximo al más lejano. | `[{"id":"00000000-0000-4000-8000-000000000001","resourceId":"00000000-0000-4000-8000-000000000001","scheduleTemplateId":"00000000-0000-4000-8000-000000000001","startAt":"2026-07-31T12:00:00.000Z","endAt":"2026-07-31T12:00:00.000Z","capacity":1,"remainingCapacity":1,"statusConceptId":"00000000-0000-4000-8000-000000000001","serviceConceptId":"00000000-0000-4000-8000-000000000001","price":{"amount":1,"currencyCode":"BOB"}}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Id a enviar para reservar el cupo | `00000000-0000-4000-8000-000000000001` |
 | `items[].resourceId` | Sí | `string` | formato `uuid` | Identificador asociado a resource. | `00000000-0000-4000-8000-000000000001` |
 | `items[].scheduleTemplateId` | No | `string` | formato `uuid`; admite null | Identificador asociado a schedule template. | `00000000-0000-4000-8000-000000000001` |
@@ -8182,6 +8225,9 @@ Campos de la respuesta:
 | `items[].remainingCapacity` | Sí | `number` | Sin restricción adicional declarada | Cupos que quedan libres. | `1` |
 | `items[].statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
 | `items[].serviceConceptId` | No | `string` | formato `uuid`; admite null | Identificador asociado a service concept. | `00000000-0000-4000-8000-000000000001` |
+| `items[].price` | Sí | `SlotPriceDto` | Sin restricción adicional declarada | El precio de la consulta de la práctica del recurso (`CITA_MEDICA`), o `null` si la práctica todavía no lo publicó. Nunca 0: un precio de 0 se rechaza al cargarlo (FAC-01, CONTRATO §3). | `{"amount":1,"currencyCode":"BOB"}` |
+| `items[].price.amount` | Sí | `number` | Sin restricción adicional declarada | Importe en bolivianos, mayor que 0. | `1` |
+| `items[].price.currencyCode` | Sí | `string` | valores: `BOB` | Sin descripción específica en el contrato OpenAPI. | `BOB` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope aplicado. | `1` |
 | `truncated` | Sí | `boolean` | Sin restricción adicional declarada | Si la ventana excede el tope y hay que estrecharla | `true` |

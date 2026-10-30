@@ -3,13 +3,13 @@
 # Flujos del módulo `delegated_access`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 12 (11 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 17 (16 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [delegated_access](../endpoints/delegated_access.md)
 
 ## Proceso: Módulo 29 — Delegated Access and Scoped Infrastructure Users
 
-- **Código:** `delegated_access` · **Agrupación:** MIXTO · **Operaciones:** 12
-- **Actores:** SECURITY_ADMIN · SYSTEM
+- **Código:** `delegated_access` · **Agrupación:** MIXTO · **Operaciones:** 17
+- **Actores:** PATIENT · PRACTITIONER · Público (sin sesión) · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/delegated_access/README.md`
 
@@ -35,6 +35,11 @@ _Fuente: `src/modules/delegated_access/README.md:3`_
 | `UC-29-09` | Evaluar actor efectivo por propósito (step-up) | POST /authz/effective-actor/evaluate | SECURITY_ADMIN | MEDIO | 7 |
 | `UC-29-10` | Reasignar supervisor / suspender (cascada) | PATCH /org/user-assignments/{id} | SECURITY_ADMIN | MEDIO | 3 |
 | `ctrl:DelegatedPermissionSetsController` | Operaciones de DelegatedPermissionSetsController que el README no asigna a un caso de uso | GET /delegated-permission-sets | SECURITY_ADMIN | BAJO | 1 |
+| `ctrl:PrescriptionSharesController` | Operaciones de PrescriptionSharesController que el README no asigna a un caso de uso | GET /clinical/prescription-shares | PATIENT · PRACTITIONER | BAJO | 3 |
+|  |  | POST /clinical/prescription-shares | PATIENT · PRACTITIONER | MEDIO | 2 |
+|  |  | POST /clinical/prescription-shares/{shareId}/revoke | PATIENT · PRACTITIONER | MEDIO | 2 |
+|  |  | GET /clinical/prescription-shares/by-token/{token} | PATIENT · PRACTITIONER | BAJO | 1 |
+| `ctrl:PrescriptionSharesPublicController` | Operaciones de PrescriptionSharesPublicController que el README no asigna a un caso de uso | GET /public/prescription-shares/{token} | Público (sin sesión) | ALTO | 6 |
 
 ### Diagrama — etapas `UC-29-01`, `UC-29-02`, `UC-29-03`…
 
@@ -42,6 +47,8 @@ _Fuente: `src/modules/delegated_access/README.md:3`_
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a23(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a30(["PATIENT · PRACTITIONER"]):::actor
+  a38(["Público (sin sesión)"]):::actor
   t3[("delegated_access.organization_user_assignments")]:::tabla
   t5[("delegated_access.delegated_permission_set_items")]:::tabla
   t6[("delegated_access.delegated_permission_sets")]:::tabla
@@ -53,6 +60,12 @@ flowchart LR
   t17[("delegated_access.delegated_access_grants")]:::tabla
   t19[("clinical.encounters")]:::tabla
   t20[("profiles.patient_profiles")]:::tabla
+  t31[("clinical.medication_requests")]:::tabla
+  t32[("delegated_access.shared_access_link_uses")]:::tabla
+  t33[("delegated_access.shared_access_links")]:::tabla
+  t39[("profiles.health_practitioner_profiles")]:::tabla
+  t40[("profiles.jurisdiction_authorizations")]:::tabla
+  t41[("profiles.persons")]:::tabla
   subgraph s0["UC-29-01 · Asignar usuario de organización (scoped, vigente)"]
     o1["POST /org/{tenantMembershipId}/user-assignments"]:::op
   end
@@ -89,6 +102,15 @@ flowchart LR
   end
   subgraph s10["ctrl:DelegatedPermissionSetsController · Operaciones de DelegatedPermissionSets…"]
     o28["GET /delegated-permission-sets"]:::op
+  end
+  subgraph s11["ctrl:PrescriptionSharesController · Operaciones de PrescriptionSharesController…"]
+    o29["GET /clinical/prescription-shares"]:::op
+    o34["POST /clinical/prescription-shares"]:::op
+    o35["POST /clinical/prescription-shares/{shareId}/revoke"]:::op
+    o36["GET /clinical/prescription-shares/by-token/{token}"]:::op
+  end
+  subgraph s12["ctrl:PrescriptionSharesPublicController · Operaciones de PrescriptionSharesPubl…"]
+    o37["GET /public/prescription-shares/{token}"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -155,6 +177,25 @@ flowchart LR
   o27 -->|"ACTUALIZA"| t10
   a2 --> o28
   o28 -->|"LEE"| t6
+  a30 --> o29
+  o29 -->|"LEE"| t31
+  o29 -->|"LEE"| t32
+  o29 -->|"LEE"| t33
+  a30 --> o34
+  o34 -->|"LEE"| t31
+  o34 -->|"CREA"| t33
+  a30 --> o35
+  o35 -->|"ACTUALIZA"| t33
+  o35 -->|"LEE"| t33
+  a30 --> o36
+  o36 -->|"LEE"| t33
+  a38 --> o37
+  o37 -->|"LEE"| t31
+  o37 -->|"CREA"| t32
+  o37 -->|"LEE"| t33
+  o37 -->|"LEE"| t39
+  o37 -->|"LEE"| t40
+  o37 -->|"LEE"| t41
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -330,7 +371,202 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /delegated-access/expiry-sweep
+#### 3. GET /clinical/prescription-shares
+
+Enlaces de receta de un paciente
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Paciente no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PrescriptionSharesService.listForPatient"]:::llamada
+  n2 --> n3
+  n4{"!isOwner && !actor.practitionerProfileId"}:::decision
+  n3 --> n4
+  n5(["404 NOT_FOUND Paciente no encontrado"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a SharedAccessLinksRepository.findByPatient"]:::llamada
+  n4 -->|"no"| n6
+  n7[("LEE delegated_access.shared_access_links")]:::efecto
+  n6 --> n7
+  n8["Llama a SharedAccessLinksRepository.findItemsForResources"]:::llamada
+  n7 --> n8
+  n9[("LEE clinical.medication_requests")]:::efecto
+  n8 --> n9
+  n10["Llama a SharedAccessLinksRepository.countOpenedByLinkIds"]:::llamada
+  n9 --> n10
+  n11[("LEE delegated_access.shared_access_link_uses")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /clinical/prescription-shares
+
+Compartir una receta con un enlace
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: {{ code: ErrorCode.VALIDATION_FAILED, message: 'Indicá la co…} |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {{ code: ErrorCode.FORBIDDEN, message: 'Solo el paciente o q…} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La receta no tiene medicamentos emitidos y vigentes para compartir. |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PrescriptionSharesService.create"]:::llamada
+  n2 --> n3
+  n4["Llama a PrescriptionSharesService.targetOf"]:::llamada
+  n3 --> n4
+  n5{"hasEncounter === hasItem"}:::decision
+  n4 --> n5
+  n6(["400 VALIDATION_FAILED {{ code: ErrorCode.VALIDATION_FAILED, message: 'Indicá la co…}"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a SharedAccessLinksRepository.findItemsByEncounter"]:::llamada
+  n7 --> n8
+  n9[("LEE clinical.medication_requests")]:::efecto
+  n8 --> n9
+  n10["Llama a PrescriptionSharesService.single"]:::llamada
+  n9 --> n10
+  n11["Llama a SharedAccessLinksRepository.findItemById"]:::llamada
+  n10 --> n11
+  n12[("LEE clinical.medication_requests")]:::efecto
+  n11 --> n12
+  n13{"items.length === 0"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PrescriptionSharesService.assertCanShare"]:::llamada
+  n13 -->|"no"| n15
+  n16{"!practitionerProfileId"}:::decision
+  n15 --> n16
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"sí"| n17
+  n18{"!issuedAll"}:::decision
+  n16 -->|"no"| n18
+  n19(["403 FORBIDDEN {{ code: ErrorCode.FORBIDDEN, message: 'Solo el paciente o q…}"]):::error
+  n18 -->|"sí"| n19
+  n20{"activeItems.length === 0"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED La receta no tiene medicamentos emitidos y vigentes para compartir."]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a SharedAccessLinksRepository.create"]:::llamada
+  n20 -->|"no"| n22
+  n23[("CREA delegated_access.shared_access_links")]:::efecto
+  n22 --> n23
+  n24(("201 Responde con éxito")):::ok
+  n23 --> n24
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. POST /clinical/prescription-shares/{shareId}/revoke
+
+Revocar un enlace de receta
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 204 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PrescriptionSharesService.revoke"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SharedAccessLinksRepository.findById"]:::llamada
+  n4 --> n5
+  n6[("LEE delegated_access.shared_access_links")]:::efecto
+  n5 --> n6
+  n7{"!link || !this.ownsOrCreated(link, actor)"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9[("ACTUALIZA delegated_access.shared_access_links · ACTUALIZA delegated_access.shared_access_links · ACTUALIZA d…")]:::efecto
+  n7 -->|"no"| n9
+  n10(("204 Responde con éxito")):::ok
+  n9 --> n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. GET /clinical/prescription-shares/by-token/{token}
+
+Saber si un enlace es de la sesión
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PrescriptionSharesService.resolveOwnership"]:::llamada
+  n2 --> n3
+  n4["Llama a PrescriptionSharesService.findByToken"]:::llamada
+  n3 --> n4
+  n5["Llama a SharedAccessLinksRepository.findByTokenHash"]:::llamada
+  n4 --> n5
+  n6[("LEE delegated_access.shared_access_links")]:::efecto
+  n5 --> n6
+  n7{"!link || !this.ownsOrCreated(link, actor)"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9(("200 Responde con éxito")):::ok
+  n7 -->|"no"| n9
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. POST /delegated-access/expiry-sweep
 
 Expirar delegaciones y grants vencidos (barrido)
 
@@ -395,7 +631,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /delegated-permission-sets
+#### 8. POST /delegated-permission-sets
 
 Publicar set de permisos delegados (scoped)
 
@@ -453,7 +689,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /delegated-permission-sets/{id}/versions
+#### 9. POST /delegated-permission-sets/{id}/versions
 
 Versionar set de permisos delegados
 
@@ -510,7 +746,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /org/{tenantMembershipId}/user-assignments
+#### 10. POST /org/{tenantMembershipId}/user-assignments
 
 Asignar usuario de organización con alcance y vigencia
 
@@ -554,7 +790,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. PATCH /org/user-assignments/{id}
+#### 11. PATCH /org/user-assignments/{id}
 
 Reasignar supervisor / suspender asignación de organización
 
@@ -627,7 +863,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /practitioner-delegates
+#### 12. POST /practitioner-delegates
 
 Crear asignación de delegado de practitioner
 
@@ -706,7 +942,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /practitioner-delegates/{id}/access-requests
+#### 13. POST /practitioner-delegates/{id}/access-requests
 
 Solicitar acceso delegado (aprobación previa)
 
@@ -768,7 +1004,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /practitioner-delegates/{id}/grants
+#### 14. POST /practitioner-delegates/{id}/grants
 
 Otorgar grant delegado por-propósito y temporal
 
@@ -857,7 +1093,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /practitioner-delegates/{id}/revoke
+#### 15. POST /practitioner-delegates/{id}/revoke
 
 Revocar delegación de forma inmediata (cascada authz)
 
@@ -913,6 +1149,93 @@ flowchart TD
   n19 --> n20
   n21(("200 Responde con éxito")):::ok
   n20 --> n21
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. GET /public/prescription-shares/{token}
+
+Comprobar un enlace de receta compartida
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PrescriptionSharesService.readPublic"]:::llamada
+  n2 --> n3
+  n4["Llama a PrescriptionSharesService.resolve"]:::llamada
+  n3 --> n4
+  n5["Llama a PrescriptionSharesService.findByToken"]:::llamada
+  n4 --> n5
+  n6["Llama a SharedAccessLinksRepository.findByTokenHash"]:::llamada
+  n5 --> n6
+  n7[("LEE delegated_access.shared_access_links")]:::efecto
+  n6 --> n7
+  n8["Llama a SharedAccessLinksRepository.findItemsByEncounter"]:::llamada
+  n7 --> n8
+  n9[("LEE clinical.medication_requests")]:::efecto
+  n8 --> n9
+  n10["Llama a PrescriptionSharesService.single"]:::llamada
+  n9 --> n10
+  n11["Llama a SharedAccessLinksRepository.findItemById"]:::llamada
+  n10 --> n11
+  n12[("LEE clinical.medication_requests")]:::efecto
+  n11 --> n12
+  n13{"!resolved"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15{"resolved.status !== 'VALID'"}:::decision
+  n13 -->|"no"| n15
+  n16["Llama a PrescriptionSharesService.recordUse"]:::llamada
+  n15 -->|"sí"| n16
+  n17["Transacción: transactional(…)"]:::transaccion
+  n16 --> n17
+  n18["Llama a SharedAccessLinksRepository.appendUse"]:::llamada
+  n17 --> n18
+  n19[("CREA delegated_access.shared_access_link_uses")]:::efecto
+  n18 --> n19
+  n20["Llama a PrescriptionSharesService.prescriberOf"]:::llamada
+  n19 --> n20
+  n15 -->|"no"| n20
+  n21["Llama a PrescriberIdentityReader.read"]:::llamada
+  n20 --> n21
+  n22["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n21 --> n22
+  n23[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n22 --> n23
+  n24["Llama a PersonsRepository.findById"]:::llamada
+  n23 --> n24
+  n25[("LEE profiles.persons")]:::efecto
+  n24 --> n25
+  n26["Llama a JurisdictionAuthorizationsRepository.findByPractitioner"]:::llamada
+  n25 --> n26
+  n27[("LEE profiles.jurisdiction_authorizations")]:::efecto
+  n26 --> n27
+  n28{"resolved.status === 'VALID'"}:::decision
+  n27 --> n28
+  n29["Llama a PrescriptionSharesService.recordUse"]:::llamada
+  n28 -->|"sí"| n29
+  n30["Transacción: transactional(…)"]:::transaccion
+  n29 --> n30
+  n31["Llama a SharedAccessLinksRepository.appendUse"]:::llamada
+  n30 --> n31
+  n32[("CREA delegated_access.shared_access_link_uses")]:::efecto
+  n31 --> n32
+  n33(("200 Responde con éxito")):::ok
+  n32 --> n33
+  n28 -->|"no"| n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

@@ -23,6 +23,7 @@ import { ProfessionalCredentialsRepository } from '../profiles/infrastructure/re
 import { AuditModule } from '../audit/audit.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { ClinicalModule } from '../clinical/clinical.module';
+import { AuthzModule } from '../authz/authz.module';
 
 /**
  * Módulo perioperatorio: programación del caso quirúrgico, valoración y
@@ -38,6 +39,9 @@ import { ClinicalModule } from '../clinical/clinical.module';
     // El caso quirúrgico registra su diagnóstico y su procedimiento a través de
     // los servicios de `clinical`, que no importa este módulo (sin ciclo).
     ClinicalModule,
+    // El paciente del caso se prueba contra el tenant con la regla de `authz`
+    // (`AuthzClinicalScopeService.isPatientInTenant`, #893).
+    AuthzModule,
   ],
   controllers: [PeriopController, DentalController],
   providers: [

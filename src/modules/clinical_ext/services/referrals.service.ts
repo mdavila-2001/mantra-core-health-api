@@ -874,8 +874,14 @@ export class ReferralsService {
    * oferta activa, o los de las prácticas activas de la organización. Con los
    * dos parámetros, los del profesional en esa organización.
    *
+   * Sólo de destinos que {@link searchTargets} mostraría (vitrina pública
+   * activa y, para la organización, tenant activo): el catálogo y los precios
+   * de un destino no listable no se ven por ninguna otra pantalla (#1058).
+   *
    * @param query - `targetProfileId` y/o `targetTenantId`.
    * @returns Los servicios, por nombre.
+   * @throws ResourceNotFoundException si algún destino no es listable; el
+   *   mismo 404 que si no existiera.
    */
   async listTargetServices(
     query: ListReferralTargetServicesQueryDto,
@@ -888,6 +894,25 @@ export class ReferralsService {
       );
     }
     const em = this.em.fork();
+    const [profileListable, tenantListable] = await Promise.all([
+      targetProfileId
+        ? this.targetsRepo.isListablePractitioner(em, targetProfileId)
+        : Promise.resolve(true),
+      // Con profesional, el tenant acota sus servicios a esa organización:
+      // basta con que esté activo, sin vitrina propia (así sale en la
+      // búsqueda de destinos). Sin profesional, el destino es la organización.
+      !targetTenantId
+        ? Promise.resolve(true)
+        : targetProfileId
+          ? this.targetsRepo.isActiveTenant(em, targetTenantId)
+          : this.targetsRepo.isListableOrganization(em, targetTenantId),
+    ]);
+    if (!profileListable || !tenantListable) {
+      throw new ResourceNotFoundException('Destino no encontrado', {
+        targetProfileId,
+        targetTenantId,
+      });
+    }
 
     let services: ServiceCatalog[];
     if (targetProfileId) {

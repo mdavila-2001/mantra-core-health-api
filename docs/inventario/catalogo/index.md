@@ -2,9 +2,9 @@
 
 # Catálogo de datos
 
-**1230 tablas** en **61 schemas**, con 16851 columnas, 8267 índices y 7069 claves foráneas, leídas del DDL canónico del modelo.
+**1230 tablas** en **61 schemas**, con 16852 columnas, 8267 índices y 7069 claves foráneas, leídas del DDL canónico del modelo.
 
-- Columnas con descripción: 3989 (23.7 %). Por fuente: JSDOC_ESTANDAR 2727 · JSDOC_ENTIDAD 1208 · MODELO_PUML 54. El resto dice «sin dato»: no se infiere por el nombre.
+- Columnas con descripción: 3990 (23.7 %). Por fuente: JSDOC_ESTANDAR 2727 · JSDOC_ENTIDAD 1208 · MODELO_PUML 55. El resto dice «sin dato»: no se infiere por el nombre.
 - Índices con «para qué»: 7804 de 8267. El resto dice «sin uso detectado estáticamente».
 - Tablas con entidad del ORM: 1230 de 1230. Deriva: [deriva.md](deriva.md).
 - Tablas que alguna operación HTTP toca: 947. Tablas append-only declaradas en un README: 140.
@@ -66,7 +66,7 @@ Otras vistas: [glosario](glosario.md).
 | `qa_lab` | 13 | 201 | [qa_lab.md](qa_lab.md) |
 | `read_models` | 13 | 221 | [read_models.md](read_models.md) |
 | `reporting` | 12 | 174 | [reporting.md](reporting.md) |
-| `scheduling` | 18 | 276 | [scheduling.md](scheduling.md) |
+| `scheduling` | 18 | 277 | [scheduling.md](scheduling.md) |
 | `surveys` | 7 | 87 | [surveys.md](surveys.md) |
 | `system_context` | 9 | 126 | [system_context.md](system_context.md) |
 | `system_ops` | 29 | 430 | [system_ops.md](system_ops.md) |

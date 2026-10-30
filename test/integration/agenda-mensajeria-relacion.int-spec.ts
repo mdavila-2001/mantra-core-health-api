@@ -651,7 +651,20 @@ describe('Relación agenda → mensajería · dobles de ambos extremos (H2)', ()
 
       // Lo que vuelve reproducible al paquete: su commit está en la historia
       // del corte, así que los 117 archivos se pueden volver a sacar de acá
-      // aunque el paquete en sí no viaje en este repo.
+      // aunque el paquete en sí no viaje en este repo. En un clon superficial
+      // el ancestro no es alcanzable aunque exista: se dice así, en vez de un
+      // rojo que parece una regresión.
+      const superficial = spawnSync(
+        'git',
+        ['rev-parse', '--is-shallow-repository'],
+        { cwd: process.cwd(), encoding: 'utf8' },
+      );
+      if (superficial.stdout.trim() === 'true') {
+        throw new Error(
+          'H2.S1.M1 necesita el historial completo y este clon es superficial: ' +
+            'corré `git fetch --unshallow` (en CI, `fetch-depth: 0`).',
+        );
+      }
       expect(
         gitExitCode([
           'merge-base',

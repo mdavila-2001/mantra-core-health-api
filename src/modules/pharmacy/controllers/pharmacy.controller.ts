@@ -484,16 +484,21 @@ export class PharmacyController {
     entity: 'pharmacy_external_product_mapping',
     entityId: 'result.id',
   })
-  @Post(':pharmacyId/integration-connections/:connId/product-mappings')
+  @Post(':pharmacyId/integration-connections/:connectionId/product-mappings')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Mapear producto a código de proveedor externo' })
   mapProduct(
     @Param('pharmacyId', ParseUUIDPipe) pharmacyId: string,
-    @Param('connId', ParseUUIDPipe) connId: string,
+    @Param('connectionId', ParseUUIDPipe) connectionId: string,
     @Body() dto: CreateMappingDto,
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MappingResponseDto> {
-    return this.integrationService.mapProduct(pharmacyId, connId, dto, actor);
+    return this.integrationService.mapProduct(
+      pharmacyId,
+      connectionId,
+      dto,
+      actor,
+    );
   }
 
   /** UC-24-11. */
