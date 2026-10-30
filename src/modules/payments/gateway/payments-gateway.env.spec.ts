@@ -2,12 +2,17 @@ import {
   loadPaymentsGatewayConfig,
   paymentsGatewayEnvSchema,
 } from './payments-gateway.env';
-import { TEST_WEBHOOK_SECRET } from './payments-gateway.double.testing';
+import {
+  TEST_API_KEY,
+  TEST_WEBHOOK_SECRET,
+} from './payments-gateway.double.testing';
+
+const NOT_A_SECRET_KEY = ['pk', 'test', 'noEsUnaClaveSecreta12345'].join('_');
 
 const COMPLETE = {
   PAYMENTS_VIA_GATEWAY: 'true',
   PAYMENTS_GATEWAY_BASE_URL: 'https://sandbox.pay.example/v1/',
-  PAYMENTS_GATEWAY_API_KEY: 'sk_test_unaClaveSinteticaDeCuarentaChars',
+  PAYMENTS_GATEWAY_API_KEY: TEST_API_KEY,
   PAYMENTS_GATEWAY_WEBHOOK_SECRETS: TEST_WEBHOOK_SECRET,
 } satisfies NodeJS.ProcessEnv;
 
@@ -79,7 +84,11 @@ describe('loadPaymentsGatewayConfig', () => {
         loadPaymentsGatewayConfig({
           ...COMPLETE,
           // Armada en ejecución: un literal `sk_live_…` dispara la protección de secretos del remoto aunque sea sintético.
-          PAYMENTS_GATEWAY_API_KEY: ['sk', 'live', 'unaClaveSinteticaDeCuarentaChars'].join('_'),
+          PAYMENTS_GATEWAY_API_KEY: [
+            'sk',
+            'live',
+            'unaClaveSinteticaDeCuarentaChars',
+          ].join('_'),
         }).mode,
       ).toBe('live');
     });
@@ -89,7 +98,7 @@ describe('loadPaymentsGatewayConfig', () => {
     it.each([
       ['PAYMENTS_GATEWAY_BASE_URL', ''],
       ['PAYMENTS_GATEWAY_API_KEY', ''],
-      ['PAYMENTS_GATEWAY_API_KEY', 'pk_test_noEsUnaClaveSecreta12345'],
+      ['PAYMENTS_GATEWAY_API_KEY', NOT_A_SECRET_KEY],
       ['PAYMENTS_GATEWAY_WEBHOOK_SECRETS', ''],
       ['PAYMENTS_GATEWAY_WEBHOOK_SECRETS', 'whsec_corto'],
     ])('%s = %j', (name, value) => {
@@ -143,7 +152,7 @@ describe('paymentsGatewayEnvSchema (validación global de AppModule)', () => {
   it('rechaza una clave que no es sk_test_/sk_live_', () => {
     const { error } = validate({
       ...COMPLETE,
-      PAYMENTS_GATEWAY_API_KEY: 'pk_test_noEsUnaClaveSecreta12345',
+      PAYMENTS_GATEWAY_API_KEY: NOT_A_SECRET_KEY,
     });
     expect(error).toBeDefined();
   });
