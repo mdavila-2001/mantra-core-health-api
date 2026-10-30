@@ -103,6 +103,9 @@ describe('instrumentations', () => {
       `/pharmacy/prescription-shares/${TOKEN}?x=1`,
       `/clinical/prescription-shares/by-token/${TOKEN}`,
       `/PUBLIC/Prescription-Shares/${TOKEN}`,
+      `/public//prescription-shares/${TOKEN}`,
+      `/public%2Fprescription-shares/${TOKEN}`,
+      `/clinical/prescription-shares/by-token//${TOKEN}`,
     ])('el span HTTP de %s recibe url.path con [token]', (url) => {
       const attributes = shareTokenSafeIncomingAttributes(incoming(url));
       expect(attributes['url.path']).toMatch(/\/\[token\]$/);

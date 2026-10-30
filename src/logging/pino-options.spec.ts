@@ -198,6 +198,25 @@ describe('redacción del token del enlace compartido de receta', () => {
       expect(log).not.toContain('sintetico-no-real');
     });
 
+    it.each([
+      `/public//prescription-shares/${TOKEN}`,
+      `/public%2Fprescription-shares/${TOKEN}`,
+      `/public/prescription%2Dshares/${TOKEN}`,
+      `/clinical/prescription-shares/by-token//${TOKEN}`,
+    ])(
+      'una ruta no canónica (%s) ni el Referer /rx//<token> dejan el token',
+      async (path) => {
+        const { port } = server.address() as AddressInfo;
+        await fetch(`http://127.0.0.1:${port}${path}`, {
+          headers: { referer: `https://app.alovida.test/rx//${TOKEN}` },
+        });
+        await new Promise((resolve) => setImmediate(resolve));
+        const log = lines.join('');
+        expect(log).toContain('[token]');
+        expect(log).not.toContain(TOKEN);
+      },
+    );
+
     it('la línea de la petición lleva [token] y no el token', async () => {
       const { port } = server.address() as AddressInfo;
       await fetch(
