@@ -41,12 +41,21 @@ import {
 import { decideCallback, eventReference } from './payment-callback-machine';
 import { evaluateCallbackEndpoint } from './callback-endpoint.policy';
 import { PaymentsErrorReason } from '../payments.error-reasons';
-import { PaymentsGatewayChargeService } from './payments-gateway-charge.service';
+import {
+  PaymentsGatewayChargeService,
+  type GatewayChargeable,
+} from './payments-gateway-charge.service';
 import { runCommitted } from './payments-committed-transaction';
 import {
-  blocksOtherCharges,
+  canResendWithSameKey,
+  classifyInFlight,
   isDispatchMark,
 } from '../gateway/payments-gateway-dispatch-mark';
+import { gatewayMetrics } from '../gateway/payments-gateway-metrics';
+import {
+  PaymentsGatewayError,
+  PaymentsGatewayResultAmbiguousException,
+} from '../gateway/payments-gateway.errors';
 import { DEBT_SOURCE_REF_TYPE, mayChargeADebt } from '../payments.source-refs';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
@@ -339,6 +348,92 @@ export class PaymentsTransactionsService {
   }
 
   /**
+   * Conciliación explícita de una reserva de despacho sin `pi_…` (la llamada anterior
+   * terminó ambigua, o el proceso murió antes de asociar).
+   *
+   * Reenvía a la pasarela la MISMA creación con la MISMA `Idempotency-Key` (se
+   * deriva de campos persistidos): si la pasarela ya tenía el cobro, devuelve el
+   * mismo (`replayed`) y se asocia a la intención; si nunca llegó, lo crea una sola
+   * vez y es el cobro legítimo de ESTA intención. Sólo así la reserva se resuelve y
+   * se consulta el estado vigente del cobro. Mientras no se concilia, ninguna otra
+   * intención cobra la deuda.
+   *
+   * Pasado lo que la pasarela recuerda la clave (23 h desde la marca, 1 h de
+   * margen sobre las 24 h de retención) **no reenvía**: pide conciliación manual
+   * (`409 PAYMENT_GATEWAY_RECONCILIATION_REQUIRED`), porque repetir la clave podría
+   * crear un segundo cobro. Con la fecha de la marca ilegible, igual.
+   *
+   * Pasa por las mismas compuertas que un cobro (estado, riesgo, saldo, deuda) y
+   * necesita el mismo `paymentMethodType` de la primera vez (no se persiste): con
+   * otro, la pasarela contesta `idempotency_key_reused` y la reserva se conserva.
+   *
+   * @throws ConflictException `PAYMENT_GATEWAY_NOTHING_TO_RECONCILE` si la intención no
+   *   tiene una reserva pendiente.
+   */
+  async reconcileGatewayDispatch(
+    intentId: string,
+    dto: Pick<ProcessTransactionDto, 'paymentMethodType'>,
+  ): Promise<TransactionResponseDto> {
+    if (!this.gatewayCharge?.enabled) {
+      throw new ConflictException(
+        'La pasarela no está activa: no hay despachos que conciliar',
+        { intentId },
+        PaymentsErrorReason.PAYMENT_GATEWAY_NOTHING_TO_RECONCILE,
+      );
+    }
+    this.logger.info(
+      { operation: 'payments.gateway.reconcile', intentId },
+      'Reconciling gateway dispatch reservation',
+    );
+    return this.processViaGateway(
+      intentId,
+      { operation: 'SALE', paymentMethodType: dto.paymentMethodType },
+      this.gatewayCharge,
+      'reconcile',
+    );
+  }
+
+  /**
+   * Reenvío de una conciliación: despacha con la misma clave, deja constancia del
+   * resultado y, si la pasarela ya tenía el cobro (`replayed`), lee su estado
+   * vigente (la respuesta repetida trae el del momento de crearlo).
+   */
+  private async resendReservedDispatch(
+    intent: GatewayChargeable,
+    dto: ProcessTransactionDto,
+    gateway: PaymentsGatewayChargeService,
+  ) {
+    let charged: Awaited<ReturnType<PaymentsGatewayChargeService['dispatch']>>;
+    try {
+      charged = await gateway.dispatch(intent, dto.paymentMethodType);
+    } catch (error) {
+      gatewayMetrics.reconciled(
+        error instanceof PaymentsGatewayResultAmbiguousException ||
+          (error instanceof PaymentsGatewayError && error.isAmbiguous)
+          ? 'ambiguous'
+          : 'rejected',
+      );
+      throw error;
+    }
+    gatewayMetrics.reconciled(charged.replayed ? 'replayed' : 'created');
+    this.logger.info(
+      {
+        operation: 'payments.gateway.reconcile',
+        intentId: intent.id,
+        outcome: charged.replayed ? 'replayed' : 'created',
+      },
+      'Gateway dispatch reservation reconciled',
+    );
+    return charged.replayed
+      ? gateway.consult(
+          intent.id,
+          charged.gatewayIntentRef,
+          charged.localStatusConceptId,
+        )
+      : charged;
+  }
+
+  /**
    * UC-42-05 con `payments.via_gateway=on` (REQ-INT-1): crea el cobro en la pasarela.
    *
    * Tres tiempos. La llamada HTTP no sostiene ningún bloqueo de fila: la compuerta y
@@ -375,6 +470,27 @@ export class PaymentsTransactionsService {
     intentId: string,
     dto: ProcessTransactionDto,
     gateway: PaymentsGatewayChargeService,
+    mode: 'dispatch' | 'reconcile' = 'dispatch',
+  ): Promise<TransactionResponseDto> {
+    // Dentro de la transacción de la petición (`RLS_ENFORCE=true`) cada despacho
+    // retiene la conexión del interceptor y necesita otra: se limita cuántos a la
+    // vez para que nunca se agote el pool por espera circular. Sin esa transacción
+    // cada sección usa una sola conexión a la vez y no hace falta.
+    const release = this.em.isInTransaction()
+      ? gateway.acquireDispatchSlot(intentId)
+      : undefined;
+    try {
+      return await this.processViaGatewayWithSlot(intentId, dto, gateway, mode);
+    } finally {
+      release?.();
+    }
+  }
+
+  private async processViaGatewayWithSlot(
+    intentId: string,
+    dto: ProcessTransactionDto,
+    gateway: PaymentsGatewayChargeService,
+    mode: 'dispatch' | 'reconcile',
   ): Promise<TransactionResponseDto> {
     // El tenant sale del contexto verificado por el interceptor, nunca del
     // cuerpo ni de la ruta: el UUID de la intención no prueba que sea del actor.
@@ -416,6 +532,36 @@ export class PaymentsTransactionsService {
       if (found.gatewayIntentRef && !isDispatchMark(found.gatewayIntentRef)) {
         return found;
       }
+      if (mode === 'reconcile' && !isDispatchMark(found.gatewayIntentRef)) {
+        throw new ConflictException(
+          'La intención no tiene un despacho pendiente de conciliar',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_GATEWAY_NOTHING_TO_RECONCILE,
+        );
+      }
+      // Reenviar con la misma clave sólo mientras la pasarela la recuerde (24 h). Pasado
+      // ese plazo —o con la fecha de la marca ilegible— repetir podría crear un
+      // SEGUNDO cobro: no se reenvía, la marca sigue bloqueando la deuda y la
+      // conciliación es manual contra la pasarela.
+      if (
+        isDispatchMark(found.gatewayIntentRef) &&
+        !canResendWithSameKey(found.gatewayIntentRef, Date.now())
+      ) {
+        this.logger.error(
+          {
+            operation: 'payments.gateway.reconcile',
+            intentId,
+            reason: 'too_old_to_resend',
+          },
+          'Dispatch reservation is older than the gateway idempotency retention; not resending, manual reconciliation required',
+        );
+        gatewayMetrics.reconciliationRequired('too_old_to_resend');
+        throw new ConflictException(
+          'La reserva de este cobro es más vieja que la memoria de la clave en la pasarela: reenviar podría crear un segundo cobro. Concilialo a mano contra la pasarela',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+        );
+      }
 
       // Sin cobro en la pasarela, una intención `PI_PROCESSING` tiene una
       // operación del camino de siempre en marcha: cobrarla otra vez duplicaría
@@ -429,7 +575,12 @@ export class PaymentsTransactionsService {
         );
       }
       await this.assertNoBlockingOpenOperation(tx, intentId, dto.operation);
-      await this.assertRiskCleared(tx, intentId, true);
+      // Una intención que ya tiene su reserva pudo haber creado un cobro que SÍ
+      // existe: el riesgo ya se evaluó antes de reservar y un `REVIEW` posterior no
+      // puede impedir recuperarlo (igual que con un `pi_…`, que sale antes).
+      if (!isDispatchMark(found.gatewayIntentRef)) {
+        await this.assertRiskCleared(tx, intentId, true);
+      }
       // La pasarela cobra el importe completo: si ya hay algo capturado por el
       // camino de siempre, excede el saldo y no se despacha (sobrecobro).
       await this.assertWithinBalance(tx, found, intentId, found.amount);
@@ -441,14 +592,18 @@ export class PaymentsTransactionsService {
       return found;
     });
 
-    const charged =
-      intent.gatewayIntentRef && !isDispatchMark(intent.gatewayIntentRef)
-        ? await gateway.consult(
-            intent.id,
-            intent.gatewayIntentRef,
-            intent.statusConceptId,
-          )
-        : await gateway.dispatch(intent, dto.paymentMethodType);
+    let charged: Awaited<ReturnType<PaymentsGatewayChargeService['dispatch']>>;
+    if (intent.gatewayIntentRef && !isDispatchMark(intent.gatewayIntentRef)) {
+      charged = await gateway.consult(
+        intent.id,
+        intent.gatewayIntentRef,
+        intent.statusConceptId,
+      );
+    } else if (mode === 'reconcile') {
+      charged = await this.resendReservedDispatch(intent, dto, gateway);
+    } else {
+      charged = await gateway.dispatch(intent, dto.paymentMethodType);
+    }
 
     return {
       id: intent.id,
@@ -489,8 +644,10 @@ export class PaymentsTransactionsService {
    * No se aplica a la intención que ya tiene su `pi_…`: esa es el reintento con la
    * misma clave (regla 11) y sale antes, hacia la consulta. La marca de despacho de
    * la PROPIA intención no cuenta contra ella (`excludeIntentId`). La de otra
-   * intención deja de bloquear cuando vence (`dispatchLeaseMs`); entonces se deja
-   * constancia en el log y la deuda se ofrece de nuevo.
+   * intención bloquea SIEMPRE, sea cual sea su antigüedad: pasado `dispatchLeaseMs`
+   * sólo pasa de «en vuelo» a «requiere conciliación» (log, contador y
+   * `listDispatchesRequiringReconciliation`) y la deuda no se ofrece a nadie hasta
+   * que `reconcileGatewayDispatch` la resuelve.
    */
   private async assertDebtAllowsCharge(
     tx: EntityManager,
@@ -561,25 +718,41 @@ export class PaymentsTransactionsService {
         },
       );
       const nowMs = Date.now();
-      const inFlight = candidates.filter((other) =>
-        blocksOtherCharges(other, nowMs, leaseMs),
+      const blocking = candidates.filter(
+        (other) => classifyInFlight(other, nowMs, leaseMs) !== 'none',
       );
-      const expired = candidates.filter((other) => !inFlight.includes(other));
-      if (expired.length > 0) {
-        this.logger.warn(
-          {
-            operation: 'payments.gateway.debt-gate',
-            intentId: intent.id,
-            paymentDebtId,
-            expiredReservationIntentIds: expired.map((other) => other.id),
-          },
-          'Ignoring expired dispatch reservations on the debt; those charges may exist in the gateway and need to be reviewed',
+      if (blocking.length > 0) {
+        // Una reserva sin `pi_` que ya no está en vuelo sigue BLOQUEANDO (la
+        // ambigüedad no prueba que la pasarela no creó el cobro): sólo se deja
+        // constancia de que requiere conciliación.
+        const unreconciled = blocking.filter(
+          (other) =>
+            classifyInFlight(other, nowMs, leaseMs) ===
+            'reconciliation_required',
         );
-      }
-      if (inFlight.length > 0) {
+        if (unreconciled.length > 0) {
+          this.logger.error(
+            {
+              operation: 'payments.gateway.debt-gate',
+              intentId: intent.id,
+              paymentDebtId,
+              reconciliationRequiredIntentIds: unreconciled.map(
+                (other) => other.id,
+              ),
+            },
+            'Debt is blocked by a dispatch reservation without a gateway charge reference; it may have created a charge and needs reconciliation',
+          );
+          gatewayMetrics.reconciliationRequired('stale_blocks_debt');
+        }
         throw new ConflictException(
           'La deuda ya tiene otro cobro en curso en la pasarela',
-          { intentId: intent.id, paymentDebtId },
+          {
+            intentId: intent.id,
+            paymentDebtId,
+            ...(unreconciled.length > 0
+              ? { reconciliationRequired: true }
+              : {}),
+          },
           PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
         );
       }

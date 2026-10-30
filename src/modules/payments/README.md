@@ -111,32 +111,68 @@ deshabilitaría el endpoint en la pasarela).
   conoce después de la respuesta de la pasarela, así que durante toda la llamada HTTP (y
   para siempre si termina ambigua o el proceso muere antes de asociar) otra intención de la
   misma deuda no vería ningún cobro en vuelo. Por eso la compuerta, con la deuda bloqueada
-  `FOR UPDATE`, escribe una marca `dispatching:<uuid>` en `gateway_intent_ref` y **confirma
-  esa transacción antes de llamar**: la compuerta contra la deuda cuenta como «en vuelo» a
-  toda otra intención con `pi_…` o con una marca vigente, y responde `409
+  `FOR UPDATE`, escribe una marca `dispatching:<epoch-ms>:<uuid>` en `gateway_intent_ref` y
+  **confirma esa transacción antes de llamar**: la compuerta contra la deuda cuenta como «en
+  vuelo» a toda otra intención con `pi_…` o con una marca, y responde `409
   PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE`. La llamada HTTP no sostiene ningún bloqueo de fila
   (la compuerta y la asociación del `pi_…` son transacciones cortas, confirmadas con
-  `runCommitted`). El `pi_…` reemplaza la marca al asociar; una respuesta definitiva de
-  rechazo (`4xx` del contrato, `429` agotado) la libera; un resultado ambiguo (`504`) la
-  conserva. La marca no es un cobro: nunca se consulta ni resuelve un webhook. La propia
-  intención no se bloquea a sí misma (regla 11): repetir `/transactions` con la marca vuelve
-  a pasar las compuertas y despacha con la MISMA `Idempotency-Key`. Una marca más vieja que
-  `dispatchLeaseMs` (el mayor de 15 minutos y cuatro veces el peor caso de la llamada, por
-  `updated_at`) deja de bloquear a las OTRAS intenciones y se registra en el log con los ids
-  afectados; la marca no se borra: es el rastro de un cobro que pudo crearse y que
-  alguien debe revisar. Una marca sin fecha legible bloquea.
+  `runCommitted`). El `pi_…` reemplaza la marca al asociar. Una respuesta definitiva de
+  rechazo la libera **sólo si todos los intentos de esa llamada fueron rechazos definitivos
+  del contrato**: un `4xx` cuenta como definitivo únicamente si trae el cuerpo de error del
+  contrato (problema con `code`) o es un `429`; un `404`/`400`/`408`/`413`/`499` sin ese
+  cuerpo (un proxy) es ambiguo, un timeout, un corte o un `5xx` previo hace ambiguo el error
+  final aunque el último intento sea un `4xx`, y `422 idempotency_key_reused` prueba que el
+  cobro existe. Un resultado ambiguo (`504`) la conserva. Cada petición escribe su propio
+  valor de marca y libera sólo el suyo (una segunda petición de la misma intención que sigue
+  en vuelo conserva el suyo). Un reintento con marca no vuelve a evaluar el riesgo (el riesgo
+  se evaluó antes de reservar y un `REVIEW` posterior no impide recuperar un cobro que pudo
+  crearse). La marca no es un cobro: nunca se consulta ni
+  resuelve un webhook.
+- **Una marca no vence como permiso para cobrar.** La ambigüedad no prueba que la pasarela
+  no ejecutó la operación (regla 11), así que una marca bloquea a las OTRAS intenciones de
+  la deuda sea cual sea su antigüedad. Pasado `dispatchLeaseMs` (el mayor de 15 minutos y
+  cuatro veces el peor caso de la llamada, por la fecha DENTRO de la marca) deja de ser «en
+  vuelo» y pasa a «requiere conciliación»: la compuerta lo registra en el log con los ids,
+  incrementa `payments_gateway_dispatch_reconciliation_required_total`, responde el mismo
+  `409` con `details.reconciliationRequired` y
+  `PaymentsGatewayChargeService.listDispatchesRequiringReconciliation(tenantId)` las lista.
+  La salida es `PaymentsTransactionsService.reconcileGatewayDispatch(intentId, { paymentMethodType })`
+  (servicio, sin endpoint): reenvía la MISMA creación con la MISMA `Idempotency-Key`; si la
+  pasarela ya tenía el cobro (`replayed`) lo asocia y consulta su estado vigente, y si
+  nunca llegó lo crea una sola vez para ESA intención. Necesita el mismo `paymentMethodType`
+  de la primera vez (no se persiste). Reintentar `/transactions` con la misma intención
+  hace lo mismo. Con la marca de más de 23 h (la pasarela retiene la clave 24 h) o con la
+  fecha ilegible **no reenvía**: `409 PAYMENT_GATEWAY_RECONCILIATION_REQUIRED` y la
+  conciliación es manual contra la pasarela. Un reintento que vuelve a terminar ambiguo
+  conserva la fecha original de la marca.
 - **La compuerta falla cerrado.** Una intención sin sesión de checkout que parece cobrar
   una deuda —propósito `DEBT`, o `sourceRefType`/`sourceRefId` con un tipo que no sea
-  `payment_debt` ni uno conocido como ajeno a las deudas, como `EDUCATION_COURSE`
-  (`payments.source-refs.ts`)— se rechaza con `422 PAYMENT_GATEWAY_DEBT_UNRESOLVED` antes
+  `payment_debt` ni uno conocido como ajeno a las deudas (hoy sólo `EDUCATION_COURSE`,
+  `payments.source-refs.ts`; cualquier otro origen sin sesión de checkout se rechaza)— se rechaza con `422 PAYMENT_GATEWAY_DEBT_UNRESOLVED` antes
   de reservar ni llamar. `sourceRefType` es texto libre en el DTO: la compuerta mide por
   `sourceRef` sólo el valor exacto `payment_debt`.
-- **Conexión durante la llamada.** Con `RLS_ENFORCE=false` ninguna conexión del pool queda
-  tomada durante la llamada HTTP. Con `RLS_ENFORCE=true` el `TenantContextInterceptor` abre
-  una transacción para toda la petición y esa conexión queda «idle in transaction» hasta
-  que termina (hasta 3 × 10 s más esperas con los valores por defecto); la compuerta y la
-  asociación corren en una transacción aparte y no retienen bloqueos de fila. Con muchas
-  llamadas lentas simultáneas el pool se puede agotar.
+- **Conexiones del pool.** Con `RLS_ENFORCE=false` ninguna conexión queda tomada durante la
+  llamada HTTP. Con `RLS_ENFORCE=true` el `TenantContextInterceptor` abre una transacción
+  para toda la petición y retiene UNA conexión hasta que termina; la compuerta, la
+  asociación y la liberación necesitan OTRA (se confirman por su cuenta y no retienen
+  bloqueos de fila). Sin un tope eso es una espera circular: con tantos cobros simultáneos
+  como conexiones del pool (`DB_POOL_MAX`, 10 por defecto) todos retienen una y esperan otra,
+  sin importar la latencia de la pasarela. Por eso, dentro de una transacción de petición,
+  hay a lo sumo `ceil(DB_POOL_MAX / 2) - 1` despachos simultáneos por proceso
+  (`gateway/payments-gateway-concurrency.ts`; 4 con el pool por defecto) y el excedente
+  falla **al instante, sin cola**, con `503 PAYMENT_GATEWAY_BUSY` (no se reservó ni se llamó
+  a nada; reintentable con la misma `idempotencyKey`). Además `DB_CONNECTION_TIMEOUT_MS`
+  (30 s por defecto, global del pool de la API) acota la espera por una conexión libre, que
+  `pg` deja sin límite por defecto. El tope es por proceso y no ve el resto del tráfico:
+  con varias réplicas o mucho tráfico ajeno ocupando conexiones, el pool sigue pudiendo
+  agotarse hasta ese timeout. La solución de fondo es que la ruta no corra dentro de la
+  transacción del interceptor.
+- **Operación de marcas colgadas y apagado del flag.** Una intención con marca (o `pi_…`)
+  responde `409 PAYMENT_INTENT_VIA_GATEWAY` a `risk-assessment DECLINE` y a
+  `/transactions` con el flag apagado, aunque nunca se haya creado un cobro: la salida es
+  la conciliación (`reconcileGatewayDispatch`) con el flag encendido. Antes de apagar el
+  flag hay que listar `listDispatchesRequiringReconciliation` y conciliar (o resolver a mano
+  contra la pasarela) cada una; ver el runbook del informe del carril.
 - Con el flag apagado, una intención con `gateway_intent_ref` no admite
   `POST /payments/intents/:id/transactions` (`409 PAYMENT_INTENT_VIA_GATEWAY`): su resultado
   llega por webhook y no hay un segundo camino hacia el proveedor.

@@ -49,9 +49,21 @@ export class PaymentsGatewayError extends Error {
     }
   }
 
-  /** `true` si no se puede afirmar que la pasarela no ejecutó la operación. */
+  /**
+   * `true` si un intento ANTERIOR de la misma llamada (misma `Idempotency-Key`) fue
+   * ambiguo —timeout, corte, 5xx, 409 en curso— y por lo tanto pudo haber llegado a
+   * la pasarela y ejecutarse, aunque el ÚLTIMO intento haya recibido una respuesta
+   * definitiva. Lo fija el cliente (`PaymentsGatewayClient.send`) al terminar.
+   */
+  earlierAttemptMayHaveReached = false;
+
+  /**
+   * `true` si no se puede afirmar que la pasarela no ejecutó la operación: el
+   * error es ambiguo en sí, o algún intento previo de la misma llamada lo fue
+   * (un 4xx final no prueba que el primer intento no se ejecutó).
+   */
   get isAmbiguous(): boolean {
-    return this.ambiguity === 'ambiguous';
+    return this.ambiguity === 'ambiguous' || this.earlierAttemptMayHaveReached;
   }
 
   /** Código estable del problema, si la pasarela lo mandó. */
@@ -107,6 +119,24 @@ export class PaymentsGatewayUnavailableException extends DomainException {
       'La pasarela de pagos no está disponible en este momento. El cobro local quedó pendiente: reintentá con la misma idempotencyKey',
       { intentId },
       PaymentsErrorReason.PAYMENT_GATEWAY_UNAVAILABLE,
+    );
+  }
+}
+
+/**
+ * 503 reintentable: demasiados cobros por la pasarela en curso en este proceso.
+ * No se creó ni se reservó nada; repetir con la misma `idempotencyKey` es seguro.
+ * Existe para que las peticiones excedentes no esperen una conexión del pool
+ * mientras retienen otra (ver `payments-gateway-concurrency.ts`).
+ */
+export class PaymentsGatewayBusyException extends DomainException {
+  constructor(intentId: string) {
+    super(
+      HttpStatus.SERVICE_UNAVAILABLE,
+      ErrorCode.DEPENDENCY_UNAVAILABLE,
+      'Hay demasiados cobros por la pasarela en curso. No se hizo nada: reintentá en unos segundos con la misma idempotencyKey',
+      { intentId },
+      PaymentsErrorReason.PAYMENT_GATEWAY_BUSY,
     );
   }
 }

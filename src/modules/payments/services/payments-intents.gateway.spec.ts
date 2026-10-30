@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { randomUUID } from 'node:crypto';
 import { PaymentsIntentsService } from './payments-intents.service';
 import { PaymentsGatewayChargeService } from './payments-gateway-charge.service';
@@ -14,7 +15,12 @@ import {
 } from '../gateway/payments-gateway.errors';
 import type { PaymentsGatewayConfig } from '../gateway/payments-gateway.env';
 import { PaymentsErrorReason } from '../payments.error-reasons';
-import { isDispatchMark } from '../gateway/payments-gateway-dispatch-mark';
+import {
+  dispatchMarkStamp,
+  isDispatchMark,
+  newDispatchMark,
+} from '../gateway/payments-gateway-dispatch-mark';
+import { gatewayMetrics } from '../gateway/payments-gateway-metrics';
 import {
   CONCEPTS,
   ConflictException,
@@ -103,7 +109,11 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
     retryBaseMs: 5,
   });
 
-  function build(viaGateway: boolean, withCharge = true) {
+  function build(
+    viaGateway: boolean,
+    withCharge = true,
+    inRequestTransaction = false,
+  ) {
     const store = new Map<string, Row>();
     const risks = new Map<string, Row>();
     const legacyTransactions: Row[] = [];
@@ -111,12 +121,15 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
     let staged: Row[] = [];
     const em = {
       // Sin transacción de petición (`RLS_ENFORCE` apagado): `runCommitted` usa el
-      // `transactional` de siempre.
-      isInTransaction: () => false,
+      // `transactional` de siempre. Con ella (`inRequestTransaction`) abre una
+      // transacción aparte en un `fork()`, que acá es el mismo almacén.
+      isInTransaction: () => inRequestTransaction,
+      fork: () => em,
+      execute: async () => [],
       transactional: async (cb: (tx: unknown) => Promise<unknown>) => {
         staged = [];
         try {
-          const result = await cb({});
+          const result = await cb({ execute: async () => [] });
           for (const row of staged)
             store.set(`${row.tenantId}|${row.idempotencyKey}`, row);
           return result;
@@ -144,6 +157,16 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         return row;
       },
       findByIdForUpdate: async (_tx: unknown, id: string) => byId(id),
+      findDispatchMarksByTenant: async (_em: unknown, tenantId: string) =>
+        [...store.values()].filter(
+          (r) =>
+            r.tenantId === tenantId &&
+            typeof r.gatewayIntentRef === 'string' &&
+            r.gatewayIntentRef.startsWith('dispatching:') &&
+            [CONCEPTS.PI_PENDING, CONCEPTS.PI_PROCESSING].includes(
+              r.statusConceptId,
+            ),
+        ),
       // El tenant va en el mismo `WHERE`: la fila ajena no se devuelve (ni se espera).
       findByIdAndTenantForUpdate: async (
         _tx: unknown,
@@ -266,6 +289,7 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
     return {
       intents,
       transactions,
+      realTransactions,
       charge,
       store,
       assess,
@@ -1170,9 +1194,11 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
       { kind: 'execute_then_status' as const, status: 503 as const },
       { kind: 'execute_then_status' as const, status: 503 as const },
     ];
-    const staleBy = (row: Row, ms: number) => {
-      row.updatedAt = new Date(Date.now() - ms);
+    /** Envejece la reserva de la intención: la fecha vive DENTRO de la marca. */
+    const ageMark = (row: Row, ms: number) => {
+      row.gatewayIntentRef = newDispatchMark(Date.now() - ms);
     };
+    const HOUR = 3_600_000;
 
     describe('correcto', () => {
       it('un despacho exitoso reemplaza la marca por el pi_ real', async () => {
@@ -1340,22 +1366,44 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         expect(isDispatchMark(a.gatewayIntentRef)).toBe(true);
       });
 
-      it('el reintento con la marca vuelve a pasar TODAS las compuertas: un DECLINE posterior lo frena sin llamar', async () => {
+      it.each([
+        ['REVIEW', 'REVIEW' as const],
+        ['DECLINE', 'DECLINE' as const],
+      ])(
+        'P9: un riesgo %s posterior al 504 NO impide recuperar el cobro que pudo crearse (el riesgo se evaluó antes de reservar)',
+        async (_name, decision) => {
+          const d = build(true);
+          const { a } = await pair(d);
+          double.script = ambiguous();
+          await expect(
+            d.transactions.processTransaction(a.id, sale(), actor),
+          ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
+          expect(double.createdCount).toBe(1);
+          d.assess(a.id, decision);
+
+          const again = await d.transactions.processTransaction(
+            a.id,
+            sale(),
+            actor,
+          );
+
+          expect(again.gatewayTransactionRef).toBe(
+            [...double.created.values()][0].intent.id,
+          );
+          expect(double.createdCount).toBe(1);
+        },
+      );
+
+      it('control P9: sin marca ni pi_, un riesgo DECLINE sí frena el primer despacho', async () => {
         const d = build(true);
         const { a } = await pair(d);
-        double.script = ambiguous();
-        await expect(
-          d.transactions.processTransaction(a.id, sale(), actor),
-        ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
         d.assess(a.id, 'DECLINE');
-        double.calls.length = 0;
 
         await expect(
           d.transactions.processTransaction(a.id, sale(), actor),
         ).rejects.toMatchObject({
           reason: PaymentsErrorReason.PAYMENT_INTENT_RISK_DECLINED,
         });
-
         expect(double.calls).toHaveLength(0);
       });
 
@@ -1374,47 +1422,105 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
       });
     });
 
-    describe('límite: expiración de una reserva abandonada (crash antes de asociar)', () => {
-      it('una marca VIGENTE (dentro del plazo) bloquea a las demás', async () => {
-        const d = build(true);
-        const { a, b } = await pair(d);
+    describe('límite: una reserva vencida NO es permiso para cobrar (regla 11)', () => {
+      const ambiguousA = async (d: ReturnType<typeof build>, a: Row) => {
         double.script = ambiguous();
         await expect(
           d.transactions.processTransaction(a.id, sale(), actor),
         ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
-        staleBy(a, d.charge.dispatchLeaseMs - 60_000);
+      };
+
+      it('una marca VIGENTE (dentro del plazo) bloquea a las demás, sin pedir conciliación', async () => {
+        const d = build(true);
+        const { a, b } = await pair(d);
+        await ambiguousA(d, a);
+        ageMark(a, d.charge.dispatchLeaseMs - 60_000);
+        const required = jest.spyOn(gatewayMetrics, 'reconciliationRequired');
 
         await expect(
           d.transactions.processTransaction(b.id, sale(), actor),
         ).rejects.toMatchObject({
           reason: PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
         });
+        expect(required).not.toHaveBeenCalled();
+        required.mockRestore();
       });
 
-      it('una marca VENCIDA deja de bloquear a las OTRAS intenciones: la deuda no queda bloqueada para siempre', async () => {
+      it.each([
+        ['apenas vencida', 60_000],
+        ['de hace 5 horas', 5 * HOUR],
+        ['de hace 30 horas', 30 * HOUR],
+      ])(
+        'una marca VENCIDA (%s) SIGUE bloqueando a las OTRAS intenciones (409): no se abre un segundo cobro y queda para conciliar',
+        async (_name, extra) => {
+          const d = build(true);
+          const { a, b } = await pair(d);
+          await ambiguousA(d, a);
+          ageMark(a, d.charge.dispatchLeaseMs + extra);
+          const required = jest.spyOn(gatewayMetrics, 'reconciliationRequired');
+          const posts = double.postCalls.length;
+
+          const error = await d.transactions
+            .processTransaction(b.id, sale(), actor)
+            .catch((e: unknown) => e);
+
+          expect(error).toMatchObject({
+            status: 409,
+            reason: PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+          });
+          expect((error as { details?: unknown }).details).toMatchObject({
+            reconciliationRequired: true,
+          });
+          expect(required).toHaveBeenCalledWith('stale_blocks_debt');
+          expect(double.postCalls).toHaveLength(posts);
+          expect(double.createdCount).toBe(1);
+          expect(b.gatewayIntentRef).toBeUndefined();
+          required.mockRestore();
+        },
+      );
+
+      it('una marca con la fecha ilegible tampoco desbloquea a nadie', async () => {
         const d = build(true);
         const { a, b } = await pair(d);
-        double.script = ambiguous();
+        await ambiguousA(d, a);
+        a.gatewayIntentRef = 'dispatching:formato-viejo';
+
         await expect(
-          d.transactions.processTransaction(a.id, sale(), actor),
-        ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
-        staleBy(a, d.charge.dispatchLeaseMs + 60_000);
-
-        await d.transactions.processTransaction(b.id, sale(), actor);
-
-        expect(b.gatewayIntentRef).toMatch(/^pi_/u);
-        // La marca vencida NO se borra: sigue siendo el rastro de un cobro que pudo crearse.
-        expect(isDispatchMark(a.gatewayIntentRef)).toBe(true);
+          d.transactions.processTransaction(b.id, sale(), actor),
+        ).rejects.toMatchObject({
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        });
+        expect(double.createdCount).toBe(1);
       });
 
-      it('la intención dueña de una marca vencida conserva su camino de salida: repetir con la misma clave', async () => {
+      it('la marca vencida es consultable: listDispatchesRequiringReconciliation la lista y no lista la vigente', async () => {
+        const d = build(true);
+        const { a, b } = await pair(d);
+        await ambiguousA(d, a);
+        double.script = ambiguous();
+        // B es de otra deuda para poder reservar también.
+        b.sourceRefId = randomUUID();
+        d.debts.set(b.sourceRefId, {
+          ...d.debts.get(DEBT_ID),
+          id: b.sourceRefId,
+        });
+        await expect(
+          d.transactions.processTransaction(b.id, sale(), actor),
+        ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
+        ageMark(a, d.charge.dispatchLeaseMs + 1_000);
+
+        const listed =
+          await d.charge.listDispatchesRequiringReconciliation(TENANT);
+
+        expect(listed.map((x) => x.intentId)).toEqual([a.id]);
+        expect(listed[0].ageMs).toBeGreaterThan(d.charge.dispatchLeaseMs);
+      });
+
+      it('la intención dueña de una marca vencida (menos de 23 h) conserva su salida: repetir con la misma clave, sin segundo cobro', async () => {
         const d = build(true);
         const { a } = await pair(d);
-        double.script = ambiguous();
-        await expect(
-          d.transactions.processTransaction(a.id, sale(), actor),
-        ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
-        staleBy(a, d.charge.dispatchLeaseMs + 60_000);
+        await ambiguousA(d, a);
+        ageMark(a, d.charge.dispatchLeaseMs + 60_000);
 
         const again = await d.transactions.processTransaction(
           a.id,
@@ -1426,22 +1532,451 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         expect(double.createdCount).toBe(1);
       });
 
-      it('si OTRA intención ya tomó la deuda tras el vencimiento, la dueña de la marca vencida se rechaza (no hay dos cobros) y queda registrado', async () => {
+      it('un reintento que vuelve a terminar ambiguo CONSERVA la fecha original de la marca (no la renueva)', async () => {
         const d = build(true);
-        const { a, b } = await pair(d);
+        const { a } = await pair(d);
+        await ambiguousA(d, a);
+        ageMark(a, 2 * HOUR);
+        const original = a.gatewayIntentRef;
         double.script = ambiguous();
+
         await expect(
           d.transactions.processTransaction(a.id, sale(), actor),
         ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
-        staleBy(a, d.charge.dispatchLeaseMs + 60_000);
-        await d.transactions.processTransaction(b.id, sale(), actor);
+
+        // Renovar la fecha ocultaría cuánto lleva la clave en la pasarela (24 h);
+        // el valor sí es nuevo (cada petición libera sólo la suya, P2).
+        expect(dispatchMarkStamp(a.gatewayIntentRef)).toBe(
+          dispatchMarkStamp(original),
+        );
+        expect(a.gatewayIntentRef).not.toBe(original);
+      });
+
+      it.each([
+        ['más de 23 h', () => newDispatchMark(Date.now() - 25 * HOUR)],
+        ['fecha ilegible', () => 'dispatching:formato-viejo'],
+      ])(
+        'la dueña de una marca de %s NO reenvía: 409 RECONCILIATION_REQUIRED, cero llamadas y la marca queda',
+        async (_name, makeMark) => {
+          const d = build(true);
+          const { a } = await pair(d);
+          await ambiguousA(d, a);
+          a.gatewayIntentRef = makeMark();
+          const mark = a.gatewayIntentRef;
+          const required = jest.spyOn(gatewayMetrics, 'reconciliationRequired');
+          const posts = double.postCalls.length;
+
+          await expect(
+            d.transactions.processTransaction(a.id, sale(), actor),
+          ).rejects.toMatchObject({
+            status: 409,
+            reason: PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+          });
+
+          expect(double.postCalls).toHaveLength(posts);
+          expect(a.gatewayIntentRef).toBe(mark);
+          expect(required).toHaveBeenCalledWith('too_old_to_resend');
+          required.mockRestore();
+        },
+      );
+    });
+
+    describe('conciliación explícita (reconcileGatewayDispatch)', () => {
+      const reconcile = (
+        d: ReturnType<typeof build>,
+        id: string,
+        method = 'qr',
+      ) =>
+        runWithTenant(TENANT, () =>
+          d.realTransactions.reconcileGatewayDispatch(id, {
+            paymentMethodType: method as 'qr',
+          }),
+        );
+      const ambiguousExecuted = async (d: ReturnType<typeof build>, a: Row) => {
+        double.script = [
+          { kind: 'execute_then_drop' },
+          { kind: 'execute_then_drop' },
+          { kind: 'execute_then_drop' },
+        ];
+        await expect(
+          d.transactions.processTransaction(a.id, sale(), actor),
+        ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
+      };
+
+      it('la pasarela SÍ tenía el cobro: se reenvía la MISMA clave, se asocia el MISMO pi_ y se consulta su estado; no hay segundo cobro', async () => {
+        const d = build(true);
+        const { a, b } = await pair(d);
+        await ambiguousExecuted(d, a);
+        ageMark(a, d.charge.dispatchLeaseMs + 5 * HOUR);
+        const original = [...double.created.values()][0].intent.id;
+        double.calls.length = 0;
+        const reconciled = jest.spyOn(gatewayMetrics, 'reconciled');
+
+        const res = await reconcile(d, a.id);
+
+        expect(res.gatewayTransactionRef).toBe(original);
+        expect(a.gatewayIntentRef).toBe(original);
+        expect(double.createdCount).toBe(1);
+        expect(double.calls.map((c) => c.method)).toEqual(['POST', 'GET']);
+        expect(double.postCalls[0].idempotencyKey).toBe(
+          deriveGatewayIdempotencyKey({
+            tenantId: TENANT,
+            sourceRefType: 'payment_debt',
+            sourceRefId: DEBT_ID,
+            invoiceId: undefined,
+            localIdempotencyKey: 'cobro-consulta-001',
+          }),
+        );
+        expect(reconciled).toHaveBeenCalledWith('replayed');
+        // Ahora SÍ hay un cobro real en vuelo: B sigue sin poder cobrar la deuda.
+        await expect(
+          d.transactions.processTransaction(b.id, sale(), actor),
+        ).rejects.toMatchObject({
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        });
+        reconciled.mockRestore();
+      });
+
+      it('el primer envío NUNCA llegó: la conciliación crea el cobro de ESA intención, una sola vez', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        double.script = [
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+          { kind: 'drop_before' },
+        ];
+        await expect(
+          d.transactions.processTransaction(a.id, sale(), actor),
+        ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
+        expect(double.createdCount).toBe(0);
+        ageMark(a, d.charge.dispatchLeaseMs + 60_000);
+        const reconciled = jest.spyOn(gatewayMetrics, 'reconciled');
+
+        const res = await reconcile(d, a.id);
+
+        expect(double.createdCount).toBe(1);
+        expect(a.gatewayIntentRef).toBe(res.gatewayTransactionRef);
+        expect(reconciled).toHaveBeenCalledWith('created');
+        reconciled.mockRestore();
+      });
+
+      it('con la marca de más de 23 h NO reenvía y pide conciliación manual', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        await ambiguousExecuted(d, a);
+        ageMark(a, 25 * HOUR);
+        const posts = double.postCalls.length;
+
+        await expect(reconcile(d, a.id)).rejects.toMatchObject({
+          status: 409,
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+        });
+
+        expect(double.postCalls).toHaveLength(posts);
+        expect(isDispatchMark(a.gatewayIntentRef)).toBe(true);
+      });
+
+      it('sin reserva pendiente no hay nada que conciliar (409)', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+
+        await expect(reconcile(d, a.id)).rejects.toMatchObject({
+          status: 409,
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_NOTHING_TO_RECONCILE,
+        });
+        expect(double.calls).toHaveLength(0);
+      });
+
+      it('con la pasarela apagada no hay nada que conciliar y no sale ninguna llamada', async () => {
+        const d = build(false);
+        await expect(reconcile(d, randomUUID())).rejects.toMatchObject({
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_NOTHING_TO_RECONCILE,
+        });
+        expect(double.calls).toHaveLength(0);
+      });
+
+      it('con OTRO medio de pago la pasarela contesta idempotency_key_reused: la reserva se CONSERVA (el cobro existe) y se pide conciliar', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        await ambiguousExecuted(d, a);
+        ageMark(a, d.charge.dispatchLeaseMs + 60_000);
+        const mark = a.gatewayIntentRef;
+
+        await expect(reconcile(d, a.id, 'card')).rejects.toMatchObject({
+          status: 409,
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+        });
+
+        expect(isDispatchMark(a.gatewayIntentRef)).toBe(true);
+        expect(dispatchMarkStamp(a.gatewayIntentRef)).toBe(
+          dispatchMarkStamp(mark),
+        );
+        expect(double.createdCount).toBe(1);
+      });
+
+      it('un resultado ambiguo durante la conciliación conserva la reserva', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        await ambiguousExecuted(d, a);
+        ageMark(a, d.charge.dispatchLeaseMs + 60_000);
+        const mark = a.gatewayIntentRef;
+        double.script = ambiguous();
+
+        await expect(reconcile(d, a.id)).rejects.toBeInstanceOf(
+          PaymentsGatewayResultAmbiguousException,
+        );
+
+        expect(isDispatchMark(a.gatewayIntentRef)).toBe(true);
+        expect(dispatchMarkStamp(a.gatewayIntentRef)).toBe(
+          dispatchMarkStamp(mark),
+        );
+      });
+    });
+
+    describe('P2: una petición libera sólo SU reserva', () => {
+      it('doble clic: la petición 1 recibe un rechazo definitivo mientras la 2 sigue en vuelo con su propia marca; la marca de la 2 NO se borra y otra intención sigue bloqueada', async () => {
+        const d = build(true);
+        const { a, b } = await pair(d);
+        let secondRequestMark: string | undefined;
+        double.script = [
+          { kind: 'status', status: 422, code: 'validation_failed' },
+        ];
+        // Durante la llamada de la petición 1, la petición 2 (misma intención) pasa su
+        // compuerta y reemplaza la marca por la suya.
+        double.onCreate = () => {
+          secondRequestMark = newDispatchMark(
+            dispatchMarkStamp(a.gatewayIntentRef) ?? Date.now(),
+          );
+          a.gatewayIntentRef = secondRequestMark;
+        };
 
         await expect(
           d.transactions.processTransaction(a.id, sale(), actor),
         ).rejects.toMatchObject({
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_REJECTED,
+        });
+
+        expect(a.gatewayIntentRef).toBe(secondRequestMark);
+        double.onCreate = undefined;
+        await expect(
+          d.transactions.processTransaction(b.id, sale(), actor),
+        ).rejects.toMatchObject({
           reason: PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
         });
-        expect(double.createdCount).toBe(2);
+        expect(double.createdCount).toBe(0);
+      });
+
+      it('control: sin otra petición, el rechazo definitivo sí libera la reserva propia', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        double.script = [
+          { kind: 'status', status: 422, code: 'validation_failed' },
+        ];
+        await expect(
+          d.transactions.processTransaction(a.id, sale(), actor),
+        ).rejects.toMatchObject({
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_REJECTED,
+        });
+        expect(a.gatewayIntentRef).toBeUndefined();
+      });
+    });
+
+    describe('P3: sólo un problema del contrato es definitivo', () => {
+      it.each([404, 400, 408, 413, 499])(
+        'un %i SIN cuerpo del contrato (un proxy) es ambiguo: 504 y la reserva se CONSERVA',
+        async (status) => {
+          const d = build(true);
+          const { a, b } = await pair(d);
+          double.script = [{ kind: 'bare_status', status }];
+
+          await expect(
+            d.transactions.processTransaction(a.id, sale(), actor),
+          ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
+
+          expect(isDispatchMark(a.gatewayIntentRef)).toBe(true);
+          await expect(
+            d.transactions.processTransaction(b.id, sale(), actor),
+          ).rejects.toMatchObject({
+            reason: PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+          });
+        },
+      );
+
+      it('control: un 400 CON problema del contrato sí es definitivo y libera', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        double.script = [
+          { kind: 'status', status: 400, code: 'invalid_request' },
+        ];
+        await expect(
+          d.transactions.processTransaction(a.id, sale(), actor),
+        ).rejects.toMatchObject({
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_REJECTED,
+        });
+        expect(a.gatewayIntentRef).toBeUndefined();
+      });
+    });
+
+    describe('P1: con transacción de petición (RLS_ENFORCE=true) el cupo de despachos es finito y sin cola', () => {
+      const withPool = async (poolMax: string, fn: () => Promise<void>) => {
+        const before = process.env.DB_POOL_MAX;
+        process.env.DB_POOL_MAX = poolMax;
+        try {
+          await fn();
+        } finally {
+          if (before === undefined) delete process.env.DB_POOL_MAX;
+          else process.env.DB_POOL_MAX = before;
+        }
+      };
+
+      it('pool de 4: UN solo despacho a la vez; el excedente falla AL INSTANTE con 503 PAYMENT_GATEWAY_BUSY, sin reservar ni llamar, y reintentar con la misma clave funciona', async () => {
+        await withPool('4', async () => {
+          const d = build(true, true, true);
+          const { a, b } = await pair(d);
+          b.sourceRefId = randomUUID();
+          d.debts.set(b.sourceRefId, {
+            ...d.debts.get(DEBT_ID),
+            id: b.sourceRefId,
+          });
+          let busyAt = -1;
+          double.latencyMs = 150;
+          const first = d.transactions.processTransaction(a.id, sale(), actor);
+          await new Promise((resolve) => setTimeout(resolve, 20));
+          const t0 = Date.now();
+          const second = await d.transactions
+            .processTransaction(b.id, sale(), actor)
+            .catch((e: unknown) => e);
+          busyAt = Date.now() - t0;
+
+          expect(second).toMatchObject({
+            status: 503,
+            reason: PaymentsErrorReason.PAYMENT_GATEWAY_BUSY,
+          });
+          expect(busyAt).toBeLessThan(100);
+          expect(b.gatewayIntentRef).toBeUndefined();
+          await first;
+          double.latencyMs = 0;
+
+          // El cupo se libera: el reintento de la rechazada pasa.
+          await d.transactions.processTransaction(b.id, sale(), actor);
+          expect(double.createdCount).toBe(2);
+        });
+      });
+
+      it('el cupo se libera también cuando el despacho falla (no se filtran cupos)', async () => {
+        await withPool('4', async () => {
+          const d = build(true, true, true);
+          const { a } = await pair(d);
+          double.script = [
+            { kind: 'status', status: 422, code: 'validation_failed' },
+          ];
+          for (let i = 0; i < 5; i += 1) {
+            await expect(
+              d.transactions.processTransaction(a.id, sale(), actor),
+            ).rejects.toMatchObject({
+              reason: PaymentsErrorReason.PAYMENT_GATEWAY_REJECTED,
+            });
+            double.script = [
+              { kind: 'status', status: 422, code: 'validation_failed' },
+            ];
+          }
+        });
+      });
+
+      it('sin transacción de petición (RLS_ENFORCE=false) no hay cupo: 6 despachos simultáneos entran', async () => {
+        await withPool('4', async () => {
+          const d = build(true);
+          double.latencyMs = 50;
+          const ids: string[] = [];
+          for (let i = 0; i < 6; i += 1) {
+            const src = randomUUID();
+            d.debts.set(src, { ...d.debts.get(DEBT_ID), id: src });
+            const res = await d.intents.createIntent(
+              dto({ idempotencyKey: `n-${i}`, sourceRefId: src }),
+              actor,
+            );
+            d.assess(res.id, 'APPROVE');
+            ids.push(res.id);
+          }
+          const results = await Promise.allSettled(
+            ids.map((id) =>
+              d.transactions.processTransaction(id, sale(), actor),
+            ),
+          );
+          expect(results.every((r) => r.status === 'fulfilled')).toBe(true);
+        });
+      });
+    });
+
+    describe('F1-A: un 4xx final NO libera la reserva si un intento previo de la misma llamada pudo llegar', () => {
+      it('503 (ejecutó) y luego 422 definitivo: 504 ambiguo y la marca se CONSERVA; otra intención sigue bloqueada', async () => {
+        const d = build(true);
+        const { a, b } = await pair(d);
+        double.script = [
+          { kind: 'execute_then_status', status: 503 },
+          { kind: 'status', status: 422, code: 'validation_failed' },
+        ];
+
+        await expect(
+          d.transactions.processTransaction(a.id, sale(), actor),
+        ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
+
+        expect(isDispatchMark(a.gatewayIntentRef)).toBe(true);
+        expect(double.createdCount).toBe(1);
+        await expect(
+          d.transactions.processTransaction(b.id, sale(), actor),
+        ).rejects.toMatchObject({
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        });
+      });
+
+      it('corte de conexión y luego 429 agotado: se conserva', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        double.script = [
+          { kind: 'execute_then_drop' },
+          { kind: 'status', status: 429, code: 'rate_limited' },
+          { kind: 'status', status: 429, code: 'rate_limited' },
+        ];
+
+        await expect(
+          d.transactions.processTransaction(a.id, sale(), actor),
+        ).rejects.toBeInstanceOf(PaymentsGatewayResultAmbiguousException);
+
+        expect(isDispatchMark(a.gatewayIntentRef)).toBe(true);
+      });
+
+      it('control: un 422 en el ÚNICO intento (todos definitivos) sí libera la reserva', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        double.script = [
+          { kind: 'status', status: 422, code: 'validation_failed' },
+        ];
+
+        await expect(
+          d.transactions.processTransaction(a.id, sale(), actor),
+        ).rejects.toMatchObject({
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_REJECTED,
+        });
+
+        expect(a.gatewayIntentRef).toBeUndefined();
+      });
+
+      it('control: 429 y luego 422 (todos definitivos) libera la reserva', async () => {
+        const d = build(true);
+        const { a } = await pair(d);
+        double.script = [
+          { kind: 'status', status: 429, code: 'rate_limited' },
+          { kind: 'status', status: 422, code: 'validation_failed' },
+        ];
+
+        await expect(
+          d.transactions.processTransaction(a.id, sale(), actor),
+        ).rejects.toMatchObject({
+          reason: PaymentsErrorReason.PAYMENT_GATEWAY_REJECTED,
+        });
+
+        expect(a.gatewayIntentRef).toBeUndefined();
       });
     });
 

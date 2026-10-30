@@ -100,6 +100,12 @@ export enum PaymentsErrorReason {
   PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT = 'PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT',
   /** La intención parece cobrar una deuda (propósito `DEBT` o referencia de origen) pero no se puede saber cuál: no se cobra a ciegas. */
   PAYMENT_GATEWAY_DEBT_UNRESOLVED = 'PAYMENT_GATEWAY_DEBT_UNRESOLVED',
+  /** Hay un cobro posiblemente creado en la pasarela que la API no tiene asociado: se necesita conciliarlo (reenviar con la misma clave, o a mano si ya no se puede). */
+  PAYMENT_GATEWAY_RECONCILIATION_REQUIRED = 'PAYMENT_GATEWAY_RECONCILIATION_REQUIRED',
+  /** Demasiados cobros por la pasarela en curso en este proceso (límite de concurrencia con RLS): reintentable con la misma clave. */
+  PAYMENT_GATEWAY_BUSY = 'PAYMENT_GATEWAY_BUSY',
+  /** La intención no tiene una reserva de despacho pendiente: no hay nada que conciliar. */
+  PAYMENT_GATEWAY_NOTHING_TO_RECONCILE = 'PAYMENT_GATEWAY_NOTHING_TO_RECONCILE',
   /** Los webhooks de la pasarela están desactivados (`payments.via_gateway` apagado). */
   GATEWAY_WEBHOOKS_DISABLED = 'GATEWAY_WEBHOOKS_DISABLED',
   /** El webhook no trae el cuerpo crudo necesario para verificar la firma. */

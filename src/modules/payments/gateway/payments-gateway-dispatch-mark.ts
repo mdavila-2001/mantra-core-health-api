@@ -15,24 +15,47 @@ import type { PaymentsGatewayConfig } from './payments-gateway.env';
  * ve cualquier otra transacción, sin tocar el esquema y sin sostener ni una
  * conexión ni un bloqueo durante la llamada HTTP.
  *
- * Una marca nunca es un `pi_…`: el receptor de webhooks sólo acepta referencias
- * con la forma `pi_[a-z0-9]{10,40}`, así que ningún evento puede resolver a una
- * intención por su marca. `associate` la reemplaza por el `pi_…` real.
+ * Formato `dispatching:<epoch-ms>:<uuid>`. La fecha va dentro de la marca (y no se
+ * deduce de `updated_at`, que cualquier escritura posterior refresca) porque de
+ * ella depende la única decisión peligrosa: si todavía se puede reenviar con la
+ * misma `Idempotency-Key`. Una marca no es un `pi_…`: el receptor de webhooks sólo
+ * acepta referencias con la forma `pi_[a-z0-9]{10,40}`, así que ningún evento
+ * resuelve a una intención por su marca. `associate` la reemplaza por el `pi_…`.
+ *
+ * **Una marca nunca vence como permiso para cobrar.** Un resultado ambiguo no
+ * prueba que la pasarela no ejecutó la operación (regla 11): mientras la intención
+ * no tenga su `pi_…`, la marca bloquea a las OTRAS intenciones de la deuda sea cual
+ * sea su antigüedad. Pasado el plazo (`dispatchLeaseMs`) sólo cambia de clase:
+ * deja de ser «en vuelo» y pasa a «requiere conciliación» (log, contador y
+ * consulta). La salida es repetir la creación con la MISMA clave
+ * (`reconcileGatewayDispatch`), dentro de lo que dura la clave en la pasarela.
  */
 export const DISPATCH_MARK_PREFIX = 'dispatching:';
 
-/** Plazo mínimo de una reserva antes de considerarla abandonada (15 minutos). */
+/** Plazo mínimo para que una reserva sin `pi_` pase a «requiere conciliación» (15 minutos). */
 export const MIN_DISPATCH_LEASE_MS = 15 * 60_000;
+
+/**
+ * Cuánto retiene la pasarela una `Idempotency-Key` (24 h, `common.yaml`). Pasado ese
+ * plazo, repetir la misma clave puede crear un SEGUNDO cobro.
+ */
+export const GATEWAY_IDEMPOTENCY_RETENTION_MS = 24 * 3_600_000;
+
+/**
+ * Antigüedad máxima de una marca para reenviar con la misma clave: una hora menos
+ * que la retención de la pasarela, de margen para los relojes y la demora entre la
+ * marca y el primer envío. Más vieja —o con una fecha ilegible— no se reenvía.
+ */
+export const MAX_RESEND_AGE_MS = GATEWAY_IDEMPOTENCY_RETENTION_MS - 3_600_000;
 
 /** Tope del backoff entre reintentos del cliente (ver `PaymentsGatewayClient.send`). */
 const CLIENT_MAX_DELAY_MS = 5_000;
 
-/**
- * Valor nuevo de marca. Lleva un identificador único sólo para que dos
- * reservas sucesivas de la misma intención sean distinguibles en el log.
- */
-export function newDispatchMark(): string {
-  return `${DISPATCH_MARK_PREFIX}${randomUUID()}`;
+const MARK_PATTERN = /^dispatching:(\d{10,16}):[0-9a-f-]{36}$/u;
+
+/** Valor nuevo de marca, fechado en `nowMs`. */
+export function newDispatchMark(nowMs: number = Date.now()): string {
+  return `${DISPATCH_MARK_PREFIX}${nowMs}:${randomUUID()}`;
 }
 
 /** `true` si el valor es una marca de despacho y no un `pi_…` de la pasarela. */
@@ -40,18 +63,37 @@ export function isDispatchMark(ref: string | null | undefined): boolean {
   return typeof ref === 'string' && ref.startsWith(DISPATCH_MARK_PREFIX);
 }
 
+/** Fecha (epoch en ms) escrita dentro de la marca, o `undefined` si es ilegible. */
+export function dispatchMarkStamp(
+  ref: string | null | undefined,
+): number | undefined {
+  if (!isDispatchMark(ref)) return undefined;
+  const match = MARK_PATTERN.exec(ref as string);
+  if (!match) return undefined;
+  const stamp = Number(match[1]);
+  return Number.isSafeInteger(stamp) ? stamp : undefined;
+}
+
 /**
- * Cuánto vive una reserva antes de dejar de bloquear a las demás intenciones de
- * la deuda.
+ * Antigüedad de una marca en milisegundos, o `undefined` si la fecha no se puede
+ * leer (marca con otro formato o fecha en el futuro lejano). Quien decide con ella
+ * trata lo ilegible como «no se sabe» y nunca como «reciente».
+ */
+export function dispatchMarkAgeMs(
+  ref: string | null | undefined,
+  nowMs: number,
+): number | undefined {
+  const stamp = dispatchMarkStamp(ref);
+  return stamp === undefined ? undefined : Math.max(0, nowMs - stamp);
+}
+
+/**
+ * Cuánto tarda una reserva sin `pi_` en pasar de «en vuelo» a «requiere
+ * conciliación».
  *
- * Una reserva sólo puede estar legítimamente «en vuelo» mientras dura la llamada:
+ * Una reserva sólo está legítimamente en vuelo mientras dura la llamada:
  * `maxAttempts` intentos de `timeoutMs` más las esperas entre ellos. El plazo es
- * como mínimo 15 minutos y nunca menos de cuatro veces ese peor caso, para que
- * una reserva viva jamás se confunda con una abandonada. Pasado el plazo la
- * reserva deja de bloquear a las OTRAS intenciones (la deuda no queda bloqueada
- * para siempre por un proceso que murió); la intención dueña de la marca
- * conserva su camino de salida —repetir la operación con la misma clave— y la
- * marca no se borra: sigue siendo el rastro de un cobro que pudo crearse.
+ * como mínimo 15 minutos y nunca menos de cuatro veces ese peor caso.
  */
 export function dispatchLeaseMs(
   config: Pick<PaymentsGatewayConfig, 'timeoutMs' | 'maxAttempts'>,
@@ -62,28 +104,48 @@ export function dispatchLeaseMs(
   return Math.max(MIN_DISPATCH_LEASE_MS, 4 * worstCaseMs);
 }
 
-/** Lo que hace falta de una intención para decidir si su cobro bloquea a otra. */
+/**
+ * ¿Se puede reenviar la creación con la misma `Idempotency-Key`? Sólo si la marca
+ * tiene fecha legible y es más joven que `MAX_RESEND_AGE_MS`: pasado ese plazo la
+ * pasarela pudo haber olvidado la clave y repetirla podría crear un segundo cobro,
+ * así que no se reenvía y se pide conciliación manual. Ante la duda, no.
+ */
+export function canResendWithSameKey(
+  ref: string | null | undefined,
+  nowMs: number,
+): boolean {
+  const age = dispatchMarkAgeMs(ref, nowMs);
+  return age !== undefined && age < MAX_RESEND_AGE_MS;
+}
+
+/** Lo que hace falta de una intención para decidir cómo bloquea a otra. */
 export interface InFlightCandidate {
   /** Referencia del cobro o marca de despacho. */
   gatewayIntentRef?: string | null;
-  /** Última escritura de la fila (la reserva se fecha con ella). */
-  updatedAt?: Date | null;
 }
 
 /**
- * ¿Esta intención, que apunta a la deuda y no está terminada, bloquea el cobro de
- * otra? Un `pi_…` real bloquea siempre; una marca bloquea mientras es reciente
- * (`updatedAt` dentro del plazo) y **ante la duda bloquea**: sin fecha legible
- * no se desbloquea.
+ * Cómo cuenta, para el cobro de OTRA intención de la misma deuda, una intención
+ * que apunta a la deuda y no está terminada:
+ *
+ * - `none`: sin referencia; no hay cobro ni reserva.
+ * - `in_flight`: un `pi_…` real, o una marca reciente (la llamada puede seguir en
+ *   curso).
+ * - `reconciliation_required`: una marca más vieja que el plazo, o con una fecha
+ *   ilegible. **Bloquea igual que `in_flight`**: la ambigüedad no prueba que la
+ *   pasarela no creó el cobro. Sólo se distingue para dejar constancia.
  */
-export function blocksOtherCharges(
+export type InFlightClass = 'none' | 'in_flight' | 'reconciliation_required';
+
+export function classifyInFlight(
   candidate: InFlightCandidate,
   nowMs: number,
   leaseMs: number,
-): boolean {
-  if (!candidate.gatewayIntentRef) return false;
-  if (!isDispatchMark(candidate.gatewayIntentRef)) return true;
-  const stamp = candidate.updatedAt?.getTime();
-  if (stamp === undefined || Number.isNaN(stamp)) return true;
-  return nowMs - stamp < leaseMs;
+): InFlightClass {
+  if (!candidate.gatewayIntentRef) return 'none';
+  if (!isDispatchMark(candidate.gatewayIntentRef)) return 'in_flight';
+  const age = dispatchMarkAgeMs(candidate.gatewayIntentRef, nowMs);
+  return age !== undefined && age < leaseMs
+    ? 'in_flight'
+    : 'reconciliation_required';
 }

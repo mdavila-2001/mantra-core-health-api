@@ -16,12 +16,22 @@ import {
 } from '../gateway/payments-gateway.env';
 import { PaymentsGatewayClient } from '../gateway/payments-gateway.client';
 import {
+  classifyInFlight,
   dispatchLeaseMs,
+  dispatchMarkAgeMs,
+  dispatchMarkStamp,
   isDispatchMark,
   newDispatchMark,
 } from '../gateway/payments-gateway-dispatch-mark';
+import { gatewayMetrics } from '../gateway/payments-gateway-metrics';
+import {
+  DispatchSlots,
+  dispatchConcurrencyLimit,
+  readPoolMax,
+} from '../gateway/payments-gateway-concurrency';
 import { runCommitted } from './payments-committed-transaction';
 import {
+  PaymentsGatewayBusyException,
   PaymentsGatewayError,
   PaymentsGatewayResultAmbiguousException,
   PaymentsGatewayUnavailableException,
@@ -43,6 +53,13 @@ import type {
   GatewayPaymentMethodType,
 } from '../gateway/payments-gateway.types';
 
+/**
+ * `422 idempotency_key_reused`: la pasarela YA tiene una petición con esta clave y
+ * otro cuerpo, o sea que un cobro de esta intención existe. No es un rechazo que
+ * libere la reserva.
+ */
+const IDEMPOTENCY_KEY_REUSED = 'idempotency_key_reused';
+
 /** Vida mínima y máxima de un cobro que admite la pasarela (`expires_in_seconds`). */
 const MIN_EXPIRES_IN_SECONDS = 60;
 const MAX_EXPIRES_IN_SECONDS = 86_400;
@@ -59,6 +76,8 @@ export interface GatewayChargeable {
   currencyConceptId: string;
   /** Clave de idempotencia local. */
   idempotencyKey: string;
+  /** Referencia del cobro o marca de despacho que la intención lleva ahora. */
+  gatewayIntentRef?: string | null;
   /** Tipo del recurso de origen, si lo hay. */
   sourceRefType?: string | null;
   /** Id del recurso de origen (deuda u orden), si lo hay. */
@@ -105,6 +124,9 @@ export interface GatewayDispatchResult {
 @Injectable()
 export class PaymentsGatewayChargeService {
   private readonly client?: PaymentsGatewayClient;
+  private readonly slots = new DispatchSlots(
+    dispatchConcurrencyLimit(readPoolMax()),
+  );
 
   /**
    * @param config - Configuración validada al arrancar.
@@ -141,20 +163,80 @@ export class PaymentsGatewayChargeService {
   }
 
   /**
+   * Cupo de despacho para una petición que corre DENTRO de una transacción de
+   * petición (`RLS_ENFORCE=true`): ver `dispatchConcurrencyLimit`. Sin cupo falla
+   * al instante con `503 PAYMENT_GATEWAY_BUSY` (reintentable con la misma clave),
+   * sin reservar ni llamar a nada.
+   *
+   * @returns La función que libera el cupo; hay que llamarla siempre (`finally`).
+   */
+  acquireDispatchSlot(intentId: string): () => void {
+    const release = this.slots.tryAcquire();
+    if (!release) {
+      this.logger.warn(
+        {
+          operation: 'payments.gateway.create',
+          intentId,
+          limit: this.slots.limit,
+        },
+        'Too many gateway dispatches in flight inside request transactions; rejecting',
+      );
+      throw new PaymentsGatewayBusyException(intentId);
+    }
+    return release;
+  }
+
+  /**
    * Reserva el despacho: escribe la marca en `gateway_intent_ref`. Se llama DENTRO
    * de la transacción de la compuerta, con la deuda bloqueada, para que se confirme
    * junto con ella y antes de llamar a la pasarela. A partir de ese `COMMIT` las
    * demás intenciones de la deuda ven este cobro como «en vuelo» (`pi_…` todavía
    * desconocido incluido) y la propia intención puede repetir la operación con la
    * misma clave sin bloquearse.
+   *
+   * Si la intención YA tiene una marca (reintento tras un resultado ambiguo) la
+   * nueva conserva su fecha original: de ella depende saber cuánto lleva la clave
+   * en la pasarela, y renovarla ocultaría que pasó más de lo que la pasarela
+   * recuerda. El valor, en cambio, es nuevo en cada petición: así una petición que
+   * termina con un rechazo definitivo sólo libera su propia reserva y nunca la de
+   * otra petición de la misma intención que sigue en vuelo.
    */
   reserveDispatch(intent: {
     gatewayIntentRef?: string;
     updatedAt: Date;
     updatedByUserId?: string;
   }): void {
-    intent.gatewayIntentRef = newDispatchMark();
+    // Cada petición escribe SU marca (valor único) para poder liberar sólo la
+    // suya (`releaseReservation`); si ya había una, la fecha es la original.
+    const stamp = dispatchMarkStamp(intent.gatewayIntentRef);
+    intent.gatewayIntentRef = newDispatchMark(stamp ?? Date.now());
     touch(intent, undefined);
+  }
+
+  /**
+   * Intenciones del tenant con una reserva de despacho que ya no está en vuelo
+   * (más vieja que `dispatchLeaseMs`, o con la fecha ilegible) y sigue sin `pi_…`:
+   * son las que requieren conciliación. Bloquean la deuda hasta que alguien las
+   * concilia (`PaymentsTransactionsService.reconcileGatewayDispatch`).
+   */
+  async listDispatchesRequiringReconciliation(
+    tenantId: string,
+  ): Promise<{ intentId: string; ageMs: number | null }[]> {
+    const nowMs = Date.now();
+    const marked = await this.intentsRepo.findDispatchMarksByTenant(
+      this.em,
+      tenantId,
+    );
+    return marked
+      .filter(
+        (row) =>
+          classifyInFlight(row, nowMs, this.dispatchLeaseMs) ===
+          'reconciliation_required',
+      )
+      .map((row) => ({
+        intentId: row.id,
+        ageMs: dispatchMarkAgeMs(row.gatewayIntentRef, nowMs) ?? null,
+      }));
   }
 
   /**
@@ -263,6 +345,9 @@ export class PaymentsGatewayChargeService {
     intent: GatewayChargeable,
     methodType: GatewayPaymentMethodType | undefined,
   ): Promise<GatewayDispatchResult> {
+    // La marca que escribió ESTA petición, leída antes de llamar: `releaseReservation`
+    // sólo borra una marca con ese valor.
+    const ownMark = intent.gatewayIntentRef;
     let request: GatewayPaymentIntentCreate;
     let idempotencyKey: string;
     let client: PaymentsGatewayClient;
@@ -282,7 +367,7 @@ export class PaymentsGatewayChargeService {
       client = this.client;
     } catch (error) {
       // Nada salió hacia la pasarela: la reserva no tiene motivo para quedar.
-      await this.releaseReservation(intent);
+      await this.releaseReservation(intent, ownMark);
       throw error;
     }
 
@@ -311,8 +396,12 @@ export class PaymentsGatewayChargeService {
       // Sólo una respuesta definitiva de la pasarela prueba que no creó nada y
       // libera la reserva. Un resultado ambiguo (504) la CONSERVA: el cobro pudo
       // haberse creado, y mientras tanto la deuda no se ofrece a otra intención.
-      if (error instanceof PaymentsGatewayError && !error.isAmbiguous) {
-        await this.releaseReservation(intent);
+      if (
+        error instanceof PaymentsGatewayError &&
+        !error.isAmbiguous &&
+        error.code !== IDEMPOTENCY_KEY_REUSED
+      ) {
+        await this.releaseReservation(intent, ownMark);
       }
       throw this.toDomainError(error, intent.id);
     }
@@ -409,10 +498,13 @@ export class PaymentsGatewayChargeService {
    * borra. Si no se puede liberar no se enmascara el error que la motivó: la
    * marca vence sola (`dispatchLeaseMs`) y la propia intención puede repetir.
    */
-  private async releaseReservation(intent: {
-    id: string;
-    tenantId: string;
-  }): Promise<void> {
+  private async releaseReservation(
+    intent: { id: string; tenantId: string },
+    ownMark: string | null | undefined,
+  ): Promise<void> {
+    // Sólo la marca que escribió ESTA petición: si otra petición de la misma
+    // intención la reemplazó, sigue en vuelo y su reserva no se toca.
+    if (!isDispatchMark(ownMark)) return;
     try {
       await runCommitted(this.em, intent.tenantId, async (tx) => {
         const row = await this.intentsRepo.findByIdAndTenantForUpdate(
@@ -420,7 +512,7 @@ export class PaymentsGatewayChargeService {
           intent.id,
           intent.tenantId,
         );
-        if (row && isDispatchMark(row.gatewayIntentRef)) {
+        if (row && row.gatewayIntentRef === ownMark) {
           row.gatewayIntentRef = undefined;
           touch(row, undefined);
         }
@@ -477,6 +569,21 @@ export class PaymentsGatewayChargeService {
       requestId: error.details.requestId,
     };
 
+    // La clave ya existe en la pasarela con otro cuerpo (típicamente otro medio de
+    // pago): un cobro de esta intención existe y la reserva se conserva. No se
+    // reintenta con otro cuerpo; hay que conciliar contra la pasarela.
+    if (error.code === IDEMPOTENCY_KEY_REUSED) {
+      this.logger.error(
+        { ...log, resolution: 'reconcile-against-gateway' },
+        'Gateway already holds this idempotency key with a different body; a charge may exist',
+      );
+      gatewayMetrics.reconciliationRequired('key_reused');
+      return new ConflictException(
+        'La pasarela ya tiene un cobro con esta clave y otro cuerpo (¿otro medio de pago?). Reintentá con el mismo medio de pago de la primera vez o conciliá contra la pasarela',
+        { intentId },
+        PaymentsErrorReason.PAYMENT_GATEWAY_RECONCILIATION_REQUIRED,
+      );
+    }
     // Ambiguo: el cobro local se conserva; nada se anula ni se borra (regla 11).
     if (error.isAmbiguous) {
       this.logger.warn(

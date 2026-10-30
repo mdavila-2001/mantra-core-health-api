@@ -44,6 +44,8 @@ export type DoubleFault =
     }
   /** Ejecuta la operación y tarda más que el plazo del cliente (ambiguo y EJECUTADO). */
   | { kind: 'execute_then_hang'; ms: number }
+  /** Responde un estado HTTP SIN cuerpo (lo que haría un proxy): no es un problema del contrato. */
+  | { kind: 'bare_status'; status: number }
   /** Responde con un problema sin ejecutar nada. */
   | { kind: 'status'; status: number; code: string; retryAfter?: number }
   /** Responde 201 con un cuerpo que no cumple el contrato (la operación SÍ se ejecutó). */
@@ -189,6 +191,10 @@ export class PayGatewayDouble {
     }
 
     if (fault?.kind === 'drop_before') return void req.socket.destroy();
+    if (fault?.kind === 'bare_status') {
+      res.writeHead(fault.status);
+      return void res.end();
+    }
     if (fault?.kind === 'status') {
       return this.problem(res, fault.status, fault.code, fault.retryAfter);
     }

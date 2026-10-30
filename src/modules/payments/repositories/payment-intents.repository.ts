@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PaymentIntents } from '../entities';
-import { ConflictException, createdBy } from '../../../common';
+import { CONCEPTS, ConflictException, createdBy } from '../../../common';
 import { PaymentsErrorReason } from '../payments.error-reasons';
 
 /** Alta de una intención de pago (UC-42-01). */
@@ -153,6 +153,22 @@ export class PaymentIntentsRepository {
       { id, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
+  }
+
+  /**
+   * Intenciones del tenant con una marca de despacho y sin terminar: las que
+   * tienen (o pueden tener) un cobro en la pasarela que la API todavía no asoció.
+   * Quien las pide decide cuáles requieren conciliación según la fecha de la marca.
+   */
+  findDispatchMarksByTenant(
+    em: EntityManager,
+    tenantId: string,
+  ): Promise<PaymentIntents[]> {
+    return em.find(PaymentIntents, {
+      tenantId,
+      gatewayIntentRef: { $like: 'dispatching:%' },
+      statusConceptId: { $in: [CONCEPTS.PI_PENDING, CONCEPTS.PI_PROCESSING] },
+    });
   }
 
   /**

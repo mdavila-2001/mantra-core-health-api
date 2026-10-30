@@ -152,9 +152,44 @@ export class PaymentsGatewayClient {
     call: () => Promise<AxiosResponse>,
     options: GatewayCallOptions,
   ): Promise<AxiosResponse> {
+    // Un intento ambiguo pudo haber llegado a la pasarela y ejecutarse: si el
+    // último intento termina con un 4xx definitivo, el error final NO prueba que
+    // la operación no se ejecutó. Se recuerda para marcarlo (regla 11).
+    let earlierAttemptMayHaveReached = false;
+    try {
+      return await this.sendAttempts(operation, call, options, () => {
+        earlierAttemptMayHaveReached = true;
+      });
+    } catch (error) {
+      if (
+        error instanceof PaymentsGatewayError &&
+        earlierAttemptMayHaveReached
+      ) {
+        error.earlierAttemptMayHaveReached = true;
+      }
+      throw error;
+    }
+  }
+
+  /** Los intentos con reintento; avisa cuando uno termina ambiguo. */
+  private sendAttempts(
+    operation: string,
+    call: () => Promise<AxiosResponse>,
+    options: GatewayCallOptions,
+    onAmbiguousAttempt: () => void,
+  ): Promise<AxiosResponse> {
     return retry(
       operation,
-      async () => this.classify(await this.attempt(call)),
+      async () => {
+        try {
+          return this.classify(await this.attempt(call));
+        } catch (error) {
+          if (error instanceof PaymentsGatewayError && error.isAmbiguous) {
+            onAmbiguousAttempt();
+          }
+          throw error;
+        }
+      },
       {
         attempts: this.config.maxAttempts,
         baseDelayMs: this.config.retryBaseMs,
@@ -237,7 +272,18 @@ export class PaymentsGatewayClient {
         details,
       );
     }
-    // El resto de 4xx es respuesta definitiva del contrato: repetir no lo arregla.
+    // Un 4xx SIN el cuerpo de error del contrato no lo escribió la pasarela (un
+    // proxy, un balanceador, un corte a mitad de respuesta): no prueba que la
+    // operación no se ejecutó (regla 11). Es ambiguo; repetir no lo arregla.
+    if (!problem) {
+      throw new PaymentsGatewayError(
+        'ambiguous',
+        false,
+        `La respuesta ${status} no trae el cuerpo de error del contrato; no prueba que la pasarela no ejecutó la operación`,
+        details,
+      );
+    }
+    // El resto de 4xx CON problema del contrato es definitivo: repetir no lo arregla.
     throw new PaymentsGatewayError(
       'rejected',
       false,

@@ -3,6 +3,7 @@ import { PaymentsGatewayError } from './payments-gateway.errors';
 import {
   PayGatewayDouble,
   TEST_API_KEY,
+  type DoubleFault,
 } from './payments-gateway.double.testing';
 
 const NOT_A_SECRET_KEY = ['pk', 'live', 'loQueSeaDeCuarentaCaracteres0'].join(
@@ -242,6 +243,118 @@ describe('PaymentsGatewayClient (contra el doble HTTP)', () => {
         .createPaymentIntent(BODY, KEY)
         .catch((e: unknown) => e);
       expect((error as PaymentsGatewayError).isAmbiguous).toBe(true);
+    });
+
+    describe('P3: un 4xx SIN el cuerpo de error del contrato no es definitivo', () => {
+      it.each([404, 400, 408, 413, 499])(
+        '%i sin cuerpo (lo que haría un proxy): ambiguo, no se reintenta y no prueba que no se ejecutó',
+        async (status) => {
+          double.script = [{ kind: 'bare_status', status }];
+
+          const error = (await client()
+            .createPaymentIntent(BODY, KEY)
+            .catch((e: unknown) => e)) as PaymentsGatewayError;
+
+          expect(error).toBeInstanceOf(PaymentsGatewayError);
+          expect(error.ambiguity).toBe('ambiguous');
+          expect(error.isAmbiguous).toBe(true);
+          expect(error.retryable).toBe(false);
+          expect(double.postCalls).toHaveLength(1);
+        },
+      );
+
+      it('control: el mismo 400 CON problema del contrato sí es definitivo', async () => {
+        double.script = [
+          { kind: 'status', status: 400, code: 'invalid_request' },
+        ];
+        const error = (await client()
+          .createPaymentIntent(BODY, KEY)
+          .catch((e: unknown) => e)) as PaymentsGatewayError;
+        expect(error.ambiguity).toBe('rejected');
+        expect(error.isAmbiguous).toBe(false);
+      });
+
+      it('control: 429 sigue siendo un rechazo explícito reintentable', async () => {
+        double.script = [{ kind: 'status', status: 429, code: 'rate_limited' }];
+        const result = await client().createPaymentIntent(BODY, KEY);
+        expect(result.intent.id).toMatch(/^pi_/u);
+        expect(double.postCalls).toHaveLength(2);
+      });
+    });
+
+    describe('F1-A: un 4xx final NO borra la ambigüedad de un intento previo de la misma llamada', () => {
+      const fail = async (script: DoubleFault[]) => {
+        double.script = script;
+        return (await client({ maxAttempts: 3 })
+          .createPaymentIntent(BODY, KEY)
+          .catch((e: unknown) => e)) as PaymentsGatewayError;
+      };
+
+      it.each([
+        [
+          '503 (ejecutó) y luego 422',
+          [
+            { kind: 'execute_then_status', status: 503 },
+            { kind: 'status', status: 422, code: 'validation_failed' },
+          ] as const,
+        ],
+        [
+          'corte de conexión y luego 422',
+          [
+            { kind: 'execute_then_drop' },
+            { kind: 'status', status: 422, code: 'validation_failed' },
+          ] as const,
+        ],
+        [
+          'corte, 429 y 429',
+          [
+            { kind: 'execute_then_drop' },
+            { kind: 'status', status: 429, code: 'rate_limited' },
+            { kind: 'status', status: 429, code: 'rate_limited' },
+          ] as const,
+        ],
+      ])(
+        '%s: el error final es AMBIGUO (no prueba que no se ejecutó)',
+        async (_name, script) => {
+          const error = await fail([...script]);
+
+          expect(error).toBeInstanceOf(PaymentsGatewayError);
+          // La respuesta final es un rechazo, pero un intento anterior pudo llegar.
+          expect(error.ambiguity).toBe('rejected');
+          expect(error.earlierAttemptMayHaveReached).toBe(true);
+          expect(error.isAmbiguous).toBe(true);
+        },
+      );
+
+      it.each([
+        [
+          'un solo 422',
+          [{ kind: 'status', status: 422, code: 'validation_failed' }] as const,
+        ],
+        [
+          '429 y luego 422 (todos definitivos)',
+          [
+            { kind: 'status', status: 429, code: 'rate_limited' },
+            { kind: 'status', status: 422, code: 'validation_failed' },
+          ] as const,
+        ],
+        [
+          '429 agotado',
+          [
+            { kind: 'status', status: 429, code: 'rate_limited' },
+            { kind: 'status', status: 429, code: 'rate_limited' },
+            { kind: 'status', status: 429, code: 'rate_limited' },
+          ] as const,
+        ],
+      ])(
+        '%s: todos los intentos fueron rechazos definitivos, el error NO es ambiguo',
+        async (_name, script) => {
+          const error = await fail([...script]);
+
+          expect(error.earlierAttemptMayHaveReached).toBe(false);
+          expect(error.isAmbiguous).toBe(false);
+        },
+      );
     });
 
     it('422 es definitivo: NO se reintenta', async () => {
