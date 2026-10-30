@@ -6,23 +6,21 @@ con clase ATC (5 niveles), mecanismo, farmacocinética, indicaciones, posología
 advertencias, interacciones, reacciones adversas con frecuencia, embarazo y lactancia, sobredosis,
 formas y vías; todo lo clínico **literal** de una fuente oficial y citado.
 
-## Saturación (medida el 2026-10-30): BLOQUEADA
+## Saturación (medida el 2026-10-30): no alcanzada
 
-El catálogo **no está saturado** y la cadena de pasadas termina en un bloqueo, no en dos ceros:
+El catálogo **no está saturado**. Ninguna de las diez pasadas con fuente nueva aportó 0, y la regla de
+cierre pide dos pasadas seguidas con 0 ATC 5 **y** 0 secciones nuevas.
 
-- **Pasadas 1 a 9:** ninguna pasada con fuente nueva aportó 0 (ATC 5 o secciones).
-- **Pasada 10:** información de producto de la EMA en PDF. Da 0 ATC 5 y 0 secciones publicadas, pero
-  ese 0 **no cuenta**: el texto no se publica porque la extracción del PDF no es literal en todos los
-  casos (ver «Pasada 10»). Es un bloqueo de calidad.
+- **Pasada 10:** información de producto de la EMA en PDF. Con el extractor verificado aporta 0 ATC 5 y
+  +3 671 secciones en castellano de medicamentos que no están en CIMA (ver «Pasada 10»).
 - **Fuentes libres y oficiales que quedan:** todas bloqueadas o fuera de licencia; detalle en
   «Fuentes evaluadas sin pasada» y «Fuentes descartadas». Prueba del 2026-10-30:
   - `www.minsalud.gob.bo` (Formulario Terapéutico Nacional): `curl: (52) Empty reply from server`.
   - `api.pharmgkb.org`: «gateway answered 502 to CONNECT (policy denial or upstream failure)».
   - `agemed.gob.bo`: responde, pero exige reCAPTCHA, que no se elude.
 
-El estado y lo que lo destraba están en el issue 824
-(https://github.com/mdavila-2001/mantra-core-health-api/issues/824). Las cuatro decisiones del
-propietario están tomadas y se aplican como dice «Decisiones del propietario».
+El estado está en el issue 824 (https://github.com/mdavila-2001/mantra-core-health-api/issues/824). Las
+cuatro decisiones del propietario están tomadas y se aplican como dice «Decisiones del propietario».
 
 Hosts:
 
@@ -119,7 +117,7 @@ literal de cada pasada está en la descripción del PR que la incorporó: PR 710
 | 7 | 18:43 | **CIMA exhaustiva** (`--granularity product`): todas las fichas de todos los titulares, sin repetir texto ya publicado para el ATC. Corpus aparte, fuera de `data/` | **0** | **+134 574** |
 | 8 | 18:56 | **LactMed (NICHD/NLM)**: secciones de lactancia, enlazadas por los UNII del registro | **+105** | **+4 586** |
 | 9 | 19:05 | **LiverTox (NIDDK/NLM)**: secciones de hepatotoxicidad, enlazadas por CAS → UNII (CAS PRIMARY del GSRS) | **+18** | **+1 836** |
-| 10 | 30-10, 05:23 | **EMA, información de producto** (PDF en castellano, 1 397 medicamentos), por el ATC que asigna la EMA. Texto no publicado: puntero al PDF oficial | **0** | **0** (bloqueo de fidelidad: no cuenta como cero) |
+| 10 | 30-10 | **EMA, información de producto** (PDF en castellano, 1 397 medicamentos), por el ATC que asigna la EMA. Texto sólo de las secciones de extracción verificada; el resto, puntero al PDF oficial | **0** | **+3 671** |
 
 Las pasadas 8 y 9 se midieron sobre la 6, con granularidad por vía: la 7 no entra en `data/`. Las horas
 son del 2026-10-24 salvo la pasada 10.
@@ -237,36 +235,66 @@ midió contra esa base.
 - **Documentos:** el PDF en castellano del EPAR de cada medicamento de uso humano autorizado con ATC 5
   (1 400), con la URL que publica su página.
   - Bajados 1 397, con sha256 en la meta; 3 dan 404 y no se prueba otra URL.
-  - Texto: `pdftotext -layout` (poppler 24.02).
-  - En 10 no se encuentra el anexo I.
+  - 12 no los puede abrir `pdfminer` («No /Root object!») y en 17 no se encuentra el anexo I.
 - **Enlace:** por el ATC 5 que asigna la EMA. Si algún nº de autorización EU de la sección 8 está en
   CIMA (EU/1/AA/NNN/PPP → `AANNNPPP` o `1AANNNPPP`), la ficha es la misma y ya entra por CIMA. Son
-  1 065 medicamentos; los 322 restantes no están en CIMA.
-- **Fidelidad, medida en los 1 065 que están en CIMA:** misma sección y mismo nº de registro, comparando
-  el texto sin espacios.
+  1 004 medicamentos; los 364 restantes no están en CIMA.
+- **Extracción (`py/ema_pi_extract.py`, `pdfminer.six` 20260107).** Una sección se publica sólo si pasa
+  todos estos controles:
+  1. **Caracteres sin resolver:** ninguno (U+FFFD).
+     - Cada carácter sale del mapa ToUnicode o de la codificación declarada de una fuente de texto.
+     - Una fuente simbólica sin ToUnicode no se adivina: con WinAnsi, el «≥» de Symbol se leería «³».
+     - Los códigos del área privada de Symbol se traducen con la tabla oficial «Adobe Symbol Encoding
+       to Unicode» (unicode.org, sha256 fijado). Si la tabla da varios valores, sólo vale cuando son el
+       mismo carácter en NFKC (µ/μ).
+  2. **Sin filas dentro de una tabla:** el texto plano no conserva su estructura.
+  3. **Completitud:** todos los glifos de la página llegan a las filas.
+  4. **Sin trazos vectoriales dentro del texto:** en Besremi, 4.3, el «≥» de «clase ≥2 de la NYHA» es
+     una curva y una barra, no un glifo. Un subrayado no cuenta.
+  5. **Sin guion de fin de línea entre letras:** en el PDF no se distingue de un guion de corte.
+  6. **Consenso con `pdftotext`:** en NFKC y sin espacios, los mismos caracteres. Sólo se admite un
+     símbolo no latino que `pdftotext` deja en blanco. En Emtricitabina/Tenofovir Mylan, el ToUnicode de
+     una fuente da un espacio donde el PDF dibuja el guion de «VIH-1».
 
-  | Sección | Idénticas |
+  Superíndices y subíndices (10⁹/l, m²) van en `html` con `<sup>`/`<sub>`, como en CIMA.
+- **Fidelidad, medida contra CIMA** en los medicamentos que están en las dos fuentes (misma sección, mismo
+  nº de registro, NFKC y sin espacios), sobre las secciones publicables:
+
+  | Sección | Idénticas a CIMA |
   |---|---:|
-  | 6.2 | 1 007 / 1 040 |
-  | 4.7 | 984 / 1 042 |
-  | 4.9 | 912 / 1 040 |
-  | 4.1 | 740 / 1 040 |
-  | 4.4 | 396 / 1 042 |
-  | 4.2 | 310 / 1 041 |
-  | 5.1 | 106 / 1 041 |
-  | 4.8 | 34 / 1 042 |
+  | 6.2 | 941 / 971 |
+  | 4.7 | 919 / 970 |
+  | 4.9 | 831 / 938 |
+  | 4.3 | 826 / 932 |
+  | 3 | 824 / 960 |
+  | 6.1 | 819 / 957 |
+  | 2 | 741 / 940 |
+  | 4.6 | 725 / 925 |
+  | 4.1 | 723 / 892 |
+  | 5.3 | 695 / 903 |
+  | 4.5 | 573 / 809 |
+  | 5.2 | 341 / 635 |
+  | 4.4 | 330 / 696 |
+  | 4.2 | 267 / 458 |
+  | 5.1 | 84 / 189 |
+  | 4.8 | 2 / 12 |
 
-  Parte de las diferencias son versiones distintas del mismo documento (el PDF es más reciente). Pero
-  la extracción **pierde símbolos**: en Deferasirox Accord, 4.1, CIMA dice «(≥7 ml/kg/mes» y el PDF
-  extraído «( 7 ml/kg/mes». 705 de los 1 397 PDF tienen alguna fuente sin mapa a Unicode, y las tablas
-  (4.8) no conservan su estructura.
-- **Resultado:** las fichas de los 322 medicamentos que no están en CIMA entran como **punteros sin
-  texto** al PDF oficial: 437 punteros en 226 monografías, en `pharmacology_external_documents`, con la
-  lista de secciones QRD que trae cada ficha. 0 ATC 5 nuevos y 0 secciones publicadas.
-- **Destrabarla:** hace falta una extracción que sea literal y que se pueda demostrar, por ejemplo un
-  parser que valide cada sección contra los mapas a Unicode de las fuentes del PDF y rechace las que
-  pierden caracteres. Con texto, la pasada mediría como máximo 4 753 secciones nuevas de esos 322
-  medicamentos.
+  Las 646 diferencias de hasta 4 caracteres se revisaron todas:
+  - **582 son de versión del documento:** `pdftotext` del mismo PDF también dice lo del PDF. Por ejemplo
+    Arava pasa de L04AA13 a L04AK01, Takhzyro de 1,11 a 1,07 y «sólo» de CIMA es «solo» en el PDF.
+  - **64 se revisaron a mano:** versión, punto final que CIMA no trae, y una errata del propio PDF
+    (Mirvaso, «por jemplo»).
+  - **Errores del extractor: 0.**
+  - **CIMA pierde símbolos que el PDF sí trae:** «?» en lugar de α, ≤, ≥, μ, β, ±.
+- **Resultado:**
+  - **Texto:** 3 671 secciones literales de 352 medicamentos que no están en CIMA. 243 de ellas llevan
+    `html` con superíndices.
+  - **Punteros:** las secciones que no pasan los controles quedan en el puntero al PDF oficial, con su
+    motivo: tabla 1 137, `pdftotext` no coincide 275, guion de fin de línea 242, trazo dibujado 145,
+    glifo sin resolver 12.
+  - **Total:** 491 punteros en `pharmacology_external_documents`. 0 ATC 5 nuevos.
+- **Riesgo residual:** un ToUnicode equivocado que los dos extractores leen igual. La comparación con
+  CIMA no encontró ninguno.
 
 ## Cobertura medida (tras la pasada 10, granularidad por vía)
 
@@ -378,17 +406,21 @@ la descripción de los PR 730, 835 y el de la pasada 10.
 | **Pasada 10, 2.ª** | 0 | 0 | 0 | 0 | 0 | 0 | 24 s |
 | Pasada 10 sobre la base anterior (actualización) | 0 | 0 | 0 | 226 | 0 | 69 | 24 s |
 | Ídem, otra vez | 0 | 0 | 0 | 0 | 0 | 0 | 23 s |
+| **Pasada 10 con texto verificado, 1.ª** (base nueva) | **3 959** | **3 943** | **3 945** | **103 684** | **429** | 0 | — |
+| **Ídem, 2.ª** | 0 | 0 | 0 | 0 | 0 | 0 | — |
+| Ídem sobre la base de la pasada 10 sin texto (actualización) | 0 | 0 | 0 | 4 156 | 0 | 467 | — |
+| Ídem, otra vez | 0 | 0 | 0 | 0 | 0 | 0 | — |
 
 - **Tamaño de `concept_properties`, recién cargado:** 342 MB con la pasada 5, 374 MB con la 9 y
-  372 MB con la 10 (sin texto de la eEML).
-- **Integridad del texto:** de las 77 404 secciones de la pasada 10, ninguna tiene un `textSha256`
-  distinto del sha256 del texto guardado.
+  384 MB con la 10 con texto verificado.
+- **Integridad del texto:** de las 81 075 secciones de la pasada 10, ninguna tiene un `textSha256`
+  distinto del sha256 del texto guardado. Las 3 671 de la EMA (PDF): 0 con U+FFFD, todas `professional`.
 - **Atribuciones:** ninguna de LactMed ni de LiverTox carece de «Courtesy of the U.S. National Library
   of Medicine». La eEML no tiene filas de texto que atribuir: sus referencias llevan la licencia y su
   enlace.
-- **Corpus de `data/`:** 77 404 secciones, ninguna de la eEML y ninguna fuera de `professional`.
-- **Punteros sin texto:** 1 700 en `pharmacology_external_documents`: 275 de DailyMed, 988 de la eEML y
-  437 de la EMA (PDF). Ninguno lleva texto.
+- **Corpus de `data/`:** 81 075 secciones, ninguna de la eEML y ninguna fuera de `professional`.
+- **Punteros sin texto:** en `pharmacology_external_documents`, 275 de DailyMed, 988 de la eEML y 491 de
+  la EMA (PDF). Ninguno lleva texto.
 - **`validate-links`:** 429 de los 483 ATC 5 de `vademecum` tienen monografía y su `concept_map`.
 - **`drug-treatments`** (ya en `dev`): enlazados por RxCUI o UNII, sin base de datos.
   Llegan a una monografía 3 240 de 4 842 fármacos y 12 657 de 18 032 afirmaciones, que suman 1 465
