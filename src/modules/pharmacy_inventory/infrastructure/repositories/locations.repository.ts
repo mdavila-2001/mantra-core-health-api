@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { InventoryLocations } from '../../entities';
 import { createdBy } from '../../../../common';
+import { PINV } from '../../domain/pharmacy_inventory.concepts';
 
 /** Datos para crear una ubicación de inventario. */
 export interface CreateLocationData {
@@ -55,6 +56,21 @@ export class LocationsRepository {
    */
   findById(em: EntityManager, id: string): Promise<InventoryLocations | null> {
     return em.findOne(InventoryLocations, { id });
+  }
+
+  /**
+   * La primera ubicación activa de una sede, por fecha de alta: donde el stock
+   * por sede (FAR-06) guarda sus posiciones.
+   */
+  findFirstActiveInSite(
+    em: EntityManager,
+    pharmacySiteId: string,
+  ): Promise<InventoryLocations | null> {
+    return em.findOne(
+      InventoryLocations,
+      { pharmacySiteId, statusConceptId: PINV.LOCATION_ACTIVE },
+      { orderBy: { createdAt: 'asc', id: 'asc' } },
+    );
   }
 
   /**
