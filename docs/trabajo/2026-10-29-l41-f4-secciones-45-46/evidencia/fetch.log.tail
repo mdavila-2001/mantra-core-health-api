@@ -1,0 +1,3 @@
+[cima-sections] 2200/2380 filas · 4220 peticiones · +{"4.5":2104,"4.6":1620}
+[cima-sections] listo {"rows":2380,"withoutReference":100,"requested":4560,"added":{"4.5":2274,"4.6":1761},"empty":{"4.6":519,"4.5":6},"http":{"requests":4554,"retries":0,"cacheHits":6,"failures":0,"bytes":39430314}}
+exit 0
