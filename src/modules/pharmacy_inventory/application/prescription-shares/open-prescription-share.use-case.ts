@@ -304,19 +304,13 @@ export class OpenPrescriptionShareUseCase {
     if (controlled.length === 0) {
       return { dispensed: new Map(), reserved: new Map() };
     }
-    const requestIds = items.map((item) => item.id);
-    // En serie: las dos lecturas comparten la conexión del `fork`.
-    const dispensed = await this.balances.dispensedByConcept(
+    // Una sola sentencia: lo entregado y lo reservado salen de la misma foto,
+    // y una dispensa que se confirma en medio no descuadra el saldo.
+    return this.balances.balanceByConcept(
       em,
-      requestIds,
+      items.map((item) => item.id),
       controlled,
     );
-    const reserved = await this.balances.reservedByConcept(
-      em,
-      requestIds,
-      controlled,
-    );
-    return { dispensed, reserved };
   }
 
   /** Conceptos por id: fármacos, unidades y monedas. */

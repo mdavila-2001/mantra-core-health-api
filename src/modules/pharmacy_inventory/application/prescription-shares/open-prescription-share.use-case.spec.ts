@@ -98,9 +98,13 @@ function build(
       },
     ]),
   };
+  // Solo la lectura conjunta: si el caso de uso volviera a leer entregado y
+  // reservado por separado, no habría con qué responderle.
   const balances = {
-    dispensedByConcept: mockFn(async () => new Map([['med-syrup', 1]])),
-    reservedByConcept: mockFn(async () => new Map([['med-syrup', 0]])),
+    balanceByConcept: mockFn(async () => ({
+      dispensed: new Map([['med-syrup', 1]]),
+      reserved: new Map([['med-syrup', 0]]),
+    })),
   };
   const directory = {
     // Solo farmacias activas y verificadas del tenant (filtro del directorio).
@@ -415,12 +419,49 @@ describe('OpenPrescriptionShareUseCase (FAR-02)', () => {
       remainingQuantity: 1,
       dosageText: '5 mL · cada 8 horas',
     });
-    // Solo se consulta el saldo de lo controlable, sobre los ítems de la receta.
-    expect(d.balances.dispensedByConcept).toHaveBeenCalledWith(
+    // Solo se consulta el saldo de lo controlable, sobre los ítems de la receta,
+    // y en una sola lectura: entregado y reservado salen de la misma foto.
+    expect(d.balances.balanceByConcept).toHaveBeenCalledTimes(1);
+    expect(d.balances.balanceByConcept).toHaveBeenCalledWith(
       expect.anything(),
       ['mr-syrup', 'mr-tablet'],
       ['med-syrup'],
     );
+  });
+
+  it('reserved stock lowers the remaining from the same balance read', async () => {
+    const d = build();
+    d.balances.balanceByConcept.mockResolvedValue({
+      dispensed: new Map([['med-syrup', 0.5]]),
+      reserved: new Map([['med-syrup', 1]]),
+    });
+    const res = await open(d);
+    expect(
+      res.items.find((item) => item.medicationRequestId === 'mr-syrup'),
+    ).toMatchObject({ dispensedQuantity: 0.5, remainingQuantity: 0.5 });
+  });
+
+  it('decimal quantities of the same drug add up exactly: 0.1 + 0.2 is 0.3', async () => {
+    const first = { ...SHARE.items[0], quantity: 0.1 };
+    const second = { ...SHARE.items[0], id: 'mr-syrup-2', quantity: 0.2 };
+    const d = build({ share: { ...SHARE, items: [first, second] } });
+    d.balances.balanceByConcept.mockResolvedValue({
+      dispensed: new Map([['med-syrup', 0.1]]),
+      reserved: new Map(),
+    });
+    const res = await open(d);
+    // Lo que daría la suma en `number`, para que el caso no sea trivial.
+    expect(0.1 + 0.2).not.toBe(0.3);
+    expect(
+      res.items.map((item) => [
+        item.prescribedQuantity,
+        item.dispensedQuantity,
+        item.remainingQuantity,
+      ]),
+    ).toEqual([
+      [0.3, 0.1, 0.2],
+      [0.3, 0.1, 0.2],
+    ]);
   });
 
   it('without comparable units, dispensed and remaining are null', async () => {
@@ -440,10 +481,10 @@ describe('OpenPrescriptionShareUseCase (FAR-02)', () => {
   it('the same drug in two items reads one drug-level balance, never "4 left of 2" (MEDIUM-3)', async () => {
     const renewal = { ...SHARE.items[0], id: 'mr-syrup-2' };
     const d = build({ share: { ...SHARE, items: [SHARE.items[0], renewal] } });
-    d.balances.dispensedByConcept.mockResolvedValue(
-      new Map([['med-syrup', 1]]),
-    );
-    d.balances.reservedByConcept.mockResolvedValue(new Map());
+    d.balances.balanceByConcept.mockResolvedValue({
+      dispensed: new Map([['med-syrup', 1]]),
+      reserved: new Map(),
+    });
     const res = await open(d);
     expect(
       res.items.map((item) => [
@@ -472,14 +513,13 @@ describe('OpenPrescriptionShareUseCase (FAR-02)', () => {
       dispensedQuantity: null,
       remainingQuantity: null,
     });
-    expect(d.balances.dispensedByConcept).not.toHaveBeenCalled();
+    expect(d.balances.balanceByConcept).not.toHaveBeenCalled();
   });
 
   it('does not read balances when nothing is quantity-controlled', async () => {
     const d = build({ share: { ...SHARE, items: [SHARE.items[1]] } });
     await open(d);
-    expect(d.balances.dispensedByConcept).not.toHaveBeenCalled();
-    expect(d.balances.reservedByConcept).not.toHaveBeenCalled();
+    expect(d.balances.balanceByConcept).not.toHaveBeenCalled();
   });
 
   it('the price is the one of the general public list, not a site list', async () => {
