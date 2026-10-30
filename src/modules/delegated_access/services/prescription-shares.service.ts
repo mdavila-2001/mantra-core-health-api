@@ -387,17 +387,23 @@ export class PrescriptionSharesService {
    * Qué farmacia lo abrió no va acá (`shared_access_link_uses` no tiene
    * actor): va en el registro de acceso del endpoint que llama.
    *
+   * Con `prepare`, quien llama arma su respuesta antes de que se escriba el
+   * `OPENED` y se devuelve lo suyo: si falla, no queda una apertura (FAR-02).
+   *
    * @param token - Token en claro de la ruta.
    * @param context - IP y agente del cliente.
-   * @returns El enlace, el prescriptor y los ítems vigentes.
+   * @param prepare - Opcional; sin él se devuelve el enlace resuelto.
+   * @returns El enlace, el prescriptor y los ítems vigentes, o lo de `prepare`.
    * @throws ResourceNotFoundException 404 si el token no existe.
    * @throws GoneException 410 con `reason` `PRESCRIPTION_SHARE_EXPIRED` o
    *   `PRESCRIPTION_SHARE_REVOKED`.
    */
-  async openForPharmacy(
+  async openForPharmacy<T = PharmacyPrescriptionShare>(
     token: string,
     context: PrescriptionShareUseContext = {},
-  ): Promise<PharmacyPrescriptionShare> {
+    prepare: (share: PharmacyPrescriptionShare) => Promise<T> = (share) =>
+      Promise.resolve(share as T),
+  ): Promise<T> {
     const em = this.em.fork();
     const now = new Date();
     const resolved = await this.resolve(em, token, now);
@@ -412,16 +418,10 @@ export class PrescriptionSharesService {
       );
       throw this.gone(resolved.status);
     }
-    // El `OPENED` se escribe cuando ya está todo lo que se devuelve: si el
-    // lector del prescriptor falla, no queda una apertura que no ocurrió.
+    // El `OPENED` va al final: si el prescriptor o `prepare` fallan, no queda
+    // una apertura que no ocurrió.
     const prescriber = await this.prescriberOf(em, resolved.activeItems);
-    await this.recordUse(
-      resolved.link.id,
-      DELEG.SHARE_OUTCOME_OPENED,
-      context,
-      now,
-    );
-    return {
+    const share: PharmacyPrescriptionShare = {
       shareId: resolved.link.id,
       tenantId: resolved.link.tenantId,
       patientProfileId: resolved.link.patientProfileId,
@@ -433,6 +433,14 @@ export class PrescriptionSharesService {
       prescriber,
       items: resolved.activeItems,
     };
+    const result = await prepare(share);
+    await this.recordUse(
+      resolved.link.id,
+      DELEG.SHARE_OUTCOME_OPENED,
+      context,
+      now,
+    );
+    return result;
   }
 
   // --- Internos ---------------------------------------------------------
