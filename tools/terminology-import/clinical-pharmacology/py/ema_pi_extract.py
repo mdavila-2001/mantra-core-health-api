@@ -17,6 +17,9 @@ Por carácter (sobre pdfminer.six, versión fijada en requirements.txt):
     otro carácter del área privada, o un glifo sin Unicode, también es U+FFFD.
 Por línea: marca `table` si cae dentro de una grilla dibujada (bordes LTRect/
 LTLine agrupados), porque el texto plano no conserva la estructura de una tabla.
+Los superíndices y subíndices (más chicos y con la línea base corrida, p. ej. el
+9 de «10⁹/l») no caben en el texto plano: la fila lleva además `html` con
+<sup>/<sub>, como el HTML de CIMA.
 Se quita el número de página (última fila de la página, sólo dígitos).
 
 Uso: python3 -I ema_pi_extract.py <symbol.txt> <salida-dir> <pdf>...
@@ -29,7 +32,10 @@ import unicodedata
 from multiprocessing import Pool
 
 from pdfminer.converter import PDFPageAggregator
-from pdfminer.layout import LAParams, LTChar, LTCurve, LTLine, LTRect, LTTextContainer, LTTextLine
+from html import escape
+from statistics import median
+
+from pdfminer.layout import LAParams, LTAnno, LTChar, LTCurve, LTLine, LTRect, LTTextContainer, LTTextLine
 from pdfminer.pdffont import PDFUnicodeNotDefined
 from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
 from pdfminer.pdfpage import PDFPage
@@ -149,31 +155,84 @@ def table_boxes(page):
     return boxes
 
 
+def line_markup(ln):
+    """Texto de la línea y, si tiene superíndices o subíndices, su HTML con <sup>/<sub> (si no, None)."""
+    chars = [c for c in ln if isinstance(c, LTChar)]
+    text = ln.get_text().rstrip('\n')
+    if not chars:
+        return text, None
+    sizes = {}
+    for c in chars:
+        sizes[round(c.size, 1)] = sizes.get(round(c.size, 1), 0) + 1
+    dom = max(sizes, key=sizes.get)
+    base = median(c.y0 for c in chars if round(c.size, 1) == dom)
+    out, cur, buf, marked = [], None, [], False
+    for item in ln:
+        if not isinstance(item, (LTChar, LTAnno)):
+            continue
+        kind = None
+        if isinstance(item, LTChar) and item.size < 0.85 * dom:
+            if item.y0 > base + 0.15 * dom:
+                kind = 'sup'
+            elif item.y0 < base - 0.05 * dom:
+                kind = 'sub'
+        t = item.get_text()
+        if kind != cur:
+            if buf:
+                out.append(f'<{cur}>{escape("".join(buf))}</{cur}>' if cur else escape(''.join(buf)))
+            cur, buf = kind, []
+        buf.append(t)
+        marked = marked or kind is not None
+    if buf:
+        out.append(f'<{cur}>{escape("".join(buf))}</{cur}>' if cur else escape(''.join(buf)))
+    return text, (''.join(out).rstrip('\n') if marked else None)
+
+
 def page_rows(page):
-    """Filas de texto de arriba hacia abajo; líneas a la misma altura se unen con tabulador."""
+    """
+    Filas de texto de arriba hacia abajo. Una línea entra en la fila con la que más se solapa en vertical (al menos
+    la mitad de la menor de las dos alturas): así un número de sección o una viñeta dibujados en otra columna, con
+    la línea base apenas corrida, quedan en su fila y no en la anterior. Dentro de la fila, de izquierda a derecha,
+    unidas con tabulador.
+    """
     lines = []
     for el in page:
         if isinstance(el, LTTextContainer):
             for ln in el:
-                if isinstance(ln, LTTextLine):
-                    t = ln.get_text().rstrip('\n')
-                    if t.strip():
-                        lines.append(ln)
-    lines.sort(key=lambda l: (-round(l.y0, 0), l.x0))
+                if isinstance(ln, LTTextLine) and ln.get_text().strip():
+                    lines.append(ln)
+    lines.sort(key=lambda l: (-(l.y0 + l.y1) / 2, l.x0))
     boxes = table_boxes(page)
-    rows = []
+    rows = []  # cada fila: {'y0', 'y1', 'parts': [(x0, texto, en_tabla)]}
     for ln in lines:
+        best, best_ov = None, 0.0
+        for r in rows[-3:]:
+            ov = min(ln.y1, r['y1']) - max(ln.y0, r['y0'])
+            h = min(ln.y1 - ln.y0, r['y1'] - r['y0']) or 1.0
+            if ov / h >= 0.5 and ov / h > best_ov:
+                best, best_ov = r, ov / h
         cx, cy = (ln.x0 + ln.x1) / 2, (ln.y0 + ln.y1) / 2
         in_table = any(b[0] - 1 <= cx <= b[2] + 1 and b[1] - 1 <= cy <= b[3] + 1 for b in boxes)
-        text = ln.get_text().rstrip('\n').rstrip()
-        if rows and abs(rows[-1]['y'] - ln.y0) < 2:
-            rows[-1]['text'] += '\t' + text.strip()
-            rows[-1]['table'] = rows[-1]['table'] or in_table
+        text, html = line_markup(ln)
+        part = (ln.x0, text.rstrip(), in_table, html.rstrip() if html else None)
+        if best is None:
+            rows.append({'y0': ln.y0, 'y1': ln.y1, 'parts': [part]})
         else:
-            rows.append({'text': text, 'y': ln.y0, 'table': in_table})
-    if rows and rows[-1]['text'].strip().isdigit() and rows[-1]['y'] < 90:
-        rows.pop()
-    return [{'text': r['text'], 'table': r['table']} for r in rows]
+            best['parts'].append(part)
+            best['y0'], best['y1'] = min(best['y0'], ln.y0), max(best['y1'], ln.y1)
+    rows.sort(key=lambda r: -(r['y0'] + r['y1']) / 2)
+    out = []
+    for r in rows:
+        parts = sorted(r['parts'], key=lambda p: p[0])
+        text = parts[0][1] + ''.join('\t' + p[1].strip() for p in parts[1:])
+        html = None
+        if any(p[3] for p in parts):
+            hs = [p[3] if p[3] else escape(p[1]) for p in parts]
+            html = hs[0] + ''.join('\t' + h.strip() for h in hs[1:])
+        out.append({'text': text, 'y': r['y0'], 'table': any(p[2] for p in parts), 'html': html})
+    if out and out[-1]['text'].strip().isdigit() and out[-1]['y'] < 90:
+        out.pop()
+    return [{'text': r['text'], 'table': r['table'], **({'html': r['html']} if r['html'] else {})} for r in out]
 
 
 def extract(args):

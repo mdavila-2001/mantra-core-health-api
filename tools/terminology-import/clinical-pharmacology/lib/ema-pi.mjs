@@ -69,9 +69,12 @@ function smpcsFromLines(lines) {
   let sec = null;
   const close = () => {
     if (cur && sec) {
+      const marked = sec.lines.some((l) => l.html);
       cur.sections.set(sec.number, {
         title: sec.title,
         text: clean(sec.lines.map((l) => l.text)),
+        // Superíndices y subíndices (p. ej. 10⁹/l) no caben en el texto plano: van en HTML, como en CIMA.
+        html: marked ? clean(sec.lines.map((l) => l.html ?? escapeHtml(l.text))).replace(/\n/g, '<br>\n') : null,
         table: sec.lines.some((l) => l.table),
         unresolved: sec.lines.reduce((n, l) => n + (l.text.match(/\uFFFD/g)?.length ?? 0), 0),
       });
@@ -113,15 +116,29 @@ export const piSmpcs = (text) => smpcsFromLines(annexI(piLines(text)).map((t) =>
  * parser. Cada sección lleva `table` (alguna fila dentro de una grilla dibujada) y `unresolved` (U+FFFD).
  */
 export function piSmpcsFromRows(doc) {
-  const lines = (doc?.pages ?? []).flatMap((p) => p.rows.map((r) => ({ text: r.text.replace(/\s+$/, ''), table: Boolean(r.table) })));
+  const lines = (doc?.pages ?? []).flatMap((p) => p.rows.map((r) => ({ text: r.text.replace(/\s+$/, ''), table: Boolean(r.table), html: r.html ? r.html.replace(/\s+$/, '') : null })));
   const start = lines.findIndex((l) => /^\s*ANEXO I\s*$/.test(l.text));
   if (start < 0) return [];
   const end = lines.findIndex((l, i) => i > start && /^\s*ANEXO II\s*$/.test(l.text));
   return smpcsFromLines(lines.slice(start + 1, end < 0 ? lines.length : end));
 }
 
-/** Sección publicable: sin glifos sin resolver y sin filas dentro de una tabla. */
-export const isVerifiedSection = (s) => Boolean(s?.text) && !s.table && s.unresolved === 0 && !s.text.includes('\uFFFD');
+const escapeHtml = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** Guion a final de línea entre dos letras: en el PDF no se distingue un guion real de uno de corte de palabra. */
+const AMBIGUOUS_HYPHEN = /\p{L}-\n\p{L}/u;
+
+/** Por qué una sección no se publica, o null si se publica. */
+export function withheldReason(s) {
+  if (!s?.text) return 'sin texto';
+  if (s.table) return 'tabla';
+  if (s.unresolved > 0 || s.text.includes('\uFFFD')) return 'glifo sin resolver';
+  if (AMBIGUOUS_HYPHEN.test(s.text)) return 'guion de fin de línea ambiguo';
+  return null;
+}
+
+/** Sección publicable: sin tablas, sin glifos sin resolver y sin guiones de fin de línea ambiguos. */
+export const isVerifiedSection = (s) => withheldReason(s) === null;
 
 /**
  * Nº de autorización EU → nº de registro con que CIMA publica el mismo medicamento. CIMA usa dos formas
@@ -136,7 +153,7 @@ export function cimaNregCandidates(eu) {
 
 /** Secciones de una ficha que entran en la monografía (catálogo de CIMA, por número QRD). */
 export const piMonographSections = (smpc) =>
-  [...smpc.sections].filter(([n, s]) => CIMA_SECTIONS[n] && s.text).map(([n, s]) => ({ number: n, key: CIMA_SECTIONS[n], title: s.title, text: s.text, table: s.table, unresolved: s.unresolved }));
+  [...smpc.sections].filter(([n, s]) => CIMA_SECTIONS[n] && s.text).map(([n, s]) => ({ number: n, key: CIMA_SECTIONS[n], title: s.title, text: s.text, html: s.html ?? null, table: s.table, unresolved: s.unresolved }));
 
 /** Clave de comparación entre fuentes: el texto sin ningún espacio en blanco. Sólo para medir, nunca se publica. */
 export const comparisonKey = (text) => String(text ?? '').replace(/\s+/g, '');
@@ -150,7 +167,7 @@ export const fidelityKey = (text) =>
     String(text ?? '')
       .normalize('NFKC')
       // Marcador de lista de un carácter que el extractor separa del texto con un tabulador (columna distinta en el PDF).
-      .replace(/(^|\n)\s*[-–•o▪·]\t/g, '$1')
+      .replace(/(^|\n)\s*[-–•o▪·][\t ]+/g, '$1')
       .replace(/•/g, ''),
   );
 
@@ -166,7 +183,7 @@ export function keyDiff(a, b) {
 export const EMA_PI_TEXT_WITHHELD =
   'Texto publicado sólo en las secciones de extracción verificada (py/ema_pi_extract.py): cada carácter sale del mapa ToUnicode o de la codificación ' +
   'declarada de una fuente de texto; los símbolos de fuentes Symbol se traducen con la tabla oficial de Adobe (unicode.org). Una sección con algún ' +
-  'glifo que no se puede resolver, o con filas dentro de una tabla, no se publica: queda este puntero al documento oficial.';
+  'glifo que no se puede resolver, con filas dentro de una tabla o con un guion de fin de línea ambiguo no se publica: queda este puntero al documento oficial.';
 
 /** Sección verificada de una ficha EMA que no está en CIMA → fila literal (castellano) con su procedencia. */
 export function emaPiSection(r, smpc, s, { url, retrievedAt, license }) {
@@ -188,13 +205,14 @@ export function emaPiSection(r, smpc, s, { url, retrievedAt, license }) {
       pageUrl: r.url,
     },
     section: { number: s.number, title: s.title, url, apiUrl: url },
-    html: null,
+    html: s.html ?? null,
     text: s.text,
     tables: [],
     textSha256: textSha256(s.text),
     extraction:
       'pdfminer.six (py/ema_pi_extract.py): carácter por carácter desde el mapa ToUnicode o la codificación declarada; símbolos de fuentes Symbol con la tabla ' +
-      'oficial de Adobe (unicode.org), en su forma NFKC cuando la tabla da varios valores equivalentes (μ). Verificada: sin glifos sin resolver y sin tablas.',
+      'oficial de Adobe (unicode.org), en su forma NFKC cuando la tabla da varios valores equivalentes (μ); superíndices y subíndices en `html`. ' +
+      'Verificada: sin glifos sin resolver, sin tablas y sin guiones de fin de línea ambiguos.',
     retrievedAt,
     license,
     citation:
@@ -225,7 +243,7 @@ export function emaPiPointer(r, smpc, { url, retrievedAt, license }) {
       key: s.key,
       title: s.title,
       textPublished: isVerifiedSection(s),
-      ...(isVerifiedSection(s) ? {} : { withheldBecause: s.table ? 'tabla' : 'glifo sin resolver' }),
+      ...(isVerifiedSection(s) ? {} : { withheldBecause: withheldReason(s) }),
     })),
     atc5: r.atc5,
     atcLinkRule: 'ATC 5 asignado por la EMA (informe «Medicines output»)',

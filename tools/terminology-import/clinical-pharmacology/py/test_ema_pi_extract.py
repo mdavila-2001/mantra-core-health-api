@@ -90,6 +90,8 @@ class RealPdf(unittest.TestCase):
         self.assertTrue(any('(≥ 7 ml/kg/mes de concentrado de hematíes)' in t for t in texts), 'pdftotext lo dejaba en «( 7 ml/kg/mes»')
         self.assertTrue(any('ferritina sérica > 1 000 μg/l' in t for t in texts))
         self.assertTrue(any(r['table'] for r in rows), 'las tablas de dosificación quedan marcadas')
+        self.assertIn('2.\tCOMPOSICIÓN CUALITATIVA Y CUANTITATIVA', texts, 'el número de sección va antes del título aunque esté en otra columna')
+        self.assertTrue(any('50 000/mm<sup>3</sup> (50 x 10<sup>9</sup>/l)' in (r.get('html') or '') for r in rows), 'superíndices en html')
         self.assertFalse(any(t.strip().isdigit() and len(t.strip()) <= 3 for t in texts[-3:]), 'sin número de página al final')
 
 
