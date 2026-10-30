@@ -14,15 +14,15 @@
     "indicesConParaQue": 7804,
     "paraQuePorTipo": {
       "DOCUMENTO": 8014,
-      "CONSULTA": 1485,
+      "CONSULTA": 1487,
       "ESTRUCTURAL": 17
     },
     "tablasConEntidad": 1230,
     "tablasAppendOnlyDeclaradas": 140,
     "tablasConOperaciones": 947,
     "orm": {
-      "COINCIDE": 1191,
-      "DIVERGE": 39
+      "COINCIDE": 1190,
+      "DIVERGE": 40
     },
     "columnasOrm": {
       "COINCIDE": 16824,
@@ -512,7 +512,7 @@
     ],
     "tablasSinEntidad": [],
     "columnasAusentesEnOrm": 1,
-    "columnasDeMasEnOrm": 89,
+    "columnasDeMasEnOrm": 90,
     "nulabilidad": 26,
     "tipos": 0,
     "esquemasSinCatalogoDeApi": [],
@@ -3811,7 +3811,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 19,
       "indices": 9,
-      "operaciones": 17,
+      "operaciones": 19,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -3822,7 +3822,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 25,
       "indices": 14,
-      "operaciones": 30,
+      "operaciones": 39,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3866,7 +3866,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 18,
       "indices": 12,
-      "operaciones": 13,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3899,7 +3899,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 11,
       "indices": 7,
-      "operaciones": 10,
+      "operaciones": 12,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3921,7 +3921,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 48,
+      "operaciones": 51,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -4317,7 +4317,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 20,
       "indices": 13,
-      "operaciones": 83,
+      "operaciones": 85,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10642,7 +10642,7 @@
       "dominio": "Farmacia",
       "columnas": 23,
       "indices": 16,
-      "operaciones": 36,
+      "operaciones": 38,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10653,7 +10653,7 @@
       "dominio": "Farmacia",
       "columnas": 14,
       "indices": 7,
-      "operaciones": 15,
+      "operaciones": 19,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10719,7 +10719,7 @@
       "dominio": "Farmacia",
       "columnas": 11,
       "indices": 3,
-      "operaciones": 40,
+      "operaciones": 44,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10774,7 +10774,7 @@
       "dominio": "Farmacia",
       "columnas": 15,
       "indices": 5,
-      "operaciones": 4,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10785,7 +10785,7 @@
       "dominio": "Farmacia",
       "columnas": 13,
       "indices": 4,
-      "operaciones": 4,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10840,7 +10840,7 @@
       "dominio": "Farmacia",
       "columnas": 16,
       "indices": 13,
-      "operaciones": 67,
+      "operaciones": 73,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -10851,7 +10851,7 @@
       "dominio": "Farmacia",
       "columnas": 12,
       "indices": 5,
-      "operaciones": 6,
+      "operaciones": 9,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10862,7 +10862,7 @@
       "dominio": "Farmacia",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 5,
+      "operaciones": 10,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10917,7 +10917,7 @@
       "dominio": "Farmacia",
       "columnas": 21,
       "indices": 11,
-      "operaciones": 60,
+      "operaciones": 63,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -10928,7 +10928,7 @@
       "dominio": "Farmacia",
       "columnas": 16,
       "indices": 9,
-      "operaciones": 45,
+      "operaciones": 48,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -11665,7 +11665,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 8,
-      "operaciones": 176,
+      "operaciones": 179,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12886,8 +12886,8 @@
       "dominio": "Práctica y Agenda",
       "columnas": 12,
       "indices": 4,
-      "operaciones": 4,
-      "orm": "COINCIDE",
+      "operaciones": 8,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -13018,7 +13018,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 132,
+      "operaciones": 133,
       "orm": "COINCIDE",
       "appendOnly": false
     },

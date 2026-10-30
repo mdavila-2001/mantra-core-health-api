@@ -17,6 +17,7 @@
 | [`practice`](practice.md) | 9 | 15 | 12 | 11 | 21 |
 | [`clinical_ext`](clinical_ext.md) | 8 | 9 | 13 | 13 | 9 |
 | [`identity_assurance`](identity_assurance.md) | 8 | 12 | 10 | 11 | 17 |
+| [`pharmacy_inventory`](pharmacy_inventory.md) | 8 | 12 | 18 | 21 | 19 |
 | [`scheduling`](scheduling.md) | 8 | 16 | 8 | 19 | 9 |
 | [`system_ops`](system_ops.md) | 8 | 8 | 8 | 30 | 10 |
 | [`chart`](chart.md) | 7 | 9 | 4 | 11 | 6 |
@@ -27,7 +28,6 @@
 | [`billing`](billing.md) | 6 | 15 | 12 | 24 | 16 |
 | [`common`](common.md) | 6 | 6 | 7 | 7 | 5 |
 | [`forms`](forms.md) | 6 | 6 | 6 | 16 | 17 |
-| [`pharmacy_inventory`](pharmacy_inventory.md) | 6 | 11 | 17 | 21 | 17 |
 | [`delegated_access`](delegated_access.md) | 5 | 6 | 8 | 7 | 12 |
 | [`diagnostic_units`](diagnostic_units.md) | 5 | 9 | 12 | 10 | 13 |
 | [`geo`](geo.md) | 5 | 5 | 6 | 6 | 14 |
