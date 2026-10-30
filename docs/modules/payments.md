@@ -90,24 +90,37 @@ deshabilitaría el endpoint en la pasarela).
 
 **Flag encendido.**
 
-- `POST /payments/intents` exige `paymentMethodType` (`qr`, `card`, `bank_transfer`,
-  `wallet`), crea la intención local y llama a `POST /payment_intents` de la pasarela con
+- `POST /payments/intents` crea la intención igual que siempre, y además comprueba que la
+  pasarela podría cobrarla (BOB, centavos enteros, vencimiento de 60 s a 24 h): si no, `422`
+  y no queda fila. **Aquí no se cobra**: la evaluación de riesgo todavía no puede existir.
+- `POST /payments/intents/:id/transactions` despacha el cobro, detrás de la MISMA compuerta
+  que el camino de siempre (estado de la intención y evaluación de riesgo presente y no
+  `DECLINE`, una sola implementación en `assertRiskCleared`); si la compuerta no pasa, la
+  pasarela no recibe ninguna llamada. Con la pasarela una última evaluación `REVIEW` tampoco
+  deja cobrar (el camino de siempre la deja pasar, sin tocarlo). Exige `paymentMethodType`
+  (`qr`, `card`, `bank_transfer`, `wallet`), sólo admite `SALE` y el importe completo, y llama
+  a `POST /payment_intents` de la pasarela con
   `Idempotency-Key = mantra-pi-v1-<sha256(tenant, deuda u orden, idempotencyKey local)>`.
   La clave sale de campos persistidos, así que un reintento manda la misma. Nunca se llama
-  al proveedor directo. La respuesta agrega `gateway { paymentIntentId, status, nextAction }`
-  con lo que el pagador tiene que hacer (QR, transferencia, formulario del banco).
+  al proveedor directo. La respuesta no tiene transacción local: `id` y `paymentIntentId` son
+  los de la intención, `gatewayTransactionRef` el `pi_…` y `gateway { paymentIntentId,
+  status, nextAction }` lo que el pagador tiene que hacer (QR, transferencia, formulario del
+  banco). Repetir la operación sobre una intención que ya tiene su cobro lo consulta
+  (`GET`), no crea otro.
 - Sólo viaja lo mínimo: importe en centavos enteros, `BOB`, tipo de medio de pago, vida del
-  cobro (relativa al alta persistida) y el id local de la intención como metadato. La
+  cobro (relativa al alta persistida). Ni el id local va como metadato (el escáner de
+  números de tarjeta de la pasarela puede confundir un UUID con un PAN). La
   pasarela opera en bolivianos (D-06): otra moneda, o un importe con más de 2 decimales, se
   rechazan con `422` antes de persistir; no se redondea.
 - **Un resultado ambiguo no es un fallo.** Un corte, un timeout, un `5xx` o un `409
   idempotency_request_in_progress` se reintentan (hasta `PAYMENTS_GATEWAY_MAX_ATTEMPTS`) con
   la MISMA clave. Si se agotan, la API responde `504 PAYMENT_GATEWAY_RESULT_AMBIGUOUS`, la
-  intención local queda pendiente sin tocar y el cliente reintenta con la misma
-  `idempotencyKey`: se retoma sin crear un segundo cobro. Un `4xx` definitivo del contrato
+  intención local queda pendiente sin tocar y el cliente repite la operación
+  (`/transactions`): se retoma con la misma clave sin crear un segundo cobro. Un `4xx` definitivo del contrato
   corta los reintentos (`422 PAYMENT_GATEWAY_REJECTED`; `401/403` se muestran como `503`).
-- Una intención con `gateway_intent_ref` no admite `POST /payments/intents/:id/transactions`
-  (`409 PAYMENT_INTENT_VIA_GATEWAY`): su resultado llega por webhook.
+- Con el flag apagado, una intención con `gateway_intent_ref` no admite
+  `POST /payments/intents/:id/transactions` (`409 PAYMENT_INTENT_VIA_GATEWAY`): su resultado
+  llega por webhook y no hay un segundo camino hacia el proveedor.
 
 **Receptor de webhooks** (`POST /payments/gateway-webhooks`, pública). `main.ts` conserva
 los bytes crudos del cuerpo sólo de esa ruta (`gateway/payments-gateway-raw-body.ts`).

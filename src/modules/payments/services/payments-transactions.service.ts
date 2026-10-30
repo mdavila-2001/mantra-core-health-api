@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -39,6 +39,7 @@ import {
 import { decideCallback, eventReference } from './payment-callback-machine';
 import { evaluateCallbackEndpoint } from './callback-endpoint.policy';
 import { PaymentsErrorReason } from '../payments.error-reasons';
+import { PaymentsGatewayChargeService } from './payments-gateway-charge.service';
 
 const OPERATION_CONCEPT: Readonly<Record<TransactionOperation, string>> = {
   AUTHORIZE: CONCEPTS.TXN_OP_AUTHORIZE,
@@ -81,6 +82,7 @@ export class PaymentsTransactionsService {
     private readonly flowRepo: PaymentFlowRepository,
     private readonly transactionsRepo: PaymentTransactionsRepository,
     private readonly logger: PinoLogger,
+    @Optional() private readonly gatewayCharge?: PaymentsGatewayChargeService,
   ) {
     this.logger.setContext(PaymentsTransactionsService.name);
   }
@@ -113,6 +115,12 @@ export class PaymentsTransactionsService {
       'Processing gateway transaction',
     );
 
+    // `payments.via_gateway`: el cobro lo despacha la pasarela, pero detrás de la
+    // misma compuerta de estado y de riesgo que el camino de siempre.
+    if (this.gatewayCharge?.enabled) {
+      return this.processViaGateway(intentId, dto, this.gatewayCharge);
+    }
+
     return this.em.transactional(async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
       if (!intent) {
@@ -124,24 +132,7 @@ export class PaymentsTransactionsService {
           PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
         );
       }
-      if (intent.statusConceptId === CONCEPTS.PI_SUCCEEDED) {
-        throw new ConflictException(
-          'La intención ya fue cobrada',
-          {
-            intentId,
-          },
-          PaymentsErrorReason.PAYMENT_INTENT_ALREADY_SUCCEEDED,
-        );
-      }
-      if (intent.statusConceptId === CONCEPTS.PI_CANCELED) {
-        throw new PreconditionFailedException(
-          'La intención está cancelada',
-          {
-            intentId,
-          },
-          PaymentsErrorReason.PAYMENT_INTENT_CANCELED,
-        );
-      }
+      this.assertIntentOpen(intent, intentId);
       // Una intención cobrada por la pasarela (`payments.via_gateway`) no abre un
       // segundo camino contra el proveedor: su resultado llega por webhook firmado.
       if (intent.gatewayIntentRef) {
@@ -174,23 +165,7 @@ export class PaymentsTransactionsService {
         );
       }
 
-      const risk = await this.flowRepo.findLatestRiskAssessment(tx, intentId);
-      if (!risk) {
-        throw new PreconditionFailedException(
-          'La intención requiere evaluación de riesgo antes de cobrar',
-          { intentId },
-          PaymentsErrorReason.PAYMENT_INTENT_RISK_ASSESSMENT_MISSING,
-        );
-      }
-      if (risk.decisionConceptId === CONCEPTS.RISK_DECLINE) {
-        throw new PreconditionFailedException(
-          'El motor de riesgo rechazó la intención',
-          {
-            intentId,
-          },
-          PaymentsErrorReason.PAYMENT_INTENT_RISK_DECLINED,
-        );
-      }
+      await this.assertRiskCleared(tx, intentId, false);
 
       // MCH-036: el importe de la operación se mide contra lo que todavía se
       // debe, no contra el de la intención. Antes se admitía cualquier importe y
@@ -252,6 +227,145 @@ export class PaymentsTransactionsService {
         gatewayTransactionRef: dto.gatewayTransactionRef,
       };
     });
+  }
+
+  /** La intención no está cobrada ni cancelada: es lo primero que exige cualquier cobro. */
+  private assertIntentOpen(
+    intent: { statusConceptId: string },
+    intentId: string,
+  ): void {
+    if (intent.statusConceptId === CONCEPTS.PI_SUCCEEDED) {
+      throw new ConflictException(
+        'La intención ya fue cobrada',
+        {
+          intentId,
+        },
+        PaymentsErrorReason.PAYMENT_INTENT_ALREADY_SUCCEEDED,
+      );
+    }
+    if (intent.statusConceptId === CONCEPTS.PI_CANCELED) {
+      throw new PreconditionFailedException(
+        'La intención está cancelada',
+        {
+          intentId,
+        },
+        PaymentsErrorReason.PAYMENT_INTENT_CANCELED,
+      );
+    }
+  }
+
+  /**
+   * Compuerta de riesgo previa a cobrar: debe existir una evaluación y no puede
+   * ser `DECLINE`. Es la ÚNICA implementación: la usan el camino de siempre y el
+   * de la pasarela, para que ninguno cobre lo que el otro no cobraría.
+   *
+   * @param blockOnReview - Con `true`, una última evaluación `REVIEW` (pide
+   *   revisión humana) tampoco deja cobrar. El camino de siempre la deja pasar
+   *   (comportamiento previo, sin tocar); en el de la pasarela, donde el cobro
+   *   lo puede completar el pagador sin que nadie intervenga, se toma el
+   *   supuesto conservador. Ver la ambigüedad registrada en el informe del carril.
+   */
+  private async assertRiskCleared(
+    tx: EntityManager,
+    intentId: string,
+    blockOnReview: boolean,
+  ): Promise<void> {
+    const risk = await this.flowRepo.findLatestRiskAssessment(tx, intentId);
+    if (!risk) {
+      throw new PreconditionFailedException(
+        'La intención requiere evaluación de riesgo antes de cobrar',
+        { intentId },
+        PaymentsErrorReason.PAYMENT_INTENT_RISK_ASSESSMENT_MISSING,
+      );
+    }
+    if (risk.decisionConceptId === CONCEPTS.RISK_DECLINE) {
+      throw new PreconditionFailedException(
+        'El motor de riesgo rechazó la intención',
+        {
+          intentId,
+        },
+        PaymentsErrorReason.PAYMENT_INTENT_RISK_DECLINED,
+      );
+    }
+    if (blockOnReview && risk.decisionConceptId === CONCEPTS.RISK_REVIEW) {
+      throw new PreconditionFailedException(
+        'La evaluación de riesgo pide revisión humana antes de cobrar',
+        { intentId },
+        PaymentsErrorReason.PAYMENT_INTENT_RISK_REVIEW_PENDING,
+      );
+    }
+  }
+
+  /**
+   * UC-42-05 con `payments.via_gateway=on` (REQ-INT-1): crea el cobro en la pasarela.
+   *
+   * Pasa por la misma compuerta que el camino de siempre —estado de la intención
+   * y evaluación de riesgo— ANTES de llamar a la pasarela; si la compuerta no
+   * pasa, la pasarela no recibe ninguna llamada. La compuerta corre en su propia
+   * transacción y la llamada HTTP va fuera de ella, para no sostener el bloqueo
+   * de la fila durante los reintentos.
+   *
+   * La pasarela cobra el importe completo con un solo paso (`SALE`); no hay
+   * autorización/captura separadas ni importes parciales. Repetir la operación
+   * sobre una intención que ya tiene su cobro NO crea otro: lo consulta.
+   */
+  private async processViaGateway(
+    intentId: string,
+    dto: ProcessTransactionDto,
+    gateway: PaymentsGatewayChargeService,
+  ): Promise<TransactionResponseDto> {
+    if (dto.operation !== 'SALE') {
+      throw new PreconditionFailedException(
+        'La pasarela cobra en un solo paso: sólo admite la operación SALE',
+        { intentId, operation: dto.operation },
+        PaymentsErrorReason.PAYMENT_GATEWAY_OPERATION_NOT_SUPPORTED,
+      );
+    }
+
+    const intent = await this.em.transactional(async (tx) => {
+      const found = await this.intentsRepo.findByIdForUpdate(tx, intentId);
+      if (!found) {
+        throw new ResourceNotFoundException(
+          'Intención de pago no encontrada',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
+      }
+      this.assertIntentOpen(found, intentId);
+      if (dto.amount && compareAmounts(dto.amount, found.amount) !== 0) {
+        throw new PreconditionFailedException(
+          'La pasarela cobra el importe completo de la intención',
+          { intentId },
+          PaymentsErrorReason.PAYMENT_GATEWAY_AMOUNT_MUST_MATCH_INTENT,
+        );
+      }
+      // Ya despachada antes: no se vuelve a evaluar ni a crear; se consulta.
+      if (!found.gatewayIntentRef) {
+        await this.assertRiskCleared(tx, intentId, true);
+      }
+      return found;
+    });
+
+    const charged = intent.gatewayIntentRef
+      ? await gateway.consult(
+          intent.id,
+          intent.gatewayIntentRef,
+          intent.statusConceptId,
+        )
+      : await gateway.dispatch(intent, dto.paymentMethodType);
+
+    return {
+      id: intent.id,
+      paymentIntentId: intent.id,
+      amount: intent.amount,
+      statusConceptId: charged.localStatusConceptId,
+      gatewayTransactionRef: charged.gatewayIntentRef,
+      gateway: {
+        paymentIntentId: charged.gatewayIntentRef,
+        status: charged.gatewayStatus,
+        ...(charged.nextAction ? { nextAction: charged.nextAction } : {}),
+      },
+    };
   }
 
   /**
