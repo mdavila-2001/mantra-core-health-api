@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -70,6 +71,9 @@ export class BulkRequestDto {
   @ArrayMinSize(1)
   @ArrayMaxSize(BULK_MAX_ROWS)
   @IsObject({ each: true })
+  // Sin esto, la conversión implícita del pipe global convierte cada fila en
+  // un arreglo; con `Object` la fila llega tal cual y la valida su tabla.
+  @Type(() => Object)
   rows!: Record<string, unknown>[];
 }
 

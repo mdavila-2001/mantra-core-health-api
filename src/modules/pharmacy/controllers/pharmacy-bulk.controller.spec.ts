@@ -8,6 +8,7 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { ROLES_KEY } from '../../../common/auth/roles.decorator';
+import { createGlobalValidationPipe } from '../../../common/http/validation-pipe';
 import { BulkRequestDto } from '../dto';
 import { PharmacyBulkController } from './pharmacy-bulk.controller';
 import { PharmacyTenantScopeGuard } from './pharmacy-tenant-scope.guard';
@@ -112,5 +113,25 @@ describe('PharmacyBulkController', () => {
         rows: [{ whatever: 1, name: '' }],
       }),
     ).toHaveLength(0);
+  });
+
+  it('the global validation pipe lets the rows through as plain objects', async () => {
+    const pipe = createGlobalValidationPipe();
+    const body = (await pipe.transform(
+      {
+        mode: 'UPSERT',
+        dryRun: true,
+        rows: [
+          { name: 'Vitaminas', extra: 1 },
+          { productCode: 'P1', unitPrice: '3' },
+        ],
+      },
+      { type: 'body', metatype: BulkRequestDto },
+    )) as BulkRequestDto;
+    expect(body.rows).toEqual([
+      { name: 'Vitaminas', extra: 1 },
+      { productCode: 'P1', unitPrice: '3' },
+    ]);
+    expect(Array.isArray(body.rows[0])).toBe(false);
   });
 });
