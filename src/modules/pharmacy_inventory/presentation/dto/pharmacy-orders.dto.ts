@@ -362,6 +362,24 @@ export class PharmacyOrderDto implements PatientSettlementProjection {
   pickupCode!: string | null;
 
   /**
+   * Vitrina pública de la farmacia, para abrir el chat del pedido.
+   *
+   * **Solo en la lectura del titular** (`GET /pharmacy/orders/me` y
+   * `GET /pharmacy/orders/:id` como dueño): `null` si la farmacia no tiene
+   * vitrina activa de un tenant verificado. Las lecturas del mostrador no lo
+   * traen.
+   */
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
+  pharmacyPublicProfileId?: string | null;
+
+  /**
+   * Slug de esa vitrina (`organization-<tenantId>`), con la misma regla que
+   * `pharmacyPublicProfileId`.
+   */
+  @ApiPropertyOptional({ type: String, nullable: true })
+  pharmacyPublicSlug?: string | null;
+
+  /**
    * Total CONGELADO del pedido con su moneda: suma de los precios congelados
    * por el saldo reservado de cada renglón en pie. `null` si a algún renglón
    * le falta precio publicado o si las listas mezclan monedas — una suma con
@@ -588,4 +606,18 @@ export class PharmacyOrderListResponseDto {
    */
   @ApiProperty()
   count!: number;
+}
+
+/** El hilo de chat del pedido: `POST /pharmacy/orders/:id/conversation`. */
+export class PharmacyOrderConversationDto {
+  /** La conversación directa paciente ↔ farmacia (nueva o reutilizada). */
+  @ApiProperty({ format: 'uuid' })
+  conversationId!: string;
+
+  /**
+   * La vitrina de la farmacia en ese hilo. El personal la usa como
+   * `profileId`/`senderProfileId` en la mensajería.
+   */
+  @ApiProperty({ format: 'uuid' })
+  pharmacyProfileId!: string;
 }

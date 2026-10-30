@@ -5,6 +5,11 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { PharmacyModule } from '../pharmacy/pharmacy.module';
 import { MessagingModule } from '../messaging/messaging.module';
 import { ProfilesModule } from '../profiles/profiles.module';
+// El chat del pedido (hilo paciente ↔ vitrina de la farmacia). No hay ciclo:
+// `community` no importa este módulo.
+import { CommunityModule } from '../community/community.module';
+import { PHARMACY_ORDER_CHAT_PORT } from './application/ports/pharmacy-order-chat.port';
+import { CommunityPharmacyOrderChatAdapter } from './infrastructure/adapters/community-pharmacy-order-chat.adapter';
 import { DIRECTORY_TENANT_ADMINISTRATION_PORT } from './application/ports/directory-tenant-administration.port';
 import { INSURANCE_PATIENT_SETTLEMENT_PORT } from './application/ports/insurance-patient-settlement.port';
 import { PHARMACY_DIRECTORY_PORT } from './application/ports/pharmacy-directory.port';
@@ -35,6 +40,8 @@ import { ReadPharmacyInventoryUseCase } from './application/pharmacy-inventory-r
 import { NotifyPharmacyOrderUseCase } from './application/pharmacy-order-notifications/notify-pharmacy-order.use-case';
 import { PharmacyOrdersUseCases } from './application/pharmacy-orders/pharmacy-orders.use-cases';
 import { PharmacyProcurementUseCases } from './application/pharmacy-procurement/pharmacy-procurement.use-cases';
+import { SetSiteProductAvailabilityUseCase } from './application/site-availability/set-site-product-availability.use-case';
+import { SiteStockWriter } from './application/site-availability/site-stock-writer';
 import {
   PharmacyProcurementController,
   PharmacyInventoryController,
@@ -42,6 +49,7 @@ import {
   PharmacyDispensingController,
   PharmacyInventoryInternalController,
   PharmacyInventoryReadController,
+  PharmacySiteAvailabilityController,
 } from './presentation/controllers';
 import {
   InventoryLocationsService,
@@ -98,6 +106,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     // (enviado, cancelado, vencido) en la misma transacción del cambio.
     MessagingModule,
     ProfilesModule,
+    CommunityModule,
   ],
   controllers: [
     PharmacyProcurementController,
@@ -106,6 +115,7 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     PharmacyDispensingController,
     PharmacyInventoryInternalController,
     PharmacyInventoryReadController,
+    PharmacySiteAvailabilityController,
   ],
   providers: [
     // Repositorios
@@ -157,6 +167,11 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
       provide: PERSON_ACCOUNT_LINKS_PORT,
       useExisting: ProfilesPersonAccountLinksAdapter,
     },
+    CommunityPharmacyOrderChatAdapter,
+    {
+      provide: PHARMACY_ORDER_CHAT_PORT,
+      useExisting: CommunityPharmacyOrderChatAdapter,
+    },
     // Servicios
     InventoryLocationsService,
     OpenInventoryCountUseCase,
@@ -176,6 +191,8 @@ import { PharmacyInventoryScopePolicy } from './application/scope/pharmacy-inven
     NotifyPharmacyOrderUseCase,
     PharmacyOrdersUseCases,
     PharmacyProcurementUseCases,
+    SiteStockWriter,
+    SetSiteProductAvailabilityUseCase,
     PharmacyProcurementService,
     InventoryReservationsService,
     PharmacyOrdersService,

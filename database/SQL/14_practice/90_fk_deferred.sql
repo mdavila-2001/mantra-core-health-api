@@ -149,6 +149,13 @@ DO $$ BEGIN
         REFERENCES "common"."files" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- destino: common.files (requiere schema common)
+DO $$ BEGIN
+    ALTER TABLE "practice"."practice_sites"
+        ADD CONSTRAINT "fk_practice_sites_logo_file_id" FOREIGN KEY ("logo_file_id")
+        REFERENCES "common"."files" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
+
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN
     ALTER TABLE "practice"."practice_sites"
@@ -211,6 +218,13 @@ DO $$ BEGIN
         ADD CONSTRAINT "fk_clinical_units_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: iam.users (requiere schema iam)
+DO $$ BEGIN
+    ALTER TABLE "practice"."clinical_units"
+        ADD CONSTRAINT "fk_clinical_units_responsible_user_id" FOREIGN KEY ("responsible_user_id")
+        REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;  -- (inferida por convención)
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)
 DO $$ BEGIN

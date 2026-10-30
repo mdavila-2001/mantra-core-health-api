@@ -162,17 +162,29 @@ export class PharmacyReadController {
     required: false,
     description: 'Tope del listado (por defecto 50)',
   })
+  @ApiQuery({
+    name: 'openNow',
+    required: false,
+    enum: ['true', 'false'],
+    description:
+      'P34: `true` deja sólo las sedes abiertas ahora (24 h declaradas o de turno vigente)',
+  })
   @ApiOkResponse({ type: PharmacySiteListResponseDto })
   listSites(
     @Query('search') search?: string,
     @Query('lat') lat?: string,
     @Query('lng') lng?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
+    @Query('openNow') openNow?: string,
   ): Promise<PharmacySiteListResponseDto> {
+    if (openNow !== undefined && openNow !== 'true' && openNow !== 'false') {
+      throw new BadRequestException('openNow debe ser `true` o `false`');
+    }
     return this.readService.listSites({
       search,
       origin: parseOrigin(lat, lng),
       limit: limit ?? 50,
+      ...(openNow === 'true' ? { openNow: true } : {}),
     });
   }
 
@@ -215,19 +227,44 @@ export class PharmacyReadController {
     description: 'Sólo lo publicado por esta farmacia (carril A, H5)',
   })
   @ApiQuery({
+    name: 'managed',
+    required: false,
+    enum: ['true', 'false'],
+    description:
+      'P47: con `true` (y `pharmacyId`) lista TODO el catálogo de esa farmacia —borradores y retirados— con estado, existencias, umbral e imágenes. Sólo su personal; cualquier otro, 404.',
+  })
+  @ApiQuery({
     name: 'limit',
     required: false,
     description: 'Tope del listado (por defecto 50)',
   })
   @ApiOkResponse({ type: PharmacyProductSearchResponseDto })
   searchProducts(
+    @CurrentUser() actor: AuthenticatedUser,
     @Query('search') search?: string,
     @Query('conceptId', new ParseUUIDPipe({ optional: true }))
     conceptId?: string,
     @Query('pharmacyId', new ParseUUIDPipe({ optional: true }))
     pharmacyId?: string,
+    @Query('managed') managed?: string,
     @Query('limit', new ParseOptionalLimitPipe()) limit?: number,
   ): Promise<PharmacyProductSearchResponseDto> {
+    if (managed !== undefined && managed !== 'true' && managed !== 'false') {
+      throw new BadRequestException('managed es true o false');
+    }
+    if (managed === 'true') {
+      if (!pharmacyId) {
+        throw new BadRequestException(
+          'managed=true necesita pharmacyId: es el catálogo de una farmacia',
+        );
+      }
+      return this.staffReadService.listManagedProducts(
+        pharmacyId,
+        { search, conceptId },
+        limit ?? 50,
+        actor,
+      );
+    }
     return this.readService.searchProducts(
       { search, conceptId, pharmacyId },
       limit ?? 50,

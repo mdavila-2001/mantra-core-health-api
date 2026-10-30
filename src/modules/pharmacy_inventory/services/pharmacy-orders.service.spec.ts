@@ -139,7 +139,7 @@ function build() {
   const pharmacyRepo = {
     findActiveSiteById: mockFn(async () => SITE),
     findVisibleById: mockFn(async () => PHARMACY),
-    findActiveProductsByIds: mockFn(async () => [PRODUCT]),
+    findSellableProductsByIds: mockFn(async () => [PRODUCT]),
     findCurrentPublicPriceLists: mockFn(async () => []),
     findCurrentPrices: mockFn(async () => []),
   };
@@ -160,6 +160,18 @@ function build() {
     activeClaimForDispensation: mockFn(async () => undefined),
   };
   const tenantAdministration = { canAdminister: mockFn(async () => false) };
+  // El chat del pedido (community), doblado: por defecto ninguna farmacia
+  // tiene vitrina y abrir el hilo devuelve uno fijo.
+  const orderChat = {
+    findPharmacyShowcases: mockFn(async () => new Map()),
+    openOrderConversation: mockFn(async () => ({
+      conversationId: 'conv-1',
+      pharmacyProfileId: 'vitrina-1',
+    })),
+  };
+  const accountLinks = {
+    findActiveByPerson: mockFn(async () => ({ userId: 'user-1' })),
+  };
   const logger = { setContext: mockFn(), info: mockFn() };
   const useCases = new PharmacyOrdersUseCases(
     em as any,
@@ -177,10 +189,14 @@ function build() {
     logger as any,
     settlements as any,
     tenantAdministration as any,
+    orderChat as any,
+    accountLinks as any,
   );
   const service = new PharmacyOrdersService(useCases, logger as any);
   return {
     service,
+    orderChat,
+    accountLinks,
     settlements,
     tenantAdministration,
     tx,
@@ -273,7 +289,7 @@ describe('PharmacyOrdersService', () => {
     it('a line without stock stays SIN_STOCK and does NOT sink the order', async () => {
       const d = build();
       const products = [PRODUCT, { ...PRODUCT, id: 'prod-2' }];
-      d.pharmacyRepo.findActiveProductsByIds.mockResolvedValue(products);
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue(products);
       // Solo prod-1 tiene posición; prod-2 no existe en el estante.
       d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
       d.stockRepo.findByKeyForUpdate.mockResolvedValue(position());
@@ -1000,6 +1016,210 @@ describe('PharmacyOrdersService', () => {
       expect(
         d.reservationsService.releaseConfirmedLines,
       ).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('chat del pedido', () => {
+    const pharmacyStaff = {
+      id: 'user-staff',
+      roles: ['USER', 'PHARMACY_STAFF'],
+    } as any;
+    const linkedPharmacy = { ...PHARMACY, publicProfileId: 'vitrina-1' };
+
+    it('el titular ve la vitrina de la farmacia en su lista (null si no hay)', async () => {
+      const d = build();
+      const other = { ...PHARMACY, id: 'ph-2', tenantId: 'tenant-b' };
+      d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([
+        linkedPharmacy,
+        other,
+      ]);
+      d.ordersRepo.findOrdersByPatient.mockResolvedValue([
+        order(),
+        order({ id: 'order-2', pharmacyId: 'ph-2' }),
+      ]);
+      d.orderChat.findPharmacyShowcases.mockResolvedValue(
+        new Map([['ph-1', { profileId: 'vitrina-1', slug: 'organization-a' }]]),
+      );
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.listMine(patient),
+      );
+
+      // En lote: una sola consulta para todas las farmacias de la página.
+      expect(d.orderChat.findPharmacyShowcases).toHaveBeenCalledTimes(1);
+      expect(d.orderChat.findPharmacyShowcases).toHaveBeenCalledWith(d.fork, [
+        {
+          pharmacyId: 'ph-1',
+          tenantId: 'tenant-a',
+          publicProfileId: 'vitrina-1',
+        },
+        { pharmacyId: 'ph-2', tenantId: 'tenant-b', publicProfileId: null },
+      ]);
+      const byId = new Map(res.items.map((item) => [item.id, item]));
+      expect(byId.get('order-1')).toEqual(
+        expect.objectContaining({
+          pharmacyPublicProfileId: 'vitrina-1',
+          pharmacyPublicSlug: 'organization-a',
+        }),
+      );
+      expect(byId.get('order-2')).toEqual(
+        expect.objectContaining({
+          pharmacyPublicProfileId: null,
+          pharmacyPublicSlug: null,
+        }),
+      );
+    });
+
+    it('el titular la ve en el detalle; el mostrador no la recibe', async () => {
+      const d = build();
+      withReading(d, order(), []);
+      d.orderChat.findPharmacyShowcases.mockResolvedValue(
+        new Map([['ph-1', { profileId: 'vitrina-1', slug: 'organization-a' }]]),
+      );
+
+      const own = await runWithTenant('tenant-a', () =>
+        d.service.getOrder('order-1', patient),
+      );
+      expect(own.pharmacyPublicProfileId).toBe('vitrina-1');
+      expect(own.pharmacyPublicSlug).toBe('organization-a');
+
+      d.orderChat.findPharmacyShowcases.mockClear();
+      const counter = await runWithTenant('tenant-a', () =>
+        d.service.getOrder('order-1', pharmacyStaff),
+      );
+      expect(counter).not.toHaveProperty('pharmacyPublicProfileId');
+      expect(counter).not.toHaveProperty('pharmacyPublicSlug');
+      expect(d.orderChat.findPharmacyShowcases).not.toHaveBeenCalled();
+    });
+
+    it('la ruta exige sesión, no es pública y autoriza por recurso en el servicio', () => {
+      const handler = Reflect.get(
+        PharmacyOrdersController.prototype,
+        'openConversation',
+      );
+      expect(Reflect.getMetadata(ROLES_KEY, handler)).toBeUndefined();
+      expect(Reflect.getMetadata(IS_PUBLIC_KEY, handler)).not.toBe(true);
+    });
+
+    it('el titular abre el hilo con la vitrina de la farmacia de su pedido', async () => {
+      const d = build();
+      d.ordersRepo.findOrderById.mockResolvedValue(order());
+      d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue([
+        linkedPharmacy,
+      ]);
+
+      const res = await runWithTenant('tenant-z', () =>
+        d.service.openConversation('order-1', patient),
+      );
+
+      expect(res).toEqual({
+        conversationId: 'conv-1',
+        pharmacyProfileId: 'vitrina-1',
+      });
+      // El titular ve su pedido desde cualquier organización.
+      expect(d.ordersRepo.findPharmaciesByIdsInTenant).toHaveBeenCalledWith(
+        d.fork,
+        undefined,
+        ['ph-1'],
+      );
+      expect(d.orderChat.openOrderConversation).toHaveBeenCalledWith(
+        {
+          pharmacy: { tenantId: 'tenant-a', publicProfileId: 'vitrina-1' },
+          patientUserId: 'user-1',
+          openedBy: 'PATIENT',
+        },
+        patient,
+      );
+      // La cuenta del titular es la de la sesión: no hace falta resolverla.
+      expect(d.accountLinks.findActiveByPerson).not.toHaveBeenCalled();
+    });
+
+    it('el personal de la farmacia del pedido abre el mismo hilo como la farmacia', async () => {
+      const d = build();
+      d.ordersRepo.findOrderById.mockResolvedValue(order());
+      d.accountLinks.findActiveByPerson.mockResolvedValue({
+        userId: 'user-1',
+      });
+
+      const res = await runWithTenant('tenant-a', () =>
+        d.service.openConversation('order-1', pharmacyStaff),
+      );
+
+      expect(res.conversationId).toBe('conv-1');
+      // La farmacia tiene que ser del tenant activo del request.
+      expect(d.ordersRepo.findPharmaciesByIdsInTenant).toHaveBeenCalledWith(
+        d.fork,
+        'tenant-a',
+        ['ph-1'],
+      );
+      expect(d.accountLinks.findActiveByPerson).toHaveBeenCalledWith(
+        d.fork,
+        'pat-1',
+      );
+      expect(d.orderChat.openOrderConversation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patientUserId: 'user-1',
+          openedBy: 'PHARMACY_STAFF',
+        }),
+        pharmacyStaff,
+      );
+    });
+
+    it.each([
+      [
+        'personal de otra farmacia',
+        { id: 'user-otro', roles: ['PHARMACY_STAFF'] },
+        [],
+      ],
+      [
+        'otro paciente',
+        { id: 'user-2', roles: ['PATIENT'], patientProfileId: 'pat-2' },
+        [PHARMACY],
+      ],
+      [
+        'la plataforma sin rol de farmacia',
+        { id: 'admin', roles: ['SECURITY_ADMIN'] },
+        [PHARMACY],
+      ],
+    ])('%s recibe el mismo 404', async (_case, actor, pharmacies) => {
+      const d = build();
+      d.ordersRepo.findOrderById.mockResolvedValue(order());
+      d.ordersRepo.findPharmaciesByIdsInTenant.mockResolvedValue(pharmacies);
+
+      await expect(
+        runWithTenant('tenant-b', () =>
+          d.service.openConversation('order-1', actor as any),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.orderChat.openOrderConversation).not.toHaveBeenCalled();
+    });
+
+    it('un pedido inexistente responde 404', async () => {
+      const d = build();
+
+      await expect(
+        runWithTenant('tenant-a', () =>
+          d.service.openConversation('order-x', patient),
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    it('sin cuenta del paciente, 422 tipificado y no se abre nada', async () => {
+      const d = build();
+      d.ordersRepo.findOrderById.mockResolvedValue(order());
+      d.accountLinks.findActiveByPerson.mockResolvedValue(null);
+
+      const error = await runWithTenant('tenant-a', () =>
+        d.service
+          .openConversation('order-1', pharmacyStaff)
+          .catch((e: unknown) => e),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect((error as PreconditionFailedException).getResponse()).toEqual(
+        expect.objectContaining({ reason: 'PATIENT_CHAT_PROFILE_MISSING' }),
+      );
+      expect(d.orderChat.openOrderConversation).not.toHaveBeenCalled();
     });
   });
 
