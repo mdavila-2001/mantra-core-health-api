@@ -443,7 +443,6 @@ export class PharmacyOrdersUseCases {
         request,
         products,
         dto.lines,
-        now,
       );
 
       // El precio se CONGELA acá, al crear (v4.2.1): lo que el paciente vio

@@ -1,7 +1,10 @@
 import { jest } from '@jest/globals';
 import { PreconditionFailedException } from '../../../../common';
 import { CLIN } from '../../../clinical/clinical.concepts';
-import type { PrescriptionOrderItem } from '../../domain/prescription-order-policy';
+import type {
+  LockedPrescription,
+  PrescriptionOrderItem,
+} from '../../domain/prescription-order-policy';
 import {
   PRESCRIPTION_ORDER_MESSAGES,
   PrescriptionOrderGuard,
@@ -43,10 +46,23 @@ function product(id: string, medicationConceptId?: string) {
   };
 }
 
+/** La receta tal como la deja el lock: la referida y sus hermanos bloqueados. */
+function locked(
+  referred: PrescriptionOrderItem = item(),
+  siblings: PrescriptionOrderItem[] = [],
+): LockedPrescription {
+  return { item: referred, siblings };
+}
+
 function build() {
+  // El repositorio doblado: solo bloquea y lee el saldo. No hay otra lectura de
+  // la receta: si el guard la intentara, el doble no la tiene.
   const balances = {
     lockRequest: mockFn(async () => null),
-    findActiveSiblings: mockFn(async () => []),
+    balanceByConcept: mockFn(async () => ({
+      dispensed: new Map(),
+      reserved: new Map(),
+    })),
     dispensedByConcept: mockFn(async () => new Map()),
     reservedByConcept: mockFn(async () => new Map()),
   };
@@ -66,11 +82,11 @@ async function failureOf(promise: Promise<unknown>): Promise<any> {
 describe('PrescriptionOrderGuard', () => {
   it('lockOwnRequest delega en el repositorio con el paciente y el instante', async () => {
     const { balances, guard } = build();
-    balances.lockRequest.mockResolvedValue(item());
+    balances.lockRequest.mockResolvedValue(locked());
 
     await expect(
       guard.lockOwnRequest(em, 'rx-1', 'pat-1', NOW),
-    ).resolves.toEqual(item());
+    ).resolves.toEqual(locked());
     expect(balances.lockRequest).toHaveBeenCalledWith(em, 'rx-1', 'pat-1', NOW);
   });
 
@@ -80,10 +96,9 @@ describe('PrescriptionOrderGuard', () => {
     const error = await failureOf(
       guard.assertOrderRespectsPrescription(
         em,
-        item({ state: 'NOT_ACTIVE' }),
+        locked(item({ state: 'NOT_ACTIVE' })),
         [product('prod-x', 'concept-x')],
         [{ productId: 'prod-x', quantity: 1 }],
-        NOW,
       ),
     );
 
@@ -98,36 +113,64 @@ describe('PrescriptionOrderGuard', () => {
     );
   });
 
-  it('una receta que no está ACTIVE (vencida) no consulta hermanos ni saldo', async () => {
+  it('una receta que no está ACTIVE (vencida) no consulta el saldo', async () => {
     const { balances, guard } = build();
 
     await failureOf(
       guard.assertOrderRespectsPrescription(
         em,
-        item({ state: 'EXPIRED' }),
+        locked(item({ state: 'EXPIRED' })),
         [],
         [],
-        NOW,
       ),
     );
 
-    expect(balances.findActiveSiblings).not.toHaveBeenCalled();
-    expect(balances.reservedByConcept).not.toHaveBeenCalled();
+    expect(balances.balanceByConcept).not.toHaveBeenCalled();
+  });
+
+  it('los hermanos son los que quedaron bloqueados: sin otra lectura de la receta', async () => {
+    const { balances, guard } = build();
+
+    await expect(
+      guard.assertOrderRespectsPrescription(
+        em,
+        locked(item(), [
+          item({
+            id: 'rx-2',
+            medicationConceptId: 'concept-y',
+            quantity: null,
+          }),
+        ]),
+        [product('prod-y', 'concept-y')],
+        [{ productId: 'prod-y', quantity: 1 }],
+      ),
+    ).resolves.toBeUndefined();
+
+    // Solo el saldo, una vez y sobre la referida y el hermano bloqueado.
+    expect(balances.lockRequest).not.toHaveBeenCalled();
+    expect(balances.balanceByConcept).toHaveBeenCalledTimes(1);
+    expect(balances.balanceByConcept).toHaveBeenCalledWith(
+      em,
+      ['rx-1', 'rx-2'],
+      ['concept-x'],
+    );
   });
 
   it('un hermano que no está ACTIVE no es parte de la receta', async () => {
-    const { balances, guard } = build();
-    balances.findActiveSiblings.mockResolvedValue([
-      item({ id: 'rx-2', medicationConceptId: 'concept-y', state: 'EXPIRED' }),
-    ]);
+    const { guard } = build();
 
     const error = await failureOf(
       guard.assertOrderRespectsPrescription(
         em,
-        item(),
+        locked(item(), [
+          item({
+            id: 'rx-2',
+            medicationConceptId: 'concept-y',
+            state: 'EXPIRED',
+          }),
+        ]),
         [product('prod-y', 'concept-y')],
         [{ productId: 'prod-y', quantity: 1 }],
-        NOW,
       ),
     );
 
@@ -135,38 +178,52 @@ describe('PrescriptionOrderGuard', () => {
     expect(error.details.productIds).toEqual(['prod-y']);
   });
 
-  it('una renovación del mismo fármaco suma lo recetado y descuenta entregado y reservado', async () => {
+  it('entregado y reservado salen de una sola lectura (la misma foto)', async () => {
     const { balances, guard } = build();
-    // 2 + 3 frascos recetados, 1 entregado y 2 reservados: quedan 2.
-    balances.findActiveSiblings.mockResolvedValue([
-      item({ id: 'rx-2', quantity: 3 }),
-    ]);
-    balances.dispensedByConcept.mockResolvedValue(new Map([['concept-x', 1]]));
-    balances.reservedByConcept.mockResolvedValue(new Map([['concept-x', 2]]));
-    const products = [product('prod-x', 'concept-x')];
+    balances.balanceByConcept.mockResolvedValue({
+      dispensed: new Map([['concept-x', 1]]),
+      reserved: new Map([['concept-x', 1]]),
+    });
 
-    await expect(
-      guard.assertOrderRespectsPrescription(
-        em,
-        item(),
-        products,
-        [{ productId: 'prod-x', quantity: 2 }],
-        NOW,
-      ),
-    ).resolves.toBeUndefined();
     const error = await failureOf(
       guard.assertOrderRespectsPrescription(
         em,
-        item(),
-        products,
-        [{ productId: 'prod-x', quantity: 3 }],
-        NOW,
+        locked(),
+        [product('prod-x', 'concept-x')],
+        [{ productId: 'prod-x', quantity: 1 }],
       ),
     );
 
+    // 2 recetados − 1 entregado − 1 reservado = 0.
     expect(error.reason).toBe('QUANTITY_EXCEEDS_PRESCRIPTION');
-    expect(balances.findActiveSiblings).toHaveBeenCalledWith(em, item(), NOW);
-    expect(balances.reservedByConcept).toHaveBeenCalledWith(
+    expect(balances.balanceByConcept).toHaveBeenCalledTimes(1);
+    expect(balances.dispensedByConcept).not.toHaveBeenCalled();
+    expect(balances.reservedByConcept).not.toHaveBeenCalled();
+  });
+
+  it('una renovación del mismo fármaco suma lo recetado y descuenta entregado y reservado', async () => {
+    const { balances, guard } = build();
+    // 2 + 3 frascos recetados, 1 entregado y 2 reservados: quedan 2.
+    balances.balanceByConcept.mockResolvedValue({
+      dispensed: new Map([['concept-x', 1]]),
+      reserved: new Map([['concept-x', 2]]),
+    });
+    const prescription = locked(item(), [item({ id: 'rx-2', quantity: 3 })]);
+    const products = [product('prod-x', 'concept-x')];
+
+    await expect(
+      guard.assertOrderRespectsPrescription(em, prescription, products, [
+        { productId: 'prod-x', quantity: 2 },
+      ]),
+    ).resolves.toBeUndefined();
+    const error = await failureOf(
+      guard.assertOrderRespectsPrescription(em, prescription, products, [
+        { productId: 'prod-x', quantity: 3 },
+      ]),
+    );
+
+    expect(error.reason).toBe('QUANTITY_EXCEEDS_PRESCRIPTION');
+    expect(balances.balanceByConcept).toHaveBeenCalledWith(
       em,
       ['rx-1', 'rx-2'],
       ['concept-x'],
@@ -175,20 +232,18 @@ describe('PrescriptionOrderGuard', () => {
 
   it('unidades distintas del mismo fármaco no se comparan', async () => {
     const { balances, guard } = build();
-    balances.findActiveSiblings.mockResolvedValue([
-      item({ id: 'rx-2', unitConceptId: CLIN.MEDICATION_UNIT_TUBE }),
-    ]);
 
     await expect(
       guard.assertOrderRespectsPrescription(
         em,
-        item(),
+        locked(item(), [
+          item({ id: 'rx-2', unitConceptId: CLIN.MEDICATION_UNIT_TUBE }),
+        ]),
         [product('prod-x', 'concept-x')],
         [{ productId: 'prod-x', quantity: 40 }],
-        NOW,
       ),
     ).resolves.toBeUndefined();
-    expect(balances.reservedByConcept).toHaveBeenCalledWith(
+    expect(balances.balanceByConcept).toHaveBeenCalledWith(
       em,
       ['rx-1', 'rx-2'],
       [],
@@ -201,10 +256,9 @@ describe('PrescriptionOrderGuard', () => {
     await expect(
       guard.assertOrderRespectsPrescription(
         em,
-        item({ quantity: null }),
+        locked(item({ quantity: null })),
         [product('prod-x', 'concept-x')],
         [{ productId: 'prod-x', quantity: 40 }],
-        NOW,
       ),
     ).resolves.toBeUndefined();
   });
@@ -218,7 +272,6 @@ describe('PrescriptionOrderGuard', () => {
         null,
         [product('prod-x', 'concept-x')],
         [{ productId: 'prod-x', quantity: 1 }],
-        NOW,
       ),
     );
 
@@ -228,7 +281,7 @@ describe('PrescriptionOrderGuard', () => {
       medicationRequestId: null,
       productIds: ['prod-x'],
     });
-    expect(balances.findActiveSiblings).not.toHaveBeenCalled();
+    expect(balances.balanceByConcept).not.toHaveBeenCalled();
   });
 
   it('los cinco mensajes son los textos acordados para el paciente', () => {

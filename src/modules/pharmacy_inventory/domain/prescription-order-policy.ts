@@ -32,6 +32,16 @@ export interface PrescriptionOrderItem {
   unitConceptId: string | null;
 }
 
+/**
+ * La receta del pedido tal como quedó bloqueada: el ítem referido y, del mismo
+ * conjunto de filas bloqueadas, sus hermanos `ACTIVE` del encuentro. Un ítem
+ * que aparece después del bloqueo no está acá y no autoriza nada en el pedido.
+ */
+export interface LockedPrescription {
+  item: PrescriptionOrderItem;
+  siblings: readonly PrescriptionOrderItem[];
+}
+
 /** Un fármaco de la receta con lo que queda de él. */
 export interface PrescribedDrug {
   medicationConceptId: string;

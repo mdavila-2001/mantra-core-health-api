@@ -176,12 +176,13 @@ function build() {
     findActiveByPerson: mockFn(async () => ({ userId: 'user-1' })),
   };
   // El saldo de la receta (FAR-03), doblado: por defecto ninguna receta
-  // existe, no hay hermanos ni entregas ni reservas.
+  // existe, y no hay entregas ni reservas.
   const balances = {
     lockRequest: mockFn(async () => null),
-    findActiveSiblings: mockFn(async () => []),
-    dispensedByConcept: mockFn(async () => new Map()),
-    reservedByConcept: mockFn(async () => new Map()),
+    balanceByConcept: mockFn(async () => ({
+      dispensed: new Map(),
+      reserved: new Map(),
+    })),
   };
   const prescriptionGuard = new PrescriptionOrderGuard(balances as any);
   const logger = { setContext: mockFn(), info: mockFn() };
@@ -427,11 +428,11 @@ describe('PharmacyOrdersService', () => {
     const RX_PRODUCT = { ...PRODUCT, requiresPrescription: true } as any;
 
     /**
-     * Una receta emitida del paciente (2 frascos de amoxicilina, encuentro A),
-     * tal como la entrega el repositorio: la fila clínica traducida con la
+     * Un ítem emitido del paciente (2 frascos de amoxicilina, encuentro A),
+     * tal como lo entrega el repositorio: la fila clínica traducida con la
      * regla única de receta vigente.
      */
-    function rxRow(extra: Record<string, unknown> = {}) {
+    function rxItem(extra: Record<string, unknown> = {}) {
       return toPrescriptionOrderItem(
         {
           id: 'rx-1',
@@ -446,6 +447,14 @@ describe('PharmacyOrdersService', () => {
         } as any,
         new Date(),
       );
+    }
+
+    /** La receta bloqueada: la referida y sus hermanos (ya bloqueados). */
+    function rxLocked(
+      extra: Record<string, unknown> = {},
+      siblings: Record<string, unknown>[] = [],
+    ) {
+      return { item: rxItem(extra), siblings: siblings.map(rxItem) };
     }
 
     /** Pide `quantity` unidades de `prod-1`; `null` = sin receta. */
@@ -513,7 +522,7 @@ describe('PharmacyOrdersService', () => {
     it('una receta invalidada → 422 PRESCRIPTION_NOT_ACTIVE', async () => {
       const d = build();
       d.balances.lockRequest.mockResolvedValue(
-        rxRow({ statusConceptId: CLIN.MEDICATION_REQUEST_INVALIDATED }),
+        rxLocked({ statusConceptId: CLIN.MEDICATION_REQUEST_INVALIDATED }),
       );
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([RX_PRODUCT]);
 
@@ -529,7 +538,7 @@ describe('PharmacyOrdersService', () => {
     it('una receta vencida → 422 PRESCRIPTION_EXPIRED', async () => {
       const d = build();
       d.balances.lockRequest.mockResolvedValue(
-        rxRow({ validTo: new Date(Date.now() - 86_400_000) }),
+        rxLocked({ validTo: new Date(Date.now() - 86_400_000) }),
       );
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([RX_PRODUCT]);
 
@@ -544,7 +553,7 @@ describe('PharmacyOrdersService', () => {
 
     it('un producto con receta obligatoria de otro fármaco → 422 PRODUCT_NOT_PRESCRIBED', async () => {
       const d = build();
-      d.balances.lockRequest.mockResolvedValue(rxRow());
+      d.balances.lockRequest.mockResolvedValue(rxLocked());
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
         { ...RX_PRODUCT, medicationConceptId: 'concept-otro' },
       ]);
@@ -560,12 +569,13 @@ describe('PharmacyOrdersService', () => {
 
     it('lo pedido por encima del saldo → 422 QUANTITY_EXCEEDS_PRESCRIPTION', async () => {
       const d = build();
-      d.balances.lockRequest.mockResolvedValue(rxRow());
+      d.balances.lockRequest.mockResolvedValue(rxLocked());
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([RX_PRODUCT]);
       // Recetados 2 frascos, 1 ya reservado en otro pedido vivo: quedan 1.
-      d.balances.reservedByConcept.mockResolvedValue(
-        new Map([['concept-amoxi', 1]]),
-      );
+      d.balances.balanceByConcept.mockResolvedValue({
+        dispensed: new Map(),
+        reserved: new Map([['concept-amoxi', 1]]),
+      });
 
       expect422(
         await failureOf(createOrder(d, 2)),
@@ -573,12 +583,9 @@ describe('PharmacyOrdersService', () => {
         'Está pidiendo más de lo que le queda en su receta.',
         { medicationRequestId: 'rx-1', productIds: ['prod-1'] },
       );
-      expect(d.balances.reservedByConcept).toHaveBeenCalledWith(
-        d.tx,
-        ['rx-1'],
-        ['concept-amoxi'],
-      );
-      expect(d.balances.dispensedByConcept).toHaveBeenCalledWith(
+      // Entregado y reservado en una sola lectura (la misma foto).
+      expect(d.balances.balanceByConcept).toHaveBeenCalledTimes(1);
+      expect(d.balances.balanceByConcept).toHaveBeenCalledWith(
         d.tx,
         ['rx-1'],
         ['concept-amoxi'],
@@ -602,7 +609,7 @@ describe('PharmacyOrdersService', () => {
 
     it('dentro del saldo crea el pedido con la receta y pide el lock sobre ella', async () => {
       const d = build();
-      d.balances.lockRequest.mockResolvedValue(rxRow());
+      d.balances.lockRequest.mockResolvedValue(rxLocked());
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([RX_PRODUCT]);
       readyToCreate(d);
 
@@ -614,15 +621,10 @@ describe('PharmacyOrdersService', () => {
         'pat-1',
         expect.any(Date),
       );
-      expect(d.balances.findActiveSiblings).toHaveBeenCalledWith(
-        d.tx,
-        expect.objectContaining({ id: 'rx-1', encounterId: 'enc-a' }),
-        expect.any(Date),
-      );
-      // Un solo instante por pedido: el del lock es el de los hermanos.
-      expect(d.balances.findActiveSiblings.mock.calls[0][2]).toBe(
-        d.balances.lockRequest.mock.calls[0][3],
-      );
+      // Un solo instante por pedido, y solo se mide en el lock: la referida
+      // y sus hermanos salen de esa lectura; después solo se lee el saldo.
+      expect(d.balances.lockRequest).toHaveBeenCalledTimes(1);
+      expect(d.balances.balanceByConcept).toHaveBeenCalledTimes(1);
       expect(d.reservationsRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({ medicationRequestId: 'rx-1' }),
@@ -635,15 +637,16 @@ describe('PharmacyOrdersService', () => {
 
     it('un fármaco hermano del mismo encuentro también es de la receta', async () => {
       const d = build();
-      d.balances.lockRequest.mockResolvedValue(rxRow());
-      d.balances.findActiveSiblings.mockResolvedValue([
-        rxRow({
-          id: 'rx-2',
-          medicationConceptId: 'concept-ibu',
-          unitConceptId: CLIN.MEDICATION_UNIT_TABLET,
-          quantityDecimal: '30',
-        }),
-      ]);
+      d.balances.lockRequest.mockResolvedValue(
+        rxLocked({}, [
+          {
+            id: 'rx-2',
+            medicationConceptId: 'concept-ibu',
+            unitConceptId: CLIN.MEDICATION_UNIT_TABLET,
+            quantityDecimal: '30',
+          },
+        ]),
+      );
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
         { ...RX_PRODUCT, medicationConceptId: 'concept-ibu' },
       ]);
@@ -655,16 +658,34 @@ describe('PharmacyOrdersService', () => {
       expect(d.reservationsRepo.create).toHaveBeenCalled();
       // Solo se consulta el saldo de lo comparable: la amoxicilina en frascos,
       // no el ibuprofeno en comprimidos.
-      expect(d.balances.reservedByConcept).toHaveBeenCalledWith(
+      expect(d.balances.balanceByConcept).toHaveBeenCalledWith(
         d.tx,
         ['rx-1', 'rx-2'],
         ['concept-amoxi'],
       );
     });
 
+    it('un fármaco que no está entre las filas bloqueadas no autoriza nada (otro emitido después del lock)', async () => {
+      const d = build();
+      // El lock devolvió la receta sin hermanos; el doble no ofrece otra
+      // lectura de la receta, así que el guard no puede ir a buscarlos.
+      d.balances.lockRequest.mockResolvedValue(rxLocked());
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
+        { ...RX_PRODUCT, medicationConceptId: 'concept-ibu' },
+      ]);
+
+      expect422(
+        await failureOf(createOrder(d)),
+        'PRODUCT_NOT_PRESCRIBED',
+        'Uno de los productos no es el medicamento de su receta. Quítelo del pedido para continuar.',
+        { medicationRequestId: 'rx-1', productIds: ['prod-1'] },
+      );
+      expectNoEffects(d);
+    });
+
     it('una línea de venta libre con receta pasa sin validarse contra ella (D-4)', async () => {
       const d = build();
-      d.balances.lockRequest.mockResolvedValue(rxRow());
+      d.balances.lockRequest.mockResolvedValue(rxLocked());
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
         { ...PRODUCT, medicationConceptId: 'concept-otro' },
       ]);
@@ -689,7 +710,7 @@ describe('PharmacyOrdersService', () => {
     it('producto ajeno sigue siendo 404 antes que la receta', async () => {
       const d = build();
       d.balances.lockRequest.mockResolvedValue(
-        rxRow({ statusConceptId: CLIN.MEDICATION_REQUEST_INVALIDATED }),
+        rxLocked({ statusConceptId: CLIN.MEDICATION_REQUEST_INVALIDATED }),
       );
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
         { ...RX_PRODUCT, pharmacyId: 'ph-otra' },
@@ -709,7 +730,7 @@ describe('PharmacyOrdersService', () => {
       withReading(d, order({ id: 'order-9' }), []);
       // Aunque hoy la receta ya no sirva, repetir la clave devuelve el pedido.
       d.balances.lockRequest.mockResolvedValue(
-        rxRow({ statusConceptId: CLIN.MEDICATION_REQUEST_COMPLETED }),
+        rxLocked({ statusConceptId: CLIN.MEDICATION_REQUEST_COMPLETED }),
       );
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([RX_PRODUCT]);
 

@@ -8,6 +8,7 @@ import {
 import {
   evaluatePrescriptionOrder,
   type PrescribedDrug,
+  type LockedPrescription,
   type PrescriptionOrderItem,
   type PrescriptionOrderLine,
   type PrescriptionOrderPrescription,
@@ -66,20 +67,22 @@ export class PrescriptionOrderGuard {
   /**
    * La receta del pedido, del paciente, con lock de escritura sobre todos los
    * ítems de su encuentro: dos pedidos simultáneos sobre la misma receta no
-   * superan juntos su saldo, aunque refieran a ítems distintos.
+   * superan juntos su saldo, aunque refieran a ítems distintos. Los hermanos
+   * salen de las mismas filas bloqueadas, y el estado de todos se mide con el
+   * mismo instante.
    *
    * @param em - EntityManager de la transacción del alta.
    * @param id - `medicationRequestId` del pedido.
    * @param patientProfileId - Paciente del token.
-   * @param now - Instante del pedido; el mismo que recibe {@link assertOrderRespectsPrescription}.
-   * @returns La receta con su estado, o `null` si no existe o es de otro paciente.
+   * @param now - Instante del pedido contra el que se mide el vencimiento.
+   * @returns La referida y sus hermanos `ACTIVE`, o `null` si no existe o es de otro paciente.
    */
   lockOwnRequest(
     em: EntityManager,
     id: string,
     patientProfileId: string,
     now: Date,
-  ): Promise<PrescriptionOrderItem | null> {
+  ): Promise<LockedPrescription | null> {
     return this.balances.lockRequest(em, id, patientProfileId, now);
   }
 
@@ -87,18 +90,16 @@ export class PrescriptionOrderGuard {
    * Lanza el 422 del primer motivo por el que el pedido no respeta la receta.
    *
    * @param em - EntityManager de la transacción del alta.
-   * @param request - La receta referida, ya bloqueada y con su estado; `null` si el pedido no trae.
+   * @param request - La receta bloqueada ({@link lockOwnRequest}); `null` si el pedido no trae.
    * @param products - Los productos del pedido, ya validados como vendibles en la sede.
    * @param lines - Las líneas del pedido.
-   * @param now - Instante del pedido; el mismo con el que se bloqueó la receta.
    * @throws PreconditionFailedException Si el pedido no respeta la receta.
    */
   async assertOrderRespectsPrescription(
     em: EntityManager,
-    request: PrescriptionOrderItem | null,
+    request: LockedPrescription | null,
     products: readonly PharmacyProductSnapshot[],
     lines: readonly PrescriptionOrderLineInput[],
-    now: Date,
   ): Promise<void> {
     const productById = new Map(
       products.map((product) => [product.id, product]),
@@ -111,7 +112,7 @@ export class PrescriptionOrderGuard {
       quantity: line.quantity,
     }));
     const prescription = request
-      ? await this.resolvePrescription(em, request, now)
+      ? await this.resolvePrescription(em, request)
       : null;
 
     const violation = evaluatePrescriptionOrder({
@@ -125,7 +126,7 @@ export class PrescriptionOrderGuard {
       PRESCRIPTION_ORDER_MESSAGES[violation.reason],
       {
         reason,
-        medicationRequestId: request?.id ?? null,
+        medicationRequestId: request?.item.id ?? null,
         ...(violation.productIds ? { productIds: violation.productIds } : {}),
       },
       reason,
@@ -139,18 +140,17 @@ export class PrescriptionOrderGuard {
    */
   private async resolvePrescription(
     em: EntityManager,
-    request: PrescriptionOrderItem,
-    now: Date,
+    request: LockedPrescription,
   ): Promise<PrescriptionOrderPrescription> {
-    const { state } = request;
+    const { state } = request.item;
     if (state !== 'ACTIVE') return { state, drugs: [] };
 
-    // El estado ya viene resuelto por la regla única de receta vigente; acá
-    // solo se descarta lo que no está `ACTIVE`.
-    const siblings = await this.balances.findActiveSiblings(em, request, now);
+    // Los hermanos son las filas que quedaron bloqueadas, sin otra lectura. El
+    // estado ya viene resuelto por la regla única de receta vigente; acá solo
+    // se descarta lo que no está `ACTIVE`.
     const items = [
-      request,
-      ...siblings.filter((item) => item.state === 'ACTIVE'),
+      request.item,
+      ...request.siblings.filter((item) => item.state === 'ACTIVE'),
     ];
 
     // Un fármaco recetado dos veces (una renovación del mismo encuentro) suma
@@ -177,13 +177,8 @@ export class PrescriptionOrderGuard {
     );
     const requestIds = items.map((item) => item.id);
     const conceptIds = controlled.map((drug) => drug.conceptId);
-    // En serie: las dos lecturas comparten la conexión de la transacción.
-    const dispensed = await this.balances.dispensedByConcept(
-      em,
-      requestIds,
-      conceptIds,
-    );
-    const reserved = await this.balances.reservedByConcept(
+    // Entregado y reservado en una sola sentencia: la misma foto de la base.
+    const { dispensed, reserved } = await this.balances.balanceByConcept(
       em,
       requestIds,
       conceptIds,
