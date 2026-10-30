@@ -19,9 +19,12 @@ import { CommunityPresenceService } from './community-presence.service';
 import { COMM } from '../community.concepts';
 import type { FileContentDto } from '../../common/dto';
 import { CommunityErrorReason } from '../community.error-reasons';
+import { PractitionerVerificationReader } from '../../profiles/application/services/practitioner-verification-reader.service';
+import type { PractitionerVerificationView } from '../../profiles/domain/admissions/admission-status';
 import type {
   ChatContactPageDto,
   ConversationListItemDto,
+  ConversationPeerDto,
   ConversationPageDto,
   ConversationPresenceDto,
   DirectMessageDto,
@@ -31,6 +34,7 @@ import type {
   ConversationParticipants,
   Conversations,
   DirectMessages,
+  PublicProfiles,
 } from '../entities';
 
 /**
@@ -63,6 +67,8 @@ export class CommunityMessagingReadService {
    * @param profilesRepo - Perfiles públicos, para nombrar el otro lado.
    * @param visibility - Reglas transversales de propiedad y bloqueo.
    * @param presence - Quién está en línea (F4.2).
+   * @param files - Archivos (avatares y adjuntos).
+   * @param verifications - El sello de verificación de los profesionales.
    * @param logger - Logger estructurado.
    */
   constructor(
@@ -72,6 +78,7 @@ export class CommunityMessagingReadService {
     private readonly visibility: CommunityVisibilityService,
     private readonly presence: CommunityPresenceService,
     private readonly files: FileUploadService,
+    private readonly verifications: PractitionerVerificationReader,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CommunityMessagingReadService.name);
@@ -310,15 +317,7 @@ export class CommunityMessagingReadService {
           .map((participant) => participant.participantProfileId),
       ),
     ]);
-    const nameByProfile = new Map(
-      profiles.map((profile) => [profile.id, profile.displayName]),
-    );
-    const avatarByProfile = new Map(
-      profiles.map((profile) => [
-        profile.id,
-        this.fileUrl(profile.avatarFileId),
-      ]),
-    );
+    const peerByProfile = await this.peerCards(em, profiles);
 
     const todas: ConversationListItemDto[] = await Promise.all(
       conversations.map(async (conversation) => {
@@ -334,13 +333,9 @@ export class CommunityMessagingReadService {
           ),
         ]);
         return {
-          peers: other.map((otherSide) => ({
-            profileId: otherSide.participantProfileId,
-            displayName:
-              nameByProfile.get(otherSide.participantProfileId) ?? null,
-            avatarUrl:
-              avatarByProfile.get(otherSide.participantProfileId) ?? null,
-          })),
+          peers: other.map((otherSide) =>
+            this.peerOf(peerByProfile, otherSide.participantProfileId),
+          ),
           id: conversation.id,
           conversationTypeConceptId: conversation.conversationTypeConceptId,
           groupId: conversation.groupId ?? null,
@@ -494,6 +489,12 @@ export class CommunityMessagingReadService {
           )
         : null;
 
+    // La cabecera del hilo (con quién se habla y su sello) viaja sólo con la
+    // primera página, junto al fijado.
+    const peers = options.cursor
+      ? undefined
+      : await this.threadPeers(em, conversationId, profileId);
+
     return {
       items: page.map((message) => this.toDto(message)),
       count: page.length,
@@ -506,6 +507,7 @@ export class CommunityMessagingReadService {
             })
           : null,
       peerReadUpTo,
+      ...(peers ? { peers } : {}),
       ...(options.cursor
         ? {}
         : {
@@ -558,6 +560,85 @@ export class CommunityMessagingReadService {
       conversationId,
       peers: await this.presence.presence(other),
     };
+  }
+
+  /**
+   * Los demás participantes de una conversación, como los ve su cabecera.
+   * Misma forma que `peers` de la bandeja, sello incluido.
+   */
+  private async threadPeers(
+    em: EntityManager,
+    conversationId: string,
+    profileId: string,
+  ): Promise<ConversationPeerDto[]> {
+    const participants = await this.conversationsRepo.findParticipants(
+      em,
+      conversationId,
+    );
+    const otherIds = participants
+      .map((participant) => participant.participantProfileId)
+      .filter((id) => id !== profileId);
+    const profiles = await this.profilesRepo.listByIds(em, [
+      ...new Set(otherIds),
+    ]);
+    const cards = await this.peerCards(em, profiles);
+    return otherIds.map((id) => this.peerOf(cards, id));
+  }
+
+  /**
+   * Nombre, avatar y sello de varios perfiles, con **una** consulta de sellos
+   * para todo el lote (la bandeja de alguien con cincuenta hilos no paga
+   * cincuenta). Sólo los perfiles de profesional llevan sello; el resto, `null`.
+   */
+  private async peerCards(
+    em: EntityManager,
+    profiles: readonly PublicProfiles[],
+  ): Promise<Map<string, ConversationPeerDto>> {
+    const practitionerIds = [
+      ...new Set(
+        profiles
+          .filter(
+            (profile) =>
+              profile.targetTypeConceptId === COMM.PROFILE_TARGET_PRACTITIONER,
+          )
+          .map((profile) => profile.targetId),
+      ),
+    ];
+    const seals =
+      practitionerIds.length > 0
+        ? await this.verifications.verificationOf(em, practitionerIds)
+        : new Map<string, PractitionerVerificationView>();
+    return new Map(
+      profiles.map((profile) => {
+        const isPractitioner =
+          profile.targetTypeConceptId === COMM.PROFILE_TARGET_PRACTITIONER;
+        const seal = isPractitioner ? seals.get(profile.targetId) : undefined;
+        return [
+          profile.id,
+          {
+            profileId: profile.id,
+            displayName: profile.displayName,
+            avatarUrl: this.fileUrl(profile.avatarFileId),
+            verification: seal ? { ...seal } : null,
+          },
+        ];
+      }),
+    );
+  }
+
+  /** La tarjeta de un participante; si su perfil ya no se resuelve, sin nombre ni sello. */
+  private peerOf(
+    cards: ReadonlyMap<string, ConversationPeerDto>,
+    profileId: string,
+  ): ConversationPeerDto {
+    return (
+      cards.get(profileId) ?? {
+        profileId,
+        displayName: null,
+        avatarUrl: null,
+        verification: null,
+      }
+    );
   }
 
   /**

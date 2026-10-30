@@ -306,6 +306,23 @@ function build() {
     assertIsHealthFacility: mockFn(() => Promise.resolve()),
   };
 
+  const admissions = {
+    openForRegistration: mockFn(() => Promise.resolve({})),
+    recordCredentialReview: mockFn(() => Promise.resolve(false)),
+  };
+  const admissionsRead = {
+    verificationOf: mockFn((_em: unknown, ids: string[]) =>
+      Promise.resolve(
+        new Map(
+          ids.map((id) => [
+            id,
+            { status: 'UNVERIFIED', verifiedAt: null, validUntil: null },
+          ]),
+        ),
+      ),
+    ),
+  };
+
   const service = new ProfilesPractitionersService(
     em as any,
     personsRepo,
@@ -331,10 +348,16 @@ function build() {
     specialtyCatalog as any,
     administrativeAreas as any,
     healthFacilities as any,
+    // v4.2.67: la verificación del alta es de las admisiones. Por defecto no hay
+    // ninguna abierta y el estado visible sale vacío (UNVERIFIED).
+    admissions as any,
+    admissionsRead as any,
     logger as any,
   );
   return {
     service,
+    admissions,
+    admissionsRead,
     administrativeAreas,
     healthFacilities,
     specialtyCatalog,
@@ -823,7 +846,7 @@ describe('ProfilesPractitionersService', () => {
       );
     });
 
-    it('verifies the credential and activates the practitioner when none remain pending', async () => {
+    it('verifies the credential, records it in the admission and NEVER writes the practitioner profile (D-01)', async () => {
       const d = build();
       const credential = {
         id: 'c1',
@@ -832,8 +855,13 @@ describe('ProfilesPractitionersService', () => {
         updatedAt: new Date(),
       };
       d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+      // Antes: sin credenciales pendientes, esta ruta verificaba al profesional.
       d.credentialsRepo.countInStateExcept.mockResolvedValue(0);
-      const practitioner = { profileId: 'pp1', updatedAt: new Date() } as any;
+      const practitioner = {
+        profileId: 'pp1',
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        updatedAt: new Date(),
+      } as any;
       d.practitionersRepo.findById.mockResolvedValue(practitioner);
 
       const res = await d.service.verifyCredential(
@@ -854,13 +882,50 @@ describe('ProfilesPractitionersService', () => {
           'https://colegiomedico.example/registro/LIC-12345',
         verifiedByUserId: actor.id,
       });
+      // El perfil NO se toca: verificar es de la admisión (único escritor).
       expect(practitioner.verificationStatusConceptId).toBe(
-        PROF.PRACT_VERIF_VERIFIED,
+        PROF.PRACT_VERIF_PENDING,
       );
-      expect(res).toMatchObject({ id: 'c1', practitionerVerified: true });
+      expect(res).toMatchObject({ id: 'c1', practitionerVerified: false });
+      expect(d.admissions.recordCredentialReview).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          credentialId: 'c1',
+          practitionerProfileId: 'pp1',
+          decision: 'VERIFIED',
+          verificationSourceUri:
+            'https://colegiomedico.example/registro/LIC-12345',
+        }),
+      );
       expect(d.credentialsRepo.findByIdForUpdate).toHaveBeenCalledWith(
         d.tx,
         'c1',
+      );
+    });
+
+    it('guarda el motivo del rechazo en la credencial y en la admisión', async () => {
+      const d = build();
+      const credential = {
+        id: 'c1',
+        stateConceptId: PROF.CRED_PENDING,
+        practitionerProfileId: 'pp1',
+        updatedAt: new Date(),
+      } as any;
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+
+      await d.service.verifyCredential(
+        'c1',
+        { decision: 'REJECTED', reason: '  Documento ilegible ' } as any,
+        actor,
+      );
+
+      expect(credential.rejectionReasonText).toBe('Documento ilegible');
+      expect(d.admissions.recordCredentialReview).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          decision: 'REJECTED',
+          reason: '  Documento ilegible ',
+        }),
       );
     });
   });
@@ -3050,11 +3115,39 @@ describe('ProfilesPractitionersService', () => {
         ]),
       );
 
+      d.admissionsRead.verificationOf.mockResolvedValue(
+        new Map([
+          [
+            'per-1',
+            {
+              status: 'VERIFIED',
+              verifiedAt: '2026-10-01T00:00:00.000Z',
+              validUntil: '2029-10-01',
+            },
+          ],
+          [
+            'per-2',
+            { status: 'UNVERIFIED', verifiedAt: null, validUntil: null },
+          ],
+        ]) as never,
+      );
+
       const page = await d.service.listPractitioners({ limit: 50 });
 
       // El front no compara conceptos: el uuid del estado no viaja escrito en
-      // ningún cliente.
+      // ningún cliente. El check lo decide la admisión, no el estado del perfil.
       expect(page.items.map((i) => i.verified)).toEqual([true, false]);
+      expect(page.items[0].verification.status).toBe('VERIFIED');
+    });
+
+    it('un perfil que dice VERIFIED pero cuya admisión no está verificada NO muestra el check', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([row]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([['per-1', { id: 'per-1', displayName: 'Dra. Verificada' }]]),
+      );
+      const page = await d.service.listPractitioners({ limit: 50 });
+      expect(page.items[0].verified).toBe(false);
     });
 
     it('con el bypass activo no filtra por verificación', async () => {

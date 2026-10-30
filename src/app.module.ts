@@ -41,6 +41,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AuditTrailInterceptor } from './modules/audit/interceptors/audit-trail.interceptor';
 import { AudioAssetsModule } from './modules/audio_assets/audio-assets.module';
 import { audioEnvSchema } from './modules/audio_assets/audio.env';
+import { admissionsEnvSchema } from './modules/profiles/domain/admissions/admissions.config';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
 import { BillingModule } from './modules/billing/billing.module';
@@ -128,6 +129,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
         .concat(appSecurityEnvSchema)
         .concat(storageEnvSchema)
         .concat(audioEnvSchema)
+        .concat(admissionsEnvSchema)
         .concat(telemetryEnvSchema)
         .concat(webAnalyticsEnvSchema)
         .concat(verificationBypassEnvSchema)

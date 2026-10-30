@@ -8,6 +8,7 @@ import { AdministrativeAreaCatalogService } from '../../../profiles/application/
 import { createContactPerson } from '../../../profiles/application/services/contact-person';
 import { createGuardianRelatedPerson } from '../../../profiles/application/services/guardian-related-person';
 import { MedicalSpecialtyCatalogService } from '../../../profiles/application/services/medical-specialty-catalog.service';
+import { PractitionerAdmissionsService } from '../../../profiles/application/services/practitioner-admissions.service';
 import {
   HealthPractitionerProfilesRepository,
   JurisdictionAuthorizationsRepository,
@@ -48,6 +49,7 @@ export class ProfilesRegistrationAdapter implements ProfileRegistrationPort {
     private readonly contactPointsRepo: ContactPointsRepository,
     private readonly administrativeAreas: AdministrativeAreaCatalogService,
     private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
+    private readonly admissions: PractitionerAdmissionsService,
   ) {}
 
   createPerson(tx: EntityManager, data: object) {
@@ -115,6 +117,13 @@ export class ProfilesRegistrationAdapter implements ProfileRegistrationPort {
       tx,
       data as Parameters<PractitionerSpecialtiesRepository['create']>[1],
     );
+  }
+
+  openPractitionerAdmission(
+    tx: EntityManager,
+    data: Parameters<ProfileRegistrationPort['openPractitionerAdmission']>[1],
+  ) {
+    return this.admissions.openForRegistration(tx, data);
   }
 
   assertIsAdministrativeArea(tx: EntityManager, conceptId: string) {

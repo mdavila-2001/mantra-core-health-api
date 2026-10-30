@@ -188,6 +188,44 @@ source_identifier)`; marks the patient `linked`.
   (`••••123`) and leaves out the caller and whoever already represents or was
   already asked. Both the request and the name search are rate limited.
 
+## Admisiones de profesionales (alta de doctor)
+
+La verificación de un médico es una **admisión** (`practitioner_admissions`): un
+checklist de requisitos por tipo (`admission_requirements`), una revisión por
+ítem (`practitioner_admission_reviews`) y una bitácora inmutable
+(`practitioner_admission_events`). Se crea en la misma transacción del registro.
+
+| Ruta | Quién | Qué |
+|---|---|---|
+| `GET /admissions`, `POST /admissions/search` | revisor, aprobador, `SECURITY_ADMIN` | Bandeja por `due_at` con cursor y conteos; cédula enmascarada; excluye la admisión propia |
+| `GET /admissions/:id` | ídem | Detalle: checklist, documentos, formulario enviado, bitácora; `evidenceSha256` por ítem |
+| `POST /admissions/:id/claim`, `release`, `reassign`, `request-info` | revisor / aprobador | Tomar, soltar, pasar y pedir información |
+| `POST /admissions/:id/items/:itemId/review` | revisor asignado | VERIFIED (exige fuente y `evidenceSha256`), REJECTED, INFO_REQUIRED |
+| `POST /admissions/:id/decision`, `suspend`, `reinstate` | aprobador | Resolver (cuatro ojos configurable), suspender, reponer |
+| `POST /admissions/:id/documents/:fileId/download-url` y `GET .../content` | revisor, aprobador | URL firmada de 2 min atada a usuario+admisión+archivo, auditada |
+| `GET /profiles/practitioners/me/admission`, `POST .../resubmit`, `.../withdraw` | el propio profesional | Su caso, sin notas internas ni revisor |
+| `POST /admissions/expire-sweep` | `SYSTEM`, `SECURITY_ADMIN` | Baja vencidas y abandona sin respuesta; un cerrojo consultivo deja correr un solo barrido (`skipped: true` si otro nodo lo tiene). Lo dispara cada hora el worker `profiles` (`ADMISSIONS_EXPIRE_SWEEP_ENABLED` / `ADMISSIONS_EXPIRE_SWEEP_CRON`) |
+
+Reglas que no se negocian:
+
+- **Único escritor.** Sólo `PractitionerVerificationProjector` escribe `PRACT_VERIF_*`, el rol
+  `PRACTITIONER` y el sello público (prueba arquitectónica
+  `practitioner-verification-single-writer.spec.ts`).
+- **Nadie toca su propia admisión.** `assertNotSelfAccess` responde 403 `ADMISSION_SELF_ACCESS` en
+  todas las rutas, antes de cualquier retorno idempotente.
+- **Lo que el revisor vio es lo que se verifica.** VERIFIED de un ítem lleva la huella
+  (`evidenceSha256`) que el detalle entregó; si cambió, 409 `ADMISSION_EVIDENCE_CHANGED`.
+- **CV-20 ya no verifica** un título de una admisión abierta (412 `ADMISSION_VERIFY_VIA_REVIEW`);
+  sólo rechaza, con las mismas puertas que `reviewItem`.
+- **Falla cerrado.** Sin requisitos aplicables nadie puede verificar.
+- **Frontera con M27** (`identity_manual_review_cases`): M27 decide si una matrícula coincide con el
+  registro de la autoridad; la admisión decide si el profesional queda habilitado. El efecto de M27
+  sólo deja una revisión de ese ítem (fuente `REGISTRO_MINSALUD`, caso como referencia) y nunca
+  escribe `PRACT_VERIF_*` ni concede el sello.
+- Configuración (`admissions.config.ts`): `ADMISSIONS_FOUR_EYES`, `ADMISSIONS_SECURITY_ADMIN_INHERITS`,
+  `ADMISSIONS_SLA_BUSINESS_DAYS` (3), `ADMISSIONS_DEFAULT_VALIDITY_MONTHS` (36),
+  `ADMISSIONS_INFO_WINDOW_DAYS` (30), `ADMISSIONS_MAX_RESUBMISSIONS` (3).
+
 ## Concepts
 
 Declared in `profiles.concepts.ts` via `defineModuleConcepts('profiles', {...})`,
