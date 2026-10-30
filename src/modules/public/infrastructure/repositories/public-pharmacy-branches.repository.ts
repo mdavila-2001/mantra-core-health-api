@@ -92,8 +92,8 @@ export class PublicPharmacyBranchesRepository {
   /**
    * Los productos **disponibles** de las sedes de un tenant que casan con algún
    * renglón de la receta, con su precio vigente para esa sede. «Disponible» es
-   * la regla única de {@link siteProductAvailabilitySql}: lotes si la sede los
-   * lleva, lo declarado en el catálogo si no.
+   * la regla única de {@link siteProductAvailabilitySql}: lotes si el producto
+   * tiene posición en la sede, lo declarado en el catálogo si no.
    *
    * El filtro por renglón va en SQL (sin tildes ni mayúsculas, «contiene») para
    * no traer el catálogo entero; cuál gana por renglón lo decide el dominio.
