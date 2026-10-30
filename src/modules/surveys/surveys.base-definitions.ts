@@ -12,8 +12,9 @@ import type { AnswerTypeCode } from './surveys.concepts';
  * deterministas derivados de este contenido.
  *
  * - `CONSULTATION`: se emite al completarse una reserva sin servicio
- *   (`practitionerServiceOfferingId` nulo). Las ocho primeras son obligatorias;
- *   el comentario final es libre y opcional.
+ *   (`practitionerServiceOfferingId` nulo). Son obligatorias todas menos la
+ *   revisión de la medicación (no a todos les recetaron algo) y el comentario
+ *   final, libre.
  * - `SERVICE`: se emite al completarse la reserva de un servicio (laboratorio,
  *   imagen, procedimiento...). Todas opcionales.
  *
@@ -26,6 +27,16 @@ import type { AnswerTypeCode } from './surveys.concepts';
  * Contenido: banco de preguntas de experiencia del paciente (28/10/2026). Es
  * una adaptación propia, sin validación psicométrica ni comparabilidad con
  * CAHPS: no reescribir un enunciado sin subir `SYSTEM_BASE_SURVEY_VERSION`.
+ *
+ * Versión 2 (29/10/2026): la consulta suma tres ítems del núcleo CAHPS de la
+ * AHRQ que el banco no cubría —tiempo suficiente, inquietudes contestadas y
+ * revisión de la medicación—, con el enunciado de la **traducción oficial al
+ * castellano** que publica CMS (Encuesta de Satisfacción de Medicare, OMB
+ * 0938-0732, ítems 18, 41 y 25; obra del gobierno de los EE. UU., dominio
+ * público): sólo cambia «en los últimos 6 meses / su doctor personal» por
+ * «esta consulta / el profesional», y las escalas siguen el formato del banco.
+ * Los enunciados de la versión 1 no se tocan: el resumen agrupa el histórico
+ * por texto (`survey-dimensions.ts`) y reescribirlos lo partiría.
  */
 
 /** Los dos tipos de encuesta base. */
@@ -43,7 +54,7 @@ export const SYSTEM_SURVEY_KINDS: readonly SystemSurveyKind[] = [
  * publica la versión nueva en cada tenant y retira la anterior, sin tocar las
  * respuestas ya dadas.
  */
-export const SYSTEM_BASE_SURVEY_VERSION = 1;
+export const SYSTEM_BASE_SURVEY_VERSION = 2;
 
 /** Plazo, en días, para responder una invitación base. */
 export const SYSTEM_BASE_RESPONSE_WINDOW_DAYS = DEFAULT_RESPONSE_WINDOW_DAYS;
@@ -142,6 +153,37 @@ export const SYSTEM_BASE_SURVEYS: Readonly<
       },
       {
         position: 6,
+        text: 'En esta consulta, ¿con qué frecuencia el profesional pasó suficiente tiempo con usted? (1 = Nunca, 5 = Siempre)',
+        answerType: 'SCALE',
+        required: true,
+        scaleMin: 1,
+        scaleMax: 5,
+        dimension: 'tiempo_suficiente',
+      },
+      {
+        position: 7,
+        text: '¿Salió de la consulta sintiendo que todas sus inquietudes o preguntas habían sido contestadas del todo? (1 = Nada, 5 = Del todo)',
+        answerType: 'SCALE',
+        required: true,
+        scaleMin: 1,
+        scaleMax: 5,
+        dimension: 'inquietudes_resueltas',
+      },
+      {
+        position: 8,
+        text: '¿Hablaron usted y el profesional sobre todas las medicinas recetadas que estaba tomando?',
+        answerType: 'SINGLE_CHOICE',
+        required: false,
+        options: [
+          'Sí, definitivamente',
+          'Sí, hasta cierto punto',
+          'No',
+          'No estoy tomando medicinas recetadas',
+        ],
+        dimension: 'revision_medicacion',
+      },
+      {
+        position: 9,
         text: 'Durante esta consulta, ¿tuvo algún problema de seguridad o de trato que quiera reportar? (por ejemplo: falta de respeto, falta de privacidad, un posible error o una indicación que le pareció insegura)',
         answerType: 'SINGLE_CHOICE',
         required: true,
@@ -153,7 +195,7 @@ export const SYSTEM_BASE_SURVEYS: Readonly<
         dimension: 'seguridad_percibida',
       },
       {
-        position: 7,
+        position: 10,
         text: 'En general, ¿cómo calificaría su experiencia con esta consulta? (1 = Muy mala, 5 = Excelente)',
         answerType: 'SCALE',
         required: true,
@@ -162,7 +204,7 @@ export const SYSTEM_BASE_SURVEYS: Readonly<
         dimension: 'satisfaccion_global',
       },
       {
-        position: 8,
+        position: 11,
         text: '¿Qué tan probable es que usted recomiende a este profesional a un familiar o a un amigo que necesite una atención parecida? (0 = Nada probable, 10 = Totalmente probable)',
         answerType: 'SCALE',
         required: true,
@@ -171,7 +213,7 @@ export const SYSTEM_BASE_SURVEYS: Readonly<
         dimension: 'recomendacion_nps',
       },
       {
-        position: 9,
+        position: 12,
         text: 'Si lo desea, cuéntenos qué podríamos hacer mejor.',
         answerType: 'TEXT',
         required: false,
