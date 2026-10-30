@@ -668,6 +668,33 @@ describeIt(
         expect(end.intent.row_version).toBe(mid.intent.row_version);
         expect(end.transactions).toHaveLength(0);
       });
+
+      it('una intención ya despachada no se vuelve a evaluar: tras `processing` (webhook) y una evaluación REVIEW posterior, reintentar CONSULTA (200), no da 409 ni 422 ni crea otro cobro', async () => {
+        const c = await approved();
+        const first = await on.transactions.processTransaction(
+          c.id,
+          sale(),
+          actor,
+        );
+        // Lo que dejaría el webhook `processing` (se simula el efecto sobre la fila, no el webhook).
+        await run(
+          `update payments.payment_intents set status_concept_id = ? where id = ?`,
+          [CONCEPTS.PI_PROCESSING, c.id],
+        );
+        await assess(c.id, 'REVIEW', '60');
+
+        const again = await on.transactions.processTransaction(
+          c.id,
+          sale(),
+          actor,
+        );
+
+        expect(again.gatewayTransactionRef).toBe(first.gatewayTransactionRef);
+        expect(again.statusConceptId).toBe(CONCEPTS.PI_PROCESSING);
+        expect(postsFor(c)).toHaveLength(1);
+        expect(double.createdCount).toBe(1);
+        expect(getsFor(first.gatewayTransactionRef as string)).toHaveLength(1);
+      });
     });
 
     // ------------------------------------------------ (2) concurrencia
