@@ -463,6 +463,13 @@ export class PharmacyProductReadDto {
   @ApiPropertyOptional({ nullable: true, type: Number })
   minStock?: number | null;
 
+  /**
+   * «No tengo» de toda la farmacia: gana sobre el conteo y sobre el stock de
+   * cada sede, que no lo puede apagar.
+   */
+  @ApiPropertyOptional({ type: Boolean })
+  outOfStockDeclared?: boolean;
+
   /** Imágenes propias, en orden. */
   @ApiPropertyOptional({ type: [String], format: 'uuid' })
   imageFileIds?: string[];

@@ -703,6 +703,7 @@ export function toProductReadDto(
         status: catalogStatusOf(row.statusConceptId),
         stock: row.stockQuantity ?? null,
         minStock: row.minStockQuantity ?? null,
+        outOfStockDeclared: row.outOfStockDeclared ?? false,
         imageFileIds: [...(extras.imageFileIds ?? [])],
       }
     : {};
