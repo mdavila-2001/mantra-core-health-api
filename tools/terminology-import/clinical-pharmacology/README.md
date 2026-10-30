@@ -29,7 +29,10 @@ node $D/fetch-cima.mjs --granularity product  # pasada exhaustiva: todas las fic
 node $D/fetch-rxnorm.mjs                      # ATC 5 → RxCUI → UNII (por código)
 node $D/fetch-openfda.mjs                     # particiones de drug/label (descarga masiva, ~1,8 GB)
 node $D/fetch-gsrs.mjs                        # sustancias FDA GSRS → out/gsrs-entries.ndjson (puente UNII ↔ WHO-ATC)
-node $D/fetch-ema-pi.mjs                      # PDF de información de producto de la EMA (castellano) + texto pdftotext → caché (sólo punteros)
+node $D/fetch-ema-pi.mjs                      # PDF de información de producto de la EMA (castellano), texto pdftotext y tabla de Adobe → caché
+EMA_PI_WORKERS=4 python3 -I $D/py/ema_pi_extract.py <cache>/ema-pi/adobe-symbol.txt <cache>/ema-pi/rows <cache>/ema-pi/*_es.pdf
+                                              # extracción verificada (pdfminer.six de py/requirements.txt)
+python3 -I -m unittest discover -s $D/py -p 'test_*.py'
 node $D/build-monographs.mjs                  # sin red → out/monographs.ndjson (por principio activo y vías: lo que se versiona)
 node $D/build-monographs.mjs --granularity product  # sin red → out/product/monographs.product.ndjson (~2,2 GB; no se versiona ni se carga)
 node $D/coverage-report.mjs                   # out/coverage.json + coverage.md
