@@ -14,6 +14,7 @@ import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 import type { Server, ServerOptions } from 'socket.io';
 import { AppModule } from './app.module';
+import { captureGatewayWebhookRawBody } from './modules/payments/gateway/payments-gateway-raw-body';
 import { loadHttpSliEnv } from './observability/http-sli/http-sli.env';
 import { createHttpSliMiddleware } from './observability/http-sli/http-sli.middleware';
 import { httpSliAggregator } from './observability/http-sli/http-sli.tokens';
@@ -173,7 +174,10 @@ async function bootstrap() {
   // Límite explícito de tamaño de payload. El default de Express (100 kb) queda
   // documentado aquí de forma intencional; las cargas grandes (imágenes, DICOM)
   // van por el flujo de almacenamiento de objetos, no por el body JSON.
-  app.use(json({ limit: '1mb' }));
+  //
+  // `verify` conserva los bytes crudos sólo de `/payments/gateway-webhooks`: la
+  // firma del webhook de la pasarela se calcula sobre el cuerpo byte a byte.
+  app.use(json({ limit: '1mb', verify: captureGatewayWebhookRawBody }));
   app.use(urlencoded({ extended: true, limit: '1mb' }));
 
   // CORS deny-by-default. Con front y API bajo el mismo origen (nginx del
