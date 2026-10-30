@@ -36,12 +36,12 @@
 | [`integrations`](integrations.md) | 4 | 5 | 9 | 10 | 9 |
 | [`messaging`](messaging.md) | 4 | 4 | 4 | 22 | 3 |
 | [`organization_extensions`](organization_extensions.md) | 4 | 4 | 6 | 6 | 8 |
+| [`payments`](payments.md) | 4 | 7 | 6 | 53 | 5 |
 | [`pharmacy`](pharmacy.md) | 4 | 14 | 15 | 12 | 17 |
 | [`qa_lab`](qa_lab.md) | 4 | 5 | 2 | 13 | 1 |
 | [`surveys`](surveys.md) | 4 | 5 | 6 | 7 | 11 |
 | [`data_catalog`](data_catalog.md) | 3 | 7 | 3 | 13 | 4 |
 | [`directory`](directory.md) | 3 | 12 | 6 | 9 | 21 |
-| [`payments`](payments.md) | 3 | 5 | 6 | 53 | 4 |
 | [`polyglot_storage`](polyglot_storage.md) | 3 | 3 | 4 | 20 | 1 |
 | [`read_models`](read_models.md) | 3 | 5 | 8 | 13 | 5 |
 | [`workflow`](workflow.md) | 3 | 3 | 3 | 8 | 1 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **301** | **493** | **447** | **1287** | **554** |
+| **Total** | **302** | **495** | **447** | **1287** | **555** |

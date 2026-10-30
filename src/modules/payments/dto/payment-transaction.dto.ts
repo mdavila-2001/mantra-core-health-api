@@ -9,6 +9,11 @@ import {
   Matches,
   MaxLength,
 } from 'class-validator';
+import {
+  GATEWAY_PAYMENT_METHOD_TYPES,
+  type GatewayPaymentMethodType,
+} from '../gateway/payments-gateway.types';
+import { PaymentIntentGatewayDto } from './payment-intent.dto';
 
 /**
  * Importe monetario positivo con hasta 2 decimales, como cadena. Rechaza
@@ -68,6 +73,18 @@ export class ProcessTransactionDto {
   @IsString()
   @MaxLength(100)
   authorizationCode?: string;
+
+  /**
+   * Medio de pago en la pasarela (sólo con `payments.via_gateway`).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Medio de pago en la pasarela. Obligatorio sólo con `payments.via_gateway` encendido; sin el flag se ignora.',
+    enum: GATEWAY_PAYMENT_METHOD_TYPES,
+  })
+  @IsOptional()
+  @IsIn(GATEWAY_PAYMENT_METHOD_TYPES as readonly string[])
+  paymentMethodType?: GatewayPaymentMethodType;
 }
 
 /**
@@ -103,6 +120,14 @@ export class TransactionResponseDto {
    */
   @ApiPropertyOptional()
   gatewayTransactionRef?: string;
+
+  /**
+   * Cobro en la pasarela (sólo con `payments.via_gateway`). En ese caso no hay
+   * transacción local: `id` es el de la intención y `gatewayTransactionRef` el
+   * `pi_…` de la pasarela; el resultado llega por webhook.
+   */
+  @ApiPropertyOptional({ type: () => PaymentIntentGatewayDto })
+  gateway?: PaymentIntentGatewayDto;
 }
 
 /** Cuerpo de `POST /payments/callbacks/{callbackPath}` (UC-42-06). */
