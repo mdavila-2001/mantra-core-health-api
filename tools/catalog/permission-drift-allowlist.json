@@ -474,7 +474,8 @@
         "src/modules/insurance/application/services/insurance-campaigns.service.ts",
         "src/modules/insurance/application/services/insurance-portability.service.ts#assertOwnership",
         "src/modules/insurance/application/services/insurance-analytics.service.ts#getLossRatioAnalytics",
-        "src/modules/insurance/application/services/my-claims.service.ts"
+        "src/modules/insurance/application/services/my-claims.service.ts",
+        "src/modules/insurance/application/services/practitioner-insurer-requests.service.ts#listReceived"
       ],
       "routes": [
         "GET /insurance-campaigns",
@@ -490,6 +491,7 @@
         "GET /insurance/patients/options",
         "GET /insurance/portability/certificates/:certificateId/json",
         "GET /insurance/portability/certificates/:certificateId/pdf",
+        "GET /insurance/practitioner-requests",
         "GET /insurance/received-claims",
         "GET /practitioner-settlement-batches",
         "GET /practitioner-settlement-batches/:id",
@@ -510,6 +512,8 @@
         "POST /insurance/patients/conversation",
         "POST /insurance/patients/search",
         "POST /insurance/portability/export",
+        "POST /insurance/practitioner-requests/:id/approve",
+        "POST /insurance/practitioner-requests/:id/reject",
         "POST /insurance/received-claims/:id/decision",
         "POST /practitioner-settlement-batches",
         "POST /prior-authorization-requests",
