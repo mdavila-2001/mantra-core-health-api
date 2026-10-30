@@ -65,12 +65,12 @@ en el tenant sembrado. Por defecto `admin@redesa.test` / `S3cret-passw0rd`; se p
 3. `POST /iam/auth/login` con `{{email}}` / `{{password}}` — su test guarda `accessToken` y
    `refreshToken` en el entorno automáticamente; el resto de la colección los hereda.
 4. **01 · Alta de usuarios (por tipo)** crea, en orden y encadenando ids por el entorno:
-   organización en sus diez tipos (`PROVIDER`, `PAYER` con su aseguradora, `BROKER` con su
-   corredora, `UNIVERSITY`, `PHARMACY`, `HEALTH_BUSINESS` y las cuatro institucionales
-   `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`), profesional de salud con su matrícula,
+   organización en sus once tipos (`PROVIDER`, `PAYER` con su aseguradora, `BROKER` con su
+   corredora, `UNIVERSITY`, `PHARMACY`, `HEALTH_BUSINESS` y las cinco institucionales
+   `HOSPITAL`, `CLINIC`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`), profesional de salud con su matrícula,
    paciente público, paciente asistido con su activación, usuario estándar, administrador de
    seguridad, elevación a `SUPERADMIN`, perfil de paciente con la vinculación de su cuenta,
-   perfil de profesional, y un rol de negocio con su asignación por tenant. Los 22 pasos se
+   perfil de profesional, y un rol de negocio con su asignación por tenant. Los 23 pasos se
    verifican contra la API real con `yarn postman:verify`.
 
    Autoregistro **público desde cero** (sin token) hay tres: organización, profesional de salud
@@ -117,7 +117,7 @@ cuenta, no desde un parámetro que el cliente pueda declarar.
 | Orden dentro del folder | Recorrido de cliente: listados → altas → sub-altas → lecturas por id → modificaciones → bajas. Correr el folder entero encadena solo; el borrado va último para no llevarse lo que el resto todavía usa. |
 | Bodies | Ejemplos derivados del schema. Los campos uuid resuelven contra la variable del recurso (`{{practiceId}}`) cuando el nombre coincide; si no hay variable, el campo **opcional se omite** y el **obligatorio** queda como marcador `<campo: uuid existente>`, que falla con un 400 nombrando el campo en vez de un 500 opaco. Las altas llevan cuerpo curado y verificado contra la API. |
 | Requisitos condicionales | El cuerpo derivado del schema emite **todos** los campos opcionales a la vez, y eso rompe cualquier endpoint que exija unos u otros según un discriminador: `register-organization` mandaba `payer` y `broker` juntos bajo un `tenantType: PROVIDER`. OpenAPI no expresa «PAYER exige `payer`» — eso vive en el servicio. Por eso esos flujos llevan cuerpo curado y `yarn postman:verify` los ejerce. |
-| `tenantType` | **Obligatorio** en las tres altas de tenant. Diez códigos: `PAYER` exige el bloque `payer`, que crea su aseguradora, y `BROKER` el bloque `broker`, que crea su corredor —ambas nacen pendientes de verificación—. Los ocho territoriales (`PROVIDER`, `UNIVERSITY`, `PHARMACY`, `HEALTH_BUSINESS`, `HOSPITAL`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`) exigen país y jurisdicción, que es lo que determina bajo qué regulador operan, y no materializan fila propia: operan por sus sedes. |
+| `tenantType` | **Obligatorio** en las tres altas de tenant. Once códigos: `PAYER` exige el bloque `payer`, que crea su aseguradora, y `BROKER` el bloque `broker`, que crea su corredor —ambas nacen pendientes de verificación—. Los nueve territoriales (`PROVIDER`, `UNIVERSITY`, `PHARMACY`, `HEALTH_BUSINESS`, `HOSPITAL`, `CLINIC`, `MEDICAL_OFFICE`, `NURSING`, `HEALTH_OTHER`) exigen país y jurisdicción, que es lo que determina bajo qué regulador operan, y no materializan fila propia: operan por sus sedes. |
 | `*ConceptId` | Casi 300 campos del contrato piden un uuid del catálogo de terminología. Resuélvelos con **`GET /terminology/concepts?q=…`** (folder 00): es la única forma de descubrirlos, porque `$lookup` exige conocer sistema y código exactos. En las tres altas de tenant, un concepto inexistente responde **422 nombrando el campo**; en el resto de endpoints todavía sale como 500, porque la FK se descubre en el `INSERT`. |
 | Tests | `pm.test` del primer status 2xx documentado; login y refresh capturan los tokens; el folder 01 encadena los ids. |
 

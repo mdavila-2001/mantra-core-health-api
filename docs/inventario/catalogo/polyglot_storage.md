@@ -21,7 +21,7 @@
 | [encryption_profiles](#encryption_profiles) | Define perfiles de cifrado requeridos para persistencia de datos en cada backend. | 11 | 2 | 3 | COINCIDE |
 | [key_rotation_policies](#key_rotation_policies) | Establece reglas de rotación de claves para mantener protección criptográfica a lo largo del ciclo de vida de datos. | 7 | 1 | 2 | COINCIDE |
 | [replication_policies](#replication_policies) | Define replicación permitida para disponibilidad y recuperación de datos derivados. | 8 | 1 | 3 | COINCIDE |
-| [residency_policies](#residency_policies) | Restringe regiones donde pueden alojarse datos conforme a requerimientos institucionales y normativos. | 8 | 2 | 3 | DIVERGE |
+| [residency_policies](#residency_policies) | Restringe regiones donde pueden alojarse datos conforme a requerimientos institucionales y normativos. | 8 | 2 | 4 | DIVERGE |
 | [retention_policies](#retention_policies) | Configura cuánto tiempo pueden conservarse datasets y colecciones en cada store. | 8 | 2 | 2 | COINCIDE |
 | [storage_backend_regions](#storage_backend_regions) | Registra regiones ofrecidas por cada almacén para aplicar residencia geográfica y latencia. | 9 | 2 | 4 | COINCIDE |
 | [storage_backends](#storage_backends) | Cataloga almacenes disponibles y determina qué tecnologías pueden persistir datasets del sistema médico. | 17 | 2 | 3 | COINCIDE |
@@ -934,7 +934,7 @@ Restringe regiones donde pueden alojarse datos conforme a requerimientos institu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml: residency_policies`
 - **Dominio:** Datos y NoSQL · **Diagrama:** `Mantra Core Health Context/modules/diagram_54_polyglot_storage.puml` · **DDL:** `SQL/54_polyglot_storage/02_tables.sql`
 - **Entidad del ORM:** `ResidencyPolicies` — `src/modules/polyglot_storage/entities/residency_policies.entity.ts`
-- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 2 entrantes · 3 operaciones
+- **Resumen:** 8 columnas · 2 índices · 0 FK salientes · 2 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -976,6 +976,7 @@ Restringe regiones donde pueden alojarse datos conforme a requerimientos institu
 | POST /governance/placements/approve | LEE | DIRECTA |
 | POST /governance/policies | CREA | DIRECTA |
 | POST /governance/policies | LEE | DIRECTA |
+| POST /admin/governance/tenant-residency-bindings | LEE | DIRECTA |
 
 #### Gobierno
 

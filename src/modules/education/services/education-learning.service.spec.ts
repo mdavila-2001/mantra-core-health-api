@@ -8,15 +8,21 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 
-import { EducationLearningService } from './education-learning.service';
+import {
+  COURSE_PAYMENT_SOURCE_REF,
+  EducationLearningService,
+} from './education-learning.service';
 import {
   CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
+import { EducationErrorReason } from '../education.error-reasons';
+import { EducationScopeService } from './education-scope.service';
+import { T1, T2, expectOutOfScope, inTenant } from './education.testing';
 
-const actor = { id: 'user-1', roles: ['EDUCATION_ADMIN'] };
+const actor = { id: 'user-1', roles: ['EDUCATION_ADMIN'] } as any;
 const COURSE = '11111111-1111-1111-1111-111111111111';
 const COHORT = '22222222-2222-2222-2222-222222222222';
 const ENROLLMENT = '33333333-3333-3333-3333-333333333333';
@@ -40,9 +46,13 @@ function build() {
     findEnrollmentById: mockFn(),
     findEnrollmentForUpdate: mockFn(),
     findLiveEnrollment: mockFn(),
+    findPaymentIntent: mockFn(),
+    findPaymentIntentForUpdate: mockFn(),
+    findEnrollmentByPaymentIntent: mockFn(),
     createLessonProgress: mockFn(),
     findProgressByEnrollment: mockFn(),
     createAttempt: mockFn(),
+    findAttemptById: mockFn(),
     findAttemptForUpdate: mockFn(),
     findAttemptsForUpdate: mockFn(),
     findPassedAttempts: mockFn(),
@@ -58,6 +68,7 @@ function build() {
   };
   const catalogRepo = {
     findCourseById: mockFn(),
+    findCohortById: mockFn(),
     findCohortForUpdate: mockFn(),
     findModulesByCourse: mockFn(),
     findLessonById: mockFn(),
@@ -67,13 +78,50 @@ function build() {
     findQuestionsByAssessment: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
-  const service = new EducationLearningService(
+  // Por defecto el curso y la inscripción existen y son de T1: cada prueba
+  // sustituye lo que necesite. Los resolvedores de alcance leen primero sin
+  // bloqueo y recién después con bloqueo.
+  catalogRepo.findCourseById.mockResolvedValue(publishedCourse());
+  learningRepo.findEnrollmentById.mockResolvedValue(activeEnrollment());
+  const scope = new EducationScopeService(
+    catalogRepo as any,
+    learningRepo as any,
+  );
+  const raw = new EducationLearningService(
     em as any,
     learningRepo,
     catalogRepo as any,
+    scope,
     logger as any,
   );
-  return { service, tx, learningRepo, catalogRepo, logger };
+  return { raw, service: inTenant(raw), tx, learningRepo, catalogRepo, logger };
+}
+
+/** Deja la inscripción disponible para la lectura sin bloqueo y para la bloqueada. */
+function seedEnrollment(d: ReturnType<typeof build>, enrollment: any) {
+  d.learningRepo.findEnrollmentById.mockResolvedValue(enrollment);
+  d.learningRepo.findEnrollmentForUpdate.mockResolvedValue(enrollment);
+}
+
+/** Deja el intento disponible para la lectura sin bloqueo y para la bloqueada. */
+function seedAttempt(d: ReturnType<typeof build>, attempt: any) {
+  d.learningRepo.findAttemptById.mockResolvedValue(attempt);
+  d.learningRepo.findAttemptForUpdate.mockResolvedValue(attempt);
+}
+
+/** Deja el certificado (del curso de la prueba) disponible con y sin bloqueo. */
+function seedCertificate(d: ReturnType<typeof build>, certificate: any) {
+  if (certificate && certificate.courseId === undefined) {
+    certificate.courseId = COURSE;
+  }
+  d.learningRepo.findCertificateById.mockResolvedValue(certificate);
+  d.learningRepo.findCertificateForUpdate.mockResolvedValue(certificate);
+}
+
+/** Deja la cohorte disponible con y sin bloqueo. */
+function seedCohort(d: ReturnType<typeof build>, cohort: any) {
+  d.catalogRepo.findCohortById.mockResolvedValue(cohort);
+  d.catalogRepo.findCohortForUpdate.mockResolvedValue(cohort);
 }
 
 /**
@@ -85,6 +133,7 @@ function build() {
 function publishedCourse(overrides: Record<string, unknown> = {}): any {
   return {
     id: COURSE,
+    tenantId: T1,
     statusConceptId: CONCEPTS.COURSE_PUBLISHED,
     code: 'CUR-01',
     ...overrides,
@@ -104,6 +153,26 @@ function activeEnrollment(overrides: Record<string, unknown> = {}): any {
     learnerRefId: LEARNER,
     statusConceptId: CONCEPTS.ENROLLMENT_STATE_ACTIVE,
     progressPercent: '0',
+    ...overrides,
+  };
+}
+
+/** Deja el intento de pago disponible para la lectura sin bloqueo y para la bloqueada. */
+function seedIntent(d: ReturnType<typeof build>, intent: any) {
+  d.learningRepo.findPaymentIntent.mockResolvedValue(intent);
+  d.learningRepo.findPaymentIntentForUpdate.mockResolvedValue(intent);
+}
+
+/** Intento de pago confirmado del tenant T1. */
+function paidIntent(overrides: Record<string, unknown> = {}): any {
+  return {
+    id: INTENT,
+    tenantId: T1,
+    statusConceptId: CONCEPTS.PI_SUCCEEDED,
+    // Creado por el actor de las pruebas, sin referencia de origen.
+    createdByUserId: 'user-1',
+    amount: '100.00',
+    currencyConceptId: 'cur-1',
     ...overrides,
   };
 }
@@ -152,7 +221,7 @@ describe('EducationLearningService', () => {
         capacity: 2,
         enrolledCount: 1,
       };
-      d.catalogRepo.findCohortForUpdate.mockResolvedValue(cohort);
+      seedCohort(d, cohort);
       d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
 
       const res = await d.service.enrollLearner(
@@ -168,7 +237,7 @@ describe('EducationLearningService', () => {
       const d = build();
       d.catalogRepo.findCourseById.mockResolvedValue(publishedCourse());
       d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
-      d.catalogRepo.findCohortForUpdate.mockResolvedValue({
+      seedCohort(d, {
         id: COHORT,
         courseId: COURSE,
         statusConceptId: CONCEPTS.COHORT_OPEN,
@@ -206,6 +275,8 @@ describe('EducationLearningService', () => {
       const d = build();
       d.catalogRepo.findCourseById.mockResolvedValue(publishedCourse());
       d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+      seedIntent(d, paidIntent());
+      d.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue(null);
       d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
 
       const res = await d.service.enrollLearner(
@@ -216,11 +287,343 @@ describe('EducationLearningService', () => {
       expect(res.id).toBe(ENROLLMENT);
     });
 
+    describe('fuentes y cursos de pago para un aprendiz', () => {
+      const learner = {
+        id: 'user-7',
+        roles: ['LEARNER'],
+        practitionerProfileId: LEARNER,
+      } as any;
+      const own = (overrides: Record<string, unknown> = {}) =>
+        dto({ learnerRefId: undefined, ...overrides });
+      const paidCourse = () =>
+        publishedCourse({ price: '120.00', currencyConceptId: 'cur-1' });
+
+      it.each(['ASSIGNED', 'PARTNER'] as const)(
+        'un aprendiz no puede inscribirse con la fuente administrativa %s',
+        async (source) => {
+          const d = build();
+          d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+
+          await expect(
+            d.service.enrollLearner(own({ source }), learner),
+          ).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_SOURCE_NOT_ALLOWED,
+          });
+          expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+        },
+      );
+
+      it('quien administra la formación sí puede usar ASSIGNED y PARTNER', async () => {
+        const d = build();
+        d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+
+        for (const source of ['ASSIGNED', 'PARTNER'] as const) {
+          await expect(
+            d.service.enrollLearner(dto({ source }), actor),
+          ).resolves.toMatchObject({ id: ENROLLMENT });
+        }
+      });
+
+      it('un curso de pago no admite a un aprendiz con SELF', async () => {
+        const d = build();
+        d.catalogRepo.findCourseById.mockResolvedValue(paidCourse());
+        d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+
+        await expect(
+          d.service.enrollLearner(own({ source: 'SELF' }), learner),
+        ).rejects.toMatchObject({
+          reason: EducationErrorReason.ENROLLMENT_PAYMENT_REQUIRED,
+        });
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
+
+      it('un curso gratuito sí admite SELF; uno de pago, con compra confirmada', async () => {
+        const free = build();
+        free.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        free.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+        await expect(
+          free.service.enrollLearner(own({ source: 'SELF' }), learner),
+        ).resolves.toMatchObject({ id: ENROLLMENT });
+
+        const paid = build();
+        paid.catalogRepo.findCourseById.mockResolvedValue(paidCourse());
+        paid.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        seedIntent(
+          paid,
+          paidIntent({
+            createdByUserId: 'user-7',
+            amount: '120.00',
+            sourceRefType: COURSE_PAYMENT_SOURCE_REF,
+            sourceRefId: COURSE,
+          }),
+        );
+        paid.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue(null);
+        paid.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+        await expect(
+          paid.service.enrollLearner(
+            own({ source: 'PURCHASED', paymentIntentId: INTENT }),
+            learner,
+          ),
+        ).resolves.toMatchObject({ id: ENROLLMENT });
+      });
+
+      it('quien administra puede inscribir sin pago en un curso de pago (cortesía)', async () => {
+        const d = build();
+        d.catalogRepo.findCourseById.mockResolvedValue(paidCourse());
+        d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+
+        await expect(
+          d.service.enrollLearner(dto({ source: 'ASSIGNED' }), actor),
+        ).resolves.toMatchObject({ id: ENROLLMENT });
+      });
+
+      it.each(['SELF', 'ASSIGNED', 'PARTNER'] as const)(
+        'un intento de pago con la fuente %s se rechaza',
+        async (source) => {
+          const d = build();
+
+          await expect(
+            d.service.enrollLearner(
+              dto({ source, paymentIntentId: INTENT }),
+              actor,
+            ),
+          ).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_PAYMENT_NOT_APPLICABLE,
+          });
+          expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+        },
+      );
+    });
+
+    describe('verificación del pago de una inscripción comprada', () => {
+      it('bloquea la fila del pago tras comprobar su tenant y antes de ver si ya se usó', async () => {
+        const d = build();
+        const order: string[] = [];
+        d.learningRepo.findPaymentIntent.mockImplementation(async () => {
+          order.push('lectura');
+          return paidIntent();
+        });
+        d.learningRepo.findPaymentIntentForUpdate.mockImplementation(
+          async () => {
+            order.push('bloqueo');
+            return paidIntent();
+          },
+        );
+        d.learningRepo.findEnrollmentByPaymentIntent.mockImplementation(
+          async () => {
+            order.push('uso');
+            return null;
+          },
+        );
+        d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+        d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+
+        await d.service.enrollLearner(purchased(), actor);
+
+        expect(order).toEqual(['lectura', 'bloqueo', 'uso']);
+      });
+
+      describe('el pago corresponde a la compra', () => {
+        const priced = () =>
+          publishedCourse({ price: '120.00', currencyConceptId: 'cur-1' });
+
+        function run(intent: any, course: any = priced(), who: any = actor) {
+          const d = build();
+          d.catalogRepo.findCourseById.mockResolvedValue(course);
+          d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+          d.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue(null);
+          d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+          seedIntent(d, intent);
+          return {
+            d,
+            result: d.service.enrollLearner(purchased(), who),
+          };
+        }
+        const ok = (overrides: Record<string, unknown> = {}) =>
+          paidIntent({ amount: '120.00', ...overrides });
+
+        it('acepta un pago del actor, de monto suficiente y misma moneda', async () => {
+          await expect(run(ok()).result).resolves.toMatchObject({
+            id: ENROLLMENT,
+          });
+        });
+
+        it('acepta un monto mayor al precio', async () => {
+          await expect(
+            run(ok({ amount: '500' })).result,
+          ).resolves.toBeDefined();
+        });
+
+        it('rechaza un intento de monto menor al precio del curso', async () => {
+          const { d, result } = run(ok({ amount: '119.99' }));
+          await expect(result).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_PAYMENT_MISMATCH,
+          });
+          expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+        });
+
+        it('rechaza un intento en otra moneda que la del curso', async () => {
+          const { result } = run(ok({ currencyConceptId: 'cur-2' }));
+          await expect(result).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_PAYMENT_MISMATCH,
+          });
+        });
+
+        it('un curso con precio y sin moneda rechaza la compra (falla cerrada)', async () => {
+          const { d, result } = run(ok(), publishedCourse({ price: '120.00' }));
+          await expect(result).rejects.toMatchObject({
+            reason: EducationErrorReason.COURSE_PRICE_WITHOUT_CURRENCY,
+          });
+          expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+        });
+
+        it('un curso sin precio no compara moneda', async () => {
+          const { result } = run(
+            ok({ amount: '0', currencyConceptId: 'cur-2' }),
+            publishedCourse({ price: '0' }),
+          );
+          await expect(result).resolves.toBeDefined();
+        });
+
+        it('rechaza un intento creado por otro pagador', async () => {
+          const { d, result } = run(ok({ createdByUserId: 'user-ajeno' }));
+          await expect(result).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_PAYMENT_MISMATCH,
+          });
+          expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+        });
+
+        it('rechaza un intento sin pagador registrado', async () => {
+          const { result } = run(ok({ createdByUserId: null }));
+          await expect(result).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_PAYMENT_MISMATCH,
+          });
+        });
+
+        it('acepta el pago del propio usuario aprendiz hecho por un administrador', async () => {
+          const d = build();
+          d.catalogRepo.findCourseById.mockResolvedValue(priced());
+          d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+          d.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue(null);
+          d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+          seedIntent(d, ok({ createdByUserId: LEARNER }));
+
+          await expect(
+            d.service.enrollLearner(
+              dto({
+                source: 'PURCHASED',
+                paymentIntentId: INTENT,
+                learnerType: 'USER',
+              }),
+              actor,
+            ),
+          ).resolves.toBeDefined();
+        });
+
+        it('rechaza un intento que declara pagar otro curso', async () => {
+          const { d, result } = run(
+            ok({
+              sourceRefType: COURSE_PAYMENT_SOURCE_REF,
+              sourceRefId: 'otro-curso',
+            }),
+          );
+          await expect(result).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_PAYMENT_MISMATCH,
+          });
+          expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+        });
+
+        it('rechaza un intento que declara pagar otro tipo de recurso o una factura', async () => {
+          await expect(
+            run(ok({ sourceRefType: 'INVOICE', sourceRefId: COURSE })).result,
+          ).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_PAYMENT_MISMATCH,
+          });
+          await expect(
+            run(ok({ invoiceId: 'factura-1' })).result,
+          ).rejects.toMatchObject({
+            reason: EducationErrorReason.ENROLLMENT_PAYMENT_MISMATCH,
+          });
+        });
+
+        it('acepta un intento que declara pagar este curso', async () => {
+          await expect(
+            run(
+              ok({
+                sourceRefType: COURSE_PAYMENT_SOURCE_REF,
+                sourceRefId: COURSE,
+              }),
+            ).result,
+          ).resolves.toBeDefined();
+        });
+      });
+
+      it('un intento ajeno no llega a bloquearse', async () => {
+        const d = build();
+        d.learningRepo.findPaymentIntent.mockResolvedValue(
+          paidIntent({ tenantId: T2 }),
+        );
+
+        await expectOutOfScope(d.service.enrollLearner(purchased(), actor));
+        expect(
+          d.learningRepo.findPaymentIntentForUpdate,
+        ).not.toHaveBeenCalled();
+      });
+
+      const purchased = () =>
+        dto({ source: 'PURCHASED' as const, paymentIntentId: INTENT });
+
+      it('un intento de pago de otro tenant responde como inexistente y no inscribe', async () => {
+        const d = build();
+        seedIntent(d, paidIntent({ tenantId: T2 }));
+
+        await expectOutOfScope(d.service.enrollLearner(purchased(), actor));
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
+
+      it('un intento de pago inexistente responde igual que uno ajeno', async () => {
+        const d = build();
+        seedIntent(d, null);
+
+        await expectOutOfScope(d.service.enrollLearner(purchased(), actor));
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
+
+      it('un pago sin confirmar (pendiente, fallido) no habilita la inscripción', async () => {
+        const d = build();
+        seedIntent(d, paidIntent({ statusConceptId: CONCEPTS.PI_PENDING }));
+
+        await expect(
+          d.service.enrollLearner(purchased(), actor),
+        ).rejects.toMatchObject({
+          reason: EducationErrorReason.ENROLLMENT_PAYMENT_NOT_CONFIRMED,
+        });
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
+
+      it('un pago que ya respalda otra inscripción no se reutiliza', async () => {
+        const d = build();
+        seedIntent(d, paidIntent());
+        d.learningRepo.findEnrollmentByPaymentIntent.mockResolvedValue({
+          id: 'enr-prev',
+        });
+
+        await expect(
+          d.service.enrollLearner(purchased(), actor),
+        ).rejects.toMatchObject({
+          reason: EducationErrorReason.ENROLLMENT_PAYMENT_ALREADY_USED,
+        });
+        expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+      });
+    });
+
     it('refuses a cohort that belongs to another course', async () => {
       const d = build();
       d.catalogRepo.findCourseById.mockResolvedValue(publishedCourse());
       d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
-      d.catalogRepo.findCohortForUpdate.mockResolvedValue({
+      seedCohort(d, {
         id: COHORT,
         courseId: 'other-course',
         statusConceptId: CONCEPTS.COHORT_OPEN,
@@ -260,8 +663,11 @@ describe('EducationLearningService', () => {
       totalLessons = 4,
     ) {
       const enrollment = activeEnrollment();
-      d.learningRepo.findEnrollmentForUpdate.mockResolvedValue(enrollment);
-      d.catalogRepo.findLessonById.mockResolvedValue({ id: LESSON });
+      seedEnrollment(d, enrollment);
+      d.catalogRepo.findLessonById.mockResolvedValue({
+        id: LESSON,
+        courseModuleId: 'mod-1',
+      });
       d.learningRepo.createLessonProgress.mockReturnValue({ id: 'prog-1' });
       d.catalogRepo.findModulesByCourse.mockResolvedValue([{ id: 'mod-1' }]);
       d.catalogRepo.countLessonsByModules.mockResolvedValue(totalLessons);
@@ -323,7 +729,8 @@ describe('EducationLearningService', () => {
 
     it('refuses to record progress on an expired enrollment', async () => {
       const d = build();
-      d.learningRepo.findEnrollmentForUpdate.mockResolvedValue(
+      seedEnrollment(
+        d,
         activeEnrollment({ expiresAt: new Date('2020-01-01T00:00:00Z') }),
       );
 
@@ -334,7 +741,8 @@ describe('EducationLearningService', () => {
 
     it('refuses a cancelled enrollment', async () => {
       const d = build();
-      d.learningRepo.findEnrollmentForUpdate.mockResolvedValue(
+      seedEnrollment(
+        d,
         activeEnrollment({
           statusConceptId: CONCEPTS.ENROLLMENT_STATE_CANCELLED,
         }),
@@ -347,9 +755,7 @@ describe('EducationLearningService', () => {
 
     it('fails when the lesson does not exist', async () => {
       const d = build();
-      d.learningRepo.findEnrollmentForUpdate.mockResolvedValue(
-        activeEnrollment(),
-      );
+      seedEnrollment(d, activeEnrollment());
       d.catalogRepo.findLessonById.mockResolvedValue(null);
 
       await expect(
@@ -498,7 +904,7 @@ describe('EducationLearningService', () => {
     it('grades against the stored answers and passes above the threshold', async () => {
       const d = build();
       const attempt = openAttempt();
-      d.learningRepo.findAttemptForUpdate.mockResolvedValue(attempt);
+      seedAttempt(d, attempt);
       d.catalogRepo.findAssessmentById.mockResolvedValue({
         id: ASSESSMENT,
         isGraded: true,
@@ -522,7 +928,7 @@ describe('EducationLearningService', () => {
 
     it('fails the attempt below the passing score', async () => {
       const d = build();
-      d.learningRepo.findAttemptForUpdate.mockResolvedValue(openAttempt());
+      seedAttempt(d, openAttempt());
       d.catalogRepo.findAssessmentById.mockResolvedValue({
         id: ASSESSMENT,
         isGraded: true,
@@ -541,7 +947,7 @@ describe('EducationLearningService', () => {
 
     it('weights the score by the points of each question', async () => {
       const d = build();
-      d.learningRepo.findAttemptForUpdate.mockResolvedValue(openAttempt());
+      seedAttempt(d, openAttempt());
       d.catalogRepo.findAssessmentById.mockResolvedValue({
         id: ASSESSMENT,
         isGraded: true,
@@ -563,7 +969,7 @@ describe('EducationLearningService', () => {
 
     it('compares multiple-choice answers as a set, ignoring order', async () => {
       const d = build();
-      d.learningRepo.findAttemptForUpdate.mockResolvedValue(openAttempt());
+      seedAttempt(d, openAttempt());
       d.catalogRepo.findAssessmentById.mockResolvedValue({
         id: ASSESSMENT,
         isGraded: true,
@@ -584,7 +990,7 @@ describe('EducationLearningService', () => {
 
     it('passes an ungraded survey regardless of the answers', async () => {
       const d = build();
-      d.learningRepo.findAttemptForUpdate.mockResolvedValue(openAttempt());
+      seedAttempt(d, openAttempt());
       d.catalogRepo.findAssessmentById.mockResolvedValue({
         id: ASSESSMENT,
         isGraded: false,
@@ -604,9 +1010,7 @@ describe('EducationLearningService', () => {
 
     it('rejects submitting an attempt that was already graded', async () => {
       const d = build();
-      d.learningRepo.findAttemptForUpdate.mockResolvedValue(
-        openAttempt({ statusConceptId: CONCEPTS.ATTEMPT_GRADED }),
-      );
+      seedAttempt(d, openAttempt({ statusConceptId: CONCEPTS.ATTEMPT_GRADED }));
 
       await expect(
         d.service.submitAttempt(ATTEMPT, { responsesJson: {} }, actor as any),
@@ -615,7 +1019,8 @@ describe('EducationLearningService', () => {
 
     it('rejects an attempt whose time ran out', async () => {
       const d = build();
-      d.learningRepo.findAttemptForUpdate.mockResolvedValue(
+      seedAttempt(
+        d,
         openAttempt({ startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000) }),
       );
       d.catalogRepo.findAssessmentById.mockResolvedValue({
@@ -643,7 +1048,7 @@ describe('EducationLearningService', () => {
       overrides: Record<string, unknown> = {},
     ) {
       const enrollment = activeEnrollment(overrides);
-      d.learningRepo.findEnrollmentForUpdate.mockResolvedValue(enrollment);
+      seedEnrollment(d, enrollment);
       d.catalogRepo.findModulesByCourse.mockResolvedValue([{ id: 'mod-1' }]);
       d.catalogRepo.countLessonsByModules.mockResolvedValue(1);
       d.learningRepo.findProgressByEnrollment.mockResolvedValue([
@@ -670,7 +1075,8 @@ describe('EducationLearningService', () => {
 
     it('is idempotent on an already completed enrollment', async () => {
       const d = build();
-      d.learningRepo.findEnrollmentForUpdate.mockResolvedValue(
+      seedEnrollment(
+        d,
         activeEnrollment({
           statusConceptId: CONCEPTS.ENROLLMENT_STATE_COMPLETED,
           progressPercent: '100.00',
@@ -733,7 +1139,8 @@ describe('EducationLearningService', () => {
       d: ReturnType<typeof build>,
       course: Record<string, unknown> = {},
     ) {
-      d.learningRepo.findEnrollmentForUpdate.mockResolvedValue(
+      seedEnrollment(
+        d,
         activeEnrollment({
           statusConceptId: CONCEPTS.ENROLLMENT_STATE_COMPLETED,
         }),
@@ -796,9 +1203,7 @@ describe('EducationLearningService', () => {
 
     it('refuses to certify an enrollment that is not completed', async () => {
       const d = build();
-      d.learningRepo.findEnrollmentForUpdate.mockResolvedValue(
-        activeEnrollment(),
-      );
+      seedEnrollment(d, activeEnrollment());
 
       await expect(
         d.service.issueCertificate(ENROLLMENT, {}, actor as any),
@@ -902,7 +1307,7 @@ describe('EducationLearningService', () => {
         id: CERTIFICATE,
         statusConceptId: CONCEPTS.CERTIFICATE_ISSUED,
       };
-      d.learningRepo.findCertificateForUpdate.mockResolvedValue(certificate);
+      seedCertificate(d, certificate);
       const record: any = {
         id: 'cme-1',
         statusConceptId: CONCEPTS.CME_AWARDED,
@@ -921,7 +1326,7 @@ describe('EducationLearningService', () => {
 
     it('does not re-reverse a record that was already reversed', async () => {
       const d = build();
-      d.learningRepo.findCertificateForUpdate.mockResolvedValue({
+      seedCertificate(d, {
         id: CERTIFICATE,
         statusConceptId: CONCEPTS.CERTIFICATE_ISSUED,
       });
@@ -936,7 +1341,7 @@ describe('EducationLearningService', () => {
 
     it('rejects revoking twice', async () => {
       const d = build();
-      d.learningRepo.findCertificateForUpdate.mockResolvedValue({
+      seedCertificate(d, {
         id: CERTIFICATE,
         statusConceptId: CONCEPTS.CERTIFICATE_REVOKED,
       });
@@ -948,11 +1353,610 @@ describe('EducationLearningService', () => {
 
     it('fails when the certificate does not exist', async () => {
       const d = build();
-      d.learningRepo.findCertificateForUpdate.mockResolvedValue(null);
+      seedCertificate(d, null);
 
       await expect(
         d.service.revokeCertificate(CERTIFICATE, dto, actor as any),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+  });
+
+  describe('alcance de tenant (EDU-01)', () => {
+    const COURSE_B = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
+    /** El curso `COURSE_B` es de T2; cualquier otro es de T1. */
+    function foreignCourseB(d: ReturnType<typeof build>) {
+      d.catalogRepo.findCourseById.mockImplementation(
+        (_tx: unknown, id: string) =>
+          Promise.resolve(
+            publishedCourse({
+              id,
+              tenantId: id === COURSE_B ? T2 : T1,
+            }),
+          ),
+      );
+    }
+
+    it('correcto: el admin de T1 inscribe en un curso de T1', async () => {
+      const d = build();
+      d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+      d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+      const res = await d.service.enrollLearner(
+        {
+          courseId: COURSE,
+          learnerType: 'PRACTITIONER',
+          learnerRefId: LEARNER,
+          source: 'SELF',
+        } as any,
+        actor,
+      );
+      expect(res.id).toBe(ENROLLMENT);
+    });
+
+    it('inscribir en un curso de T2 responde 404 uniforme y no crea la inscripción', async () => {
+      const d = build();
+      foreignCourseB(d);
+      await expectOutOfScope(
+        d.service.enrollLearner(
+          {
+            courseId: COURSE_B,
+            learnerType: 'PRACTITIONER',
+            learnerRefId: LEARNER,
+            source: 'SELF',
+          } as any,
+          actor,
+        ),
+      );
+      expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+    });
+
+    it('una cohorte de T2 responde 404 uniforme (no 422) y no se bloquea', async () => {
+      const d = build();
+      d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+      d.catalogRepo.findCourseById.mockImplementation(
+        (_tx: unknown, id: string) =>
+          Promise.resolve(
+            publishedCourse({
+              id,
+              tenantId: id === COURSE_B ? T2 : T1,
+            }),
+          ),
+      );
+      d.catalogRepo.findCohortById.mockResolvedValue({
+        id: COHORT,
+        courseId: COURSE_B,
+        statusConceptId: CONCEPTS.COHORT_OPEN,
+        capacity: 5,
+        enrolledCount: 0,
+      });
+      await expectOutOfScope(
+        d.service.enrollLearner(
+          {
+            courseId: COURSE,
+            cohortId: COHORT,
+            learnerType: 'PRACTITIONER',
+            learnerRefId: LEARNER,
+            source: 'SELF',
+          } as any,
+          actor,
+        ),
+      );
+      expect(d.catalogRepo.findCohortForUpdate).not.toHaveBeenCalled();
+      expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+    });
+
+    it('registrar progreso en una inscripción de T2 no escribe ni recalcula', async () => {
+      const d = build();
+      const enrollment = activeEnrollment({ courseId: COURSE_B });
+      foreignCourseB(d);
+      d.learningRepo.findEnrollmentById.mockResolvedValue(enrollment);
+      await expectOutOfScope(
+        d.service.recordProgress(
+          ENROLLMENT,
+          { lessonId: LESSON, status: 'COMPLETED' },
+          actor,
+        ),
+      );
+      expect(d.learningRepo.findEnrollmentForUpdate).not.toHaveBeenCalled();
+      expect(d.learningRepo.createLessonProgress).not.toHaveBeenCalled();
+      expect(enrollment.progressPercent).toBe('0');
+    });
+
+    it('una lección de otro curso no se registra en la inscripción', async () => {
+      const d = build();
+      seedEnrollment(d, activeEnrollment());
+      d.catalogRepo.findLessonById.mockResolvedValue({
+        id: LESSON,
+        courseModuleId: 'modulo-de-otro-curso',
+      });
+      d.catalogRepo.findModulesByCourse.mockResolvedValue([{ id: 'mod-1' }]);
+      await expectOutOfScope(
+        d.service.recordProgress(
+          ENROLLMENT,
+          { lessonId: LESSON, status: 'COMPLETED' },
+          actor,
+        ),
+      );
+      expect(d.learningRepo.createLessonProgress).not.toHaveBeenCalled();
+    });
+
+    it('iniciar un intento sobre una evaluación de T2 no lo crea', async () => {
+      const d = build();
+      foreignCourseB(d);
+      d.catalogRepo.findAssessmentById.mockResolvedValue({
+        id: ASSESSMENT,
+        courseId: COURSE_B,
+      });
+      await expectOutOfScope(
+        d.service.startAttempt(ASSESSMENT, { enrollmentId: ENROLLMENT }, actor),
+      );
+      expect(d.learningRepo.createAttempt).not.toHaveBeenCalled();
+    });
+
+    it('iniciar un intento con una inscripción de T2 no lo crea', async () => {
+      const d = build();
+      foreignCourseB(d);
+      d.catalogRepo.findAssessmentById.mockResolvedValue({
+        id: ASSESSMENT,
+        courseId: COURSE,
+      });
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        activeEnrollment({ courseId: COURSE_B }),
+      );
+      await expectOutOfScope(
+        d.service.startAttempt(ASSESSMENT, { enrollmentId: ENROLLMENT }, actor),
+      );
+      expect(d.learningRepo.createAttempt).not.toHaveBeenCalled();
+    });
+
+    it('enviar un intento de T2 no lo califica ni lo bloquea', async () => {
+      const d = build();
+      foreignCourseB(d);
+      const attempt: any = {
+        id: ATTEMPT,
+        assessmentId: ASSESSMENT,
+        enrollmentId: ENROLLMENT,
+        statusConceptId: CONCEPTS.ATTEMPT_IN_PROGRESS,
+        startedAt: new Date(),
+      };
+      d.learningRepo.findAttemptById.mockResolvedValue(attempt);
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        activeEnrollment({ courseId: COURSE_B }),
+      );
+      await expectOutOfScope(
+        d.service.submitAttempt(ATTEMPT, { responsesJson: {} }, actor),
+      );
+      expect(d.learningRepo.findAttemptForUpdate).not.toHaveBeenCalled();
+      expect(attempt.statusConceptId).toBe(CONCEPTS.ATTEMPT_IN_PROGRESS);
+      expect(attempt.score).toBeUndefined();
+    });
+
+    it('completar una inscripción de T2 conserva su estado', async () => {
+      const d = build();
+      foreignCourseB(d);
+      const enrollment = activeEnrollment({ courseId: COURSE_B });
+      d.learningRepo.findEnrollmentById.mockResolvedValue(enrollment);
+      await expectOutOfScope(d.service.completeEnrollment(ENROLLMENT, actor));
+      expect(d.learningRepo.findEnrollmentForUpdate).not.toHaveBeenCalled();
+      expect(enrollment.statusConceptId).toBe(CONCEPTS.ENROLLMENT_STATE_ACTIVE);
+    });
+
+    it('emitir el certificado de una inscripción de T2 no lo crea', async () => {
+      const d = build();
+      foreignCourseB(d);
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        activeEnrollment({
+          courseId: COURSE_B,
+          statusConceptId: CONCEPTS.ENROLLMENT_STATE_COMPLETED,
+        }),
+      );
+      await expectOutOfScope(d.service.issueCertificate(ENROLLMENT, {}, actor));
+      expect(d.learningRepo.createCertificate).not.toHaveBeenCalled();
+    });
+
+    it('acreditar CME de un certificado de T2 no crea el crédito', async () => {
+      const d = build();
+      foreignCourseB(d);
+      d.learningRepo.findCertificateById.mockResolvedValue({
+        id: CERTIFICATE,
+        courseId: COURSE_B,
+        statusConceptId: CONCEPTS.CERTIFICATE_ISSUED,
+        cmeCreditsAwarded: '8.00',
+      });
+      await expectOutOfScope(
+        d.service.recordCmeCredit(
+          CERTIFICATE,
+          { practitionerProfileId: PROFILE },
+          actor,
+        ),
+      );
+      expect(d.learningRepo.createCmeRecord).not.toHaveBeenCalled();
+    });
+
+    it('revocar el certificado de T2 conserva su estado y sus créditos', async () => {
+      const d = build();
+      foreignCourseB(d);
+      const certificate: any = {
+        id: CERTIFICATE,
+        courseId: COURSE_B,
+        statusConceptId: CONCEPTS.CERTIFICATE_ISSUED,
+      };
+      d.learningRepo.findCertificateById.mockResolvedValue(certificate);
+      await expectOutOfScope(
+        d.service.revokeCertificate(CERTIFICATE, { reason: 'x' }, actor),
+      );
+      expect(d.learningRepo.findCertificateForUpdate).not.toHaveBeenCalled();
+      expect(d.learningRepo.findCmeRecordsForUpdate).not.toHaveBeenCalled();
+      expect(certificate.statusConceptId).toBe(CONCEPTS.CERTIFICATE_ISSUED);
+    });
+
+    it('lo ajeno responde igual que lo inexistente', async () => {
+      const ajeno = build();
+      foreignCourseB(ajeno);
+      ajeno.learningRepo.findCertificateById.mockResolvedValue({
+        id: CERTIFICATE,
+        courseId: COURSE_B,
+        statusConceptId: CONCEPTS.CERTIFICATE_ISSUED,
+      });
+      const inexistente = build();
+      inexistente.learningRepo.findCertificateById.mockResolvedValue(null);
+      const a = await expectOutOfScope(
+        ajeno.service.revokeCertificate(CERTIFICATE, { reason: 'x' }, actor),
+      );
+      const b = await expectOutOfScope(
+        inexistente.service.revokeCertificate(
+          CERTIFICATE,
+          { reason: 'x' },
+          actor,
+        ),
+      );
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('el mismo recurso lo opera el admin de su propio tenant', async () => {
+      const d = build();
+      foreignCourseB(d);
+      const certificate: any = {
+        id: CERTIFICATE,
+        courseId: COURSE_B,
+        statusConceptId: CONCEPTS.CERTIFICATE_ISSUED,
+      };
+      seedCertificate(d, certificate);
+      d.learningRepo.findCmeRecordsForUpdate.mockResolvedValue([]);
+      await inTenant(d.raw, T2).revokeCertificate(
+        CERTIFICATE,
+        { reason: 'x' },
+        actor,
+      );
+      expect(certificate.statusConceptId).toBe(CONCEPTS.CERTIFICATE_REVOKED);
+    });
+
+    it('sin tenant en el contexto no se lee nada', async () => {
+      const d = build();
+      await expect(
+        d.raw.completeEnrollment(ENROLLMENT, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.learningRepo.findEnrollmentById).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('el LEARNER anclado a su identidad (EDU-02)', () => {
+    const OTHER_LEARNER = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
+    const learner = {
+      id: 'user-learner',
+      roles: ['LEARNER'],
+      patientProfileId: LEARNER,
+      practitionerProfileId: PROFILE,
+    } as any;
+
+    /** Inscripción de paciente del aprendiz `ref`. */
+    function patientEnrollment(ref: string, overrides = {}) {
+      return activeEnrollment({
+        learnerTypeConceptId: CONCEPTS.LEARNER_PATIENT,
+        learnerRefId: ref,
+        ...overrides,
+      });
+    }
+
+    it('correcto: el alumno inicia y entrega su propio intento', async () => {
+      const d = build();
+      d.catalogRepo.findAssessmentById.mockResolvedValue({
+        id: ASSESSMENT,
+        courseId: COURSE,
+        maxAttempts: 3,
+        isGraded: true,
+        passingScore: '0',
+      });
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        patientEnrollment(LEARNER),
+      );
+      d.learningRepo.findAttemptsForUpdate.mockResolvedValue([]);
+      d.learningRepo.createAttempt.mockReturnValue({ id: ATTEMPT });
+      const started = await d.service.startAttempt(
+        ASSESSMENT,
+        { enrollmentId: ENROLLMENT },
+        learner,
+      );
+      expect(started.id).toBe(ATTEMPT);
+
+      const attempt: any = {
+        id: ATTEMPT,
+        assessmentId: ASSESSMENT,
+        enrollmentId: ENROLLMENT,
+        statusConceptId: CONCEPTS.ATTEMPT_IN_PROGRESS,
+        startedAt: new Date(),
+      };
+      seedAttempt(d, attempt);
+      d.catalogRepo.findQuestionsByAssessment.mockResolvedValue([]);
+      const graded = await d.service.submitAttempt(
+        ATTEMPT,
+        { responsesJson: {} },
+        learner,
+      );
+      expect(graded.statusConceptId).toBe(CONCEPTS.ATTEMPT_GRADED);
+    });
+
+    it('límite: el alumno se inscribe sin declarar learnerRefId y se deriva su perfil', async () => {
+      const d = build();
+      d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+      d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+      await d.service.enrollLearner(
+        { courseId: COURSE, learnerType: 'PATIENT', source: 'SELF' } as any,
+        learner,
+      );
+      expect(d.learningRepo.createEnrollment).toHaveBeenCalledTimes(1);
+      expect(d.learningRepo.createEnrollment).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ learnerRefId: LEARNER }),
+      );
+      expect(d.learningRepo.findLiveEnrollment).toHaveBeenCalledWith(
+        d.tx,
+        COURSE,
+        CONCEPTS.LEARNER_PATIENT,
+        LEARNER,
+        expect.anything(),
+      );
+    });
+
+    it('límite: un perfil profesional o el propio usuario también se derivan', async () => {
+      const d = build();
+      d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+      d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+      await d.service.enrollLearner(
+        {
+          courseId: COURSE,
+          learnerType: 'PRACTITIONER',
+          source: 'SELF',
+        } as any,
+        learner,
+      );
+      await d.service.enrollLearner(
+        { courseId: COURSE, learnerType: 'USER', source: 'SELF' } as any,
+        learner,
+      );
+      const refs = d.learningRepo.createEnrollment.mock.calls.map(
+        (c: any[]) => c[1].learnerRefId,
+      );
+      expect(refs).toEqual([PROFILE, learner.id]);
+    });
+
+    it('falla catalogada: el alumno A inscribe a B → 403 LEARNER_ENROLLMENT_OWNER_REQUIRED', async () => {
+      const d = build();
+      const error: any = await d.service
+        .enrollLearner(
+          {
+            courseId: COURSE,
+            learnerType: 'PATIENT',
+            learnerRefId: OTHER_LEARNER,
+            source: 'SELF',
+          } as any,
+          learner,
+        )
+        .catch((e: unknown) => e);
+      expect(error.getStatus()).toBe(403);
+      expect(error.code).toBe('FORBIDDEN');
+      expect(error.reason).toBe(
+        EducationErrorReason.LEARNER_ENROLLMENT_OWNER_REQUIRED,
+      );
+      expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+    });
+
+    it('un alumno sin el perfil que declara no puede inscribirse con ese tipo', async () => {
+      const d = build();
+      await expect(
+        d.service.enrollLearner(
+          { courseId: COURSE, learnerType: 'PATIENT', source: 'SELF' } as any,
+          { id: 'u', roles: ['LEARNER'] } as any,
+        ),
+      ).rejects.toMatchObject({
+        status: 403,
+        reason: EducationErrorReason.LEARNER_ENROLLMENT_OWNER_REQUIRED,
+      });
+      expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+    });
+
+    it('error: el alumno A usa la inscripción de B → 404 y no registra progreso', async () => {
+      const d = build();
+      const other = patientEnrollment(OTHER_LEARNER);
+      d.learningRepo.findEnrollmentById.mockResolvedValue(other);
+      await expectOutOfScope(
+        d.service.recordProgress(
+          ENROLLMENT,
+          { lessonId: LESSON, status: 'COMPLETED' },
+          learner,
+        ),
+      );
+      expect(d.learningRepo.findEnrollmentForUpdate).not.toHaveBeenCalled();
+      expect(d.learningRepo.createLessonProgress).not.toHaveBeenCalled();
+      expect(other.progressPercent).toBe('0');
+    });
+
+    it('error: el alumno A no inicia un intento sobre la inscripción de B', async () => {
+      const d = build();
+      d.catalogRepo.findAssessmentById.mockResolvedValue({
+        id: ASSESSMENT,
+        courseId: COURSE,
+      });
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        patientEnrollment(OTHER_LEARNER),
+      );
+      await expectOutOfScope(
+        d.service.startAttempt(
+          ASSESSMENT,
+          { enrollmentId: ENROLLMENT },
+          learner,
+        ),
+      );
+      expect(d.learningRepo.createAttempt).not.toHaveBeenCalled();
+    });
+
+    it('error: el alumno A no entrega el intento de B ni cambia su calificación', async () => {
+      const d = build();
+      const attempt: any = {
+        id: ATTEMPT,
+        assessmentId: ASSESSMENT,
+        enrollmentId: ENROLLMENT,
+        statusConceptId: CONCEPTS.ATTEMPT_IN_PROGRESS,
+        startedAt: new Date(),
+      };
+      d.learningRepo.findAttemptById.mockResolvedValue(attempt);
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        patientEnrollment(OTHER_LEARNER),
+      );
+      await expectOutOfScope(
+        d.service.submitAttempt(ATTEMPT, { responsesJson: {} }, learner),
+      );
+      expect(attempt.statusConceptId).toBe(CONCEPTS.ATTEMPT_IN_PROGRESS);
+      expect(attempt.score).toBeUndefined();
+      expect(d.learningRepo.findAttemptForUpdate).not.toHaveBeenCalled();
+    });
+
+    it('error: el alumno A no completa la inscripción de B', async () => {
+      const d = build();
+      const other = patientEnrollment(OTHER_LEARNER);
+      d.learningRepo.findEnrollmentById.mockResolvedValue(other);
+      await expectOutOfScope(d.service.completeEnrollment(ENROLLMENT, learner));
+      expect(other.statusConceptId).toBe(CONCEPTS.ENROLLMENT_STATE_ACTIVE);
+    });
+
+    it('la inscripción de otra persona responde igual que una inexistente', async () => {
+      const ajena = build();
+      ajena.learningRepo.findEnrollmentById.mockResolvedValue(
+        patientEnrollment(OTHER_LEARNER),
+      );
+      const inexistente = build();
+      inexistente.learningRepo.findEnrollmentById.mockResolvedValue(null);
+      const a = await expectOutOfScope(
+        ajena.service.completeEnrollment(ENROLLMENT, learner),
+      );
+      const b = await expectOutOfScope(
+        inexistente.service.completeEnrollment(ENROLLMENT, learner),
+      );
+      expect(a.getResponse()).toEqual(b.getResponse());
+    });
+
+    it('una inscripción de tipo USER solo la opera ese usuario', async () => {
+      const d = build();
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        activeEnrollment({
+          learnerTypeConceptId: CONCEPTS.LEARNER_USER,
+          learnerRefId: 'otro-usuario',
+        }),
+      );
+      await expectOutOfScope(d.service.completeEnrollment(ENROLLMENT, learner));
+    });
+
+    it('una inscripción de tipo desconocido nunca habilita a un alumno', async () => {
+      const d = build();
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        activeEnrollment({ learnerTypeConceptId: 'concepto-desconocido' }),
+      );
+      await expectOutOfScope(d.service.completeEnrollment(ENROLLMENT, learner));
+    });
+
+    it('la vía administrativa se conserva: EDUCATION_ADMIN inscribe a un tercero explícito', async () => {
+      const d = build();
+      d.learningRepo.findLiveEnrollment.mockResolvedValue(null);
+      d.learningRepo.createEnrollment.mockReturnValue({ id: ENROLLMENT });
+      await d.service.enrollLearner(
+        {
+          courseId: COURSE,
+          learnerType: 'PATIENT',
+          learnerRefId: OTHER_LEARNER,
+          source: 'ASSIGNED',
+        } as any,
+        actor,
+      );
+      expect(d.learningRepo.createEnrollment).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ learnerRefId: OTHER_LEARNER }),
+      );
+    });
+
+    it('el administrador debe indicar a quién inscribe', async () => {
+      const d = build();
+      await expect(
+        d.service.enrollLearner(
+          {
+            courseId: COURSE,
+            learnerType: 'PATIENT',
+            source: 'ASSIGNED',
+          } as any,
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.learningRepo.createEnrollment).not.toHaveBeenCalled();
+    });
+
+    it('un actor con LEARNER y EDUCATION_ADMIN conserva la vía administrativa', async () => {
+      const d = build();
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        patientEnrollment(OTHER_LEARNER),
+      );
+      seedEnrollment(d, patientEnrollment(OTHER_LEARNER));
+      d.catalogRepo.findModulesByCourse.mockResolvedValue([]);
+      d.catalogRepo.countLessonsByModules.mockResolvedValue(0);
+      d.learningRepo.findProgressByEnrollment.mockResolvedValue([]);
+      await expect(
+        d.service.completeEnrollment(ENROLLMENT, {
+          id: 'u',
+          roles: ['LEARNER', 'EDUCATION_ADMIN'],
+        } as any),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+
+    it('un worker SYSTEM completa la inscripción de cualquier alumno del tenant', async () => {
+      const d = build();
+      const enrollment = patientEnrollment(OTHER_LEARNER);
+      seedEnrollment(d, enrollment);
+      d.catalogRepo.findModulesByCourse.mockResolvedValue([{ id: 'mod-1' }]);
+      d.catalogRepo.countLessonsByModules.mockResolvedValue(1);
+      d.learningRepo.findProgressByEnrollment.mockResolvedValue([
+        { lessonId: LESSON, statusConceptId: CONCEPTS.LESSON_COMPLETED },
+      ]);
+      d.catalogRepo.findGradedAssessments.mockResolvedValue([]);
+      d.learningRepo.findPassedAttempts.mockResolvedValue([]);
+      const res = await d.service.completeEnrollment(ENROLLMENT, {
+        id: 'worker',
+        roles: ['SYSTEM'],
+      } as any);
+      expect(res.statusConceptId).toBe(CONCEPTS.ENROLLMENT_STATE_COMPLETED);
+    });
+
+    it('un rol EDUCATION_ADMIN acotado a otro tenant no da la vía administrativa en este', async () => {
+      const d = build();
+      const adminElsewhere = {
+        ...learner,
+        roles: ['LEARNER', 'EDUCATION_ADMIN'],
+        scopedRoles: { [T2]: ['EDUCATION_ADMIN'] },
+      };
+      d.learningRepo.findEnrollmentById.mockResolvedValue(
+        patientEnrollment(OTHER_LEARNER),
+      );
+      await expectOutOfScope(
+        d.service.completeEnrollment(ENROLLMENT, adminElsewhere),
+      );
+      expect(d.learningRepo.findEnrollmentForUpdate).not.toHaveBeenCalled();
     });
   });
 });

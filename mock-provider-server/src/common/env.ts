@@ -21,6 +21,12 @@ export interface MockProviderEnv {
   identityVerificationDelayMs: number;
   /** Probabilidad (0-1) de que la verificación acabe RECHAZADA. */
   identityVerificationRejectionRate: number;
+  /**
+   * Probabilidad (0-1) de que el sistema de la farmacia externa no responda
+   * (503). Opcional para que los dobles de entorno de las otras pruebas no
+   * tengan que nombrarla.
+   */
+  pharmacyErpFailureRate?: number;
 }
 
 /** Lee y acota el entorno del proceso. Tasas fuera de [0,1] se recortan. */
@@ -47,6 +53,7 @@ export function loadEnv(): MockProviderEnv {
       process.env.IDENTITY_VERIFICATION_REJECTION_RATE,
       0,
     ),
+    pharmacyErpFailureRate: clampRate(process.env.PHARMACY_ERP_FAILURE_RATE, 0),
   };
 }
 

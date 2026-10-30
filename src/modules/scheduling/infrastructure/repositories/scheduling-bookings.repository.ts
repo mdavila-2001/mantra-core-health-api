@@ -13,6 +13,7 @@ import {
   type CancellationPolicySnapshot,
 } from '../../entities';
 import { createdBy } from '../../../../common';
+import { Invoices } from '../../../billing/entities';
 
 /**
  * Describe el contrato estructural de create hold data.
@@ -457,6 +458,55 @@ export class SchedulingBookingsRepository {
     });
   }
 
+  /**
+   * S-3 (FAC-01): al abrir el encuentro de una cita, su factura queda ligada a
+   * él. La cita se cobró antes de atenderse, así que su cuenta por cobrar nació
+   * sin encuentro; acá se completa, solo si todavía no tiene uno.
+   *
+   * El `appointmentId` del check-in viaja en el cuerpo: la cita, y después la
+   * factura, tienen que ser **del mismo paciente y tenant** que el encuentro.
+   * Si no, no se liga nada (no es este método el que decide si el check-in es
+   * válido, pero tampoco cruza el cobro de un paciente con la atención de otro).
+   *
+   * @param em - Transacción del check-in.
+   * @param encounter - El encuentro recién abierto: id, cita, paciente y tenant.
+   * @returns Si alguna factura quedó ligada.
+   */
+  async linkPaymentInvoiceToEncounter(
+    em: EntityManager,
+    encounter: {
+      readonly id: string;
+      readonly appointmentId: string;
+      readonly patientProfileId: string;
+      readonly tenantId: string;
+    },
+  ): Promise<boolean> {
+    const booking = await em.findOne(
+      AppointmentBookings,
+      {
+        appointmentId: encounter.appointmentId,
+        patientProfileId: encounter.patientProfileId,
+        tenantId: encounter.tenantId,
+      },
+      { fields: ['id'] },
+    );
+    if (!booking) return false;
+    const payment = await this.findPaymentState(em, booking.id);
+    if (!payment?.invoiceId) return false;
+    const updated = await em.nativeUpdate(
+      Invoices,
+      {
+        id: payment.invoiceId,
+        // La factura no tiene tenant propio: la acota la cita (ya filtrada por
+        // tenant) y, además, el paciente.
+        patientProfileId: encounter.patientProfileId,
+        encounterId: null,
+      },
+      { encounterId: encounter.id },
+    );
+    return updated > 0;
+  }
+
   /** Cita concreta, sin bloquear: es la cara de lectura de UC-41-15. */
   findBookingById(
     em: EntityManager,
@@ -495,8 +545,18 @@ export class SchedulingBookingsRepository {
   async findBookings(
     em: EntityManager,
     filters: {
+      /**
+       * Tenant activo. Obligatorio y parte del `where`: filtrar después de
+       * cargar las filas ya habría leído citas de otra organización.
+       */
+      tenantId: string;
       /** Paciente titular de la cita. */
       patientProfileId?: string;
+      /**
+       * Pacientes titulares admitidos (el propio perfil y los representados);
+       * es el acotamiento de una cuenta de paciente que lista por agenda.
+       */
+      patientProfileIds?: readonly string[];
       /** Recurso (agenda) al que pertenece. */
       resourceId?: string;
       /** Inicio de la ventana sobre el instante del slot. */
@@ -513,9 +573,11 @@ export class SchedulingBookingsRepository {
     /** `true` si la lectura previa al filtro por ventana agotó su tope. */
     fetchCapReached: boolean;
   }> {
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { tenantId: filters.tenantId };
     if (filters.patientProfileId) {
       where.patientProfileId = filters.patientProfileId;
+    } else if (filters.patientProfileIds) {
+      where.patientProfileId = { $in: [...filters.patientProfileIds] };
     }
     if (filters.resourceId) where.resourceId = filters.resourceId;
     if (filters.statusConceptIds && filters.statusConceptIds.length > 0) {

@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
+  Audited,
   CurrentUser,
   Roles,
   requireTenantId,
@@ -80,11 +81,17 @@ export class DentalController {
   })
   listByPatient(
     @Query() query: ListDentalProceduresQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
   ): Promise<DentalProcedureListDto> {
-    return this.dentalService.listByPatient(query);
+    return this.dentalService.listByPatient(query, actor);
   }
 
   /** Registra un tratamiento odontológico ya realizado. */
+  @Audited({
+    action: 'DENTAL_PROCEDURE_RECORDED',
+    entity: 'procedure_case',
+    entityId: 'result.id',
+  })
   @Post('dental-procedures')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

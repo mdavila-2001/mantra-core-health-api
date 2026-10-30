@@ -14,17 +14,17 @@
 |---|---|---|---|---|---|---|
 | 1 | POST | `/lakehouse/catalogs` | Registrar el catálogo / metastore | MEDIO | 5 | DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN |
 | 2 | POST | `/lakehouse/data-products/{id}/versions` | Publicar el producto de datos y su versión | MEDIO | 10 | DATA_PRODUCT_OWNER, PLATFORM_ADMIN |
-| 3 | POST | `/lakehouse/datasets` | Registrar el dataset y su esquema inicial | MEDIO | 9 | DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN |
-| 4 | POST | `/lakehouse/datasets/{id}/quality-runs` | Evaluar la calidad del dataset y abrir hallazgos | MEDIO | 9 | DATA_STEWARD, SYSTEM, PLATFORM_ADMIN |
+| 3 | POST | `/lakehouse/datasets` | Registrar el dataset y su esquema inicial | MEDIO | 10 | DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN |
+| 4 | POST | `/lakehouse/datasets/{id}/quality-runs` | Evaluar la calidad del dataset y abrir hallazgos | MEDIO | 10 | DATA_STEWARD, SYSTEM, PLATFORM_ADMIN |
 | 5 | POST | `/lakehouse/ingestion/curated-runs` | Ingerir dato de salud de-identificado en la zona curada | MEDIO | 12 | SYSTEM, DEIDENTIFICATION_WORKER, PLATFORM_ADMIN |
 | 6 | POST | `/lakehouse/transformations/{defId}/runs` | Registrar la corrida con sus particiones, archivos y linaje | MEDIO | 13 | SYSTEM, TRANSFORMATION_WORKER, PLATFORM_ADMIN |
 | 7 | POST | `/lakehouse/zones` | Definir una zona del data lake | MEDIO | 5 | DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN |
 | 8 | POST | `/research/dataset-releases` | Solicitar el release de un dataset para investigación | MEDIO | 8 | PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN |
-| 9 | POST | `/research/dataset-releases/{id}/approve` | Aprobar y materializar el manifiesto de-identificado | MEDIO | 10 | RESEARCH_GOVERNANCE, DPO, PLATFORM_ADMIN |
-| 10 | POST | `/research/dataset-releases/{id}/revoke` | Expirar o revocar el release | MEDIO | 7 | RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN |
+| 9 | POST | `/research/dataset-releases/{id}/approve` | Aprobar y materializar el manifiesto de-identificado | MEDIO | 9 | RESEARCH_GOVERNANCE, DPO, PLATFORM_ADMIN |
+| 10 | POST | `/research/dataset-releases/{id}/revoke` | Expirar o revocar el release | MEDIO | 6 | RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN |
 | 11 | GET | `/research/dataset-releases/expired` | Listar releases con manifiesto vencido sin cerrar | BAJO | 2 | RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN |
 | 12 | POST | `/research/deidentification-profiles` | Dar de alta un perfil de de-identificación | MEDIO | 1 | RESEARCH_GOVERNANCE, DPO, PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN |
-| 13 | POST | `/research/projects/{id}/cohorts` | Definir el proyecto de investigación y su cohorte | MEDIO | 8 | PRINCIPAL_INVESTIGATOR, RESEARCH_GOVERNANCE, PLATFORM_ADMIN |
+| 13 | POST | `/research/projects/{id}/cohorts` | Definir el proyecto de investigación y su cohorte | MEDIO | 9 | PRINCIPAL_INVESTIGATOR, RESEARCH_GOVERNANCE, PLATFORM_ADMIN |
 
 ---
 
@@ -35,7 +35,7 @@
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LakehouseController.registerCatalog` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:63`
+- **Implementación:** `LakehouseController.registerCatalog` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:73`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -45,18 +45,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /lakehouse/catalogs` la atiende `LakehouseController.registerCatalog` (src/modules/lakehouse/controllers/lakehouse.controller.ts:63). Exige sesión con alguno de los roles DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterCatalogDto` (5 campos, 3 obligatorios). Delega en `LakehouseCatalogService.registerCatalog`. Crea filas en lakehouse.lakehouse_catalogs, messaging.domain_events, messaging.outbox_messages. Lee lakehouse.lakehouse_catalogs, messaging.outbox_messages. Publica LakehouseCatalogRegistered.
+`POST /lakehouse/catalogs` la atiende `LakehouseController.registerCatalog` (src/modules/lakehouse/controllers/lakehouse.controller.ts:73). Exige sesión con alguno de los roles DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterCatalogDto` (5 campos, 3 obligatorios). Delega en `LakehouseCatalogService.registerCatalog`. Crea filas en lakehouse.lakehouse_catalogs, messaging.domain_events, messaging.outbox_messages. Lee lakehouse.lakehouse_catalogs, messaging.outbox_messages. Publica LakehouseCatalogRegistered.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:73` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -65,14 +65,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `lakehouse.lakehouse_catalogs` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerCatalog → LakehouseCatalogService.registerCatalog → LakehouseCatalogRepository.createCatalog | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:129` |
 | `lakehouse.lakehouse_catalogs` | LEE | LEE | DIRECTA | LakehouseController.registerCatalog → LakehouseCatalogService.registerCatalog → LakehouseCatalogRepository.findCatalogByCode | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:143` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerCatalog → LakehouseCatalogService.registerCatalog → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerCatalog → LakehouseCatalogService.registerCatalog → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.registerCatalog → LakehouseCatalogService.registerCatalog → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerCatalog → LakehouseCatalogService.registerCatalog → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.registerCatalog → LakehouseCatalogService.registerCatalog → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `LakehouseCatalogRegistered` | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:118` |
+| Evento de dominio | `LakehouseCatalogRegistered` | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:137` |
 
 ### Cuerpo — DTO `RegisterCatalogDto` · `application/json`
 
@@ -146,7 +146,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LakehouseController.publishProductVersion` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:75`
+- **Implementación:** `LakehouseController.publishProductVersion` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:90`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -156,40 +156,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /lakehouse/data-products/{id}/versions` la atiende `LakehouseController.publishProductVersion` (src/modules/lakehouse/controllers/lakehouse.controller.ts:75). Exige sesión con alguno de los roles DATA_PRODUCT_OWNER, PLATFORM_ADMIN. Valida el cuerpo como `PublishProductVersionDto` (16 campos, 5 obligatorios). Delega en `LakehouseCatalogService.publishProductVersion`. Crea filas en lakehouse.data_product_versions, lakehouse.data_products, lakehouse.lakehouse_quality_rules, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.data_product_versions, lakehouse.data_products. Lee lakehouse.data_product_versions, lakehouse.data_products, messaging.outbox_messages. Publica DataProductVersionPublished.
+`POST /lakehouse/data-products/{id}/versions` la atiende `LakehouseController.publishProductVersion` (src/modules/lakehouse/controllers/lakehouse.controller.ts:90). Exige sesión con alguno de los roles DATA_PRODUCT_OWNER, PLATFORM_ADMIN. Valida el cuerpo como `PublishProductVersionDto` (16 campos, 5 obligatorios). Delega en `LakehouseCatalogService.publishProductVersion`. Crea filas en lakehouse.data_product_versions, lakehouse.data_products, lakehouse.lakehouse_quality_rules, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.data_product_versions, lakehouse.data_products. Lee lakehouse.data_product_versions, lakehouse.data_products, messaging.outbox_messages. Publica DataProductVersionPublished.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_PRODUCT_OWNER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/lakehouse.controller.ts:75` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: DATA_PRODUCT_OWNER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:90` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/lakehouse.controller.ts:90` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `lakehouse.data_product_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:219` |
-| `lakehouse.data_product_versions` | ESCRIBE | CREA | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.createProductVersion | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:282` |
-| `lakehouse.data_product_versions` | LEE | LEE | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.findProductVersion | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:312` |
-| `lakehouse.data_products` | ESCRIBE | ACTUALIZA | POR_TIPO | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:187` |
-| `lakehouse.data_products` | ESCRIBE | CREA | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.createProduct | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:241` |
-| `lakehouse.data_products` | LEE | LEE | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.findProductForUpdate | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:186` |
-| `lakehouse.lakehouse_quality_rules` | ESCRIBE | CREA | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.createQualityRule | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:370` |
+| `lakehouse.data_product_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:258` |
+| `lakehouse.data_product_versions` | ESCRIBE | CREA | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.createProductVersion | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:298` |
+| `lakehouse.data_product_versions` | LEE | LEE | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.findProductVersion | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:337` |
+| `lakehouse.data_products` | ESCRIBE | ACTUALIZA | POR_TIPO | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:226` |
+| `lakehouse.data_products` | ESCRIBE | CREA | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.createProduct | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:257` |
+| `lakehouse.data_products` | LEE | LEE | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.findProductById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:206` |
+| `lakehouse.lakehouse_quality_rules` | ESCRIBE | CREA | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → LakehouseCatalogRepository.createQualityRule | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:395` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.publishProductVersion → LakehouseCatalogService.publishProductVersion → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `DataProductVersionPublished` | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:258` |
+| Evento de dominio | `DataProductVersionPublished` | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:300` |
 
 ### Parámetros
 
@@ -277,7 +277,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe un producto con ese código para el tenant, con otro identificador.; ConflictException: El producto existente tiene otro código o pertenece a otro tenant.; ConflictException: Esa versión del producto ya está publicada.; ConflictException: Dos reglas de calidad comparten el mismo código. |
+| 409 | `CONFLICT` | ConflictException: Ya existe un producto con ese código para el tenant, con otro identificador.; ConflictException: El producto existente tiene otro código.; ConflictException: Esa versión del producto ya está publicada.; ConflictException: Dos reglas de calidad comparten el mismo código. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
@@ -299,7 +299,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LakehouseController.registerDataset` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:92`
+- **Implementación:** `LakehouseController.registerDataset` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:112`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -309,38 +309,39 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /lakehouse/datasets` la atiende `LakehouseController.registerDataset` (src/modules/lakehouse/controllers/lakehouse.controller.ts:92). Exige sesión con alguno de los roles DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterDatasetDto` (12 campos, 8 obligatorios). Delega en `LakehouseCatalogService.registerDataset`. Crea filas en lakehouse.lakehouse_datasets, lakehouse.lakehouse_schema_versions, messaging.domain_events, messaging.outbox_messages. Lee lakehouse.data_lake_zones, lakehouse.data_product_versions, lakehouse.lakehouse_catalogs, lakehouse.lakehouse_datasets, messaging.outbox_messages. Publica LakehouseDatasetRegistered.
+`POST /lakehouse/datasets` la atiende `LakehouseController.registerDataset` (src/modules/lakehouse/controllers/lakehouse.controller.ts:112). Exige sesión con alguno de los roles DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `RegisterDatasetDto` (12 campos, 8 obligatorios). Delega en `LakehouseCatalogService.registerDataset`. Crea filas en lakehouse.lakehouse_datasets, lakehouse.lakehouse_schema_versions, messaging.domain_events, messaging.outbox_messages. Lee lakehouse.data_lake_zones, lakehouse.data_product_versions, lakehouse.data_products, lakehouse.lakehouse_catalogs, lakehouse.lakehouse_datasets, messaging.outbox_messages. Publica LakehouseDatasetRegistered.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:112` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `lakehouse.data_lake_zones` | LEE | LEE | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.findZoneById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:88` |
-| `lakehouse.data_product_versions` | LEE | LEE | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.findProductVersionById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:296` |
+| `lakehouse.data_product_versions` | LEE | LEE | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.findProductVersionInTenant | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:315` |
+| `lakehouse.data_products` | LEE | LEE | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.findProductVersionInTenant | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:317` |
 | `lakehouse.lakehouse_catalogs` | LEE | LEE | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.findCatalogById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:157` |
-| `lakehouse.lakehouse_datasets` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.createDataset | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:465` |
-| `lakehouse.lakehouse_datasets` | LEE | LEE | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.findDatasetByTable | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:507` |
-| `lakehouse.lakehouse_schema_versions` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.createSchemaVersion | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:550` |
+| `lakehouse.lakehouse_datasets` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.createDataset | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:490` |
+| `lakehouse.lakehouse_datasets` | LEE | LEE | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.findDatasetByTable | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:547` |
+| `lakehouse.lakehouse_schema_versions` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → LakehouseCatalogRepository.createSchemaVersion | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:591` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.registerDataset → LakehouseCatalogService.registerDataset → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `LakehouseDatasetRegistered` | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:397` |
+| Evento de dominio | `LakehouseDatasetRegistered` | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:442` |
 
 ### Cuerpo — DTO `RegisterDatasetDto` · `application/json`
 
@@ -413,7 +414,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Versión de producto no encontrada.; ResourceNotFoundException: Zona no encontrada.; ResourceNotFoundException: Catálogo no encontrado. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Zona no encontrada.; ResourceNotFoundException: Catálogo no encontrado. |
 | 409 | `CONFLICT` | ConflictException: Ya hay un dataset registrado para esa tabla. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La versión del producto ya no es la vigente.; PreconditionFailedException: La zona no está activa.; PreconditionFailedException: El catálogo no está activo. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -437,7 +438,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LakehouseController.runQualityCheck` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:140`
+- **Implementación:** `LakehouseController.runQualityCheck` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:175`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -447,39 +448,40 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /lakehouse/datasets/{id}/quality-runs` la atiende `LakehouseController.runQualityCheck` (src/modules/lakehouse/controllers/lakehouse.controller.ts:140). Exige sesión con alguno de los roles DATA_STEWARD, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RunQualityCheckDto` (8 campos, 2 obligatorios). Delega en `TransformationService.runQualityCheck`. Crea filas en lakehouse.lakehouse_quality_issues, lakehouse.lakehouse_quality_runs, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.lakehouse_datasets, lakehouse.lakehouse_quality_runs. Lee lakehouse.lakehouse_datasets, lakehouse.lakehouse_quality_rules, messaging.outbox_messages. Publica QualityRunEvaluated.
+`POST /lakehouse/datasets/{id}/quality-runs` la atiende `LakehouseController.runQualityCheck` (src/modules/lakehouse/controllers/lakehouse.controller.ts:175). Exige sesión con alguno de los roles DATA_STEWARD, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RunQualityCheckDto` (8 campos, 3 obligatorios). Delega en `TransformationService.runQualityCheck`. Crea filas en lakehouse.lakehouse_quality_issues, lakehouse.lakehouse_quality_runs, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.lakehouse_quality_runs. Lee lakehouse.lakehouse_datasets, lakehouse.lakehouse_partitions, lakehouse.lakehouse_quality_rules, lakehouse.transformation_runs, messaging.outbox_messages. Publica QualityRunEvaluated.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_STEWARD, SYSTEM, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:140` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/lakehouse.controller.ts:140` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: DATA_STEWARD, SYSTEM, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:175` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/lakehouse.controller.ts:175` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `lakehouse.lakehouse_datasets` | ESCRIBE | ACTUALIZA | POR_TIPO | LakehouseController.runQualityCheck → TransformationService.runQualityCheck | `src/modules/lakehouse/services/transformation.service.ts:392` |
-| `lakehouse.lakehouse_datasets` | LEE | LEE | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseCatalogRepository.findDatasetForUpdate | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:493` |
-| `lakehouse.lakehouse_quality_issues` | ESCRIBE | CREA | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseRuntimeRepository.createQualityIssue | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:371` |
-| `lakehouse.lakehouse_quality_rules` | LEE | LEE | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseCatalogRepository.findActiveQualityRules | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:386` |
-| `lakehouse.lakehouse_quality_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | LakehouseController.runQualityCheck → TransformationService.runQualityCheck | `src/modules/lakehouse/services/transformation.service.ts:386` |
-| `lakehouse.lakehouse_quality_runs` | ESCRIBE | CREA | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseRuntimeRepository.createQualityRun | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:328` |
+| `lakehouse.lakehouse_datasets` | LEE | LEE | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseCatalogRepository.findDatasetForUpdate | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:522` |
+| `lakehouse.lakehouse_partitions` | LEE | LEE | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseRuntimeRepository.findPartitionById | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:195` |
+| `lakehouse.lakehouse_quality_issues` | ESCRIBE | CREA | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseRuntimeRepository.createQualityIssue | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:376` |
+| `lakehouse.lakehouse_quality_rules` | LEE | LEE | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseCatalogRepository.findActiveQualityRules | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:411` |
+| `lakehouse.lakehouse_quality_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | LakehouseController.runQualityCheck → TransformationService.runQualityCheck | `src/modules/lakehouse/services/transformation.service.ts:428` |
+| `lakehouse.lakehouse_quality_runs` | ESCRIBE | CREA | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseRuntimeRepository.createQualityRun | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:333` |
+| `lakehouse.transformation_runs` | LEE | LEE | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → LakehouseRuntimeRepository.findRunById | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:117` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.runQualityCheck → TransformationService.runQualityCheck → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `QualityRunEvaluated` | `src/modules/lakehouse/services/transformation.service.ts:395` |
+| Evento de dominio | `QualityRunEvaluated` | `src/modules/lakehouse/services/transformation.service.ts:437` |
 
 ### Parámetros
 
@@ -492,7 +494,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
 | `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:994` |
-| `transformationRunId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Corrida de transformación evaluada | `src/modules/lakehouse/dto/lakehouse.dto.ts:1005` |
+| `transformationRunId` | `string` | Sí | formato uuid | `@IsOptional()` `@IsUUID()` | Corrida de transformación evaluada | `src/modules/lakehouse/dto/lakehouse.dto.ts:1005` |
 | `evaluatedRecordCount` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Registros evaluados; cadena por ser bigint | `src/modules/lakehouse/dto/lakehouse.dto.ts:1012` |
 | `findings` | `array<LakehouseQualityFindingDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => QualityFindingDto)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1022` |
 | `findings[].ruleCode` | `string` | No | longitud máxima 100 | — | Código de la regla violada | sin fuente |
@@ -505,6 +507,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 ```json
 {
   "tenantId": "00000000-0000-4000-8000-000000000001",
+  "transformationRunId": "00000000-0000-4000-8000-000000000001",
   "evaluatedRecordCount": "valor-ejemplo"
 }
 ```
@@ -548,7 +551,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El hallazgo cita una regla que no está activa para la versión del producto. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -571,7 +573,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LakehouseController.ingestCurated` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:124`
+- **Implementación:** `LakehouseController.ingestCurated` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:154`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -581,18 +583,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /lakehouse/ingestion/curated-runs` la atiende `LakehouseController.ingestCurated` (src/modules/lakehouse/controllers/lakehouse.controller.ts:124). Exige sesión con alguno de los roles SYSTEM, DEIDENTIFICATION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `CuratedIngestionDto` (23 campos, 14 obligatorios). Delega en `TransformationService.ingestCurated`. Crea filas en health_data.health_deidentification_runs, lakehouse.lakehouse_files, lakehouse.lakehouse_lineage_edges, lakehouse.lakehouse_partitions, messaging.domain_events, messaging.outbox_messages. Lee health_data.health_deidentification_profiles, lakehouse.data_lake_zones, lakehouse.lakehouse_datasets, lakehouse.lakehouse_files, lakehouse.lakehouse_partitions, messaging.outbox_messages. Publica HealthBatchDeidentified.
+`POST /lakehouse/ingestion/curated-runs` la atiende `LakehouseController.ingestCurated` (src/modules/lakehouse/controllers/lakehouse.controller.ts:154). Exige sesión con alguno de los roles SYSTEM, DEIDENTIFICATION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `CuratedIngestionDto` (23 campos, 14 obligatorios). Delega en `TransformationService.ingestCurated`. Crea filas en health_data.health_deidentification_runs, lakehouse.lakehouse_files, lakehouse.lakehouse_lineage_edges, lakehouse.lakehouse_partitions, messaging.domain_events, messaging.outbox_messages. Lee health_data.health_deidentification_profiles, lakehouse.data_lake_zones, lakehouse.lakehouse_datasets, lakehouse.lakehouse_files, lakehouse.lakehouse_partitions, messaging.outbox_messages. Publica HealthBatchDeidentified.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, DEIDENTIFICATION_WORKER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:124` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, DEIDENTIFICATION_WORKER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:154` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -601,21 +603,21 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `health_data.health_deidentification_profiles` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → DataReleaseRepository.findDeidProfileById | `src/modules/health_data/repositories/data-release.repository.ts:31` |
 | `health_data.health_deidentification_runs` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → DataReleaseRepository.createDeidRun | `src/modules/health_data/repositories/data-release.repository.ts:150` |
 | `lakehouse.data_lake_zones` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → LakehouseCatalogRepository.findZoneById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:88` |
-| `lakehouse.lakehouse_datasets` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.requireWritableDataset → LakehouseCatalogRepository.findDatasetById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:479` |
-| `lakehouse.lakehouse_files` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.createFile | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:232` |
-| `lakehouse.lakehouse_files` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.findFileByHash | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:252` |
-| `lakehouse.lakehouse_lineage_edges` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.createLineageEdge | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:287` |
-| `lakehouse.lakehouse_partitions` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.createPartition | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:176` |
-| `lakehouse.lakehouse_partitions` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.findPartitionByHash | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:126` |
+| `lakehouse.lakehouse_datasets` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.requireWritableDataset → LakehouseCatalogRepository.findDatasetById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:506` |
+| `lakehouse.lakehouse_files` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.createFile | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:237` |
+| `lakehouse.lakehouse_files` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.findFileByHash | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:257` |
+| `lakehouse.lakehouse_lineage_edges` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.createLineageEdge | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:292` |
+| `lakehouse.lakehouse_partitions` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.createPartition | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:181` |
+| `lakehouse.lakehouse_partitions` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → TransformationService.materialize → LakehouseRuntimeRepository.findPartitionByHash | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:131` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.ingestCurated → TransformationService.ingestCurated → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `HealthBatchDeidentified` | `src/modules/lakehouse/services/transformation.service.ts:275` |
+| Evento de dominio | `HealthBatchDeidentified` | `src/modules/lakehouse/services/transformation.service.ts:286` |
 
 ### Cuerpo — DTO `CuratedIngestionDto` · `application/json`
 
@@ -729,7 +731,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Dataset objetivo no encontrado.; ResourceNotFoundException: Perfil de de-identificación no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El dataset objetivo no está activo; no admite escrituras.; PreconditionFailedException: La ingesta de-identificada sólo puede escribir en la zona curated. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -752,7 +753,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LakehouseController.runTransformation` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:107`
+- **Implementación:** `LakehouseController.runTransformation` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:132`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -762,44 +763,44 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /lakehouse/transformations/{defId}/runs` la atiende `LakehouseController.runTransformation` (src/modules/lakehouse/controllers/lakehouse.controller.ts:107). Exige sesión con alguno de los roles SYSTEM, TRANSFORMATION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `RunTransformationDto` (21 campos, 12 obligatorios). Delega en `TransformationService.runTransformation`. Crea filas en lakehouse.lakehouse_files, lakehouse.lakehouse_lineage_edges, lakehouse.lakehouse_partitions, lakehouse.transformation_runs, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.transformation_runs. Lee lakehouse.lakehouse_datasets, lakehouse.lakehouse_files, lakehouse.lakehouse_partitions, lakehouse.transformation_definitions, lakehouse.transformation_runs, messaging.outbox_messages. Publica TransformationRunCompleted, LineageRecorded.
+`POST /lakehouse/transformations/{defId}/runs` la atiende `LakehouseController.runTransformation` (src/modules/lakehouse/controllers/lakehouse.controller.ts:132). Exige sesión con alguno de los roles SYSTEM, TRANSFORMATION_WORKER, PLATFORM_ADMIN. Valida el cuerpo como `RunTransformationDto` (21 campos, 12 obligatorios). Delega en `TransformationService.runTransformation`. Crea filas en lakehouse.lakehouse_files, lakehouse.lakehouse_lineage_edges, lakehouse.lakehouse_partitions, lakehouse.transformation_runs, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.transformation_runs. Lee lakehouse.lakehouse_datasets, lakehouse.lakehouse_files, lakehouse.lakehouse_partitions, lakehouse.transformation_definitions, lakehouse.transformation_runs, messaging.outbox_messages. Publica TransformationRunCompleted, LineageRecorded.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SYSTEM, TRANSFORMATION_WORKER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:107` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/lakehouse/controllers/lakehouse.controller.ts:107` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SYSTEM, TRANSFORMATION_WORKER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:132` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: defId | `src/modules/lakehouse/controllers/lakehouse.controller.ts:132` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `lakehouse.lakehouse_datasets` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.requireWritableDataset → LakehouseCatalogRepository.findDatasetById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:479` |
-| `lakehouse.lakehouse_files` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.createFile | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:232` |
-| `lakehouse.lakehouse_files` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.findFileByHash | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:252` |
-| `lakehouse.lakehouse_lineage_edges` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.createLineageEdge | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:287` |
-| `lakehouse.lakehouse_partitions` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.createPartition | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:176` |
-| `lakehouse.lakehouse_partitions` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.findPartitionByHash | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:126` |
-| `lakehouse.transformation_definitions` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → LakehouseRuntimeRepository.findDefinitionById | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:37` |
-| `lakehouse.transformation_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | LakehouseController.runTransformation → TransformationService.runTransformation | `src/modules/lakehouse/services/transformation.service.ts:157` |
-| `lakehouse.transformation_runs` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → LakehouseRuntimeRepository.createRun | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:89` |
-| `lakehouse.transformation_runs` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → LakehouseRuntimeRepository.findLiveRunByTargetForUpdate | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:50` |
+| `lakehouse.lakehouse_datasets` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → LakehouseCatalogRepository.findDatasetById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:506` |
+| `lakehouse.lakehouse_files` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.createFile | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:237` |
+| `lakehouse.lakehouse_files` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.findFileByHash | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:257` |
+| `lakehouse.lakehouse_lineage_edges` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.createLineageEdge | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:292` |
+| `lakehouse.lakehouse_partitions` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.createPartition | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:181` |
+| `lakehouse.lakehouse_partitions` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → TransformationService.materialize → LakehouseRuntimeRepository.findPartitionByHash | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:131` |
+| `lakehouse.transformation_definitions` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → LakehouseRuntimeRepository.findDefinitionById | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:40` |
+| `lakehouse.transformation_runs` | ESCRIBE | ACTUALIZA | POR_TIPO | LakehouseController.runTransformation → TransformationService.runTransformation | `src/modules/lakehouse/services/transformation.service.ts:169` |
+| `lakehouse.transformation_runs` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → LakehouseRuntimeRepository.createRun | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:92` |
+| `lakehouse.transformation_runs` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → LakehouseRuntimeRepository.findLiveRunByTargetForUpdate | `src/modules/lakehouse/repositories/lakehouse-runtime.repository.ts:53` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.runTransformation → TransformationService.runTransformation → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `TransformationRunCompleted` | `src/modules/lakehouse/services/transformation.service.ts:163` |
-| Evento de dominio | `LineageRecorded` | `src/modules/lakehouse/services/transformation.service.ts:179` |
+| Evento de dominio | `TransformationRunCompleted` | `src/modules/lakehouse/services/transformation.service.ts:175` |
+| Evento de dominio | `LineageRecorded` | `src/modules/lakehouse/services/transformation.service.ts:191` |
 
 ### Parámetros
 
@@ -916,7 +917,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Definición de transformación no encontrada.; ResourceNotFoundException: Dataset objetivo no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La definición de transformación no está activa.; PreconditionFailedException: El dataset objetivo no está activo; no admite escrituras. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -939,7 +939,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `LakehouseController.defineZone` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:47`
+- **Implementación:** `LakehouseController.defineZone` — `src/modules/lakehouse/controllers/lakehouse.controller.ts:52`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -949,18 +949,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /lakehouse/zones` la atiende `LakehouseController.defineZone` (src/modules/lakehouse/controllers/lakehouse.controller.ts:47). Exige sesión con alguno de los roles DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `DefineZoneDto` (6 campos, 3 obligatorios). Delega en `LakehouseCatalogService.defineZone`. Crea filas en lakehouse.data_lake_zones, messaging.domain_events, messaging.outbox_messages. Lee lakehouse.data_lake_zones, messaging.outbox_messages. Publica LakeZoneDefined.
+`POST /lakehouse/zones` la atiende `LakehouseController.defineZone` (src/modules/lakehouse/controllers/lakehouse.controller.ts:52). Exige sesión con alguno de los roles DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN. Valida el cuerpo como `DefineZoneDto` (6 campos, 6 obligatorios). Delega en `LakehouseCatalogService.defineZone`. Crea filas en lakehouse.data_lake_zones, messaging.domain_events, messaging.outbox_messages. Lee lakehouse.data_lake_zones, messaging.outbox_messages. Publica LakeZoneDefined.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: DATA_PLATFORM_ENGINEER, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/lakehouse.controller.ts:52` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -969,14 +969,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `lakehouse.data_lake_zones` | ESCRIBE | CREA | DIRECTA | LakehouseController.defineZone → LakehouseCatalogService.defineZone → LakehouseCatalogRepository.createZone | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:63` |
 | `lakehouse.data_lake_zones` | LEE | LEE | DIRECTA | LakehouseController.defineZone → LakehouseCatalogService.defineZone → LakehouseCatalogRepository.findZoneByCode | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:77` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | LakehouseController.defineZone → LakehouseCatalogService.defineZone → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.defineZone → LakehouseCatalogService.defineZone → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.defineZone → LakehouseCatalogService.defineZone → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | LakehouseController.defineZone → LakehouseCatalogService.defineZone → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | LakehouseController.defineZone → LakehouseCatalogService.defineZone → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `LakeZoneDefined` | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:70` |
+| Evento de dominio | `LakeZoneDefined` | `src/modules/lakehouse/services/lakehouse-catalog.service.ts:88` |
 
 ### Cuerpo — DTO `DefineZoneDto` · `application/json`
 
@@ -985,9 +985,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `code` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:43` |
 | `name` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:51` |
 | `zoneType` | `string` | Sí | valores: raw, standardized, curated, research | `@IsIn(ZONE_TYPES)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:58` |
-| `namespaceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:66` |
-| `encryptionProfileCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Perfil de cifrado en reposo | `src/modules/lakehouse/dto/lakehouse.dto.ts:78` |
-| `retentionPolicyCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:87` |
+| `namespaceId` | `string` | Sí | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:66` |
+| `encryptionProfileCode` | `string` | Sí | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Perfil de cifrado en reposo | `src/modules/lakehouse/dto/lakehouse.dto.ts:78` |
+| `retentionPolicyCode` | `string` | Sí | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:87` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -995,7 +995,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 {
   "code": "CODIGO_EJEMPLO",
   "name": "Nombre de ejemplo",
-  "zoneType": "raw"
+  "zoneType": "raw",
+  "namespaceId": "00000000-0000-4000-8000-000000000001",
+  "encryptionProfileCode": "CODIGO_EJEMPLO",
+  "retentionPolicyCode": "CODIGO_EJEMPLO"
 }
 ```
 
@@ -1053,7 +1056,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ResearchController.requestRelease` — `src/modules/lakehouse/controllers/research.controller.ts:95`
+- **Implementación:** `ResearchController.requestRelease` — `src/modules/lakehouse/controllers/research.controller.ts:106`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1063,37 +1066,37 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /research/dataset-releases` la atiende `ResearchController.requestRelease` (src/modules/lakehouse/controllers/research.controller.ts:95). Exige sesión con alguno de los roles PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN. Valida el cuerpo como `RequestDatasetReleaseDto` (5 campos, 5 obligatorios). Delega en `ResearchReleaseService.requestRelease`. Crea filas en lakehouse.dataset_release_requests, messaging.domain_events, messaging.outbox_messages. Lee lakehouse.cohort_definitions, lakehouse.data_product_versions, lakehouse.data_products, lakehouse.research_projects, messaging.outbox_messages. Publica DatasetReleaseRequested.
+`POST /research/dataset-releases` la atiende `ResearchController.requestRelease` (src/modules/lakehouse/controllers/research.controller.ts:106). Exige sesión con alguno de los roles PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN. Valida el cuerpo como `RequestDatasetReleaseDto` (5 campos, 5 obligatorios). Delega en `ResearchReleaseService.requestRelease`. Crea filas en lakehouse.dataset_release_requests, messaging.domain_events, messaging.outbox_messages. Lee lakehouse.cohort_definitions, lakehouse.data_product_versions, lakehouse.data_products, lakehouse.research_projects, messaging.outbox_messages. Publica DatasetReleaseRequested.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:95` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:106` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `lakehouse.cohort_definitions` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → ResearchRepository.findCohortById | `src/modules/lakehouse/repositories/research.repository.ts:190` |
-| `lakehouse.data_product_versions` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → LakehouseCatalogRepository.findProductVersionById | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:296` |
-| `lakehouse.data_products` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → LakehouseCatalogRepository.findProductForUpdate | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:186` |
-| `lakehouse.dataset_release_requests` | ESCRIBE | CREA | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → ResearchRepository.createReleaseRequest | `src/modules/lakehouse/repositories/research.repository.ts:253` |
-| `lakehouse.research_projects` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → ResearchRepository.findProjectById | `src/modules/lakehouse/repositories/research.repository.ts:30` |
+| `lakehouse.cohort_definitions` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → ResearchRepository.findCohortById | `src/modules/lakehouse/repositories/research.repository.ts:209` |
+| `lakehouse.data_product_versions` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → LakehouseCatalogRepository.findProductVersionInTenant | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:315` |
+| `lakehouse.data_products` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → LakehouseCatalogRepository.findProductVersionInTenant | `src/modules/lakehouse/repositories/lakehouse-catalog.repository.ts:317` |
+| `lakehouse.dataset_release_requests` | ESCRIBE | CREA | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → ResearchRepository.createReleaseRequest | `src/modules/lakehouse/repositories/research.repository.ts:272` |
+| `lakehouse.research_projects` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → ResearchRepository.findProjectById | `src/modules/lakehouse/repositories/research.repository.ts:32` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | ResearchController.requestRelease → ResearchReleaseService.requestRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `DatasetReleaseRequested` | `src/modules/lakehouse/services/research-release.service.ts:356` |
+| Evento de dominio | `DatasetReleaseRequested` | `src/modules/lakehouse/services/research-release.service.ts:384` |
 
 ### Cuerpo — DTO `RequestDatasetReleaseDto` · `application/json`
 
@@ -1147,7 +1150,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Proyecto de investigación no encontrado.; ResourceNotFoundException: La cohorte no pertenece a ese proyecto.; ResourceNotFoundException: Versión de producto no encontrada. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proyecto no está aprobado.; PreconditionFailedException: La ventana de aprobación ética del proyecto no está vigente.; PreconditionFailedException: La cohorte no está activa.; PreconditionFailedException: El producto contiene datos de paciente y la cohorte no declara perfil de de-identificación. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1170,7 +1172,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ResearchController.approveRelease` — `src/modules/lakehouse/controllers/research.controller.ts:111`
+- **Implementación:** `ResearchController.approveRelease` — `src/modules/lakehouse/controllers/research.controller.ts:127`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1180,40 +1182,39 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /research/dataset-releases/{id}/approve` la atiende `ResearchController.approveRelease` (src/modules/lakehouse/controllers/research.controller.ts:111). Exige sesión con alguno de los roles RESEARCH_GOVERNANCE, DPO, PLATFORM_ADMIN. Valida el cuerpo como `ApproveDatasetReleaseDto` (6 campos, 3 obligatorios). Delega en `ResearchReleaseService.approveRelease`. Crea filas en health_data.health_deidentification_runs, lakehouse.dataset_release_manifests, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.dataset_release_requests. Lee lakehouse.cohort_definitions, lakehouse.dataset_release_manifests, lakehouse.dataset_release_requests, lakehouse.research_projects, messaging.outbox_messages. Publica DatasetReleaseMaterialized.
+`POST /research/dataset-releases/{id}/approve` la atiende `ResearchController.approveRelease` (src/modules/lakehouse/controllers/research.controller.ts:127). Exige sesión con alguno de los roles RESEARCH_GOVERNANCE, DPO, PLATFORM_ADMIN. Valida el cuerpo como `ApproveDatasetReleaseDto` (6 campos, 5 obligatorios). Delega en `ResearchReleaseService.approveRelease`. Crea filas en health_data.health_deidentification_runs, lakehouse.dataset_release_manifests, messaging.domain_events, messaging.outbox_messages. Lee lakehouse.cohort_definitions, lakehouse.dataset_release_manifests, lakehouse.dataset_release_requests, lakehouse.research_projects, messaging.outbox_messages. Publica DatasetReleaseMaterialized.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/research.controller.ts:111` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:127` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/research.controller.ts:127` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `health_data.health_deidentification_runs` | ESCRIBE | CREA | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → DataReleaseRepository.createDeidRun | `src/modules/health_data/repositories/data-release.repository.ts:150` |
-| `lakehouse.cohort_definitions` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.findCohortById | `src/modules/lakehouse/repositories/research.repository.ts:190` |
-| `lakehouse.dataset_release_manifests` | ESCRIBE | CREA | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.createManifest | `src/modules/lakehouse/repositories/research.repository.ts:363` |
-| `lakehouse.dataset_release_manifests` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.findManifestByRequestForUpdate | `src/modules/lakehouse/repositories/research.repository.ts:297` |
-| `lakehouse.dataset_release_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ResearchController.approveRelease → ResearchReleaseService.approveRelease | `src/modules/lakehouse/services/research-release.service.ts:500` |
-| `lakehouse.dataset_release_requests` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.findReleaseRequestForUpdate | `src/modules/lakehouse/repositories/research.repository.ts:271` |
-| `lakehouse.research_projects` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.findProjectById | `src/modules/lakehouse/repositories/research.repository.ts:30` |
+| `lakehouse.cohort_definitions` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.findCohortById | `src/modules/lakehouse/repositories/research.repository.ts:209` |
+| `lakehouse.dataset_release_manifests` | ESCRIBE | CREA | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.createManifest | `src/modules/lakehouse/repositories/research.repository.ts:416` |
+| `lakehouse.dataset_release_manifests` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.findManifestByRequestForUpdate | `src/modules/lakehouse/repositories/research.repository.ts:320` |
+| `lakehouse.dataset_release_requests` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.findReleaseRequestForUpdate | `src/modules/lakehouse/repositories/research.repository.ts:294` |
+| `lakehouse.research_projects` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → ResearchRepository.findProjectById | `src/modules/lakehouse/repositories/research.repository.ts:32` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | ResearchController.approveRelease → ResearchReleaseService.approveRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `DatasetReleaseMaterialized` | `src/modules/lakehouse/services/research-release.service.ts:502` |
+| Evento de dominio | `DatasetReleaseMaterialized` | `src/modules/lakehouse/services/research-release.service.ts:537` |
 
 ### Parámetros
 
@@ -1228,8 +1229,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `purposeConceptId` | `string` | Sí | formato uuid | `@IsUUID()` | Propósito con el que corre la de-identificación | `src/modules/lakehouse/dto/lakehouse.dto.ts:1306` |
 | `recordCount` | `string` | Sí | — | `@IsNumberString({ no_symbols: true })` | Registros del manifiesto; cadena por ser bigint | `src/modules/lakehouse/dto/lakehouse.dto.ts:1315` |
 | `contentHash` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Hash del contenido materializado | `src/modules/lakehouse/dto/lakehouse.dto.ts:1326` |
-| `objectManifestId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Manifiesto del objeto de-identificado | `src/modules/lakehouse/dto/lakehouse.dto.ts:1337` |
-| `schemaVersion` | `string` | No | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1346` |
+| `objectManifestId` | `string` | Sí | formato uuid | `@IsOptional()` `@IsUUID()` | Manifiesto del objeto de-identificado | `src/modules/lakehouse/dto/lakehouse.dto.ts:1337` |
+| `schemaVersion` | `string` | Sí | longitud máxima 50 | `@IsOptional()` `@IsString()` `@MaxLength(50)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1346` |
 | `ttlDays` | `number` | No | mínimo 1; máximo 3650 | `@IsOptional()` `@IsInt()` `@Min(1)` | Días de vigencia del acceso; por omisión, 90 | `src/modules/lakehouse/dto/lakehouse.dto.ts:1359` |
 
 **Payload mínimo** (sólo los obligatorios):
@@ -1238,7 +1239,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 {
   "purposeConceptId": "00000000-0000-4000-8000-000000000001",
   "recordCount": "valor-ejemplo",
-  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "objectManifestId": "00000000-0000-4000-8000-000000000001",
+  "schemaVersion": "valor-ejemplo"
 }
 ```
 
@@ -1276,7 +1279,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de release no encontrada.; ResourceNotFoundException: Proyecto de investigación no encontrado. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud no está en un estado que admita aprobación.; PreconditionFailedException: La aprobación ética del proyecto caducó; el release no puede materializarse.; PreconditionFailedException: La cohorte no declara perfil de de-identificación. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1299,7 +1301,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ResearchController.revokeRelease` — `src/modules/lakehouse/controllers/research.controller.ts:143`
+- **Implementación:** `ResearchController.revokeRelease` — `src/modules/lakehouse/controllers/research.controller.ts:165`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1309,37 +1311,36 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /research/dataset-releases/{id}/revoke` la atiende `ResearchController.revokeRelease` (src/modules/lakehouse/controllers/research.controller.ts:143). Exige sesión con alguno de los roles RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RevokeDatasetReleaseDto` (2 campos, 0 obligatorios). Delega en `ResearchReleaseService.revokeRelease`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.dataset_release_manifests, lakehouse.dataset_release_requests. Lee lakehouse.dataset_release_manifests, lakehouse.dataset_release_requests, messaging.outbox_messages. Publica DatasetReleaseRevoked.
+`POST /research/dataset-releases/{id}/revoke` la atiende `ResearchController.revokeRelease` (src/modules/lakehouse/controllers/research.controller.ts:165). Exige sesión con alguno de los roles RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN. Valida el cuerpo como `RevokeDatasetReleaseDto` (2 campos, 0 obligatorios). Delega en `ResearchReleaseService.revokeRelease`. Crea filas en messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.dataset_release_manifests. Lee lakehouse.dataset_release_manifests, lakehouse.dataset_release_requests, messaging.outbox_messages. Publica DatasetReleaseRevoked.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:143` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/research.controller.ts:143` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:165` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/research.controller.ts:165` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `lakehouse.dataset_release_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease | `src/modules/lakehouse/services/research-release.service.ts:584` |
-| `lakehouse.dataset_release_manifests` | LEE | LEE | DIRECTA | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease → ResearchRepository.findManifestByRequestForUpdate | `src/modules/lakehouse/repositories/research.repository.ts:297` |
-| `lakehouse.dataset_release_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease | `src/modules/lakehouse/services/research-release.service.ts:580` |
-| `lakehouse.dataset_release_requests` | LEE | LEE | DIRECTA | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease → ResearchRepository.findReleaseRequestForUpdate | `src/modules/lakehouse/repositories/research.repository.ts:271` |
+| `lakehouse.dataset_release_manifests` | ESCRIBE | ACTUALIZA | POR_TIPO | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease | `src/modules/lakehouse/services/research-release.service.ts:621` |
+| `lakehouse.dataset_release_manifests` | LEE | LEE | DIRECTA | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease → ResearchRepository.findManifestByRequestForUpdate | `src/modules/lakehouse/repositories/research.repository.ts:320` |
+| `lakehouse.dataset_release_requests` | LEE | LEE | DIRECTA | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease → ResearchRepository.findReleaseRequestForUpdate | `src/modules/lakehouse/repositories/research.repository.ts:294` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | ResearchController.revokeRelease → ResearchReleaseService.revokeRelease → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `DatasetReleaseRevoked` | `src/modules/lakehouse/services/research-release.service.ts:587` |
+| Evento de dominio | `DatasetReleaseRevoked` | `src/modules/lakehouse/services/research-release.service.ts:624` |
 
 ### Parámetros
 
@@ -1387,7 +1388,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud de release no encontrada. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/lakehouse.md).
@@ -1409,7 +1409,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ResearchController.listExpiredReleases` — `src/modules/lakehouse/controllers/research.controller.ts:131`
+- **Implementación:** `ResearchController.listExpiredReleases` — `src/modules/lakehouse/controllers/research.controller.ts:152`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1419,30 +1419,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /research/dataset-releases/expired` la atiende `ResearchController.listExpiredReleases` (src/modules/lakehouse/controllers/research.controller.ts:131). Exige sesión con alguno de los roles RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN. Delega en `ResearchReleaseService.listExpiredReleases`. Lee lakehouse.dataset_release_manifests, lakehouse.dataset_release_requests.
+`GET /research/dataset-releases/expired` la atiende `ResearchController.listExpiredReleases` (src/modules/lakehouse/controllers/research.controller.ts:152). Exige sesión con alguno de los roles RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN. Delega en `ResearchReleaseService.listExpiredReleases`. Lee lakehouse.dataset_release_manifests, lakehouse.dataset_release_requests.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:131` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, SYSTEM, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:152` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `lakehouse.dataset_release_manifests` | LEE | LEE | DIRECTA | ResearchController.listExpiredReleases → ResearchReleaseService.listExpiredReleases → ResearchRepository.findExpiredManifests | `src/modules/lakehouse/repositories/research.repository.ts:316` |
-| `lakehouse.dataset_release_requests` | LEE | LEE | DIRECTA | ResearchController.listExpiredReleases → ResearchReleaseService.listExpiredReleases → ResearchRepository.findReleaseRequestById | `src/modules/lakehouse/repositories/research.repository.ts:283` |
-
-### Parámetros
-
-| Nombre | En | Obligatorio | Tipo | Descripción |
-|---|---|---|---|---|
-| `limit` | query | Sí | `number` | — |
+| `lakehouse.dataset_release_manifests` | LEE | LEE | DIRECTA | ResearchController.listExpiredReleases → ResearchReleaseService.listExpiredReleases → ResearchRepository.findExpiredManifests | `src/modules/lakehouse/repositories/research.repository.ts:366` |
+| `lakehouse.dataset_release_requests` | LEE | LEE | DIRECTA | ResearchController.listExpiredReleases → ResearchReleaseService.listExpiredReleases → ResearchRepository.findOpenRequestIds | `src/modules/lakehouse/repositories/research.repository.ts:342` |
 
 ### Cuerpo
 
@@ -1461,7 +1454,6 @@ La operación no recibe cuerpo.
 | HTTP | Código | Cuándo |
 |---|---|---|
 | 200 | — | Éxito |
-| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -1485,7 +1477,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ResearchController.createDeidentificationProfile` — `src/modules/lakehouse/controllers/research.controller.ts:60`
+- **Implementación:** `ResearchController.createDeidentificationProfile` — `src/modules/lakehouse/controllers/research.controller.ts:61`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1495,18 +1487,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /research/deidentification-profiles` la atiende `ResearchController.createDeidentificationProfile` (src/modules/lakehouse/controllers/research.controller.ts:60). Exige sesión con alguno de los roles RESEARCH_GOVERNANCE, DPO, PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN. Valida el cuerpo como `CreateDeidentificationProfileDto` (8 campos, 4 obligatorios). Delega en `ResearchReleaseService.createDeidentificationProfile`. Crea filas en health_data.health_deidentification_profiles.
+`POST /research/deidentification-profiles` la atiende `ResearchController.createDeidentificationProfile` (src/modules/lakehouse/controllers/research.controller.ts:61). Exige sesión con alguno de los roles RESEARCH_GOVERNANCE, DPO, PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN. Valida el cuerpo como `CreateDeidentificationProfileDto` (8 campos, 4 obligatorios). Delega en `ResearchReleaseService.createDeidentificationProfile`. Crea filas en health_data.health_deidentification_profiles.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: RESEARCH_GOVERNANCE, DPO, PRINCIPAL_INVESTIGATOR, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:61` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1592,7 +1584,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Datos y NoSQL
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `ResearchController.defineCohort` — `src/modules/lakehouse/controllers/research.controller.ts:78`
+- **Implementación:** `ResearchController.defineCohort` — `src/modules/lakehouse/controllers/research.controller.ts:84`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -1602,38 +1594,39 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 
 ### Cómo se atiende (sistema)
 
-`POST /research/projects/{id}/cohorts` la atiende `ResearchController.defineCohort` (src/modules/lakehouse/controllers/research.controller.ts:78). Exige sesión con alguno de los roles PRINCIPAL_INVESTIGATOR, RESEARCH_GOVERNANCE, PLATFORM_ADMIN. Valida el cuerpo como `DefineCohortDto` (13 campos, 10 obligatorios). Delega en `ResearchReleaseService.defineCohort`. Crea filas en lakehouse.cohort_definitions, lakehouse.research_projects, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.research_projects. Lee lakehouse.cohort_definitions, lakehouse.research_projects, messaging.outbox_messages. Publica CohortDefined.
+`POST /research/projects/{id}/cohorts` la atiende `ResearchController.defineCohort` (src/modules/lakehouse/controllers/research.controller.ts:84). Exige sesión con alguno de los roles PRINCIPAL_INVESTIGATOR, RESEARCH_GOVERNANCE, PLATFORM_ADMIN. Valida el cuerpo como `DefineCohortDto` (13 campos, 11 obligatorios). Delega en `ResearchReleaseService.defineCohort`. Crea filas en lakehouse.cohort_definitions, lakehouse.research_projects, messaging.domain_events, messaging.outbox_messages. Actualiza lakehouse.research_projects. Lee health_data.health_deidentification_profiles, lakehouse.cohort_definitions, lakehouse.research_projects, messaging.outbox_messages. Publica CohortDefined.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PRINCIPAL_INVESTIGATOR, RESEARCH_GOVERNANCE, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/research.controller.ts:78` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PRINCIPAL_INVESTIGATOR, RESEARCH_GOVERNANCE, PLATFORM_ADMIN | `src/modules/lakehouse/controllers/research.controller.ts:84` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/lakehouse/controllers/research.controller.ts:84` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `lakehouse.cohort_definitions` | ESCRIBE | CREA | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → ResearchRepository.createCohort | `src/modules/lakehouse/repositories/research.repository.ts:167` |
-| `lakehouse.cohort_definitions` | LEE | LEE | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → ResearchRepository.findCohortByVersion | `src/modules/lakehouse/repositories/research.repository.ts:208` |
-| `lakehouse.research_projects` | ESCRIBE | ACTUALIZA | POR_TIPO | ResearchController.defineCohort → ResearchReleaseService.defineCohort | `src/modules/lakehouse/services/research-release.service.ts:186` |
-| `lakehouse.research_projects` | ESCRIBE | CREA | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → ResearchRepository.createProject | `src/modules/lakehouse/repositories/research.repository.ts:112` |
-| `lakehouse.research_projects` | LEE | LEE | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → ResearchRepository.findProjectForUpdate | `src/modules/lakehouse/repositories/research.repository.ts:44` |
+| `health_data.health_deidentification_profiles` | LEE | LEE | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → DataReleaseRepository.findDeidProfileById | `src/modules/health_data/repositories/data-release.repository.ts:31` |
+| `lakehouse.cohort_definitions` | ESCRIBE | CREA | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → ResearchRepository.createCohort | `src/modules/lakehouse/repositories/research.repository.ts:186` |
+| `lakehouse.cohort_definitions` | LEE | LEE | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → ResearchRepository.findCohortByVersion | `src/modules/lakehouse/repositories/research.repository.ts:227` |
+| `lakehouse.research_projects` | ESCRIBE | ACTUALIZA | POR_TIPO | ResearchController.defineCohort → ResearchReleaseService.defineCohort | `src/modules/lakehouse/services/research-release.service.ts:222` |
+| `lakehouse.research_projects` | ESCRIBE | CREA | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → ResearchRepository.createProject | `src/modules/lakehouse/repositories/research.repository.ts:131` |
+| `lakehouse.research_projects` | LEE | LEE | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → ResearchRepository.findProjectByIdAnyTenant | `src/modules/lakehouse/repositories/research.repository.ts:47` |
 | `messaging.domain_events` | ESCRIBE | CREA | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createDomainEvent | `src/modules/messaging/repositories/outbox.repository.ts:117` |
-| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:164` |
-| `messaging.outbox_messages` | LEE | LEE | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:188` |
+| `messaging.outbox_messages` | ESCRIBE | CREA | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.createOutboxMessage | `src/modules/messaging/repositories/outbox.repository.ts:169` |
+| `messaging.outbox_messages` | LEE | LEE | DIRECTA | ResearchController.defineCohort → ResearchReleaseService.defineCohort → OutboxService.publishDomainEvent → OutboxService.persistDomainEvent → OutboxRepository.findOutboxByIdempotencyKey | `src/modules/messaging/repositories/outbox.repository.ts:193` |
 
 ### Eventos y trabajos
 
 | Tipo | Nombre | Fuente |
 |---|---|---|
-| Evento de dominio | `CohortDefined` | `src/modules/lakehouse/services/research-release.service.ts:223` |
+| Evento de dominio | `CohortDefined` | `src/modules/lakehouse/services/research-release.service.ts:259` |
 
 ### Parámetros
 
@@ -1655,7 +1648,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | `approvedTo` | `string` | Sí | formato date-time | `@IsISO8601()` | Fin de la ventana ética | `src/modules/lakehouse/dto/lakehouse.dto.ts:1143` |
 | `cohortCode` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1151` |
 | `cohortVersion` | `string` | Sí | longitud máxima 50 | `@IsString()` `@MaxLength(50)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1159` |
-| `inclusionExpression` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1168` |
+| `inclusionExpression` | `string` | Sí | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1168` |
 | `exclusionExpression` | `string` | No | longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MaxLength(2000)` | — | `src/modules/lakehouse/dto/lakehouse.dto.ts:1177` |
 | `deidentificationProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil de de-identificación con el que se materializará el release | `src/modules/lakehouse/dto/lakehouse.dto.ts:1188` |
 
@@ -1672,6 +1665,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
   "approvedTo": "2026-07-31T12:00:00.000Z",
   "cohortCode": "CODIGO_EJEMPLO",
   "cohortVersion": "valor-ejemplo",
+  "inclusionExpression": "valor-ejemplo",
   "deidentificationProfileId": "00000000-0000-4000-8000-000000000001"
 }
 ```
@@ -1716,7 +1710,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/lakehou
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 409 | `CONFLICT` | ConflictException: Ya existe un proyecto con ese código para el tenant, con otro identificador.; ConflictException: El proyecto existente tiene otro código o pertenece a otro tenant.; ConflictException: Esa versión de la cohorte ya está definida. |
+| 409 | `CONFLICT` | ConflictException: Ya existe un proyecto con ese código para el tenant, con otro identificador.; ConflictException: El proyecto existente tiene otro código.; ConflictException: Esa versión de la cohorte ya está definida. |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La ventana de aprobación ética tiene que empezar antes de terminar.; PreconditionFailedException: La aprobación ética ya está caducada. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 

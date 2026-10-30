@@ -3,11 +3,10 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import { CONCEPTS, touch } from '../../../common';
 import { PROF } from '../../profiles/profiles.concepts';
-import {
-  HealthPractitionerProfilesRepository,
-  JurisdictionAuthorizationsRepository,
-} from '../../profiles/infrastructure/repositories';
+import { JurisdictionAuthorizationsRepository } from '../../profiles/infrastructure/repositories';
+import { PractitionerAdmissionsService } from '../../profiles/application/services/practitioner-admissions.service';
 import { TenantsRepository } from '../../directory/repositories';
+import { PharmacyOperatingRequirementsService } from '../../directory/services/pharmacy-operating-requirements.service';
 import { DIR } from '../../directory/directory.concepts';
 import { CommunityVerificationService } from '../../community/services';
 import { COMM } from '../../community/community.concepts';
@@ -49,16 +48,18 @@ export class IdentityVerificationEffectsService {
    * Inicializa la instancia y sus dependencias.
    *
    * @param authorizationsRepo - Valor de authorizations repo requerido por la operación.
-   * @param practitionersRepo - Valor de practitioners repo requerido por la operación.
+   * @param admissions - Admisiones de profesionales: recibe la matrícula verificada como revisión.
    * @param tenantsRepo - Valor de tenants repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param operatingRequirements - Requisitos para operar de farmacias y laboratorios.
    */
   constructor(
     private readonly authorizationsRepo: JurisdictionAuthorizationsRepository,
-    private readonly practitionersRepo: HealthPractitionerProfilesRepository,
+    private readonly admissions: PractitionerAdmissionsService,
     private readonly tenantsRepo: TenantsRepository,
     private readonly verification: CommunityVerificationService,
     private readonly logger: PinoLogger,
+    private readonly operatingRequirements: PharmacyOperatingRequirementsService,
   ) {
     this.logger.setContext(IdentityVerificationEffectsService.name);
   }
@@ -80,7 +81,12 @@ export class IdentityVerificationEffectsService {
   ): Promise<void> {
     switch (kase.subjectTypeConceptId) {
       case IDA.SUBJECT_PRACTITIONER_LICENSE:
-        await this.activateLicense(tx, kase.subjectEntityId, actorUserId);
+        await this.activateLicense(
+          tx,
+          kase.subjectEntityId,
+          actorUserId,
+          kase.id,
+        );
         return;
       case IDA.SUBJECT_TENANT_IDENTITY:
         await this.verifyTenant(tx, kase.subjectEntityId, actorUserId);
@@ -160,16 +166,33 @@ export class IdentityVerificationEffectsService {
   }
 
   /**
-   * Activa la matrícula verificada y, con ella, al profesional que la sostiene.
+   * Registra la matrícula verificada por la autoridad externa como revisión de
+   * su requisito en la admisión del profesional.
+   *
+   * ## Qué ya no hace (v4.2.67 · D-01)
+   *
+   * Antes activaba la matrícula, **verificaba al profesional** (escribía
+   * `PRACT_VERIF_VERIFIED`, abría la agenda) y le concedía el sello público, todo
+   * por el solo hecho de que la autoridad confirmara UNA matrícula: sin revisar
+   * sus títulos ni su identidad y sin cuatro ojos. Un veredicto de la autoridad
+   * es evidencia, no la resolución: ahora queda como revisión VERIFICADA del
+   * ítem (fuente: registro del Ministerio; referencia: este caso) y el cierre
+   * —verificar al profesional, concederle el check— es de la admisión.
+   *
+   * Si el profesional no tiene una admisión abierta (ya verificado, o una ficha
+   * de directorio sin cuenta), sólo se activa la matrícula: no hay a quién
+   * verificar ni de quién aprobar.
    *
    * @param tx - Transacción activa.
    * @param authorizationId - Autorización jurisdiccional verificada.
    * @param actorUserId - Quién registró el resultado.
+   * @param identityCaseId - El caso de verificación que la respalda.
    */
   private async activateLicense(
     tx: EntityManager,
     authorizationId: string,
     actorUserId: string,
+    identityCaseId: string,
   ): Promise<void> {
     const authorization = await this.authorizationsRepo.findById(
       tx,
@@ -185,39 +208,31 @@ export class IdentityVerificationEffectsService {
       return;
     }
 
-    authorization.stateConceptId = PROF.AUTH_ACTIVE;
-    touch(authorization, actorUserId);
-
-    // Una matrícula verificada es lo que habilita a ejercer: el profesional
-    // deja de estar en onboarding.
-    const practitioner = await this.practitionersRepo.findById(
+    const recorded = await this.admissions.recordExternalLicenseVerification(
       tx,
-      authorization.practitionerProfileId,
+      {
+        authorizationId,
+        practitionerProfileId: authorization.practitionerProfileId,
+        identityCaseId,
+        actorUserId,
+      },
     );
-    if (practitioner) {
-      practitioner.verificationStatusConceptId = PROF.PRACT_VERIF_VERIFIED;
-      practitioner.practiceStatusConceptId = PROF.PRACTICE_ACTIVE;
-      touch(practitioner, actorUserId);
+    if (!recorded) {
+      authorization.stateConceptId = PROF.AUTH_ACTIVE;
+      authorization.verifiedByUserId = actorUserId;
+      authorization.verifiedAt = new Date();
+      authorization.verificationSourceUri = `identity_verification_case:${identityCaseId}`;
+      touch(authorization, actorUserId);
     }
-
-    // El sello público del profesional. `validTo` sale del vencimiento de la
-    // propia matrícula: un sello que dure más que la habilitación que lo
-    // respalda es el sello que miente.
-    await this.verification.applyVerified(tx, {
-      targetId: authorization.practitionerProfileId,
-      methodConceptId: COMM.BADGE_METHOD_AUTHORITY_CHECK,
-      actorUserId,
-      evidenceRef: `identity_verification_case:${authorization.id}`,
-      validTo: authorization.validTo ?? undefined,
-    });
 
     this.logger.info(
       {
         operation: 'ida.effects.license',
         authorizationId,
         practitionerProfileId: authorization.practitionerProfileId,
+        recordedInAdmission: recorded,
       },
-      'Medical license activated after external verification',
+      'Medical license verified by the authority and recorded',
     );
   }
 
@@ -244,6 +259,36 @@ export class IdentityVerificationEffectsService {
         'Verified institution case points to a tenant that no longer exists',
       );
       return;
+    }
+
+    // P50 y P51: activar una farmacia o un laboratorio pendiente exige sus
+    // papeles (y, la farmacia, el punto de su casa central), igual que la
+    // verificación de la plataforma (`DirectoryTenantsService.verify`). El
+    // veredicto de la autoridad prueba la identidad de la institución, no que
+    // presentó la licencia o el certificado sanitario: sin este control, este
+    // camino la dejaba operando sin ellos. Si faltan, el caso de verificación
+    // se cierra igual —la identidad sí quedó probada— pero el tenant sigue
+    // pendiente, sin sello público, y el motivo queda en el log.
+    if (tenant.statusConceptId === DIR.TENANT_PENDING) {
+      const operating = await this.operatingRequirements.evaluateForTenant(
+        tx,
+        tenant,
+      );
+      if (operating && !operating.readiness.ready) {
+        this.logger.warn(
+          {
+            operation: 'ida.effects.tenant',
+            tenantId,
+            reason:
+              operating.kind === 'PHARMACY'
+                ? 'pharmacy-not-ready'
+                : 'laboratory-not-ready',
+            missing: operating.readiness.missing,
+          },
+          'Institution identity verified but kept pending: operating requirements missing',
+        );
+        return;
+      }
     }
 
     tenant.verificationStatusConceptId = CONCEPTS.TENANT_VERIFIED;

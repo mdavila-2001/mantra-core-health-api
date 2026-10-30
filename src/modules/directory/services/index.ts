@@ -7,3 +7,5 @@ export * from './tenant-administration.service';
 export * from './affiliation-document-concepts.service';
 export * from './tenant-affiliation-documents.service';
 export * from './tenant-legal-representatives.service';
+export * from './pharmacy-operating-requirements.service';
+export * from './tenant-document-completion.service';

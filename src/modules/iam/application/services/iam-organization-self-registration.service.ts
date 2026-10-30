@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
@@ -10,35 +10,33 @@ import {
 import {
   CONCEPTS,
   ConflictException,
-  createdBy,
   PreconditionFailedException,
   TokenService,
-  type AuthenticatedUser,
 } from '../../../../common';
-import { Pharmacies } from '../../../pharmacy/entities/pharmacies.entity';
-import { PHARM } from '../../../pharmacy/pharmacy.concepts';
-import { MESSAGING_SEED } from '../../../../common/seed/messaging-seed.service';
-import { NotificationsService } from '../../../messaging/services';
 import { IamErrorReason } from '../../iam.error-reasons';
 import {
   BRANCH_TYPE_CONCEPT_BY_CODE,
   DIR,
+  MEDICAL_FACILITY_TENANT_TYPES,
   TENANT_TYPE_CONCEPT_BY_CODE,
 } from '../../../directory/directory.concepts';
 import {
   countryConceptForLegalEntityType,
   resolveLegalEntityType,
-} from '../../../directory/legal-entity-types';
+} from '../../../../common/constants/legal-entity-types';
 import {
-  BranchesRepository,
-  TenantMembershipsRepository,
-  TenantsRepository,
-} from '../../../directory/repositories';
+  DIRECTORY_REGISTRATION_PORT,
+  type DirectoryRegistrationPort,
+} from '../ports/directory-registration.port';
 import {
-  TenantAffiliationDocumentsService,
-  TenantTypeProfileService,
-} from '../../../directory/services';
-import { composeAccountDisplayName } from '../../../profiles/domain/person-name';
+  EMAIL_NOTICE_PORT,
+  type EmailNoticePort,
+} from '../ports/email-notice.port';
+import {
+  PHARMACY_REGISTRATION_PORT,
+  type PharmacyRegistrationPort,
+} from '../ports/pharmacy-registration.port';
+import { composeAccountDisplayName } from '../../../../common/text/person-name';
 import {
   CredentialsRepository,
   EmailVerificationsRepository,
@@ -53,16 +51,34 @@ import {
 import { IamOrganizationRepresentativesService } from './iam-organization-representatives.service';
 import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 
+/** Nombre con el que nace la sede central de una farmacia (P50). */
+const PHARMACY_HEADQUARTERS_NAME = 'Casa central';
+
 /** Vida útil del token de verificación de correo (24 h). */
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Las formas de persona natural: no tienen escritura de constitución. El
+ * profesional independiente, además, ejerce con su NIT personal y sin
+ * matrícula de comercio (`terminology-designations.es.ts`). Decisión del
+ * propietario del 28/10/2026 para el alta de organización médica.
+ */
+const WITHOUT_CONSTITUTION: ReadonlySet<string> = new Set([
+  'UNIPERSONAL',
+  'PROFESIONAL_INDEPENDIENTE',
+]);
+const WITHOUT_COMMERCE_REGISTRY: ReadonlySet<string> = new Set([
+  'PROFESIONAL_INDEPENDIENTE',
+]);
 
 /**
  * Los documentos que exige el tipo societario, comprobados **antes** de crear
  * nada (CL-43).
  *
- * El DTO deja opcionales la escritura de constitución y el poder del
- * representante porque una empresa unipersonal no tiene ni una ni otro; el
- * resto de las formas (SRL, S.A., ...) los exige. Vive acá y no en un
+ * El DTO deja opcionales la escritura de constitución, la matrícula de
+ * comercio y el poder del representante porque las personas naturales no los
+ * tienen (ver {@link WITHOUT_CONSTITUTION} y {@link WITHOUT_COMMERCE_REGISTRY});
+ * el resto de las formas (SRL, S.A., ...) los exige. Vive acá y no en un
  * `@ValidateIf` del DTO porque el bloque `legalDocuments` no ve el
  * `legalEntityType`, que está un nivel más arriba. Responde 422 nombrando el
  * documento faltante y, al correr antes de cualquier escritura, no queda
@@ -71,17 +87,35 @@ const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
 function assertLegalDocumentsForEntityType(
   organization: RegisterOrganizationDto['organization'],
 ): void {
+  const entityType = organization.legalEntityType ?? '';
+  if (
+    organization.legalDocuments &&
+    organization.legalDocuments.commerceRegistryFileId === undefined &&
+    !WITHOUT_COMMERCE_REGISTRY.has(entityType)
+  ) {
+    throw new PreconditionFailedException(
+      'Falta la matrícula de comercio: sólo un profesional independiente puede omitirla',
+      { document: 'commerceRegistryFileId' },
+    );
+  }
   if (organization.legalEntityType === 'UNIPERSONAL') return;
   if (
     organization.legalDocuments &&
-    organization.legalDocuments.constitutionFileId === undefined
+    organization.legalDocuments.constitutionFileId === undefined &&
+    !WITHOUT_CONSTITUTION.has(entityType)
   ) {
     throw new PreconditionFailedException(
-      'Falta la escritura de constitución: sólo una empresa unipersonal puede omitirla',
+      'Falta la escritura de constitución: sólo una empresa unipersonal o un profesional independiente pueden omitirla',
       { document: 'constitutionFileId' },
     );
   }
+  // Farmacia (P50): el poder, como los otros cinco papeles, se exige para
+  // operar y no para nacer (decisión D2 del carril). Lo hace cumplir la
+  // verificación de la plataforma (`PharmacyOperatingRequirementsService`),
+  // y la farmacia lo puede subir después con
+  // `POST /tenants/{id}/affiliation-documents`.
   if (
+    organization.tenantType !== 'PHARMACY' &&
     organization.legalRepresentative &&
     organization.legalRepresentative.powerOfAttorneyFileId === undefined
   ) {
@@ -127,11 +161,9 @@ export class IamOrganizationSelfRegistrationService {
    * @param rolesRepo - Valor de roles repo requerido por la operación.
    * @param eventsRepo - Valor de events repo requerido por la operación.
    * @param emailVerificationsRepo - Valor de email verifications repo requerido por la operación.
-   * @param tenantsRepo - Valor de tenants repo requerido por la operación.
-   * @param membershipsRepo - Valor de memberships repo requerido por la operación.
-   * @param branchesRepo - Casa central y sucursales que declara el alta de una farmacia.
-   * @param notificationsService - Valor de notifications service requerido por la operación.
-   * @param affiliationDocuments - Vincula los documentos legales declarados (subtarea 1.2).
+   * @param directory - Tenant, membresía, sucursales, perfil por tipo y documentos legales (subtarea 1.2) de `directory`.
+   * @param emailNotice - Encolado del correo de verificación.
+   * @param pharmacies - La farmacia, su central y sus sucursales, que nacen con el alta (P50).
    * @param representatives - Registra al representante legal y a las gerencias (subtarea 1.4).
    * @param logger - Valor de logger requerido por la operación.
    * @param tracing - Valor de tracing requerido por la operación.
@@ -144,12 +176,12 @@ export class IamOrganizationSelfRegistrationService {
     private readonly rolesRepo: UserGlobalRolesRepository,
     private readonly eventsRepo: SecurityEventsRepository,
     private readonly emailVerificationsRepo: EmailVerificationsRepository,
-    private readonly tenantsRepo: TenantsRepository,
-    private readonly membershipsRepo: TenantMembershipsRepository,
-    private readonly branchesRepo: BranchesRepository,
-    private readonly notificationsService: NotificationsService,
-    private readonly typeProfile: TenantTypeProfileService,
-    private readonly affiliationDocuments: TenantAffiliationDocumentsService,
+    @Inject(DIRECTORY_REGISTRATION_PORT)
+    private readonly directory: DirectoryRegistrationPort,
+    @Inject(EMAIL_NOTICE_PORT)
+    private readonly emailNotice: EmailNoticePort,
+    @Inject(PHARMACY_REGISTRATION_PORT)
+    private readonly pharmacies: PharmacyRegistrationPort,
     private readonly representatives: IamOrganizationRepresentativesService,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
@@ -206,7 +238,7 @@ export class IamOrganizationSelfRegistrationService {
       // Las dos unicidades se comprueban ANTES de escribir nada: el código de
       // tenant y el correo del owner son ambos únicos, y descubrirlo por una
       // violación de constraint devolvería un 500 en vez de un 409 explicativo.
-      const codeClash = await this.tenantsRepo.findByCode(
+      const codeClash = await this.directory.findTenantByCode(
         tx,
         dto.organization.code,
       );
@@ -225,7 +257,12 @@ export class IamOrganizationSelfRegistrationService {
         );
       }
 
-      const emailClash = await this.credentialsRepo.findLivePasswordBySubject(
+      // Cerrojo por correo antes de comprobarlo, como el alta de paciente: sin
+      // él, dos altas simultáneas con el mismo correo pasan las dos la lectura y
+      // la segunda choca con el índice único como un 409 genérico.
+      // Sin distinguir mayúsculas: «Ana@…» y «ana@…» son el mismo buzón (#1000).
+      await this.credentialsRepo.lockEmailForRegistration(tx, dto.owner.email);
+      const emailClash = await this.credentialsRepo.findLivePasswordByEmail(
         tx,
         dto.owner.email,
       );
@@ -248,11 +285,11 @@ export class IamOrganizationSelfRegistrationService {
       // siquiera la cuenta—, y con ellos los conceptos: un `countryConceptId`
       // inexistente sólo lo delataba la FK, ya dentro del INSERT, y salía
       // como 500 sin decir qué campo era.
-      this.typeProfile.assertProfileMatchesType(dto.organization);
+      this.directory.assertProfileMatchesType(dto.organization);
       assertLegalDocumentsForEntityType(dto.organization);
-      await this.typeProfile.assertConceptsExist(
+      await this.directory.assertConceptsExist(
         tx,
-        this.typeProfile.declaredConcepts(dto.organization),
+        this.directory.declaredConcepts(dto.organization),
       );
 
       // 1) Cuenta del owner, ACTIVA y con su contraseña definitiva: el titular
@@ -281,7 +318,7 @@ export class IamOrganizationSelfRegistrationService {
       });
 
       // 2) La organización, pendiente de verificación por la plataforma.
-      const tenant = this.tenantsRepo.create(tx, {
+      const tenant = this.directory.createTenant(tx, {
         code: dto.organization.code,
         legalName: dto.organization.legalName,
         tradeName: dto.organization.tradeName,
@@ -312,42 +349,65 @@ export class IamOrganizationSelfRegistrationService {
       // aquí: elegir el tipo y no crear su fila dejaba un tenant etiquetado
       // que no se sostiene en nada. Acá el owner ES el actor: es su propia
       // alta, así que no hace falta el quinto parámetro.
-      const profileId = await this.typeProfile.materializeProfile(
+      const profileId = await this.directory.materializeProfile(
         tx,
         tenant.id,
         dto.organization,
         user.id,
       );
 
-      // 2b) Farmacia: la casa central y las sucursales declaradas en el alta
-      // (P50) y la fila de `pharmacy.pharmacies`, que nace en borrador y sin
-      // verificar: la plataforma la activa al verificar el tenant
-      // (`DirectoryTenantsService.verify`). Sin esto el alta descartaba las
-      // sedes y la farmacia nacía invisible para su propio portal.
+      // Establecimiento médico: `materializeProfile` ya persistió el NIT, el
+      // registro sanitario, el director y las sedes declaradas. La respuesta lo
+      // informa sólo para los cinco tipos médicos: `true` si el alta trajo el
+      // bloque, `false` si no.
+      const medicalFacilityRegistered = MEDICAL_FACILITY_TENANT_TYPES.includes(
+        dto.organization.tenantType,
+      )
+        ? dto.organization.medicalFacility !== undefined
+        : undefined;
+
+      // 2b) Farmacia (P50): la fila de `pharmacy.pharmacies` en borrador, su
+      // práctica propia y la casa central y cada sucursal como sede física y
+      // sede dispensadora, con la central enlazada. Las sucursales además se
+      // registran en `directory.branches`, que es lo que lista y edita el
+      // portal de la organización. Todo en esta transacción: si algo falla no
+      // queda una farmacia sin sedes ni sedes sin farmacia.
+      let pharmacyId: string | undefined;
       if (dto.organization.tenantType === 'PHARMACY') {
         this.createPharmacyBranches(tx, tenant.id, dto, user.id);
-        tx.create(
-          Pharmacies,
+        const block = dto.organization.pharmacy;
+        const provisioned = await this.pharmacies.provision(
+          tx,
           {
             tenantId: tenant.id,
             code: dto.organization.code,
             legalName: dto.organization.legalName,
             tradeName: dto.organization.tradeName,
-            pharmacyTypeConceptId: PHARM.PHARMACY_TYPE_RETAIL,
-            ownershipTypeConceptId: PHARM.OWNERSHIP_PRIVATE,
-            defaultCurrencyConceptId: PHARM.CURRENCY_USD,
-            verificationStatusConceptId: PHARM.VERIFICATION_PENDING,
-            statusConceptId: PHARM.PHARMACY_DRAFT,
-            ...createdBy(user.id),
+            ownerUserId: user.id,
+            timeZone: dto.organization.timeZone,
           },
-          { partial: true },
+          {
+            headquarters: {
+              name: PHARMACY_HEADQUARTERS_NAME,
+              addressLines: block?.address,
+              latitude: block?.latitude,
+              longitude: block?.longitude,
+            },
+            branches: (block?.branches ?? []).map((branch) => ({
+              name: branch.name,
+              latitude: branch.latitude,
+              longitude: branch.longitude,
+            })),
+          },
+          user.id,
         );
+        pharmacyId = provisioned.pharmacyId;
       }
 
       // 3) La membresía OWNER, que es lo que convierte a esa cuenta en dueña de
       // esta organización y lo único que la hace utilizable: sin esta fila,
       // `TenantContextInterceptor` rechaza con 403 cualquier request posterior.
-      const membership = this.membershipsRepo.create(tx, {
+      const membership = this.directory.createTenantMembership(tx, {
         userId: user.id,
         tenantId: tenant.id,
         tenantRoleConceptId: DIR.ROLE_OWNER,
@@ -365,11 +425,14 @@ export class IamOrganizationSelfRegistrationService {
       // (archivo ajeno, ya reclamado, o el catálogo sin sembrar) revienta
       // toda el alta — ni cuenta, ni tenant, ni correo.
       const legalDocumentIds = dto.organization.legalDocuments
-        ? await this.affiliationDocuments.attachRegistrationDocuments(tx, {
+        ? await this.directory.attachRegistrationDocuments(tx, {
             tenantId: tenant.id,
             ownerUserId: user.id,
             legalEntityType: dto.organization.legalEntityType,
-            taxIdentifier: dto.organization.payer?.regulatorIdentifier,
+            taxIdentifier:
+              dto.organization.taxIdentifier ??
+              dto.organization.payer?.regulatorIdentifier ??
+              dto.organization.medicalFacility?.taxIdentifierNumber,
             documents: {
               CONSTITUTION_DOC:
                 dto.organization.legalDocuments.constitutionFileId,
@@ -436,6 +499,7 @@ export class IamOrganizationSelfRegistrationService {
           ...(representativesRegistered === undefined
             ? {}
             : { representatives: representativesRegistered }),
+          ...(medicalFacilityRegistered ? { medicalFacility: true } : {}),
         },
       });
 
@@ -455,8 +519,10 @@ export class IamOrganizationSelfRegistrationService {
           dto.organization.tenantType === 'DIAGNOSTIC_CENTER'
             ? profileId
             : undefined,
+        pharmacyId,
         legalDocumentsRegistered: legalDocumentIds?.length,
         representativesRegistered,
+        medicalFacilityRegistered,
       };
     });
 
@@ -489,8 +555,10 @@ export class IamOrganizationSelfRegistrationService {
       status: created.status,
       emailVerificationSent,
       diagnosticUnitId: created.diagnosticUnitId,
+      pharmacyId: created.pharmacyId,
       legalDocumentsRegistered: created.legalDocumentsRegistered,
       representativesRegistered: created.representativesRegistered,
+      medicalFacilityRegistered: created.medicalFacilityRegistered,
     };
   }
 
@@ -528,7 +596,7 @@ export class IamOrganizationSelfRegistrationService {
       description?: string;
       locationUrl?: string;
     }): void => {
-      this.branchesRepo.create(tx, {
+      this.directory.createBranch(tx, {
         tenantId,
         code: codeOf(item.name),
         name: item.name,
@@ -570,23 +638,16 @@ export class IamOrganizationSelfRegistrationService {
     email: string,
     token: string,
   ): Promise<boolean> {
-    const actor: AuthenticatedUser = { id: userId, roles: [] };
     try {
-      await this.notificationsService.createRequest(
-        {
-          channelId: MESSAGING_SEED.emailChannelId,
-          recipientUserId: userId,
-          recipientAddress: email,
-          payloadJson: {
-            subject: 'Verifique el correo de su organización',
-            bodyText:
-              'Para verificar su correo, use este código: ' +
-              `${token}\n\nTu organización quedó registrada y está pendiente ` +
-              'de verificación por parte de la plataforma.',
-          },
-        },
-        actor,
-      );
+      await this.emailNotice.enqueueEmail({
+        recipientUserId: userId,
+        recipientAddress: email,
+        subject: 'Verifique el correo de su organización',
+        bodyText:
+          'Para verificar su correo, use este código: ' +
+          `${token}\n\nTu organización quedó registrada y está pendiente ` +
+          'de verificación por parte de la plataforma.',
+      });
       return true;
     } catch (error) {
       this.logger.warn(

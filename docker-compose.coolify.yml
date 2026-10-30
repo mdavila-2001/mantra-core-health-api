@@ -117,9 +117,21 @@ x-app-env: &app-env
   # --- PostgreSQL ---------------------------------------------------------
   DB_HOST: postgres
   DB_PORT: "5432"
+  # Rol DUEÑO (superusuario de la imagen): DDL, migraciones y seed. Es el único
+  # que tiene `api-migrate`. Con RLS esto sólo aísla si la API NO lo usa (HZ-05).
   DB_USER: ${POSTGRES_USER}
   DB_PASSWORD: ${POSTGRES_PASSWORD}
   DB_NAME: ${POSTGRES_DB}
+  # Rol de RUNTIME de la API y los workers: `mantra_app`, sin SUPERUSER ni
+  # BYPASSRLS (lo crea el patch 2026-08-05_tenant_rls.sql y `postgres-init` le
+  # habilita LOGIN con DB_APP_PASSWORD). Usarlo requiere también RLS_ENFORCE=true
+  # (abajo). Vacíos, la API conectaría con el rol dueño y, en producción, el
+  # arranque se niega (SYSTEM_DB_ROLE_PRIVILEGED) salvo
+  # DB_ALLOW_PRIVILEGED_RUNTIME_ROLE=true, excepción transitoria.
+  # Ver docs/operations/coolify.md § 3.1.
+  DB_APP_USER: ${DB_APP_USER:-}
+  DB_APP_PASSWORD: ${DB_APP_PASSWORD:-}
+  DB_ALLOW_PRIVILEGED_RUNTIME_ROLE: ${DB_ALLOW_PRIVILEGED_RUNTIME_ROLE:-false}
 
   # --- Los otros cuatro motores ------------------------------------------
   MONGODB_URI: mongodb://mongodb:27017/${MONGO_DB:-alovida_document_store}
@@ -193,6 +205,25 @@ x-app-env: &app-env
   # son cuatro credenciales conocidas.
   SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-}
   SEED_DEMO_ALLOW_PRODUCTION: ${SEED_DEMO_ALLOW_PRODUCTION:-false}
+  # --- Carga de datos del padrón (los hace `api-migrate`) -----------------
+  # Todos apagados por defecto: un despliegue que no los declara no carga nada.
+  # Organizaciones reales (hospitales, clínicas, centros de salud, laboratorios,
+  # centros de imágenes y farmacias) con ids deterministas. No crea cuentas: es
+  # el único paso pensado también para producción. Cada ficha sale sin sello de
+  # verificado salvo las que `verify` acepta.
+  SEED_PADRON_ORGANIZATIONS_ENABLED: ${SEED_PADRON_ORGANIZATIONS_ENABLED:-false}
+  # Pasos de DEMOSTRACIÓN (solo desarrollo y pruebas): crean cuentas `@alovida.test`
+  # con `SEED_DEMO_PASSWORD` y exigen además `SEED_DEMO_ALLOW_PRODUCTION=true`.
+  # En producción no se define ninguna de las dos y estos pasos no hacen nada.
+  SEED_PADRON_ORG_ADMINS_ENABLED: ${SEED_PADRON_ORG_ADMINS_ENABLED:-false}
+  SEED_PEOPLE_ENABLED: ${SEED_PEOPLE_ENABLED:-false}
+  # Carpeta con USUARIO_MEDICOS_1.md y USUARIO_PACIENTES_1.md. Datos personales
+  # reales: se monta solo en desarrollo y pruebas y nunca entra al repositorio.
+  # Del padrón se toman nombre, apellidos, matrícula y ocupación; el resto se inventa.
+  SEED_PEOPLE_SOURCE_DIR: ${SEED_PEOPLE_SOURCE_DIR:-}
+  SEED_DIRECTORY_NETWORKS_ENABLED: ${SEED_DIRECTORY_NETWORKS_ENABLED:-false}
+  # Reindexa el directorio público en el buscador al final de la siembra.
+  SEED_SEARCH_REINDEX: ${SEED_SEARCH_REINDEX:-false}
 
   # --- Postura de seguridad ----------------------------------------------
   # Cookie httpOnly del refresh (TX-10). Se enciende junto con PUBLIC_REFRESH_COOKIE
@@ -247,6 +278,14 @@ x-app-env: &app-env
   GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
   GOOGLE_OAUTH_REFRESH_TOKEN: ${GOOGLE_OAUTH_REFRESH_TOKEN:-}
   GOOGLE_SENDER_EMAIL: ${GOOGLE_SENDER_EMAIL:-}
+  # Guarda de destinatarios para dev/test. Lista de dominios separada por comas
+  # (p. ej. `alovida.test`): el canal EMAIL solo entrega a esos dominios
+  # (comparación exacta, sin distinguir mayúsculas; subdominios solo si se
+  # listan) y suprime el resto sin llamar al proveedor. VACÍA = sin
+  # restricción, que es lo que corresponde en producción. La lee
+  # `worker-messaging`, que es quien envía; la API la recibe por compartir el
+  # bloque y la ignora.
+  EMAIL_ALLOWED_RECIPIENT_DOMAINS: ${EMAIL_ALLOWED_RECIPIENT_DOMAINS:-}
 
   # --- Audio / TTS --------------------------------------------------------
   # El único subsistema que puede COSTAR DINERO por ejecución, y por eso lleva
@@ -386,6 +425,10 @@ services:
   # MOTORES DE DATOS
   # =======================================================================
   postgres:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     image: timescale/timescaledb-ha:pg18
     restart: always
     logging: *logging
@@ -393,16 +436,19 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    # Puerto PUBLICADO EN EL HOST para que los testers de datos entren desde
-    # fuera con un cliente SQL. Es la ÚNICA base del stack que se expone: Mongo,
-    # Redis, OpenSearch y MinIO siguen solo en la red interna `alovida`.
-    # Postgres exige contraseña (scram-sha-256) a toda conexión que no sea
-    # local, así que el rol `alovida` NO se comparte: a los testers se les da
-    # el rol de solo lectura de `scripts/postgres/provision-roles.sql`.
-    # Cambiar a `127.0.0.1:5432:5432` para volver a cerrarlo y entrar por
-    # túnel SSH. Ver docs/operations/coolify.md § 7.
+    # Puerto del host para que los testers de datos entren con un cliente SQL.
+    # Por defecto queda ATADO AL LOOPBACK del servidor (IC-02): se entra por
+    # túnel SSH (`ssh -L 5432:localhost:5432 usuario@servidor`) y nada de la base
+    # se ofrece a internet. Esta imagen no trae TLS de servidor, así que abrirlo
+    # (`POSTGRES_PUBLIC_BIND=0.0.0.0`) deja filas clínicas y credenciales viajando
+    # sin cifrar: sólo con TLS montado y `hostssl` exigido en `pg_hba.conf`, y con
+    # el firewall limitado a las IP de los testers. Es la ÚNICA base del stack que
+    # se publica: Mongo, Redis, OpenSearch y MinIO siguen solo en la red interna
+    # `alovida`. A los testers se les da el rol de solo lectura de
+    # `scripts/postgres/provision-reader-role.sql`, nunca `POSTGRES_USER`.
+    # Ver docs/operations/coolify.md § 7.
     ports:
-      - "${POSTGRES_PUBLIC_PORT:-5432}:5432"
+      - "${POSTGRES_PUBLIC_BIND:-127.0.0.1}:${POSTGRES_PUBLIC_PORT:-5432}:5432"
     volumes:
       # `timescaledb-ha` usa PGDATA=/home/postgres/pgdata/data, NO la ruta de la
       # imagen oficial de postgres. Montado en /var/lib/postgresql/data el
@@ -435,13 +481,21 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # HZ-05: habilita LOGIN del rol de runtime `mantra_app` (ver el script).
+      DB_APP_USER: ${DB_APP_USER:-}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 
   mongodb:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     image: mongo:8.2.12
     restart: always
     logging: *logging
@@ -471,10 +525,15 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 
   redis:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     image: redis:8.10-alpine
     restart: always
     logging: *logging
@@ -493,6 +552,10 @@ services:
       - alovida
 
   opensearch:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     image: opensearchproject/opensearch:3.8.0
     restart: always
     logging: *logging
@@ -534,10 +597,15 @@ services:
     depends_on:
       opensearch:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 
   minio:
+    # Fuera del despliegue de Coolify: estas bases las sirve el stack
+    # `alovida-data-<entorno>` del VPS (infra/resilience/data-stack/), así un
+    # despliegue de la API no las reinicia. En local: COMPOSE_PROFILES=embedded-data.
+    profiles: ["embedded-data"]
     # quay.io y Docker Hub ya no sirven `minio/minio` sin autenticación: un
     # `docker pull` de este tag devuelve 401 (quay.io) o «pull access denied»
     # (Docker Hub), comprobado el 2026-10-07 desde 62.169.18.132. Coolify corre
@@ -613,6 +681,7 @@ services:
     depends_on:
       minio:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 
@@ -641,25 +710,33 @@ services:
       # que este servicio exista.
       ORM_SCHEMA_SYNC: "safe"
       ORM_VERIFY_FIDELITY: "true"
+      # Migración y seed SÍ usan el rol dueño (DDL): se vacía el rol de runtime
+      # que hereda del ancla para que `buildOrmConfig` caiga a DB_USER (HZ-05).
+      DB_APP_USER: ""
+      DB_APP_PASSWORD: ""
     deploy:
       resources: *api-resources
     depends_on:
       postgres:
         condition: service_healthy
+        required: false
       postgres-init:
         condition: service_completed_successfully
       mongodb:
         condition: service_healthy
+        required: false
       mongo-init:
         condition: service_completed_successfully
       opensearch:
         condition: service_healthy
+        required: false
       opensearch-init:
         condition: service_completed_successfully
       minio-init:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+        required: false
     networks:
       - alovida
 

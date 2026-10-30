@@ -1,0 +1,112 @@
+# Muestras revisadas a mano (semilla fija). Oraciones literales de CIMA.
+
+## Descartadas: negated-interaction (2010 oraciones; primeras 30 de la muestra)
+- No se ha observado este efecto con hidróxido de aluminio.
+- Lamivudina no inhibe las enzimas del citocromo P450.
+- Daptomicina no tuvo efecto sobre la farmacocinética de warfarina o probenecida, ni estos medicamentos alteraron la farmacocinética de daptomicina.
+- Los estudios clínicos de interacciones farmacológicas han revelado que la administración concomitante de ticagrelor y heparina, enoxaparina y AAS o desmopresina no tuvo ningún efecto sobre la farmacoc
+- No se han descrito interacciones con otros fármacos en aquellos pacientes que estaban siendo tratados con medicamentos concomitantes para el glaucoma o para otras alteraciones oculares o para cualquie
+- Los resultados clínicos hasta la fecha no indican ninguna interacción de darbepoetina alfa con otras substancias.
+- • Anticoagulantes orales: no se ha encontrado ninguna interacción potencial entre acenocumarol y espironolactona.
+- Emtricitabina no inhibió la reacción de glucuronidación de un sustrato UGT no específico in vitro.
+- Resultados de los estudios farmacocinéticos con sustratos CYP3A4, por ejemplo midazolam y cisaprida, no mostraron interacciones farmacocinéticas significativas cuando estas sustancias se administraron
+- Nirsevimab no interfiere con la reacción en cadena de la polimerasa con transcriptasa inversa (RT PCR) ni con los ensayos de diagnóstico de detección rápida de antígenos del VRS que emplean anticuerpo
+- La coadministración con metotrexato no modifica la farmacocinética de MabThera en los pacientes con artritis reumatoide.
+- Etinilestradiol combinado con norgestrel o gestodeno no modificaron la exposición a midazolam a niveles clínicamente significativos.
+- Entre los AINE, por un lado, y los agonistas alfa de acción central y los bloqueadores de los canales del calcio, por el otro, no se han observado interacciones.
+- Se ha observado una ligera reducción de la excreción renal de gabapentina cuando se administra junto con cimetidina, hecho del que no se espera que tenga relevancia clínica.
+- Como la simeticona no es absorbida en el tracto gastrointestinal, no se espera que se produzca ninguna interacción entre la simeticona y otros medicamentos.
+- No se esperan interacciones medicamentosas significativas entre ceftolozano/tazobactam y los sustratos, inhibidores e inductores de las enzimas del citocromo P450 (CYP) según los estudios in vitro e i
+- Los estudios de interacciones realizados en voluntarios sanos indican que ertugliflozina no tiene un efecto clínicamente significativo sobre la farmacocinética de sitagliptina, metformina y glimepirid
+- En base a los resultados de un estudio clínico con rosuvastatina, no es probable la inducción de OATP1B1/1B3 y BCRP.
+- La dexametasona no produjo efectos adversos sobre la fertilidad en un modelo de rata cebado con gonadotropina coriónica.
+- Por consiguiente, no se espera que los inhibidores de CYP3A y de la gp‑P influyan en la exposición a tepotinib.
+- En un estudio farmacocinético de interacción realizado en voluntarios sanos, no se detectaron efectos significativos sobre los niveles plasmáticos de carbamazepina ni de su metabolito activo, en pacie
+- Los datos in vitro sugieren que sitagliptina ni inhibe ni induce las isoenzimas del CYP450.
+- No se observó ninguna interacción farmacocinética clínicamente significativa al combinar vinorelbina con otros agentes quimioterápicos (paclitaxel, docetaxel, capecitabina y ciclofosfamida oral).
+- Según la biotransformación y eliminación de faricimab (ver sección 5.2) no se esperan interacciones.
+- Por lo tanto, no se esperan interacciones medicamentosas debidas al metabolismo mediado por el citocromo P450.
+- Este aumento no se considera clínicamente relevante.
+- • Anticoagulantes orales: no se ha encontrado ninguna interacción potencial entre acenocumarol y espironolactona.
+- Estudios in vitro han demostrado que vinflunina no induce la actividad del CYP1A2, CYP2B6 o CYP3A4 ni ejerce efectos inhibidores sobre el CYP1A2, CYP2B6, CYP2C8, CYP2C9, CYP2C19, CYP2D6 y CYP3A4.
+- Ponesimod no es un sustrato de los transportadores P-gp, BCRP, OATP1B1 u OATP1B3.
+- La administración concomitante de fingolimod con ciclosporina no produce ningún cambio en la exposición de ciclosporina o de fingolimod.
+
+## Descartadas: no-interaction-data (1145 oraciones; primeras 30 de la muestra)
+- No se ha estudiado el uso conjunto de terapia fotodinámica (TFD) con verteporfina y Eylea, por lo que no se ha establecido un perfil de seguridad.
+- Interacción no estudiada.
+- No se han realizado estudios de interacciones.
+- No se han realizado estudios de interacciones.
+- No se han realizado estudios de interacción farmacológica con Boey inyectable.
+- No se han realizado estudios formales de interacción farmacológica clínica con azacitidina.
+- No se ha evaluado el potencial de inhibición del CYP2B6.
+- Pravastatina/Tenofovir disoproxilo — Interacción no estudiada.
+- No se ha estudiado la interacción de Abelcet complejo lipídico con otros medicamentos.
+- Compuestos retinoides (ej. isotretinoína)/Lamivudina No hay estudios sobre interacciones de medicamentos — Interacción no estudiada.
+- No se han realizado estudios de interacción de eplerenona con litio.
+- No se han realizado estudios de interacciones (ver sección 5.2).
+- No se han realizado estudios de interacción.
+- No se han realizado ensayos de interacción con levocetirizina (incluyendo ensayos con inductores del CYP 3A4).
+- No hay datos sobre la eficacia de la abaloparatida en pacientes tratadas previamente o de forma concomitante con bisfosfonatos o con glucocorticoides.
+- No se han realizado estudios de interacciones.
+- No se han realizado estudios de interacciones.
+- No se han llevado a cabo estudios clínicos de interacción entre medicamentos para evaluar la relevancia clínica de este hallazgo.
+- Interacción no estudiada.
+- Actualmente no se dispone de información sobre las interacciones farmacodinámicas de brexpiprazol.
+- No se han realizado estudios de interacción entre fármacos con dalbavancina.
+- No se dispone de datos clínicos sobre el siponimod combinado con inductores moderados del CYP3A4.
+- Viekirax sin dasabuvir — No se ha estudiado. Se esperan efectos comparables a los observados con Viekirax + dasabuvir
+- No se ha estudiado la seguridad de la inmunización con vacunas con virus vivos atenuados durante o después del tratamiento con Vyjuvek.
+- No se han realizado estudios de interacciones con Vyxeos liposomal.
+- Interacción no estudiada.
+- Interacción no estudiada.
+- No se ha realizado ningún estudio formal sobre la interacción con inhibidores potentes del CYP3A4.
+- No se han estudiado ni la seguridad ni la eficacia de la inmunización con cualquier vacuna, especialmente vacunas de virus vivos, después del tratamiento con Zevalin (ver también la sección “Advertenc
+- Fenitoína/Lamivudina — Interacción no estudiada.
+
+## Conservadas con palabra de negación (1711 de 11414 oraciones UNSPECIFIED; primeras 45 de la muestra)
+- No obstante, no hubo un impacto aparente de este aumento en la exposición de rosuvastatina en plasma en la actividad de la HMG-CoA reductasa.
+- Sin embargo, ha habido informes después de la comercialización de aumentos del cociente internacional normalizado (INR) en pacientes que tomaban ezetimiba con warfarina o fluindiona.
+- Fenobarbital Fentoína No se ha realizado ningún estudio de interacción — Fenobarbital y fentoína inducen el CYP3A4. — Fenobarbital y fentoína deben utilizarse con precaución en combinación con Aptivus
+- Viekirax sin dasabuvir — No estudiado: Se espera un efecto similar al observado con Viekirax + dasabuvir.
+- Fenobarbital — No estudiado. Se espera una disminución en la exposición. — Se deben monitorizar las concentraciones valle de everolimus en sangre completa siempre que los inductores del CYP3A4 se admi
+- No puede descartarse una interacción farmacológica in vivo y la administración conjunta de eravaciclina y otros medicamentos que inhiben estos transportadores (ejemplos de inhibidores de OATPlBl/3: at
+- No obstante, se han descrito casos de uso post-comercialización en los que se ha producido una elevación clínicamente significativa del INR durante el tratamiento simultáneo con warfarina.
+- • Inhibidores de la coagulación (heparina), antiinflamatorios no esteroideos (AINE), sustitutos del plasma (dextrano), fenotiazinas, butirofenonas: disminución del efecto vasopresor de la epinefrina, 
+- Por eso, el uso de emtricitabina en combinación con lamivudina para tratar la infección por el VIH no puede ser recomendado por el momento.
+- En los datos clínicos disponibles, el efecto de la reducción del LDL-C no se consideró significativamente diferente al de la monoterapia de simvastatina cuando se controla el LDL-C en el momento de in
+- En algunos pacientes con la función renal comprometida, (por ej. pacientes ancianos o pacientes con hipovolemia, incluyendo aquellos en tratamiento con diuréticos) que están siendo tratados con antiin
+- La administración conjunta de vibegrón con metoprolol, un betabloqueante representativo, o amlodipino, un vasodilatador representativo, no produjo un descenso o aumento clínicamente significativo de l
+- No obstante, los efectos sobre los lípidos fueron mayores cuando se administraron conjuntamente Zarator y colestipol que cuando los fármacos se administraron por separado.
+- • Anticoagulantes orales: los AOC reducen el efecto de los anticoagulantes orales probablemente debido al efecto antagonista sobre algunos factores de la coagulación, sin embargo, potencian la acción 
+- Sin embargo, es importante tener en consideración que amlodipino/valsartán/hidroclorotiazida puede aumentar el efecto hipotensor de otros agentes antihipertensores.
+- Sirolimus (rapamicina) — Aunque no se ha estudiado directamente, es probable que itraconazol aumente las concentraciones de sirolimus. — No recomendado
+- Primidona y su metabolito principal fenobarbital son inductores fuertes del citocromo P450 y en consecuencia pueden llevar a situaciones de amenaza para la vida, debido al riesgo de disminución de con
+- No mostraron un efecto global significativo en el balance de cobre, aunque se pudo detectar una leve interacción del zinc con los quelantes (penicilamina y trientina) que consistía en disminución de l
+- Relajantes musculares no despolarizantes (p. ej., cloruro de tubocurarina): los efectos de estos agentes pueden ser potenciados por la hidroclorotiazida.
+- Además, la actividad farmacodinámica de clopidogrel no se vio significativamente influenciada por la administración concomitante de fenobarbital, cimetidina o estrógenos.
+- El tratamiento con atorvastatina no se ha asociado a hemorragias ni cambios en el tiempo de protrombina en pacientes que no toman anticoagulantes.
+- No obstante, se ha constatado que la fluvoxamina (inhibidor potente de CYP1A2) aumenta las concentraciones plasmáticas de amitriptilina y esta combinación debe evitarse.
+- No hubo efecto de ticagrelor sobre los niveles de ciclosporina en sangre.
+- Algunos ejemplos incluyen, aunque no se limitan a, aminoglucósidos, amfotericina B, foscarnet, ganciclovir, pentamidina, vancomicina, cidofovir o interleucina-2 (también llamada aldesleucina).
+- Los comprimidos de Lamivudina y tenofovir disoproxilo no deberian administraese concomitantemente con otros medicamentos que contengan tenofovir disoproxilo o tenofovir alafenamida.
+- El mecanismo de acción de estos efectos es el aumento de la absorción intestinal de bicarbonato no neutralizado debido a la unión del magnesio por el poliestireno sulfonato sódico.
+- Antiinflamatorios no esteroideos y ácido acetilsalicílico: Cabe esperar la disminución del efecto antihipertensivo de Ramipril/Hidroclorotiazida TecniGen.
+- La buprenorfina no debe usarse antes de 20 horas desde la suspensión de Levometadona Molteni.
+- Sin embargo, dado que tacrolimus y ciclosporina pueden afectar la función renal, se recomienda una estrecha monitorización cuando alguno de estos agentes se coadministra con adefovir dipivoxil (ver se
+- Disopiramida Flecainida Lidocaína sistémica Mexiletina Propafenona — Interacción no estudiada. Las concentraciones de estos medicamentos antiarrítmicos pueden aumentar al administrarse de forma concom
+- • Topiramato reduce modestamente la biodisponibilidad de risperidona, pero no de la fracción antipsicótica activa.
+- Al combinar nebivolol con nicardipino se incrementaron ligeramente los niveles en plasma de ambos fármacos, sin modificar el efecto clínico.
+- Los estudios han mostrado que otros inhibidores del citocromo P450 3A4 producen incrementos insignificantes (eritromicina) y menores (ketoconazol) en la exposición sistémica al propionato de fluticaso
+- En consecuencia, el carbonato de sevelámero no se debe tomar simultáneamente con ciprofloxacino.
+- Isoniacida: el tratamiento con isoniazida debe suspenderse una semana antes de la operación y no debe reiniciarse hasta 15 días después de la misma, ya que el uso concomitante de isoflurano e isoniazi
+- El tratamiento simultáneo con medicamentos nefrotóxicos (como los aminoglucósidos, diuréticos, antiinflamatorios no esteroideos o litio) puede aumentar el potencial de reacciones adversas renales (por
+- Aunque no se han realizado estudios de interacciones medicamentosas específicas con Combigan, se debe considerar la posibilidad teórica de un efecto reductor aditivo de la PIO con prostamidas, prostag
+- La administración simultánea de lenvatinib, carboplatino y paclitaxel no tiene un impacto significativo en la farmacocinética de ninguno de estos tres fármacos.
+- El uso concurrente de probenecid, cimetidina o ciclosporina junto con levofloxacino ha alterado algunos parámetros farmacocinéticos del levofloxacino, pero no en un grado clínicamente significativo.
+- Durante los ensayos clínicos con la pauta combinada para el VHC ombitasvir/paritaprevir/ritonavir y dasabuvir con o sin ribavirina, elevaciones de ALT mayores a 5 veces el límite superior normal (LSN)
+- Dado que el iloprost inhibe la función plaquetaria, su uso con anticoagulantes (tales como heparina o anticoagulantes cumarínicos), u otros inhibidores de la función plaquetaria (tales como ácido acet
+- La farmacocinética (FC) de rituximab, bendamustina, ciclofosfamida y doxorubicina no se ve afectada por la administración concomitante de polatuzumab vedotina.
+- No obstante, aunque se desconocen los mecanismos de interacción, los efectos de la administración de atovacuona con zidovudina y ddI pueden ser mayores con la suspensión de atovacuona.
+- Bloqueantes beta-adrenérgicos no selectivos (p. ej., propranolol, nadolol):
+- No existe experiencia con el uso concomitante de otros tratamientos inmunosupresores administrados para el eccema atópico, tales como, UVB, UVA, PUVA, azatioprina y ciclosporina A.

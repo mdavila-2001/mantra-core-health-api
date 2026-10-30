@@ -1,5 +1,13 @@
 {
   "_nota": "Especialidades que aparecen en las redes y el arancel, para contrastar contra VS_MEDICAL_SPECIALTY.",
+  "_procedencia": {
+    "modeloCommit": "3dc2f323b0f4c533c31430c64187baf6d63d6459",
+    "fuentes": {
+      "markdown_convertidos/Alianza_Medicos_Habilitados.md": "425bbcadd7b177638f08fecc8aad39299746794e06ecd270617ab483fcaf5727",
+      "markdown_convertidos/Arancel_Honorarios_Medicos_Santa_Cruz_2025_3_columnas.md": "85c68678b19d382b25affa50cc71f076581a2602d89db605ac2b376bd0adb040",
+      "markdown_convertidos/Nacional_Seguros_Red_Medica_Bolivia.md": "bfcd40c8bb0019b50f466e0bd2502ba521953a0cda1ef7a133bad308a7713a72"
+    }
+  },
   "datos": [
     {
       "nombre": "TRAUMATOLOGIA Y ORTOPEDIA",

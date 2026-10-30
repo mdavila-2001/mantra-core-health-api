@@ -92,7 +92,7 @@ function preference(overrides: Record<string, unknown> = {}): any {
 
 describe('NotificationsService · carril P9 (preferencias)', () => {
   describe('readMyPreferences', () => {
-    it('devuelve las cuatro categorías aunque no haya ninguna fila', async () => {
+    it('devuelve todas las categorías (incluida ADMISSION) aunque no haya ninguna fila', async () => {
       const d = build();
 
       const res = await d.service.readMyPreferences(actor as any);
@@ -104,8 +104,24 @@ describe('NotificationsService · carril P9 (preferencias)', () => {
         { category: 'SCHEDULING', optedIn: true },
         { category: 'MESSAGES', optedIn: true },
         { category: 'SOCIAL', optedIn: true },
+        { category: 'ADMISSION', optedIn: true },
       ]);
       expect(res.quietHours).toBeNull();
+    });
+
+    it('ADMISSION se puede silenciar como cualquier categoría', async () => {
+      const d = build();
+      d.notificationsRepo.findPreferences.mockResolvedValue([
+        preference({
+          categoryConceptId: NOTIFICATION_CATEGORY_CONCEPT.ADMISSION,
+          optedIn: false,
+        }),
+      ]);
+      const res = await d.service.readMyPreferences(actor as any);
+      expect(res.categories).toContainEqual({
+        category: 'ADMISSION',
+        optedIn: false,
+      });
     });
 
     it('refleja lo silenciado y la ventana de silencio del canal', async () => {

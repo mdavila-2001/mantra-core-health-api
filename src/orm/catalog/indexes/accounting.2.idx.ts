@@ -2,7 +2,7 @@ import type { IndexTuple } from '../catalog.types';
 
 /**
  * Índices secundarios declarados por el modelo oficial para el schema `accounting` (parte 2/2).
- * 167 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
+ * 180 definiciones. Generado desde los `<<INDEX_SET>>` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const accountingIndexes2: readonly IndexTuple[] = [
@@ -72,7 +72,7 @@ export const accountingIndexes2: readonly IndexTuple[] = [
   ['journal_entry_assignments', 'ix_journal_entry_assignments_asset_line', ['asset_id', 'ledger_entry_id'], false, 'btree'],
   ['journal_entry_assignments', 'ix_journal_entry_assignments_liability_line', ['liability_id', 'ledger_entry_id'], false, 'btree'],
   ['journal_entry_assignments', 'ix_journal_entry_assignments_contract_line', ['contract_id', 'ledger_entry_id'], false, 'btree'],
-  ['journal_transactions', 'uq_journal_transactions_transaction_number', ['transaction_number'], true, 'btree'],
+  ['journal_transactions', 'uq_journal_transactions_practice_id_transaction_number', ['practice_id', 'transaction_number'], true, 'btree'],
   ['journal_transactions', 'ix_journal_transactions_practice_id', ['practice_id'], false, 'btree'],
   ['journal_transactions', 'ix_journal_transactions_transaction_type_concept_id', ['transaction_type_concept_id'], false, 'btree'],
   ['journal_transactions', 'ix_journal_transactions_fiscal_period_id', ['fiscal_period_id'], false, 'btree'],
@@ -128,6 +128,19 @@ export const accountingIndexes2: readonly IndexTuple[] = [
   ['open_items', 'ix_open_items_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['open_items', 'ix_open_items_tenant_status_due', ['tenant_id', 'status_concept_id', 'due_date'], false, 'btree'],
   ['open_items', 'ix_open_items_subledger_status_due', ['subledger_account_id', 'status_concept_id', 'due_date'], false, 'btree'],
+  ['practitioner_simple_accounts', 'uq_practitioner_simple_accounts_practice_code', ['practice_id', 'code'], true, 'btree'],
+  ['practitioner_simple_accounts', 'ix_practitioner_simple_accounts_practice_id', ['practice_id'], false, 'btree'],
+  ['practitioner_simple_accounts', 'ix_practitioner_simple_accounts_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['practitioner_simple_accounts', 'ix_practitioner_simple_accounts_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['practitioner_simple_records', 'ix_practitioner_simple_records_practice_id', ['practice_id'], false, 'btree'],
+  ['practitioner_simple_records', 'ix_practitioner_simple_records_account_id', ['account_id'], false, 'btree'],
+  ['practitioner_simple_records', 'ix_practitioner_simple_records_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['practitioner_simple_records', 'ix_practitioner_simple_records_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
+  ['practitioner_simple_transactions', 'ix_practitioner_simple_transactions_practice_id', ['practice_id'], false, 'btree'],
+  ['practitioner_simple_transactions', 'ix_practitioner_simple_transactions_debit_account_id', ['debit_account_id'], false, 'btree'],
+  ['practitioner_simple_transactions', 'ix_practitioner_simple_transactions_credit_account_id', ['credit_account_id'], false, 'btree'],
+  ['practitioner_simple_transactions', 'ix_practitioner_simple_transactions_created_by_user_id', ['created_by_user_id'], false, 'btree'],
+  ['practitioner_simple_transactions', 'ix_practitioner_simple_transactions_updated_by_user_id', ['updated_by_user_id'], false, 'btree'],
   ['profit_centers', 'uq_profit_centers_tenant_id_code', ['tenant_id', 'code'], true, 'btree'],
   ['profit_centers', 'ix_profit_centers_controlling_area_id', ['controlling_area_id'], false, 'btree'],
   ['profit_centers', 'ix_profit_centers_tenant_id', ['tenant_id'], false, 'btree'],

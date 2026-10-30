@@ -246,6 +246,25 @@ describe('ClinicalFormsSeedService', () => {
     expect(second.rowsOf('DynamicFieldDefinitions')).toHaveLength(0);
   });
 
+  it('retoma una corrida cortada: reusa la sección que quedó sin plantilla', async () => {
+    const form = STANDARD_FORMS[0];
+    const sectionId = deterministicId(`clinical-forms:section:${form.code}`);
+    const { service, rowsOf } = build(new Set([sectionId]));
+
+    const result = await service.run();
+
+    // La plantilla que faltaba se crea y cuelga de la sección existente; la
+    // sección NO se vuelve a insertar (eso violaba `pk_dynamic_field_sections`).
+    expect(result.templates).toBe(STANDARD_FORMS.length);
+    expect(rowsOf('DynamicFieldSections').map((row) => row.id)).not.toContain(
+      sectionId,
+    );
+    const template = rowsOf('SpecialtyChartTemplates').find(
+      (row) => row.code === form.code,
+    );
+    expect(template?.sectionId).toBe(sectionId);
+  });
+
   it('no pisa una plantilla que la organización ya editó', async () => {
     const edited = STANDARD_FORMS[0];
     const templateId = deterministicId(

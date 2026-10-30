@@ -6,18 +6,18 @@ Entidades (31, `find src/modules/insurance -name '*.entity.ts' | wc -l`): `insur
 
 ## Rutas HTTP y alcance (medido)
 
-<!-- Medido el 2026-10-08 sobre origin/dev (dae4fd68). Repetir con:
+<!-- Medido el 2026-10-24 sobre la rama del carril 16 (base origin/dev ab5fb64c). Repetir con:
   find src/modules/insurance -name '*.controller.ts' | wc -l
   find src/modules/insurance -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
   find src/modules/insurance -name '*.entity.ts' | wc -l
   find src/modules/insurance -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **19 controllers, 61 rutas HTTP, 31 entidad y 24 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **19 controllers, 63 rutas HTTP, 31 entidad y 27 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
-Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationModule`, `TerminologyModule`, `CommonModule`, `AuditModule`, `MessagingModule`, `CommunityModule` (`insurance.module.ts`); `insurance-patient-settlement.module.ts` es un módulo aparte sin imports.
+Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationModule`, `TerminologyModule`, `CommonModule`, `AuditModule`, `MessagingModule`, `CommunityModule` (`insurance.module.ts`; además provee directo `InvoicesRepository` de `billing`, que sólo toca el adaptador `billing-patient-invoice.adapter.ts`, carril 16); `insurance-patient-settlement.module.ts` es un módulo aparte sin imports.
 
 | Método y ruta | Acceso | Controller |
 | --- | --- | --- |
@@ -26,10 +26,12 @@ Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationM
 | `GET /insurance-claims` | BILLING_OPERATOR, SECURITY_ADMIN | `claims-read` |
 | `GET /insurance-claims/:id` | BILLING_OPERATOR, SECURITY_ADMIN | `claims-read` |
 | `POST /insurance-claims` |  | `claims` |
+| `POST /insurance-claims/quote` |  | `claims` |
+| `POST /insurance-claims/:id/patient-invoice` |  | `claims` |
 | `POST /insurance-claims/:id/adjudications` |  | `claims` |
 | `POST /insurance-claims/:id/eob` |  | `claims` |
 | `POST /insurance-claims/:id/reversals` |  | `claims` |
-| `POST /insurance-claims/:id/disputes` | BILLING_OPERATOR, SECURITY_ADMIN | `claims` |
+| `POST /insurance-claims/:id/disputes` | BILLING_OPERATOR, SECURITY_ADMIN, PATIENT | `claims` |
 | `GET /patient-coverages/me` | PATIENT | `coverage` |
 | `POST /patient-coverages` | BILLING, FINANCE | `coverage` |
 | `POST /coverage-eligibility-requests` | BILLING, FINANCE | `coverage` |
@@ -87,6 +89,10 @@ Importa (leído de los `.module.ts`): `PracticeModule`, `DirectoryAuthorizationM
 | `POST /prior-authorization-requests/:id/determinations` |  | `prior-auth` |
 | `POST /reconciliation-batches` | SECURITY_ADMIN | `reconciliation` |
 | `POST /reconciliation-batches/:id/items` | SECURITY_ADMIN | `reconciliation` |
+
+## Catálogo público de aseguradoras
+
+`GET /insurance-carrier-catalog` ofrece siempre los seguros públicos (seguridad social, SUS y cajas) y, de las aseguradoras privadas, solo las que tienen una cuenta registrada: `tenant_id` no nulo, tenant activo, una membresía OWNER o ADMIN vigente de un usuario activo con una credencial activa y sin vencer. Se resuelve con una sola consulta con `exists` (`insurance-catalog.service.ts`, `findPrivateWithAccount`). La forma de la respuesta no cambia.
 
 ## Liquidación al profesional (H8)
 
@@ -296,6 +302,40 @@ Reglas que no se deducen del código:
   viaja siempre `null`: el modelo no declara dónde vive la factura del prestador
   a la aseguradora (`billing.invoices` exige práctica y paciente y no tiene
   anulación).
+
+## Protección al paciente en el cobro con seguro (carril 16, REQ-16-026, 028 a 034)
+
+Cuatro piezas, cada una con su responsabilidad. Todas parten del mismo cálculo del servidor,
+`splitCoveredAmount` (`domain/coverage-split.ts`): paciente = copago + (monto − copago) × (100 − % de
+cobertura) / 100, truncado a centavos a favor del paciente; aseguradora = monto − paciente.
+
+| Pieza | Ruta | Qué garantiza |
+| --- | --- | --- |
+| `ClaimQuoteService` | `POST /insurance-claims/quote` | Cotiza sin efectos: no abre transacción, no bloquea ninguna fila y no guarda nada. Mismas reglas que el cobro real (`ClaimCoveragePolicy.quoteLine`) y misma puerta que el envío directo. |
+| `ClaimPatientInvoiceService` | `POST /insurance-claims/:id/patient-invoice` | El servidor arma la factura al paciente con su parte calculada y la vincula a la línea del reclamo; el cliente no manda el monto. Un solo `FOR UPDATE` sobre el reclamo, tomado primero, serializa los pedidos; el índice único de la base es la red de seguridad y su violación sale como 422, no como 409. |
+| `PatientConsentValidator` | (dentro de la factura) | El cobro particular de un servicio sin cobertura exige una aceptación previa del paciente, por el mismo importe. **La persistencia está bloqueada**: no existe la tabla en el modelo, así que el adaptador enlazado falla cerrado. |
+| `PatientChargeObjectionService` | `POST /insurance-claims/:id/disputes` (rol `PATIENT`) | El paciente titular de la cobertura objeta el cobro con un motivo cerrado. Es una disputa del mecanismo existente (`claim_disputes`), idempotente. Mientras esté abierta, `POST /billing/payments-received:apply` rechaza el cobro de las facturas vinculadas (la pausa se deriva de la disputa y la apelación existente la levanta). |
+
+La ruta de disputas sirve a dos actores y despacha por **quién es el actor**, no por el cuerpo
+(`domain/actor-kind.ts`). `@PlatformTenantOptional('PATIENT')` evita exigirle una organización al
+paciente; el personal sin rol de paciente conserva la resolución de tenant de siempre.
+
+**Capas.** La regla pura vive en `domain/patient-billing-enforcer.ts` (sin imports). Billing se alcanza
+sólo por `PatientBillingPort`, cuyo adaptador `billing-patient-invoice.adapter.ts` es el único archivo del
+módulo que importa `billing`. El aviso al paciente sale por `PatientNoticePort` después de confirmar la
+transacción y nunca lanza.
+
+**Trazabilidad.** Cada ruta nueva lleva `@Audited` (o `@NotAudited` con su motivo, la cotización). Como
+`audit_log` no guarda motivo ni importes, estos viajan en eventos del outbox con payload de ids e importes,
+nunca texto libre: `InsuranceClaimPatientInvoiceIssued`, `InsuranceClaimPatientInvoiceRejected`,
+`InsuranceClaimPatientChargeObjected` e `InsuranceClaimPatientObjectionRejected` (ver
+[catálogo de eventos](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/docs/events/event-catalog.md)).
+
+**Pendiente, declarado.** Persistencia de la aceptación del paciente (REQ-16-030, requiere el cambio de
+modelo); desglose en el portal del paciente (REQ-16-031); aviso a personal de la práctica y a la
+aseguradora y correo (REQ-16-032); rechazo de servicios ya reclamados que se facturan como particulares por
+`issueFromEncounter` sin declarar el reclamo (REQ-16-029, segundo punto), porque los reclamos no guardan el
+encuentro y una coincidencia por concepto de servicio bloquearía facturas legítimas.
 
 ## Contenido
 

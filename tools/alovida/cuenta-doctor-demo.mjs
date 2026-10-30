@@ -14,7 +14,7 @@
 
 // Correos reales: sembrar contra `@redesa.test` permitía comprobar que el
 // worker marca la entrega, y no que el correo llega. Ver `correos-reales.mjs`.
-import { CORREOS } from './correos-reales.mjs';
+import { CORREOS, correoDe } from './correos-reales.mjs';
 
 const BASE = process.env.API_BASE_URL ?? 'http://localhost:3000';
 const ADMIN = process.env.BOOTSTRAP_ADMIN_EMAIL ?? CORREOS.admin;
@@ -23,6 +23,8 @@ const ADMIN_PASS = process.env.BOOTSTRAP_ADMIN_PASSWORD ?? 'S3cret-passw0rd';
 /** Credenciales fijas de la cuenta de prueba, para que el equipo las use. */
 const DOCTOR_EMAIL = process.env.DOCTOR_EMAIL ?? CORREOS.doctor;
 const DOCTOR_PASS = process.env.DOCTOR_PASSWORD ?? 'D3mo-passw0rd!';
+/** Documento fijo de la paciente demo: la doctora la encuentra por él. */
+const PATIENT_NATIONAL_ID = process.env.PATIENT_NATIONAL_ID ?? '9900417';
 
 let ok = 0;
 let fail = 0;
@@ -158,21 +160,122 @@ practitionerProfileId = c.hpid ?? practitionerProfileId;
 const tenantDeLaDoctora = c.tenants?.[0] ?? tenantId;
 
 console.log('\n=== 6 · el recorrido, con la cuenta de la doctora ================');
-const pacientes = await call('leer pacientes', 'GET', '/profiles/patients?limit=1', {
-  token: doctorToken,
-  expect: [200, 403],
+// La paciente de la demo es fija y se reutiliza entre corridas. Tomar «el
+// primero del padrón» no sirve: en una base local ese primero suele ser un resto
+// de pruebas sin nombre, y la cita directa lo rechaza («Paciente no
+// encontrado») porque exige una persona con nombre.
+const municipios = await call(
+  'catálogo de municipios',
+  'GET',
+  '/terminology/value-sets?code=VS_BO_MUNICIPALITY',
+  { token: adminToken },
+);
+const vsMunicipio = (municipios.body?.items ?? []).find(
+  (i) => i.internalCode === 'VS_BO_MUNICIPALITY',
+);
+const municipio = vsMunicipio
+  ? (
+      await call('municipios', 'GET', `/terminology/value-sets/${vsMunicipio.id}/$expand`, {
+        token: adminToken,
+      })
+    ).body?.items?.[0]?.conceptId
+  : undefined;
+const altaPaciente = await call('alta de la paciente demo', 'POST', '/iam/auth/register-patient', {
+  body: sinAusentes({
+    nationalId: PATIENT_NATIONAL_ID,
+    issuerAdministrativeAreaConceptId: departamentoEmisor,
+    residenceMunicipalityConceptId: municipio,
+    password: DOCTOR_PASS,
+    email: correoDe('paciente-demo', 'receta'),
+    name: 'Lucía',
+    lastName: 'Rojas',
+    motherLastName: 'Vaca',
+    birthDate: '1988-04-12',
+    phone: '+591 70000001',
+    sexAtBirth: 'FEMALE',
+  }),
+  expect: [201, 409],
 });
-// El padrón pide SECURITY_ADMIN: si responde 403 se toma un paciente por el
-// administrador. La ficha clínica no depende de esa lectura (es cosmética).
+// Quien atiende busca, no enumera: sin `q` ni `nationalId` el padrón responde
+// 422 (`requiereCriterioDeBusqueda()`). Con el documento, la doctora la
+// encuentra igual que en la pantalla.
+const busqueda = await call(
+  'buscar a la paciente por documento',
+  'GET',
+  `/profiles/patients?nationalId=${PATIENT_NATIONAL_ID}&limit=1`,
+  { token: doctorToken },
+);
 const patientProfileId =
-  pacientes.status === 200
-    ? pacientes.body.items[0].profileId
-    : (
-        await call('leer pacientes (admin)', 'GET', '/profiles/patients?limit=1', {
-          token: adminToken,
-        })
-      ).body.items[0].profileId;
+  altaPaciente.body?.patientProfileId ??
+  altaPaciente.body?.profileId ??
+  busqueda.body?.items?.[0]?.profileId;
+if (!patientProfileId) {
+  console.log('\nNo se pudo obtener la paciente demo. Se corta acá.');
+  process.exit(1);
+}
 console.log(`        paciente: ${patientProfileId}`);
+
+// Escribir en la historia exige estar atendiendo a ESE paciente —consulta en
+// curso, cita de hoy o relación asistencial vigente— (SEC-01 / MCH-007): sin
+// eso `POST /clinical/medication-requests` responde 403. Una relación creada
+// por el administrador no sirve: exige una huella del propio paciente en el
+// tenant (`patientHasFootprintInTenant`). Se hace lo que hace la médica: agenda
+// una cita directa en su consultorio y la inicia.
+const recursos = await call(
+  'consultorios de la doctora',
+  'GET',
+  `/scheduling/resources?tenantId=${tenantDeLaDoctora}&resourceType=PRACTITIONER`,
+  { token: doctorToken },
+);
+let resourceId = recursos.body?.items?.find((r) => r.resourceRefId === practitionerProfileId)?.id;
+if (!resourceId) {
+  const recurso = await call('crear consultorio', 'POST', '/scheduling/resources', {
+    token: doctorToken,
+    body: {
+      tenantId: tenantDeLaDoctora,
+      resourceType: 'PRACTITIONER',
+      resourceRefType: 'health_practitioner_profiles',
+      resourceRefId: practitionerProfileId,
+      name: 'Consultorio de la doctora demo',
+      timeZone: 'America/La_Paz',
+      capacity: 1,
+    },
+  });
+  resourceId = recurso.body?.id;
+}
+
+// Cada corrida deja una cita: se busca un hueco libre de media hora en media
+// hora para que re-correr el script no choque con la anterior.
+const DURACION_MIN = 15;
+let bookingId = null;
+for (let intento = 0; intento < 8 && !bookingId; intento++) {
+  const startAt = new Date(Date.now() + (intento * 30 + 1) * 60_000);
+  startAt.setSeconds(0, 0);
+  const directa = await call('cita directa', 'POST', '/scheduling/appointments/direct', {
+    token: doctorToken,
+    body: {
+      patientProfileId,
+      resourceId,
+      startAt: startAt.toISOString(),
+      durationMinutes: DURACION_MIN,
+      reasonText: 'Control por tos y fiebre',
+    },
+    expect: [201, 409, 422],
+  });
+  bookingId = directa.status === 201 ? directa.body.bookingId : null;
+  // El hueco ocupado responde 409 (cupo) o 422 (la médica ya atiende a esa hora,
+  // «no puede estar en dos lugares a la vez»): sólo eso justifica probar la
+  // media hora siguiente.
+  if (directa.status !== 409 && directa.status !== 422) break;
+}
+if (!bookingId) {
+  console.log('\nNo se pudo agendar la cita: sin ella no hay base para escribir. Se corta acá.');
+  process.exit(1);
+}
+await call('iniciar la atención', 'POST', `/scheduling/bookings/${bookingId}/start`, {
+  token: doctorToken,
+  body: {},
+});
 
 const encuentro = await call('check-in del encuentro', 'POST', '/clinical/encounters/check-in', {
   token: doctorToken,
@@ -226,6 +329,10 @@ const receta = await call('prescribir', 'POST', '/clinical/medication-requests',
     unitConceptId: mg?.conceptId,
   }),
 });
+if (!receta.body?.id) {
+  console.log('\nLa receta no se creó: firmar y emitir no tienen sobre qué correr. Se corta acá.');
+  process.exit(1);
+}
 await call('firmar', 'POST', `/clinical/medication-requests/${receta.body.id}/sign`, {
   token: doctorToken,
   body: {},
@@ -292,6 +399,10 @@ if (encounterId) {
     body: {},
   });
 }
+await call('completar la cita', 'POST', `/scheduling/bookings/${bookingId}/complete`, {
+  token: doctorToken,
+  body: {},
+});
 
 console.log(`\n== ${ok} conformes · ${fail} fallidas ==`);
 console.log(`\nCuenta de prueba lista:  ${DOCTOR_EMAIL} / ${DOCTOR_PASS}`);

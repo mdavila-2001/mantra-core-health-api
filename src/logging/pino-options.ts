@@ -2,6 +2,11 @@ import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Params } from 'nestjs-pino';
 import { loadLoggingEnv } from './logging.env';
+import {
+  REDACTED_SHARE_TOKEN,
+  redactShareTokenInReferer,
+  redactShareTokenInUrl,
+} from './share-token-redaction';
 import { currentTraceContext } from '../observability/trace-context.service';
 
 /**
@@ -35,6 +40,57 @@ const REDACT_PATHS = [
   'req.body.secret',
   'req.body.otp',
 ];
+
+export {
+  REDACTED_SHARE_TOKEN,
+  redactShareTokenInReferer,
+  redactShareTokenInUrl,
+} from './share-token-redaction';
+
+/** La forma de `req` que deja el serializador estándar de pino. */
+interface SerializedRequest {
+  url?: unknown;
+  params?: unknown;
+  headers?: unknown;
+  [key: string]: unknown;
+}
+
+/**
+ * Serializador de `req` de pino-http: recibe la petición ya serializada por
+ * `pino-std-serializers` y le saca el token del enlace compartido de `url`,
+ * de `params.token` y del `Referer`.
+ *
+ * El `Referer` se redacta en vez de quitarse: en el resto de las páginas sigue
+ * diciendo desde dónde vino la petición, que es lo que se busca en el log, y
+ * solo cambia el segmento del token. `params` y `headers` se copian: los
+ * objetos originales son los de Express y los siguen leyendo los handlers.
+ *
+ * @param req - Petición serializada.
+ * @returns La misma petición, sin el token en claro.
+ */
+export function serializeRequest(req: SerializedRequest): SerializedRequest {
+  if (typeof req.url === 'string') {
+    const url = redactShareTokenInUrl(req.url);
+    if (url !== req.url) {
+      req.url = url;
+      const params = req.params;
+      if (params && typeof params === 'object' && 'token' in params) {
+        req.params = { ...params, token: REDACTED_SHARE_TOKEN };
+      }
+    }
+  }
+  const headers = req.headers;
+  if (headers && typeof headers === 'object') {
+    const referer = (headers as { referer?: unknown }).referer;
+    if (typeof referer === 'string') {
+      const redacted = redactShareTokenInReferer(referer);
+      if (redacted !== referer) {
+        req.headers = { ...headers, referer: redacted };
+      }
+    }
+  }
+  return req;
+}
 
 /**
  * Comprueba si `pino-pretty` está instalado.
@@ -101,6 +157,7 @@ export function buildPinoOptions(): Params {
       level: env.level,
       genReqId,
       redact: { paths: REDACT_PATHS, remove: true },
+      serializers: { req: serializeRequest },
 
       // Correlación log ↔ traza. `mixin` se evalúa en CADA línea de log y añade
       // el contexto de traza activo en ese instante, de modo que buscar

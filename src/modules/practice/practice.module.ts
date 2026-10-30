@@ -13,6 +13,9 @@ import {
   SiteInfrastructureController,
   InfrastructureCatalogController,
   SiteLicensesController,
+  OrganizationPracticesController,
+  PracticeInvitationsController,
+  PractitionerInvitationsController,
 } from './controllers';
 import {
   PracticeSitesService,
@@ -31,6 +34,10 @@ import {
   ClinicalUnitsAdminService,
   SiteEstablishmentService,
   InfrastructureReadService,
+  OrganizationPracticeProvisioningService,
+  PracticeAdministrationService,
+  HealthcareServiceOffersService,
+  PracticeAffiliationInvitationsService,
 } from './services';
 import {
   PracticesRepository,
@@ -68,7 +75,13 @@ import { ServiceCatalogRepository } from '../billing/repositories';
 import { DirectoryAuthorizationModule } from '../directory/directory-authorization.module';
 import { AuditModule } from '../audit/audit.module';
 import { BranchesRepository } from '../directory/repositories/branches.repository';
+import { ProcedureReferenceReader } from '../billing/services/procedure-reference.reader';
+import { TenantsRepository } from '../directory/repositories';
 import { AddressesRepository } from '../common/repositories';
+// El logo del consultorio pasa por `AttachableFileService` (archivo vivo, de
+// imagen y subido por quien lo fija). `common` no importa `practice`, así que
+// no cierra ciclo.
+import { CommonModule } from '../common/common.module';
 // ALV-005/006: `PractitionerSitesService.createOwnSite` necesita saber de
 // quién es la sesión (`ProfileOwnershipService`); `OwnSiteProvisioningService`
 // necesita crear la dirección de la sede (`AddressesRepository`). Mismo
@@ -90,9 +103,12 @@ import {
 @Module({
   imports: [
     MikroOrmModule.forFeature(Object.values(entities)),
+    // Regla de administración por organización (A-6), sin importar
+    // `DirectoryModule` entero.
     DirectoryAuthorizationModule,
     AuditModule,
     MessagingModule,
+    CommonModule,
   ],
   controllers: [
     PracticesController,
@@ -106,6 +122,9 @@ import {
     SiteInfrastructureController,
     InfrastructureCatalogController,
     SiteLicensesController,
+    OrganizationPracticesController,
+    PracticeInvitationsController,
+    PractitionerInvitationsController,
   ],
   providers: [
     // Repositorios
@@ -133,7 +152,11 @@ import {
     // `em` en cada llamada—, así que una segunda instancia es la misma cosa.
     ServiceCatalogRepository,
     BranchesRepository,
+    // Lector sin estado del nomenclador: se registra la clase, no `BillingModule`.
+    ProcedureReferenceReader,
     AddressesRepository,
+    // Stateless: sólo lee la verificación de la organización (CM-11).
+    TenantsRepository,
     PersonAccountLinksRepository,
     HealthPractitionerProfilesRepository,
     PatientProfilesRepository,
@@ -155,6 +178,10 @@ import {
     ClinicalUnitsAdminService,
     SiteEstablishmentService,
     InfrastructureReadService,
+    OrganizationPracticeProvisioningService,
+    PracticeAdministrationService,
+    HealthcareServiceOffersService,
+    PracticeAffiliationInvitationsService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que

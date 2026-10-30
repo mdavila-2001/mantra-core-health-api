@@ -164,6 +164,8 @@ function build() {
       effectiveRoles.ensureRoleByCode(...args),
     ),
     managingTenantId: mockFn().mockResolvedValue(null),
+    // Sin cifras por defecto: nadie tiene cuenta ni reseñas.
+    directoryStats: mockFn().mockResolvedValue(new Map()),
   };
   // Por defecto el bypass está apagado: listPractitioners filtra por
   // verificado, igual que se comportaría un arranque sin
@@ -235,6 +237,7 @@ function build() {
   };
   const personRecords = {
     hasCurrentIdentityAssertion: mockFn().mockResolvedValue(false),
+    hasOpenIdentityCase: mockFn().mockResolvedValue(false),
     findCurrentContact: mockFn((...args: any[]) =>
       args[3] === undefined
         ? contactPointsRepo.findCurrentByOwnerAndSystem(...args.slice(0, 3))
@@ -303,6 +306,23 @@ function build() {
     assertIsHealthFacility: mockFn(() => Promise.resolve()),
   };
 
+  const admissions = {
+    openForRegistration: mockFn(() => Promise.resolve({})),
+    recordCredentialReview: mockFn(() => Promise.resolve(false)),
+  };
+  const admissionsRead = {
+    verificationOf: mockFn((_em: unknown, ids: string[]) =>
+      Promise.resolve(
+        new Map(
+          ids.map((id) => [
+            id,
+            { status: 'UNVERIFIED', verifiedAt: null, validUntil: null },
+          ]),
+        ),
+      ),
+    ),
+  };
+
   const service = new ProfilesPractitionersService(
     em as any,
     personsRepo,
@@ -328,10 +348,16 @@ function build() {
     specialtyCatalog as any,
     administrativeAreas as any,
     healthFacilities as any,
+    // v4.2.67: la verificación del alta es de las admisiones. Por defecto no hay
+    // ninguna abierta y el estado visible sale vacío (UNVERIFIED).
+    admissions as any,
+    admissionsRead as any,
     logger as any,
   );
   return {
     service,
+    admissions,
+    admissionsRead,
     administrativeAreas,
     healthFacilities,
     specialtyCatalog,
@@ -820,7 +846,7 @@ describe('ProfilesPractitionersService', () => {
       );
     });
 
-    it('verifies the credential and activates the practitioner when none remain pending', async () => {
+    it('verifies the credential, records it in the admission and NEVER writes the practitioner profile (D-01)', async () => {
       const d = build();
       const credential = {
         id: 'c1',
@@ -829,8 +855,13 @@ describe('ProfilesPractitionersService', () => {
         updatedAt: new Date(),
       };
       d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+      // Antes: sin credenciales pendientes, esta ruta verificaba al profesional.
       d.credentialsRepo.countInStateExcept.mockResolvedValue(0);
-      const practitioner = { profileId: 'pp1', updatedAt: new Date() } as any;
+      const practitioner = {
+        profileId: 'pp1',
+        verificationStatusConceptId: PROF.PRACT_VERIF_PENDING,
+        updatedAt: new Date(),
+      } as any;
       d.practitionersRepo.findById.mockResolvedValue(practitioner);
 
       const res = await d.service.verifyCredential(
@@ -851,13 +882,50 @@ describe('ProfilesPractitionersService', () => {
           'https://colegiomedico.example/registro/LIC-12345',
         verifiedByUserId: actor.id,
       });
+      // El perfil NO se toca: verificar es de la admisión (único escritor).
       expect(practitioner.verificationStatusConceptId).toBe(
-        PROF.PRACT_VERIF_VERIFIED,
+        PROF.PRACT_VERIF_PENDING,
       );
-      expect(res).toMatchObject({ id: 'c1', practitionerVerified: true });
+      expect(res).toMatchObject({ id: 'c1', practitionerVerified: false });
+      expect(d.admissions.recordCredentialReview).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          credentialId: 'c1',
+          practitionerProfileId: 'pp1',
+          decision: 'VERIFIED',
+          verificationSourceUri:
+            'https://colegiomedico.example/registro/LIC-12345',
+        }),
+      );
       expect(d.credentialsRepo.findByIdForUpdate).toHaveBeenCalledWith(
         d.tx,
         'c1',
+      );
+    });
+
+    it('guarda el motivo del rechazo en la credencial y en la admisión', async () => {
+      const d = build();
+      const credential = {
+        id: 'c1',
+        stateConceptId: PROF.CRED_PENDING,
+        practitionerProfileId: 'pp1',
+        updatedAt: new Date(),
+      } as any;
+      d.credentialsRepo.findByIdForUpdate.mockResolvedValue(credential);
+
+      await d.service.verifyCredential(
+        'c1',
+        { decision: 'REJECTED', reason: '  Documento ilegible ' } as any,
+        actor,
+      );
+
+      expect(credential.rejectionReasonText).toBe('Documento ilegible');
+      expect(d.admissions.recordCredentialReview).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          decision: 'REJECTED',
+          reason: '  Documento ilegible ',
+        }),
       );
     });
   });
@@ -2328,6 +2396,59 @@ describe('ProfilesPractitionersService', () => {
       );
     });
 
+    it('ADR-0028: homeDistrict viaja aparte de la calle y abre otra fila', async () => {
+      const d = build();
+      prepareForEdit(d, practitionerBase());
+      const current = {
+        id: 'addr-1',
+        lines: 'Calle Warnes 45',
+        districtText: 'Centro',
+      };
+      d.addressesRepo.findCurrentByOwnerAndUse.mockResolvedValue(current);
+
+      await d.service.updateOwnPractitionerProfile(
+        { homeDistrict: 'Equipetrol' },
+        { id: 'u-1' } as any,
+      );
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          lines: 'Calle Warnes 45',
+          districtText: 'Equipetrol',
+        }),
+      );
+    });
+
+    it("ADR-0028: workDistrict '' borra el distrito del trabajo y conserva la calle", async () => {
+      const d = build();
+      prepareForEdit(d, practitionerBase());
+      const current = {
+        id: 'addr-work-1',
+        lines: 'Calle Ayacucho 241',
+        districtText: 'Casco Viejo',
+      };
+      d.addressesRepo.findCurrentByOwnerAndUse.mockImplementation(
+        (_em: unknown, _ownerId: string, useConceptId: string) =>
+          Promise.resolve(
+            useConceptId === CONCEPTS.ADDR_USE_WORK ? current : null,
+          ),
+      );
+
+      await d.service.updateOwnPractitionerProfile({ workDistrict: '' }, {
+        id: 'u-1',
+      } as any);
+
+      expect(d.addressesRepo.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          lines: 'Calle Ayacucho 241',
+          districtText: undefined,
+          useConceptId: CONCEPTS.ADDR_USE_WORK,
+        }),
+      );
+    });
+
     /** Sin dirección previa, la primera escritura no intenta cerrar nada. */
     it('sin dirección previa, sólo crea la nueva', async () => {
       const d = build();
@@ -2843,6 +2964,82 @@ describe('ProfilesPractitionersService', () => {
       expect(page.nextCursor).toBeNull();
     });
 
+    /**
+     * Lo que deja ordenar la guía por nota y por atenciones: cada fila trae sus
+     * cifras, pedidas en UN lote para la página entera.
+     */
+    it('suma la nota y la actividad de cada fila, en un solo lote', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([
+        row,
+        { ...row, profileId: 'per-2', practitionerCode: 'MED-2' },
+      ]);
+      d.practitionerContext.directoryStats.mockResolvedValue(
+        new Map([
+          [
+            'per-1',
+            {
+              activity: {
+                encounters: 120,
+                medicationRequests: 45,
+                clinicalNotes: 80,
+                documents: 3,
+              },
+              ratingAverage: 4.6,
+              ratingCount: 12,
+            },
+          ],
+        ]),
+      );
+
+      const page = await d.service.listPractitioners({ limit: 50 });
+
+      expect(d.practitionerContext.directoryStats).toHaveBeenCalledTimes(1);
+      expect(d.practitionerContext.directoryStats.mock.calls[0][1]).toEqual([
+        'per-1',
+        'per-2',
+      ]);
+      expect(page.items[0]).toMatchObject({
+        ratingAverage: 4.6,
+        ratingCount: 12,
+        activity: {
+          encounters: 120,
+          medicationRequests: 45,
+          clinicalNotes: 80,
+          documents: 3,
+        },
+      });
+      // Sin cifras: `null` de nota —no cero estrellas— y actividad en cero.
+      expect(page.items[1]).toMatchObject({
+        ratingAverage: null,
+        ratingCount: 0,
+        activity: {
+          encounters: 0,
+          medicationRequests: 0,
+          clinicalNotes: 0,
+          documents: 0,
+        },
+      });
+    });
+
+    /** Una lectura de cifras caída no tumba la guía: salen en cero. */
+    it('si las cifras no se pueden leer, lista igual con ceros', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([row]);
+      d.practitionerContext.directoryStats.mockRejectedValue(
+        new Error('relation does not exist'),
+      );
+
+      const page = await d.service.listPractitioners({ limit: 50 });
+
+      expect(page.items).toHaveLength(1);
+      expect(page.items[0]).toMatchObject({
+        ratingAverage: null,
+        ratingCount: 0,
+        activity: { encounters: 0 },
+      });
+    });
+
     /** La fila de más existe sólo para saber si hay página siguiente. */
     it('recorta la fila extra y devuelve cursor de continuación', async () => {
       const d = build();
@@ -2918,11 +3115,39 @@ describe('ProfilesPractitionersService', () => {
         ]),
       );
 
+      d.admissionsRead.verificationOf.mockResolvedValue(
+        new Map([
+          [
+            'per-1',
+            {
+              status: 'VERIFIED',
+              verifiedAt: '2026-10-01T00:00:00.000Z',
+              validUntil: '2029-10-01',
+            },
+          ],
+          [
+            'per-2',
+            { status: 'UNVERIFIED', verifiedAt: null, validUntil: null },
+          ],
+        ]) as never,
+      );
+
       const page = await d.service.listPractitioners({ limit: 50 });
 
       // El front no compara conceptos: el uuid del estado no viaja escrito en
-      // ningún cliente.
+      // ningún cliente. El check lo decide la admisión, no el estado del perfil.
       expect(page.items.map((i) => i.verified)).toEqual([true, false]);
+      expect(page.items[0].verification.status).toBe('VERIFIED');
+    });
+
+    it('un perfil que dice VERIFIED pero cuya admisión no está verificada NO muestra el check', async () => {
+      const d = build();
+      d.practitionersRepo.listPage.mockResolvedValue([row]);
+      d.personsRepo.findByIds.mockResolvedValue(
+        new Map([['per-1', { id: 'per-1', displayName: 'Dra. Verificada' }]]),
+      );
+      const page = await d.service.listPractitioners({ limit: 50 });
+      expect(page.items[0].verified).toBe(false);
     });
 
     it('con el bypass activo no filtra por verificación', async () => {
@@ -4171,6 +4396,211 @@ describe('ProfilesPractitionersService', () => {
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(document.issuerAdministrativeAreaConceptId).toBe('LP');
+    });
+  });
+
+  describe('P28: número del documento del médico', () => {
+    function withOwnProfile(d: ReturnType<typeof build>) {
+      d.accountLinksRepo.findActiveByUser.mockResolvedValue({ personId: 'p1' });
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'p1',
+        practitionerCode: 'X',
+      });
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'p1',
+        displayName: 'Ana',
+      });
+    }
+
+    it('cierra la fila vigente y abre otra con el número corregido, sin tocar la vieja', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document: Record<string, unknown> = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '765432',
+        issuerAdministrativeAreaConceptId: 'LP',
+        validTo: null,
+      };
+      d.tx.find.mockResolvedValue([document]);
+
+      await d.service.updateOwnPractitionerProfile(
+        { nationalId: '7654321' },
+        actor,
+      );
+
+      // La fila vieja conserva su número —quien la referencia sigue viendo lo
+      // que declaró— y queda cerrada.
+      expect(document.value).toBe('765432');
+      expect(document.validTo).toBeInstanceOf(Date);
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'p1',
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: '7654321',
+          issuerAdministrativeAreaConceptId: 'LP',
+        }),
+      );
+    });
+
+    it('con un caso de verificación en curso responde 409 y no escribe', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document: Record<string, unknown> = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '765432',
+        validTo: null,
+      };
+      d.tx.find.mockResolvedValue([document]);
+      d.personRecords.hasOpenIdentityCase.mockResolvedValue(true);
+
+      const error = await d.service
+        .updateOwnPractitionerProfile({ nationalId: '7654321' }, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).getResponse()).toMatchObject({
+        reason: 'NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY',
+      });
+      expect(document.validTo).toBeNull();
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('un departamento fuera de catálogo junto al número responde 422 sin cerrar la fila', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document: Record<string, unknown> = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '765432',
+        validTo: null,
+      };
+      d.tx.find.mockResolvedValue([document]);
+      d.administrativeAreas.assertIsAdministrativeArea.mockRejectedValue(
+        new PreconditionFailedException('no es departamento'),
+      );
+
+      await expect(
+        d.service.updateOwnPractitionerProfile(
+          { nationalId: '7654321', issuerAdministrativeAreaConceptId: 'MUNI' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(document.validTo).toBeNull();
+      expect(d.identifiersRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('con la identidad verificada responde 409 y no toca el número', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '765432',
+      };
+      d.tx.find.mockResolvedValue([document]);
+      d.personRecords.hasCurrentIdentityAssertion.mockResolvedValue(true);
+
+      const error = await d.service
+        .updateOwnPractitionerProfile({ nationalId: '7654321' }, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).getResponse()).toMatchObject({
+        reason: 'NATIONAL_ID_LOCKED_BY_VERIFIED_IDENTITY',
+      });
+      expect(document.value).toBe('765432');
+    });
+
+    it('mandar el mismo número no es una corrección: no consulta la verificación', async () => {
+      const d = build();
+      withOwnProfile(d);
+      d.tx.find.mockResolvedValue([
+        { typeConceptId: CONCEPTS.ID_TYPE_NATIONAL, value: '7654321' },
+      ]);
+      d.personRecords.hasCurrentIdentityAssertion.mockResolvedValue(true);
+
+      await d.service.updateOwnPractitionerProfile(
+        { nationalId: '7654321' },
+        actor,
+      );
+
+      expect(
+        d.personRecords.hasCurrentIdentityAssertion,
+      ).not.toHaveBeenCalledWith(d.tx, 'p1');
+    });
+
+    it('sin documento vigente lo crea con la forma del alta', async () => {
+      const d = build();
+      withOwnProfile(d);
+      d.tx.find.mockResolvedValue([]);
+
+      await d.service.updateOwnPractitionerProfile(
+        { nationalId: '7654321', issuerAdministrativeAreaConceptId: 'SCZ' },
+        actor,
+      );
+
+      expect(d.identifiersRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          ownerId: 'p1',
+          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+          value: '7654321',
+          issuerAdministrativeAreaConceptId: 'SCZ',
+        }),
+      );
+    });
+  });
+
+  describe('P28: corrección del perfil por la plataforma (:profileId)', () => {
+    it('aplica el mismo PATCH sobre el perfil indicado tras comprobar la titularidad', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue({
+        profileId: 'p2',
+        practitionerCode: 'X',
+      });
+      const practitioner = { profileId: 'p2', practitionerCode: 'X' } as Record<
+        string,
+        unknown
+      >;
+      d.practitionersRepo.findById.mockResolvedValue(practitioner);
+      d.personsRepo.findById.mockResolvedValue({
+        id: 'p2',
+        displayName: 'Bea',
+      });
+      d.tx.find.mockResolvedValue([]);
+
+      await d.service
+        .updatePractitionerProfile(
+          'p2',
+          { professionalBio: 'Corregida' },
+          actor,
+        )
+        .catch(() => undefined);
+
+      expect(d.ownership.assertOwnsPractitionerProfile).toHaveBeenCalledWith(
+        d.tx,
+        'p2',
+        actor,
+      );
+      expect(practitioner.professionalBio).toBe('Corregida');
+    });
+
+    it('un profesional sobre el perfil de otro recibe 403 y no escribe', async () => {
+      const d = build();
+      const practitioner = { profileId: 'p2' } as Record<string, unknown>;
+      d.practitionersRepo.findById.mockResolvedValue(practitioner);
+      d.ownership.assertOwnsPractitionerProfile.mockRejectedValue(
+        new ForbiddenException('no'),
+      );
+
+      await expect(
+        d.service.updatePractitionerProfile(
+          'p2',
+          { nationalId: '1234567' },
+          actor,
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(practitioner.professionalBio).toBeUndefined();
+      expect(d.tx.flush).not.toHaveBeenCalled();
     });
   });
 

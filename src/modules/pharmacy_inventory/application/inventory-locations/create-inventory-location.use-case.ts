@@ -5,6 +5,7 @@ import type { AuthenticatedUser } from '../../../../common';
 import { LocationsRepository } from '../../infrastructure/repositories';
 import type { CreateLocationDto, IdResponseDto } from '../../presentation/dto';
 import { PINV } from '../../domain/pharmacy_inventory.concepts';
+import { PharmacyInventoryScopePolicy } from '../scope/pharmacy-inventory-scope.policy';
 
 /** Crea una ubicación activa para la sede dentro de una transacción. */
 @Injectable()
@@ -12,6 +13,7 @@ export class CreateInventoryLocationUseCase {
   constructor(
     private readonly em: EntityManager,
     private readonly locations: LocationsRepository,
+    private readonly scope: PharmacyInventoryScopePolicy,
     private readonly logger: PinoLogger,
   ) {}
 
@@ -29,6 +31,16 @@ export class CreateInventoryLocationUseCase {
       'Creating inventory location',
     );
     return this.em.transactional(async (tx) => {
+      // La sede de la ruta debe ser de una farmacia que el actor administra, y
+      // la ubicación padre, de esa misma sede.
+      const site = await this.scope.requireManagedSite(
+        tx,
+        pharmacySiteId,
+        actor,
+      );
+      if (dto.parentLocationId) {
+        await this.scope.requireLocation(tx, site, dto.parentLocationId);
+      }
       const location = this.locations.create(tx, {
         pharmacySiteId,
         parentLocationId: dto.parentLocationId,

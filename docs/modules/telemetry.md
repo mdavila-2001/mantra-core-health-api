@@ -9,7 +9,7 @@
 # Módulo `telemetry`
 
 **Fuente:** [`src/modules/telemetry/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/telemetry/README.md)
-· 4 controllers · 5 services · 15 repositories · 14 entidades · 12 DTO
+· 5 controllers · 6 services · 16 repositories · 14 entidades · 12 DTO
 
 ---
 
@@ -105,12 +105,12 @@ Entidades (`tableName`, 14 de 14 archivos `*.entity.ts`): `activity_event_schema
 
 ## Estructura
 
-- `controllers/`: rutas HTTP de gobernanza, consentimiento, ingesta y analítica.
-- `services/`: transacciones de dominio, gate de consentimiento y composición de lectura.
-- `repositories/`: persistencia MikroORM y consultas SQL agregadas.
+- `presentation/controllers/`: rutas HTTP de gobernanza, consentimiento, ingesta y analítica.
+- `application/services/`: transacciones de dominio, gate de consentimiento y composición de lectura.
+- `infrastructure/repositories/`: persistencia MikroORM y consultas SQL agregadas.
 - `entities/`: tablas del esquema `telemetry`.
-- `domain/` e `infrastructure/`: puerto y adaptadores de analítica web.
-- `dto/`: contratos validados para cuerpos y consultas.
+- `domain/` e `infrastructure/adapters/`: puerto y adaptadores de analítica web.
+- `presentation/dto/`: contratos validados para cuerpos y consultas.
 
 ## Rutas
 

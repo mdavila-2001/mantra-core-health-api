@@ -27,7 +27,6 @@ function build(factors: any[]) {
     {} as any,
     {} as any,
     {} as any,
-    {} as any,
     logger as any,
     {} as any,
     mfaRepo as any,

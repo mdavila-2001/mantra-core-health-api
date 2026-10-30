@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `directory`.
- * 55 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 62 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const directoryForeignKeys: readonly ForeignKeyTuple[] = [
@@ -48,6 +48,13 @@ export const directoryForeignKeys: readonly ForeignKeyTuple[] = [
   ['tenant_legal_representatives', 'status_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['tenant_legal_representatives', 'tenant_id', 'directory', 'tenants', 'id'],
   ['tenant_legal_representatives', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['tenant_medical_facilities', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['tenant_medical_facilities', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['tenant_medical_facilities', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['tenant_medical_facility_sites', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['tenant_medical_facility_sites', 'medical_facility_id', 'directory', 'tenant_medical_facilities', 'id'],
+  ['tenant_medical_facility_sites', 'tenant_id', 'directory', 'tenants', 'id'],
+  ['tenant_medical_facility_sites', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['tenant_memberships', 'access_scope_concept_id', 'terminology', 'catalog_concepts', 'id'],
   ['tenant_memberships', 'created_by_user_id', 'iam', 'users', 'id'],
   ['tenant_memberships', 'invited_by_user_id', 'iam', 'users', 'id'],

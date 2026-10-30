@@ -4,24 +4,55 @@ import { PinoLogger } from 'nestjs-pino';
 import {
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   CONCEPTS,
   type AuthenticatedUser,
 } from '../../../common';
+import { assertResourceInTenant } from '../../../common/tenant/resource-scope';
 import { BillingErrorReason } from '../billing.error-reasons';
 import {
   BillsRepository,
   BillingDocumentLinksRepository,
+  BillingLinkTargetsRepository,
 } from '../repositories';
 import { RegisterBillDto, BillResponseDto } from '../dto';
 import { BILL } from '../billing.concepts';
-import { fromCents, toCents } from '../money.util';
+import { fromCents } from '../money.util';
+import { validateLineAmounts } from '../billing-lines';
+import { PracticeTenantLookupService } from '../../practice/services';
+import {
+  activeTenantId,
+  assertDocumentInPractice,
+  assertPracticeInTenant,
+} from '../billing-scope';
+
+/** "No existe" del proveedor de la factura; el ajeno responde idéntico. */
+const VENDOR_NOT_FOUND = {
+  message: 'Proveedor no encontrado',
+  reason: BillingErrorReason.BILL_VENDOR_NOT_FOUND,
+};
+
+/** "No existe" de la orden de compra de la factura; la ajena responde idéntico. */
+const PURCHASE_ORDER_NOT_FOUND = {
+  message: 'Orden de compra no encontrada',
+  reason: BillingErrorReason.BILL_PURCHASE_ORDER_NOT_FOUND,
+};
+
+/** "No existe" del contrato de la factura; el ajeno responde idéntico. */
+const CONTRACT_NOT_FOUND = {
+  message: 'Contrato no encontrado',
+  reason: BillingErrorReason.BILL_CONTRACT_NOT_FOUND,
+};
 
 /**
  * UC-17-04: registra una factura de proveedor con verificación three-way match.
  * Valida que el vendor exista y esté activo, que no haya doble captura del mismo
  * `bill_number`, y que las líneas con orden de compra referencien su recepción de
  * bienes. Persiste cabecera y líneas en la misma transacción (flush intermedio).
+ *
+ * Alcance: la práctica tiene que ser del tenant del contexto y el proveedor de
+ * esa misma práctica; uno ajeno responde igual que uno inexistente. Los importes
+ * de las líneas se validan con decimal exacto (cantidad positiva, precio e
+ * impuesto no negativos). El tenant del vínculo de documento sale del contexto.
  */
 @Injectable()
 export class BillsService {
@@ -31,12 +62,15 @@ export class BillsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param billsRepo - Valor de bills repo requerido por la operación.
    * @param linksRepo - Valor de links repo requerido por la operación.
+   * @param linkTargets - Lectura de los documentos que la factura vincula.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly billsRepo: BillsRepository,
     private readonly linksRepo: BillingDocumentLinksRepository,
+    private readonly linkTargets: BillingLinkTargetsRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(BillsService.name);
@@ -62,16 +96,45 @@ export class BillsService {
       },
       'Registering vendor bill',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
-      const vendor = await this.billsRepo.findVendor(tx, dto.vendorId);
-      if (!vendor)
-        throw new ResourceNotFoundException(
-          'Proveedor no encontrado',
-          {
-            vendorId: dto.vendorId,
-          },
-          BillingErrorReason.BILL_VENDOR_NOT_FOUND,
+      await assertPracticeInTenant(
+        this.practiceTenantLookup,
+        dto.practiceId,
+        tenantId,
+      );
+      // La orden de compra y el contrato se contrastan con el tenant antes de
+      // escribir: una FK sólo demuestra que existen, y la factura (y su vínculo)
+      // quedaría colgada de un documento de otra organización.
+      if (dto.purchaseOrderId) {
+        const order = await this.linkTargets.findPurchaseOrder(
+          tx,
+          dto.purchaseOrderId,
         );
+        assertResourceInTenant(
+          order,
+          order?.tenantId,
+          tenantId,
+          PURCHASE_ORDER_NOT_FOUND,
+        );
+      }
+      if (dto.contractId) {
+        const contract = await this.linkTargets.findContract(
+          tx,
+          dto.contractId,
+        );
+        assertResourceInTenant(
+          contract,
+          contract?.tenantId,
+          tenantId,
+          CONTRACT_NOT_FOUND,
+        );
+      }
+      const vendor = assertDocumentInPractice(
+        await this.billsRepo.findVendor(tx, dto.vendorId),
+        dto.practiceId,
+        VENDOR_NOT_FOUND,
+      );
       if (
         vendor.statusConceptId !== CONCEPTS.STATE_ACTIVE &&
         vendor.statusConceptId !== CONCEPTS.TENANT_ACTIVE
@@ -116,11 +179,12 @@ export class BillsService {
       let subtotalCents = 0;
       let taxCents = 0;
       const lineTotals = dto.lines.map((l) => {
-        const baseCents = Math.round(Number(l.quantity) * toCents(l.unitPrice));
-        const taxAmtCents = l.taxAmount ? toCents(l.taxAmount) : 0;
-        subtotalCents += baseCents;
-        taxCents += taxAmtCents;
-        return fromCents(baseCents + taxAmtCents);
+        const line = validateLineAmounts(l, {
+          amount: BillingErrorReason.BILL_LINE_AMOUNT_INVALID,
+        });
+        subtotalCents += line.netCents;
+        taxCents += line.taxCents;
+        return fromCents(line.lineTotalCents);
       });
       const totalCents = subtotalCents + taxCents;
 
@@ -161,9 +225,9 @@ export class BillsService {
         });
       });
 
-      if (dto.tenantId && (dto.purchaseOrderId || dto.contractId)) {
+      if (dto.purchaseOrderId || dto.contractId) {
         this.linksRepo.create(tx, {
-          tenantId: dto.tenantId,
+          tenantId,
           relationTypeConceptId: BILL.REL_ENCOUNTER_OF,
           billId: bill.id,
           purchaseOrderId: dto.purchaseOrderId,

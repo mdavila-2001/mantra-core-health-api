@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildSourceIndex } from './ast.mjs';
+import { rutaDelModelo } from './salida.mjs';
 import { crearAnalizadorDeDatos } from './datos.mjs';
 import {
   casosDeUsoDe,
@@ -23,7 +24,7 @@ import {
   explicacionDeSistema,
   riesgoDe,
 } from './explicaciones.mjs';
-import { buildHandlerTable } from './handlers.mjs';
+import { buildHandlerTable, claveDeHandler } from './handlers.mjs';
 import {
   loadContract,
   requestBody,
@@ -72,7 +73,7 @@ function leerCurado(root) {
  */
 export function construirInventarioDeEndpoints({
   root = process.cwd(),
-  modelRoot = path.resolve(root, '..', 'mantra-core-health-model'),
+  modelRoot = rutaDelModelo(root),
 } = {}) {
   const contract = loadContract(root);
   const index = buildSourceIndex(root);
@@ -338,7 +339,7 @@ export function construirInventarioDeEndpoints({
         ruta: fila.ruta,
         modulo: fila.modulo,
         operation,
-        handler: index.controllerMethods.get(fila.operationId.split('__')[0]),
+        handler: index.controllerMethods.get(claveDeHandler(fila.operationId)),
       }),
     );
   }

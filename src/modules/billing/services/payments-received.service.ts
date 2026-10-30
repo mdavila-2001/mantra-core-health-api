@@ -3,7 +3,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -18,12 +17,31 @@ import {
   AllocatedInvoiceDto,
 } from '../dto';
 import { BILL } from '../billing.concepts';
-import { fromCents, toCents } from '../money.util';
+import { exactCents, fromCents, toCents } from '../money.util';
+import { PracticeTenantLookupService } from '../../practice/services';
+import {
+  activeTenantId,
+  assertDocumentInPractice,
+  assertPracticeInTenant,
+} from '../billing-scope';
+import type { Invoices } from '../entities';
+
+/** "No existe" de la factura asignada; la ajena responde idéntico. */
+const INVOICE_NOT_FOUND = {
+  message: 'Factura no encontrada',
+  reason: BillingErrorReason.PAYMENT_RECEIVED_INVOICE_NOT_FOUND,
+};
 
 /**
  * UC-17-02: aplica un pago recibido con asignación multi-factura. Valida que la
  * suma asignada no exceda el monto, que cada factura exista y tenga saldo, y
  * actualiza `paid_total`/`balance`/estado de cada factura en la misma transacción.
+ *
+ * Alcance: la práctica del pago tiene que ser del tenant del contexto y cada
+ * factura asignada tiene que ser de esa misma práctica; una ajena responde igual
+ * que una inexistente y no se escribe nada. Los importes son decimales exactos:
+ * la asignación es positiva, el descuento no es negativo y entre asignación y
+ * descuento no superan ni el saldo de la factura ni el monto del pago.
  */
 @Injectable()
 export class PaymentsReceivedService {
@@ -39,6 +57,7 @@ export class PaymentsReceivedService {
     private readonly em: EntityManager,
     private readonly paymentsRepo: PaymentsReceivedRepository,
     private readonly invoicesRepo: InvoicesRepository,
+    private readonly practiceTenantLookup: PracticeTenantLookupService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(PaymentsReceivedService.name);
@@ -64,27 +83,72 @@ export class PaymentsReceivedService {
       },
       'Applying received payment',
     );
+    const tenantId = activeTenantId();
     return this.em.transactional(async (tx) => {
-      const amountCents = toCents(dto.amount);
-      if (amountCents <= 0) {
+      await assertPracticeInTenant(
+        this.practiceTenantLookup,
+        dto.practiceId,
+        tenantId,
+      );
+
+      const amountCents = exactCents(dto.amount);
+      if (amountCents === null || amountCents <= 0) {
         throw new PreconditionFailedException(
           'El monto del pago debe ser positivo',
-          {
-            amount: dto.amount,
-          },
+          {},
           BillingErrorReason.PAYMENT_RECEIVED_AMOUNT_NOT_POSITIVE,
         );
       }
 
-      const allocatedCents = dto.allocations.reduce(
-        (acc, a) => acc + toCents(a.allocatedAmount),
-        0,
-      );
-      if (allocatedCents > amountCents) {
+      // Cada asignación y su descuento se validan antes de tocar nada. El
+      // descuento reduce el saldo igual que la asignación, así que cuenta en el
+      // mismo límite del pago: sin eso, un descuento de 99 cerraba una factura
+      // de 100 con un pago de 1.
+      const effects: Array<{ allocCents: number; discountCents: number }> = [];
+      let effectCents = 0;
+      for (const alloc of dto.allocations) {
+        const allocCents = exactCents(alloc.allocatedAmount);
+        if (allocCents === null || allocCents <= 0) {
+          throw new PreconditionFailedException(
+            'La asignación debe ser un importe positivo',
+            {},
+            BillingErrorReason.PAYMENT_RECEIVED_ALLOCATION_AMOUNT_INVALID,
+          );
+        }
+        const discountCents =
+          alloc.discountAmount === undefined
+            ? 0
+            : exactCents(alloc.discountAmount);
+        if (discountCents === null) {
+          throw new PreconditionFailedException(
+            'El descuento debe ser un importe no negativo',
+            {},
+            BillingErrorReason.PAYMENT_RECEIVED_DISCOUNT_AMOUNT_INVALID,
+          );
+        }
+        effects.push({ allocCents, discountCents });
+        effectCents += allocCents + discountCents;
+      }
+      if (effectCents > amountCents) {
         throw new PreconditionFailedException(
           'La suma asignada excede el monto del pago',
-          { amount: dto.amount, allocated: fromCents(allocatedCents) },
+          { amount: dto.amount, allocated: fromCents(effectCents) },
           BillingErrorReason.PAYMENT_RECEIVED_ALLOCATION_EXCEEDS_AMOUNT,
+        );
+      }
+
+      // Las facturas se resuelven y se acotan a la práctica ANTES de crear el
+      // pago: una ajena no deja ni la fila del pago.
+      const invoices = new Map<string, Invoices>();
+      for (const alloc of dto.allocations) {
+        if (invoices.has(alloc.invoiceId)) continue;
+        invoices.set(
+          alloc.invoiceId,
+          assertDocumentInPractice(
+            await this.invoicesRepo.findById(tx, alloc.invoiceId),
+            dto.practiceId,
+            INVOICE_NOT_FOUND,
+          ),
         );
       }
 
@@ -103,19 +167,19 @@ export class PaymentsReceivedService {
       await tx.flush();
 
       const affected: AllocatedInvoiceDto[] = [];
-      for (const alloc of dto.allocations) {
-        const invoice = await this.invoicesRepo.findById(tx, alloc.invoiceId);
-        if (!invoice) {
-          throw new ResourceNotFoundException(
-            'Factura no encontrada',
-            {
-              invoiceId: alloc.invoiceId,
-            },
-            BillingErrorReason.PAYMENT_RECEIVED_INVOICE_NOT_FOUND,
+      for (const [index, alloc] of dto.allocations.entries()) {
+        const invoice = invoices.get(alloc.invoiceId) as Invoices;
+        const { allocCents, discountCents } = effects[index];
+        // Carril 16, REQ-16-032: con una objeción abierta del paciente el
+        // cobro está en pausa; la disputa resuelta lo libera sola.
+        if (await this.invoicesRepo.hasOpenPatientObjection(tx, invoice.id)) {
+          throw new PreconditionFailedException(
+            'El cobro está en pausa mientras el paciente tenga una objeción abierta',
+            { invoiceId: invoice.id },
+            BillingErrorReason.PAYMENT_RECEIVED_INVOICE_ON_HOLD,
           );
         }
         const balanceCents = toCents(invoice.balance ?? '0');
-        const allocCents = toCents(alloc.allocatedAmount);
         if (balanceCents <= 0) {
           throw new PreconditionFailedException(
             'La factura no tiene saldo pendiente',
@@ -125,13 +189,14 @@ export class PaymentsReceivedService {
             BillingErrorReason.PAYMENT_RECEIVED_INVOICE_NO_BALANCE,
           );
         }
-        if (allocCents > balanceCents) {
+        if (allocCents + discountCents > balanceCents) {
           throw new PreconditionFailedException(
             'La asignación excede el saldo de la factura',
             {
               invoiceId: invoice.id,
               balance: invoice.balance,
               allocated: alloc.allocatedAmount,
+              discount: alloc.discountAmount,
             },
             BillingErrorReason.PAYMENT_RECEIVED_ALLOCATION_EXCEEDS_INVOICE_BALANCE,
           );
@@ -147,14 +212,10 @@ export class PaymentsReceivedService {
           actorUserId: actor.id,
         });
 
-        const discountCents = alloc.discountAmount
-          ? toCents(alloc.discountAmount)
-          : 0;
         const newPaidCents = toCents(invoice.paidTotal ?? '0') + allocCents;
-        const newBalanceCents = Math.max(
-          0,
-          balanceCents - allocCents - discountCents,
-        );
+        // Ya no hay `Math.max(0, …)`: la guarda de arriba garantiza que el
+        // saldo no baja de cero, y un exceso no se oculta, se rechaza.
+        const newBalanceCents = balanceCents - allocCents - discountCents;
         invoice.paidTotal = fromCents(newPaidCents);
         invoice.balance = fromCents(newBalanceCents);
         invoice.statusConceptId =

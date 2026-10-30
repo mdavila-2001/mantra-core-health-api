@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import * as argon2 from 'argon2';
@@ -11,44 +11,23 @@ import {
 import {
   CONCEPTS,
   ConflictException,
+  LOGO_IMAGE_MIME_TYPES,
   PreconditionFailedException,
   SEED,
   TokenService,
   UPLOAD_MIME_ALLOWLIST,
+  assertLogoImage,
   sniffMimeType,
   type AuthenticatedUser,
 } from '../../../../common';
 import { IamErrorReason } from '../../iam.error-reasons';
-// El alta administrativa deja al profesional operativo: los roles asistenciales
-// viven en `authz`, que es quien decide si un código existe y es asignable.
-import { AuthzEffectiveRolesService } from '../../../authz/services';
-import { MESSAGING_SEED } from '../../../../common/seed/messaging-seed.service';
 import {
   ADMIN_GENDER_CONCEPT_BY_CODE,
   BIRTH_SEX_CONCEPT_BY_CODE,
   PROF,
 } from '../../../profiles/profiles.concepts';
-import { composeAccountDisplayName } from '../../../profiles/domain/person-name';
-import {
-  HealthPractitionerProfilesRepository,
-  JurisdictionAuthorizationsRepository,
-  PersonAccountLinksRepository,
-  PersonProfilesRepository,
-  PersonsRepository,
-  PractitionerLanguagesRepository,
-  PractitionerSpecialtiesRepository,
-  ProfessionalCredentialsRepository,
-} from '../../../profiles/infrastructure/repositories';
-import { MedicalSpecialtyCatalogService } from '../../../profiles/application/services/medical-specialty-catalog.service';
-import { AdministrativeAreaCatalogService } from '../../../profiles/application/services/administrative-area-catalog.service';
-import {
-  AddressesRepository,
-  ContactPointsRepository,
-  IdentifiersRepository,
-} from '../../../common/repositories';
-import { NotificationsService } from '../../../messaging/services';
+import { composeAccountDisplayName } from '../../../../common/text/person-name';
 import { DIR } from '../../../directory/directory.concepts';
-import { TenantMembershipsRepository } from '../../../directory/repositories';
 import {
   AccountActivationsRepository,
   CredentialsRepository,
@@ -63,19 +42,39 @@ import {
   RegisterPractitionerDto,
   RegisterPractitionerResponseDto,
 } from '../../presentation/dto';
+// El alta administrativa deja al profesional operativo: los roles asistenciales
+// viven en `authz`, que es quien decide si un código existe y es asignable.
 import {
-  createResidenceAddress,
-  createWorkAddress,
-} from '../../../common/services/residence-address';
-import { FileUploadService } from '../../../common/services/file-upload.service';
-import { AttachableFileService } from '../../../common/services/attachable-file.service';
-import { FileCategory, FileSensitivity } from '../../../common/dto';
-import { CatalogConceptsRepository } from '../../../terminology/repositories';
-import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
+  BUSINESS_ROLES_PORT,
+  type BusinessRolesPort,
+} from '../ports/business-roles.port';
+import {
+  COMMON_RECORDS_PORT,
+  type CommonRecordsPort,
+} from '../ports/common-records.port';
+import {
+  DIRECTORY_REGISTRATION_PORT,
+  type DirectoryRegistrationPort,
+} from '../ports/directory-registration.port';
+import {
+  EMAIL_NOTICE_PORT,
+  type EmailNoticePort,
+} from '../ports/email-notice.port';
 // P20: el consultorio propio declarado en el alta se provisiona con el mismo
-// caso de uso que `POST /practitioners/me/sites`. Import por archivo, mismo
-// criterio que `MedicalSpecialtyCatalogService` arriba.
-import { OwnSiteProvisioningService } from '../../../practice/services/own-site-provisioning.service';
+// caso de uso que `POST /practitioners/me/sites`.
+import {
+  OWN_SITE_PROVISIONING_PORT,
+  type OwnSiteProvisioningPort,
+} from '../ports/own-site.port';
+import {
+  PROFILE_REGISTRATION_PORT,
+  type ProfileRegistrationPort,
+} from '../ports/profile-registration.port';
+import {
+  REGISTRATION_FILES_PORT,
+  type RegistrationFilesPort,
+} from '../ports/registration-files.port';
+import { ROLE_CONCEPT_BY_CODE } from './role-mapping';
 import { BO_PROFESSION_CONCEPT_IDS } from '../../../../common/seed/bo-professions.catalog';
 
 /**
@@ -277,21 +276,15 @@ export class IamPractitionerSelfRegistrationService {
    * @param rolesRepo - Repositorio de roles globales.
    * @param emailVerificationsRepo - Repositorio de verificaciones de correo.
    * @param eventsRepo - Repositorio de eventos de seguridad.
-   * @param personsRepo - Repositorio de personas.
-   * @param personProfilesRepo - Repositorio de clasificación de perfiles.
-   * @param practitionersRepo - Repositorio de perfiles profesionales.
-   * @param authorizationsRepo - Repositorio de licencias jurisdiccionales.
-   * @param professionalCredentialsRepo - Repositorio de títulos profesionales.
-   * @param languagesRepo - Repositorio de idiomas de atención.
-   * @param accountLinksRepo - Repositorio de vínculos cuenta-persona.
-   * @param identifiersRepo - Repositorio de identificadores oficiales.
-   * @param contactPointsRepo - Repositorio de puntos de contacto.
-   * @param tenantMembershipsRepo - Repositorio de membresías de tenant.
+   * @param profiles - Persona, perfiles, matrícula, títulos, idiomas, especialidades y vínculo cuenta-persona (`profiles`).
+   * @param commonRecords - Identificadores, contactos y direcciones (`common`).
+   * @param directory - Membresía en el tenant por defecto (`directory`).
    * @param effectiveRoles - Concesión de roles asistenciales (`authz`).
-   * @param notificationsService - Encolado del correo de verificación.
+   * @param emailNotice - Encolado del correo de verificación.
    * @param logger - Logger estructurado.
    * @param tracing - Trazado del span de negocio.
    * @param ownSiteProvisioning - Alta del consultorio propio declarado en `ownSite` (P20).
+   * @param files - Subida anónima y reclamo de archivos (foto, firma, sello, títulos).
    */
   constructor(
     private readonly em: EntityManager,
@@ -302,29 +295,22 @@ export class IamPractitionerSelfRegistrationService {
     private readonly rolesRepo: UserGlobalRolesRepository,
     private readonly emailVerificationsRepo: EmailVerificationsRepository,
     private readonly eventsRepo: SecurityEventsRepository,
-    private readonly personsRepo: PersonsRepository,
-    private readonly personProfilesRepo: PersonProfilesRepository,
-    private readonly practitionersRepo: HealthPractitionerProfilesRepository,
-    private readonly specialtiesRepo: PractitionerSpecialtiesRepository,
-    private readonly specialtyCatalog: MedicalSpecialtyCatalogService,
-    private readonly authorizationsRepo: JurisdictionAuthorizationsRepository,
-    private readonly professionalCredentialsRepo: ProfessionalCredentialsRepository,
-    private readonly languagesRepo: PractitionerLanguagesRepository,
-    private readonly accountLinksRepo: PersonAccountLinksRepository,
-    private readonly identifiersRepo: IdentifiersRepository,
-    private readonly contactPointsRepo: ContactPointsRepository,
-    private readonly addressesRepo: AddressesRepository,
-    private readonly catalogConceptsRepo: CatalogConceptsRepository,
-    private readonly tenantMembershipsRepo: TenantMembershipsRepository,
-    private readonly effectiveRoles: AuthzEffectiveRolesService,
-    private readonly notificationsService: NotificationsService,
+    @Inject(PROFILE_REGISTRATION_PORT)
+    private readonly profiles: ProfileRegistrationPort,
+    @Inject(COMMON_RECORDS_PORT)
+    private readonly commonRecords: CommonRecordsPort,
+    @Inject(DIRECTORY_REGISTRATION_PORT)
+    private readonly directory: DirectoryRegistrationPort,
+    @Inject(BUSINESS_ROLES_PORT)
+    private readonly effectiveRoles: BusinessRolesPort,
+    @Inject(EMAIL_NOTICE_PORT)
+    private readonly emailNotice: EmailNoticePort,
     private readonly logger: PinoLogger,
     private readonly tracing: TracingService,
-    private readonly ownSiteProvisioning: OwnSiteProvisioningService,
-    private readonly administrativeAreas: AdministrativeAreaCatalogService,
-    private readonly attachableFiles: AttachableFileService,
-    @Optional()
-    private readonly fileUploadService?: FileUploadService,
+    @Inject(OWN_SITE_PROVISIONING_PORT)
+    private readonly ownSiteProvisioning: OwnSiteProvisioningPort,
+    @Inject(REGISTRATION_FILES_PORT)
+    private readonly files: RegistrationFilesPort,
   ) {
     this.logger.setContext(IamPractitionerSelfRegistrationService.name);
   }
@@ -438,6 +424,67 @@ export class IamPractitionerSelfRegistrationService {
       );
     }
 
+    // P29: el respaldo del SEDES va pegado a SU fila. Sin el número no hay fila
+    // donde dejarlo, y aceptarlo igual sería tirarlo en silencio, que es el
+    // defecto que estos dos campos vienen a cerrar. Y un mismo archivo no
+    // respalda las dos habilitaciones: la segunda reclamada fallaría igual,
+    // pero con un mensaje que no dice por qué.
+    if (
+      dto.sedesLicenseFileId !== undefined &&
+      dto.sedesLicenseNumber === undefined
+    ) {
+      throw new PreconditionFailedException(
+        'El archivo del registro del SEDES necesita su número de registro',
+        { field: 'sedesLicenseFileId' },
+      );
+    }
+    if (
+      dto.licenseFileId !== undefined &&
+      dto.licenseFileId === dto.sedesLicenseFileId
+    ) {
+      throw new PreconditionFailedException(
+        'La matrícula y el registro del SEDES no pueden compartir el mismo archivo',
+        { field: 'sedesLicenseFileId' },
+      );
+    }
+    // La fecha del SEDES es de SU fila, igual que su archivo.
+    if (
+      dto.sedesLicenseIssueDate !== undefined &&
+      dto.sedesLicenseNumber === undefined
+    ) {
+      throw new PreconditionFailedException(
+        'La fecha del registro del SEDES necesita su número de registro',
+        { field: 'sedesLicenseIssueDate' },
+      );
+    }
+    // El registro del colegio, con las mismas reglas: su fecha, su colegio y su
+    // archivo van pegados a su número, y su archivo no es el de otra fila.
+    if (dto.collegeLicenseNumber === undefined) {
+      const suelto = (
+        [
+          'collegeName',
+          'collegeLicenseIssueDate',
+          'collegeLicenseFileId',
+        ] as const
+      ).find((campo) => dto[campo] !== undefined);
+      if (suelto !== undefined) {
+        throw new PreconditionFailedException(
+          'Los datos del registro del colegio necesitan su número de registro',
+          { field: suelto },
+        );
+      }
+    }
+    if (
+      dto.collegeLicenseFileId !== undefined &&
+      (dto.collegeLicenseFileId === dto.licenseFileId ||
+        dto.collegeLicenseFileId === dto.sedesLicenseFileId)
+    ) {
+      throw new PreconditionFailedException(
+        'El registro del colegio no puede compartir el archivo de otra habilitación',
+        { field: 'collegeLicenseFileId' },
+      );
+    }
+
     // Una foto que no se puede leer se rechaza acá, antes de escribir nada.
     // Antes se descartaba en silencio y el alta respondía 201 sin la foto que
     // el profesional había cargado.
@@ -459,8 +506,10 @@ export class IamPractitionerSelfRegistrationService {
 
     const created = await this.em.transactional(async (tx) => {
       // El correo es la identidad de login: comprobarlo antes de escribir nada
-      // convierte una violación de constraint (500) en un 409 explicativo.
-      const clash = await this.credentialsRepo.findLivePasswordBySubject(
+      // convierte una violación de constraint (500) en un 409 explicativo. Con
+      // cerrojo y sin distinguir mayúsculas, como el alta de organización (#1000).
+      await this.credentialsRepo.lockEmailForRegistration(tx, dto.email);
+      const clash = await this.credentialsRepo.findLivePasswordByEmail(
         tx,
         dto.email,
       );
@@ -480,7 +529,7 @@ export class IamPractitionerSelfRegistrationService {
       }
 
       const practitionerCode = `PRC-${randomUUID()}`;
-      const clashCode = await this.practitionersRepo.findByCode(
+      const clashCode = await this.profiles.findPractitionerByCode(
         tx,
         practitionerCode,
       );
@@ -564,9 +613,17 @@ export class IamPractitionerSelfRegistrationService {
         ? await this.claimProfilePhoto(tx, uploadedPhotoId, user.id)
         : undefined;
 
+      // 1.6) Logo del consultorio propio, si vino: una pre-carga anónima que
+      // pasa a ser de la cuenta nueva, igual que la foto. Se reclama antes de
+      // escribir la persona: un logo que no sirve aborta el alta entera (422)
+      // y no queda ni la persona ni la sede.
+      if (dto.ownSite?.logoFileId) {
+        await this.claimOwnSiteLogo(tx, dto.ownSite.logoFileId, user.id);
+      }
+
       // 2) Persona con sus datos demográficos. El código legible del DTO se
       // traduce aquí al concepto de terminología que persiste la columna.
-      const person = this.personsRepo.create(tx, {
+      const person = this.profiles.createPerson(tx, {
         personStatusConceptId: PROF.PERSON_ACTIVE,
         vitalStatusConceptId: PROF.VITAL_ALIVE,
         name: dto.name,
@@ -594,7 +651,7 @@ export class IamPractitionerSelfRegistrationService {
       });
       await tx.flush();
 
-      this.personProfilesRepo.create(tx, {
+      this.profiles.createPersonProfile(tx, {
         personId: person.id,
         profileTypeConceptId: PROF.PROFILE_TYPE_PRACTITIONER,
         statusConceptId: PROF.PROFILE_ACTIVE,
@@ -605,17 +662,16 @@ export class IamPractitionerSelfRegistrationService {
       // Reclamar dentro del alta: un fallo revierte cuenta, propiedad y perfil.
       for (const fileId of [dto.signatureFileId, dto.sealFileId]) {
         if (fileId == null) continue;
-        const { file, version } =
-          await this.attachableFiles.claimAnonymousUpload(
-            tx,
-            fileId,
-            { ownerUserId: user.id, tenantId: SEED.tenantId },
-            {
-              allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
-              allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
-              operation: 'iam.auth.register-practitioner.signature-assets',
-            },
-          );
+        const { file, version } = await this.files.claimAnonymousUpload(
+          tx,
+          fileId,
+          { ownerUserId: user.id, tenantId: SEED.tenantId },
+          {
+            allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+            allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+            operation: 'iam.auth.register-practitioner.signature-assets',
+          },
+        );
         if (
           file.sensitivityConceptId !== CONCEPTS.SENSITIVITY_PHI ||
           BigInt(version.sizeBytes) > BigInt(2 * 1024 * 1024)
@@ -628,7 +684,7 @@ export class IamPractitionerSelfRegistrationService {
 
       // 3) Perfil profesional. `health_practitioner_profiles.profile_id` ES
       // `persons.id` (ver ProfilesPractitionersService), no un id propio.
-      const practitioner = this.practitionersRepo.create(tx, {
+      const practitioner = this.profiles.createPractitionerProfile(tx, {
         profileId: person.id,
         practitionerCode,
         practitionerCategoryConceptId:
@@ -646,7 +702,31 @@ export class IamPractitionerSelfRegistrationService {
       await tx.flush();
 
       // 4) Licencia y título, ambos pendientes de validación.
-      const license = this.authorizationsRepo.create(tx, {
+      //
+      // P29: los respaldos de las dos habilitaciones se reclaman ANTES de crear
+      // sus filas y dentro de esta transacción, con las mismas reglas que el
+      // PDF de cada título: si el archivo no existe, ya tiene dueño o no es un
+      // PDF, el alta entera se revierte en vez de nacer sin el respaldo que la
+      // persona creyó adjuntar.
+      const licenseFileId = await this.claimLicenseDocument(
+        tx,
+        dto.licenseFileId,
+        user.id,
+        'La matrícula profesional',
+      );
+      const sedesLicenseFileId = await this.claimLicenseDocument(
+        tx,
+        dto.sedesLicenseFileId,
+        user.id,
+        'El registro del SEDES',
+      );
+      const collegeLicenseFileId = await this.claimLicenseDocument(
+        tx,
+        dto.collegeLicenseFileId,
+        user.id,
+        'El registro del colegio',
+      );
+      const license = this.profiles.createJurisdictionAuthorization(tx, {
         practitionerProfileId: person.id,
         jurisdictionConceptId:
           dto.jurisdictionConceptId ?? PROF.JURISDICTION_NATIONAL,
@@ -660,6 +740,7 @@ export class IamPractitionerSelfRegistrationService {
           ? new Date(dto.licenseIssueDate)
           : undefined,
         stateConceptId: PROF.AUTH_PENDING,
+        fileId: licenseFileId,
         actorUserId: user.id,
       });
       // El registro del SEDES es una SEGUNDA habilitación, no un título. El
@@ -671,11 +752,33 @@ export class IamPractitionerSelfRegistrationService {
       const sitesLicense =
         dto.sedesLicenseNumber === undefined
           ? undefined
-          : this.authorizationsRepo.create(tx, {
+          : this.profiles.createJurisdictionAuthorization(tx, {
               practitionerProfileId: person.id,
               jurisdictionConceptId: PROF.JURISDICTION_SEDES_SANTA_CRUZ,
               licenseNumber: dto.sedesLicenseNumber,
+              validFrom: dto.sedesLicenseIssueDate
+                ? new Date(dto.sedesLicenseIssueDate)
+                : undefined,
               stateConceptId: PROF.AUTH_PENDING,
+              fileId: sedesLicenseFileId,
+              actorUserId: user.id,
+            });
+      // El registro en el colegio de la profesión: la tercera habilitación,
+      // con su fecha y su respaldo. El nombre del colegio viaja como texto en
+      // `regulatoryAuthority`, como el de la matrícula.
+      const collegeLicense =
+        dto.collegeLicenseNumber === undefined
+          ? undefined
+          : this.profiles.createJurisdictionAuthorization(tx, {
+              practitionerProfileId: person.id,
+              jurisdictionConceptId: PROF.JURISDICTION_PROFESSIONAL_COLLEGE,
+              licenseNumber: dto.collegeLicenseNumber,
+              regulatoryAuthority: dto.collegeName,
+              validFrom: dto.collegeLicenseIssueDate
+                ? new Date(dto.collegeLicenseIssueDate)
+                : undefined,
+              stateConceptId: PROF.AUTH_PENDING,
+              fileId: collegeLicenseFileId,
               actorUserId: user.id,
             });
       // La credencial sólo nace si se declara un título de verdad. Dejó de ser
@@ -683,7 +786,7 @@ export class IamPractitionerSelfRegistrationService {
       const credential =
         dto.credentialNumber === undefined
           ? undefined
-          : this.professionalCredentialsRepo.create(tx, {
+          : this.profiles.createProfessionalCredential(tx, {
               practitionerProfileId: person.id,
               credentialTypeConceptId:
                 dto.credentialTypeConceptId ?? PROF.CREDENTIAL_TYPE_DEGREE,
@@ -733,7 +836,7 @@ export class IamPractitionerSelfRegistrationService {
           );
         }
         if (declared.fileId) {
-          await this.attachableFiles.claimAnonymousUpload(
+          await this.files.claimAnonymousUpload(
             tx,
             declared.fileId,
             { tenantId: SEED.tenantId, ownerUserId: user.id },
@@ -748,7 +851,7 @@ export class IamPractitionerSelfRegistrationService {
             },
           );
         }
-        this.professionalCredentialsRepo.create(tx, {
+        this.profiles.createProfessionalCredential(tx, {
           practitionerProfileId: person.id,
           credentialTypeConceptId: declared.credentialTypeConceptId,
           number: registrationNumber,
@@ -762,7 +865,7 @@ export class IamPractitionerSelfRegistrationService {
           actorUserId: user.id,
         });
       }
-      this.languagesRepo.create(tx, {
+      this.profiles.createPractitionerLanguage(tx, {
         practitionerProfileId: person.id,
         languageConceptId: dto.languageConceptId ?? PROF.LANGUAGE_SPANISH,
         proficiencyConceptId: PROF.LANG_PROFICIENCY_NATIVE,
@@ -779,11 +882,8 @@ export class IamPractitionerSelfRegistrationService {
       // dos filas: quien pega dos veces la misma opción declara una.
       const specialties = [...new Set(dto.specialtyConceptIds ?? [])];
       for (const [order, specialtyConceptId] of specialties.entries()) {
-        await this.specialtyCatalog.assertIsMedicalSpecialty(
-          tx,
-          specialtyConceptId,
-        );
-        this.specialtiesRepo.create(tx, {
+        await this.profiles.assertIsMedicalSpecialty(tx, specialtyConceptId);
+        this.profiles.createPractitionerSpecialty(tx, {
           practitionerProfileId: person.id,
           specialtyConceptId,
           isPrimary: order === 0,
@@ -796,7 +896,7 @@ export class IamPractitionerSelfRegistrationService {
       await tx.flush();
 
       // 5) Vínculo cuenta-persona: el titular es él mismo.
-      this.accountLinksRepo.create(tx, {
+      this.profiles.createAccountLink(tx, {
         personId: person.id,
         userId: user.id,
         linkTypeConceptId: PROF.ACCOUNT_LINK_SELF,
@@ -808,7 +908,7 @@ export class IamPractitionerSelfRegistrationService {
 
       // El departamento emisor ya se comprobó semánticamente
       // (VS_BO_DEPARTMENT) al principio de esta transacción.
-      this.identifiersRepo.create(tx, {
+      this.commonRecords.createIdentifier(tx, {
         ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
         ownerId: person.id,
         typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
@@ -824,42 +924,33 @@ export class IamPractitionerSelfRegistrationService {
       // El departamento lo deriva el ayudante del código del INE, no viene
       // del cliente. Mismos tres campos y mismo destino que en el alta de
       // paciente (`IamPatientSelfRegistrationService`).
-      await createResidenceAddress(
-        this.addressesRepo,
-        tx,
-        this.catalogConceptsRepo,
-        {
-          personId: person.id,
-          municipalityConceptId: dto.residenceMunicipalityConceptId,
-          lines: dto.homeAddressLines,
-          latitude: dto.homeLatitude,
-          longitude: dto.homeLongitude,
-          actorUserId: user.id,
-        },
-      );
+      await this.commonRecords.createResidenceAddress(tx, {
+        personId: person.id,
+        municipalityConceptId: dto.residenceMunicipalityConceptId,
+        lines: dto.homeAddressLines,
+        district: dto.homeDistrict,
+        latitude: dto.homeLatitude,
+        longitude: dto.homeLongitude,
+        actorUserId: user.id,
+      });
 
       // Dirección y punto de trabajo (MED-03): fila distinta de HOME y del
       // consultorio propio opcional. El registro sólo tiene líneas y GPS; no
       // selecciona municipio laboral, que queda sin derivación administrativa.
-      await createWorkAddress(
-        this.addressesRepo,
-        tx,
-        this.catalogConceptsRepo,
-        {
-          personId: person.id,
-          lines: dto.workAddressLines,
-          latitude: dto.workLatitude,
-          longitude: dto.workLongitude,
-          actorUserId: user.id,
-        },
-      );
+      await this.commonRecords.createWorkAddress(tx, {
+        personId: person.id,
+        lines: dto.workAddressLines,
+        latitude: dto.workLatitude,
+        longitude: dto.workLongitude,
+        actorUserId: user.id,
+      });
 
       // 6) Contacto: el correo de trabajo siempre —es el de login—, y los
       // demás si los aportó. Cada uno es una fila propia de
       // `common.contact_points`, distinguida por el par sistema/uso: el modelo
       // ya admitía N contactos por persona, lo que faltaba era pedirlos.
       for (const contact of declaredContacts(dto)) {
-        this.contactPointsRepo.create(tx, {
+        this.commonRecords.createContactPoint(tx, {
           ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
           ownerId: person.id,
           systemConceptId: contact.systemConceptId,
@@ -874,7 +965,7 @@ export class IamPractitionerSelfRegistrationService {
       // del profesional: la cuenta quedaría inutilizable más allá del login.
       // Cuando se incorpore a una organización real, esa alta le dará su propia
       // membresía; ésta es el mínimo para que la cuenta funcione desde el día 1.
-      this.tenantMembershipsRepo.create(tx, {
+      this.directory.createTenantMembership(tx, {
         userId: user.id,
         tenantId: SEED.tenantId,
         tenantRoleConceptId: DIR.ROLE_STAFF,
@@ -903,6 +994,29 @@ export class IamPractitionerSelfRegistrationService {
             assisted?.actor.id ?? user.id,
           )
         : null;
+
+      // 7c) La solicitud de admisión (verificación del alta). Va en ESTA
+      // transacción: si no se puede abrir, el alta entera se revierte en vez de
+      // dejar a un profesional pendiente que nadie va a ver en la bandeja. Se abre
+      // con todas las fichas ya creadas, porque la foto del formulario las toma.
+      // Si pidió atestación, el texto y la fecha quedan con la solicitud.
+      if (dto.attestationAccepted === true && !dto.attestationTextVersion) {
+        throw new PreconditionFailedException(
+          'La atestación necesita la versión del texto aceptado',
+          { field: 'attestationTextVersion' },
+        );
+      }
+      await this.profiles.openPractitionerAdmission(tx, {
+        practitionerProfileId: person.id,
+        actorUserId: assisted?.actor.id ?? user.id,
+        attestation:
+          dto.attestationAccepted === true && dto.attestationTextVersion
+            ? {
+                acceptedAt: new Date(),
+                textVersion: dto.attestationTextVersion,
+              }
+            : undefined,
+      });
 
       // 8) Verificación del correo. No condiciona el acceso.
       const { raw, hash } = this.tokenService.issueRefreshToken();
@@ -982,6 +1096,7 @@ export class IamPractitionerSelfRegistrationService {
         licenseId: license.id,
         credentialId: credential?.id,
         sedesLicenseId: sitesLicense?.id,
+        collegeLicenseId: collegeLicense?.id,
         photoFileId,
         emailVerificationToken: raw,
         activacion: activation,
@@ -1020,6 +1135,9 @@ export class IamPractitionerSelfRegistrationService {
       ...(created.credentialId ? { credentialId: created.credentialId } : {}),
       ...(created.sedesLicenseId
         ? { sedesLicenseId: created.sedesLicenseId }
+        : {}),
+      ...(created.collegeLicenseId
+        ? { collegeLicenseId: created.collegeLicenseId }
         : {}),
       verificationStatus: 'PENDING',
       emailVerificationSent,
@@ -1073,7 +1191,7 @@ export class IamPractitionerSelfRegistrationService {
         { field: 'issuerAdministrativeAreaConceptId' },
       );
     }
-    await this.administrativeAreas.assertIsAdministrativeArea(tx, conceptId);
+    await this.profiles.assertIsAdministrativeArea(tx, conceptId);
   }
 
   /**
@@ -1089,23 +1207,16 @@ export class IamPractitionerSelfRegistrationService {
     email: string,
     token: string,
   ): Promise<boolean> {
-    const actor: AuthenticatedUser = { id: userId, roles: [] };
     try {
-      await this.notificationsService.createRequest(
-        {
-          channelId: MESSAGING_SEED.emailChannelId,
-          recipientUserId: userId,
-          recipientAddress: email,
-          payloadJson: {
-            subject: 'Verifique su correo profesional',
-            bodyText:
-              'Para verificar su correo, use este código: ' +
-              `${token}\n\nTu matrícula quedó registrada y está pendiente de ` +
-              'verificación por parte de la plataforma.',
-          },
-        },
-        actor,
-      );
+      await this.emailNotice.enqueueEmail({
+        recipientUserId: userId,
+        recipientAddress: email,
+        subject: 'Verifique su correo profesional',
+        bodyText:
+          'Para verificar su correo, use este código: ' +
+          `${token}\n\nTu matrícula quedó registrada y está pendiente de ` +
+          'verificación por parte de la plataforma.',
+      });
       return true;
     } catch (error) {
       this.logger.warn(
@@ -1132,7 +1243,7 @@ export class IamPractitionerSelfRegistrationService {
   private async uploadProfilePhoto(
     profilePhotoBase64?: string,
   ): Promise<string | undefined> {
-    if (!profilePhotoBase64 || !this.fileUploadService) {
+    if (!profilePhotoBase64) {
       return undefined;
     }
     const parsed = parseBase64Image(profilePhotoBase64);
@@ -1140,17 +1251,15 @@ export class IamPractitionerSelfRegistrationService {
     const detectedMimeType = sniffMimeType(parsed.buffer) ?? parsed.mimeType;
     const ext = detectedMimeType.split('/')[1] ?? 'jpg';
     try {
-      const uploaded = await this.fileUploadService.uploadAnonymous(
+      const uploaded = await this.files.uploadAnonymous(
         {
           originalname: `practitioner-photo.${ext}`,
           mimetype: detectedMimeType,
           buffer: parsed.buffer,
         },
         {
-          category: FileCategory.IMAGE,
-          sensitivity: FileSensitivity.NORMAL,
-        },
-        {
+          category: 'IMAGE',
+          sensitivity: 'NORMAL',
           allowedMimeTypes: UPLOAD_MIME_ALLOWLIST.IMAGE,
           operation: 'iam.auth.register-practitioner',
         },
@@ -1170,6 +1279,76 @@ export class IamPractitionerSelfRegistrationService {
   }
 
   /**
+   * Reclama el logo del consultorio propio para la cuenta recién creada y
+   * comprueba que sirve como logo: png, jpeg o webp de categoría IMAGE,
+   * sensibilidad NORMAL y hasta 2 MB —las reglas del logo de una
+   * organización—. Va en la transacción del alta: si algo falla, el archivo
+   * vuelve a quedar sin dueño y no se crea nada.
+   *
+   * @param tx - Transacción del alta.
+   * @param fileId - Pre-carga anónima del logo.
+   * @param userId - Cuenta recién creada.
+   * @throws PreconditionFailedException (422) si el archivo no sirve como logo.
+   */
+  private async claimOwnSiteLogo(
+    tx: EntityManager,
+    fileId: string,
+    userId: string,
+  ): Promise<void> {
+    const { file, version } = await this.files.claimAnonymousUpload(
+      tx,
+      fileId,
+      { ownerUserId: userId, tenantId: SEED.tenantId },
+      {
+        allowedMimeTypes: LOGO_IMAGE_MIME_TYPES,
+        allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_IMAGE,
+        operation: 'iam.auth.register-practitioner.own-site-logo',
+      },
+      {
+        subject: 'El logo del consultorio',
+        notFound: 'El logo del consultorio no existe',
+      },
+    );
+    assertLogoImage(file, version);
+  }
+
+  /**
+   * P29 — reclama el PDF de una habilitación (matrícula o SEDES) para la cuenta
+   * recién creada. Mismas reglas que el PDF de un título del alta: sólo PDF,
+   * categoría DOCUMENT, y el archivo pasa a ser del profesional. Sin archivo
+   * no hace nada.
+   *
+   * @param tx - La transacción del alta.
+   * @param fileId - El id devuelto por `upload-registration-document`, o nada.
+   * @param ownerUserId - La cuenta recién creada.
+   * @param subject - Cómo se nombra el respaldo en el error.
+   * @returns El mismo id, ya reclamado, o `undefined`.
+   */
+  private async claimLicenseDocument(
+    tx: EntityManager,
+    fileId: string | undefined,
+    ownerUserId: string,
+    subject: string,
+  ): Promise<string | undefined> {
+    if (fileId === undefined) return undefined;
+    await this.files.claimAnonymousUpload(
+      tx,
+      fileId,
+      { tenantId: SEED.tenantId, ownerUserId },
+      {
+        allowedMimeTypes: ['application/pdf'],
+        allowedCategoryConceptId: CONCEPTS.FILE_CATEGORY_DOCUMENT,
+        operation: 'iam.practitioner.self-register.license',
+      },
+      {
+        subject,
+        notFound: `${subject}: el archivo no fue encontrado`,
+      },
+    );
+    return fileId;
+  }
+
+  /**
    * Asigna la foto pre-cargada a la cuenta que se está creando. Va en la
    * transacción del alta: si el alta se revierte, el archivo vuelve a quedar
    * sin dueño. El tenant es el DEFAULT, el mismo de la única membresía que el
@@ -1185,7 +1364,7 @@ export class IamPractitionerSelfRegistrationService {
     fileId: string,
     userId: string,
   ): Promise<string> {
-    await this.attachableFiles.claimAnonymousUpload(
+    await this.files.claimAnonymousUpload(
       tx,
       fileId,
       { ownerUserId: userId, tenantId: SEED.tenantId },

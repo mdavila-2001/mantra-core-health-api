@@ -10,7 +10,12 @@
 // reproducen con los fetchers, que guardan URL, fecha y sha256 en sus metas.
 //
 // `data/MANIFEST.json` lista cada archivo con su sha256, bytes y filas.
-// Reconstruir: `zcat data/monographs.part-*.ndjson.gz > monographs.ndjson`.
+// Reconstruir: `zcat data/monographs.part-*.ndjson.gz > monographs.ndjson` (ídem `gsrs-entries`).
+//
+// NO entra el corpus por producto (`--granularity product`, ~2,2 GB; decisión del
+// propietario, 2026-10-26, issue 824): `build-monographs.mjs` lo escribe en
+// `out/product/`, y acá sólo se empaqueta la lista cerrada `PACKABLE`. Si el
+// `monographs.meta.json` de `out/` no es de granularidad `route`, se aborta.
 //
 // Uso: node tools/terminology-import/clinical-pharmacology/pack-data.mjs
 // =============================================================================
@@ -21,16 +26,34 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
-import { ensureDir } from '../lib/glossary-es/common.mjs';
+import { ensureDir, sha256File } from '../lib/glossary-es/common.mjs';
+import { ndjsonLines } from './lib/cli.mjs';
 import { cpCache, cpOut, openFdaDir } from './lib/paths.mjs';
 
 const DATA_DIR = ensureDir(join(dirname(fileURLToPath(import.meta.url)), 'data'));
 const MAX_PART_BYTES = 45 * 1024 * 1024;
 const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 
+/** NDJSON normalizados que se versionan: lista cerrada. El corpus por producto no figura y no puede figurar. */
+export const PACKABLE = Object.freeze(['monographs', 'gsrs-entries']);
+
+/** Lanza si `name` es un corpus por producto o no está en la lista cerrada. */
+export function assertPackable(name) {
+  if (/product/i.test(name)) throw new Error(`«${name}» es un corpus por producto: no se versiona en data/ (issue 824).`);
+  if (!PACKABLE.includes(name)) throw new Error(`«${name}» no está en la lista de lo que se empaqueta (${PACKABLE.join(', ')}).`);
+  return name;
+}
+
+/** El meta de `out/` debe ser de granularidad `route`: un build por producto no se empaqueta. */
+export function assertRouteGranularity(meta) {
+  if (meta?.granularity !== undefined && meta.granularity !== 'route') throw new Error(`out/monographs.meta.json es de granularidad «${meta.granularity}»: sólo se empaqueta la de vía (route).`);
+  return meta;
+}
+
 /** Parte un NDJSON por líneas en trozos cuyo gzip queda bajo el tope. Devuelve los buffers comprimidos. */
 export function splitNdjson(text, maxBytes = MAX_PART_BYTES) {
-  const lines = text.split('\n').filter((l) => l.trim() !== '');
+  // Acepta el texto entero o un iterable de líneas (archivos > 512 MB no caben en un string).
+  const lines = typeof text === 'string' ? text.split('\n').filter((l) => l.trim() !== '') : text;
   const parts = [];
   let chunk = [];
   let rawBytes = 0;
@@ -57,6 +80,7 @@ export function splitNdjson(text, maxBytes = MAX_PART_BYTES) {
 }
 
 function main() {
+  if (existsSync(cpOut('monographs.meta.json'))) assertRouteGranularity(JSON.parse(readFileSync(cpOut('monographs.meta.json'), 'utf8')));
   for (const name of readdirSync(DATA_DIR)) if (name.endsWith('.gz') || name === 'MANIFEST.json') unlinkSync(join(DATA_DIR, name));
   const manifest = { generatedAt: new Date().toISOString(), note: 'Datos normalizados (no crudos). Ver SOURCES.md y docs/seed-research/clinical-pharmacology.md.', files: [] };
   const add = (name, gz, rows, from) => {
@@ -64,16 +88,17 @@ function main() {
     manifest.files.push({ name, from, bytes: gz.length, sha256: sha256(gz), rows });
   };
 
-  const ndjson = cpOut('monographs.ndjson');
-  if (existsSync(ndjson)) {
-    const text = readFileSync(ndjson, 'utf8');
-    const parts = splitNdjson(text);
-    parts.forEach((p, i) => add(`monographs.part-${String(i + 1).padStart(3, '0')}.ndjson.gz`, p.gz, p.rows, 'out/monographs.ndjson'));
-    manifest.monographsSha256 = sha256(Buffer.from(text, 'utf8'));
-    manifest.monographs = parts.reduce((n, p) => n + p.rows, 0);
+  manifest.ndjson = {};
+  for (const name of PACKABLE.map(assertPackable)) {
+    const ndjson = cpOut(`${name}.ndjson`);
+    if (!existsSync(ndjson)) continue;
+    const parts = splitNdjson(ndjsonLines(ndjson));
+    parts.forEach((p, i) => add(`${name}.part-${String(i + 1).padStart(3, '0')}.ndjson.gz`, p.gz, p.rows, `out/${name}.ndjson`));
+    manifest.ndjson[name] = { sha256: sha256File(ndjson), rows: parts.reduce((n, p) => n + p.rows, 0), parts: parts.length };
   }
   const small = [
     ['out/monographs.meta.json', cpOut('monographs.meta.json')],
+    ['out/gsrs-entries.meta.json', cpOut('gsrs-entries.meta.json')],
     ['out/coverage.json', cpOut('coverage.json')],
     ['out/coverage.md', cpOut('coverage.md')],
     ['out/validate-links.json', cpOut('validate-links.json')],
@@ -81,6 +106,12 @@ function main() {
     ['cache/cima/fetch.meta.json', cpCache('cima', 'fetch.meta.json')],
     ['cache/rxnav/fetch.meta.json', cpCache('rxnav', 'fetch.meta.json')],
     ['cache/openfda/fetch.meta.json', join(openFdaDir(), 'fetch.meta.json')],
+    ['cache/ema/fetch.meta.json', cpCache('ema', 'fetch.meta.json')],
+    ['cache/eml/fetch.meta.json', cpCache('eml', 'fetch.meta.json')],
+    ['cache/dailymed/fetch.meta.json', cpCache('dailymed', 'fetch.meta.json')],
+    ['cache/lactmed/fetch.meta.json', cpCache('lactmed', 'fetch.meta.json')],
+    ['cache/livertox/fetch.meta.json', cpCache('livertox', 'fetch.meta.json')],
+    ['cache/ema-pi/fetch.meta.json', cpCache('ema-pi', 'fetch.meta.json')],
   ];
   for (const [from, path] of small) {
     if (!existsSync(path)) continue;

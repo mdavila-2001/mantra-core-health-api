@@ -73,6 +73,27 @@ export class ScheduleRules {
   bookingModeConceptId?: string;
 
   /**
+   * La franja atiende también por telemedicina (v4.2.61).
+   *
+   * `NOT NULL DEFAULT false`: por defecto la telemedicina está apagada y toda
+   * franja existente queda «sólo presencial». Una cita directa por
+   * TELECONSULTA sólo se acepta si empieza en una franja con este valor en
+   * `true`.
+   */
+  @Property({
+    fieldName: 'telemedicine_enabled',
+    type: 'boolean',
+    default: false,
+  })
+  telemedicineEnabled!: boolean;
+
+  /**
+   * Valor de flexible hours mantenido por la instancia.
+   */
+  @Property({ fieldName: 'flexible_hours', type: 'boolean', default: false })
+  flexibleHours!: boolean;
+
+  /**
    * Valor de valid from mantenido por la instancia.
    */
   @Property({ fieldName: 'valid_from', columnType: 'date', nullable: true })

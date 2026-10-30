@@ -14,6 +14,7 @@ import {
   PreconditionFailedException,
 } from '../../../common';
 import { PINV } from '../domain/pharmacy_inventory.concepts';
+import { allowAllScope } from '../application/scope/pharmacy-inventory-scope.testing';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
 
@@ -39,7 +40,6 @@ function build() {
     findByIdempotencyKey: mockFn(),
     findLines: mockFn(),
   };
-  const locationsRepo = { findById: mockFn() };
   const lotsRepo = { findByProductAndNumber: mockFn(), create: mockFn() };
   const ledgerRepo = {
     nextSequence: mockFn(async () => '1'),
@@ -52,15 +52,16 @@ function build() {
     create: mockFn(),
   };
   const logger = { setContext: mockFn(), info: mockFn() };
+  const scope = allowAllScope();
   const useCases = new PharmacyProcurementUseCases(
     em as any,
     suppliersRepo,
     ordersRepo,
     receiptsRepo as any,
-    locationsRepo as any,
     lotsRepo as any,
     ledgerRepo,
     stockRepo as any,
+    scope,
     logger as any,
   );
   const service = new PharmacyProcurementService(useCases, logger as any);
@@ -70,10 +71,10 @@ function build() {
     suppliersRepo,
     ordersRepo,
     receiptsRepo,
-    locationsRepo,
     lotsRepo,
     stockRepo,
     ledgerRepo,
+    scope,
   };
 }
 
@@ -92,6 +93,7 @@ describe('PharmacyProcurementService', () => {
     const d = build();
     d.suppliersRepo.findById.mockResolvedValue({
       id: 'sup1',
+      pharmacyId: 'ph1',
       statusConceptId: PINV.SUPPLIER_ACTIVE,
     });
     d.ordersRepo.create.mockReturnValue({ id: 'po1' });
@@ -122,6 +124,7 @@ describe('PharmacyProcurementService', () => {
     const d = build();
     d.suppliersRepo.findById.mockResolvedValue({
       id: 'sup1',
+      pharmacyId: 'ph1',
       statusConceptId: 'other',
     });
     await expect(
@@ -137,12 +140,14 @@ describe('PharmacyProcurementService', () => {
     const d = build();
     d.ordersRepo.findById.mockResolvedValue({
       id: 'po1',
+      pharmacyId: 'ph1',
       statusConceptId: PINV.PO_ORDERED,
     });
-    d.locationsRepo.findById.mockResolvedValue({ id: 'loc1' });
     d.receiptsRepo.create.mockReturnValue({ id: 'gr1', receiptNumber: 'GR-1' });
     d.ordersRepo.findLineById.mockResolvedValue({
       id: 'pol1',
+      pharmacyPurchaseOrderId: 'po1',
+      pharmacyProductId: 'p1',
       orderedQuantity: '10',
       receivedQuantity: '0',
     });
@@ -204,8 +209,10 @@ describe('PharmacyProcurementService', () => {
     const d = build();
     d.receiptsRepo.findByIdempotencyKey.mockResolvedValue({
       id: 'gr-existing',
+      pharmacyPurchaseOrderId: 'po1',
       receiptNumber: 'GR-existing',
     });
+    d.ordersRepo.findById.mockResolvedValue({ id: 'po1', pharmacyId: 'ph1' });
     d.receiptsRepo.findLines.mockResolvedValue([
       { id: 'grl1', inventoryLotId: 'lot-existing' },
     ]);
@@ -250,6 +257,7 @@ describe('PharmacyProcurementService', () => {
     const d = build();
     d.ordersRepo.findById.mockResolvedValue({
       id: 'po1',
+      pharmacyId: 'ph1',
       statusConceptId: PINV.PO_RECEIVED,
     });
     await expect(

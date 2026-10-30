@@ -23,7 +23,7 @@ _Fuente: `src/modules/chart/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `ctrl:ChartCarePlansController` | Operaciones de ChartCarePlansController que el README no asigna a un caso de uso | POST /charts/care-plans | CLINICIAN · PRACTITIONER | MEDIO | 4 |
+| `ctrl:ChartCarePlansController` | Operaciones de ChartCarePlansController que el README no asigna a un caso de uso | POST /charts/care-plans | CLINICIAN · PRACTITIONER | MEDIO | 5 |
 |  |  | PATCH /charts/care-plans/{planId}/activities/{activityId} | CLINICIAN · PRACTITIONER | MEDIO | 20 |
 | `ctrl:ChartDocumentsController` | Operaciones de ChartDocumentsController que el README no asigna a un caso de uso | POST /charts/documents | CLINICIAN · PRACTITIONER | MEDIO | 5 |
 |  |  | GET /charts/documents/{documentId}/files/{fileId}/content | CLINICIAN · PRACTITIONER | BAJO | 22 |
@@ -33,7 +33,7 @@ _Fuente: `src/modules/chart/README.md:3`_
 |  |  | GET /charts/me/encounters/{id}/pdf | Cualquier sesión válida | BAJO | 14 |
 |  |  | GET /charts/me/notes | Cualquier sesión válida | ALTO | 3 |
 | `ctrl:ChartNotesController` | Operaciones de ChartNotesController que el README no asigna a un caso de uso | GET /charts/notes | CLINICIAN · PRACTITIONER | BAJO | 2 |
-|  |  | POST /charts/notes | CLINICIAN · PRACTITIONER | MEDIO | 3 |
+|  |  | POST /charts/notes | CLINICIAN · PRACTITIONER | MEDIO | 4 |
 |  |  | POST /charts/notes/{noteId}/amendments | CLINICIAN · PRACTITIONER | MEDIO | 20 |
 |  |  | PUT /charts/notes/{noteId}/versions | CLINICIAN · PRACTITIONER | MEDIO | 20 |
 |  |  | POST /charts/notes/{noteId}/versions/{versionId}/cosign | CLINICIAN · PRACTITIONER | MEDIO | 20 |
@@ -52,224 +52,227 @@ _Fuente: `src/modules/chart/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["CLINICIAN · PRACTITIONER"]):::actor
-  a25(["Cualquier sesión válida"]):::actor
-  a51(["CLINICIAN · PRACTITIONER · SECURITY_ADMIN"]):::actor
-  a56(["SECURITY_ADMIN"]):::actor
+  a26(["Cualquier sesión válida"]):::actor
+  a52(["CLINICIAN · PRACTITIONER · SECURITY_ADMIN"]):::actor
+  a57(["SECURITY_ADMIN"]):::actor
   t3[("chart.care_plan_activities")]:::tabla
   t4[("chart.care_plans")]:::tabla
-  t5[("clinical.encounters")]:::tabla
-  t6[("forms.form_instances")]:::tabla
-  t8[("authz.access_policies")]:::tabla
-  t9[("authz.care_relationships")]:::tabla
-  t10[("authz.clinical_access_grants")]:::tabla
-  t11[("authz.field_permissions")]:::tabla
-  t12[("authz.patient_legal_representations")]:::tabla
-  t13[("authz.permissions")]:::tabla
-  t16[("chart.document_record_files")]:::tabla
-  t17[("chart.document_records")]:::tabla
-  t18[("common.file_versions")]:::tabla
-  t19[("common.files")]:::tabla
-  t26[("audit.data_access_log")]:::tabla
-  t29[("chart.clinical_note_headers")]:::tabla
-  t30[("chart.clinical_note_versions")]:::tabla
-  t52[("chart.specialty_chart_templates")]:::tabla
-  t53[("forms.dynamic_field_definitions")]:::tabla
-  t54[("forms.field_assignments")]:::tabla
-  t57[("forms.dynamic_field_sections")]:::tabla
-  t60[("chart.chart_template_assignments")]:::tabla
-  t14[("+14 tablas más")]
+  t5[("clinical.conditions")]:::tabla
+  t6[("clinical.encounters")]:::tabla
+  t7[("forms.form_instances")]:::tabla
+  t9[("authz.access_policies")]:::tabla
+  t10[("authz.care_relationships")]:::tabla
+  t11[("authz.clinical_access_grants")]:::tabla
+  t12[("authz.field_permissions")]:::tabla
+  t13[("authz.patient_legal_representations")]:::tabla
+  t14[("authz.permissions")]:::tabla
+  t17[("chart.document_record_files")]:::tabla
+  t18[("chart.document_records")]:::tabla
+  t19[("common.file_versions")]:::tabla
+  t20[("common.files")]:::tabla
+  t27[("audit.data_access_log")]:::tabla
+  t30[("chart.clinical_note_headers")]:::tabla
+  t31[("chart.clinical_note_versions")]:::tabla
+  t53[("chart.specialty_chart_templates")]:::tabla
+  t54[("forms.dynamic_field_definitions")]:::tabla
+  t55[("forms.field_assignments")]:::tabla
+  t58[("forms.dynamic_field_sections")]:::tabla
+  t61[("chart.chart_template_assignments")]:::tabla
+  t15[("+14 tablas más")]
   subgraph s0["ctrl:ChartCarePlansController · Operaciones de ChartCarePlansController que el…"]
     o1["POST /charts/care-plans"]:::op
-    o7["PATCH /charts/care-plans/{planId}/activities/{activityId}"]:::op
+    o8["PATCH /charts/care-plans/{planId}/activities/{activityId}"]:::op
   end
-  t21[("+16 tablas más")]
+  t22[("+16 tablas más")]
   subgraph s1["ctrl:ChartDocumentsController · Operaciones de ChartDocumentsController que el…"]
-    o15["POST /charts/documents"]:::op
-    o20["GET /charts/documents/{documentId}/files/{fileId}/content"]:::op
+    o16["POST /charts/documents"]:::op
+    o21["GET /charts/documents/{documentId}/files/{fileId}/content"]:::op
   end
-  t23[("+24 tablas más")]
+  t24[("+24 tablas más")]
   subgraph s2["ctrl:ChartEncountersController · Operaciones de ChartEncountersController que e…"]
-    o22["GET /charts/encounters/{id}/pdf"]:::op
+    o23["GET /charts/encounters/{id}/pdf"]:::op
   end
-  t31[("+8 tablas más")]
+  t32[("+8 tablas más")]
   subgraph s3["ctrl:ChartMeController · Operaciones de ChartMeController que el README no asig…"]
-    o24["GET /charts/me/documents"]:::op
-    o27["GET /charts/me/documents/{documentId}/files/{fileId}/content"]:::op
-    o28["GET /charts/me/encounters/{id}/pdf"]:::op
-    o32["GET /charts/me/notes"]:::op
+    o25["GET /charts/me/documents"]:::op
+    o28["GET /charts/me/documents/{documentId}/files/{fileId}/content"]:::op
+    o29["GET /charts/me/encounters/{id}/pdf"]:::op
+    o33["GET /charts/me/notes"]:::op
   end
-  t36[("+14 tablas más")]
-  t38[("+14 tablas más")]
-  t40[("+14 tablas más")]
-  t42[("+13 tablas más")]
-  t44[("+14 tablas más")]
-  t46[("+14 tablas más")]
-  t48[("+14 tablas más")]
+  t37[("+14 tablas más")]
+  t39[("+14 tablas más")]
+  t41[("+14 tablas más")]
+  t43[("+13 tablas más")]
+  t45[("+14 tablas más")]
+  t47[("+14 tablas más")]
+  t49[("+14 tablas más")]
   subgraph s4["ctrl:ChartNotesController · Operaciones de ChartNotesController que el README n…"]
-    o33["GET /charts/notes"]:::op
-    o34["POST /charts/notes"]:::op
-    o35["POST /charts/notes/{noteId}/amendments"]:::op
-    o37["PUT /charts/notes/{noteId}/versions"]:::op
-    o39["POST /charts/notes/{noteId}/versions/{versionId}/cosign"]:::op
-    o41["POST /charts/notes/{noteId}/versions/{versionId}/sign"]:::op
-    o43["POST /charts/notes/versions/{versionId}/exam-findings"]:::op
-    o45["POST /charts/notes/versions/{versionId}/release"]:::op
-    o47["POST /charts/notes/versions/{versionId}/withhold"]:::op
+    o34["GET /charts/notes"]:::op
+    o35["POST /charts/notes"]:::op
+    o36["POST /charts/notes/{noteId}/amendments"]:::op
+    o38["PUT /charts/notes/{noteId}/versions"]:::op
+    o40["POST /charts/notes/{noteId}/versions/{versionId}/cosign"]:::op
+    o42["POST /charts/notes/{noteId}/versions/{versionId}/sign"]:::op
+    o44["POST /charts/notes/versions/{versionId}/exam-findings"]:::op
+    o46["POST /charts/notes/versions/{versionId}/release"]:::op
+    o48["POST /charts/notes/versions/{versionId}/withhold"]:::op
   end
   subgraph s5["ctrl:ChartReadController · Operaciones de ChartReadController que el README no…"]
-    o49["GET /charts/patients/{patientProfileId}/chart"]:::op
+    o50["GET /charts/patients/{patientProfileId}/chart"]:::op
   end
   subgraph s6["ctrl:ChartTemplatesController · Operaciones de ChartTemplatesController que el…"]
-    o50["GET /charts/templates"]:::op
-    o55["POST /charts/templates"]:::op
-    o58["GET /charts/templates/{id}"]:::op
-    o59["POST /charts/templates/{templateId}/assignments"]:::op
+    o51["GET /charts/templates"]:::op
+    o56["POST /charts/templates"]:::op
+    o59["GET /charts/templates/{id}"]:::op
+    o60["POST /charts/templates/{templateId}/assignments"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
   o1 -->|"CREA"| t4
   o1 -->|"LEE"| t5
   o1 -->|"LEE"| t6
-  a2 --> o7
-  o7 -->|"LEE"| t8
-  o7 -->|"LEE"| t9
-  o7 -->|"LEE"| t10
-  o7 -->|"LEE"| t11
-  o7 -->|"LEE"| t12
-  o7 -->|"LEE"| t13
-  o7 -.-> t14
-  a2 --> o15
-  o15 -->|"CREA"| t16
-  o15 -->|"CREA"| t17
-  o15 -->|"LEE"| t5
-  o15 -->|"LEE"| t18
-  o15 -->|"LEE"| t19
-  a2 --> o20
-  o20 -->|"LEE"| t8
-  o20 -->|"LEE"| t9
-  o20 -->|"LEE"| t10
-  o20 -->|"LEE"| t11
-  o20 -->|"LEE"| t12
-  o20 -->|"LEE"| t13
-  o20 -.-> t21
-  a2 --> o22
-  o22 -->|"LEE"| t8
-  o22 -->|"LEE"| t9
-  o22 -->|"LEE"| t10
-  o22 -->|"LEE"| t11
-  o22 -->|"LEE"| t12
-  o22 -->|"LEE"| t13
-  o22 -.-> t23
-  a25 --> o24
-  o24 -->|"CREA"| t26
-  o24 -->|"LEE"| t16
-  o24 -->|"LEE"| t17
-  a25 --> o27
-  o27 -->|"CREA"| t26
-  o27 -->|"LEE"| t16
-  o27 -->|"LEE"| t17
-  o27 -->|"LEE"| t18
-  o27 -->|"LEE"| t19
-  a25 --> o28
-  o28 -->|"LEE"| t3
-  o28 -->|"LEE"| t4
-  o28 -->|"LEE"| t29
-  o28 -->|"LEE"| t30
-  o28 -->|"LEE"| t16
+  o1 -->|"LEE"| t7
+  a2 --> o8
+  o8 -->|"LEE"| t9
+  o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t11
+  o8 -->|"LEE"| t12
+  o8 -->|"LEE"| t13
+  o8 -->|"LEE"| t14
+  o8 -.-> t15
+  a2 --> o16
+  o16 -->|"CREA"| t17
+  o16 -->|"CREA"| t18
+  o16 -->|"LEE"| t6
+  o16 -->|"LEE"| t19
+  o16 -->|"LEE"| t20
+  a2 --> o21
+  o21 -->|"LEE"| t9
+  o21 -->|"LEE"| t10
+  o21 -->|"LEE"| t11
+  o21 -->|"LEE"| t12
+  o21 -->|"LEE"| t13
+  o21 -->|"LEE"| t14
+  o21 -.-> t22
+  a2 --> o23
+  o23 -->|"LEE"| t9
+  o23 -->|"LEE"| t10
+  o23 -->|"LEE"| t11
+  o23 -->|"LEE"| t12
+  o23 -->|"LEE"| t13
+  o23 -->|"LEE"| t14
+  o23 -.-> t24
+  a26 --> o25
+  o25 -->|"CREA"| t27
+  o25 -->|"LEE"| t17
+  o25 -->|"LEE"| t18
+  a26 --> o28
+  o28 -->|"CREA"| t27
   o28 -->|"LEE"| t17
-  o28 -.-> t31
-  a25 --> o32
-  o32 -->|"CREA"| t26
-  o32 -->|"LEE"| t29
-  o32 -->|"LEE"| t30
-  a2 --> o33
-  o33 -->|"LEE"| t29
+  o28 -->|"LEE"| t18
+  o28 -->|"LEE"| t19
+  o28 -->|"LEE"| t20
+  a26 --> o29
+  o29 -->|"LEE"| t3
+  o29 -->|"LEE"| t4
+  o29 -->|"LEE"| t30
+  o29 -->|"LEE"| t31
+  o29 -->|"LEE"| t17
+  o29 -->|"LEE"| t18
+  o29 -.-> t32
+  a26 --> o33
+  o33 -->|"CREA"| t27
   o33 -->|"LEE"| t30
+  o33 -->|"LEE"| t31
   a2 --> o34
-  o34 -->|"ACTUALIZA"| t29
-  o34 -->|"CREA"| t29
-  o34 -->|"CREA"| t30
+  o34 -->|"LEE"| t30
+  o34 -->|"LEE"| t31
   a2 --> o35
-  o35 -->|"LEE"| t8
-  o35 -->|"LEE"| t9
-  o35 -->|"LEE"| t10
-  o35 -->|"LEE"| t11
-  o35 -->|"LEE"| t12
-  o35 -->|"LEE"| t13
-  o35 -.-> t36
-  a2 --> o37
-  o37 -->|"LEE"| t8
-  o37 -->|"LEE"| t9
-  o37 -->|"LEE"| t10
-  o37 -->|"LEE"| t11
-  o37 -->|"LEE"| t12
-  o37 -->|"LEE"| t13
-  o37 -.-> t38
-  a2 --> o39
-  o39 -->|"LEE"| t8
-  o39 -->|"LEE"| t9
-  o39 -->|"LEE"| t10
-  o39 -->|"LEE"| t11
-  o39 -->|"LEE"| t12
-  o39 -->|"LEE"| t13
-  o39 -.-> t40
-  a2 --> o41
-  o41 -->|"LEE"| t8
-  o41 -->|"LEE"| t9
-  o41 -->|"LEE"| t10
-  o41 -->|"LEE"| t11
-  o41 -->|"LEE"| t12
-  o41 -->|"LEE"| t13
-  o41 -.-> t42
-  a2 --> o43
-  o43 -->|"LEE"| t8
-  o43 -->|"LEE"| t9
-  o43 -->|"LEE"| t10
-  o43 -->|"LEE"| t11
-  o43 -->|"LEE"| t12
-  o43 -->|"LEE"| t13
-  o43 -.-> t44
-  a2 --> o45
-  o45 -->|"LEE"| t8
-  o45 -->|"LEE"| t9
-  o45 -->|"LEE"| t10
-  o45 -->|"LEE"| t11
-  o45 -->|"LEE"| t12
-  o45 -->|"LEE"| t13
-  o45 -.-> t46
-  a2 --> o47
-  o47 -->|"LEE"| t8
-  o47 -->|"LEE"| t9
-  o47 -->|"LEE"| t10
-  o47 -->|"LEE"| t11
-  o47 -->|"LEE"| t12
-  o47 -->|"LEE"| t13
-  o47 -.-> t48
-  a2 --> o49
-  o49 -->|"LEE"| t3
-  o49 -->|"LEE"| t4
-  o49 -->|"LEE"| t29
-  o49 -->|"LEE"| t30
-  o49 -->|"LEE"| t16
-  o49 -->|"LEE"| t17
-  a51 --> o50
-  o50 -->|"LEE"| t52
-  o50 -->|"LEE"| t53
-  o50 -->|"LEE"| t54
-  a56 --> o55
-  o55 -->|"ACTUALIZA"| t52
-  o55 -->|"CREA"| t52
-  o55 -->|"CREA"| t53
-  o55 -->|"CREA"| t57
-  o55 -->|"CREA"| t54
-  a51 --> o58
-  o58 -->|"LEE"| t52
-  o58 -->|"LEE"| t53
-  o58 -->|"LEE"| t54
-  a56 --> o59
-  o59 -->|"ACTUALIZA"| t60
-  o59 -->|"CREA"| t60
-  o59 -->|"LEE"| t60
+  o35 -->|"ACTUALIZA"| t30
+  o35 -->|"CREA"| t30
+  o35 -->|"CREA"| t31
+  o35 -->|"LEE"| t6
+  a2 --> o36
+  o36 -->|"LEE"| t9
+  o36 -->|"LEE"| t10
+  o36 -->|"LEE"| t11
+  o36 -->|"LEE"| t12
+  o36 -->|"LEE"| t13
+  o36 -->|"LEE"| t14
+  o36 -.-> t37
+  a2 --> o38
+  o38 -->|"LEE"| t9
+  o38 -->|"LEE"| t10
+  o38 -->|"LEE"| t11
+  o38 -->|"LEE"| t12
+  o38 -->|"LEE"| t13
+  o38 -->|"LEE"| t14
+  o38 -.-> t39
+  a2 --> o40
+  o40 -->|"LEE"| t9
+  o40 -->|"LEE"| t10
+  o40 -->|"LEE"| t11
+  o40 -->|"LEE"| t12
+  o40 -->|"LEE"| t13
+  o40 -->|"LEE"| t14
+  o40 -.-> t41
+  a2 --> o42
+  o42 -->|"LEE"| t9
+  o42 -->|"LEE"| t10
+  o42 -->|"LEE"| t11
+  o42 -->|"LEE"| t12
+  o42 -->|"LEE"| t13
+  o42 -->|"LEE"| t14
+  o42 -.-> t43
+  a2 --> o44
+  o44 -->|"LEE"| t9
+  o44 -->|"LEE"| t10
+  o44 -->|"LEE"| t11
+  o44 -->|"LEE"| t12
+  o44 -->|"LEE"| t13
+  o44 -->|"LEE"| t14
+  o44 -.-> t45
+  a2 --> o46
+  o46 -->|"LEE"| t9
+  o46 -->|"LEE"| t10
+  o46 -->|"LEE"| t11
+  o46 -->|"LEE"| t12
+  o46 -->|"LEE"| t13
+  o46 -->|"LEE"| t14
+  o46 -.-> t47
+  a2 --> o48
+  o48 -->|"LEE"| t9
+  o48 -->|"LEE"| t10
+  o48 -->|"LEE"| t11
+  o48 -->|"LEE"| t12
+  o48 -->|"LEE"| t13
+  o48 -->|"LEE"| t14
+  o48 -.-> t49
+  a2 --> o50
+  o50 -->|"LEE"| t3
+  o50 -->|"LEE"| t4
+  o50 -->|"LEE"| t30
+  o50 -->|"LEE"| t31
+  o50 -->|"LEE"| t17
+  o50 -->|"LEE"| t18
+  a52 --> o51
+  o51 -->|"LEE"| t53
+  o51 -->|"LEE"| t54
+  o51 -->|"LEE"| t55
+  a57 --> o56
+  o56 -->|"ACTUALIZA"| t53
+  o56 -->|"CREA"| t53
+  o56 -->|"CREA"| t54
+  o56 -->|"CREA"| t58
+  o56 -->|"CREA"| t55
+  a52 --> o59
+  o59 -->|"LEE"| t53
+  o59 -->|"LEE"| t54
+  o59 -->|"LEE"| t55
+  a57 --> o60
+  o60 -->|"ACTUALIZA"| t61
+  o60 -->|"CREA"| t61
+  o60 -->|"LEE"| t61
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -292,6 +295,7 @@ Crear un plan de cuidado con actividades
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Un plan de cuidados necesita un profesional autor.; ForbiddenException: La sesión no tiene un perfil profesional con el que crear el plan.; ForbiddenException: El autor del plan es el profesional de la sesión: no se crea en nombre de otro perfil. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Diagnóstico no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El encuentro ya está cerrado y sellado: no admite más escrituras. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -323,49 +327,79 @@ flowchart TD
   n10 -->|"no"| n12
   n13{"dto.encounterId"}:::decision
   n12 --> n13
-  n14["Llama a EncounterSealGuardService.assertEncounterWritable"]:::llamada
+  n14["Llama a ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable"]:::llamada
   n13 -->|"sí"| n14
   n15["Llama a EncountersRepository.findById"]:::llamada
   n14 --> n15
   n16[("LEE clinical.encounters")]:::efecto
   n15 --> n16
-  n17{"encounter?.sealedAt"}:::decision
+  n17{"!encounter || encounter.patientProfileId !== patientProfileId || encounter.tenantId !== tenantId"}:::decision
   n16 --> n17
-  n18(["422 PRECONDITION_FAILED El encuentro ya está cerrado y sellado: no admite más escrituras."]):::error
+  n18(["404 NOT_FOUND Encuentro no encontrado"]):::error
   n17 -->|"sí"| n18
-  n19{"dto.formInstanceId !== undefined"}:::decision
+  n19{"encounter.sealedAt"}:::decision
   n17 -->|"no"| n19
-  n13 -->|"no"| n19
-  n20["Llama a FormInstanceOriginValidator.assertUsableOrigin"]:::llamada
+  n20(["422 PRECONDITION_FAILED El encuentro ya está cerrado y sellado: no admite más escrituras."]):::error
   n19 -->|"sí"| n20
-  n21[("LEE forms.form_instances")]:::efecto
-  n20 --> n21
-  n22{"!instance"}:::decision
-  n21 --> n22
-  n23(["↩ (relanza el error capturado)"]):::error
-  n22 -->|"sí"| n23
-  n24{"instance.stateConceptId !== FORMS.INSTANCE_CLOSED"}:::decision
-  n22 -->|"no"| n24
-  n25(["↩ (relanza el error capturado)"]):::error
-  n24 -->|"sí"| n25
-  n26{"encounterId && instance.resourceId !== encounterId"}:::decision
-  n24 -->|"no"| n26
-  n27(["↩ (relanza el error capturado)"]):::error
-  n26 -->|"sí"| n27
-  n28["Llama a CarePlansRepository.createPlan"]:::llamada
-  n26 -->|"no"| n28
-  n19 -->|"no"| n28
-  n29[("CREA chart.care_plans")]:::efecto
+  n21{"dto.conditionId"}:::decision
+  n19 -->|"no"| n21
+  n13 -->|"no"| n21
+  n22["Llama a ChartEncounterScopeService.assertConditionBelongsToPatient"]:::llamada
+  n21 -->|"sí"| n22
+  n23["Llama a ConditionsRepository.findById"]:::llamada
+  n22 --> n23
+  n24[("LEE clinical.conditions")]:::efecto
+  n23 --> n24
+  n25{"!condition || condition.patientProfileId !== patientProfileId || condition.custodianTenantId !== tenantId"}:::decision
+  n24 --> n25
+  n26(["404 NOT_FOUND Diagnóstico no encontrado"]):::error
+  n25 -->|"sí"| n26
+  n27{"dto.encounterId"}:::decision
+  n25 -->|"no"| n27
+  n21 -->|"no"| n27
+  n28["Llama a EncounterSealGuardService.assertEncounterWritable"]:::llamada
+  n27 -->|"sí"| n28
+  n29["Llama a EncountersRepository.findById"]:::llamada
   n28 --> n29
-  n30["Repite: por cada const a de activities"]:::bucle
+  n30[("LEE clinical.encounters")]:::efecto
   n29 --> n30
-  n31["Llama a CarePlansRepository.createActivity"]:::llamada
-  n30 -->|"cada elemento"| n31
-  n32[("CREA chart.care_plan_activities")]:::efecto
-  n31 --> n32
-  n33(("201 Responde con éxito")):::ok
-  n32 --> n33
-  n30 -->|"al terminar"| n33
+  n31{"encounter?.sealedAt"}:::decision
+  n30 --> n31
+  n32(["422 PRECONDITION_FAILED El encuentro ya está cerrado y sellado: no admite más escrituras."]):::error
+  n31 -->|"sí"| n32
+  n33{"dto.formInstanceId !== undefined"}:::decision
+  n31 -->|"no"| n33
+  n27 -->|"no"| n33
+  n34["Llama a FormInstanceOriginValidator.assertUsableOrigin"]:::llamada
+  n33 -->|"sí"| n34
+  n35[("LEE forms.form_instances")]:::efecto
+  n34 --> n35
+  n36{"!instance"}:::decision
+  n35 --> n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"sí"| n37
+  n38{"instance.stateConceptId !== FORMS.INSTANCE_CLOSED"}:::decision
+  n36 -->|"no"| n38
+  n39(["↩ (relanza el error capturado)"]):::error
+  n38 -->|"sí"| n39
+  n40{"encounterId && instance.resourceId !== encounterId"}:::decision
+  n38 -->|"no"| n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a CarePlansRepository.createPlan"]:::llamada
+  n40 -->|"no"| n42
+  n33 -->|"no"| n42
+  n43[("CREA chart.care_plans")]:::efecto
+  n42 --> n43
+  n44["Repite: por cada const a de activities"]:::bucle
+  n43 --> n44
+  n45["Llama a CarePlansRepository.createActivity"]:::llamada
+  n44 -->|"cada elemento"| n45
+  n46[("CREA chart.care_plan_activities")]:::efecto
+  n45 --> n46
+  n47(("201 Responde con éxito")):::ok
+  n46 --> n47
+  n44 -->|"al terminar"| n47
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -483,7 +517,7 @@ Adjuntar un documento con archivos gobernados
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: {labels.notFound} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: {labels.notFound} |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El encuentro ya está cerrado y sellado: no admite más escrituras.; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -498,81 +532,98 @@ flowchart TD
   n3 --> n4
   n5{"dto.encounterId"}:::decision
   n4 --> n5
-  n6["Llama a EncounterSealGuardService.assertEncounterWritable"]:::llamada
+  n6["Llama a ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable"]:::llamada
   n5 -->|"sí"| n6
   n7["Llama a EncountersRepository.findById"]:::llamada
   n6 --> n7
   n8[("LEE clinical.encounters")]:::efecto
   n7 --> n8
-  n9{"encounter?.sealedAt"}:::decision
+  n9{"!encounter || encounter.patientProfileId !== patientProfileId || encounter.tenantId !== tenantId"}:::decision
   n8 --> n9
-  n10(["422 PRECONDITION_FAILED El encuentro ya está cerrado y sellado: no admite más escrituras."]):::error
+  n10(["404 NOT_FOUND Encuentro no encontrado"]):::error
   n9 -->|"sí"| n10
-  n11["Repite: por cada const f de dto.files ?? []"]:::bucle
+  n11{"encounter.sealedAt"}:::decision
   n9 -->|"no"| n11
-  n5 -->|"no"| n11
-  n12["Llama a AttachableFileService.assertUsableBy"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13["Llama a FilesRepository.findById"]:::llamada
-  n12 --> n13
-  n14[("LEE common.files")]:::efecto
-  n13 --> n14
-  n15{"!file"}:::decision
+  n12(["422 PRECONDITION_FAILED El encuentro ya está cerrado y sellado: no admite más escrituras."]):::error
+  n11 -->|"sí"| n12
+  n13{"dto.encounterId"}:::decision
+  n11 -->|"no"| n13
+  n5 -->|"no"| n13
+  n14["Llama a EncounterSealGuardService.assertEncounterWritable"]:::llamada
+  n13 -->|"sí"| n14
+  n15["Llama a EncountersRepository.findById"]:::llamada
   n14 --> n15
-  n16(["404 NOT_FOUND {labels.notFound}"]):::error
-  n15 -->|"sí"| n16
-  n17{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n15 -->|"no"| n17
-  n18(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
+  n16[("LEE clinical.encounters")]:::efecto
+  n15 --> n16
+  n17{"encounter?.sealedAt"}:::decision
+  n16 --> n17
+  n18(["422 PRECONDITION_FAILED El encuentro ya está cerrado y sellado: no admite más escrituras."]):::error
   n17 -->|"sí"| n18
-  n19{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n19["Repite: por cada const f de dto.files ?? []"]:::bucle
   n17 -->|"no"| n19
-  n20(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n19 -->|"sí"| n20
-  n21{"!file.currentVersionId"}:::decision
-  n19 -->|"no"| n21
-  n22(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n21 -->|"sí"| n22
-  n23["Llama a AttachableFileService.assertVersionUsable"]:::llamada
-  n21 -->|"no"| n23
-  n24{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n23 --> n24
-  n25(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n24 -->|"sí"| n25
-  n26{"!file.currentVersionId"}:::decision
-  n24 -->|"no"| n26
-  n27(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n26 -->|"sí"| n27
-  n28["Llama a FileVersionsRepository.findById"]:::llamada
-  n26 -->|"no"| n28
-  n29[("LEE common.file_versions")]:::efecto
-  n28 --> n29
-  n30{"!version"}:::decision
-  n29 --> n30
-  n31(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
-  n30 -->|"sí"| n31
-  n32{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
-  n30 -->|"no"| n32
-  n33(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n13 -->|"no"| n19
+  n20["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n19 -->|"cada elemento"| n20
+  n21["Llama a FilesRepository.findById"]:::llamada
+  n20 --> n21
+  n22[("LEE common.files")]:::efecto
+  n21 --> n22
+  n23{"!file"}:::decision
+  n22 --> n23
+  n24(["404 NOT_FOUND {labels.notFound}"]):::error
+  n23 -->|"sí"| n24
+  n25{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n23 -->|"no"| n25
+  n26(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
+  n25 -->|"sí"| n26
+  n27{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n25 -->|"no"| n27
+  n28(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n27 -->|"sí"| n28
+  n29{"!file.currentVersionId"}:::decision
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n29 -->|"no"| n31
+  n32{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n31 --> n32
+  n33(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
   n32 -->|"sí"| n33
-  n34{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n34{"!file.currentVersionId"}:::decision
   n32 -->|"no"| n34
-  n35(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n35(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
   n34 -->|"sí"| n35
-  n36["Llama a DocumentsRepository.createRecord"]:::llamada
+  n36["Llama a FileVersionsRepository.findById"]:::llamada
   n34 -->|"no"| n36
-  n11 -->|"al terminar"| n36
-  n37[("CREA chart.document_records")]:::efecto
+  n37[("LEE common.file_versions")]:::efecto
   n36 --> n37
-  n38["Repite: forEach(…)"]:::bucle
+  n38{"!version"}:::decision
   n37 --> n38
-  n39["Llama a DocumentsRepository.createFile"]:::llamada
-  n38 -->|"cada elemento"| n39
-  n40[("CREA chart.document_record_files")]:::efecto
-  n39 --> n40
-  n41(("201 Responde con éxito")):::ok
-  n40 --> n41
-  n38 -->|"al terminar"| n41
+  n39(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n38 -->|"sí"| n39
+  n40{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n38 -->|"no"| n40
+  n41(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n40 -->|"sí"| n41
+  n42{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n40 -->|"no"| n42
+  n43(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a DocumentsRepository.createRecord"]:::llamada
+  n42 -->|"no"| n44
+  n19 -->|"al terminar"| n44
+  n45[("CREA chart.document_records")]:::efecto
+  n44 --> n45
+  n46["Repite: forEach(…)"]:::bucle
+  n45 --> n46
+  n47["Llama a DocumentsRepository.createFile"]:::llamada
+  n46 -->|"cada elemento"| n47
+  n48[("CREA chart.document_record_files")]:::efecto
+  n47 --> n48
+  n49(("201 Responde con éxito")):::ok
+  n48 --> n49
+  n46 -->|"al terminar"| n49
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1236,6 +1287,8 @@ Crear una nota clínica versionada (borrador SOAP)
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Una nota clínica necesita un profesional autor.; ForbiddenException: La sesión no tiene un perfil profesional con el que escribir la nota.; ForbiddenException: El autor de la nota es el profesional de la sesión: no se escribe en nombre de otro perfil. |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El encuentro ya está cerrado y sellado: no admite más escrituras. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1264,18 +1317,35 @@ flowchart TD
   n10 -->|"sí"| n11
   n12["Transacción: transactional(…)"]:::transaccion
   n10 -->|"no"| n12
-  n13["Llama a ClinicalNotesRepository.createHeader"]:::llamada
+  n13{"dto.encounterId"}:::decision
   n12 --> n13
-  n14[("CREA chart.clinical_note_headers")]:::efecto
-  n13 --> n14
-  n15["Llama a ClinicalNotesRepository.createVersion"]:::llamada
+  n14["Llama a ChartEncounterScopeService.assertEncounterBelongsToPatientAndWritable"]:::llamada
+  n13 -->|"sí"| n14
+  n15["Llama a EncountersRepository.findById"]:::llamada
   n14 --> n15
-  n16[("CREA chart.clinical_note_versions")]:::efecto
+  n16[("LEE clinical.encounters")]:::efecto
   n15 --> n16
-  n17[("ACTUALIZA chart.clinical_note_headers")]:::efecto
+  n17{"!encounter || encounter.patientProfileId !== patientProfileId || encounter.tenantId !== tenantId"}:::decision
   n16 --> n17
-  n18(("201 Responde con éxito")):::ok
-  n17 --> n18
+  n18(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n17 -->|"sí"| n18
+  n19{"encounter.sealedAt"}:::decision
+  n17 -->|"no"| n19
+  n20(["422 PRECONDITION_FAILED El encuentro ya está cerrado y sellado: no admite más escrituras."]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a ClinicalNotesRepository.createHeader"]:::llamada
+  n19 -->|"no"| n21
+  n13 -->|"no"| n21
+  n22[("CREA chart.clinical_note_headers")]:::efecto
+  n21 --> n22
+  n23["Llama a ClinicalNotesRepository.createVersion"]:::llamada
+  n22 --> n23
+  n24[("CREA chart.clinical_note_versions")]:::efecto
+  n23 --> n24
+  n25[("ACTUALIZA chart.clinical_note_headers")]:::efecto
+  n24 --> n25
+  n26(("201 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1975,6 +2045,7 @@ Crear una plantilla de chart con su esquema de campos, por especialidad
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: `options`/`allowOther` sólo aplican a dataType "code"; PreconditionFailedException: Un campo "code" declara valueSetId u options, no los dos; PreconditionFailedException: `allowOther` no aplica sobre un valueSetId; PreconditionFailedException: Un campo "code" sin valueSetId necesita al menos dos opciones; PreconditionFailedException: Una opción no puede estar vacía; PreconditionFailedException: Las opciones no pueden repetirse |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1998,17 +2069,52 @@ flowchart TD
   n8 --> n9
   n10["Repite: por cada const [i, input] de dto.fields.entries()"]:::bucle
   n9 --> n10
-  n11["Llama a ChartTemplatesRepository.createTemplateField"]:::llamada
+  n11["Llama a ChartTemplatesService.validateChoiceField"]:::llamada
   n10 -->|"cada elemento"| n11
-  n12[("CREA forms.dynamic_field_definitions")]:::efecto
+  n12{"input.dataType !== 'code'"}:::decision
   n11 --> n12
-  n13["Llama a ChartTemplatesRepository.createTemplateFieldAssignment"]:::llamada
-  n12 --> n13
-  n14[("CREA forms.field_assignments")]:::efecto
-  n13 --> n14
-  n15(("201 Responde con éxito")):::ok
-  n14 --> n15
-  n10 -->|"al terminar"| n15
+  n13{"input.options !== undefined || input.allowOther"}:::decision
+  n12 -->|"sí"| n13
+  n14(["422 PRECONDITION_FAILED `options`/`allowOther` sólo aplican a dataType 'code'"]):::error
+  n13 -->|"sí"| n14
+  n15{"input.valueSetId !== undefined && input.options !== undefined"}:::decision
+  n13 -->|"no"| n15
+  n12 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED Un campo 'code' declara valueSetId u options, no los dos"]):::error
+  n15 -->|"sí"| n16
+  n17{"input.valueSetId !== undefined"}:::decision
+  n15 -->|"no"| n17
+  n18{"input.allowOther"}:::decision
+  n17 -->|"sí"| n18
+  n19(["422 PRECONDITION_FAILED `allowOther` no aplica sobre un valueSetId"]):::error
+  n18 -->|"sí"| n19
+  n20{"opciones.length ‹ 2"}:::decision
+  n18 -->|"no"| n20
+  n17 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED Un campo 'code' sin valueSetId necesita al menos dos opciones"]):::error
+  n20 -->|"sí"| n21
+  n22["Repite: por cada const opcionCruda de opciones"]:::bucle
+  n20 -->|"no"| n22
+  n23{"opcion === ''"}:::decision
+  n22 -->|"cada elemento"| n23
+  n24(["422 PRECONDITION_FAILED Una opción no puede estar vacía"]):::error
+  n23 -->|"sí"| n24
+  n25{"vistas.has(opcion)"}:::decision
+  n23 -->|"no"| n25
+  n26(["422 PRECONDITION_FAILED Las opciones no pueden repetirse"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a ChartTemplatesRepository.createTemplateField"]:::llamada
+  n25 -->|"no"| n27
+  n22 -->|"al terminar"| n27
+  n28[("CREA forms.dynamic_field_definitions")]:::efecto
+  n27 --> n28
+  n29["Llama a ChartTemplatesRepository.createTemplateFieldAssignment"]:::llamada
+  n28 --> n29
+  n30[("CREA forms.field_assignments")]:::efecto
+  n29 --> n30
+  n31(("201 Responde con éxito")):::ok
+  n30 --> n31
+  n10 -->|"al terminar"| n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

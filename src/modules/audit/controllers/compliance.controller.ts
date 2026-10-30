@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { ComplianceService } from '../services';
 import { CreateAuditExportDto, AuditExportResultDto } from '../dto';
 
@@ -17,6 +22,10 @@ export class ComplianceController {
   constructor(private readonly complianceService: ComplianceService) {}
 
   /** UC-10-07. */
+  @Audited({
+    action: 'AUDIT_EXPORT',
+    entity: 'audit_log',
+  })
   @Post('audit-export')
   @Roles('SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)

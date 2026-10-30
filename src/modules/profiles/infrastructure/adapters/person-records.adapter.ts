@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
-import { findCurrentIdentityAssertionForPerson } from '../../../identity_assurance/repositories/identity-assertions.repository';
+import {
+  findCurrentIdentityAssertionForPerson,
+  findOpenIdentityCaseForPerson,
+} from '../../../identity_assurance/repositories/identity-assertions.repository';
 import {
   AddressesRepository,
   ContactPointsRepository,
@@ -27,6 +30,10 @@ export class PersonRecordsAdapter implements PersonRecordsPort {
 
   async hasCurrentIdentityAssertion(em: EntityManager, personId: string) {
     return Boolean(await findCurrentIdentityAssertionForPerson(em, personId));
+  }
+
+  async hasOpenIdentityCase(em: EntityManager, personId: string) {
+    return Boolean(await findOpenIdentityCaseForPerson(em, personId));
   }
 
   async findCurrentContact<T>(
@@ -103,6 +110,7 @@ export class PersonRecordsAdapter implements PersonRecordsPort {
       personId: data.personId,
       municipalityConceptId: data.municipalityConceptId,
       lines: data.lines,
+      district: data.district,
       latitude: data.latitude,
       longitude: data.longitude,
       actorUserId: data.actorUserId,

@@ -8,6 +8,7 @@ Contratos de entrada y salida, validación y documentación de la API.
 
 | Archivo | Responsabilidad |
 | --- | --- |
+| `medical-facility.dto.ts` | Contratos validados de entrada y salida. |
 | `page-response.dto.ts` | Contratos validados de entrada y salida. |
 | `pagination-query.dto.ts` | Contratos validados de entrada y salida. |
 

@@ -46,8 +46,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:44` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -107,10 +107,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PLATFORM_OPERATOR | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -185,7 +185,7 @@ El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RedisRuntimeController.deleteCache` — `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:99`
+- **Implementación:** `RedisRuntimeController.deleteCache` — `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:103`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -195,16 +195,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`DELETE /redis-runtime/cache/{key}` la atiende `RedisRuntimeController.deleteCache` (src/modules/redis_runtime/controllers/redis-runtime.controller.ts:99). Exige sesión con alguno de los roles PLATFORM_OPERATOR. Delega en `RedisRuntimeService.del`. No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales.
+`DELETE /redis-runtime/cache/{key}` la atiende `RedisRuntimeController.deleteCache` (src/modules/redis_runtime/controllers/redis-runtime.controller.ts:103). Exige sesión con alguno de los roles PLATFORM_OPERATOR. Delega en `RedisRuntimeService.del`. No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_OPERATOR | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_OPERATOR | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:103` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -258,7 +258,7 @@ El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RedisRuntimeController.getCache` — `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:82`
+- **Implementación:** `RedisRuntimeController.getCache` — `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:86`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -268,16 +268,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`GET /redis-runtime/cache/{key}` la atiende `RedisRuntimeController.getCache` (src/modules/redis_runtime/controllers/redis-runtime.controller.ts:82). Exige sesión con alguno de los roles PLATFORM_OPERATOR. Delega en `RedisRuntimeService.get`. No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales.
+`GET /redis-runtime/cache/{key}` la atiende `RedisRuntimeController.getCache` (src/modules/redis_runtime/controllers/redis-runtime.controller.ts:86). Exige sesión con alguno de los roles PLATFORM_OPERATOR. Delega en `RedisRuntimeService.get`. No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_OPERATOR | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:82` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_OPERATOR | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:86` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -332,7 +332,7 @@ El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RedisRuntimeController.acquireLock` — `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:120`
+- **Implementación:** `RedisRuntimeController.acquireLock` — `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:128`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -342,18 +342,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`POST /redis-runtime/locks` la atiende `RedisRuntimeController.acquireLock` (src/modules/redis_runtime/controllers/redis-runtime.controller.ts:120). Exige sesión con alguno de los roles PLATFORM_OPERATOR. Valida el cuerpo como `AcquireLockDto` (2 campos, 2 obligatorios). Delega en `RedisRuntimeService.acquireLock`. No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales.
+`POST /redis-runtime/locks` la atiende `RedisRuntimeController.acquireLock` (src/modules/redis_runtime/controllers/redis-runtime.controller.ts:128). Exige sesión con alguno de los roles PLATFORM_OPERATOR. Valida el cuerpo como `AcquireLockDto` (2 campos, 2 obligatorios). Delega en `RedisRuntimeService.acquireLock`. No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_OPERATOR | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:120` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: PLATFORM_OPERATOR | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:128` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -426,7 +426,7 @@ El árbol de decisión completo está en [flujos](../flujos/redis_runtime.md).
 - **Bloque:** —
 - **Riesgo:** BAJO — No toca tablas relacionales
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `RedisRuntimeController.releaseLock` — `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:143`
+- **Implementación:** `RedisRuntimeController.releaseLock` — `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:155`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -436,17 +436,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 ### Cómo se atiende (sistema)
 
-`DELETE /redis-runtime/locks/{key}` la atiende `RedisRuntimeController.releaseLock` (src/modules/redis_runtime/controllers/redis-runtime.controller.ts:143). Exige sesión con alguno de los roles PLATFORM_OPERATOR. Delega en `RedisRuntimeService.releaseLock`. No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales.
+`DELETE /redis-runtime/locks/{key}` la atiende `RedisRuntimeController.releaseLock` (src/modules/redis_runtime/controllers/redis-runtime.controller.ts:155). Exige sesión con alguno de los roles PLATFORM_OPERATOR. Delega en `RedisRuntimeService.releaseLock`. No toca tablas relacionales: opera sobre Redis, no sobre tablas relacionales.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: PLATFORM_OPERATOR | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:143` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
+| ROL | Alguno de: PLATFORM_OPERATOR | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:155` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_QUERY | token (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 

@@ -75,6 +75,42 @@ export class JurisdictionAuthorizations {
   fileId?: string;
 
   /**
+   * Quién verificó (o rechazó) la matrícula.
+   */
+  @Property({ fieldName: 'verified_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  verifiedByUserId?: string;
+
+  /**
+   * Cuándo se verificó (o rechazó).
+   */
+  @Property({
+    fieldName: 'verified_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  verifiedAt?: Date;
+
+  /**
+   * Fuente consultada para verificarla (registro del colegio, resolución).
+   */
+  @Property({
+    fieldName: 'verification_source_uri',
+    columnType: 'text',
+    nullable: true,
+  })
+  verificationSourceUri?: string;
+
+  /**
+   * Por qué se rechazó.
+   */
+  @Property({
+    fieldName: 'rejection_reason_text',
+    columnType: 'text',
+    nullable: true,
+  })
+  rejectionReasonText?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

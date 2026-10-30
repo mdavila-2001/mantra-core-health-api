@@ -8,6 +8,8 @@ import { jest } from '@jest/globals';
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { AuthzGrantsService } from './authz-grants.service';
+import { AUTHZ } from '../authz.concepts';
+import { AuthzErrorReason } from '../authz.error-reasons';
 import {
   ConflictException,
   PreconditionFailedException,
@@ -134,6 +136,68 @@ describe('AuthzGrantsService', () => {
         'role-1',
         { tenantId: 'tenant-B', branchId: undefined, practiceId: undefined },
       );
+    });
+
+    it('rejects a global-scope role assigned with a tenant (it would not authorize tenant-agnostic routes)', async () => {
+      const d = build();
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        code: 'DPO',
+        isAssignable: true,
+        scopeConceptId: AUTHZ.SCOPE_GLOBAL,
+      });
+      await expect(
+        d.service.assignRole(
+          'user-1',
+          { roleId: 'role-1', tenantId: 'tenant-1' } as any,
+          actor,
+        ),
+      ).rejects.toMatchObject({
+        reason: AuthzErrorReason.ROLE_ASSIGNMENT_GLOBAL_ROLE_WITH_SCOPE,
+      });
+      expect(d.assignmentsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('assigns a global-scope role without tenant', async () => {
+      const d = build();
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        code: 'DPO',
+        isAssignable: true,
+        scopeConceptId: AUTHZ.SCOPE_GLOBAL,
+      });
+      d.assignmentsRepo.findActive.mockResolvedValue(null);
+      d.assignmentsRepo.create.mockReturnValue({
+        id: 'a-1',
+        createdAt: new Date(),
+      });
+      const res = await d.service.assignRole(
+        'user-1',
+        { roleId: 'role-1' },
+        actor,
+      );
+      expect(res.id).toBe('a-1');
+    });
+
+    it('still allows a tenant-scope role with a tenant', async () => {
+      const d = build();
+      d.rolesRepo.findById.mockResolvedValue({
+        id: 'role-1',
+        code: 'CLINICIAN',
+        isAssignable: true,
+        scopeConceptId: AUTHZ.SCOPE_TENANT,
+      });
+      d.assignmentsRepo.findActive.mockResolvedValue(null);
+      d.assignmentsRepo.create.mockReturnValue({
+        id: 'a-2',
+        createdAt: new Date(),
+      });
+      const res = await d.service.assignRole(
+        'user-1',
+        { roleId: 'role-1', tenantId: 'tenant-1' },
+        actor,
+      );
+      expect(res.id).toBe('a-2');
     });
 
     it('throws when the role is missing', async () => {

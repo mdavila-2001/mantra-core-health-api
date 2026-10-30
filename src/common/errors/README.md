@@ -10,6 +10,9 @@ Agrupa los componentes relacionados con **errors** y mantiene cohesionada esta r
 | --- | --- |
 | `domain.exception.ts` | Implementación o recurso de soporte de esta carpeta. |
 | `error-codes.ts` | Implementación o recurso de soporte de esta carpeta. |
+| `system-error-reasons.ts` | Catálogo de `reason` de sistema (guards, pipes de query, readiness, secretos). `code` dice el tipo HTTP; `reason` dice cuál fue. |
+| `reasoned-http-exceptions.ts` | Fábricas `badRequestWithReason`/`forbiddenWithReason`/`unauthorizedWithReason`/`serviceUnavailableWithReason`: devuelven la clase de Nest (los `instanceof` existentes siguen valiendo) con cuerpo `{ code, message, reason, details }`. |
+| `secret-cipher.error.ts` | `SecretCipherError`: secreto cifrado ilegible; el filtro lo sirve como 500 `INTERNAL` con `reason: SECRET_CIPHER_INVALID`. |
 
 ## Criterios de mantenimiento
 

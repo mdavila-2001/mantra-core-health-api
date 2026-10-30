@@ -7,6 +7,17 @@ export interface PractitionerActivityCounts {
   documents: number;
 }
 
+/**
+ * Las cifras de un profesional que la guía usa para ordenar: su actividad y
+ * la nota de sus pacientes. Son las mismas que publica su ficha.
+ */
+export interface PractitionerDirectoryStats {
+  activity: PractitionerActivityCounts;
+  /** Media de las reseñas publicadas, o `null` si nadie lo calificó. */
+  ratingAverage: number | null;
+  ratingCount: number;
+}
+
 export interface PractitionerContextPort {
   onboardingContext(
     em: EntityManager,
@@ -19,6 +30,16 @@ export interface PractitionerContextPort {
     em: EntityManager,
     userId: string,
   ): Promise<PractitionerActivityCounts>;
+  /**
+   * Las cifras de una página entera de la guía, en lote.
+   *
+   * @returns Mapa `profileId → cifras`; quien no tiene cuenta ni reseñas no
+   *   aparece, y se lee como ceros.
+   */
+  directoryStats(
+    em: EntityManager,
+    profileIds: readonly string[],
+  ): Promise<Map<string, PractitionerDirectoryStats>>;
   hasAuthorizationHistory(
     em: EntityManager,
     authorizationId: string,

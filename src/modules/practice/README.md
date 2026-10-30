@@ -17,7 +17,7 @@ ajustes (`practice_settings`) e inventario (`inventory_items`,
   find src/modules/practice -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **6 controllers, 29 rutas HTTP, 11 entidad y 10 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **6 controllers, 29 rutas HTTP, 11 entidad y 10 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -25,37 +25,20 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 
 Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_spaces`, `clinical_units`, `healthcare_services`, `inventory_items`, `inventory_movements`, `practice_accreditations`, `practice_settings`, `practice_sites`, `practices`, `practitioner_role_assignments`, `practitioner_support_assignments`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /accreditations/:id/verify` | SECURITY_ADMIN | `accreditations` |
-| `POST /inventory-items/:itemId/movements` | SECURITY_ADMIN | `inventory-items` |
-| `GET /practices` | SECURITY_ADMIN,
-    SURGERY_SCHEDULER,
-    PERIOP_ADMIN,
-    SURGEON,
-    ANESTHESIOLOGIST,
-    PERIOP_NURSE,
-    SCHEDULING_ADMIN,
+| Método y ruta                             | Acceso          | Controller        |
+| ----------------------------------------- | --------------- | ----------------- |
+| `POST /accreditations/:id/verify`         | SECURITY_ADMIN  | `accreditations`  |
+| `POST /inventory-items/:itemId/movements` | SECURITY_ADMIN  | `inventory-items` |
+| `GET /practices` | sesión (el servicio exige un rol clínico o de programación, o ser OWNER/ADMIN de la organización) | `practices` |
 
-
-
-    PRACTITIONER,
-    CLINICIAN,
-    ACCOUNTING_APPROVER, | `practices` |
 | `GET /practices/:practiceId/organization` | SECURITY_ADMIN,
-    PERIOP_ADMIN,
-    SURGERY_SCHEDULER,
-    SCHEDULING_ADMIN,
-    PRACTITIONER,
-    CLINICIAN,
-    ACCOUNTING_APPROVER, | `practices` |
-| `GET /practices/:practiceId/sites` | SECURITY_ADMIN,
-    SURGERY_SCHEDULER,
-    PERIOP_ADMIN,
-    SURGEON,
-    ANESTHESIOLOGIST,
-    PERIOP_NURSE,
-    SCHEDULING_ADMIN, | `practices` |
+PERIOP_ADMIN,
+SURGERY_SCHEDULER,
+SCHEDULING_ADMIN,
+PRACTITIONER,
+CLINICIAN,
+ACCOUNTING_APPROVER, | `practices` |
+| `GET /practices/:practiceId/sites` | sesión (el servicio exige un rol de programación o ser OWNER/ADMIN de la organización) | `practices` |
 | `GET /practices/:practiceId/role-assignments` | SECURITY_ADMIN | `practices` |
 | `POST /practices` | SECURITY_ADMIN | `practices` |
 | `POST /practices/:practiceId/sites` | SECURITY_ADMIN | `practices` |
@@ -68,11 +51,11 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_spaces`, `clinic
 | `POST /practices/:practiceId/inventory-items` | SECURITY_ADMIN | `practices` |
 | `GET /practitioners/me/role-assignments` | PRACTITIONER | `practitioner-sites` |
 | `GET /practitioners/:profileId/sites` | SECURITY_ADMIN,
-    SCHEDULING_ADMIN,
-    SCHEDULING_AGENT,
-    PRACTITIONER,
-    CLINICIAN,
-    PATIENT, | `practitioner-sites` |
+SCHEDULING_ADMIN,
+SCHEDULING_AGENT,
+PRACTITIONER,
+CLINICIAN,
+PATIENT, | `practitioner-sites` |
 | `POST /practitioners/me/sites` | PRACTITIONER, CLINICIAN | `practitioner-sites` |
 | `PATCH /practitioners/me/sites/:siteId` | PRACTITIONER, CLINICIAN | `practitioner-sites` |
 | `PUT /practitioners/me/sites/:siteId/bank-qr` | PRACTITIONER, CLINICIAN | `practitioner-sites` |
@@ -84,12 +67,12 @@ Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_spaces`, `clinic
 | `POST /role-assignments/:roleId/end` | SECURITY_ADMIN | `role-assignments` |
 | `POST /sites/:siteId/clinical-units` | SECURITY_ADMIN | `sites` |
 | `GET /sites/:siteId/care-spaces` | SECURITY_ADMIN,
-    SURGERY_SCHEDULER,
-    PERIOP_ADMIN,
-    SURGEON,
-    ANESTHESIOLOGIST,
-    PERIOP_NURSE,
-    SCHEDULING_ADMIN, | `sites` |
+SURGERY_SCHEDULER,
+PERIOP_ADMIN,
+SURGEON,
+ANESTHESIOLOGIST,
+PERIOP_NURSE,
+SCHEDULING_ADMIN, | `sites` |
 | `POST /sites/:siteId/care-spaces` | SECURITY_ADMIN | `sites` |
 
 ## Infraestructura hospitalaria (F1, 2026-10-30)
@@ -156,21 +139,21 @@ Lectores de `practice_sites` fuera del módulo con RLS: inventario fijado en
 
 ## Endpoints (UC → ruta)
 
-| UC | Método y ruta | Descripción |
-|---|---|---|
-| bootstrap | `POST /practices` | Dar de alta la práctica raíz |
-| UC-14-01 | `POST /practices/:practiceId/sites` | Alta de sitio (op. status PLANNED) |
-| UC-14-02 | `POST /practices/:practiceId/accreditations` | Registrar acreditación (PENDING) |
-| UC-14-03 | `POST /accreditations/:id/verify` | Verificar (→VERIFIED) o caducar (→EXPIRED) |
-| UC-14-04 | `POST /sites/:siteId/clinical-units` | Crear unidad clínica jerárquica |
-| UC-14-05 | `POST /sites/:siteId/care-spaces` | Crear espacio de atención (F1: PLANNED salvo `activate`; cuerpo de F0 sin forma/función: ACTIVO y AVAILABLE) |
-| UC-14-06 | `POST /practices/:practiceId/healthcare-services` | Publicar servicio de salud |
-| UC-14-07 | `PUT /practices/:practiceId/settings/:settingKey` | Configurar ajuste (upsert) |
-| UC-14-08 | `POST /practices/:practiceId/role-assignments` | Asignar rol de profesional |
-| UC-14-09 | `POST /role-assignments/:roleId/support-assignments` | Adjuntar personal de apoyo |
-| UC-14-10 | `POST /practices/:practiceId/inventory-items` | Alta de insumo (stock 0) |
-| UC-14-11 | `POST /inventory-items/:itemId/movements` | Movimiento de stock (IN/OUT/ADJUST) |
-| UC-14-12 | `DELETE /practices/:practiceId/sites/:siteId` | Desmantelar sitio en cascada |
+| UC        | Método y ruta                                        | Descripción                                |
+| --------- | ---------------------------------------------------- | ------------------------------------------ |
+| bootstrap | `POST /practices`                                    | Dar de alta la práctica raíz               |
+| UC-14-01  | `POST /practices/:practiceId/sites`                  | Alta de sitio (op. status PLANNED)         |
+| UC-14-02  | `POST /practices/:practiceId/accreditations`         | Registrar acreditación (PENDING)           |
+| UC-14-03  | `POST /accreditations/:id/verify`                    | Verificar (→VERIFIED) o caducar (→EXPIRED) |
+| UC-14-04  | `POST /sites/:siteId/clinical-units`                 | Crear unidad clínica jerárquica            |
+| UC-14-05  | `POST /sites/:siteId/care-spaces`                    | Crear espacio de atención (F1: PLANNED salvo `activate`; cuerpo de F0 sin forma/función: ACTIVO y AVAILABLE) |
+| UC-14-06  | `POST /practices/:practiceId/healthcare-services`    | Publicar servicio de salud                 |
+| UC-14-07  | `PUT /practices/:practiceId/settings/:settingKey`    | Configurar ajuste (upsert)                 |
+| UC-14-08  | `POST /practices/:practiceId/role-assignments`       | Asignar rol de profesional                 |
+| UC-14-09  | `POST /role-assignments/:roleId/support-assignments` | Adjuntar personal de apoyo                 |
+| UC-14-10  | `POST /practices/:practiceId/inventory-items`        | Alta de insumo (stock 0)                   |
+| UC-14-11  | `POST /inventory-items/:itemId/movements`            | Movimiento de stock (IN/OUT/ADJUST)        |
+| UC-14-12  | `DELETE /practices/:practiceId/sites/:siteId`        | Desmantelar sitio en cascada               |
 
 > `POST /practices` no es un UC numerado del PUML; la práctica es el agregado raíz
 > que todos los demás casos presuponen (y su `practice_id` es una FK forzada), por

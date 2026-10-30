@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { WindowError } from '../../telemetry/domain/analytics-window';
+import { WindowError } from '../../../common/time/analytics-window';
 import { resolveTrafficWindow } from './traffic-window';
 
 const NOW = new Date('2026-10-17T15:30:00.000Z');

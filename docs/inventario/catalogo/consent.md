@@ -10,16 +10,16 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [consent_events](#consent_events) | Mantiene la secuencia de eventos de consentimiento para reconstruir otorgamientos, cambios y revocaciones. | 10 | 7 | 14 | COINCIDE |
-| [consent_evidence](#consent_evidence) | Vincula evidencia que respalda la obtención de un consentimiento y su contexto probatorio. | 11 | 7 | 1 | COINCIDE |
+| [consent_events](#consent_events) | Mantiene la secuencia de eventos de consentimiento para reconstruir otorgamientos, cambios y revocaciones. | 10 | 7 | 15 | COINCIDE |
+| [consent_evidence](#consent_evidence) | Vincula evidencia que respalda la obtención de un consentimiento y su contexto probatorio. | 11 | 7 | 6 | COINCIDE |
 | [consent_provisions](#consent_provisions) | Desglosa un consentimiento en disposiciones específicas para representar alcances diferenciados dentro de una autorización. | 17 | 12 | 8 | COINCIDE |
-| [consents](#consents) | Conserva el estado de consentimiento de un titular respecto de una finalidad, para apoyar la habilitación o bloqueo de usos de datos. | 20 | 15 | 17 | COINCIDE |
-| [hipaa_authorizations](#hipaa_authorizations) | Registra autorizaciones de divulgación estructuradas según el modelo de autorización HIPAA contemplado por el sistema. | 17 | 9 | 6 | COINCIDE |
+| [consents](#consents) | Conserva el estado de consentimiento de un titular respecto de una finalidad, para apoyar la habilitación o bloqueo de usos de datos. | 20 | 15 | 22 | COINCIDE |
+| [hipaa_authorizations](#hipaa_authorizations) | Registra autorizaciones de divulgación estructuradas según el modelo de autorización HIPAA contemplado por el sistema. | 17 | 9 | 5 | COINCIDE |
 | [patient_objections](#patient_objections) | Registra objeciones de pacientes a usos o tratamientos de datos para hacerlas visibles a los controles del sistema. | 15 | 10 | 5 | COINCIDE |
-| [privacy_restrictions](#privacy_restrictions) | Representa restricciones de privacidad que deben considerarse al acceder o utilizar información de una persona. | 16 | 11 | 6 | COINCIDE |
-| [processing_legal_bases](#processing_legal_bases) | Registra las bases legales asociadas a finalidades de tratamiento y aporta contexto a la autorización de operaciones con datos de salud. | 16 | 11 | 3 | COINCIDE |
-| [processing_purposes](#processing_purposes) | Define finalidades de tratamiento para que el sistema médico pueda relacionar cada uso de datos con un propósito identificable. | 13 | 7 | 3 | COINCIDE |
-| [treatment_informed_consents](#treatment_informed_consents) | Conserva consentimientos informados vinculados a tratamientos para documentar el acto de autorización asistencial. | 17 | 12 | 4 | COINCIDE |
+| [privacy_restrictions](#privacy_restrictions) | Representa restricciones de privacidad que deben considerarse al acceder o utilizar información de una persona. | 16 | 11 | 8 | COINCIDE |
+| [processing_legal_bases](#processing_legal_bases) | Registra las bases legales asociadas a finalidades de tratamiento y aporta contexto a la autorización de operaciones con datos de salud. | 16 | 11 | 5 | COINCIDE |
+| [processing_purposes](#processing_purposes) | Define finalidades de tratamiento para que el sistema médico pueda relacionar cada uso de datos con un propósito identificable. | 13 | 7 | 8 | COINCIDE |
+| [treatment_informed_consents](#treatment_informed_consents) | Conserva consentimientos informados vinculados a tratamientos para documentar el acto de autorización asistencial. | 17 | 12 | 13 | DIVERGE |
 
 ## Diagrama entidad-relación
 
@@ -111,7 +111,7 @@ Mantiene la secuencia de eventos de consentimiento para reconstruir otorgamiento
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: consent_events`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `ConsentEvents` — `src/modules/consent/entities/consent_events.entity.ts`
-- **Resumen:** 10 columnas · 7 índices · 6 FK salientes · 0 entrantes · 14 operaciones
+- **Resumen:** 10 columnas · 7 índices · 6 FK salientes · 0 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -169,6 +169,7 @@ Mantiene la secuencia de eventos de consentimiento para reconstruir otorgamiento
 | POST /consent/practitioner-access-requests/{id}/decision | CREA | DIRECTA |
 | POST /consent/privacy-restrictions | CREA | DIRECTA |
 | POST /consent/treatment-informed-consents | CREA | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | CREA | DIRECTA |
 
 #### Gobierno
 
@@ -193,7 +194,7 @@ Vincula evidencia que respalda la obtención de un consentimiento y su contexto 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: consent_evidence`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `ConsentEvidence` — `src/modules/consent/entities/consent_evidence.entity.ts`
-- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 1 operaciones
+- **Resumen:** 11 columnas · 7 índices · 6 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -226,19 +227,24 @@ Vincula evidencia que respalda la obtención de un consentimiento y su contexto 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_consent_evidence_subject_type_concept_id` | no | subject_type_concept_id | Soporta la clave foránea fk_consent_evidence_subject_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_consent_evidence_subject_type_concept_id` | no | subject_type_concept_id | Soporta la clave foránea fk_consent_evidence_subject_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «subject_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_consent_evidence_evidence_type_concept_id` | no | evidence_type_concept_id | Soporta la clave foránea fk_consent_evidence_evidence_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consent_evidence_document_file_id` | no | document_file_id | Soporta la clave foránea fk_consent_evidence_document_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consent_evidence_signature_id` | no | signature_id | Soporta la clave foránea fk_consent_evidence_signature_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consent_evidence_captured_channel_concept_id` | no | captured_channel_concept_id | Soporta la clave foránea fk_consent_evidence_captured_channel_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consent_evidence_recorded_by_user_id` | no | recorded_by_user_id | Soporta la clave foránea fk_consent_evidence_recorded_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `brin_consent_evidence_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_ |
+| `brin_consent_evidence_recorded_at` | no | recorded_at | BRIN para logs e historiales append-only de gran volumen _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «recorded_at», la primera columna del índice _(CONSULTA)_ |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /consent/consent-evidence | CREA | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | CREA | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -356,7 +362,7 @@ Conserva el estado de consentimiento de un titular respecto de una finalidad, pa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: consents`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `Consents` — `src/modules/consent/entities/consents.entity.ts`
-- **Resumen:** 20 columnas · 15 índices · 11 FK salientes · 8 entrantes · 17 operaciones
+- **Resumen:** 20 columnas · 15 índices · 11 FK salientes · 8 entrantes · 22 operaciones
 
 #### Columnas
 
@@ -411,14 +417,14 @@ Conserva el estado de consentimiento de un titular respecto de una finalidad, pa
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_consents_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_consents_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_consents_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_consents_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_consents_granted_by_user_id` | no | granted_by_user_id | Soporta la clave foránea fk_consents_granted_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consents_granted_by_related_person_id` | no | granted_by_related_person_id | Soporta la clave foránea fk_consents_granted_by_related_person_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consents_category_concept_id` | no | category_concept_id | Soporta la clave foránea fk_consents_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «category_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_consents_processing_purpose_id` | no | processing_purpose_id | Soporta la clave foránea fk_consents_processing_purpose_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «processing_purpose_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_consents_processing_purpose_id` | no | processing_purpose_id | Soporta la clave foránea fk_consents_processing_purpose_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «processing_purpose_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_consents_processing_legal_basis_id` | no | processing_legal_basis_id | Soporta la clave foránea fk_consents_processing_legal_basis_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_consents_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_consents_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_consents_tenant_id` | no | tenant_id | Soporta la clave foránea fk_consents_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_consents_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_consents_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_consents_tenant_id` | no | tenant_id | Soporta la clave foránea fk_consents_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_consents_withdrawal_reason_concept_id` | no | withdrawal_reason_concept_id | Soporta la clave foránea fk_consents_withdrawal_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_consents_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_consents_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «created_by_user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_consents_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_consents_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -431,23 +437,28 @@ Conserva el estado de consentimiento de un titular respecto de una finalidad, pa
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /authz/patients/{patientProfileId}/clinical-access-grants | LEE | DIRECTA |
 | POST /consent/consents | CREA | DIRECTA |
 | POST /consent/consents | LEE | DIRECTA |
 | PATCH /consent/consents/{id}/provisions | LEE | DIRECTA |
-| POST /consent/consents/{id}/withdraw | ACTUALIZA | POR_TIPO |
 | POST /consent/consents/{id}/withdraw | LEE | DIRECTA |
 | POST /consent/internal/expiration-sweep | ACTUALIZA | POR_TIPO |
 | POST /consent/internal/expiration-sweep | LEE | DIRECTA |
 | GET /consent/me/consents | LEE | DIRECTA |
-| POST /consent/me/consents/{id}/withdraw | ACTUALIZA | POR_TIPO |
 | POST /consent/me/consents/{id}/withdraw | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests | CREA | DIRECTA |
 | POST /consent/practitioner-access-requests | LEE | DIRECTA |
 | POST /consent/practitioner-access-requests/{id}/decision | ACTUALIZA | POR_TIPO |
 | POST /consent/practitioner-access-requests/{id}/decision | LEE | DIRECTA |
 | GET /consent/practitioner-access-requests/mine | LEE | DIRECTA |
+| POST /graph/paths | LEE | DIRECTA |
+| POST /graph/traverse | LEE | DIRECTA |
+| POST /fhir/r5/$export | LEE | DIRECTA |
+| POST /health-data/deidentification-runs | LEE | DIRECTA |
+| POST /identity/verification-cases/{id}/evidence | LEE | DIRECTA |
 | POST /internal/identity/evidence/lifecycle-scan | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
+| POST /ts/location/pings/batch-ingest | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -472,7 +483,7 @@ Registra autorizaciones de divulgación estructuradas según el modelo de autori
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: hipaa_authorizations`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `HipaaAuthorizations` — `src/modules/consent/entities/hipaa_authorizations.entity.ts`
-- **Resumen:** 17 columnas · 9 índices · 7 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 17 columnas · 9 índices · 7 FK salientes · 0 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -527,7 +538,6 @@ Registra autorizaciones de divulgación estructuradas según el modelo de autori
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /consent/hipaa-authorizations | CREA | DIRECTA |
-| POST /consent/hipaa-authorizations/{id}/revoke | ACTUALIZA | POR_TIPO |
 | POST /consent/hipaa-authorizations/{id}/revoke | LEE | DIRECTA |
 | POST /consent/internal/expiration-sweep | ACTUALIZA | POR_TIPO |
 | POST /consent/internal/expiration-sweep | LEE | DIRECTA |
@@ -639,7 +649,7 @@ Representa restricciones de privacidad que deben considerarse al acceder o utili
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: privacy_restrictions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `PrivacyRestrictions` — `src/modules/consent/entities/privacy_restrictions.entity.ts`
-- **Resumen:** 16 columnas · 11 índices · 8 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 16 columnas · 11 índices · 8 FK salientes · 0 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -679,12 +689,12 @@ Representa restricciones de privacidad que deben considerarse al acceder o utili
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_privacy_restrictions_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_privacy_restrictions_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_privacy_restrictions_tenant_id` | no | tenant_id | Soporta la clave foránea fk_privacy_restrictions_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_privacy_restrictions_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_privacy_restrictions_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_privacy_restrictions_tenant_id` | no | tenant_id | Soporta la clave foránea fk_privacy_restrictions_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_privacy_restrictions_restriction_type_concept_id` | no | restriction_type_concept_id | Soporta la clave foránea fk_privacy_restrictions_restriction_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_privacy_restrictions_data_class_concept_id` | no | data_class_concept_id | Soporta la clave foránea fk_privacy_restrictions_data_class_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_privacy_restrictions_target_actor_type_concept_id` | no | target_actor_type_concept_id | Soporta la clave foránea fk_privacy_restrictions_target_actor_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_privacy_restrictions_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_privacy_restrictions_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_privacy_restrictions_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_privacy_restrictions_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_privacy_restrictions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_privacy_restrictions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_privacy_restrictions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_privacy_restrictions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_privacy_restrictions_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -701,6 +711,8 @@ Representa restricciones de privacidad que deben considerarse al acceder o utili
 | POST /consent/patient-objections/{id}/resolve | ACTUALIZA | POR_TIPO |
 | POST /consent/patient-objections/{id}/resolve | LEE | DIRECTA |
 | POST /consent/privacy-restrictions | CREA | DIRECTA |
+| POST /graph/paths | LEE | DIRECTA |
+| POST /graph/traverse | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -725,7 +737,7 @@ Registra las bases legales asociadas a finalidades de tratamiento y aporta conte
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: processing_legal_bases`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `ProcessingLegalBases` — `src/modules/consent/entities/processing_legal_bases.entity.ts`
-- **Resumen:** 16 columnas · 11 índices · 8 FK salientes · 2 entrantes · 3 operaciones
+- **Resumen:** 16 columnas · 11 índices · 8 FK salientes · 2 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -789,6 +801,8 @@ Registra las bases legales asociadas a finalidades de tratamiento y aporta conte
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /consent/consents | LEE | DIRECTA |
+| POST /consent/hipaa-authorizations | LEE | DIRECTA |
 | POST /consent/processing-legal-bases | ACTUALIZA | POR_TIPO |
 | POST /consent/processing-legal-bases | CREA | DIRECTA |
 | POST /consent/processing-legal-bases | LEE | DIRECTA |
@@ -816,7 +830,7 @@ Define finalidades de tratamiento para que el sistema médico pueda relacionar c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: processing_purposes`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `ProcessingPurposes` — `src/modules/consent/entities/processing_purposes.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 6 FK salientes · 4 entrantes · 3 operaciones
+- **Resumen:** 13 columnas · 7 índices · 6 FK salientes · 4 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -855,7 +869,7 @@ Define finalidades de tratamiento para que el sistema médico pueda relacionar c
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_processing_purposes_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_ |
+| `uq_processing_purposes_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_processing_purposes_purpose_category_concept_id` | no | purpose_category_concept_id | Soporta la clave foránea fk_processing_purposes_purpose_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_processing_purposes_purpose_of_use_concept_id` | no | purpose_of_use_concept_id | Soporta la clave foránea fk_processing_purposes_purpose_of_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_processing_purposes_default_retention_class_concept_id` | no | default_retention_class_concept_id | Soporta la clave foránea fk_processing_purposes_default_retention_class_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -873,9 +887,14 @@ Define finalidades de tratamiento para que el sistema médico pueda relacionar c
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /consent/consents | LEE | DIRECTA |
+| POST /consent/hipaa-authorizations | LEE | DIRECTA |
 | GET /consent/me/consents | LEE | DIRECTA |
 | GET /consent/me/hipaa-authorizations | LEE | DIRECTA |
 | GET /consent/me/objections | LEE | DIRECTA |
+| POST /graph/paths | LEE | DIRECTA |
+| POST /graph/traverse | LEE | DIRECTA |
+| POST /ts/location/pings/batch-ingest | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -900,13 +919,13 @@ Conserva consentimientos informados vinculados a tratamientos para documentar el
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_07_consent.puml: treatment_informed_consents`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_07_consent.puml` · **DDL:** `SQL/07_consent/02_tables.sql`
 - **Entidad del ORM:** `TreatmentInformedConsents` — `src/modules/consent/entities/treatment_informed_consents.entity.ts`
-- **Resumen:** 17 columnas · 12 índices · 10 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 17 columnas · 12 índices · 10 FK salientes · 0 entrantes · 13 operaciones
 
 #### Columnas
 
 | # | Columna | Tipo | Rol estructural | Descripción | ORM |
 |---|---|---|---|---|---|
-| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:12`)_ | coincide |
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | Identificador único de la instancia. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:18`)_ | coincide |
 | 2 | `patient_profile_id` | `uuid` | Clave foránea → profiles.patient_profiles.profile_id; Obligatoria | _sin dato_ | coincide |
 | 3 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `encounter_id` | `uuid` | Clave foránea → clinical.encounters.id; Obligatoria | _sin dato_ | coincide |
@@ -918,11 +937,11 @@ Conserva consentimientos informados vinculados a tratamientos para documentar el
 | 10 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 11 | `signed_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 12 | `withdrawn_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:100`)_ | coincide |
-| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:106`)_ | coincide |
+| 13 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:358`)_ | coincide |
+| 14 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/consent/entities/treatment_informed_consents.entity.ts:364`)_ | coincide |
 | 15 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 16 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/consent/entities/treatment_informed_consents.entity.ts:124`)_ | coincide |
+| 17 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/consent/entities/treatment_informed_consents.entity.ts:382`)_ | coincide |
 
 #### Relaciones
 
@@ -943,7 +962,7 @@ Conserva consentimientos informados vinculados a tratamientos para documentar el
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_treatment_informed_consents_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_treatment_informed_consents_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_treatment_informed_consents_patient_profile_id` | no | patient_profile_id | Soporta la clave foránea fk_treatment_informed_consents_patient_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «patient_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_treatment_informed_consents_tenant_id` | no | tenant_id | Soporta la clave foránea fk_treatment_informed_consents_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_treatment_informed_consents_encounter_id` | no | encounter_id | Soporta la clave foránea fk_treatment_informed_consents_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_treatment_informed_consents_procedure_code_concept_id` | no | procedure_code_concept_id | Soporta la clave foránea fk_treatment_informed_consents_procedure_code_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -962,8 +981,17 @@ Conserva consentimientos informados vinculados a tratamientos para documentar el
 |---|---|---|
 | GET /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | CREA | DIRECTA |
+| POST /consent/encounters/{encounterId}/informed-consent | LEE | DIRECTA |
 | GET /consent/me/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents | LEE | DIRECTA |
 | POST /consent/treatment-informed-consents | CREA | DIRECTA |
+| POST /consent/treatment-informed-consents | LEE | DIRECTA |
+| GET /consent/treatment-informed-consents/{id} | LEE | DIRECTA |
+| POST /consent/treatment-informed-consents/{id}/evidence | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | ACTUALIZA | POR_TIPO |
+| PATCH /consent/treatment-informed-consents/{id}/post-emergency-information | LEE | DIRECTA |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | ACTUALIZA | POR_TIPO |
+| PATCH /consent/treatment-informed-consents/{id}/withdraw | LEE | DIRECTA |
 
 #### Gobierno
 

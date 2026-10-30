@@ -3,7 +3,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { CONCEPTS } from '../../../common';
 import { COMM } from '../../community/community.concepts';
 import { PHARM } from '../pharmacy.concepts';
-import { PINV } from '../../pharmacy_inventory/domain/pharmacy_inventory.concepts';
+import { siteProductAvailabilitySql } from '../../pharmacy_inventory/domain/site-product-availability';
 
 /** Una oferta publicada: un producto de una farmacia, con precio y stock. */
 export interface PublishedOffer {
@@ -35,8 +35,14 @@ export interface PublishedOffer {
   price: string;
   /** Código de moneda. */
   currency: string;
-  /** Unidades disponibles hoy. */
+  /** Unidades disponibles hoy (0 si no tiene posición y no se declaró conteo). */
   availableQuantity: number;
+  /**
+   * Si la sede lo tiene hoy, según la regla única de existencias
+   * (`siteProductAvailabilitySql`): lotes si el producto tiene posición en la
+   * sede, lo declarado en el catálogo si no, nunca lo marcado «no tengo».
+   */
+  inStock: boolean;
   /** La sede entrega a domicilio. */
   homeDelivery: boolean;
   /** Se puede retirar en la sede. */
@@ -91,6 +97,7 @@ export class PharmacyMarketplaceRepository {
     filter: { texto?: string; conceptId?: string },
   ): Promise<PublishedOffer[]> {
     const text = filter.texto?.trim();
+    const availability = siteProductAvailabilitySql();
     const rows = await em.getConnection().execute<
       Array<{
         concept_id: string;
@@ -108,6 +115,7 @@ export class PharmacyMarketplaceRepository {
         price: string;
         currency: string;
         available_quantity: string;
+        in_stock: boolean;
         home_delivery: boolean | null;
         pickup: boolean | null;
         requires_prescription: boolean | null;
@@ -128,7 +136,8 @@ export class PharmacyMarketplaceRepository {
               prod.package_size_text AS package_size_text,
               COALESCE(price.patient_amount, price.unit_amount)::text AS price,
               cur.code              AS currency,
-              COALESCE(stock.available_quantity, 0)::text AS available_quantity,
+              COALESCE(av.available_quantity, 0)::text AS available_quantity,
+              (av.product_id IS NOT NULL) AS in_stock,
               site.home_delivery_available AS home_delivery,
               site.pickup_available        AS pickup,
               prod.requires_prescription   AS requires_prescription
@@ -176,12 +185,11 @@ export class PharmacyMarketplaceRepository {
                  ORDER BY d.preferred DESC
                  LIMIT 1
               ) es ON true
-    LEFT JOIN pharmacy_inventory.inventory_locations loc
-           ON loc.pharmacy_site_id = site.id
-          AND loc.status_concept_id = ?
-    LEFT JOIN pharmacy_inventory.inventory_stock_positions stock
-           ON stock.inventory_location_id = loc.id
-          AND stock.pharmacy_product_id = prod.id
+    -- La regla única de disponibilidad por sede (A1): lotes si el producto
+    -- tiene posición en la sede, lo declarado en el catálogo si no.
+    LEFT JOIN (${availability.sql}) av
+           ON av.site_id = site.id
+          AND av.product_id = prod.id
         WHERE prod.status_concept_id = ?
           AND (CAST(? AS uuid) IS NULL OR prod.medication_concept_id = CAST(? AS uuid))
           AND (
@@ -192,7 +200,8 @@ export class PharmacyMarketplaceRepository {
              OR prod.brand_name   ILIKE '%' || CAST(? AS text) || '%'
              OR prod.generic_name ILIKE '%' || CAST(? AS text) || '%'
           )
-        ORDER BY prod.id, stock.available_quantity DESC NULLS LAST`,
+        ORDER BY prod.id, (av.product_id IS NOT NULL) DESC,
+                 av.available_quantity DESC NULLS LAST`,
       [
         PHARM.PHARMACY_ACTIVE,
         PHARM.VERIFICATION_VERIFIED,
@@ -201,7 +210,7 @@ export class PharmacyMarketplaceRepository {
         PHARM.PRICE_ACTIVE,
         COMM.PROFILE_VISIBILITY_PUBLIC,
         CONCEPTS.STATE_ACTIVE,
-        PINV.LOCATION_ACTIVE,
+        ...availability.params,
         PHARM.PRODUCT_ACTIVE,
         filter.conceptId ?? null,
         filter.conceptId ?? null,
@@ -231,6 +240,7 @@ export class PharmacyMarketplaceRepository {
       price: row.price,
       currency: row.currency,
       availableQuantity: Number(row.available_quantity),
+      inStock: row.in_stock === true,
       homeDelivery: row.home_delivery === true,
       pickup: row.pickup === true,
       requiresPrescription: row.requires_prescription === true,

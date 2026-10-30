@@ -3,13 +3,13 @@
 # Flujos del módulo `billing`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 34 (32 con decisiones propias, 2 sin ellas)
+- **Operaciones:** 38 (35 con decisiones propias, 3 sin ellas)
 - Inventario de endpoints del módulo: [billing](../endpoints/billing.md)
 
 ## Proceso: Módulo Billing (17)
 
-- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 34
-- **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN · SYSTEM
+- **Código:** `billing` · **Agrupación:** MIXTO · **Operaciones:** 38
+- **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/billing/README.md`
 
@@ -23,32 +23,35 @@ _Fuente: `src/modules/billing/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
-| `UC-17-01` | InvoicesService.issueFromEncounter | POST /billing/invoices:issue-from-encounter | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-17-02` | PaymentsReceivedService.apply | POST /billing/payments-received:apply | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-17-03` | InvoicesService.creditNote | POST /billing/invoices/{id}:credit-note | SECURITY_ADMIN | MEDIO | 5 |
-| `UC-17-04` | BillsService.register | POST /billing/bills | SECURITY_ADMIN | MEDIO | 5 |
+| `UC-17-01` | InvoicesService.issueFromEncounter | POST /billing/invoices:issue-from-encounter | SECURITY_ADMIN | MEDIO | 5 |
+| `UC-17-02` | PaymentsReceivedService.apply | POST /billing/payments-received:apply | SECURITY_ADMIN | MEDIO | 6 |
+| `UC-17-03` | InvoicesService.creditNote | POST /billing/invoices/{id}:credit-note | SECURITY_ADMIN | MEDIO | 4 |
+| `UC-17-04` | BillsService.register | POST /billing/bills | SECURITY_ADMIN | MEDIO | 7 |
 | `UC-17-05` | PaymentsMadeService.execute | POST /billing/payments-made:execute | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-17-06` | LedgerService.postToLedger | POST /billing/documents/{id}:post-to-ledger | SECURITY_ADMIN | BAJO | 4 |
-| `UC-17-07` | ReconciliationService.clear | POST /billing/reconciliation:clear | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-17-08` | ReimbursementsService.link | POST /billing/reimbursements:link | SECURITY_ADMIN | MEDIO | 5 |
+| `UC-17-07` | ReconciliationService.clear | POST /billing/reconciliation:clear | SECURITY_ADMIN | BAJO | 2 |
+| `UC-17-08` | ReimbursementsService.link | POST /billing/reimbursements:link | SECURITY_ADMIN | MEDIO | 4 |
 | `UC-17-09` | PatientStatementsService.generate | POST /billing/patient-statements:generate | SECURITY_ADMIN | MEDIO | 4 |
-| `UC-17-10` | DunningService.execute | POST /billing/dunning-runs:execute | SECURITY_ADMIN | MEDIO | 6 |
-| `UC-17-11` | InvoicesService.createPaymentPlan | POST /billing/payment-plans | SECURITY_ADMIN | MEDIO | 4 |
+| `UC-17-10` | DunningService.execute | POST /billing/dunning-runs:execute | SECURITY_ADMIN | MEDIO | 5 |
+| `UC-17-11` | InvoicesService.createPaymentPlan | POST /billing/payment-plans | SECURITY_ADMIN | MEDIO | 3 |
 | `UC-17-12` | KpiSnapshotsService.compute | POST /billing/kpi-snapshots:compute | SECURITY_ADMIN | MEDIO | 2 |
 | `ctrl:BillingOperationsController` | Operaciones de BillingOperationsController que el README no asigna a un caso de uso | POST /billing/internal/dunning-runs/run-due | SYSTEM · SECURITY_ADMIN | MEDIO | 7 |
 | `ctrl:BillingReceivablesController` | Operaciones de BillingReceivablesController que el README no asigna a un caso de uso | GET /billing/invoices | SECURITY_ADMIN | BAJO | 2 |
 |  |  | GET /billing/invoices/{id} | SECURITY_ADMIN | BAJO | 3 |
 |  |  | GET /billing/patient-statements | SECURITY_ADMIN | BAJO | 2 |
 | `ctrl:BillingServiceCatalogController` | Operaciones de BillingServiceCatalogController que el README no asigna a un caso de uso | GET /billing/service-catalog | Cualquier sesión válida | BAJO | 1 |
-|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 10 |
+|  |  | POST /billing/service-catalog | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 5 |
 |  |  | PATCH /billing/service-catalog/{id} | PRACTITIONER · CLINICIAN · SECURITY_ADMIN | MEDIO | 4 |
+|  |  | GET /billing/service-catalog/{id}/image | Cualquier sesión válida | BAJO | 4 |
+|  |  | POST /billing/service-catalog/import-procedures | SECURITY_ADMIN · PRACTITIONER · CLINICIAN | MEDIO | 5 |
 |  |  | GET /billing/service-catalog/procedure-specialties | Cualquier sesión válida | BAJO | 1 |
+|  |  | GET /billing/service-catalog/procedure-specialties/mine | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /billing/service-catalog/procedures | Cualquier sesión válida | BAJO | 2 |
 | `ctrl:BillingSimulatedController` | Operaciones de BillingSimulatedController que el README no asigna a un caso de uso | GET /billing/simulated/catalogs | Cualquier sesión válida | BAJO | 0 |
 |  |  | GET /billing/simulated/charges | Cualquier sesión válida | BAJO | 11 |
 |  |  | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | Cualquier sesión válida | BAJO | 11 |
 |  |  | POST /billing/simulated/charges/{chargeId}/invoices | Cualquier sesión válida | ALTO | 12 |
-|  |  | POST /billing/simulated/charges/{chargeId}/payment | Cualquier sesión válida | ALTO | 17 |
+|  |  | POST /billing/simulated/charges/{chargeId}/payment | Cualquier sesión válida | ALTO | 18 |
 |  |  | GET /billing/simulated/invoices/{invoiceId} | Cualquier sesión válida | BAJO | 11 |
 |  |  | POST /billing/simulated/invoices/{invoiceId}/annulment | Cualquier sesión válida | ALTO | 12 |
 |  |  | POST /billing/simulated/invoices/{invoiceId}/annulment-reversal | Cualquier sesión válida | ALTO | 12 |
@@ -57,214 +60,231 @@ _Fuente: `src/modules/billing/README.md:3`_
 |  |  | GET /billing/simulated/my-invoices/{invoiceId} | Cualquier sesión válida | BAJO | 4 |
 |  |  | GET /billing/simulated/outbox | Cualquier sesión válida | BAJO | 3 |
 |  |  | GET /billing/simulated/status | Cualquier sesión válida | BAJO | 2 |
+| `ctrl:PatientSpendingController` | Operaciones de PatientSpendingController que el README no asigna a un caso de uso | GET /patient-spending/me | PATIENT | BAJO | 11 |
 
 ### Diagrama 1 de 2 — etapas `UC-17-01`, `UC-17-02`, `UC-17-03`…
 
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a30(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a35(["SYSTEM · SECURITY_ADMIN"]):::actor
   t3[("billing.billing_document_links")]:::tabla
   t4[("billing.invoice_lines")]:::tabla
   t5[("billing.invoices")]:::tabla
-  t7[("billing.payments_received")]:::tabla
-  t8[("billing.receivable_payment_allocations")]:::tabla
-  t11[("billing.bill_lines")]:::tabla
-  t12[("billing.bills")]:::tabla
-  t13[("billing.vendors")]:::tabla
-  t15[("billing.payable_payment_allocations")]:::tabla
-  t16[("billing.payments_made")]:::tabla
-  t20[("billing.reimbursements")]:::tabla
-  t22[("billing.patient_statements")]:::tabla
-  t24[("billing.dunning_items")]:::tabla
-  t25[("billing.dunning_runs")]:::tabla
-  t28[("billing.financial_kpi_snapshots")]:::tabla
-  t33[("practice.practices")]:::tabla
+  t6[("clinical.encounters")]:::tabla
+  t8[("billing.payments_received")]:::tabla
+  t9[("billing.receivable_payment_allocations")]:::tabla
+  t10[("insurance.claim_disputes")]:::tabla
+  t11[("insurance.insurance_claim_lines")]:::tabla
+  t14[("billing.bill_lines")]:::tabla
+  t15[("billing.bills")]:::tabla
+  t16[("billing.vendors")]:::tabla
+  t17[("erp.contracts")]:::tabla
+  t20[("billing.payable_payment_allocations")]:::tabla
+  t21[("billing.payments_made")]:::tabla
+  t25[("billing.reimbursements")]:::tabla
+  t27[("billing.patient_statements")]:::tabla
+  t29[("billing.dunning_items")]:::tabla
+  t30[("billing.dunning_runs")]:::tabla
+  t33[("billing.financial_kpi_snapshots")]:::tabla
+  t38[("practice.practices")]:::tabla
   subgraph s0["UC-17-01 · InvoicesService.issueFromEncounter"]
     o1["POST /billing/invoices:issue-from-encounter"]:::op
   end
   subgraph s1["UC-17-02 · PaymentsReceivedService.apply"]
-    o6["POST /billing/payments-received:apply"]:::op
+    o7["POST /billing/payments-received:apply"]:::op
   end
   subgraph s2["UC-17-03 · InvoicesService.creditNote"]
-    o9["POST /billing/invoices/{id}:credit-note"]:::op
+    o12["POST /billing/invoices/{id}:credit-note"]:::op
   end
+  t18[("+1 tablas más")]
   subgraph s3["UC-17-04 · BillsService.register"]
-    o10["POST /billing/bills"]:::op
+    o13["POST /billing/bills"]:::op
   end
   subgraph s4["UC-17-05 · PaymentsMadeService.execute"]
-    o14["POST /billing/payments-made:execute"]:::op
+    o19["POST /billing/payments-made:execute"]:::op
   end
   subgraph s5["UC-17-06 · LedgerService.postToLedger"]
-    o17["POST /billing/documents/{id}:post-to-ledger"]:::op
+    o22["POST /billing/documents/{id}:post-to-ledger"]:::op
   end
   subgraph s6["UC-17-07 · ReconciliationService.clear"]
-    o18["POST /billing/reconciliation:clear"]:::op
+    o23["POST /billing/reconciliation:clear"]:::op
   end
   subgraph s7["UC-17-08 · ReimbursementsService.link"]
-    o19["POST /billing/reimbursements:link"]:::op
+    o24["POST /billing/reimbursements:link"]:::op
   end
   subgraph s8["UC-17-09 · PatientStatementsService.generate"]
-    o21["POST /billing/patient-statements:generate"]:::op
+    o26["POST /billing/patient-statements:generate"]:::op
   end
   subgraph s9["UC-17-10 · DunningService.execute"]
-    o23["POST /billing/dunning-runs:execute"]:::op
+    o28["POST /billing/dunning-runs:execute"]:::op
   end
   subgraph s10["UC-17-11 · InvoicesService.createPaymentPlan"]
-    o26["POST /billing/payment-plans"]:::op
+    o31["POST /billing/payment-plans"]:::op
   end
   subgraph s11["UC-17-12 · KpiSnapshotsService.compute"]
-    o27["POST /billing/kpi-snapshots:compute"]:::op
+    o32["POST /billing/kpi-snapshots:compute"]:::op
   end
-  t31[("+1 tablas más")]
+  t36[("+1 tablas más")]
   subgraph s12["ctrl:BillingOperationsController · Operaciones de BillingOperationsController q…"]
-    o29["POST /billing/internal/dunning-runs/run-due"]:::op
+    o34["POST /billing/internal/dunning-runs/run-due"]:::op
   end
   subgraph s13["ctrl:BillingReceivablesController · Operaciones de BillingReceivablesController…"]
-    o32["GET /billing/invoices"]:::op
-    o34["GET /billing/invoices/{id}"]:::op
-    o35["GET /billing/patient-statements"]:::op
+    o37["GET /billing/invoices"]:::op
+    o39["GET /billing/invoices/{id}"]:::op
+    o40["GET /billing/patient-statements"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
   o1 -->|"CREA"| t4
   o1 -->|"CREA"| t5
   o1 -->|"LEE"| t5
-  a2 --> o6
-  o6 -->|"ACTUALIZA"| t5
-  o6 -->|"LEE"| t5
-  o6 -->|"CREA"| t7
-  o6 -->|"CREA"| t8
-  a2 --> o9
-  o9 -->|"CREA"| t3
-  o9 -->|"CREA"| t4
-  o9 -->|"ACTUALIZA"| t5
-  o9 -->|"CREA"| t5
-  o9 -->|"LEE"| t5
-  a2 --> o10
-  o10 -->|"CREA"| t11
-  o10 -->|"CREA"| t3
-  o10 -->|"CREA"| t12
-  o10 -->|"LEE"| t12
-  o10 -->|"LEE"| t13
-  a2 --> o14
-  o14 -->|"ACTUALIZA"| t12
-  o14 -->|"LEE"| t12
-  o14 -->|"CREA"| t15
-  o14 -->|"CREA"| t16
-  a2 --> o17
-  o17 -->|"LEE"| t12
-  o17 -->|"LEE"| t5
-  o17 -->|"LEE"| t16
-  o17 -->|"LEE"| t7
-  a2 --> o18
-  o18 -->|"ACTUALIZA"| t16
-  o18 -->|"LEE"| t16
-  o18 -->|"ACTUALIZA"| t7
-  o18 -->|"LEE"| t7
+  o1 -->|"LEE"| t6
+  a2 --> o7
+  o7 -->|"LEE"| t4
+  o7 -->|"LEE"| t5
+  o7 -->|"CREA"| t8
+  o7 -->|"CREA"| t9
+  o7 -->|"LEE"| t10
+  o7 -->|"LEE"| t11
+  a2 --> o12
+  o12 -->|"CREA"| t3
+  o12 -->|"CREA"| t4
+  o12 -->|"CREA"| t5
+  o12 -->|"LEE"| t5
+  a2 --> o13
+  o13 -->|"CREA"| t14
+  o13 -->|"CREA"| t3
+  o13 -->|"CREA"| t15
+  o13 -->|"LEE"| t15
+  o13 -->|"LEE"| t16
+  o13 -->|"LEE"| t17
+  o13 -.-> t18
   a2 --> o19
-  o19 -->|"CREA"| t3
-  o19 -->|"ACTUALIZA"| t5
-  o19 -->|"LEE"| t5
+  o19 -->|"LEE"| t15
   o19 -->|"CREA"| t20
-  o19 -->|"LEE"| t20
-  a2 --> o21
-  o21 -->|"CREA"| t3
-  o21 -->|"LEE"| t5
-  o21 -->|"CREA"| t22
-  o21 -->|"LEE"| t22
+  o19 -->|"CREA"| t21
+  o19 -->|"LEE"| t16
+  a2 --> o22
+  o22 -->|"LEE"| t15
+  o22 -->|"LEE"| t5
+  o22 -->|"LEE"| t21
+  o22 -->|"LEE"| t8
   a2 --> o23
-  o23 -->|"CREA"| t24
-  o23 -->|"ACTUALIZA"| t25
-  o23 -->|"CREA"| t25
-  o23 -->|"LEE"| t25
-  o23 -->|"ACTUALIZA"| t5
-  o23 -->|"LEE"| t5
+  o23 -->|"LEE"| t21
+  o23 -->|"LEE"| t8
+  a2 --> o24
+  o24 -->|"CREA"| t3
+  o24 -->|"LEE"| t5
+  o24 -->|"CREA"| t25
+  o24 -->|"LEE"| t25
   a2 --> o26
   o26 -->|"CREA"| t3
-  o26 -->|"ACTUALIZA"| t5
-  o26 -->|"CREA"| t5
   o26 -->|"LEE"| t5
-  a2 --> o27
-  o27 -->|"CREA"| t28
-  o27 -->|"LEE"| t28
-  a30 --> o29
-  o29 -->|"CREA"| t24
-  o29 -->|"ACTUALIZA"| t25
-  o29 -->|"CREA"| t25
-  o29 -->|"LEE"| t25
-  o29 -->|"ACTUALIZA"| t5
-  o29 -->|"LEE"| t5
-  o29 -.-> t31
+  o26 -->|"CREA"| t27
+  o26 -->|"LEE"| t27
+  a2 --> o28
+  o28 -->|"CREA"| t29
+  o28 -->|"ACTUALIZA"| t30
+  o28 -->|"CREA"| t30
+  o28 -->|"LEE"| t30
+  o28 -->|"LEE"| t5
+  a2 --> o31
+  o31 -->|"CREA"| t3
+  o31 -->|"CREA"| t5
+  o31 -->|"LEE"| t5
   a2 --> o32
-  o32 -->|"LEE"| t5
+  o32 -->|"CREA"| t33
   o32 -->|"LEE"| t33
-  a2 --> o34
-  o34 -->|"LEE"| t4
+  a35 --> o34
+  o34 -->|"CREA"| t29
+  o34 -->|"ACTUALIZA"| t30
+  o34 -->|"CREA"| t30
+  o34 -->|"LEE"| t30
+  o34 -->|"ACTUALIZA"| t5
   o34 -->|"LEE"| t5
-  o34 -->|"LEE"| t33
-  a2 --> o35
-  o35 -->|"LEE"| t22
-  o35 -->|"LEE"| t33
+  o34 -.-> t36
+  a2 --> o37
+  o37 -->|"LEE"| t5
+  o37 -->|"LEE"| t38
+  a2 --> o39
+  o39 -->|"LEE"| t4
+  o39 -->|"LEE"| t5
+  o39 -->|"LEE"| t38
+  a2 --> o40
+  o40 -->|"LEE"| t27
+  o40 -->|"LEE"| t38
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:BillingServiceCatalogController`, `ctrl:BillingSimulatedController`
+### Diagrama 2 de 2 — etapas `ctrl:BillingServiceCatalogController`, `ctrl:BillingSimulatedController`, `ctrl:PatientSpendingController`
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a5(["SECURITY_ADMIN · PRACTITIONER · CLINICIAN"]):::actor
-  a12(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
+  a10(["PRACTITIONER · CLINICIAN · SECURITY_ADMIN"]):::actor
+  a51(["PATIENT"]):::actor
   t3[("billing.service_catalog")]:::tabla
-  t6[("practice.practices")]:::tabla
-  t7[("practice.practitioner_role_assignments")]:::tabla
-  t8[("surveys.survey_assignments")]:::tabla
-  t9[("surveys.survey_questions")]:::tabla
-  t14[("terminology.concept_properties")]:::tabla
-  t16[("terminology.catalog_concepts")]:::tabla
-  t19[("billing.invoice_lines")]:::tabla
-  t20[("billing.invoices")]:::tabla
-  t21[("billing.payments_received")]:::tabla
-  t22[("billing.receivable_payment_allocations")]:::tabla
-  t23[("billing.siat_simulated_invoices")]:::tabla
-  t30[("billing.billing_document_links")]:::tabla
-  t41[("clinical.encounters")]:::tabla
-  t42[("profiles.persons")]:::tabla
-  t45[("billing.siat_simulated_outbox")]:::tabla
-  t10[("+4 tablas más")]
+  t6[("common.file_versions")]:::tabla
+  t7[("common.files")]:::tabla
+  t8[("practice.practices")]:::tabla
+  t11[("practice.practitioner_role_assignments")]:::tabla
+  t14[("terminology.catalog_concepts")]:::tabla
+  t15[("terminology.concept_properties")]:::tabla
+  t18[("profiles.practitioner_specialties")]:::tabla
+  t22[("billing.invoice_lines")]:::tabla
+  t23[("billing.invoices")]:::tabla
+  t24[("billing.payments_received")]:::tabla
+  t25[("billing.receivable_payment_allocations")]:::tabla
+  t26[("billing.siat_simulated_invoices")]:::tabla
+  t33[("billing.billing_document_links")]:::tabla
+  t44[("clinical.encounters")]:::tabla
+  t45[("profiles.persons")]:::tabla
+  t48[("billing.siat_simulated_outbox")]:::tabla
+  t52[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t53[("directory.tenants")]:::tabla
+  t54[("insurance.insurance_claim_lines")]:::tabla
+  t55[("insurance.insurance_claims")]:::tabla
   subgraph s0["ctrl:BillingServiceCatalogController · Operaciones de BillingServiceCatalogCont…"]
     o1["GET /billing/service-catalog"]:::op
     o4["POST /billing/service-catalog"]:::op
-    o11["PATCH /billing/service-catalog/{id}"]:::op
-    o13["GET /billing/service-catalog/procedure-specialties"]:::op
-    o15["GET /billing/service-catalog/procedures"]:::op
+    o9["PATCH /billing/service-catalog/{id}"]:::op
+    o12["GET /billing/service-catalog/{id}/image"]:::op
+    o13["POST /billing/service-catalog/import-procedures"]:::op
+    o16["GET /billing/service-catalog/procedure-specialties"]:::op
+    o17["GET /billing/service-catalog/procedure-specialties/mine"]:::op
+    o19["GET /billing/service-catalog/procedures"]:::op
   end
-  t24[("+5 tablas más")]
-  t26[("+5 tablas más")]
-  t28[("+6 tablas más")]
-  t31[("+11 tablas más")]
-  t33[("+5 tablas más")]
-  t35[("+6 tablas más")]
-  t37[("+6 tablas más")]
-  t39[("+7 tablas más")]
+  t27[("+5 tablas más")]
+  t29[("+5 tablas más")]
+  t31[("+6 tablas más")]
+  t34[("+12 tablas más")]
+  t36[("+5 tablas más")]
+  t38[("+6 tablas más")]
+  t40[("+6 tablas más")]
+  t42[("+7 tablas más")]
   subgraph s1["ctrl:BillingSimulatedController · Operaciones de BillingSimulatedController que…"]
-    o17["GET /billing/simulated/catalogs"]:::op
-    o18["GET /billing/simulated/charges"]:::op
-    o25["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
-    o27["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
-    o29["POST /billing/simulated/charges/{chargeId}/payment"]:::op
-    o32["GET /billing/simulated/invoices/{invoiceId}"]:::op
-    o34["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
-    o36["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
-    o38["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
-    o40["GET /billing/simulated/my-invoices"]:::op
-    o43["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
-    o44["GET /billing/simulated/outbox"]:::op
-    o46["GET /billing/simulated/status"]:::op
+    o20["GET /billing/simulated/catalogs"]:::op
+    o21["GET /billing/simulated/charges"]:::op
+    o28["POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/pay…"]:::op
+    o30["POST /billing/simulated/charges/{chargeId}/invoices"]:::op
+    o32["POST /billing/simulated/charges/{chargeId}/payment"]:::op
+    o35["GET /billing/simulated/invoices/{invoiceId}"]:::op
+    o37["POST /billing/simulated/invoices/{invoiceId}/annulment"]:::op
+    o39["POST /billing/simulated/invoices/{invoiceId}/annulment-reversal"]:::op
+    o41["POST /billing/simulated/invoices/{invoiceId}/email"]:::op
+    o43["GET /billing/simulated/my-invoices"]:::op
+    o46["GET /billing/simulated/my-invoices/{invoiceId}"]:::op
+    o47["GET /billing/simulated/outbox"]:::op
+    o49["GET /billing/simulated/status"]:::op
+  end
+  t56[("+5 tablas más")]
+  subgraph s2["ctrl:PatientSpendingController · Operaciones de PatientSpendingController que e…"]
+    o50["GET /patient-spending/me"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -273,101 +293,122 @@ flowchart LR
   o4 -->|"LEE"| t3
   o4 -->|"LEE"| t6
   o4 -->|"LEE"| t7
-  o4 -->|"CREA"| t8
-  o4 -->|"CREA"| t9
-  o4 -.-> t10
-  a12 --> o11
-  o11 -->|"ACTUALIZA"| t3
-  o11 -->|"LEE"| t3
-  o11 -->|"LEE"| t6
-  o11 -->|"LEE"| t7
-  a2 --> o13
+  o4 -->|"LEE"| t8
+  a10 --> o9
+  o9 -->|"ACTUALIZA"| t3
+  o9 -->|"LEE"| t3
+  o9 -->|"LEE"| t8
+  o9 -->|"LEE"| t11
+  a2 --> o12
+  o12 -->|"LEE"| t3
+  o12 -->|"LEE"| t6
+  o12 -->|"LEE"| t7
+  o12 -->|"LEE"| t8
+  a5 --> o13
+  o13 -->|"CREA"| t3
+  o13 -->|"LEE"| t3
+  o13 -->|"LEE"| t8
   o13 -->|"LEE"| t14
-  a2 --> o15
-  o15 -->|"LEE"| t16
-  o15 -->|"LEE"| t14
+  o13 -->|"LEE"| t15
+  a2 --> o16
+  o16 -->|"LEE"| t15
   a2 --> o17
-  a2 --> o18
-  o18 -->|"LEE"| t19
-  o18 -->|"LEE"| t20
-  o18 -->|"LEE"| t21
-  o18 -->|"LEE"| t22
-  o18 -->|"LEE"| t3
-  o18 -->|"LEE"| t23
-  o18 -.-> t24
-  a2 --> o25
-  o25 -->|"LEE"| t19
-  o25 -->|"LEE"| t20
-  o25 -->|"LEE"| t21
-  o25 -->|"LEE"| t22
-  o25 -->|"LEE"| t3
-  o25 -->|"LEE"| t23
-  o25 -.-> t26
-  a2 --> o27
-  o27 -->|"LEE"| t19
-  o27 -->|"LEE"| t20
-  o27 -->|"LEE"| t21
-  o27 -->|"LEE"| t22
-  o27 -->|"LEE"| t3
-  o27 -->|"CREA"| t23
-  o27 -.-> t28
-  a2 --> o29
-  o29 -->|"CREA"| t30
-  o29 -->|"CREA"| t19
-  o29 -->|"LEE"| t19
-  o29 -->|"CREA"| t20
-  o29 -->|"ACTUALIZA"| t20
-  o29 -->|"LEE"| t20
-  o29 -.-> t31
+  o17 -->|"LEE"| t18
+  o17 -->|"LEE"| t14
+  o17 -->|"LEE"| t15
+  a2 --> o19
+  o19 -->|"LEE"| t14
+  o19 -->|"LEE"| t15
+  a2 --> o20
+  a2 --> o21
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t23
+  o21 -->|"LEE"| t24
+  o21 -->|"LEE"| t25
+  o21 -->|"LEE"| t3
+  o21 -->|"LEE"| t26
+  o21 -.-> t27
+  a2 --> o28
+  o28 -->|"LEE"| t22
+  o28 -->|"LEE"| t23
+  o28 -->|"LEE"| t24
+  o28 -->|"LEE"| t25
+  o28 -->|"LEE"| t3
+  o28 -->|"LEE"| t26
+  o28 -.-> t29
+  a2 --> o30
+  o30 -->|"LEE"| t22
+  o30 -->|"LEE"| t23
+  o30 -->|"LEE"| t24
+  o30 -->|"LEE"| t25
+  o30 -->|"LEE"| t3
+  o30 -->|"CREA"| t26
+  o30 -.-> t31
   a2 --> o32
-  o32 -->|"LEE"| t19
-  o32 -->|"LEE"| t20
-  o32 -->|"LEE"| t21
+  o32 -->|"CREA"| t33
+  o32 -->|"CREA"| t22
   o32 -->|"LEE"| t22
-  o32 -->|"LEE"| t3
+  o32 -->|"CREA"| t23
   o32 -->|"LEE"| t23
-  o32 -.-> t33
-  a2 --> o34
-  o34 -->|"LEE"| t19
-  o34 -->|"LEE"| t20
-  o34 -->|"LEE"| t21
-  o34 -->|"LEE"| t22
-  o34 -->|"LEE"| t3
-  o34 -->|"ACTUALIZA"| t23
-  o34 -.-> t35
-  a2 --> o36
-  o36 -->|"LEE"| t19
-  o36 -->|"LEE"| t20
-  o36 -->|"LEE"| t21
-  o36 -->|"LEE"| t22
-  o36 -->|"LEE"| t3
-  o36 -->|"ACTUALIZA"| t23
-  o36 -.-> t37
-  a2 --> o38
-  o38 -->|"LEE"| t19
-  o38 -->|"LEE"| t20
-  o38 -->|"LEE"| t21
-  o38 -->|"LEE"| t22
-  o38 -->|"LEE"| t3
-  o38 -->|"ACTUALIZA"| t23
-  o38 -.-> t39
-  a2 --> o40
-  o40 -->|"LEE"| t23
-  o40 -->|"LEE"| t41
-  o40 -->|"LEE"| t6
-  o40 -->|"LEE"| t42
+  o32 -->|"CREA"| t24
+  o32 -.-> t34
+  a2 --> o35
+  o35 -->|"LEE"| t22
+  o35 -->|"LEE"| t23
+  o35 -->|"LEE"| t24
+  o35 -->|"LEE"| t25
+  o35 -->|"LEE"| t3
+  o35 -->|"LEE"| t26
+  o35 -.-> t36
+  a2 --> o37
+  o37 -->|"LEE"| t22
+  o37 -->|"LEE"| t23
+  o37 -->|"LEE"| t24
+  o37 -->|"LEE"| t25
+  o37 -->|"LEE"| t3
+  o37 -->|"ACTUALIZA"| t26
+  o37 -.-> t38
+  a2 --> o39
+  o39 -->|"LEE"| t22
+  o39 -->|"LEE"| t23
+  o39 -->|"LEE"| t24
+  o39 -->|"LEE"| t25
+  o39 -->|"LEE"| t3
+  o39 -->|"ACTUALIZA"| t26
+  o39 -.-> t40
+  a2 --> o41
+  o41 -->|"LEE"| t22
+  o41 -->|"LEE"| t23
+  o41 -->|"LEE"| t24
+  o41 -->|"LEE"| t25
+  o41 -->|"LEE"| t3
+  o41 -->|"ACTUALIZA"| t26
+  o41 -.-> t42
   a2 --> o43
-  o43 -->|"LEE"| t23
-  o43 -->|"LEE"| t41
-  o43 -->|"LEE"| t6
-  o43 -->|"LEE"| t42
-  a2 --> o44
-  o44 -->|"LEE"| t23
-  o44 -->|"LEE"| t45
-  o44 -->|"LEE"| t41
+  o43 -->|"LEE"| t26
+  o43 -->|"LEE"| t44
+  o43 -->|"LEE"| t8
+  o43 -->|"LEE"| t45
   a2 --> o46
-  o46 -->|"LEE"| t41
-  o46 -->|"LEE"| t6
+  o46 -->|"LEE"| t26
+  o46 -->|"LEE"| t44
+  o46 -->|"LEE"| t8
+  o46 -->|"LEE"| t45
+  a2 --> o47
+  o47 -->|"LEE"| t26
+  o47 -->|"LEE"| t48
+  o47 -->|"LEE"| t44
+  a2 --> o49
+  o49 -->|"LEE"| t44
+  o49 -->|"LEE"| t8
+  a51 --> o50
+  o50 -->|"LEE"| t22
+  o50 -->|"LEE"| t23
+  o50 -->|"LEE"| t52
+  o50 -->|"LEE"| t53
+  o50 -->|"LEE"| t54
+  o50 -->|"LEE"| t55
+  o50 -.-> t56
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -390,7 +431,6 @@ Registrar factura de proveedor con three-way match
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Proveedor no encontrado |
 | 409 | `CONFLICT` | ConflictException: La factura del proveedor ya fue capturada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El proveedor no está activo; PreconditionFailedException: Three-way match: la línea con orden de compra requiere recepción de bienes |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -404,53 +444,63 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a BillsRepository.findVendor"]:::llamada
+  n5{"dto.purchaseOrderId"}:::decision
   n4 --> n5
-  n6[("LEE billing.vendors")]:::efecto
-  n5 --> n6
-  n7{"!vendor"}:::decision
+  n6["Llama a BillingLinkTargetsRepository.findPurchaseOrder"]:::llamada
+  n5 -->|"sí"| n6
+  n7[("LEE erp.purchase_orders")]:::efecto
   n6 --> n7
-  n8(["404 NOT_FOUND Proveedor no encontrado"]):::error
-  n7 -->|"sí"| n8
-  n9{"vendor.statusConceptId !== CONCEPTS.STATE_ACTIVE && vendor.statusConceptId !== CONCEPTS.TENANT_ACTIVE"}:::decision
-  n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED El proveedor no está activo"]):::error
-  n9 -->|"sí"| n10
-  n11["Llama a BillsRepository.findByNumber"]:::llamada
-  n9 -->|"no"| n11
-  n12[("LEE billing.bills")]:::efecto
+  n8{"dto.contractId"}:::decision
+  n7 --> n8
+  n5 -->|"no"| n8
+  n9["Llama a BillingLinkTargetsRepository.findContract"]:::llamada
+  n8 -->|"sí"| n9
+  n10[("LEE erp.contracts")]:::efecto
+  n9 --> n10
+  n11["Llama a BillsRepository.findVendor"]:::llamada
+  n10 --> n11
+  n8 -->|"no"| n11
+  n12[("LEE billing.vendors")]:::efecto
   n11 --> n12
-  n13{"clash"}:::decision
+  n13{"vendor.statusConceptId !== CONCEPTS.STATE_ACTIVE && vendor.statusConceptId !== CONCEPTS.TENANT_ACTIVE"}:::decision
   n12 --> n13
-  n14(["409 CONFLICT La factura del proveedor ya fue capturada"]):::error
+  n14(["422 PRECONDITION_FAILED El proveedor no está activo"]):::error
   n13 -->|"sí"| n14
-  n15["Repite: por cada const l de dto.lines"]:::bucle
+  n15["Llama a BillsRepository.findByNumber"]:::llamada
   n13 -->|"no"| n15
-  n16{"l.purchaseOrderItemId && !l.goodsReceiptItemId"}:::decision
-  n15 -->|"cada elemento"| n16
-  n17(["422 PRECONDITION_FAILED Three-way match: la línea con orden de compra requiere recepción de bienes"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a BillsRepository.create"]:::llamada
-  n16 -->|"no"| n18
-  n15 -->|"al terminar"| n18
-  n19[("CREA billing.bills")]:::efecto
-  n18 --> n19
-  n20["Repite: forEach(…)"]:::bucle
-  n19 --> n20
-  n21["Llama a BillsRepository.createLine"]:::llamada
-  n20 -->|"cada elemento"| n21
-  n22[("CREA billing.bill_lines")]:::efecto
-  n21 --> n22
-  n23{"dto.tenantId && (dto.purchaseOrderId || dto.contractId)"}:::decision
+  n16[("LEE billing.bills")]:::efecto
+  n15 --> n16
+  n17{"clash"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT La factura del proveedor ya fue capturada"]):::error
+  n17 -->|"sí"| n18
+  n19["Repite: por cada const l de dto.lines"]:::bucle
+  n17 -->|"no"| n19
+  n20{"l.purchaseOrderItemId && !l.goodsReceiptItemId"}:::decision
+  n19 -->|"cada elemento"| n20
+  n21(["422 PRECONDITION_FAILED Three-way match: la línea con orden de compra requiere recepción de bienes"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a BillsRepository.create"]:::llamada
+  n20 -->|"no"| n22
+  n19 -->|"al terminar"| n22
+  n23[("CREA billing.bills")]:::efecto
   n22 --> n23
-  n20 -->|"al terminar"| n23
-  n24["Llama a BillingDocumentLinksRepository.create"]:::llamada
-  n23 -->|"sí"| n24
-  n25[("CREA billing.billing_document_links")]:::efecto
-  n24 --> n25
-  n26(("201 Responde con éxito")):::ok
+  n24["Repite: forEach(…)"]:::bucle
+  n23 --> n24
+  n25["Llama a BillsRepository.createLine"]:::llamada
+  n24 -->|"cada elemento"| n25
+  n26[("CREA billing.bill_lines")]:::efecto
   n25 --> n26
-  n23 -->|"no"| n26
+  n27{"dto.purchaseOrderId || dto.contractId"}:::decision
+  n26 --> n27
+  n24 -->|"al terminar"| n27
+  n28["Llama a BillingDocumentLinksRepository.create"]:::llamada
+  n27 -->|"sí"| n28
+  n29[("CREA billing.billing_document_links")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
+  n27 -->|"no"| n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -469,7 +519,6 @@ Contabilizar documento (posting CxC/CxP)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Documento no encontrado |
 | 409 | `CONFLICT` | ConflictException: El documento ya fue contabilizado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -502,20 +551,16 @@ flowchart TD
   n6 -->|"'PAYMENT_MADE'"| n13
   n14[("LEE billing.payments_made")]:::efecto
   n13 --> n14
-  n15{"!doc"}:::decision
+  n15{"doc.transactionId"}:::decision
   n8 --> n15
   n10 --> n15
   n12 --> n15
   n14 --> n15
   n6 -->|"otro"| n15
-  n16(["404 NOT_FOUND Documento no encontrado"]):::error
+  n16(["409 CONFLICT El documento ya fue contabilizado"]):::error
   n15 -->|"sí"| n16
-  n17{"doc.transactionId"}:::decision
+  n17(("200 Responde con éxito")):::ok
   n15 -->|"no"| n17
-  n18(["409 CONFLICT El documento ya fue contabilizado"]):::error
-  n17 -->|"sí"| n18
-  n19(("200 Responde con éxito")):::ok
-  n17 -->|"no"| n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -554,30 +599,28 @@ flowchart TD
   n6 --> n7
   n8(["409 CONFLICT El número de corrida ya existe para el tenant"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a DunningRepository.createRun"]:::llamada
+  n9["Repite: por cada const item de dto.items"]:::bucle
   n7 -->|"no"| n9
-  n10[("CREA billing.dunning_runs")]:::efecto
-  n9 --> n10
-  n11["Repite: por cada const item de dto.items"]:::bucle
+  n10["Llama a InvoicesRepository.findById"]:::llamada
+  n9 -->|"cada elemento"| n10
+  n11[("LEE billing.invoices")]:::efecto
   n10 --> n11
-  n12["Llama a DunningRepository.createItem"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13[("CREA billing.dunning_items")]:::efecto
+  n12["Llama a DunningRepository.createRun"]:::llamada
+  n11 --> n12
+  n9 -->|"al terminar"| n12
+  n13[("CREA billing.dunning_runs")]:::efecto
   n12 --> n13
-  n14["Llama a InvoicesRepository.findById"]:::llamada
+  n14["Repite: por cada const [index, item] de dto.items.entries()"]:::bucle
   n13 --> n14
-  n15[("LEE billing.invoices")]:::efecto
-  n14 --> n15
-  n16{"invoice"}:::decision
+  n15["Llama a DunningRepository.createItem"]:::llamada
+  n14 -->|"cada elemento"| n15
+  n16[("CREA billing.dunning_items")]:::efecto
   n15 --> n16
-  n17[("ACTUALIZA billing.invoices")]:::efecto
-  n16 -->|"sí"| n17
-  n18[("ACTUALIZA billing.dunning_runs")]:::efecto
+  n17[("ACTUALIZA billing.dunning_runs")]:::efecto
+  n16 --> n17
+  n14 -->|"al terminar"| n17
+  n18(("201 Responde con éxito")):::ok
   n17 --> n18
-  n16 -->|"no"| n18
-  n11 -->|"al terminar"| n18
-  n19(("201 Responde con éxito")):::ok
-  n18 --> n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -707,7 +750,9 @@ Emitir factura desde los cargos del encuentro
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {INVOICE_ENCOUNTER_NOT_FOUND.message} |
 | 409 | `CONFLICT` | ConflictException: El número de factura ya existe en la práctica |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -717,36 +762,51 @@ flowchart TD
   n1 --> n2
   n3["Llama a InvoicesService.issueFromEncounter"]:::llamada
   n2 --> n3
-  n4["Transacción: transactional(…)"]:::transaccion
+  n4{"dto.claimId"}:::decision
   n3 --> n4
-  n5["Llama a InvoicesRepository.findByNumber"]:::llamada
-  n4 --> n5
-  n6[("LEE billing.invoices")]:::efecto
-  n5 --> n6
-  n7{"clash"}:::decision
+  n5(["422 PRECONDITION_FAILED Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su…"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7{"dto.encounterId"}:::decision
   n6 --> n7
-  n8(["409 CONFLICT El número de factura ya existe en la práctica"]):::error
+  n8["Llama a BillingLinkTargetsRepository.findEncounter"]:::llamada
   n7 -->|"sí"| n8
-  n9["Llama a InvoicesRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA billing.invoices")]:::efecto
+  n9[("LEE clinical.encounters")]:::efecto
+  n8 --> n9
+  n10{"encounter?.patientProfileId !== dto.patientProfileId"}:::decision
   n9 --> n10
-  n11["Repite: forEach(…)"]:::bucle
-  n10 --> n11
-  n12["Llama a InvoicesRepository.createLine"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13[("CREA billing.invoice_lines")]:::efecto
+  n11(["404 NOT_FOUND {INVOICE_ENCOUNTER_NOT_FOUND.message}"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a InvoicesRepository.findByNumber"]:::llamada
+  n10 -->|"no"| n12
+  n7 -->|"no"| n12
+  n13[("LEE billing.invoices")]:::efecto
   n12 --> n13
-  n14{"dto.tenantId && (dto.encounterId || dto.claimId)"}:::decision
+  n14{"clash"}:::decision
   n13 --> n14
-  n11 -->|"al terminar"| n14
-  n15["Llama a BillingDocumentLinksRepository.create"]:::llamada
+  n15(["409 CONFLICT El número de factura ya existe en la práctica"]):::error
   n14 -->|"sí"| n15
-  n16[("CREA billing.billing_document_links")]:::efecto
-  n15 --> n16
-  n17(("201 Responde con éxito")):::ok
+  n16["Llama a InvoicesRepository.create"]:::llamada
+  n14 -->|"no"| n16
+  n17[("CREA billing.invoices")]:::efecto
   n16 --> n17
-  n14 -->|"no"| n17
+  n18["Repite: forEach(…)"]:::bucle
+  n17 --> n18
+  n19["Llama a InvoicesRepository.createLine"]:::llamada
+  n18 -->|"cada elemento"| n19
+  n20[("CREA billing.invoice_lines")]:::efecto
+  n19 --> n20
+  n21{"dto.encounterId || dto.claimId"}:::decision
+  n20 --> n21
+  n18 -->|"al terminar"| n21
+  n22["Llama a BillingDocumentLinksRepository.create"]:::llamada
+  n21 -->|"sí"| n22
+  n23[("CREA billing.billing_document_links")]:::efecto
+  n22 --> n23
+  n24(("201 Responde con éxito")):::ok
+  n23 --> n24
+  n21 -->|"no"| n24
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -819,8 +879,7 @@ Emitir nota de crédito / castigo sobre una factura
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto de la nota de crédito excede el saldo de la factura |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La nota de crédito debe revertir un importe positivo; PreconditionFailedException: El monto de la nota de crédito excede el saldo de la factura |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -836,9 +895,9 @@ flowchart TD
   n4 --> n5
   n6[("LEE billing.invoices")]:::efecto
   n5 --> n6
-  n7{"!original"}:::decision
+  n7{"reverseCents ‹= 0"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Factura no encontrada"]):::error
+  n8(["422 PRECONDITION_FAILED La nota de crédito debe revertir un importe positivo"]):::error
   n7 -->|"sí"| n8
   n9{"reverseCents › originalBalanceCents && !dto.writeOff"}:::decision
   n7 -->|"no"| n9
@@ -854,18 +913,13 @@ flowchart TD
   n13 -->|"cada elemento"| n14
   n15[("CREA billing.invoice_lines")]:::efecto
   n14 --> n15
-  n16[("ACTUALIZA billing.invoices · ACTUALIZA billing.invoices")]:::efecto
+  n16["Llama a BillingDocumentLinksRepository.create"]:::llamada
   n15 --> n16
   n13 -->|"al terminar"| n16
-  n17{"dto.tenantId"}:::decision
+  n17[("CREA billing.billing_document_links")]:::efecto
   n16 --> n17
-  n18["Llama a BillingDocumentLinksRepository.create"]:::llamada
-  n17 -->|"sí"| n18
-  n19[("CREA billing.billing_document_links")]:::efecto
-  n18 --> n19
-  n20(("201 Responde con éxito")):::ok
-  n19 --> n20
-  n17 -->|"no"| n20
+  n18(("201 Responde con éxito")):::ok
+  n17 --> n18
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1000,18 +1054,15 @@ flowchart TD
   n10 --> n11
   n12[("CREA billing.patient_statements")]:::efecto
   n11 --> n12
-  n13{"dto.tenantId"}:::decision
+  n13["Repite: por cada const inv de invoices"]:::bucle
   n12 --> n13
-  n14["Repite: por cada const inv de invoices"]:::bucle
-  n13 -->|"sí"| n14
-  n15["Llama a BillingDocumentLinksRepository.create"]:::llamada
-  n14 -->|"cada elemento"| n15
-  n16[("CREA billing.billing_document_links")]:::efecto
+  n14["Llama a BillingDocumentLinksRepository.create"]:::llamada
+  n13 -->|"cada elemento"| n14
+  n15[("CREA billing.billing_document_links")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
   n15 --> n16
-  n17(("201 Responde con éxito")):::ok
-  n16 --> n17
-  n14 -->|"al terminar"| n17
-  n13 -->|"no"| n17
+  n13 -->|"al terminar"| n16
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1030,8 +1081,7 @@ Configurar un plan de pagos del paciente
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura origen no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La factura origen no tiene saldo; PreconditionFailedException: La suma de cuotas debe igualar el saldo de la factura |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La factura origen no tiene saldo; PreconditionFailedException: Cada cuota del plan debe ser un importe positivo; PreconditionFailedException: La suma de cuotas debe igualar el saldo de la factura |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1047,36 +1097,34 @@ flowchart TD
   n4 --> n5
   n6[("LEE billing.invoices")]:::efecto
   n5 --> n6
-  n7{"!source"}:::decision
+  n7{"balanceCents ‹= 0"}:::decision
   n6 --> n7
-  n8(["404 NOT_FOUND Factura origen no encontrada"]):::error
+  n8(["422 PRECONDITION_FAILED La factura origen no tiene saldo"]):::error
   n7 -->|"sí"| n8
-  n9{"balanceCents ‹= 0"}:::decision
+  n9["Repite: reduce(…)"]:::bucle
   n7 -->|"no"| n9
-  n10(["422 PRECONDITION_FAILED La factura origen no tiene saldo"]):::error
-  n9 -->|"sí"| n10
-  n11{"installmentsCents !== balanceCents"}:::decision
-  n9 -->|"no"| n11
-  n12(["422 PRECONDITION_FAILED La suma de cuotas debe igualar el saldo de la factura"]):::error
-  n11 -->|"sí"| n12
-  n13["Repite: ciclo for"]:::bucle
-  n11 -->|"no"| n13
-  n14["Llama a InvoicesRepository.create"]:::llamada
-  n13 -->|"cada elemento"| n14
-  n15[("CREA billing.invoices")]:::efecto
-  n14 --> n15
-  n16{"dto.tenantId"}:::decision
+  n10{"cents === null || cents ‹= 0"}:::decision
+  n9 -->|"cada elemento"| n10
+  n11(["422 PRECONDITION_FAILED Cada cuota del plan debe ser un importe positivo"]):::error
+  n10 -->|"sí"| n11
+  n12{"installmentsCents !== balanceCents"}:::decision
+  n10 -->|"no"| n12
+  n9 -->|"al terminar"| n12
+  n13(["422 PRECONDITION_FAILED La suma de cuotas debe igualar el saldo de la factura"]):::error
+  n12 -->|"sí"| n13
+  n14["Repite: ciclo for"]:::bucle
+  n12 -->|"no"| n14
+  n15["Llama a InvoicesRepository.create"]:::llamada
+  n14 -->|"cada elemento"| n15
+  n16[("CREA billing.invoices")]:::efecto
   n15 --> n16
   n17["Llama a BillingDocumentLinksRepository.create"]:::llamada
-  n16 -->|"sí"| n17
+  n16 --> n17
   n18[("CREA billing.billing_document_links")]:::efecto
   n17 --> n18
-  n19[("ACTUALIZA billing.invoices")]:::efecto
+  n19(("201 Responde con éxito")):::ok
   n18 --> n19
-  n16 -->|"no"| n19
-  n13 -->|"al terminar"| n19
-  n20(("201 Responde con éxito")):::ok
-  n19 --> n20
+  n14 -->|"al terminar"| n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1095,8 +1143,7 @@ Ejecutar pago a proveedor con asignación
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura de proveedor no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La suma asignada más retención excede el monto del pago; PreconditionFailedException: La factura de proveedor no tiene saldo; PreconditionFailedException: La asignación excede el saldo de la factura de proveedor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La asignación debe ser un importe positivo; PreconditionFailedException: El descuento debe ser un importe no negativo; PreconditionFailedException: La retención debe ser un importe no negativo; PreconditionFailedException: La suma asignada más retención excede el monto del pago; PreconditionFailedException: La factura de proveedor no tiene saldo; PreconditionFailedException: La asignación excede el saldo de la factura de proveedor |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1108,45 +1155,64 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5{"amountCents ‹= 0"}:::decision
+  n5{"amountCents === null || amountCents ‹= 0"}:::decision
   n4 --> n5
   n6(["422 PRECONDITION_FAILED El monto del pago debe ser positivo"]):::error
   n5 -->|"sí"| n6
-  n7{"allocatedCents › amountCents"}:::decision
+  n7["Repite: por cada const alloc de dto.allocations"]:::bucle
   n5 -->|"no"| n7
-  n8(["422 PRECONDITION_FAILED La suma asignada más retención excede el monto del pago"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a PaymentsMadeRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA billing.payments_made")]:::efecto
-  n9 --> n10
-  n11["Repite: por cada const alloc de dto.allocations"]:::bucle
-  n10 --> n11
-  n12["Llama a BillsRepository.findById"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13[("LEE billing.bills")]:::efecto
-  n12 --> n13
-  n14{"!bill"}:::decision
-  n13 --> n14
-  n15(["404 NOT_FOUND Factura de proveedor no encontrada"]):::error
+  n8{"allocCents === null || allocCents ‹= 0"}:::decision
+  n7 -->|"cada elemento"| n8
+  n9(["422 PRECONDITION_FAILED La asignación debe ser un importe positivo"]):::error
+  n8 -->|"sí"| n9
+  n10{"discountCents === null"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED El descuento debe ser un importe no negativo"]):::error
+  n10 -->|"sí"| n11
+  n12{"withholdingCents === null"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED La retención debe ser un importe no negativo"]):::error
+  n12 -->|"sí"| n13
+  n14{"effectCents › amountCents"}:::decision
+  n12 -->|"no"| n14
+  n7 -->|"al terminar"| n14
+  n15(["422 PRECONDITION_FAILED La suma asignada más retención excede el monto del pago"]):::error
   n14 -->|"sí"| n15
-  n16{"balanceCents ‹= 0"}:::decision
+  n16{"dto.vendorId"}:::decision
   n14 -->|"no"| n16
-  n17(["422 PRECONDITION_FAILED La factura de proveedor no tiene saldo"]):::error
+  n17["Llama a BillsRepository.findVendor"]:::llamada
   n16 -->|"sí"| n17
-  n18{"allocCents › balanceCents"}:::decision
-  n16 -->|"no"| n18
-  n19(["422 PRECONDITION_FAILED La asignación excede el saldo de la factura de proveedor"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a PaymentsMadeRepository.createAllocation"]:::llamada
-  n18 -->|"no"| n20
-  n21[("CREA billing.payable_payment_allocations")]:::efecto
+  n18[("LEE billing.vendors")]:::efecto
+  n17 --> n18
+  n19["Repite: por cada const alloc de dto.allocations"]:::bucle
+  n18 --> n19
+  n16 -->|"no"| n19
+  n20["Llama a BillsRepository.findById"]:::llamada
+  n19 -->|"cada elemento"| n20
+  n21[("LEE billing.bills")]:::efecto
   n20 --> n21
-  n22[("ACTUALIZA billing.bills · ACTUALIZA billing.bills · ACTUALIZA billing.bills")]:::efecto
+  n22["Llama a PaymentsMadeRepository.create"]:::llamada
   n21 --> n22
-  n23(("201 Responde con éxito")):::ok
+  n19 -->|"al terminar"| n22
+  n23[("CREA billing.payments_made")]:::efecto
   n22 --> n23
-  n11 -->|"al terminar"| n23
+  n24["Repite: por cada const [index, alloc] de dto.allocations.entries()"]:::bucle
+  n23 --> n24
+  n25{"balanceCents ‹= 0"}:::decision
+  n24 -->|"cada elemento"| n25
+  n26(["422 PRECONDITION_FAILED La factura de proveedor no tiene saldo"]):::error
+  n25 -->|"sí"| n26
+  n27{"allocCents + discountCents › balanceCents"}:::decision
+  n25 -->|"no"| n27
+  n28(["422 PRECONDITION_FAILED La asignación excede el saldo de la factura de proveedor"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a PaymentsMadeRepository.createAllocation"]:::llamada
+  n27 -->|"no"| n29
+  n30[("CREA billing.payable_payment_allocations")]:::efecto
+  n29 --> n30
+  n31(("201 Responde con éxito")):::ok
+  n30 --> n31
+  n24 -->|"al terminar"| n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1165,8 +1231,7 @@ Aplicar un pago recibido con asignación multi-factura
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La asignación debe ser un importe positivo; PreconditionFailedException: El descuento debe ser un importe no negativo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: El cobro está en pausa mientras el paciente tenga una objeción abierta; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1178,45 +1243,61 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5{"amountCents ‹= 0"}:::decision
+  n5{"amountCents === null || amountCents ‹= 0"}:::decision
   n4 --> n5
   n6(["422 PRECONDITION_FAILED El monto del pago debe ser positivo"]):::error
   n5 -->|"sí"| n6
-  n7{"allocatedCents › amountCents"}:::decision
+  n7["Repite: por cada const alloc de dto.allocations"]:::bucle
   n5 -->|"no"| n7
-  n8(["422 PRECONDITION_FAILED La suma asignada excede el monto del pago"]):::error
-  n7 -->|"sí"| n8
-  n9["Llama a PaymentsReceivedRepository.create"]:::llamada
-  n7 -->|"no"| n9
-  n10[("CREA billing.payments_received")]:::efecto
-  n9 --> n10
-  n11["Repite: por cada const alloc de dto.allocations"]:::bucle
-  n10 --> n11
-  n12["Llama a InvoicesRepository.findById"]:::llamada
-  n11 -->|"cada elemento"| n12
-  n13[("LEE billing.invoices")]:::efecto
-  n12 --> n13
-  n14{"!invoice"}:::decision
-  n13 --> n14
-  n15(["404 NOT_FOUND Factura no encontrada"]):::error
-  n14 -->|"sí"| n15
-  n16{"balanceCents ‹= 0"}:::decision
-  n14 -->|"no"| n16
-  n17(["422 PRECONDITION_FAILED La factura no tiene saldo pendiente"]):::error
-  n16 -->|"sí"| n17
-  n18{"allocCents › balanceCents"}:::decision
-  n16 -->|"no"| n18
-  n19(["422 PRECONDITION_FAILED La asignación excede el saldo de la factura"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a PaymentsReceivedRepository.createAllocation"]:::llamada
-  n18 -->|"no"| n20
-  n21[("CREA billing.receivable_payment_allocations")]:::efecto
+  n8{"allocCents === null || allocCents ‹= 0"}:::decision
+  n7 -->|"cada elemento"| n8
+  n9(["422 PRECONDITION_FAILED La asignación debe ser un importe positivo"]):::error
+  n8 -->|"sí"| n9
+  n10{"discountCents === null"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED El descuento debe ser un importe no negativo"]):::error
+  n10 -->|"sí"| n11
+  n12{"effectCents › amountCents"}:::decision
+  n10 -->|"no"| n12
+  n7 -->|"al terminar"| n12
+  n13(["422 PRECONDITION_FAILED La suma asignada excede el monto del pago"]):::error
+  n12 -->|"sí"| n13
+  n14["Repite: por cada const alloc de dto.allocations"]:::bucle
+  n12 -->|"no"| n14
+  n15["Llama a InvoicesRepository.findById"]:::llamada
+  n14 -->|"cada elemento"| n15
+  n16[("LEE billing.invoices")]:::efecto
+  n15 --> n16
+  n17["Llama a PaymentsReceivedRepository.create"]:::llamada
+  n16 --> n17
+  n14 -->|"al terminar"| n17
+  n18[("CREA billing.payments_received")]:::efecto
+  n17 --> n18
+  n19["Repite: por cada const [index, alloc] de dto.allocations.entries()"]:::bucle
+  n18 --> n19
+  n20["Llama a InvoicesRepository.hasOpenPatientObjection"]:::llamada
+  n19 -->|"cada elemento"| n20
+  n21[("LEE billing.invoice_lines · LEE insurance.insurance_claim_lines · LEE insurance.claim_disputes")]:::efecto
   n20 --> n21
-  n22[("ACTUALIZA billing.invoices · ACTUALIZA billing.invoices · ACTUALIZA billing.invoices")]:::efecto
+  n22{"await this.invoicesRepo.hasOpenPatientObjection(tx, invoice.id)"}:::decision
   n21 --> n22
-  n23(("201 Responde con éxito")):::ok
-  n22 --> n23
-  n11 -->|"al terminar"| n23
+  n23(["422 PRECONDITION_FAILED El cobro está en pausa mientras el paciente tenga una objeción abierta"]):::error
+  n22 -->|"sí"| n23
+  n24{"balanceCents ‹= 0"}:::decision
+  n22 -->|"no"| n24
+  n25(["422 PRECONDITION_FAILED La factura no tiene saldo pendiente"]):::error
+  n24 -->|"sí"| n25
+  n26{"allocCents + discountCents › balanceCents"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED La asignación excede el saldo de la factura"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a PaymentsReceivedRepository.createAllocation"]:::llamada
+  n26 -->|"no"| n28
+  n29[("CREA billing.receivable_payment_allocations")]:::efecto
+  n28 --> n29
+  n30(("201 Responde con éxito")):::ok
+  n29 --> n30
+  n19 -->|"al terminar"| n30
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1235,7 +1316,6 @@ Conciliar pagos vía documento de compensación
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Pago recibido no encontrado; ResourceNotFoundException: Pago emitido no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Debe indicar al menos un pago a conciliar; PreconditionFailedException: El pago recibido ya está conciliado; PreconditionFailedException: El pago emitido ya está conciliado |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1258,36 +1338,30 @@ flowchart TD
   n7 -->|"cada elemento"| n8
   n9[("LEE billing.payments_received")]:::efecto
   n8 --> n9
-  n10{"!p"}:::decision
+  n10["Repite: por cada const id de madeIds"]:::bucle
   n9 --> n10
-  n11(["404 NOT_FOUND Pago recibido no encontrado"]):::error
-  n10 -->|"sí"| n11
-  n12{"p.clearingDocumentId"}:::decision
-  n10 -->|"no"| n12
-  n13(["422 PRECONDITION_FAILED El pago recibido ya está conciliado"]):::error
-  n12 -->|"sí"| n13
-  n14[("ACTUALIZA billing.payments_received · ACTUALIZA billing.payments_received")]:::efecto
-  n12 -->|"no"| n14
-  n15["Repite: por cada const id de madeIds"]:::bucle
-  n14 --> n15
-  n7 -->|"al terminar"| n15
-  n16["Llama a PaymentsMadeRepository.findById"]:::llamada
-  n15 -->|"cada elemento"| n16
-  n17[("LEE billing.payments_made")]:::efecto
-  n16 --> n17
-  n18{"!p"}:::decision
-  n17 --> n18
-  n19(["404 NOT_FOUND Pago emitido no encontrado"]):::error
-  n18 -->|"sí"| n19
-  n20{"p.clearingDocumentId"}:::decision
-  n18 -->|"no"| n20
-  n21(["422 PRECONDITION_FAILED El pago emitido ya está conciliado"]):::error
-  n20 -->|"sí"| n21
-  n22[("ACTUALIZA billing.payments_made · ACTUALIZA billing.payments_made")]:::efecto
-  n20 -->|"no"| n22
-  n23(("200 Responde con éxito")):::ok
-  n22 --> n23
-  n15 -->|"al terminar"| n23
+  n7 -->|"al terminar"| n10
+  n11["Llama a PaymentsMadeRepository.findById"]:::llamada
+  n10 -->|"cada elemento"| n11
+  n12[("LEE billing.payments_made")]:::efecto
+  n11 --> n12
+  n13["Repite: por cada const [index, p] de received.entries()"]:::bucle
+  n12 --> n13
+  n10 -->|"al terminar"| n13
+  n14{"p.clearingDocumentId"}:::decision
+  n13 -->|"cada elemento"| n14
+  n15(["422 PRECONDITION_FAILED El pago recibido ya está conciliado"]):::error
+  n14 -->|"sí"| n15
+  n16["Repite: por cada const [index, p] de made.entries()"]:::bucle
+  n14 -->|"no"| n16
+  n13 -->|"al terminar"| n16
+  n17{"p.clearingDocumentId"}:::decision
+  n16 -->|"cada elemento"| n17
+  n18(["422 PRECONDITION_FAILED El pago emitido ya está conciliado"]):::error
+  n17 -->|"sí"| n18
+  n19(("200 Responde con éxito")):::ok
+  n17 -->|"no"| n19
+  n16 -->|"al terminar"| n19
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1306,8 +1380,8 @@ Vincular reembolso de reclamo de seguro a la factura
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Factura no encontrada |
 | 409 | `CONFLICT` | ConflictException: El reclamo ya tiene un reembolso registrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El monto del reembolso debe ser positivo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1319,37 +1393,32 @@ flowchart TD
   n2 --> n3
   n4["Transacción: transactional(…)"]:::transaccion
   n3 --> n4
-  n5["Llama a ReimbursementsRepository.findByClaim"]:::llamada
+  n5["Llama a InvoicesRepository.findById"]:::llamada
   n4 --> n5
-  n6[("LEE billing.reimbursements")]:::efecto
+  n6[("LEE billing.invoices")]:::efecto
   n5 --> n6
-  n7{"existing"}:::decision
+  n7{"amountCents === null || amountCents ‹= 0"}:::decision
   n6 --> n7
-  n8(["409 CONFLICT El reclamo ya tiene un reembolso registrado"]):::error
+  n8(["422 PRECONDITION_FAILED El monto del reembolso debe ser positivo"]):::error
   n7 -->|"sí"| n8
-  n9["Llama a InvoicesRepository.findById"]:::llamada
+  n9["Llama a ReimbursementsRepository.findByClaim"]:::llamada
   n7 -->|"no"| n9
-  n10[("LEE billing.invoices")]:::efecto
+  n10[("LEE billing.reimbursements")]:::efecto
   n9 --> n10
-  n11{"!invoice"}:::decision
+  n11{"existing"}:::decision
   n10 --> n11
-  n12(["404 NOT_FOUND Factura no encontrada"]):::error
+  n12(["409 CONFLICT El reclamo ya tiene un reembolso registrado"]):::error
   n11 -->|"sí"| n12
   n13["Llama a ReimbursementsRepository.create"]:::llamada
   n11 -->|"no"| n13
   n14[("CREA billing.reimbursements")]:::efecto
   n13 --> n14
-  n15[("ACTUALIZA billing.invoices · ACTUALIZA billing.invoices · ACTUALIZA billing.invoices")]:::efecto
+  n15["Llama a BillingDocumentLinksRepository.create"]:::llamada
   n14 --> n15
-  n16{"dto.tenantId"}:::decision
+  n16[("CREA billing.billing_document_links")]:::efecto
   n15 --> n16
-  n17["Llama a BillingDocumentLinksRepository.create"]:::llamada
-  n16 -->|"sí"| n17
-  n18[("CREA billing.billing_document_links")]:::efecto
-  n17 --> n18
-  n19(("201 Responde con éxito")):::ok
-  n18 --> n19
-  n16 -->|"no"| n19
+  n17(("201 Responde con éxito")):::ok
+  n16 --> n17
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1367,9 +1436,10 @@ Dar de alta un servicio en el catálogo maestro
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Imagen no encontrada |
 | 409 | `CONFLICT` | ConflictException: Ya existe un servicio con ese código en el catálogo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1389,45 +1459,73 @@ flowchart TD
   n6 --> n7
   n8(["404 NOT_FOUND Práctica no encontrada"]):::error
   n7 --> n8
-  n9["Transacción: transactional(…)"]:::transaccion
-  n10["Llama a ServiceCatalogRepository.findByCode"]:::llamada
-  n9 --> n10
-  n11[("LEE billing.service_catalog")]:::efecto
+  n9{"dto.imageFileId !== undefined"}:::decision
+  n10["Llama a BillingServiceCatalogService.assertImageUsable"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Intenta"]:::intento
   n10 --> n11
-  n12{"clash"}:::decision
+  n12["Llama a AttachableFileService.assertUsableBy"]:::llamada
   n11 --> n12
-  n13(["409 CONFLICT Ya existe un servicio con ese código en el catálogo"]):::error
-  n12 -->|"sí"| n13
-  n14["Llama a ServiceCatalogRepository.create"]:::llamada
-  n12 -->|"no"| n14
-  n15[("CREA billing.service_catalog")]:::efecto
+  n13["Llama a FilesRepository.findById"]:::llamada
+  n12 --> n13
+  n14[("LEE common.files")]:::efecto
+  n13 --> n14
+  n15{"!file"}:::decision
   n14 --> n15
-  n16["Llama a BillingServiceCatalogService.attachDefaultSatisfactionSurvey"]:::llamada
-  n15 --> n16
-  n17["Llama a BillingServiceCatalogService.findDefaultSurveyOwner"]:::llamada
-  n16 --> n17
-  n18[("LEE practice.practitioner_role_assignments")]:::efecto
-  n17 --> n18
-  n19["Llama a TemplatesRepository.createTemplate"]:::llamada
-  n18 --> n19
-  n20[("CREA surveys.survey_templates")]:::efecto
-  n19 --> n20
-  n21["Llama a TemplatesRepository.createVersion"]:::llamada
-  n20 --> n21
-  n22[("CREA surveys.survey_versions")]:::efecto
-  n21 --> n22
-  n23["Llama a TemplatesRepository.createQuestion"]:::llamada
-  n22 --> n23
-  n24[("CREA surveys.survey_questions")]:::efecto
+  n16(["404 NOT_FOUND {labels.notFound}"]):::error
+  n15 -->|"sí"| n16
+  n17{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n15 -->|"no"| n17
+  n18(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
+  n17 -->|"sí"| n18
+  n19{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n17 -->|"no"| n19
+  n20(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n19 -->|"sí"| n20
+  n21{"!file.currentVersionId"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n21 -->|"no"| n23
+  n24{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
   n23 --> n24
-  n25[("ACTUALIZA surveys.survey_versions · ACTUALIZA surveys.survey_versions · ACTUALIZA surveys.survey_versions · A…")]:::efecto
-  n24 --> n25
-  n26["Llama a AssignmentsRepository.create"]:::llamada
-  n25 --> n26
-  n27[("CREA surveys.survey_assignments")]:::efecto
-  n26 --> n27
-  n28(("201 Responde con éxito")):::ok
-  n27 --> n28
+  n25(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n24 -->|"sí"| n25
+  n26{"!file.currentVersionId"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n26 -->|"sí"| n27
+  n28{"!version"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n28 -->|"sí"| n29
+  n30{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n28 -->|"no"| n30
+  n31(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n30 -->|"sí"| n31
+  n32{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n30 -->|"no"| n32
+  n33(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n32 -->|"sí"| n33
+  n34(["404 NOT_FOUND Imagen no encontrada"]):::error
+  n32 -->|"no"| n34
+  n35["Transacción: transactional(…)"]:::transaccion
+  n9 -->|"no"| n35
+  n36["Llama a ServiceCatalogRepository.findByCode"]:::llamada
+  n35 --> n36
+  n37[("LEE billing.service_catalog")]:::efecto
+  n36 --> n37
+  n38{"clash"}:::decision
+  n37 --> n38
+  n39(["409 CONFLICT Ya existe un servicio con ese código en el catálogo"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a ServiceCatalogRepository.create"]:::llamada
+  n38 -->|"no"| n40
+  n41[("CREA billing.service_catalog")]:::efecto
+  n40 --> n41
+  n42(("201 Responde con éxito")):::ok
+  n41 --> n42
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1500,14 +1598,19 @@ flowchart TD
   n22 --> n23
   n24[("ACTUALIZA billing.service_catalog")]:::efecto
   n23 -->|"sí"| n24
-  n25{"dto.defaultPrice !== undefined"}:::decision
+  n25{"dto.termsText !== undefined"}:::decision
   n24 --> n25
   n23 -->|"no"| n25
-  n26[("ACTUALIZA billing.service_catalog · ACTUALIZA billing.service_catalog")]:::efecto
+  n26[("ACTUALIZA billing.service_catalog")]:::efecto
   n25 -->|"sí"| n26
-  n27(("200 Responde con éxito")):::ok
+  n27{"dto.defaultPrice !== undefined"}:::decision
   n26 --> n27
   n25 -->|"no"| n27
+  n28[("ACTUALIZA billing.service_catalog · ACTUALIZA billing.service_catalog")]:::efecto
+  n27 -->|"sí"| n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
+  n27 -->|"no"| n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1516,7 +1619,208 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /billing/service-catalog/procedures
+#### 19. GET /billing/service-catalog/{id}/image
+
+Descargar la imagen de un servicio que el actor puede ver
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {notVisible.message}; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Archivo no encontrado; ResourceNotFoundException: El contenido no está disponible en el almacenamiento local; ResourceNotFoundException: El contenido no está disponible en el almacenamiento configurado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: {labels.subject} resultó infectado; PreconditionFailedException: {labels.subject} no es de un formato admitido para este uso |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: S3 object body is empty |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a BillingServiceCatalogService.getImageContent"]:::llamada
+  n2 --> n3
+  n4["Llama a ServiceCatalogRepository.findById"]:::llamada
+  n3 --> n4
+  n5[("LEE billing.service_catalog")]:::efecto
+  n4 --> n5
+  n6["Llama a PracticeTenantLookupService.findTenantOfPractice"]:::llamada
+  n5 --> n6
+  n7["Llama a PracticesRepository.findById"]:::llamada
+  n6 --> n7
+  n8[("LEE practice.practices")]:::efecto
+  n7 --> n8
+  n9{"!imageFileId"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND {notVisible.message}"]):::error
+  n9 -->|"sí"| n10
+  n11["Intenta"]:::intento
+  n9 -->|"no"| n11
+  n12["Llama a AttachableFileService.assertUsableForAuthorizedContext"]:::llamada
+  n11 --> n12
+  n13["Llama a FilesRepository.findById"]:::llamada
+  n12 --> n13
+  n14[("LEE common.files")]:::efecto
+  n13 --> n14
+  n15{"!file"}:::decision
+  n14 --> n15
+  n16(["404 NOT_FOUND {labels.notFound}"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a AttachableFileService.assertVersionUsable"]:::llamada
+  n15 -->|"no"| n17
+  n18{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
+  n18 -->|"sí"| n19
+  n20{"!file.currentVersionId"}:::decision
+  n18 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a FileVersionsRepository.findById"]:::llamada
+  n20 -->|"no"| n22
+  n23[("LEE common.file_versions")]:::efecto
+  n22 --> n23
+  n24{"!version"}:::decision
+  n23 --> n24
+  n25(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n24 -->|"sí"| n25
+  n26{"version.malwareScanStatusConceptId === CONCEPTS.SCAN_INFECTED"}:::decision
+  n24 -->|"no"| n26
+  n27(["422 PRECONDITION_FAILED {labels.subject} resultó infectado"]):::error
+  n26 -->|"sí"| n27
+  n28{"accepted && !accepted.includes(version.mimeType ?? '')"}:::decision
+  n26 -->|"no"| n28
+  n29(["422 PRECONDITION_FAILED {labels.subject} no es de un formato admitido para este uso"]):::error
+  n28 -->|"sí"| n29
+  n30{"file.sensitivityConceptId === CONCEPTS.SENSITIVITY_NORMAL && file.tenantId === tenantId"}:::decision
+  n28 -->|"no"| n30
+  n31["Llama a FileUploadService.downloadForAuthorizedContext"]:::llamada
+  n30 -->|"sí"| n31
+  n32["Llama a FilesRepository.findById"]:::llamada
+  n31 --> n32
+  n33[("LEE common.files")]:::efecto
+  n32 --> n33
+  n34{"!file"}:::decision
+  n33 --> n34
+  n35(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n34 -->|"sí"| n35
+  n36["Llama a FileUploadService.serveCurrentVersion"]:::llamada
+  n34 -->|"no"| n36
+  n37["Llama a AttachableFileService.assertUsableForAuthorizedContext"]:::llamada
+  n36 --> n37
+  n38{"!file"}:::decision
+  n37 --> n38
+  n39(["404 NOT_FOUND {labels.notFound}"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a LocalDiskFileStorageAdapter.retrieve"]:::llamada
+  n38 -->|"no"| n40
+  n41["Intenta"]:::intento
+  n40 --> n41
+  n42{"isMissingFile(error)"}:::decision
+  n41 -->|"si falla"| n42
+  n43(["404 NOT_FOUND El contenido no está disponible en el almacenamiento local"]):::error
+  n42 -->|"sí"| n43
+  n44(["↩ (relanza el error capturado)"]):::error
+  n42 -->|"no"| n44
+  n45["Llama a S3FileStorageAdapter.retrieve"]:::llamada
+  n41 --> n45
+  n46["Intenta"]:::intento
+  n45 --> n46
+  n47{"!result.Body"}:::decision
+  n46 --> n47
+  n48(["500 INTERNAL S3 object body is empty"]):::error
+  n47 -->|"sí"| n48
+  n49{"isNotFound(error)"}:::decision
+  n46 -->|"si falla"| n49
+  n50(["404 NOT_FOUND El contenido no está disponible en el almacenamiento configurado"]):::error
+  n49 -->|"sí"| n50
+  n51(["↩ (relanza el error capturado)"]):::error
+  n49 -->|"no"| n51
+  n52(["404 NOT_FOUND {notVisible.message}"]):::error
+  n47 -->|"no"| n52
+  n30 -->|"no"| n52
+  n53(("200 Responde con éxito")):::ok
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. POST /billing/service-catalog/import-procedures
+
+Importar en lote procedimientos del arancel al catálogo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra); BadRequestException: El filtro abarca más de {PROCEDURE_IMPORT_MAX} procedimientos; acotalo por especialidad o texto |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Práctica no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ProcedureImportService.importProcedures"]:::llamada
+  n2 --> n3
+  n4["Llama a BillingServiceCatalogService.assertRegistrationCanRegister"]:::llamada
+  n3 --> n4
+  n5["Llama a PracticeTenantLookupService.isOwnOffice"]:::llamada
+  n4 --> n5
+  n6["Llama a PracticesRepository.findById"]:::llamada
+  n5 --> n6
+  n7[("LEE practice.practices")]:::efecto
+  n6 --> n7
+  n8(["404 NOT_FOUND Práctica no encontrada"]):::error
+  n7 --> n8
+  n9["Llama a ProcedureImportService.select"]:::llamada
+  n10{"filter.specialties.length › 0"}:::decision
+  n9 --> n10
+  n11[("LEE terminology.concept_properties")]:::efecto
+  n10 -->|"sí"| n11
+  n12[("LEE terminology.concept_properties · LEE terminology.catalog_concepts")]:::efecto
+  n11 --> n12
+  n10 -->|"no"| n12
+  n13{"result.length › PROCEDURE_IMPORT_MAX"}:::decision
+  n12 --> n13
+  n14(["400 VALIDATION_FAILED El filtro abarca más de {PROCEDURE_IMPORT_MAX} procedimientos; acotalo por especialidad…"]):::error
+  n13 -->|"sí"| n14
+  n15["Transacción: transactional(…)"]:::transaccion
+  n13 -->|"no"| n15
+  n16["Repite: ciclo for"]:::bucle
+  n15 --> n16
+  n17["Llama a ServiceCatalogRepository.findExistingCodes"]:::llamada
+  n16 -->|"cada elemento"| n17
+  n18[("LEE billing.service_catalog")]:::efecto
+  n17 --> n18
+  n19["Repite: ciclo for"]:::bucle
+  n18 --> n19
+  n16 -->|"al terminar"| n19
+  n20["Repite: por cada const row de pending.slice(i, i + INSERT_CHUNK)"]:::bucle
+  n19 -->|"cada elemento"| n20
+  n21["Llama a ServiceCatalogRepository.create"]:::llamada
+  n20 -->|"cada elemento"| n21
+  n22[("CREA billing.service_catalog")]:::efecto
+  n21 --> n22
+  n23(("201 Responde con éxito")):::ok
+  n22 --> n23
+  n20 -->|"al terminar"| n23
+  n19 -->|"al terminar"| n23
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 21. GET /billing/service-catalog/procedures
 
 Listar el nomenclador de procedimientos (arancel de referencia)
 
@@ -1534,19 +1838,24 @@ flowchart TD
   n1 --> n2
   n3["Llama a ProcedureNomenclatureService.search"]:::llamada
   n2 --> n3
-  n4{"options.specialty !== undefined && options.specialty !== ''"}:::decision
+  n4{"specialties.length › 0"}:::decision
   n3 --> n4
   n5[("LEE terminology.concept_properties")]:::efecto
   n4 -->|"sí"| n5
-  n6[("LEE terminology.catalog_concepts")]:::efecto
+  n6["Repite: por cada const token de searchTokens(options.query ?? '')"]:::bucle
   n5 --> n6
   n4 -->|"no"| n6
-  n7["Llama a ProcedureNomenclatureService.properties"]:::llamada
-  n6 --> n7
-  n8[("LEE terminology.concept_properties")]:::efecto
+  n7[("LEE terminology.concept_properties")]:::efecto
+  n6 -->|"cada elemento"| n7
+  n8[("LEE terminology.catalog_concepts")]:::efecto
   n7 --> n8
-  n9(("200 Responde con éxito")):::ok
+  n6 -->|"al terminar"| n8
+  n9["Llama a ProcedureNomenclatureService.properties"]:::llamada
   n8 --> n9
+  n10[("LEE terminology.concept_properties")]:::efecto
+  n9 --> n10
+  n11(("200 Responde con éxito")):::ok
+  n10 --> n11
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1555,7 +1864,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. GET /billing/simulated/catalogs
+#### 22. GET /billing/simulated/catalogs
 
 Catálogos paramétricos del SIAT simulado
 
@@ -1590,7 +1899,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. GET /billing/simulated/charges
+#### 23. GET /billing/simulated/charges
 
 Cobros de consultas (opcionalmente de una persona)
 
@@ -1636,7 +1945,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
+#### 24. POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments
 
 Pago de una instancia de plan (no soportado: 409 NOT_A_PLAN)
 
@@ -1694,7 +2003,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /billing/simulated/charges/{chargeId}/invoices
+#### 25. POST /billing/simulated/charges/{chargeId}/invoices
 
 Emitir la factura SIAT simulada de un cobro pagado
 
@@ -1782,7 +2091,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /billing/simulated/charges/{chargeId}/payment
+#### 26. POST /billing/simulated/charges/{chargeId}/payment
 
 Registrar el pago real de un cobro
 
@@ -1792,9 +2101,9 @@ Registrar el pago real de un cobro
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Su rol no permite operar la facturación |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false); ResourceNotFoundException: Factura no encontrada |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La facturación simulada está apagada (BILLING_SIMULATED_ENABLED=false); ResourceNotFoundException: {INVOICE_ENCOUNTER_NOT_FOUND.message} |
 | 409 | `CONFLICT` | ConflictException: El cobro ya está pagado; ConflictException: El número de factura ya existe en la práctica |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La consulta no tiene precio: defina el precio del servicio «{cobro.catalogName}» en el catálogo de servicios de la práctica; PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La consulta no tiene precio: defina el precio del servicio «{cobro.catalogName}» en el catálogo de servicios de la práctica; PreconditionFailedException: Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su parte calculada; PreconditionFailedException: El monto del pago debe ser positivo; PreconditionFailedException: La asignación debe ser un importe positivo; PreconditionFailedException: El descuento debe ser un importe no negativo; PreconditionFailedException: La suma asignada excede el monto del pago; PreconditionFailedException: El cobro está en pausa mientras el paciente tenga una objeción abierta; PreconditionFailedException: La factura no tiene saldo pendiente; PreconditionFailedException: La asignación excede el saldo de la factura |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1846,92 +2155,106 @@ flowchart TD
   n21 -->|"no"| n23
   n24["Llama a InvoicesService.issueFromEncounter"]:::llamada
   n23 -->|"sí"| n24
-  n25["Transacción: transactional(…)"]:::transaccion
+  n25{"dto.claimId"}:::decision
   n24 --> n25
-  n26["Llama a InvoicesRepository.findByNumber"]:::llamada
-  n25 --> n26
-  n27[("LEE billing.invoices")]:::efecto
-  n26 --> n27
-  n28{"clash"}:::decision
+  n26(["422 PRECONDITION_FAILED Los servicios con seguro se facturan al paciente desde la solicitud de seguro, con su…"]):::error
+  n25 -->|"sí"| n26
+  n27["Transacción: transactional(…)"]:::transaccion
+  n25 -->|"no"| n27
+  n28{"dto.encounterId"}:::decision
   n27 --> n28
-  n29(["409 CONFLICT El número de factura ya existe en la práctica"]):::error
+  n29["Llama a BillingLinkTargetsRepository.findEncounter"]:::llamada
   n28 -->|"sí"| n29
-  n30["Llama a InvoicesRepository.create"]:::llamada
-  n28 -->|"no"| n30
-  n31[("CREA billing.invoices")]:::efecto
+  n30[("LEE clinical.encounters")]:::efecto
+  n29 --> n30
+  n31{"encounter?.patientProfileId !== dto.patientProfileId"}:::decision
   n30 --> n31
-  n32["Repite: forEach(…)"]:::bucle
-  n31 --> n32
-  n33["Llama a InvoicesRepository.createLine"]:::llamada
-  n32 -->|"cada elemento"| n33
-  n34[("CREA billing.invoice_lines")]:::efecto
+  n32(["404 NOT_FOUND {INVOICE_ENCOUNTER_NOT_FOUND.message}"]):::error
+  n31 -->|"sí"| n32
+  n33["Llama a InvoicesRepository.findByNumber"]:::llamada
+  n31 -->|"no"| n33
+  n28 -->|"no"| n33
+  n34[("LEE billing.invoices")]:::efecto
   n33 --> n34
-  n35{"dto.tenantId && (dto.encounterId || dto.claimId)"}:::decision
+  n35{"clash"}:::decision
   n34 --> n35
-  n32 -->|"al terminar"| n35
-  n36["Llama a BillingDocumentLinksRepository.create"]:::llamada
+  n36(["409 CONFLICT El número de factura ya existe en la práctica"]):::error
   n35 -->|"sí"| n36
-  n37[("CREA billing.billing_document_links")]:::efecto
-  n36 --> n37
-  n38["Llama a PaymentsReceivedService.apply"]:::llamada
+  n37["Llama a InvoicesRepository.create"]:::llamada
+  n35 -->|"no"| n37
+  n38[("CREA billing.invoices")]:::efecto
   n37 --> n38
-  n35 -->|"no"| n38
-  n23 -->|"no"| n38
-  n39["Transacción: transactional(…)"]:::transaccion
+  n39["Repite: forEach(…)"]:::bucle
   n38 --> n39
-  n40{"amountCents ‹= 0"}:::decision
-  n39 --> n40
-  n41(["422 PRECONDITION_FAILED El monto del pago debe ser positivo"]):::error
-  n40 -->|"sí"| n41
-  n42{"allocatedCents › amountCents"}:::decision
-  n40 -->|"no"| n42
-  n43(["422 PRECONDITION_FAILED La suma asignada excede el monto del pago"]):::error
+  n40["Llama a InvoicesRepository.createLine"]:::llamada
+  n39 -->|"cada elemento"| n40
+  n41[("CREA billing.invoice_lines")]:::efecto
+  n40 --> n41
+  n42{"dto.encounterId || dto.claimId"}:::decision
+  n41 --> n42
+  n39 -->|"al terminar"| n42
+  n43["Llama a BillingDocumentLinksRepository.create"]:::llamada
   n42 -->|"sí"| n43
-  n44["Llama a PaymentsReceivedRepository.create"]:::llamada
-  n42 -->|"no"| n44
-  n45[("CREA billing.payments_received")]:::efecto
+  n44[("CREA billing.billing_document_links")]:::efecto
+  n43 --> n44
+  n45["Llama a PaymentsReceivedService.apply"]:::llamada
   n44 --> n45
-  n46["Repite: por cada const alloc de dto.allocations"]:::bucle
+  n42 -->|"no"| n45
+  n23 -->|"no"| n45
+  n46["Transacción: transactional(…)"]:::transaccion
   n45 --> n46
-  n47["Llama a InvoicesRepository.findById"]:::llamada
-  n46 -->|"cada elemento"| n47
-  n48[("LEE billing.invoices")]:::efecto
-  n47 --> n48
-  n49{"!invoice"}:::decision
-  n48 --> n49
-  n50(["404 NOT_FOUND Factura no encontrada"]):::error
-  n49 -->|"sí"| n50
-  n51{"balanceCents ‹= 0"}:::decision
-  n49 -->|"no"| n51
-  n52(["422 PRECONDITION_FAILED La factura no tiene saldo pendiente"]):::error
-  n51 -->|"sí"| n52
-  n53{"allocCents › balanceCents"}:::decision
-  n51 -->|"no"| n53
-  n54(["422 PRECONDITION_FAILED La asignación excede el saldo de la factura"]):::error
-  n53 -->|"sí"| n54
-  n55["Llama a PaymentsReceivedRepository.createAllocation"]:::llamada
-  n53 -->|"no"| n55
-  n56[("CREA billing.receivable_payment_allocations")]:::efecto
-  n55 --> n56
-  n57[("ACTUALIZA billing.invoices · ACTUALIZA billing.invoices · ACTUALIZA billing.invoices")]:::efecto
-  n56 --> n57
-  n58["Llama a BillingSimulatedService.chargeOrThrow"]:::llamada
+  n47{"amountCents === null || amountCents ‹= 0"}:::decision
+  n46 --> n47
+  n48(["422 PRECONDITION_FAILED El monto del pago debe ser positivo"]):::error
+  n47 -->|"sí"| n48
+  n49["Repite: por cada const alloc de dto.allocations"]:::bucle
+  n47 -->|"no"| n49
+  n50{"allocCents === null || allocCents ‹= 0"}:::decision
+  n49 -->|"cada elemento"| n50
+  n51(["422 PRECONDITION_FAILED La asignación debe ser un importe positivo"]):::error
+  n50 -->|"sí"| n51
+  n52{"discountCents === null"}:::decision
+  n50 -->|"no"| n52
+  n53(["422 PRECONDITION_FAILED El descuento debe ser un importe no negativo"]):::error
+  n52 -->|"sí"| n53
+  n54{"effectCents › amountCents"}:::decision
+  n52 -->|"no"| n54
+  n49 -->|"al terminar"| n54
+  n55(["422 PRECONDITION_FAILED La suma asignada excede el monto del pago"]):::error
+  n54 -->|"sí"| n55
+  n56["Repite: por cada const alloc de dto.allocations"]:::bucle
+  n54 -->|"no"| n56
+  n57["Llama a InvoicesRepository.findById"]:::llamada
+  n56 -->|"cada elemento"| n57
+  n58[("LEE billing.invoices")]:::efecto
   n57 --> n58
-  n46 -->|"al terminar"| n58
-  n59{"!/^[0-9a-f-]{36}$/i.test(id)"}:::decision
+  n59["Llama a PaymentsReceivedRepository.create"]:::llamada
   n58 --> n59
-  n60(["↩ (relanza el error capturado)"]):::error
-  n59 -->|"sí"| n60
-  n61["Llama a BillingSimulatedService.loadCharges"]:::llamada
-  n59 -->|"no"| n61
-  n62[("LEE clinical.encounters · LEE practice.practices · LEE billing.invoices · LEE billing.invoice_lines · LEE bil…")]:::efecto
-  n61 --> n62
-  n63{"c === undefined"}:::decision
+  n56 -->|"al terminar"| n59
+  n60[("CREA billing.payments_received")]:::efecto
+  n59 --> n60
+  n61["Repite: por cada const [index, alloc] de dto.allocations.entries()"]:::bucle
+  n60 --> n61
+  n62["Llama a InvoicesRepository.hasOpenPatientObjection"]:::llamada
+  n61 -->|"cada elemento"| n62
+  n63[("LEE billing.invoice_lines · LEE insurance.insurance_claim_lines · LEE insurance.claim_disputes")]:::efecto
   n62 --> n63
-  n64(["↩ (relanza el error capturado)"]):::error
-  n63 -->|"sí"| n64
-  n65(("201 Responde con éxito")):::ok
-  n63 -->|"no"| n65
+  n64{"await this.invoicesRepo.hasOpenPatientObjection(tx, invoice.id)"}:::decision
+  n63 --> n64
+  n65(["422 PRECONDITION_FAILED El cobro está en pausa mientras el paciente tenga una objeción abierta"]):::error
+  n64 -->|"sí"| n65
+  n66{"balanceCents ‹= 0"}:::decision
+  n64 -->|"no"| n66
+  n67(["422 PRECONDITION_FAILED La factura no tiene saldo pendiente"]):::error
+  n66 -->|"sí"| n67
+  n68{"allocCents + discountCents › balanceCents"}:::decision
+  n66 -->|"no"| n68
+  n69(["422 PRECONDITION_FAILED La asignación excede el saldo de la factura"]):::error
+  n68 -->|"sí"| n69
+  n70["Llama a PaymentsReceivedRepository.createAllocation"]:::llamada
+  n68 -->|"no"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1940,7 +2263,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. GET /billing/simulated/invoices/{invoiceId}
+#### 27. GET /billing/simulated/invoices/{invoiceId}
 
 Una factura simulada, dentro del alcance de quien la pide
 
@@ -2025,7 +2348,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /billing/simulated/invoices/{invoiceId}/annulment
+#### 28. POST /billing/simulated/invoices/{invoiceId}/annulment
 
 Anular la factura (sólo administración)
 
@@ -2111,7 +2434,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
+#### 29. POST /billing/simulated/invoices/{invoiceId}/annulment-reversal
 
 Revertir la anulación (sólo administración)
 
@@ -2212,7 +2535,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /billing/simulated/invoices/{invoiceId}/email
+#### 30. POST /billing/simulated/invoices/{invoiceId}/email
 
 Encolar el envío (simulado, no se envía) de la factura
 
@@ -2308,7 +2631,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. GET /billing/simulated/my-invoices
+#### 31. GET /billing/simulated/my-invoices
 
 Mis facturas: recibidas (paciente) o emitidas (quien factura)
 
@@ -2347,7 +2670,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. GET /billing/simulated/my-invoices/{invoiceId}
+#### 32. GET /billing/simulated/my-invoices/{invoiceId}
 
 Una de mis facturas
 
@@ -2394,7 +2717,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /billing/simulated/outbox
+#### 33. GET /billing/simulated/outbox
 
 Bandeja de correo simulada (sólo administración)
 
@@ -2443,7 +2766,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. GET /billing/simulated/status
+#### 34. GET /billing/simulated/status
 
 Estado fiscal simulado: emisores y credenciales sintéticas
 
@@ -2493,6 +2816,44 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+#### 35. GET /patient-spending/me
+
+Mis gastos de salud
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene perfil de paciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · parámetros de consulta (400)…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PatientSpendingService.listMine"]:::llamada
+  n2 --> n3
+  n4{"!patientProfileId"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La cuenta no tiene perfil de paciente"]):::error
+  n4 -->|"sí"| n5
+  n6["Llama a PatientSpendingRepository.findForPatient"]:::llamada
+  n4 -->|"no"| n6
+  n7[("LEE billing.invoices · LEE terminology.catalog_concepts · LEE procedures_perioperative.procedure_charge_items…")]:::efecto
+  n6 --> n7
+  n8(("200 Responde con éxito")):::ok
+  n7 --> n8
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
 ### Operaciones sin decisiones propias
 
 Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
@@ -2501,3 +2862,4 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 |---|---|---|
 | GET /billing/service-catalog | 200, 400, 401, 403, 429 | 1 |
 | GET /billing/service-catalog/procedure-specialties | 200, 401, 403, 429 | 1 |
+| GET /billing/service-catalog/procedure-specialties/mine | 200, 401, 403, 429 | 3 |

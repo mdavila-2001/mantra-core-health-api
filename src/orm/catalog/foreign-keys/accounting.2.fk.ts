@@ -2,7 +2,7 @@ import type { ForeignKeyTuple } from '../catalog.types';
 
 /**
  * Claves foráneas declaradas por el modelo oficial para el schema `accounting` (parte 2/2).
- * 123 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
+ * 135 restricciones. Generado desde las notas `FK/` de la bóveda SALUD;
  * no editar a mano: regenerar con `yarn orm:catalog`.
  */
 export const accountingForeignKeys2: readonly ForeignKeyTuple[] = [
@@ -88,6 +88,18 @@ export const accountingForeignKeys2: readonly ForeignKeyTuple[] = [
   ['open_items', 'subledger_account_id', 'accounting', 'subledger_accounts', 'id'],
   ['open_items', 'tenant_id', 'directory', 'tenants', 'id'],
   ['open_items', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_simple_accounts', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_simple_accounts', 'practice_id', 'practice', 'practices', 'id'],
+  ['practitioner_simple_accounts', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_simple_records', 'account_id', 'accounting', 'practitioner_simple_accounts', 'id'],
+  ['practitioner_simple_records', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_simple_records', 'practice_id', 'practice', 'practices', 'id'],
+  ['practitioner_simple_records', 'updated_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_simple_transactions', 'created_by_user_id', 'iam', 'users', 'id'],
+  ['practitioner_simple_transactions', 'credit_account_id', 'accounting', 'practitioner_simple_accounts', 'id'],
+  ['practitioner_simple_transactions', 'debit_account_id', 'accounting', 'practitioner_simple_accounts', 'id'],
+  ['practitioner_simple_transactions', 'practice_id', 'practice', 'practices', 'id'],
+  ['practitioner_simple_transactions', 'updated_by_user_id', 'iam', 'users', 'id'],
   ['profit_centers', 'controlling_area_id', 'accounting', 'controlling_areas', 'id'],
   ['profit_centers', 'created_by_user_id', 'iam', 'users', 'id'],
   ['profit_centers', 'parent_profit_center_id', 'accounting', 'profit_centers', 'id'],

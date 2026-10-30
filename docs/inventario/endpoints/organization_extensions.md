@@ -4,23 +4,23 @@
 
 - **Bloque:** Práctica y Agenda (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
 - **Operaciones:** 9 (9 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 9 · BAJO 0
-- **Tablas distintas que tocan:** 5
+- **Riesgo:** ALTO 0 · MEDIO 6 · BAJO 3
+- **Tablas distintas que tocan:** 12
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/organization-extensions.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | POST | `/orgext/affiliations` | Declarar afiliación entre organizaciones | MEDIO | 3 | SECURITY_ADMIN |
-| 2 | POST | `/orgext/affiliations/{id}/terminate` | Terminar afiliación y revocar acceso | MEDIO | 2 | SECURITY_ADMIN |
+| 1 | POST | `/orgext/affiliations` | Declarar afiliación entre organizaciones | MEDIO | 7 | SECURITY_ADMIN |
+| 2 | POST | `/orgext/affiliations/{id}/terminate` | Terminar afiliación y revocar acceso | BAJO | 1 | SECURITY_ADMIN |
 | 3 | POST | `/orgext/data-boundaries` | Definir frontera de datos (residencia/RLS) | MEDIO | 2 | SECURITY_ADMIN |
-| 4 | POST | `/orgext/facility-licenses` | Registrar licencia de instalación | MEDIO | 2 | SECURITY_ADMIN |
-| 5 | POST | `/orgext/facility-licenses/{id}/verify` | Verificar / rechazar licencia | MEDIO | 2 | SECURITY_ADMIN |
-| 6 | POST | `/orgext/hospitals` | Especializar practice/tenant como hospital | MEDIO | 2 | SECURITY_ADMIN |
-| 7 | POST | `/orgext/hospitals/{id}/activate` | Activar hospital y publicar perfil | MEDIO | 3 | SECURITY_ADMIN |
-| 8 | POST | `/orgext/hospitals/{id}/service-lines` | Definir línea de servicio hospitalaria | MEDIO | 2 | SECURITY_ADMIN |
-| 9 | DELETE | `/orgext/hospitals/{id}/service-lines/{lineId}` | Retirar (soft-delete) línea de servicio | MEDIO | 2 | SECURITY_ADMIN |
+| 4 | POST | `/orgext/facility-licenses` | Registrar licencia de instalación | MEDIO | 5 | SECURITY_ADMIN |
+| 5 | POST | `/orgext/facility-licenses/{id}/verify` | Verificar / rechazar licencia | BAJO | 1 | SECURITY_ADMIN |
+| 6 | POST | `/orgext/hospitals` | Especializar practice/tenant como hospital | MEDIO | 3 | SECURITY_ADMIN |
+| 7 | POST | `/orgext/hospitals/{id}/activate` | Activar hospital y publicar perfil | BAJO | 5 | SECURITY_ADMIN |
+| 8 | POST | `/orgext/hospitals/{id}/service-lines` | Definir línea de servicio hospitalaria | MEDIO | 6 | SECURITY_ADMIN |
+| 9 | DELETE | `/orgext/hospitals/{id}/service-lines/{lineId}` | Retirar (soft-delete) línea de servicio | MEDIO | 3 | SECURITY_ADMIN |
 
 ---
 
@@ -31,7 +31,7 @@
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrgextAffiliationsController.declare` — `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:37`
+- **Implementación:** `OrgextAffiliationsController.declare` — `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:42`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -41,26 +41,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Cómo se atiende (sistema)
 
-`POST /orgext/affiliations` la atiende `OrgextAffiliationsController.declare` (src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:37). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `OrganizationExtensionsCreateAffiliationDto` (9 campos, 2 obligatorios). Delega en `OrgextAffiliationsService.declare`. Crea filas en organization_extensions.organization_affiliations. Lee organization_extensions.organization_affiliations, organization_extensions.organization_data_boundaries.
+`POST /orgext/affiliations` la atiende `OrgextAffiliationsController.declare` (src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:42). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `OrganizationExtensionsCreateAffiliationDto` (9 campos, 2 obligatorios). Delega en `OrgextAffiliationsService.declare`. Crea filas en organization_extensions.organization_affiliations. Lee organization_extensions.data_use_agreements, organization_extensions.organization_affiliations, organization_extensions.organization_data_boundaries, practice.healthcare_services, practice.practice_sites, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:42` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `organization_extensions.organization_affiliations` | ESCRIBE | CREA | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrganizationAffiliationsRepository.create | `src/modules/organization_extensions/repositories/organization-affiliations.repository.ts:89` |
-| `organization_extensions.organization_affiliations` | LEE | LEE | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrganizationAffiliationsRepository.findActiveDuplicate | `src/modules/organization_extensions/repositories/organization-affiliations.repository.ts:76` |
+| `organization_extensions.data_use_agreements` | LEE | LEE | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrgextReferencesRepository.dataUseAgreementInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:111` |
+| `organization_extensions.organization_affiliations` | ESCRIBE | CREA | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrganizationAffiliationsRepository.create | `src/modules/organization_extensions/repositories/organization-affiliations.repository.ts:96` |
+| `organization_extensions.organization_affiliations` | LEE | LEE | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrganizationAffiliationsRepository.findActiveDuplicate | `src/modules/organization_extensions/repositories/organization-affiliations.repository.ts:83` |
 | `organization_extensions.organization_data_boundaries` | LEE | LEE | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrganizationDataBoundariesRepository.countActiveForTenant | `src/modules/organization_extensions/repositories/organization-data-boundaries.repository.ts:84` |
+| `practice.healthcare_services` | LEE | LEE | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrgextReferencesRepository.healthcareServiceInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:56` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrgextReferencesRepository.practiceSiteInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:44` |
+| `practice.practices` | LEE | LEE | DIRECTA | OrgextAffiliationsController.declare → OrgextAffiliationsService.declare → OrgextReferencesRepository.practiceSiteInTenants → OrgextReferencesRepository.practiceInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:31` |
 
 ### Cuerpo — DTO `OrganizationExtensionsCreateAffiliationDto` · `application/json`
 
@@ -130,6 +134,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {ORGEXT_NOT_AVAILABLE.message} |
 | 409 | `CONFLICT` | ConflictException: Ya existe una afiliación activa de ese tipo |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El tenant primario y el participante deben ser distintos; PreconditionFailedException: El tenant participante no tiene una frontera de datos activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
@@ -153,9 +158,9 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 - **Origen:** CONTRATO
 - **Nombre:** Terminar afiliación y revocar acceso
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrgextAffiliationsController.terminate` — `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:49`
+- **Implementación:** `OrgextAffiliationsController.terminate` — `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:59`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -165,24 +170,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Cómo se atiende (sistema)
 
-`POST /orgext/affiliations/{id}/terminate` la atiende `OrgextAffiliationsController.terminate` (src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:49). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `OrgextAffiliationsService.terminate`. Actualiza organization_extensions.organization_affiliations. Lee organization_extensions.organization_affiliations.
+`POST /orgext/affiliations/{id}/terminate` la atiende `OrgextAffiliationsController.terminate` (src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:59). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `OrgextAffiliationsService.terminate`. Lee organization_extensions.organization_affiliations.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:49` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:59` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-affiliations.controller.ts:59` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `organization_extensions.organization_affiliations` | ESCRIBE | ACTUALIZA | POR_TIPO | OrgextAffiliationsController.terminate → OrgextAffiliationsService.terminate | `src/modules/organization_extensions/services/orgext-affiliations.service.ts:162` |
-| `organization_extensions.organization_affiliations` | LEE | LEE | DIRECTA | OrgextAffiliationsController.terminate → OrgextAffiliationsService.terminate → OrganizationAffiliationsRepository.findById | `src/modules/organization_extensions/repositories/organization-affiliations.repository.ts:65` |
+| `organization_extensions.organization_affiliations` | LEE | LEE | DIRECTA | OrgextAffiliationsController.terminate → OrgextAffiliationsService.terminate → OrganizationAffiliationsRepository.findByIdForParty | `src/modules/organization_extensions/repositories/organization-affiliations.repository.ts:69` |
 
 ### Parámetros
 
@@ -208,7 +212,6 @@ La operación no recibe cuerpo.
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Afiliación no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La afiliación no está activa |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -233,7 +236,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrgextDataBoundariesController.define` — `src/modules/organization_extensions/controllers/orgext-data-boundaries.controller.ts:25`
+- **Implementación:** `OrgextDataBoundariesController.define` — `src/modules/organization_extensions/controllers/orgext-data-boundaries.controller.ts:30`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -243,18 +246,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Cómo se atiende (sistema)
 
-`POST /orgext/data-boundaries` la atiende `OrgextDataBoundariesController.define` (src/modules/organization_extensions/controllers/orgext-data-boundaries.controller.ts:25). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDataBoundaryDto` (10 campos, 2 obligatorios). Delega en `OrgextDataBoundariesService.define`. Crea filas en organization_extensions.organization_data_boundaries. Lee organization_extensions.organization_data_boundaries.
+`POST /orgext/data-boundaries` la atiende `OrgextDataBoundariesController.define` (src/modules/organization_extensions/controllers/orgext-data-boundaries.controller.ts:30). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateDataBoundaryDto` (10 campos, 2 obligatorios). Delega en `OrgextDataBoundariesService.define`. Crea filas en organization_extensions.organization_data_boundaries. Lee organization_extensions.organization_data_boundaries.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-data-boundaries.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-data-boundaries.controller.ts:30` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -348,7 +351,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrgextFacilityLicensesController.register` — `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:38`
+- **Implementación:** `OrgextFacilityLicensesController.register` — `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:43`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -358,25 +361,28 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Cómo se atiende (sistema)
 
-`POST /orgext/facility-licenses` la atiende `OrgextFacilityLicensesController.register` (src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:38). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFacilityLicenseDto` (11 campos, 2 obligatorios). Delega en `OrgextFacilityLicensesService.register`. Crea filas en organization_extensions.facility_licenses. Lee organization_extensions.facility_licenses.
+`POST /orgext/facility-licenses` la atiende `OrgextFacilityLicensesController.register` (src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:43). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateFacilityLicenseDto` (11 campos, 2 obligatorios). Delega en `OrgextFacilityLicensesService.register`. Crea filas en organization_extensions.facility_licenses. Lee common.files, organization_extensions.facility_licenses, practice.practice_sites, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:43` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `organization_extensions.facility_licenses` | ESCRIBE | CREA | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → FacilityLicensesRepository.create | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:101` |
-| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → FacilityLicensesRepository.findByNumber | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:80` |
+| `common.files` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → OrgextReferencesRepository.fileInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:97` |
+| `organization_extensions.facility_licenses` | ESCRIBE | CREA | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → FacilityLicensesRepository.create | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:105` |
+| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → FacilityLicensesRepository.findByNumber | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:84` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → OrgextReferencesRepository.practiceSiteInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:44` |
+| `practice.practices` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.register → OrgextFacilityLicensesService.register → OrgextReferencesRepository.practiceSiteInTenants → OrgextReferencesRepository.practiceInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:31` |
 
 ### Cuerpo — DTO `CreateFacilityLicenseDto` · `application/json`
 
@@ -463,9 +469,9 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 - **Origen:** CONTRATO
 - **Nombre:** Verificar / rechazar licencia
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrgextFacilityLicensesController.verify` — `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:50`
+- **Implementación:** `OrgextFacilityLicensesController.verify` — `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:60`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -475,26 +481,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Cómo se atiende (sistema)
 
-`POST /orgext/facility-licenses/{id}/verify` la atiende `OrgextFacilityLicensesController.verify` (src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:50). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `OrganizationExtensionsVerifyLicenseDto` (1 campo, 1 obligatorio). Delega en `OrgextFacilityLicensesService.verify`. Actualiza organization_extensions.facility_licenses. Lee organization_extensions.facility_licenses.
+`POST /orgext/facility-licenses/{id}/verify` la atiende `OrgextFacilityLicensesController.verify` (src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:60). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `OrganizationExtensionsVerifyLicenseDto` (1 campo, 1 obligatorio). Delega en `OrgextFacilityLicensesService.verify`. Lee organization_extensions.facility_licenses.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:50` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-facility-licenses.controller.ts:60` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `organization_extensions.facility_licenses` | ESCRIBE | ACTUALIZA | POR_TIPO | OrgextFacilityLicensesController.verify → OrgextFacilityLicensesService.verify | `src/modules/organization_extensions/services/orgext-facility-licenses.service.ts:123` |
-| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.verify → OrgextFacilityLicensesService.verify → FacilityLicensesRepository.findById | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:70` |
+| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextFacilityLicensesController.verify → OrgextFacilityLicensesService.verify → FacilityLicensesRepository.findByIdInTenant | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:74` |
 
 ### Parámetros
 
@@ -540,7 +545,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Licencia no encontrada |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La licencia no está en estado pendiente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -565,7 +569,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrgextHospitalsController.specialize` — `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:39`
+- **Implementación:** `OrgextHospitalsController.specialize` — `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:44`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -575,25 +579,26 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Cómo se atiende (sistema)
 
-`POST /orgext/hospitals` la atiende `OrgextHospitalsController.specialize` (src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:39). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateHospitalDto` (9 campos, 2 obligatorios). Delega en `OrgextHospitalsService.specialize`. Crea filas en organization_extensions.hospitals. Lee organization_extensions.hospitals.
+`POST /orgext/hospitals` la atiende `OrgextHospitalsController.specialize` (src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:44). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateHospitalDto` (9 campos, 2 obligatorios). Delega en `OrgextHospitalsService.specialize`. Crea filas en organization_extensions.hospitals. Lee organization_extensions.hospitals, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:39` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:44` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `organization_extensions.hospitals` | ESCRIBE | CREA | DIRECTA | OrgextHospitalsController.specialize → OrgextHospitalsService.specialize → HospitalsRepository.create | `src/modules/organization_extensions/repositories/hospitals.repository.ts:81` |
-| `organization_extensions.hospitals` | LEE | LEE | DIRECTA | OrgextHospitalsController.specialize → OrgextHospitalsService.specialize → HospitalsRepository.findByTenantOrPractice | `src/modules/organization_extensions/repositories/hospitals.repository.ts:76` |
+| `organization_extensions.hospitals` | ESCRIBE | CREA | DIRECTA | OrgextHospitalsController.specialize → OrgextHospitalsService.specialize → HospitalsRepository.create | `src/modules/organization_extensions/repositories/hospitals.repository.ts:85` |
+| `organization_extensions.hospitals` | LEE | LEE | DIRECTA | OrgextHospitalsController.specialize → OrgextHospitalsService.specialize → HospitalsRepository.findByTenantOrPractice | `src/modules/organization_extensions/repositories/hospitals.repository.ts:80` |
+| `practice.practices` | LEE | LEE | DIRECTA | OrgextHospitalsController.specialize → OrgextHospitalsService.specialize → OrgextReferencesRepository.practiceInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:31` |
 
 ### Cuerpo — DTO `CreateHospitalDto` · `application/json`
 
@@ -676,9 +681,9 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 - **Origen:** CONTRATO
 - **Nombre:** Activar hospital y publicar perfil
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrgextHospitalsController.activate` — `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:51`
+- **Implementación:** `OrgextHospitalsController.activate` — `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:61`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -688,27 +693,29 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Cómo se atiende (sistema)
 
-`POST /orgext/hospitals/{id}/activate` la atiende `OrgextHospitalsController.activate` (src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:51). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ActivateHospitalDto` (2 campos, 0 obligatorios). Delega en `OrgextHospitalsService.activate`. Actualiza organization_extensions.hospitals. Lee organization_extensions.facility_licenses, organization_extensions.hospitals.
+`POST /orgext/hospitals/{id}/activate` la atiende `OrgextHospitalsController.activate` (src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:61). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `ActivateHospitalDto` (2 campos, 0 obligatorios). Delega en `OrgextHospitalsService.activate`. Lee community.public_profiles, organization_extensions.facility_licenses, organization_extensions.hospitals, practice.practice_sites, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:51` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:61` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:61` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → FacilityLicensesRepository.countVerifiedForTenant | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:93` |
-| `organization_extensions.hospitals` | ESCRIBE | ACTUALIZA | POR_TIPO | OrgextHospitalsController.activate → OrgextHospitalsService.activate | `src/modules/organization_extensions/services/orgext-hospitals.service.ts:163` |
-| `organization_extensions.hospitals` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → HospitalsRepository.findById | `src/modules/organization_extensions/repositories/hospitals.repository.ts:64` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → OrgextReferencesRepository.publicProfileInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:83` |
+| `organization_extensions.facility_licenses` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → FacilityLicensesRepository.countVerifiedForTenant | `src/modules/organization_extensions/repositories/facility-licenses.repository.ts:97` |
+| `organization_extensions.hospitals` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → HospitalsRepository.findByIdInTenant | `src/modules/organization_extensions/repositories/hospitals.repository.ts:68` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → OrgextReferencesRepository.practiceSiteInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:44` |
+| `practice.practices` | LEE | LEE | DIRECTA | OrgextHospitalsController.activate → OrgextHospitalsService.activate → OrgextReferencesRepository.practiceSiteInTenants → OrgextReferencesRepository.practiceInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:31` |
 
 ### Parámetros
 
@@ -758,7 +765,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Hospital no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El hospital no está en estado borrador/inactivo; PreconditionFailedException: El hospital no tiene ninguna licencia de instalación verificada |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -783,7 +789,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrgextHospitalsController.addServiceLine` — `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:64`
+- **Implementación:** `OrgextHospitalsController.addServiceLine` — `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:79`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -793,26 +799,30 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Cómo se atiende (sistema)
 
-`POST /orgext/hospitals/{id}/service-lines` la atiende `OrgextHospitalsController.addServiceLine` (src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:64). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateServiceLineDto` (6 campos, 0 obligatorios). Delega en `OrgextHospitalsService.addServiceLine`. Crea filas en organization_extensions.hospital_service_lines. Lee organization_extensions.hospitals.
+`POST /orgext/hospitals/{id}/service-lines` la atiende `OrgextHospitalsController.addServiceLine` (src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:79). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateServiceLineDto` (6 campos, 0 obligatorios). Delega en `OrgextHospitalsService.addServiceLine`. Crea filas en organization_extensions.hospital_service_lines. Lee organization_extensions.hospitals, practice.clinical_units, practice.healthcare_services, practice.practice_sites, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:64` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
-| VALIDACION | no determinado (no se encontró en el código) | `src/main.ts` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:79` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:79` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `organization_extensions.hospital_service_lines` | ESCRIBE | CREA | DIRECTA | OrgextHospitalsController.addServiceLine → OrgextHospitalsService.addServiceLine → HospitalServiceLinesRepository.create | `src/modules/organization_extensions/repositories/hospital-service-lines.repository.ts:63` |
-| `organization_extensions.hospitals` | LEE | LEE | DIRECTA | OrgextHospitalsController.addServiceLine → OrgextHospitalsService.addServiceLine → HospitalsRepository.findById | `src/modules/organization_extensions/repositories/hospitals.repository.ts:64` |
+| `organization_extensions.hospitals` | LEE | LEE | DIRECTA | OrgextHospitalsController.addServiceLine → OrgextHospitalsService.addServiceLine → HospitalsRepository.findByIdInTenant | `src/modules/organization_extensions/repositories/hospitals.repository.ts:68` |
+| `practice.clinical_units` | LEE | LEE | DIRECTA | OrgextHospitalsController.addServiceLine → OrgextHospitalsService.addServiceLine → OrgextReferencesRepository.clinicalUnitInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:70` |
+| `practice.healthcare_services` | LEE | LEE | DIRECTA | OrgextHospitalsController.addServiceLine → OrgextHospitalsService.addServiceLine → OrgextReferencesRepository.healthcareServiceInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:56` |
+| `practice.practice_sites` | LEE | LEE | DIRECTA | OrgextHospitalsController.addServiceLine → OrgextHospitalsService.addServiceLine → OrgextReferencesRepository.clinicalUnitInTenants → OrgextReferencesRepository.practiceSiteInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:44` |
+| `practice.practices` | LEE | LEE | DIRECTA | OrgextHospitalsController.addServiceLine → OrgextHospitalsService.addServiceLine → OrgextReferencesRepository.healthcareServiceInTenants → OrgextReferencesRepository.practiceInTenants | `src/modules/organization_extensions/repositories/orgext-references.repository.ts:31` |
 
 ### Parámetros
 
@@ -869,7 +879,6 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Hospital no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El hospital no está activo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -894,7 +903,7 @@ El árbol de decisión completo está en [flujos](../flujos/organization_extensi
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `OrgextHospitalsController.retireServiceLine` — `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:77`
+- **Implementación:** `OrgextHospitalsController.retireServiceLine` — `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:97`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -904,24 +913,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/organiz
 
 ### Cómo se atiende (sistema)
 
-`DELETE /orgext/hospitals/{id}/service-lines/{lineId}` la atiende `OrgextHospitalsController.retireServiceLine` (src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:77). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `OrgextHospitalsService.retireServiceLine`. Actualiza organization_extensions.hospital_service_lines. Lee organization_extensions.hospital_service_lines.
+`DELETE /orgext/hospitals/{id}/service-lines/{lineId}` la atiende `OrgextHospitalsController.retireServiceLine` (src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:97). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `OrgextHospitalsService.retireServiceLine`. Actualiza organization_extensions.hospital_service_lines. Lee organization_extensions.hospital_service_lines, organization_extensions.hospitals.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:274` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: id, lineId | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:77` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:142` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:97` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id, lineId | `src/modules/organization_extensions/controllers/orgext-hospitals.controller.ts:97` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `organization_extensions.hospital_service_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | OrgextHospitalsController.retireServiceLine → OrgextHospitalsService.retireServiceLine | `src/modules/organization_extensions/services/orgext-hospitals.service.ts:259` |
+| `organization_extensions.hospital_service_lines` | ESCRIBE | ACTUALIZA | POR_TIPO | OrgextHospitalsController.retireServiceLine → OrgextHospitalsService.retireServiceLine | `src/modules/organization_extensions/services/orgext-hospitals.service.ts:337` |
 | `organization_extensions.hospital_service_lines` | LEE | LEE | DIRECTA | OrgextHospitalsController.retireServiceLine → OrgextHospitalsService.retireServiceLine → HospitalServiceLinesRepository.findByIdForHospital | `src/modules/organization_extensions/repositories/hospital-service-lines.repository.ts:58` |
+| `organization_extensions.hospitals` | LEE | LEE | DIRECTA | OrgextHospitalsController.retireServiceLine → OrgextHospitalsService.retireServiceLine → HospitalsRepository.findByIdInTenant | `src/modules/organization_extensions/repositories/hospitals.repository.ts:68` |
 
 ### Parámetros
 

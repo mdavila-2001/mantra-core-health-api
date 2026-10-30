@@ -17,7 +17,20 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { NotificationsRepository } from '../repositories';
+import { MessagingErrorReason } from '../messaging.error-reasons';
+import { providerReceiptSignedString } from '../provider-receipt-signature';
 import { NotificationsGateway } from '../gateways';
+import {
+  safeRoute,
+  WebPushService,
+  type WebPushMessage,
+} from './web-push.service';
+
+/** La ruta a abrir, si el aviso la trae en su payload (`payload.route`). */
+function routeFromPayload(payload: unknown): string | undefined {
+  const route = (payload as { route?: unknown } | null | undefined)?.route;
+  return typeof route === 'string' ? safeRoute(route) : undefined;
+}
 import {
   CreateNotificationRequestDto,
   NotificationRequestResponseDto,
@@ -65,6 +78,15 @@ const LIVE_REQUEST_STATES: readonly string[] = [
 ];
 
 const DEFAULT_PRIORITY = 5;
+
+/** Opciones de `createRequest` que sólo otros módulos pueden pedir (nunca el cliente HTTP). */
+export interface CreateRequestOptions {
+  /**
+   * El aviso es crítico: se entrega aunque el destinatario haya silenciado su
+   * categoría. Sigue respetando el opt-out del canal entero.
+   */
+  readonly mandatory?: boolean;
+}
 /** Cuántas notificaciones trae la bandeja si nadie pide un tope. */
 const DEFAULT_INBOX_PAGE = 20;
 /** Tope de filas que marca de una vez «marcar todas como leídas». */
@@ -97,6 +119,9 @@ export class NotificationsService implements InAppNotificationEmitter {
     // la escritura. En producción, Nest siempre lo resuelve (está en
     // `MessagingModule.providers`).
     private readonly gateway?: NotificationsGateway,
+    // Opcional por la misma razón que el socket: un push caído no puede tumbar
+    // la entrega, y los specs que no lo necesitan no tienen que construirlo.
+    private readonly webPush?: WebPushService,
   ) {
     this.logger.setContext(NotificationsService.name);
   }
@@ -107,21 +132,34 @@ export class NotificationsService implements InAppNotificationEmitter {
    * Sin consentimiento o sin opt-in **no se entrega, pero sí se registra** como
    * suprimida: dejar de escribir la fila haría imposible demostrar después que
    * se respetó la preferencia del destinatario.
+   *
+   * `options.mandatory` es sólo para otros módulos que llaman al servicio: lo
+   * pide el emisor de avisos críticos (rechazo, suspensión…) para que silenciar
+   * la **categoría** no los detenga. No está en el DTO a propósito: ninguna
+   * petición HTTP puede saltarse la preferencia de nadie.
    */
   async createRequest(
     dto: CreateNotificationRequestDto,
     actor: AuthenticatedUser,
+    options: CreateRequestOptions = {},
   ): Promise<NotificationRequestResponseDto> {
     this.logger.info(
       { operation: 'messaging.notification.request', channelId: dto.channelId },
       'Creating notification request',
     );
 
-    // Un canal externo necesita a dónde escribir; uno interno, a quién.
-    if (!dto.recipientUserId && !dto.recipientAddress) {
+    // `notification_requests.recipient_user_id` es NOT NULL: toda solicitud se
+    // liga a un usuario de la plataforma. `recipientAddress` sólo complementa
+    // al usuario (dirección de canal externo); sin usuario se rechaza aquí, con
+    // razón estable, y no se deja que la violación llegue como error de base.
+    const recipientUserId = dto.recipientUserId;
+    if (!recipientUserId) {
       throw new PreconditionFailedException(
-        'La notificación necesita destinatario interno o dirección de destino',
+        dto.recipientAddress
+          ? 'La notificación a una dirección externa también necesita el usuario destinatario'
+          : 'La notificación necesita el usuario destinatario',
         { channelId: dto.channelId },
+        MessagingErrorReason.NOTIFICATION_RECIPIENT_INVALID,
       );
     }
 
@@ -131,9 +169,11 @@ export class NotificationsService implements InAppNotificationEmitter {
         dto.channelId,
       );
       if (!channel) {
-        throw new ResourceNotFoundException('Canal no encontrado', {
-          channelId: dto.channelId,
-        });
+        throw new ResourceNotFoundException(
+          'Canal no encontrado',
+          { channelId: dto.channelId },
+          MessagingErrorReason.MESSAGE_CHANNEL_NOT_FOUND,
+        );
       }
       if (channel.stateConceptId !== CONCEPTS.STATE_ACTIVE) {
         throw new PreconditionFailedException('El canal no está activo', {
@@ -188,7 +228,10 @@ export class NotificationsService implements InAppNotificationEmitter {
         }
       }
 
-      const suppression = await this.evaluateSuppression(tx, dto);
+      const suppression = await this.evaluateSuppression(tx, {
+        ...dto,
+        ignoreCategoryOptOut: options.mandatory === true,
+      });
       const statusConceptId = suppression
         ? CONCEPTS.NOTIF_SUPPRESSED
         : CONCEPTS.NOTIF_PENDING;
@@ -212,7 +255,7 @@ export class NotificationsService implements InAppNotificationEmitter {
 
       const request = this.notificationsRepo.createNotificationRequest(tx, {
         tenantId: dto.tenantId,
-        recipientUserId: dto.recipientUserId,
+        recipientUserId,
         recipientAddress: dto.recipientAddress,
         channelId: dto.channelId,
         templateId: dto.templateId,
@@ -230,9 +273,7 @@ export class NotificationsService implements InAppNotificationEmitter {
         // se aporta, cada solicitud es única por definición.
         idempotencyKey: dto.debounceKey ?? `notif-${randomUUID()}`,
         recipientTypeConceptId: CONCEPTS.NOTIF_RECIPIENT_USER,
-        // Un canal externo puede no tener destinatario interno; en ese caso la
-        // referencia es el propio actor que solicitó el envío.
-        recipientRefId: dto.recipientUserId ?? actor.id,
+        recipientRefId: recipientUserId,
         sourceConceptId: CONCEPTS.NOTIF_SOURCE_SYSTEM,
         authorizedByUserId: actor.id,
         authorizationSnapshotJson,
@@ -333,7 +374,8 @@ export class NotificationsService implements InAppNotificationEmitter {
     dto: DeliverNotificationDto,
     actor: AuthenticatedUser,
   ): Promise<DeliverNotificationResponseDto> {
-    return this.em.transactional(async (tx) => {
+    let pushTarget: WebPushMessage | undefined;
+    const response = await this.em.transactional(async (tx) => {
       const request = await this.notificationsRepo.findRequestForUpdate(
         tx,
         requestId,
@@ -484,6 +526,12 @@ export class NotificationsService implements InAppNotificationEmitter {
             actorUserId: actor.id,
           },
         ).id;
+        pushTarget = {
+          recipientUserId: request.recipientUserId,
+          subject: dto.subject ?? '',
+          route: routeFromPayload(request.payloadJson),
+          notificationId: inAppNotificationId,
+        };
       }
 
       request.statusConceptId = sent
@@ -511,6 +559,9 @@ export class NotificationsService implements InAppNotificationEmitter {
         duplicate: false,
       };
     });
+    // Después del commit y fuera de todo lock: el push sale hacia un tercero.
+    if (pushTarget) void this.webPush?.pushToUser(pushTarget);
+    return response;
   }
 
   /**
@@ -537,10 +588,12 @@ export class NotificationsService implements InAppNotificationEmitter {
 
       // Verificación de firma HMAC del proveedor ANTES de conciliar nada
       // (fail-closed): sin firma válida contra el secreto del proveedor se
-      // rechaza el acuse. Esta es la única superficie pública del módulo.
+      // rechaza el acuse. Esta es la única superficie pública del módulo. La
+      // firma cubre todos los campos que deciden qué se concilia (entrega,
+      // tipo de acuse, estado, fecha y cuerpo original), no sólo el cuerpo.
       const secret = deriveWebhookSecret('provider', provider.id);
-      const rawBody = canonicalJson(dto.rawPayloadJson);
-      if (!verifySignature(secret, rawBody, dto.signature)) {
+      const signedBody = providerReceiptSignedString(providerCode, dto);
+      if (!verifySignature(secret, signedBody, dto.signature)) {
         throw new UnauthorizedException(
           'Firma del acuse del proveedor inválida',
           { providerCode },
@@ -726,6 +779,11 @@ export class NotificationsService implements InAppNotificationEmitter {
         result.availableAt &&
         new Date(result.availableAt).getTime() <= Date.now()
       ) {
+        void this.webPush?.pushToUser({
+          recipientUserId: input.recipientUserId,
+          subject: input.subject,
+          notificationId: result.inAppNotificationId,
+        });
         this.gateway?.notifyUser(input.recipientUserId, {
           id: result.inAppNotificationId,
           category: input.category,
@@ -1031,6 +1089,12 @@ export class NotificationsService implements InAppNotificationEmitter {
        * aplazado llegaría igual y sonaría el teléfono.
        */
       ignoreQuietHours?: boolean;
+      /**
+       * Entregar aunque la categoría esté silenciada (aviso crítico). No pasa
+       * por encima del opt-out del **canal** entero, que es una negativa más
+       * amplia que ninguna categoría.
+       */
+      ignoreCategoryOptOut?: boolean;
     },
   ): Promise<string | undefined> {
     if (!dto.recipientUserId) return undefined;
@@ -1055,7 +1119,7 @@ export class NotificationsService implements InAppNotificationEmitter {
       (preference) => !preference.categoryConceptId,
     );
 
-    if (ofCategory?.optedIn === false) {
+    if (ofCategory?.optedIn === false && !dto.ignoreCategoryOptOut) {
       return 'El destinatario no acepta este canal para esta categoría';
     }
     if (ofChannel?.optedIn === false) {

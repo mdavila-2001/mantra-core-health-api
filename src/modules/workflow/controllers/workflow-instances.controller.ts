@@ -8,7 +8,12 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, Roles, type AuthenticatedUser } from '../../../common';
+import {
+  Audited,
+  CurrentUser,
+  Roles,
+  type AuthenticatedUser,
+} from '../../../common';
 import { WorkflowInstancesService } from '../services';
 import {
   CreateWorkflowInstanceDto,
@@ -35,6 +40,10 @@ export class WorkflowInstancesController {
    * UC-32-10. Declarada antes que `instances` para que el segmento literal se
    * resuelva antes que cualquier ruta paramétrica que se añada después.
    */
+  @Audited({
+    action: 'WORKFLOW_TIMEOUTS_SWEPT',
+    entity: 'workflow_instance',
+  })
   @Post('instances/sweep-timeouts')
   @Roles('SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)
@@ -51,6 +60,11 @@ export class WorkflowInstancesController {
   }
 
   /** UC-32-12. */
+  @Audited({
+    action: 'WORKFLOW_INSTANCE_CREATED',
+    entity: 'workflow_instance',
+    entityId: 'result.id',
+  })
   @Post('instances')
   @Roles('CLINICIAN', 'BILLING_AGENT', 'SCHEDULER', 'SYSTEM', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.CREATED)
@@ -67,6 +81,11 @@ export class WorkflowInstancesController {
   }
 
   /** UC-32-13. */
+  @Audited({
+    action: 'WORKFLOW_TASK_COMPLETED',
+    entity: 'workflow_task',
+    entityId: 'param:id',
+  })
   @Post('tasks/:id/complete')
   @Roles('CLINICIAN', 'BILLING_AGENT', 'SCHEDULER', 'PLATFORM_ADMIN')
   @HttpCode(HttpStatus.OK)

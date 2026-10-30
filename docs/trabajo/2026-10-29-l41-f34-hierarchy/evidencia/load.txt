@@ -1,0 +1,15 @@
+antes|360255
+== dry-run
+      "concept-not-in-database": 91420
+    "rows": 28722,
+[f3 hierarchy] relaciones nuevas: 22544 (dry-run: se revierte)
+== pasada1
+      "concept-not-in-database": 91420
+    "rows": 28722,
+[f3 hierarchy] relaciones nuevas: 22544
+== pasada2
+      "concept-not-in-database": 91420
+    "rows": 28722,
+[f3 hierarchy] relaciones nuevas: 0
+despues|382799
+fks_no_validadas|0

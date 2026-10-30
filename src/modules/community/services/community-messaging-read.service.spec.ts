@@ -46,6 +46,9 @@ function build() {
   };
   const visibility = {
     assertOwnProfile: mockFn().mockResolvedValue(undefined),
+    // Variante de mensajería (titular o personal de la organización): la usan
+    // bandeja, hilo, adjuntos y presencia. La búsqueda de contactos no.
+    assertOwnMessagingProfile: mockFn().mockResolvedValue(undefined),
     isBlockedBetween: mockFn().mockResolvedValue(false),
   };
   // F4.2: la presencia se dobla; por defecto nadie está en línea.
@@ -69,6 +72,21 @@ function build() {
     }),
   };
 
+  // El sello sale de la admisión (la proyección de la Guía y el buscador); por
+  // defecto todo profesional está sin verificar.
+  const verifications = {
+    verificationOf: mockFn((_em: unknown, ids: string[]) =>
+      Promise.resolve(
+        new Map(
+          ids.map((id) => [
+            id,
+            { status: 'UNVERIFIED', verifiedAt: null, validUntil: null },
+          ]),
+        ),
+      ),
+    ),
+  };
+
   const service = new CommunityMessagingReadService(
     em as any,
     conversationsRepo as any,
@@ -76,6 +94,7 @@ function build() {
     visibility as any,
     presence as any,
     files as any,
+    verifications as any,
     logger as any,
   );
   return {
@@ -85,6 +104,7 @@ function build() {
     visibility,
     presence,
     files,
+    verifications,
   };
 }
 
@@ -215,6 +235,19 @@ describe('CommunityMessagingReadService', () => {
       expect(d.profilesRepo.searchChatContacts).not.toHaveBeenCalled();
     });
 
+    it('el personal de una farmacia no busca contactos como la farmacia', async () => {
+      const d = build();
+      d.visibility.assertOwnProfile.mockRejectedValue(
+        new ForbiddenException('perfil ajeno'),
+      );
+
+      await expect(
+        d.service.searchContacts('p-farmacia', actor, 'Juan', 10),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      // Titularidad estricta: la membresía en la organización no cuenta acá.
+      expect(d.visibility.assertOwnMessagingProfile).not.toHaveBeenCalled();
+    });
+
     it('una consulta vacía no enumera perfiles', async () => {
       const d = build();
 
@@ -274,7 +307,7 @@ describe('CommunityMessagingReadService', () => {
 
     it('mismo tenant no sustituye perfil propio ni membresía', async () => {
       const d = build();
-      d.visibility.assertOwnProfile.mockRejectedValue(
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(
         new ForbiddenException('perfil ajeno'),
       );
 
@@ -366,8 +399,160 @@ describe('CommunityMessagingReadService', () => {
           profileId: 'p-2',
           displayName: 'Andrea Peña',
           avatarUrl: '/public/media/file-9',
+          verification: null,
         },
       ]);
+    });
+
+    describe('sello de verificación del otro lado', () => {
+      const PRACT = COMM.PROFILE_TARGET_PRACTITIONER;
+      const VERIFIED = {
+        status: 'VERIFIED',
+        verifiedAt: '2026-09-01T10:00:00.000Z',
+        validUntil: '2029-09-01',
+      };
+
+      /** Tres hilos: un médico verificado, un médico sin verificar y un paciente. */
+      function threeKinds() {
+        const d = build();
+        d.conversationsRepo.listActiveParticipationsOf.mockResolvedValue(
+          ['c-1', 'c-2', 'c-3'].map((conversationId) => ({
+            conversationId,
+            lastReadMessageId: 'm-0',
+          })),
+        );
+        d.conversationsRepo.listConversationsByIds.mockResolvedValue(
+          ['c-1', 'c-2', 'c-3'].map((id) => ({
+            id,
+            conversationTypeConceptId: COMM.CONVERSATION_DIRECT,
+          })),
+        );
+        d.conversationsRepo.findParticipants.mockImplementation(
+          (_em: unknown, conversationId: string) =>
+            Promise.resolve([
+              { participantProfileId: 'p-1' },
+              { participantProfileId: `peer-${conversationId}` },
+            ]),
+        );
+        d.profilesRepo.listByIds.mockResolvedValue([
+          {
+            id: 'peer-c-1',
+            displayName: 'Dra. Ana',
+            targetTypeConceptId: PRACT,
+            targetId: 'prac-1',
+          },
+          {
+            id: 'peer-c-2',
+            displayName: 'Dr. Beto',
+            targetTypeConceptId: PRACT,
+            targetId: 'prac-2',
+          },
+          {
+            id: 'peer-c-3',
+            displayName: 'Carla (paciente)',
+            targetTypeConceptId: COMM.PROFILE_TARGET_USER,
+            targetId: 'pat-3',
+          },
+        ]);
+        d.verifications.verificationOf.mockImplementation(
+          (_em: unknown, ids: string[]) =>
+            Promise.resolve(
+              new Map(
+                ids.map((id) => [
+                  id,
+                  id === 'prac-1'
+                    ? VERIFIED
+                    : {
+                        status: 'UNVERIFIED',
+                        verifiedAt: null,
+                        validUntil: null,
+                      },
+                ]),
+              ),
+            ),
+        );
+        return d;
+      }
+
+      it('cada profesional lleva su sello; el paciente, null', async () => {
+        const d = threeKinds();
+        const res = await d.service.listConversations('p-1', actor, {
+          limit: 20,
+        });
+        const byId = Object.fromEntries(
+          res.items.map((item) => [item.id, item.peers[0].verification]),
+        );
+        expect(byId['c-1']).toEqual(VERIFIED);
+        expect(byId['c-2']).toEqual({
+          status: 'UNVERIFIED',
+          verifiedAt: null,
+          validUntil: null,
+        });
+        expect(byId['c-3']).toBeNull();
+      });
+
+      it('una sola consulta de sellos para toda la bandeja, sólo con los profesionales (sin N+1)', async () => {
+        const d = threeKinds();
+        await d.service.listConversations('p-1', actor, { limit: 20 });
+        expect(d.verifications.verificationOf).toHaveBeenCalledTimes(1);
+        expect(d.verifications.verificationOf).toHaveBeenCalledWith(
+          expect.anything(),
+          ['prac-1', 'prac-2'],
+        );
+      });
+
+      it('sin ningún profesional en la bandeja no consulta sellos', async () => {
+        const d = build();
+        d.conversationsRepo.listActiveParticipationsOf.mockResolvedValue([
+          { conversationId: 'c-1', lastReadMessageId: 'm-0' },
+        ]);
+        d.conversationsRepo.listConversationsByIds.mockResolvedValue([
+          { id: 'c-1', conversationTypeConceptId: 'ct' },
+        ]);
+        d.conversationsRepo.findParticipants.mockResolvedValue([
+          { participantProfileId: 'p-1' },
+          { participantProfileId: 'p-2' },
+        ]);
+        d.profilesRepo.listByIds.mockResolvedValue([
+          {
+            id: 'p-2',
+            displayName: 'Org',
+            targetTypeConceptId: COMM.PROFILE_TARGET_USER,
+            targetId: 't-2',
+          },
+        ]);
+        await d.service.listConversations('p-1', actor, { limit: 20 });
+        expect(d.verifications.verificationOf).not.toHaveBeenCalled();
+      });
+
+      it('el detalle (primera página del hilo) trae los peers con su sello; las páginas siguientes no', async () => {
+        const d = threeKinds();
+        d.conversationsRepo.findParticipants.mockResolvedValue([
+          { participantProfileId: 'p-1' },
+          { participantProfileId: 'peer-c-1' },
+        ]);
+        d.conversationsRepo.findConversationById.mockResolvedValue({
+          id: 'c-1',
+          conversationTypeConceptId: COMM.CONVERSATION_DIRECT,
+        });
+        const first = await d.service.listMessages('c-1', 'p-1', actor, {
+          limit: 10,
+        });
+        expect(first.peers).toEqual([
+          {
+            profileId: 'peer-c-1',
+            displayName: 'Dra. Ana',
+            avatarUrl: null,
+            verification: VERIFIED,
+          },
+        ]);
+        const next = await d.service.listMessages('c-1', 'p-1', actor, {
+          limit: 10,
+          cursor:
+            'eyJzZW50QXQiOiIyMDI2LTA5LTA5VDA5OjAwOjAwLjAwMFoiLCJpZCI6Im0tMSJ9',
+        });
+        expect(next.peers).toBeUndefined();
+      });
     });
 
     it('sin avatar el peer viaja con avatarUrl en null, no ausente', async () => {
@@ -419,7 +604,9 @@ describe('CommunityMessagingReadService', () => {
 
     it('exige ser el titular del perfil', async () => {
       const d = build();
-      d.visibility.assertOwnProfile.mockRejectedValue(new Error('prohibido'));
+      d.visibility.assertOwnMessagingProfile.mockRejectedValue(
+        new Error('prohibido'),
+      );
       await expect(
         d.service.listConversations('p-ajeno', actor, { limit: 20 }),
       ).rejects.toThrow('prohibido');

@@ -7,7 +7,7 @@ import { runTick } from '../../run-tick.util';
 const SCHEDULE_TICK_INTERVAL_MS = 15_000;
 const BATCH_SIZE = 20;
 
-/** Refleja `DueScheduleRunResultDto` (`modules/qa_lab/dto`) tal como viaja por HTTP. */
+/** Refleja `DueScheduleRunResultDto` (`modules/qa_lab/presentation/dto`) tal como viaja por HTTP. */
 interface DueScheduleRunResult {
   scheduleId: string;
   runId?: string;

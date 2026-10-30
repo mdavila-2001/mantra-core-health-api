@@ -1,0 +1,21 @@
+{
+ "sourceUrl": "https://cima.aemps.es/cima/rest/docSegmentado/contenido/1?nregistro=65198&seccion=4.3",
+ "retrievedAt": "2026-10-25",
+ "nregistro": "65198",
+ "productName": "SIMVASTATINA NORMON 20 mg COMPRIMIDOS RECUBIERTOS CON PELÍCULA EFG",
+ "vtm": {
+  "id": 96304005,
+  "nombre": "simvastatina"
+ },
+ "fichaTecnicaDate": "2026-03-04",
+ "fichaTecnicaUrl": "https://cima.aemps.es/cima/dochtml/ft/65198/FT_65198.html",
+ "note": "Respuesta literal de la API REST de CIMA (AEMPS), sin recortar. Reutilización autorizada citando el origen y la fecha de la última actualización (https://www.aemps.gob.es/aviso-legal/).",
+ "response": [
+  {
+   "seccion": "4.3",
+   "titulo": "Contraindicaciones",
+   "contenido": "<div>\r\n    <p style=\"margin:0pt\"><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">-Hipersensibilidad al principio activo o a alguno de los excipientes incluidos en la secci&#243;n 6.1.</span></p>\r\n\r\n    <p style=\"margin:0pt\"><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">- Hepatopat&#237;a activa o elevaciones persistentes e inexplicables de las transaminasas s&#233;ricas.</span></p>\r\n\r\n    <p style=\"margin:0pt\"><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">- Embarazo y lactancia (ver secci&#243;n 4.6).</span></p>\r\n\r\n    <p style=\"margin:0pt\"><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">- Administraci&#243;n concomitante de inhibidores potentes de la CYP3A4 (medicamentos que</span></p>\r\n\r\n    <p style=\"margin:0pt\"><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">aumentan el AUC aproximadamente 5 veces o m&#225;s) (p. ej., itraconazol, ketoconazol,</span></p>\r\n\r\n    <p style=\"margin:0pt\"><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">posaconazol, voriconazol, inhibidores de la proteasa del VIH (p. ej. nelfinavir), boceprevir,</span></p>\r\n\r\n    <p style=\"margin:0pt\"><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">telaprevir, eritromicina, claritromicina, telitromicina y nefazodona</span> <span style=\"font-family:Times New Roman; font-size:11pt\">y medicamentos que contienen cobicistat</span><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">) (ver&#160; secciones 4.4 y 4.5).</span></p>\r\n\r\n    <p style=\"margin:0pt\"><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</span> <span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">-Administraci&#243;n concomitante de gemfibrozilo, ciclosporina o danazol (ver secciones 4.4 y 4.5)</span></p>\r\n\r\n    <p style=\"margin:0pt; line-height:115%; font-size:11pt\"><span style=\"font-family:TimesNewRomanPSMT; font-size:11pt\">&#160;&#160;&#160;&#160;&#160; -</span> <span style=\"font-family:Times New Roman; font-size:11pt\">En pacientes con HoFH, administraci&#243;n concomitante de lomitapida con dosis superiores a 40 mg de Simvastatina NORMON (ver secciones 4.2, 4.4 y 4.5).</span></p>\r\n  </div>",
+   "orden": 6
+  }
+ ]
+}
