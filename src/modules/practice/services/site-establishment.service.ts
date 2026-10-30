@@ -190,6 +190,8 @@ export class SiteEstablishmentService {
           .map(({ s, fn }) => ({
             spaceId: s.id,
             code: s.code,
+            name: s.name,
+            function: conceptRef(s.spaceTypeConceptId),
             functionCode: fn,
           }));
         if (conflicts.length > 0) {
@@ -358,6 +360,7 @@ export class SiteEstablishmentService {
     return this.em.transactional(async (tx) => {
       const site = await this.access.requireSite(tx, siteId, tenantId);
       await this.access.assertCanAdministerOrganization(tx, tenantId, actor);
+      this.assertNoNotes(dto.notes);
       await this.assertScope(
         tx,
         site,
@@ -448,6 +451,7 @@ export class SiteEstablishmentService {
       );
       await this.access.assertCanAdministerOrganization(tx, tenantId, actor);
       checkIfMatchWhenPresent(ifMatch, license.rowVersion);
+      this.assertNoNotes(dto.notes);
       const platform = PLATFORM_ROLES.some((r) =>
         (actor.roles ?? []).includes(r),
       );
@@ -474,28 +478,28 @@ export class SiteEstablishmentService {
         changes.push('documentFileId');
       }
 
-      if (dto.statusCode !== undefined) {
+      if (dto.status !== undefined) {
         if (!platform) {
           throw new ForbiddenException(
             'Sólo la plataforma cambia el estado de una habilitación',
           );
         }
-        const verification = VERIFICATION_BY_STATUS[dto.statusCode];
+        const verification = VERIFICATION_BY_STATUS[dto.status];
         if (!verification) {
           throw ruleException(PracticeErrorReason.LICENSE_STATUS_UNSUPPORTED, {
-            statusCode: dto.statusCode,
+            status: dto.status,
             supported: Object.keys(VERIFICATION_BY_STATUS),
           });
         }
         license.verificationStatusConceptId = verification;
-        changes.push('statusCode');
+        changes.push('status');
       } else if (
         changes.length > 0 &&
         !platform &&
         license.verificationStatusConceptId === ORGEXT.LICENSE_VERIFIED
       ) {
         license.verificationStatusConceptId = ORGEXT.LICENSE_PENDING;
-        changes.push('statusCode');
+        changes.push('status');
       }
 
       touch(license, actor.id);
@@ -676,6 +680,15 @@ export class SiteEstablishmentService {
     };
   }
 
+  /** `notes` sólo vacío: `facility_licenses` no tiene la columna (desvío). */
+  private assertNoNotes(notes: string | null | undefined): void {
+    if (notes?.trim()) {
+      throw ruleException(PracticeErrorReason.LICENSE_NOTES_UNSUPPORTED, {
+        field: 'notes',
+      });
+    }
+  }
+
   /** Alcance de la habilitación: unidad y servicio de la misma sede, o 404. */
   private async assertScope(
     tx: EntityManager,
@@ -690,9 +703,11 @@ export class SiteEstablishmentService {
         unit.practiceSiteId !== site.id ||
         unit.tenantId !== site.tenantId
       ) {
-        throw new ResourceNotFoundException('Unidad clínica no encontrada', {
-          clinicalUnitId: unitId,
-        });
+        throw new ResourceNotFoundException(
+          'Unidad clínica no encontrada',
+          { clinicalUnitId: unitId },
+          PracticeErrorReason.UNIT_NOT_FOUND,
+        );
       }
     }
     if (serviceId) {

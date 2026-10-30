@@ -348,6 +348,16 @@ export class CreateSiteLicenseDto {
   @IsOptional()
   @IsUUID()
   documentFileId?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Sin columna en facility_licenses: sólo se acepta vacío (422 LICENSE_NOTES_UNSUPPORTED si trae texto)',
+    type: String,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string | null;
 }
 
 /** Cuerpo de `PATCH /site-licenses/:id`. */
@@ -387,7 +397,17 @@ export class UpdateSiteLicenseDto {
   })
   @IsOptional()
   @IsString()
-  statusCode?: string;
+  status?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Sin columna en facility_licenses: sólo se acepta vacío (422 LICENSE_NOTES_UNSUPPORTED si trae texto)',
+    type: String,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string | null;
 }
 
 /** Cuerpo de `POST /sites/:siteId/declared-capacities`. */

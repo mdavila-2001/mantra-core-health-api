@@ -298,8 +298,7 @@ export const ROOT_FORMS: readonly FormCode[] = [
 ];
 
 /** Código de regla de tipología. */
-export type TypologyRuleCode =
-  'TYPO_ALLOWED' | 'TYPO_REQUIRED' | 'TYPO_FORBIDDEN';
+export type TypologyRuleCode = 'TYPO_ALLOWED' | 'TYPO_REQUIRED';
 
 /** Una regla de tipología por códigos. */
 export interface TypologyRule {
@@ -308,9 +307,27 @@ export interface TypologyRule {
   readonly rule: TypologyRuleCode;
 }
 
+/** Funciones que una tipología admite: todas las del catálogo menos `except`. */
+function allowedExcept(
+  typology: string,
+  except: readonly string[],
+): TypologyRule[] {
+  return FUNCTION_PROFILES.filter((p) => !except.includes(p.code)).map((p) => ({
+    typology,
+    function: p.code,
+    rule: 'TYPO_ALLOWED' as const,
+  }));
+}
+
 /**
  * Reglas de tipología (contrato §2). La fuente de verdad en ejecución es
  * `practice.facility_typology_rules`; esta lista es lo que la siembra escribe.
+ *
+ * Semántica (sólo `TYPO_ALLOWED`/`TYPO_REQUIRED`, como dice el contrato; la
+ * misma que usa la web, «Desvíos» WEB-F1 punto 5): una tipología con alguna
+ * fila `TYPO_ALLOWED` admite sólo esas funciones (más las `TYPO_REQUIRED`);
+ * sin ninguna `TYPO_ALLOWED`, no restringe. «No admite X» se escribe como
+ * `TYPO_ALLOWED` de todas las funciones menos X.
  *
  * Normas de origen (Bolivia, Ministerio de Salud y Deportes, serie de
  * documentos técnico-normativos): «Norma Nacional de Caracterización de
@@ -323,28 +340,20 @@ export interface TypologyRule {
 export const TYPOLOGY_RULE_SEED: readonly TypologyRule[] = [
   // Puesto de Salud (1.er nivel, caracterización de primer nivel): sin
   // cirugía, sin terapia intensiva, sin internación.
-  ...[
+  ...allowedExcept('TYPOLOGY_HEALTH_POST', [
     'SPACE_FN_OPERATING_ROOM',
     'SPACE_FN_ICU_BAY',
     'SPACE_FN_INPATIENT_ROOM',
     'SPACE_FN_BED_STANDARD',
     'SPACE_FN_BED_ICU',
-  ].map((fn) => ({
-    typology: 'TYPOLOGY_HEALTH_POST',
-    function: fn,
-    rule: 'TYPO_FORBIDDEN' as const,
-  })),
+  ]),
   // Centro de Salud ambulatorio (1.er nivel): sin internación ni cirugía.
-  ...[
+  ...allowedExcept('TYPOLOGY_HC_AMBULATORY', [
     'SPACE_FN_INPATIENT_ROOM',
     'SPACE_FN_BED_STANDARD',
     'SPACE_FN_BED_ICU',
     'SPACE_FN_OPERATING_ROOM',
-  ].map((fn) => ({
-    typology: 'TYPOLOGY_HC_AMBULATORY',
-    function: fn,
-    rule: 'TYPO_FORBIDDEN' as const,
-  })),
+  ]),
   // Hospital de 2.º y 3.er nivel (caracterización de segundo y tercer nivel):
   // emergencia, internación y quirófano obligatorios.
   ...['TYPOLOGY_HOSPITAL_L2', 'TYPOLOGY_HOSPITAL_L3'].flatMap((typology) =>

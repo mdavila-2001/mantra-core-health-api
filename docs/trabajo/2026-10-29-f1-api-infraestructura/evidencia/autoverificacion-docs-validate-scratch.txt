@@ -1,12 +1,11 @@
-# AUTOVERIFICACIÓN FUERA DEL GATE: equivalente de 'yarn docs:openapi:generate' (dist con tsc del scratch, node_modules del scratch por symlink temporal, xlsx = stub) y de 'yarn docs:validate'
+# AUTOVERIFICACIÓN FUERA DEL GATE: equivalentes de 'yarn docs:openapi:generate' y 'yarn docs:validate' (dist con tsc del scratch, node_modules del scratch por symlink temporal, xlsx = stub) — versión final
 $ node tools/openapi/generate-openapi.mjs
-  949 DTO de cuerpo · 12 esquemas homónimos renombrados (EvidenceInputDto, CreateAssignmentDto, LocationPingDto, RunDueSchedulesDto, QualityFindingDto, CreateAffiliationDto) · 1162 esquemas con additionalProperties: false.
-  47/47 rutas públicas marcadas, 246 tags globales, 1078 descripciones y 11607 respuestas de error añadidas.
-OpenAPI generado: 1397 paths, 1533 operaciones, 1434 esquemas.
+  47/47 rutas públicas marcadas, 246 tags globales, 1079 descripciones y 11613 respuestas de error añadidas.
+OpenAPI generado: 1398 paths, 1534 operaciones, 1437 esquemas.
   → /home/user/mantra-core-health-api/openapi/openapi.json
   → /home/user/mantra-core-health-api/openapi/openapi.yaml
 EXIT=0
-$ node tools/openapi/check-breaking.mjs --base <openapi.json de HEAD> --head openapi/openapi.json
+$ node tools/openapi/check-breaking.mjs --base <openapi.json de 24f0ccc4, fin de F0> --head openapi/openapi.json
 Sin cambios incompatibles no aprobados en el contrato OpenAPI.
 EXIT=0
 $ redocly lint openapi/openapi.yaml
@@ -22,7 +21,7 @@ EXIT=0
 $ node tools/docs/check-doc-links.mjs
 BROKEN LINK: docs/trabajo/2026-10-24-seed-dx-devices-us-official/PLAN.md -> ../2026-10-24-seed-dx-devices-us/REPORTE.md
 1 enlaces rotos.
-EXIT=1  (el único enlace roto es PREEXISTENTE: docs/trabajo/2026-10-24-seed-dx-devices-us-official/PLAN.md)
-$ git diff --diff-algorithm=patience --numstat openapi
-3633	5	openapi/openapi.json
-2533	4	openapi/openapi.yaml
+EXIT=1  (único enlace roto PREEXISTENTE: docs/trabajo/2026-10-24-seed-dx-devices-us-official/PLAN.md)
+$ git diff --diff-algorithm=patience --numstat 24f0ccc4 -- openapi
+3726	5	openapi/openapi.json
+2599	4	openapi/openapi.yaml

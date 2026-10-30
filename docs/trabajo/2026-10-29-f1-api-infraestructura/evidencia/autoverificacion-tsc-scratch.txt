@@ -1,5 +1,5 @@
 # AUTOVERIFICACIÓN FUERA DEL GATE (no es yarn typecheck) — 2026-10-30, versión final
-# deps: npm --ignore-scripts con versiones de yarn.lock, SIN xlsx; tsc del repo (src/** y test/**)
+# deps: npm --ignore-scripts con las versiones de yarn.lock, SIN xlsx; tsc del repo (src/** y test/**)
 src/modules/terminology/import/xlsx-parser.spec.ts(4,23): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f19241b2-e466-53c2-a2df-a87267a67063/scratchpad/apif1/deps/node_modules/xlsx/index.js' implicitly has an 'any' type.
   Try `npm i --save-dev @types/xlsx` if it exists or add a new declaration (.d.ts) file containing `declare module 'xlsx';`
 src/modules/terminology/import/xlsx-parser.ts(10,23): error TS7016: Could not find a declaration file for module 'xlsx'. '/tmp/claude-0/-home-user/f19241b2-e466-53c2-a2df-a87267a67063/scratchpad/apif1/deps/node_modules/xlsx/index.js' implicitly has an 'any' type.

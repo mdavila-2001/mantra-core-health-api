@@ -1,7 +1,7 @@
 # AUTOVERIFICACIÓN FUERA DEL GATE: jest del repo, suite unitaria completa, desde el árbol scratch (deps con versiones de yarn.lock, sin xlsx; 'xlsx' mapeado a stub vacío) — 2026-10-30, versión final
 $ jest -c <scratch>/jest.config.json
-Test Suites: 3 failed, 1 skipped, 878 passed, 881 of 882 total
-Tests:       2 failed, 1 skipped, 10834 passed, 10837 total
+Test Suites: 3 failed, 1 skipped, 879 passed, 882 of 883 total
+Tests:       2 failed, 1 skipped, 10838 passed, 10841 total
 EXIT=1
 # Suites en rojo:
 FAIL modules/terminology/import/xlsx-parser.spec.ts

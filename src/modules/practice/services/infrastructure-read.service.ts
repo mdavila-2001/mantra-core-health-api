@@ -11,7 +11,10 @@ import type {
   CareSpaceDetailDto,
   InfrastructureCatalogDto,
   SiteStructureDto,
+  SpaceHistoryEntryDto,
 } from '../dto';
+import { HistoryRepository } from '../../audit/repositories';
+import { STRUCTURE_HISTORY } from './structure-history';
 import {
   CONCEPT_GROUPS,
   FORM_CODES,
@@ -56,6 +59,7 @@ export class InfrastructureReadService {
     private readonly unitsRepo: ClinicalUnitsRepository,
     private readonly assignmentsRepo: SpaceUnitAssignmentsRepository,
     private readonly rulesRepo: StructureRulesRepository,
+    private readonly historyRepo: HistoryRepository,
   ) {}
 
   /**
@@ -151,5 +155,85 @@ export class InfrastructureReadService {
       [space.id],
     );
     return toSpaceDetail(space, siteSpaces, assignments);
+  }
+
+  /**
+   * `GET /care-spaces/:id/history`: revisiones de `audit.care_spaces_history`,
+   * de la más nueva a la más vieja («Desvíos» WEB-F1 punto 1; §3 no declaraba
+   * la lectura). El motivo sale de la revisión (sólo lo tienen los cambios de
+   * ciclo de vida); el nombre del actor, de `iam.users.display_name`.
+   */
+  async spaceHistory(
+    spaceId: string,
+    actor: AuthenticatedUser,
+    tenantId: string,
+  ): Promise<SpaceHistoryEntryDto[]> {
+    const space = await this.access.requireSpace(this.em, spaceId, tenantId);
+    await this.access.assertCanRead(this.em, tenantId, actor);
+    const revisions = await this.historyRepo.timeline(
+      this.em,
+      STRUCTURE_HISTORY.space,
+      space.id,
+    );
+    const actorIds = [
+      ...new Set(revisions.map((r) => r.changedByUserId).filter(Boolean)),
+    ] as string[];
+    const names = new Map<string, string>();
+    if (actorIds.length > 0) {
+      const rows = await this.em.execute<
+        { id: string; display_name: string }[]
+      >(
+        'SELECT id, display_name FROM iam.users WHERE id IN (?)',
+        [actorIds],
+        'all',
+      );
+      for (const row of rows) names.set(row.id, row.display_name);
+    }
+    const IGNORED = new Set([
+      'updatedAt',
+      'updatedByUserId',
+      'rowVersion',
+      'lifecycleAction',
+      'lifecycleReason',
+    ]);
+    const entries = revisions.map((rev, index) => {
+      const snap = (rev.dataSnapshot ?? {}) as Record<string, unknown>;
+      const prev =
+        index > 0
+          ? ((revisions[index - 1].dataSnapshot ?? {}) as Record<
+              string,
+              unknown
+            >)
+          : null;
+      const changed = prev
+        ? Object.keys({ ...prev, ...snap }).filter(
+            (k) =>
+              !IGNORED.has(k) &&
+              JSON.stringify(prev[k]) !== JSON.stringify(snap[k]),
+          )
+        : [];
+      const lifecycle =
+        typeof snap.lifecycleAction === 'string' ? snap.lifecycleAction : null;
+      const action = !prev
+        ? 'created'
+        : (lifecycle ??
+          (changed.includes('parentSpaceId') ? 'moved' : 'updated'));
+      return {
+        id: `${space.id}:${rev.revisionNo ?? index + 1}`,
+        at: rev.recordedAt,
+        action,
+        actorName: rev.changedByUserId
+          ? (names.get(rev.changedByUserId) ?? null)
+          : null,
+        reason:
+          typeof snap.lifecycleReason === 'string'
+            ? snap.lifecycleReason
+            : null,
+        summary: prev ? changed.join(', ') : 'alta',
+        rowVersion:
+          typeof snap.rowVersion === 'number' ? snap.rowVersion : null,
+      };
+    });
+    return entries.reverse();
   }
 }

@@ -33,6 +33,7 @@ import {
   LifecycleChangeDto,
   MoveCareSpaceDto,
   RetireCheckDto,
+  SpaceHistoryEntryDto,
   SpaceUnitAssignmentDto,
   UpdateCareSpaceDto,
 } from '../dto';
@@ -131,6 +132,17 @@ export class CareSpacesController {
       actor,
       requireTenantId(),
     );
+  }
+
+  /** Historial de revisiones, de la más nueva a la más vieja. */
+  @Get(':id/history')
+  @ApiOperation({ summary: 'Historial de un espacio de atención' })
+  @ApiOkResponse({ type: [SpaceHistoryEntryDto] })
+  history(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<SpaceHistoryEntryDto[]> {
+    return this.read.spaceHistory(id, actor, requireTenantId());
   }
 
   /** Lo que impediría retirarlo, para mostrar antes de confirmar. */

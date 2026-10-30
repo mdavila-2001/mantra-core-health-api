@@ -22,7 +22,17 @@ export interface Blocker {
   readonly kind: BlockerKind;
   readonly count: number;
   readonly sampleIds: string[];
-  readonly nextAction: string;
+  readonly nextAction: NextAction;
+}
+
+/**
+ * Próxima acción (S3): texto para la persona y, si la web tiene dónde
+ * resolverlo, una ruta relativa a la ficha del espacio (forma de «Desvíos»
+ * WEB-F1 punto 2).
+ */
+export interface NextAction {
+  readonly label: string;
+  readonly route?: string;
 }
 
 /** Un tipo que en F1 no se puede comprobar (sin FK al espacio todavía). */
@@ -32,24 +42,43 @@ export interface UnverifiableCheck {
 }
 
 /** Próxima acción por tipo de bloqueo. */
-export const NEXT_ACTION: Readonly<Record<BlockerKind, string>> = {
-  ACTIVE_CHILDREN:
-    'Retirar o mover primero los espacios hijos que siguen activos, planificados o suspendidos.',
-  ACTIVE_ENCOUNTER:
-    'Dar de alta o trasladar a los pacientes que ocupan el espacio.',
-  FUTURE_PROCEDURE:
-    'Reprogramar en otro quirófano o cancelar las intervenciones futuras.',
-  FUTURE_BOOKING: 'Reprogramar o cancelar las reservas futuras del espacio.',
-  SCHEDULABLE_RESOURCE:
-    'Dar de baja el recurso de agenda o el horario que usa este espacio.',
-  INVENTORY_LOCATION:
-    'Trasladar el stock y cerrar la ubicación de inventario del espacio.',
-  EQUIPMENT: 'Reubicar los equipos que están instalados en el espacio.',
-  ACTIVE_CHILD_UNITS: 'Retirar o reasignar primero las unidades hijas activas.',
-  ACTIVE_SPACES:
-    'Desvincular o reasignar a otra unidad los espacios que siguen activos.',
-  ACTIVE_STAFF:
-    'Finalizar o reasignar las vinculaciones del personal de la unidad.',
+export const NEXT_ACTION: Readonly<Record<BlockerKind, NextAction>> = {
+  ACTIVE_CHILDREN: {
+    label:
+      'Retirar o mover primero los espacios hijos que siguen activos, planificados o suspendidos.',
+    route: '?tab=children',
+  },
+  ACTIVE_ENCOUNTER: {
+    label: 'Dar de alta o trasladar a los pacientes que ocupan el espacio.',
+  },
+  FUTURE_PROCEDURE: {
+    label:
+      'Reprogramar en otro quirófano o cancelar las intervenciones futuras.',
+  },
+  FUTURE_BOOKING: {
+    label: 'Reprogramar o cancelar las reservas futuras del espacio.',
+  },
+  SCHEDULABLE_RESOURCE: {
+    label:
+      'Dar de baja el recurso de agenda o el horario que usa este espacio.',
+  },
+  INVENTORY_LOCATION: {
+    label:
+      'Trasladar el stock y cerrar la ubicación de inventario del espacio.',
+  },
+  EQUIPMENT: {
+    label: 'Reubicar los equipos que están instalados en el espacio.',
+  },
+  ACTIVE_CHILD_UNITS: {
+    label: 'Retirar o reasignar primero las unidades hijas activas.',
+  },
+  ACTIVE_SPACES: {
+    label:
+      'Desvincular o reasignar a otra unidad los espacios que siguen activos.',
+  },
+  ACTIVE_STAFF: {
+    label: 'Finalizar o reasignar las vinculaciones del personal de la unidad.',
+  },
 };
 
 /**

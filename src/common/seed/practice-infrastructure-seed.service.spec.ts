@@ -78,12 +78,12 @@ describe('PracticeInfrastructureSeedService', () => {
     d.rows.get(FacilityTypologyRules)!.push({
       typologyConceptId: PRAC[first.typology as keyof typeof PRAC],
       spaceFunctionConceptId: PRAC[first.function as keyof typeof PRAC],
-      ruleConceptId: PRAC.TYPO_ALLOWED,
+      ruleConceptId: PRAC.TYPO_REQUIRED,
     });
     const res = await d.service.run();
     expect(res.typologyRules).toBe(TYPOLOGY_RULE_SEED.length - 1);
     expect(d.rows.get(FacilityTypologyRules)![0].ruleConceptId).toBe(
-      PRAC.TYPO_ALLOWED,
+      PRAC.TYPO_REQUIRED,
     );
   });
 });

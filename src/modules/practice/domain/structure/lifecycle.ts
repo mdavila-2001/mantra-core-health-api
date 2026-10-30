@@ -54,7 +54,7 @@ export function judgeTransition(
   if (!t.from.includes(current)) {
     return {
       ok: false,
-      reason: 'LIFECYCLE_INVALID_TRANSITION',
+      reason: 'SPACE_INVALID_TRANSITION',
       details: { from: current, action, allowedFrom: [...t.from] },
     };
   }

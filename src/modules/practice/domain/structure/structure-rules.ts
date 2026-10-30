@@ -42,7 +42,7 @@ export function judgeParentChild(
   if (parentForm === null) {
     return ROOT_FORMS.includes(childForm)
       ? OK
-      : fail('SPACE_PARENT_RULE_VIOLATION', {
+      : fail('SPACE_PARENT_RULE', {
           parentFormCode: null,
           formCode: childForm,
           allowed: [...ROOT_FORMS],
@@ -51,7 +51,7 @@ export function judgeParentChild(
   if (rules.some((r) => r.parent === parentForm && r.child === childForm)) {
     return OK;
   }
-  return fail('SPACE_PARENT_RULE_VIOLATION', {
+  return fail('SPACE_PARENT_RULE', {
     parentFormCode: parentForm,
     formCode: childForm,
     allowed: rules.filter((r) => r.parent === parentForm).map((r) => r.child),
@@ -74,7 +74,7 @@ export function judgeFunctionForm(
   }
   return profile.forms.includes(formCode)
     ? OK
-    : fail('SPACE_FUNCTION_FORM_MISMATCH', {
+    : fail('FUNCTION_FORM_MISMATCH', {
         functionCode,
         formCode,
         allowedForms: [...profile.forms],
@@ -85,9 +85,9 @@ export function judgeFunctionForm(
  * ¿Admite la tipología del establecimiento esa función?
  *
  * - Sin tipología declarada: no hay regla que aplicar.
- * - `TYPO_FORBIDDEN` para (tipología, función): no.
  * - Si la tipología tiene alguna `TYPO_ALLOWED`, actúa como lista blanca: la
  *   función tiene que estar como ALLOWED o REQUIRED.
+ * - Sin ninguna `TYPO_ALLOWED`, no restringe.
  * - `TYPO_REQUIRED` nunca bloquea un alta: es lo que falta (ver
  *   `missingRequiredFunctions`).
  *
@@ -102,17 +102,10 @@ export function judgeTypology(
 ): Verdict {
   if (!typologyCode) return OK;
   const own = rules.filter((r) => r.typology === typologyCode);
-  const forbidden = own.some(
-    (r) => r.function === functionCode && r.rule === 'TYPO_FORBIDDEN',
-  );
-  const whitelist = own.filter((r) => r.rule === 'TYPO_ALLOWED');
-  const listed = own.some(
-    (r) =>
-      r.function === functionCode &&
-      (r.rule === 'TYPO_ALLOWED' || r.rule === 'TYPO_REQUIRED'),
-  );
-  if (forbidden || (whitelist.length > 0 && !listed)) {
-    return fail('SPACE_TYPOLOGY_FORBIDDEN', { typologyCode, functionCode });
+  const whitelist = own.some((r) => r.rule === 'TYPO_ALLOWED');
+  const listed = own.some((r) => r.function === functionCode);
+  if (whitelist && !listed) {
+    return fail('TYPOLOGY_NOT_ALLOWED', { typologyCode, functionCode });
   }
   return OK;
 }

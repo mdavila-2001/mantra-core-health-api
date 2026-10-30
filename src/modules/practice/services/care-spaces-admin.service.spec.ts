@@ -211,7 +211,7 @@ describe('CareSpacesAdminService', () => {
       expect(res.operationalStatus?.code).toBe('SPACE_OP_AVAILABLE');
     });
 
-    it('cama en la raíz: 422 SPACE_PARENT_RULE_VIOLATION', async () => {
+    it('cama en la raíz: 422 SPACE_PARENT_RULE', async () => {
       const d = build();
       await expect(
         d.service.create(
@@ -223,7 +223,7 @@ describe('CareSpacesAdminService', () => {
           actor,
           TENANT,
         ),
-      ).rejects.toMatchObject({ reason: 'SPACE_PARENT_RULE_VIOLATION' });
+      ).rejects.toMatchObject({ reason: 'SPACE_PARENT_RULE' });
       expect(d.spacesRepo.create).not.toHaveBeenCalled();
     });
 
@@ -244,7 +244,7 @@ describe('CareSpacesAdminService', () => {
       expect(bed.path.map((p) => p.id)).toEqual([parent.id]);
     });
 
-    it('función que no admite la forma: 422 SPACE_FUNCTION_FORM_MISMATCH', async () => {
+    it('función que no admite la forma: 422 FUNCTION_FORM_MISMATCH', async () => {
       const d = build();
       await expect(
         d.service.create(
@@ -253,10 +253,10 @@ describe('CareSpacesAdminService', () => {
           actor,
           TENANT,
         ),
-      ).rejects.toMatchObject({ reason: 'SPACE_FUNCTION_FORM_MISMATCH' });
+      ).rejects.toMatchObject({ reason: 'FUNCTION_FORM_MISMATCH' });
     });
 
-    it('quirófano en un Puesto de Salud: 422 SPACE_TYPOLOGY_FORBIDDEN', async () => {
+    it('quirófano en un Puesto de Salud: 422 TYPOLOGY_NOT_ALLOWED', async () => {
       const d = build({ typology: PRAC.TYPOLOGY_HEALTH_POST });
       await expect(
         d.service.create(
@@ -265,7 +265,7 @@ describe('CareSpacesAdminService', () => {
           actor,
           TENANT,
         ),
-      ).rejects.toMatchObject({ reason: 'SPACE_TYPOLOGY_FORBIDDEN' });
+      ).rejects.toMatchObject({ reason: 'TYPOLOGY_NOT_ALLOWED' });
     });
 
     it('código repetido en la sede: 409 SPACE_CODE_TAKEN', async () => {
@@ -448,11 +448,13 @@ describe('CareSpacesAdminService', () => {
       ]);
       expect(res.rows[2].errors[0]).toEqual({
         field: 'parentSpaceId',
-        reason: 'SPACE_PARENT_RULE_VIOLATION',
+        reason: 'SPACE_PARENT_RULE',
+        message: 'Ese tipo de espacio no puede ir dentro del padre elegido',
       });
       expect(res.rows[3].errors[0]).toEqual({
         field: 'parentCode',
         reason: 'NOT_FOUND',
+        message: 'No existe en la sede',
       });
       expect(d.spacesRepo.create).not.toHaveBeenCalled();
     });
@@ -497,7 +499,11 @@ describe('CareSpacesAdminService', () => {
       );
       expect(res.rows.map((r) => r.status)).toEqual(['error', 'ok']);
       expect(res.rows[0].errors).toEqual([
-        { field: 'row', reason: 'NOT_AN_OBJECT' },
+        {
+          field: 'row',
+          reason: 'NOT_AN_OBJECT',
+          message: 'La fila no tiene el formato esperado',
+        },
       ]);
     });
 
@@ -516,13 +522,13 @@ describe('CareSpacesAdminService', () => {
   });
 
   describe('edición, movimiento e If-Match', () => {
-    it('sin If-Match: 412 IF_MATCH_REQUIRED; con otra versión: 412 ROW_VERSION_MISMATCH', async () => {
+    it('sin If-Match: 428 IF_MATCH_REQUIRED; con otra versión: 412 ROW_VERSION_MISMATCH', async () => {
       const d = build();
       const s = await d.service.create('s1', room() as any, actor, TENANT);
       const e1: any = await d.service
         .update(s.id, { name: 'X' } as any, undefined, actor, TENANT)
         .catch((e) => e);
-      expect([e1.getStatus(), e1.reason]).toEqual([412, 'IF_MATCH_REQUIRED']);
+      expect([e1.getStatus(), e1.reason]).toEqual([428, 'IF_MATCH_REQUIRED']);
       const e2: any = await d.service
         .update(s.id, { name: 'X' } as any, '"7"', actor, TENANT)
         .catch((e) => e);
@@ -681,7 +687,10 @@ describe('CareSpacesAdminService', () => {
         ['ACTIVE_CHILDREN', 1],
         ['FUTURE_BOOKING', 7],
       ]);
-      expect(err.details.blockers[0].nextAction).toMatch(/hijos/);
+      expect(err.details.blockers[0].nextAction).toEqual({
+        label: expect.stringMatching(/hijos/),
+        route: '?tab=children',
+      });
       expect(err.details.unverifiable.map((u: any) => u.kind)).toEqual([
         'INVENTORY_LOCATION',
         'EQUIPMENT',
@@ -824,7 +833,7 @@ describe('CareSpacesAdminService', () => {
           actor,
           TENANT,
         ),
-      ).rejects.toMatchObject({ reason: 'ASSIGNMENT_OWNER_TAKEN' });
+      ).rejects.toMatchObject({ reason: 'SPACE_OWNER_TAKEN' });
       const shared = await d.service.addAssignment(
         s.id,
         { clinicalUnitId: 'u2', roleCode: 'SPACE_UNIT_ROLE_SHARED' },

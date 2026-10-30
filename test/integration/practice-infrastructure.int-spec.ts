@@ -184,7 +184,7 @@ describe('Practice · infraestructura F1 (árbol físico)', () => {
         functionCode: 'SPACE_FN_BED_STANDARD',
       })
       .expect(422);
-    expect(res.body.reason).toBe('SPACE_PARENT_RULE_VIOLATION');
+    expect(res.body.reason).toBe('SPACE_PARENT_RULE');
     const n = await filas(
       'select count(*)::int as n from practice.care_spaces where code = ?',
       [`CAMA-SUELTA-${sufijo}`],
@@ -301,12 +301,12 @@ describe('Practice · infraestructura F1 (árbol físico)', () => {
     expect(n[0].n).toBe(5);
   });
 
-  it('editar: sin If-Match 412; con If-Match persiste y la relectura lo muestra', async () => {
+  it('editar: sin If-Match 428; con otra versión 412; con If-Match persiste y la relectura lo muestra', async () => {
     await http()
       .patch(`/care-spaces/${ids.room}`)
       .set(como(orgA))
       .send({ name: 'Hab. 301' })
-      .expect(412);
+      .expect(428);
     const antes = await http()
       .get(`/care-spaces/${ids.room}`)
       .set(como(orgA))
@@ -418,7 +418,7 @@ describe('Practice · infraestructura F1 (árbol físico)', () => {
       .send({ action: 'retire', reason: 'remodelación' })
       .expect(409);
     expect(bloqueado.body.reason).toBe('SPACE_RETIRE_BLOCKED');
-    expect(bloqueado.body.details.blockers[0].nextAction).toBeTruthy();
+    expect(bloqueado.body.details.blockers[0].nextAction.label).toBeTruthy();
 
     const cama = await http()
       .get(`/care-spaces/${ids.bedC}`)

@@ -44,7 +44,7 @@ export class ParentRuleDto {
 export class TypologyRuleDto {
   @ApiProperty() typology!: string;
   @ApiProperty() function!: string;
-  @ApiProperty({ enum: ['TYPO_ALLOWED', 'TYPO_REQUIRED', 'TYPO_FORBIDDEN'] })
+  @ApiProperty({ enum: ['TYPO_ALLOWED', 'TYPO_REQUIRED'] })
   rule!: string;
 }
 
@@ -128,17 +128,10 @@ export class SpaceUnitAssignmentDto {
   validTo!: Date | null;
 }
 
-/** Resumen regulatorio de la sede. */
-export class EstablishmentSummaryDto {
-  @ApiProperty({ format: 'uuid' }) id!: string;
-  @ApiProperty({ format: 'uuid' }) practiceId!: string;
-  @ApiProperty({ format: 'uuid', nullable: true, type: String }) branchId!:
-    string | null;
-  @ApiProperty() code!: string;
-  @ApiProperty() name!: string;
-  @ApiProperty({ type: ConceptDto, nullable: true }) status!: ConceptDto | null;
+/** Datos regulatorios del establecimiento (Bolivia). */
+export class SiteRegulatoryDataDto {
   @ApiProperty({ nullable: true, type: String }) snisCode!: string | null;
-  @ApiProperty({ description: 'Verificado por la plataforma' })
+  @ApiProperty({ description: 'Código SNIS verificado por la plataforma' })
   snisVerified!: boolean;
   @ApiProperty({ type: ConceptDto, nullable: true })
   subsector!: ConceptDto | null;
@@ -146,14 +139,31 @@ export class EstablishmentSummaryDto {
   careLevel!: ConceptDto | null;
   @ApiProperty({ type: ConceptDto, nullable: true })
   typology!: ConceptDto | null;
+  @ApiProperty({ nullable: true, type: String })
+  managingEntityName!: string | null;
+  @ApiProperty({ nullable: true, type: String })
+  healthNetworkName!: string | null;
   @ApiProperty({ type: ConceptDto, nullable: true }) sedes!: ConceptDto | null;
-  @ApiProperty({ nullable: true, type: String }) managingEntityName!:
-    string | null;
-  @ApiProperty({ nullable: true, type: String }) healthNetworkName!:
-    string | null;
-  @ApiProperty({ nullable: true, type: String }) municipalityName!:
-    string | null;
+  @ApiProperty({ nullable: true, type: String })
+  municipalityName!: string | null;
+}
+
+/**
+ * Resumen de la sede (`SiteSummary`; §3 no lo define: forma de «Desvíos»
+ * WEB-F1 punto 7, más `canWrite`).
+ */
+export class EstablishmentSummaryDto {
+  @ApiProperty({ format: 'uuid' }) id!: string;
+  @ApiProperty({ format: 'uuid' }) practiceId!: string;
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  branchId!: string | null;
+  @ApiProperty() code!: string;
+  @ApiProperty() name!: string;
+  @ApiProperty({ type: ConceptDto, nullable: true }) status!: ConceptDto | null;
+  @ApiProperty({ nullable: true, type: String }) timeZone!: string | null;
   @ApiProperty() rowVersion!: number;
+  @ApiProperty({ type: SiteRegulatoryDataDto })
+  regulatory!: SiteRegulatoryDataDto;
   @ApiProperty({
     description:
       'El actor puede editar la estructura (sólo refleja; la API decide)',
@@ -231,6 +241,7 @@ export class BulkCreatedDto {
 export class ImportFieldErrorDto {
   @ApiProperty() field!: string;
   @ApiProperty() reason!: string;
+  @ApiProperty({ description: 'Texto para la persona' }) message!: string;
 }
 
 /** Resultado de una fila importada. */
@@ -246,6 +257,15 @@ export class ImportResultDto {
   @ApiProperty() dryRun!: boolean;
   @ApiProperty({ type: [ImportRowResultDto] }) rows!: ImportRowResultDto[];
   @ApiPropertyOptional() created?: number;
+}
+
+/** Próxima acción de un bloqueo. */
+export class NextActionDto {
+  @ApiProperty() label!: string;
+  @ApiPropertyOptional({
+    description: 'Ruta relativa a la ficha del espacio (p. ej. ?tab=children)',
+  })
+  route?: string;
 }
 
 /** Un bloqueo de retiro (contrato §3). */
@@ -267,8 +287,11 @@ export class BlockerDto {
   kind!: string;
   @ApiProperty() count!: number;
   @ApiProperty({ type: [String] }) sampleIds!: string[];
-  @ApiProperty({ description: 'Qué hacer para destrabarlo (S3)' })
-  nextAction!: string;
+  @ApiProperty({
+    type: NextActionDto,
+    description: 'Qué hacer para destrabarlo (S3)',
+  })
+  nextAction!: NextActionDto;
 }
 
 /** Comprobación que F1 no puede hacer. */
@@ -387,4 +410,22 @@ export class SiteCapacityDto {
 /** Resultado simple de una mutación sobre un vínculo. */
 export class AssignmentRemovedDto {
   @ApiProperty() ok!: boolean;
+}
+
+/** Una entrada de `GET /care-spaces/:id/history` («Desvíos» WEB-F1 punto 1). */
+export class SpaceHistoryEntryDto {
+  @ApiProperty({ description: '`<careSpaceId>:<revisionNo>`' }) id!: string;
+  @ApiProperty({ type: String, format: 'date-time' }) at!: Date;
+  @ApiProperty({
+    description:
+      'created | updated | moved | activate | suspend | reactivate | retire',
+  })
+  action!: string;
+  @ApiProperty({ nullable: true, type: String }) actorName!: string | null;
+  @ApiProperty({ nullable: true, type: String }) reason!: string | null;
+  @ApiProperty({
+    description: 'Campos que cambiaron respecto de la revisión anterior',
+  })
+  summary!: string;
+  @ApiProperty({ nullable: true, type: Number }) rowVersion!: number | null;
 }

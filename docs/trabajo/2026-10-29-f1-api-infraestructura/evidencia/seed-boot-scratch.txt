@@ -1,6 +1,16 @@
-{"level":30,"pid":21595,"hostname":"vm","context":"SeedBootstrapService","event":"seed.step","name":"reglas de infraestructura hospitalaria","inserted":36,"tookMs":17,"failed":false,"detail":{"parentRules":21,"typologyRules":15,"formBackfill":0},"msg":"Seed: reglas de infraestructura hospitalaria"}
-{"level":30,"pid":21595,"hostname":"vm","context":"SeedBootstrapService","event":"seed.summary","ok":29,"failed":0,"inserted":42514,"tookMs":319556,"steps":[{"name":"catálogo de conceptos","inserted":4623,"tookMs":539,"failed":false},{"name":"enumeraciones dinámicas","inserted":896,"tookMs":198,"failed":false},{"name":"apoderamiento de portal","inserted":3,"tookMs":15,"failed":false},{"name":"ma
-SEED_EXIT=0
+# seed:boot (equivalente: node dist/src/seed-cli.js, dist construido fuera del gate) — 2026-10-30
+## 1.ª corrida (base recién creada, reglas con TYPO_FORBIDDEN, versión ya reemplazada):
+"msg":"Seeds: 29/29 ok · 42514 filas · 319556 ms"
+"detail":{"parentRules":21,"typologyRules":15,"formBackfill":0}
+-- después se borraron a mano las 9 filas TYPO_FORBIDDEN de la base local (artefacto de esa versión)
+## 2.ª corrida (tipología como lista blanca):
+"msg":"Seeds: 29/29 ok · 51 filas · 2905 ms"
+"detail":{"parentRules":0,"typologyRules":51,"formBackfill":0}
+## 3.ª corrida (idempotencia):
+"msg":"Seeds: 29/29 ok · 0 filas · 2760 ms"
+"detail":{"parentRules":0,"typologyRules":0,"formBackfill":0}
+EXIT=0
+## psql
 space_form_parent_rules|21
-facility_typology_rules|15
+facility_typology_rules|57
 care_spaces sin forma|0

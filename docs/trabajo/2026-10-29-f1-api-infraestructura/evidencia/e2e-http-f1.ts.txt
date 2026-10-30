@@ -89,7 +89,7 @@ async function main() {
   check('evento practice.care_space.created', sql(`select count(*) from messaging.domain_events where event_type='practice.care_space.created' and aggregate_id='${ed.body.id}' and tenant_id='${A.tenant}'`) === '1');
 
   const bed = await call('POST', `/sites/${A.siteId}/care-spaces`, { ...asA, body: { code: `CAMA-RAIZ-${suf}`, name: 'Cama', formCode: 'LOC_FORM_BED', functionCode: 'SPACE_FN_BED_STANDARD' } });
-  check('cama en la raíz 422 SPACE_PARENT_RULE_VIOLATION (con requestId)', bed.status === 422 && bed.body.reason === 'SPACE_PARENT_RULE_VIOLATION' && Boolean(bed.body.correlationId), bed.body);
+  check('cama en la raíz 422 SPACE_PARENT_RULE (con requestId)', bed.status === 422 && bed.body.reason === 'SPACE_PARENT_RULE' && Boolean(bed.body.correlationId), bed.body);
 
   const room = await call('POST', `/sites/${A.siteId}/care-spaces`, { ...asA, body: { code: `301-${suf}`, name: 'Hab 301', formCode: 'LOC_FORM_ROOM', functionCode: 'SPACE_FN_INPATIENT_ROOM', parentSpaceId: ed.body.id, activate: true, areaM2: 18.5 } });
   check('local bajo edificio 201', room.status === 201, room.body);
@@ -120,7 +120,7 @@ async function main() {
 
   // --- If-Match
   const noIf = await call('PATCH', `/care-spaces/${room.body.id}`, { ...asA, body: { name: 'Hab. 301' } });
-  check('PATCH sin If-Match 412 IF_MATCH_REQUIRED', noIf.status === 412 && noIf.body.reason === 'IF_MATCH_REQUIRED', noIf.body);
+  check('PATCH sin If-Match 428 IF_MATCH_REQUIRED', noIf.status === 428 && noIf.body.reason === 'IF_MATCH_REQUIRED', noIf.body);
   const bad = await call('PATCH', `/care-spaces/${room.body.id}`, { ...asA, ifMatch: '99', body: { name: 'Hab. 301' } });
   check('PATCH If-Match distinto 412 ROW_VERSION_MISMATCH', bad.status === 412 && bad.body.reason === 'ROW_VERSION_MISMATCH', bad.body);
   const rv = det.body.rowVersion;
@@ -145,12 +145,15 @@ async function main() {
   const rc = await call('GET', `/care-spaces/${room.body.id}/retire-check`, asA);
   check('retire-check: ACTIVE_CHILDREN 3 + no verificables', rc.status === 200 && rc.body.blockers[0]?.kind === 'ACTIVE_CHILDREN' && rc.body.blockers[0]?.count === 3 && rc.body.unverifiable.length === 2, rc.body);
   const blk = await call('POST', `/care-spaces/${room.body.id}/lifecycle`, { ...asA, ifMatch: String(rv + 1), body: { action: 'retire', reason: 'remodelación' } });
-  check('retirar con hijos 409 SPACE_RETIRE_BLOCKED con próxima acción', blk.status === 409 && blk.body.reason === 'SPACE_RETIRE_BLOCKED' && Boolean(blk.body.details?.blockers?.[0]?.nextAction), blk.body);
+  check('retirar con hijos 409 SPACE_RETIRE_BLOCKED con próxima acción', blk.status === 409 && blk.body.reason === 'SPACE_RETIRE_BLOCKED' && Boolean(blk.body.details?.blockers?.[0]?.nextAction?.label), blk.body);
   const bedC = bulk.body.created[2];
   const ret = await call('POST', `/care-spaces/${bedC.id}/lifecycle`, { ...asA, ifMatch: String(bedC.rowVersion), body: { action: 'retire', reason: 'baja de cama' } });
   check('retirar hoja 200 RETIRED', ret.status === 200 && ret.body.status?.code === 'SPACE_RETIRED', ret.body);
   check('retiro persistido con valid_to', sql(`select (status_concept_id='${PRAC.SPACE_RETIRED}' and valid_to is not null)::text from practice.care_spaces where id='${bedC.id}'`) === 'true');
   check('motivo en la historia, no en el evento', sql(`select data_snapshot->>'lifecycleReason' from audit.care_spaces_history where care_space_id='${bedC.id}' order by revision_no desc limit 1`) === 'baja de cama' && sql(`select count(*) from messaging.domain_events where aggregate_id='${bedC.id}' and payload_json::text like '%baja de cama%'`) === '0');
+  const hist = await call('GET', `/care-spaces/${bedC.id}/history`, asA);
+  check('historial: retiro primero, con motivo y actor; una sola alta', hist.status === 200 && hist.body[0]?.action === 'retire' && hist.body[0]?.reason === 'baja de cama' && Boolean(hist.body[0]?.actorName) && hist.body.filter((h: any) => h.action === 'created').length === 1, hist.body);
+  check('historial de A desde B: 404', (await call('GET', `/care-spaces/${bedC.id}/history`, asB)).status === 404);
   const re2 = await call('GET', `/care-spaces/${room.body.id}`, asA);
   check('relectura: 2 camas', re2.body.derived?.beds === 2, re2.body.derived);
 
@@ -159,7 +162,7 @@ async function main() {
     { code: `IMP1-${suf}`, name: 'Oficina', formCode: 'LOC_FORM_ROOM', functionCode: 'SPACE_FN_OFFICE_ADMIN', parentCode: `ED-${suf}` },
     { code: `IMP2-${suf}`, name: 'Cama', formCode: 'LOC_FORM_BED', functionCode: 'SPACE_FN_BED_STANDARD' },
   ] } });
-  check('import dryRun: ok false, errores por línea, nada escrito', imp.status === 200 && imp.body.ok === false && imp.body.rows[0].status === 'ok' && imp.body.rows[1].status === 'error' && sql(`select count(*) from practice.care_spaces where code like 'IMP%-${suf}'`) === '0', imp.body);
+  check('import dryRun: ok false, errores por línea, nada escrito', imp.status === 200 && imp.body.ok === false && imp.body.rows[0].status === 'ok' && imp.body.rows[1].status === 'error' && Boolean(imp.body.rows[1].errors[0]?.message) && sql(`select count(*) from practice.care_spaces where code like 'IMP%-${suf}'`) === '0', imp.body);
   const imp2 = await call('POST', `/sites/${A.siteId}/care-spaces/import?dryRun=false`, { ...asA, body: { rows: [imp.body && { code: `IMP1-${suf}`, name: 'Oficina', formCode: 'LOC_FORM_ROOM', functionCode: 'SPACE_FN_OFFICE_ADMIN', parentCode: `ED-${suf}` }] } });
   check('import real: created 1 y persistido', imp2.status === 200 && imp2.body.created === 1 && sql(`select count(*) from practice.care_spaces where code='IMP1-${suf}'`) === '1', imp2.body);
 
@@ -170,7 +173,7 @@ async function main() {
   check('vínculo OWNER 201', as1.status === 201, as1.body);
   const u2 = await call('POST', `/sites/${A.siteId}/clinical-units`, { ...asA, body: { code: `UNI2-${suf}`, name: 'Otra' } });
   const as2 = await call('POST', `/care-spaces/${room.body.id}/unit-assignments`, { ...asA, body: { clinicalUnitId: u2.body.id, roleCode: 'SPACE_UNIT_ROLE_OWNER' } });
-  check('segundo OWNER 409', as2.status === 409 && as2.body.reason === 'ASSIGNMENT_OWNER_TAKEN', as2.body);
+  check('segundo OWNER 409', as2.status === 409 && as2.body.reason === 'SPACE_OWNER_TAKEN', as2.body);
   const ud = await call('GET', `/clinical-units/${u.body.id}`, asA);
   check('ficha de unidad con el vínculo', ud.status === 200 && ud.body.assignments.length === 1, ud.body);
   const ur = await call('POST', `/clinical-units/${u.body.id}/lifecycle`, { ...asA, ifMatch: String(ud.body.rowVersion), body: { action: 'retire', reason: 'x' } });
@@ -178,23 +181,28 @@ async function main() {
 
   // --- establecimiento
   const tc = await call('PATCH', `/sites/${A.siteId}/regulatory`, { ...asA, body: { typologyCode: 'TYPOLOGY_HEALTH_POST' } });
-  check('tipología Puesto de Salud con camas 409 TYPOLOGY_CONFLICT', tc.status === 409 && tc.body.reason === 'TYPOLOGY_CONFLICT' && tc.body.details.conflicts.length >= 1, tc.body);
+  check('tipología Puesto de Salud con camas 409 TYPOLOGY_CONFLICT', tc.status === 409 && tc.body.reason === 'TYPOLOGY_CONFLICT' && tc.body.details.conflicts.length >= 1 && Boolean(tc.body.details.conflicts[0].name) && Boolean(tc.body.details.conflicts[0].function?.code), tc.body);
   const rg = await call('PATCH', `/sites/${A.siteId}/regulatory`, { ...asA, body: { typologyCode: 'TYPOLOGY_HOSPITAL_L2', snisCode: `S${suf}`, sedesCode: 'SEDES_SCZ', careLevelCode: 'CARE_LEVEL_2' } });
   check('regulatorio 200 y faltantes obligatorios', rg.status === 200 && rg.body.missingRequiredFunctions.includes('SPACE_FN_OPERATING_ROOM'), rg.body);
   check('regulatorio persistido', sql(`select facility_typology_concept_id||'|'||snis_code from practice.practice_sites where id='${A.siteId}'`) === `${PRAC.TYPOLOGY_HOSPITAL_L2}|S${suf}`);
   const vsOwner = await call('POST', `/sites/${A.siteId}/regulatory/verify-snis`, asA);
   check('verificar SNIS como owner 403', vsOwner.status === 403, vsOwner.body);
   const vs = await call('POST', `/sites/${A.siteId}/regulatory/verify-snis`, { token: admin.body.accessToken, tenant: A.tenant });
-  check('verificar SNIS como plataforma 200', vs.status === 200 && vs.body.snisVerified === true, vs.body);
+  check('verificar SNIS como plataforma 200', vs.status === 200 && vs.body.regulatory?.snisVerified === true, vs.body);
   check('snis_verified_at en la base', sql(`select (snis_verified_at is not null)::text from practice.practice_sites where id='${A.siteId}'`) === 'true');
   await call('PATCH', `/sites/${B.siteId}/regulatory`, { ...asB, body: { snisCode: `S${suf}` } });
   const vsB = await call('POST', `/sites/${B.siteId}/regulatory/verify-snis`, { token: admin.body.accessToken, tenant: B.tenant });
   check('verificar en B el código ya verificado en A: 409 genérico', vsB.status === 409 && vsB.body.reason === 'SNIS_CODE_UNAVAILABLE' && !JSON.stringify(vsB.body).includes(A.siteId), vsB.body);
 
-  const lic = await call('POST', `/sites/${A.siteId}/licenses`, { ...asA, body: { authorityName: 'SEDES Santa Cruz', resolutionNumber: `RA-${suf}`, issuedOn: '2020-01-01', expiresOn: '2021-01-01' } });
+  const tb = await call('PATCH', `/sites/${B.siteId}/regulatory`, { ...asB, body: { typologyCode: 'TYPOLOGY_HEALTH_POST' } });
+  const orB = await call('POST', `/sites/${B.siteId}/care-spaces`, { ...asB, body: { code: `QX-${suf}`, name: 'Quirófano', formCode: 'LOC_FORM_ROOM', functionCode: 'SPACE_FN_OPERATING_ROOM' } });
+  check('Puesto de Salud: quirófano 422 TYPOLOGY_NOT_ALLOWED; consultorio 201', tb.status === 200 && orB.status === 422 && orB.body.reason === 'TYPOLOGY_NOT_ALLOWED' && (await call('POST', `/sites/${B.siteId}/care-spaces`, { ...asB, body: { code: `CONS-${suf}`, name: 'Consultorio', formCode: 'LOC_FORM_ROOM', functionCode: 'SPACE_FN_CONSULTING_ROOM' } })).status === 201, orB.body);
+  const noIfMatch428 = await call('POST', `/care-spaces/${room.body.id}/move`, { ...asA, body: { parentSpaceId: null } });
+  check('move sin If-Match: 428', noIfMatch428.status === 428 && noIfMatch428.body.reason === 'IF_MATCH_REQUIRED', noIfMatch428.body);
+  const lic = await call('POST', `/sites/${A.siteId}/licenses`, { ...asA, body: { authorityName: 'SEDES Santa Cruz', resolutionNumber: `RA-${suf}`, issuedOn: '2020-01-01', expiresOn: '2021-01-01', notes: '' } });
   check('habilitación 201 en trámite', lic.status === 201 && lic.body.status.code === 'LIC_IN_PROCESS', lic.body);
   check('habilitación en facility_licenses', sql(`select practice_site_id from organization_extensions.facility_licenses where id='${lic.body.id}'`) === A.siteId);
-  const lv = await call('PATCH', `/site-licenses/${lic.body.id}`, { token: admin.body.accessToken, tenant: A.tenant, body: { statusCode: 'LIC_VALID' } });
+  const lv = await call('PATCH', `/site-licenses/${lic.body.id}`, { token: admin.body.accessToken, tenant: A.tenant, body: { status: 'LIC_VALID' } });
   check('plataforma la verifica; vencida se lee LIC_EXPIRED', lv.status === 200 && lv.body.status.code === 'LIC_EXPIRED', lv.body);
   const dc = await call('POST', `/sites/${A.siteId}/declared-capacities`, { ...asA, body: { kindCode: 'CAP_BEDS_CENSABLE', quantity: 10, asOf: '2026-01-01' } });
   check('capacidad declarada vs derivada: brecha 10 vs 2', dc.status === 201 && JSON.stringify(dc.body.gaps).includes('"declared":10,"derived":2'), dc.body);

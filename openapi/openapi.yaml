@@ -18405,6 +18405,44 @@ paths:
       description: >-
         Cambiar el ciclo de vida de un espacio. Requiere JWT y los roles o alcances declarados por el controlador. Todas
         las respuestas de error usan el envelope ErrorResponse.
+  /care-spaces/{id}/history:
+    get:
+      operationId: CareSpacesController_history
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpaceHistoryEntryDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      security:
+        - bearer: []
+      summary: Historial de un espacio de atención
+      tags:
+        - practice
+      description: >-
+        Historial de un espacio de atención. Requiere JWT y los roles o alcances declarados por el controlador. Todas
+        las respuestas de error usan el envelope ErrorResponse.
   /care-spaces/{id}/retire-check:
     get:
       operationId: CareSpacesController_retireCheck
@@ -73705,6 +73743,48 @@ components:
       required:
         - action
       additionalProperties: false
+    SpaceHistoryEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: '`<careSpaceId>:<revisionNo>`'
+        at:
+          type: string
+          format: date-time
+        action:
+          type: string
+          description: created | updated | moved | activate | suspend | reactivate | retire
+        actorName:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+        summary:
+          type: string
+          description: Campos que cambiaron respecto de la revisión anterior
+        rowVersion:
+          type: number
+          nullable: true
+      required:
+        - id
+        - at
+        - action
+        - actorName
+        - reason
+        - summary
+        - rowVersion
+    NextActionDto:
+      type: object
+      properties:
+        label:
+          type: string
+        route:
+          type: string
+          description: Ruta relativa a la ficha del espacio (p. ej. ?tab=children)
+      required:
+        - label
     BlockerDto:
       type: object
       properties:
@@ -73728,8 +73808,9 @@ components:
           items:
             type: string
         nextAction:
-          type: string
           description: Qué hacer para destrabarlo (S3)
+          allOf:
+            - $ref: '#/components/schemas/NextActionDto'
       required:
         - kind
         - count
@@ -73920,6 +74001,54 @@ components:
           format: uuid
           nullable: true
       additionalProperties: false
+    SiteRegulatoryDataDto:
+      type: object
+      properties:
+        snisCode:
+          type: string
+          nullable: true
+        snisVerified:
+          type: boolean
+          description: Código SNIS verificado por la plataforma
+        subsector:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/ConceptDto'
+        careLevel:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/ConceptDto'
+        typology:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/ConceptDto'
+        managingEntityName:
+          type: string
+          nullable: true
+        healthNetworkName:
+          type: string
+          nullable: true
+        sedes:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/ConceptDto'
+        municipalityName:
+          type: string
+          nullable: true
+      required:
+        - snisCode
+        - snisVerified
+        - subsector
+        - careLevel
+        - typology
+        - managingEntityName
+        - healthNetworkName
+        - sedes
+        - municipalityName
     EstablishmentSummaryDto:
       type: object
       properties:
@@ -73942,43 +74071,13 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/ConceptDto'
-        snisCode:
-          type: string
-          nullable: true
-        snisVerified:
-          type: boolean
-          description: Verificado por la plataforma
-        subsector:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/ConceptDto'
-        careLevel:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/ConceptDto'
-        typology:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/ConceptDto'
-        sedes:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/ConceptDto'
-        managingEntityName:
-          type: string
-          nullable: true
-        healthNetworkName:
-          type: string
-          nullable: true
-        municipalityName:
+        timeZone:
           type: string
           nullable: true
         rowVersion:
           type: number
+        regulatory:
+          $ref: '#/components/schemas/SiteRegulatoryDataDto'
         canWrite:
           type: boolean
           description: El actor puede editar la estructura (sólo refleja; la API decide)
@@ -73989,16 +74088,9 @@ components:
         - code
         - name
         - status
-        - snisCode
-        - snisVerified
-        - subsector
-        - careLevel
-        - typology
-        - sedes
-        - managingEntityName
-        - healthNetworkName
-        - municipalityName
+        - timeZone
         - rowVersion
+        - regulatory
         - canWrite
     SiteStructureDto:
       type: object
@@ -74161,9 +74253,13 @@ components:
           type: string
         reason:
           type: string
+        message:
+          type: string
+          description: Texto para la persona
       required:
         - field
         - reason
+        - message
     ImportRowResultDto:
       type: object
       properties:
@@ -74221,43 +74317,13 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/ConceptDto'
-        snisCode:
-          type: string
-          nullable: true
-        snisVerified:
-          type: boolean
-          description: Verificado por la plataforma
-        subsector:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/ConceptDto'
-        careLevel:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/ConceptDto'
-        typology:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/ConceptDto'
-        sedes:
-          nullable: true
-          type: object
-          allOf:
-            - $ref: '#/components/schemas/ConceptDto'
-        managingEntityName:
-          type: string
-          nullable: true
-        healthNetworkName:
-          type: string
-          nullable: true
-        municipalityName:
+        timeZone:
           type: string
           nullable: true
         rowVersion:
           type: number
+        regulatory:
+          $ref: '#/components/schemas/SiteRegulatoryDataDto'
         canWrite:
           type: boolean
           description: El actor puede editar la estructura (sólo refleja; la API decide)
@@ -74273,16 +74339,9 @@ components:
         - code
         - name
         - status
-        - snisCode
-        - snisVerified
-        - subsector
-        - careLevel
-        - typology
-        - sedes
-        - managingEntityName
-        - healthNetworkName
-        - municipalityName
+        - timeZone
         - rowVersion
+        - regulatory
         - canWrite
         - missingRequiredFunctions
     UpdateSiteRegulatoryDto:
@@ -74403,6 +74462,10 @@ components:
           type: string
           description: Archivo de la resolución
           format: uuid
+        notes:
+          type: string
+          description: 'Sin columna en facility_licenses: sólo se acepta vacío (422 LICENSE_NOTES_UNSUPPORTED si trae texto)'
+          nullable: true
       required:
         - authorityName
         - resolutionNumber
@@ -74585,7 +74648,6 @@ components:
           enum:
             - TYPO_ALLOWED
             - TYPO_REQUIRED
-            - TYPO_FORBIDDEN
       required:
         - typology
         - function
@@ -74719,11 +74781,15 @@ components:
           type: string
           format: uuid
           nullable: true
-        statusCode:
+        status:
           type: string
           description: >-
             Estado: LIC_IN_PROCESS | LIC_VALID | LIC_REVOKED (sólo plataforma). LIC_EXPIRED se calcula; LIC_SUSPENDED no
             tiene columna en facility_licenses
+        notes:
+          type: string
+          description: 'Sin columna en facility_licenses: sólo se acepta vacío (422 LICENSE_NOTES_UNSUPPORTED si trae texto)'
+          nullable: true
       additionalProperties: false
     DiagnosticConceptDto:
       type: object

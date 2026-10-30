@@ -19,6 +19,7 @@ import type { CareSpaceAttributesDto } from '../dto/care-space-attributes.dto';
 export interface FieldError {
   readonly field: string;
   readonly reason: string;
+  readonly message?: string;
 }
 
 /** Columnas de atributos de `care_spaces` que el cliente puede escribir. */

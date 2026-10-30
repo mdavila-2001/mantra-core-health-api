@@ -433,7 +433,7 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
       code: 'SPACE_UNIT_ROLE_LOAN',
       display: 'Unidad con el espacio en préstamo',
     },
-    // --- Reglas de tipología (facility_typology_rules.rule_concept_id). TYPO_FORBIDDEN es un desvío del contrato: ver «Desvíos»
+    // --- Reglas de tipología (facility_typology_rules.rule_concept_id). semántica de lista blanca, ver domain/structure/structure-catalog.ts
     TYPO_ALLOWED: {
       code: 'TYPO_ALLOWED',
       display: 'Función permitida por la tipología',
@@ -441,10 +441,6 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
     TYPO_REQUIRED: {
       code: 'TYPO_REQUIRED',
       display: 'Función obligatoria para la tipología',
-    },
-    TYPO_FORBIDDEN: {
-      code: 'TYPO_FORBIDDEN',
-      display: 'Función no admitida por la tipología',
     },
 
     // --- healthcare_services ---------------------------------------------------

@@ -63,7 +63,7 @@ describe('regla padre→hijo', () => {
     );
     expect(v).toMatchObject({
       ok: false,
-      reason: 'SPACE_PARENT_RULE_VIOLATION',
+      reason: 'SPACE_PARENT_RULE',
     });
   });
   it('raíz: edificio, área, local y virtual sí; cama no', () => {
@@ -95,7 +95,7 @@ describe('perfil de función', () => {
       judgeFunctionForm('SPACE_FN_OPERATING_ROOM', 'LOC_FORM_BED'),
     ).toMatchObject({
       ok: false,
-      reason: 'SPACE_FUNCTION_FORM_MISMATCH',
+      reason: 'FUNCTION_FORM_MISMATCH',
     });
   });
   it('función desconocida: SPACE_UNKNOWN_CODE', () => {
@@ -115,7 +115,7 @@ describe('regla de tipología', () => {
       ),
     ).toMatchObject({
       ok: false,
-      reason: 'SPACE_TYPOLOGY_FORBIDDEN',
+      reason: 'TYPOLOGY_NOT_ALLOWED',
     });
     expect(
       judgeTypology(
@@ -209,7 +209,7 @@ describe('ciclo de vida', () => {
     });
     expect(judgeTransition('RETIRED', 'reactivate', 'x')).toMatchObject({
       ok: false,
-      reason: 'LIFECYCLE_INVALID_TRANSITION',
+      reason: 'SPACE_INVALID_TRANSITION',
     });
   });
   it('suspender y retirar exigen motivo', () => {

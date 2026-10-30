@@ -22,6 +22,7 @@ import { PRAC } from '../practice.concepts';
 import {
   PracticeErrorReason,
   conflict,
+  reasonMessage,
   ruleException,
 } from '../practice.error-reasons';
 import type { CareSpaces, ClinicalUnits, PracticeSites } from '../entities';
@@ -288,7 +289,11 @@ export class CareSpacesAdminService {
         return {
           line: index + 1,
           status: errors.length ? 'error' : 'ok',
-          errors: errors.map(({ field, reason }) => ({ field, reason })),
+          errors: errors.map(({ field, reason }) => ({
+            field,
+            reason,
+            message: reasonMessage(reason),
+          })),
         };
       });
       if (rows.some((r) => r.status === 'error')) {
@@ -363,7 +368,13 @@ export class CareSpacesAdminService {
           return {
             line: index + 1,
             status: 'error' as const,
-            errors: [{ field: 'row', reason: 'NOT_AN_OBJECT' }],
+            errors: [
+              {
+                field: 'row',
+                reason: 'NOT_AN_OBJECT',
+                message: reasonMessage('NOT_AN_OBJECT'),
+              },
+            ],
           };
         }
         const row = plainToInstance(ImportRowInput, raw);
@@ -425,7 +436,11 @@ export class CareSpacesAdminService {
         return {
           line: index + 1,
           status: errors.length ? 'error' : 'ok',
-          errors,
+          errors: errors.map(({ field, reason }) => ({
+            field,
+            reason,
+            message: reasonMessage(reason),
+          })),
         };
       });
 
@@ -862,7 +877,7 @@ export class CareSpacesAdminService {
       ]);
       if (current.some((a) => a.clinicalUnitId === dto.clinicalUnitId)) {
         throw conflict(
-          PracticeErrorReason.ASSIGNMENT_DUPLICATE,
+          PracticeErrorReason.ASSIGNMENT_EXISTS,
           'La unidad ya está vinculada a este espacio',
           { clinicalUnitId: dto.clinicalUnitId },
         );
@@ -872,7 +887,7 @@ export class CareSpacesAdminService {
         current.some((a) => a.roleConceptId === PRAC.SPACE_UNIT_ROLE_OWNER)
       ) {
         throw conflict(
-          PracticeErrorReason.ASSIGNMENT_OWNER_TAKEN,
+          PracticeErrorReason.SPACE_OWNER_TAKEN,
           'El espacio ya tiene una unidad propietaria vigente',
           {},
         );
@@ -1008,9 +1023,11 @@ export class CareSpacesAdminService {
   ): CareSpaces {
     const found = siteSpaces.find((s) => s.id === id);
     if (!found) {
-      throw new ResourceNotFoundException('Espacio no encontrado', {
-        [field]: id,
-      });
+      throw new ResourceNotFoundException(
+        'Espacio no encontrado',
+        { [field]: id },
+        PracticeErrorReason.PARENT_NOT_FOUND,
+      );
     }
     if (found.statusConceptId === PRAC.SPACE_RETIRED) {
       throw ruleException(PracticeErrorReason.PARENT_NOT_ACTIVE, {
@@ -1033,9 +1050,11 @@ export class CareSpacesAdminService {
       unit.practiceSiteId !== site.id ||
       unit.tenantId !== site.tenantId
     ) {
-      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
-        clinicalUnitId: unitId,
-      });
+      throw new ResourceNotFoundException(
+        'Unidad clínica no encontrada',
+        { clinicalUnitId: unitId },
+        PracticeErrorReason.UNIT_NOT_FOUND,
+      );
     }
     if (unit.statusConceptId === PRAC.UNIT_RETIRED) {
       throw ruleException(PracticeErrorReason.CROSS_SITE_REFERENCE, {

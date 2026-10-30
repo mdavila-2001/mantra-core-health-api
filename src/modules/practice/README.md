@@ -113,25 +113,26 @@ tenant responde **404**. Sin `@Roles`: la autorización vive en
 | --- | --- | --- | --- |
 | `GET /practice/infrastructure-catalog` | sesión | `infrastructure-catalog` | — |
 | `GET /sites/:siteId/structure` | lectura | `site-infrastructure` | 404 |
-| `POST /sites/:siteId/care-spaces` (extendido) | estructura | `sites` | 409 `SPACE_CODE_TAKEN`; 422 `SPACE_PARENT_RULE_VIOLATION`, `SPACE_FUNCTION_FORM_MISMATCH`, `SPACE_TYPOLOGY_FORBIDDEN`, `SPACE_UNKNOWN_CODE`, `PARENT_NOT_ACTIVE`, `SITE_NOT_ACTIVE` |
+| `POST /sites/:siteId/care-spaces` (extendido) | estructura | `sites` | 409 `SPACE_CODE_TAKEN`; 422 `SPACE_PARENT_RULE`, `FUNCTION_FORM_MISMATCH`, `TYPOLOGY_NOT_ALLOWED`, `SPACE_UNKNOWN_CODE`, `PARENT_NOT_ACTIVE`, `SITE_NOT_ACTIVE`; 404 `PARENT_NOT_FOUND`, `UNIT_NOT_FOUND` |
 | `POST /sites/:siteId/care-spaces/bulk` | estructura | `site-infrastructure` | 422 `BULK_PATTERN_INVALID`, `BULK_LIMIT_EXCEEDED`, `IMPORT_INVALID_ROWS` |
 | `POST /sites/:siteId/care-spaces/import?dryRun=` | estructura | `site-infrastructure` | 200 con `ok:false` y errores por línea |
 | `GET /care-spaces/:id` | lectura | `care-spaces` | 404 |
-| `PATCH /care-spaces/:id` (`If-Match`) | estructura | `care-spaces` | 412 `IF_MATCH_REQUIRED`, `ROW_VERSION_MISMATCH`; 422 `SPACE_IMMUTABLE_FIELD`, `SPACE_RETIRED` |
-| `POST /care-spaces/:id/move` (`If-Match`) | estructura | `care-spaces` | 412; 422 `SPACE_CYCLE`, `SPACE_PARENT_RULE_VIOLATION` |
+| `PATCH /care-spaces/:id` (`If-Match`) | estructura | `care-spaces` | 428 `IF_MATCH_REQUIRED`; 412 `ROW_VERSION_MISMATCH`; 422 `SPACE_IMMUTABLE_FIELD`, `SPACE_RETIRED` |
+| `POST /care-spaces/:id/move` (`If-Match`) | estructura | `care-spaces` | 428/412; 422 `SPACE_CYCLE`, `SPACE_PARENT_RULE` |
 | `POST /care-spaces/:id/lifecycle` (`If-Match`) | estructura | `care-spaces` | 409 `SPACE_RETIRE_BLOCKED` (`details.blockers`), `SPACE_SUSPEND_BLOCKED`; 422 `LIFECYCLE_*`, `PARENT_NOT_ACTIVE` |
 | `GET /care-spaces/:id/retire-check` | lectura | `care-spaces` | — |
-| `POST /care-spaces/:id/unit-assignments` | estructura | `care-spaces` | 409 `ASSIGNMENT_OWNER_TAKEN`, `ASSIGNMENT_DUPLICATE` |
+| `GET /care-spaces/:id/history` (agregado, «Desvíos» WEB-F1) | lectura | `care-spaces` | 404 |
+| `POST /care-spaces/:id/unit-assignments` | estructura | `care-spaces` | 409 `SPACE_OWNER_TAKEN`, `ASSIGNMENT_EXISTS` |
 | `DELETE /care-spaces/:id/unit-assignments/:assignmentId` | estructura | `care-spaces` | 404 |
 | `GET /sites/:siteId/clinical-units` | lectura | `site-infrastructure` | 404 |
 | `GET /clinical-units/:id` | lectura | `clinical-units` | 404 |
-| `PATCH /clinical-units/:id` (`If-Match`) | estructura | `clinical-units` | 412; 409 `UNIT_CODE_TAKEN`; 422 `UNIT_CYCLE`, `SPACE_IMMUTABLE_FIELD` |
+| `PATCH /clinical-units/:id` (`If-Match`) | estructura | `clinical-units` | 428/412; 409 `UNIT_CODE_TAKEN`; 422 `UNIT_CYCLE`, `SPACE_IMMUTABLE_FIELD` |
 | `POST /clinical-units/:id/lifecycle` (`If-Match`) | estructura | `clinical-units` | 409 `UNIT_RETIRE_BLOCKED`, `UNIT_SUSPEND_BLOCKED` |
 | `GET /sites/:siteId/regulatory` | lectura | `site-infrastructure` | 404 |
 | `PATCH /sites/:siteId/regulatory` (`If-Match` opcional) | organización | `site-infrastructure` | 409 `TYPOLOGY_CONFLICT`, `SNIS_CODE_UNAVAILABLE` |
 | `POST /sites/:siteId/regulatory/verify-snis` | plataforma | `site-infrastructure` | 409 `SNIS_CODE_UNAVAILABLE`; 422 `SNIS_CODE_MISSING` |
 | `GET /sites/:siteId/licenses` | lectura | `site-infrastructure` | 404 |
-| `POST /sites/:siteId/licenses` | organización | `site-infrastructure` | 409 `LICENSE_NUMBER_TAKEN` |
+| `POST /sites/:siteId/licenses` | organización | `site-infrastructure` | 409 `LICENSE_NUMBER_TAKEN`; 422 `LICENSE_NOTES_UNSUPPORTED` |
 | `PATCH /site-licenses/:id` (`If-Match` opcional) | organización (estado: plataforma) | `infrastructure-catalog` (`SiteLicensesController`) | 422 `LICENSE_STATUS_UNSUPPORTED` |
 | `GET /sites/:siteId/capacity` | lectura | `site-infrastructure` | 404 |
 | `POST /sites/:siteId/declared-capacities` | organización | `site-infrastructure` | 422 `SPACE_UNKNOWN_CODE` |

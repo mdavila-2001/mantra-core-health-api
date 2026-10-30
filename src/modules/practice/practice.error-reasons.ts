@@ -15,11 +15,11 @@ export enum PracticeErrorReason {
   /** Ya hay un espacio con ese código en la sede (los códigos no se reutilizan). */
   SPACE_CODE_TAKEN = 'SPACE_CODE_TAKEN',
   /** La forma no puede colgar de la forma del padre (o de la raíz). */
-  SPACE_PARENT_RULE_VIOLATION = 'SPACE_PARENT_RULE_VIOLATION',
+  SPACE_PARENT_RULE = 'SPACE_PARENT_RULE',
   /** La función no admite esa forma (perfil de función). */
-  SPACE_FUNCTION_FORM_MISMATCH = 'SPACE_FUNCTION_FORM_MISMATCH',
+  FUNCTION_FORM_MISMATCH = 'FUNCTION_FORM_MISMATCH',
   /** La tipología del establecimiento no admite esa función. */
-  SPACE_TYPOLOGY_FORBIDDEN = 'SPACE_TYPOLOGY_FORBIDDEN',
+  TYPOLOGY_NOT_ALLOWED = 'TYPOLOGY_NOT_ALLOWED',
   /** Un código (forma, función, atributo) que el catálogo no conoce. */
   SPACE_UNKNOWN_CODE = 'SPACE_UNKNOWN_CODE',
   /** `code` o `formCode` de un espacio ya activado. */
@@ -32,6 +32,12 @@ export enum PracticeErrorReason {
   SPACE_SUSPEND_BLOCKED = 'SPACE_SUSPEND_BLOCKED',
   /** El padre no está activo (o planificado, en un alta planificada). */
   PARENT_NOT_ACTIVE = 'PARENT_NOT_ACTIVE',
+  /**
+   * 404 del padre o de la unidad referenciados: no existen, son de otra sede o
+   * de otro tenant (no se distingue, para no revelar nada).
+   */
+  PARENT_NOT_FOUND = 'PARENT_NOT_FOUND',
+  UNIT_NOT_FOUND = 'UNIT_NOT_FOUND',
   /** Referencia (padre, unidad) a otra sede. */
   CROSS_SITE_REFERENCE = 'CROSS_SITE_REFERENCE',
   /** La sede no está activa. */
@@ -40,7 +46,7 @@ export enum PracticeErrorReason {
   SPACE_RETIRED = 'SPACE_RETIRED',
 
   // --- Ciclo de vida --------------------------------------------------------
-  LIFECYCLE_INVALID_TRANSITION = 'LIFECYCLE_INVALID_TRANSITION',
+  SPACE_INVALID_TRANSITION = 'SPACE_INVALID_TRANSITION',
   LIFECYCLE_REASON_REQUIRED = 'LIFECYCLE_REASON_REQUIRED',
 
   // --- Concurrencia ---------------------------------------------------------
@@ -57,9 +63,9 @@ export enum PracticeErrorReason {
 
   // --- Vínculo espacio ↔ unidad ---------------------------------------------
   /** Ya hay una unidad propietaria vigente. */
-  ASSIGNMENT_OWNER_TAKEN = 'ASSIGNMENT_OWNER_TAKEN',
+  SPACE_OWNER_TAKEN = 'SPACE_OWNER_TAKEN',
   /** Esa unidad ya está vinculada (vigente) al espacio. */
-  ASSIGNMENT_DUPLICATE = 'ASSIGNMENT_DUPLICATE',
+  ASSIGNMENT_EXISTS = 'ASSIGNMENT_EXISTS',
 
   // --- Unidades -------------------------------------------------------------
   UNIT_CODE_TAKEN = 'UNIT_CODE_TAKEN',
@@ -79,16 +85,19 @@ export enum PracticeErrorReason {
   SNIS_CODE_MISSING = 'SNIS_CODE_MISSING',
   /** Ya hay una habilitación del tenant con ese número de resolución. */
   LICENSE_NUMBER_TAKEN = 'LICENSE_NUMBER_TAKEN',
+  /** `notes` con texto: `facility_licenses` no tiene dónde guardarlo. */
+  LICENSE_NOTES_UNSUPPORTED = 'LICENSE_NOTES_UNSUPPORTED',
   /** Estado de habilitación que `facility_licenses` no puede guardar. */
   LICENSE_STATUS_UNSUPPORTED = 'LICENSE_STATUS_UNSUPPORTED',
 }
 
 /**
- * 412 de concurrencia optimista (`If-Match`).
+ * Concurrencia optimista (`If-Match`): **412** si no coincide (contrato §3,
+ * RFC 9110 §13.1.1) y **428** si falta (RFC 6585 §3; el contrato no lo dice y
+ * la web ya lo espera así, «Desvíos» WEB-F1 punto 3).
  *
  * `PreconditionFailedException` del proyecto responde 422 (precondición de
- * negocio); el contrato pide **412** para `If-Match`, que es la semántica HTTP
- * de la cabecera (RFC 9110 §13.1.1).
+ * negocio), por eso esta clase aparte.
  */
 export class IfMatchFailedException extends DomainException {
   /**
@@ -102,7 +111,9 @@ export class IfMatchFailedException extends DomainException {
     details?: Record<string, unknown>,
   ) {
     super(
-      HttpStatus.PRECONDITION_FAILED,
+      reason === PracticeErrorReason.IF_MATCH_REQUIRED
+        ? HttpStatus.PRECONDITION_REQUIRED
+        : HttpStatus.PRECONDITION_FAILED,
       ErrorCode.CONCURRENCY_CONFLICT,
       reason === PracticeErrorReason.IF_MATCH_REQUIRED
         ? 'Falta la cabecera If-Match con la versión del recurso'
@@ -115,18 +126,18 @@ export class IfMatchFailedException extends DomainException {
 
 /** Mensajes para el usuario por `reason` de regla (422/409). */
 const MESSAGES: Partial<Record<PracticeErrorReason, string>> = {
-  [PracticeErrorReason.SPACE_PARENT_RULE_VIOLATION]:
+  [PracticeErrorReason.SPACE_PARENT_RULE]:
     'Ese tipo de espacio no puede ir dentro del padre elegido',
-  [PracticeErrorReason.SPACE_FUNCTION_FORM_MISMATCH]:
+  [PracticeErrorReason.FUNCTION_FORM_MISMATCH]:
     'La función elegida no admite esa forma de espacio',
-  [PracticeErrorReason.SPACE_TYPOLOGY_FORBIDDEN]:
+  [PracticeErrorReason.TYPOLOGY_NOT_ALLOWED]:
     'La tipología del establecimiento no admite esa función',
   [PracticeErrorReason.SPACE_UNKNOWN_CODE]: 'Código desconocido en el catálogo',
   [PracticeErrorReason.SPACE_CYCLE]:
     'El espacio no puede quedar dentro de uno de sus propios hijos',
   [PracticeErrorReason.PARENT_NOT_ACTIVE]:
     'El espacio padre no está en un estado que lo permita',
-  [PracticeErrorReason.LIFECYCLE_INVALID_TRANSITION]:
+  [PracticeErrorReason.SPACE_INVALID_TRANSITION]:
     'Ese cambio de estado no se puede hacer desde el estado actual',
   [PracticeErrorReason.LIFECYCLE_REASON_REQUIRED]:
     'Hay que indicar el motivo del cambio de estado',
@@ -135,6 +146,29 @@ const MESSAGES: Partial<Record<PracticeErrorReason, string>> = {
   [PracticeErrorReason.BULK_LIMIT_EXCEEDED]:
     'El alta masiva admite como máximo 200 espacios',
 };
+
+/** Mensajes de filas de importación que no son `PracticeErrorReason`. */
+const ROW_MESSAGES: Record<string, string> = {
+  NOT_FOUND: 'No existe en la sede',
+  NOT_AN_OBJECT: 'La fila no tiene el formato esperado',
+  [PracticeErrorReason.SPACE_CODE_TAKEN]:
+    'Ya existe un espacio con ese código en la sede',
+};
+
+/**
+ * Texto para la persona de un `reason` de fila (importación, alta masiva).
+ * Los `reason` de class-validator (`isString`, `isInt`…) se leen «valor
+ * inválido»: el campo ya dice cuál.
+ *
+ * @param reason - Código de la fila.
+ */
+export function reasonMessage(reason: string): string {
+  return (
+    ROW_MESSAGES[reason] ??
+    MESSAGES[reason as PracticeErrorReason] ??
+    'Valor inválido'
+  );
+}
 
 /**
  * Traduce un veredicto de regla a la excepción de dominio que corresponde.

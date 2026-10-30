@@ -94,8 +94,8 @@ describe('SiteEstablishmentService', () => {
         TENANT,
       );
       expect(d.site.facilityTypologyConceptId).toBe(PRAC.TYPOLOGY_HOSPITAL_L2);
-      expect(res.sedes?.code).toBe('SEDES_LPZ');
-      expect(res.snisVerified).toBe(false);
+      expect(res.regulatory.sedes?.code).toBe('SEDES_LPZ');
+      expect(res.regulatory.snisVerified).toBe(false);
       expect(res.missingRequiredFunctions.sort()).toEqual([
         'SPACE_FN_EMERGENCY_BOX',
         'SPACE_FN_INPATIENT_ROOM',
@@ -108,6 +108,7 @@ describe('SiteEstablishmentService', () => {
       d.spaces.push({
         id: 'q1',
         code: 'QX-1',
+        name: 'Quirófano 1',
         spaceTypeConceptId: PRAC.SPACE_FN_OPERATING_ROOM,
         statusConceptId: PRAC.SPACE_ACTIVE,
       });
@@ -126,6 +127,8 @@ describe('SiteEstablishmentService', () => {
         {
           spaceId: 'q1',
           code: 'QX-1',
+          name: 'Quirófano 1',
+          function: { code: 'SPACE_FN_OPERATING_ROOM', display: 'Quirófano' },
           functionCode: 'SPACE_FN_OPERATING_ROOM',
         },
       ]);
@@ -166,7 +169,7 @@ describe('SiteEstablishmentService', () => {
       const d = build();
       d.site.snisCode = '200101';
       const res = await d.service.verifySnis('s1', platform, TENANT);
-      expect(res.snisVerified).toBe(true);
+      expect(res.regulatory.snisVerified).toBe(true);
       const calls = d.tx.execute.mock.calls.map((c: any[]) => c[0]);
       expect(calls).toEqual([
         "select set_config('app.system_context', 'true', true)",
@@ -273,7 +276,7 @@ describe('SiteEstablishmentService', () => {
       await expect(
         d.service.updateLicense(
           'l1',
-          { statusCode: 'LIC_VALID' },
+          { status: 'LIC_VALID' },
           undefined,
           owner,
           TENANT,
@@ -282,7 +285,7 @@ describe('SiteEstablishmentService', () => {
       await expect(
         d.service.updateLicense(
           'l1',
-          { statusCode: 'LIC_SUSPENDED' },
+          { status: 'LIC_SUSPENDED' },
           undefined,
           platform,
           TENANT,
@@ -290,12 +293,31 @@ describe('SiteEstablishmentService', () => {
       ).rejects.toMatchObject({ reason: 'LICENSE_STATUS_UNSUPPORTED' });
       const ok = await d.service.updateLicense(
         'l1',
-        { statusCode: 'LIC_VALID' },
+        { status: 'LIC_VALID' },
         undefined,
         platform,
         TENANT,
       );
       expect(ok.status.code).toBe('LIC_VALID');
+    });
+
+    it('notes con texto: 422 LICENSE_NOTES_UNSUPPORTED (sin columna); vacío se acepta', async () => {
+      const d = build();
+      await expect(
+        d.service.createLicense(
+          's1',
+          { authorityName: 'SEDES', resolutionNumber: 'N-1', notes: 'algo' },
+          owner,
+          TENANT,
+        ),
+      ).rejects.toMatchObject({ reason: 'LICENSE_NOTES_UNSUPPORTED' });
+      const ok = await d.service.createLicense(
+        's1',
+        { authorityName: 'SEDES', resolutionNumber: 'N-2', notes: '' },
+        owner,
+        TENANT,
+      );
+      expect(ok.status.code).toBe('LIC_IN_PROCESS');
     });
 
     it('la org edita una verificada: vuelve a en trámite', async () => {

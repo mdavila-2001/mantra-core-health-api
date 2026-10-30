@@ -154,6 +154,7 @@ export class ClinicalUnitsAdminService {
             throw new ResourceNotFoundException(
               'Unidad clínica no encontrada',
               { parentUnitId: parentId },
+              PracticeErrorReason.PARENT_NOT_FOUND,
             );
           }
           const lifecycle = judgeParentAllows(stateOf(unit)!, stateOf(parent));

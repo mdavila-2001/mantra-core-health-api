@@ -491,7 +491,7 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       // (concept ids de `practice.concepts.ts`, que el catálogo acaba de
       // materializar) y forma `LOC_FORM_ROOM` en los espacios anteriores. Es
       // núcleo: sin reglas, toda alta de espacio que cuelgue de un padre
-      // responde 422 `SPACE_PARENT_RULE_VIOLATION`.
+      // responde 422 `SPACE_PARENT_RULE`.
       {
         name: 'reglas de infraestructura hospitalaria',
         kind: 'core',
