@@ -52,8 +52,106 @@ export function remainingQuantity(
   unitConceptId: string | null | undefined,
 ): number | null {
   if (!isComparableUnit(unitConceptId)) return null;
-  if (input.prescribed === null || !Number.isFinite(input.prescribed)) {
+  const prescribed = toExact(input.prescribed);
+  if (prescribed === null) return null;
+  const left = sumExact([
+    prescribed,
+    negate(toExact(input.dispensed) ?? ZERO),
+    negate(toExact(input.reserved) ?? ZERO),
+  ]);
+  return left.units > 0n ? fromExact(left) : 0;
+}
+
+/**
+ * La suma exacta de cantidades: `0.1 + 0.2` da `0.3`, no
+ * `0.30000000000000004`.
+ *
+ * @param values - Cantidades (las que no son finitas cuentan 0).
+ * @returns La suma.
+ */
+export function sumQuantities(values: readonly number[]): number {
+  return fromExact(sumExact(values.map((value) => toExact(value) ?? ZERO)));
+}
+
+/**
+ * ¿Lo pedido supera el límite? Comparación exacta: pedir `0.2` cuando quedan
+ * `0.3 − 0.1` no lo supera.
+ *
+ * @param requested - Las cantidades pedidas, que se suman.
+ * @param limit - Lo que queda.
+ * @returns Si la suma de lo pedido es mayor que el límite.
+ */
+export function exceedsQuantity(
+  requested: readonly number[],
+  limit: number,
+): boolean {
+  const total = sumExact(requested.map((value) => toExact(value) ?? ZERO));
+  return compareExact(total, toExact(limit) ?? ZERO) > 0;
+}
+
+/*
+ * Aritmética decimal exacta, sin librerías: un decimal es un entero (`bigint`)
+ * y una escala (cantidad de decimales). Las columnas de cantidad son `numeric`
+ * sin escala declarada (`clinical.medication_requests.quantity_decimal`,
+ * `pharmacy_inventory.medication_dispensation_lines.dispensed_quantity`,
+ * `inventory_reservation_lines.requested_quantity`/`fulfilled_quantity`) y el
+ * DTO del pedido no acota los decimales: no hay una escala fija que usar. Cada
+ * operación alinea a la mayor escala de sus operandos.
+ *
+ * Un `number` se lee por su representación decimal más corta (`String(0.1)`
+ * es `"0.1"`), que es el decimal que vino de la base o del cuerpo HTTP.
+ */
+interface Exact {
+  readonly units: bigint;
+  readonly scale: number;
+}
+
+const ZERO: Exact = { units: 0n, scale: 0 };
+
+const DECIMAL = /^([+-]?)(\d*)(?:\.(\d*))?(?:e([+-]?\d+))?$/i;
+
+function toExact(value: number | null | undefined): Exact | null {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
     return null;
   }
-  return Math.max(0, input.prescribed - input.dispensed - input.reserved);
+  const match = DECIMAL.exec(String(value));
+  if (!match) return null;
+  const [, sign, whole = '', fraction = '', exponent = '0'] = match;
+  const digits = BigInt(`${whole}${fraction}` || '0');
+  const power = Number(exponent) - fraction.length;
+  const units = power >= 0 ? digits * 10n ** BigInt(power) : digits;
+  return { units: sign === '-' ? -units : units, scale: Math.max(0, -power) };
+}
+
+function rescale(value: Exact, scale: number): bigint {
+  return value.units * 10n ** BigInt(scale - value.scale);
+}
+
+function negate(value: Exact): Exact {
+  return { units: -value.units, scale: value.scale };
+}
+
+function sumExact(values: readonly Exact[]): Exact {
+  const scale = Math.max(0, ...values.map((value) => value.scale));
+  return {
+    units: values.reduce((sum, value) => sum + rescale(value, scale), 0n),
+    scale,
+  };
+}
+
+function compareExact(a: Exact, b: Exact): number {
+  const scale = Math.max(a.scale, b.scale);
+  const diff = rescale(a, scale) - rescale(b, scale);
+  return diff > 0n ? 1 : diff < 0n ? -1 : 0;
+}
+
+function fromExact(value: Exact): number {
+  const negative = value.units < 0n;
+  const digits = (negative ? -value.units : value.units)
+    .toString()
+    .padStart(value.scale + 1, '0');
+  const cut = digits.length - value.scale;
+  const text =
+    value.scale === 0 ? digits : `${digits.slice(0, cut)}.${digits.slice(cut)}`;
+  return Number(`${negative ? '-' : ''}${text}`);
 }
