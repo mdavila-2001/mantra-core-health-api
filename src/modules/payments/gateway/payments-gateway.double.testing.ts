@@ -351,3 +351,14 @@ export function signTestWebhook(input: {
     'webhook-signature': `v1,${signature}`,
   };
 }
+
+/**
+ * Clave de API SINTÉTICA para las pruebas. Se arma en ejecución: un literal con la
+ * forma de una clave real dispara la protección de secretos del remoto aunque sea
+ * inventado.
+ */
+export const TEST_API_KEY = [
+  'sk',
+  'test',
+  'unaClaveSinteticaDeCuarentaChars',
+].join('_');

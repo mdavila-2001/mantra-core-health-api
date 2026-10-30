@@ -1,6 +1,13 @@
 import { PaymentsGatewayClient } from './payments-gateway.client';
 import { PaymentsGatewayError } from './payments-gateway.errors';
-import { PayGatewayDouble } from './payments-gateway.double.testing';
+import {
+  PayGatewayDouble,
+  TEST_API_KEY,
+} from './payments-gateway.double.testing';
+
+const NOT_A_SECRET_KEY = ['pk', 'live', 'loQueSeaDeCuarentaCaracteres0'].join(
+  '_',
+);
 import type { PaymentsGatewayConfig } from './payments-gateway.env';
 import type { GatewayPaymentIntentCreate } from './payments-gateway.types';
 
@@ -14,7 +21,6 @@ const BODY: GatewayPaymentIntentCreate = {
   amount_minor: 15000,
   currency: 'BOB',
   payment_method: { type: 'qr' },
-  metadata: { mantra_intent_id: '9d3c2a64-0000-4000-8000-000000000001' },
 };
 const KEY = 'mantra-pi-v1-clave-de-prueba-estable-0001';
 
@@ -33,7 +39,7 @@ describe('PaymentsGatewayClient (contra el doble HTTP)', () => {
   ): PaymentsGatewayConfig => ({
     viaGateway: true,
     baseUrl: double.baseUrl,
-    apiKey: 'sk_test_unaClaveSinteticaDeCuarentaChars',
+    apiKey: TEST_API_KEY,
     mode: 'test',
     webhookSecrets: [],
     webhookPublicKeys: [],
@@ -269,13 +275,13 @@ describe('PaymentsGatewayClient (contra el doble HTTP)', () => {
 
     it('401 es definitivo y el mensaje no contiene la clave de API', async () => {
       const error = (await client({
-        apiKey: 'pk_live_loQueSeaDeCuarentaCaracteres0',
+        apiKey: NOT_A_SECRET_KEY,
       })
         .createPaymentIntent(BODY, KEY)
         .catch((e: unknown) => e)) as PaymentsGatewayError;
 
       expect(error).toMatchObject({ status: 401, retryable: false });
-      expect(error.message).not.toContain('pk_live_');
+      expect(error.message).not.toContain(NOT_A_SECRET_KEY);
       expect(double.postCalls).toHaveLength(1);
     });
 

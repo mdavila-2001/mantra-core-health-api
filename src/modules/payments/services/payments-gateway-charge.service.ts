@@ -70,6 +70,8 @@ export interface GatewayDispatchResult {
   gatewayIntentRef: string;
   /** Estado del cobro en la pasarela. */
   gatewayStatus: GatewayPaymentIntentStatus;
+  /** Concepto de estado local de la intención tras asociar el cobro. */
+  localStatusConceptId: string;
   /** Qué tiene que hacer el pagador (QR, instrucciones, redirección). */
   nextAction?: GatewayNextAction;
   /** `true` si la pasarela devolvió la respuesta guardada de un intento anterior. */
@@ -87,8 +89,11 @@ export interface GatewayDispatchResult {
  * cobro local queda pendiente y se reintenta con la MISMA clave.
  *
  * Lo mínimo que viaja: importe en unidades menores, moneda, tipo de medio de
- * pago, vida del cobro y el id local de la intención como metadato. Ningún dato
- * del paciente, de la deuda ni de la factura.
+ * pago y vida del cobro. Ni el id local va como metadato: el escáner de números
+ * de tarjeta de la pasarela (`card_number_detected`, comprobado contra el stack
+ * sandbox) rechaza cuerpos con corridas de dígitos válidas por Luhn y un UUID
+ * puede producirlas. La correlación es por el `pi_…` que la pasarela devuelve.
+ * Ningún dato del paciente, de la deuda ni de la factura.
  */
 @Injectable()
 export class PaymentsGatewayChargeService {
@@ -135,18 +140,35 @@ export class PaymentsGatewayChargeService {
     intent: GatewayChargeable,
     methodType: GatewayPaymentMethodType | undefined,
   ): GatewayPaymentIntentCreate {
-    if (intent.currencyConceptId !== CONCEPTS.CURRENCY_BOB) {
-      throw new PreconditionFailedException(
-        'La pasarela sólo cobra en bolivianos (BOB)',
-        { intentId: intent.id },
-        PaymentsErrorReason.PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED,
-      );
-    }
     if (!methodType) {
       throw new PreconditionFailedException(
         'Con la pasarela activa hay que indicar paymentMethodType (qr, card, bank_transfer o wallet)',
         { intentId: intent.id },
         PaymentsErrorReason.PAYMENT_GATEWAY_METHOD_REQUIRED,
+      );
+    }
+    return {
+      ...this.assertRoutable(intent),
+      payment_method: { type: methodType },
+    };
+  }
+
+  /**
+   * Comprueba que la intención se pueda cobrar por la pasarela (moneda BOB,
+   * importe en centavos enteros, vida de 60 s a 24 h) sin pedir todavía el medio
+   * de pago. Se usa al crear la intención para no dejar filas que después no se
+   * podrían cobrar.
+   *
+   * @returns El cuerpo del cobro, sin el medio de pago.
+   */
+  assertRoutable(
+    intent: GatewayChargeable,
+  ): Omit<GatewayPaymentIntentCreate, 'payment_method'> {
+    if (intent.currencyConceptId !== CONCEPTS.CURRENCY_BOB) {
+      throw new PreconditionFailedException(
+        'La pasarela sólo cobra en bolivianos (BOB)',
+        { intentId: intent.id },
+        PaymentsErrorReason.PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED,
       );
     }
     let amountMinor: number;
@@ -163,11 +185,9 @@ export class PaymentsGatewayChargeService {
       );
     }
 
-    const request: GatewayPaymentIntentCreate = {
+    const request: Omit<GatewayPaymentIntentCreate, 'payment_method'> = {
       amount_minor: amountMinor,
       currency: 'BOB',
-      payment_method: { type: methodType },
-      metadata: { mantra_intent_id: intent.id },
     };
     if (intent.expiresAt) {
       // Relativo al alta persistida y no a «ahora»: así el reintento manda el
@@ -261,11 +281,16 @@ export class PaymentsGatewayChargeService {
       );
     }
 
-    await this.associate(intent.id, created.intent.id, created.intent.status);
+    const localStatusConceptId = await this.associate(
+      intent.id,
+      created.intent.id,
+      created.intent.status,
+    );
 
     return {
       gatewayIntentRef: created.intent.id,
       gatewayStatus: created.intent.status,
+      localStatusConceptId,
       nextAction: created.intent.next_action,
       replayed: created.replayed,
     };
@@ -282,10 +307,10 @@ export class PaymentsGatewayChargeService {
     intentId: string,
     gatewayIntentRef: string,
     gatewayStatus: GatewayPaymentIntentStatus,
-  ): Promise<void> {
-    await this.em.transactional(async (tx) => {
+  ): Promise<string> {
+    return this.em.transactional(async (tx) => {
       const intent = await this.intentsRepo.findByIdForUpdate(tx, intentId);
-      if (!intent) return;
+      if (!intent) return LOCAL_INTENT_STATUS[gatewayStatus];
       if (
         intent.gatewayIntentRef &&
         intent.gatewayIntentRef !== gatewayIntentRef
@@ -304,7 +329,37 @@ export class PaymentsGatewayChargeService {
         intent.statusConceptId = LOCAL_INTENT_STATUS[gatewayStatus];
       }
       touch(intent, undefined);
+      return intent.statusConceptId;
     });
+  }
+
+  /**
+   * Consulta autoritativa de un cobro ya asociado (`GET /payment_intents/{id}`):
+   * es lo que se hace ante un reintento del cobro en vez de crear otro.
+   *
+   * @throws PaymentsGatewayResultAmbiguousException / PaymentsGatewayUnavailableException
+   *   con la misma traducción que `dispatch`.
+   */
+  async consult(
+    intentId: string,
+    gatewayIntentRef: string,
+    localStatusConceptId: string,
+  ): Promise<GatewayDispatchResult> {
+    if (!this.client) throw new PaymentsGatewayUnavailableException(intentId);
+    try {
+      const found = await this.client.getPaymentIntent(gatewayIntentRef, {
+        requestId: `mantra-${intentId}`,
+      });
+      return {
+        gatewayIntentRef,
+        gatewayStatus: found.status,
+        localStatusConceptId,
+        nextAction: found.next_action,
+        replayed: true,
+      };
+    } catch (error) {
+      throw this.toDomainError(error, intentId);
+    }
   }
 
   /** Traduce el error del cliente al contrato HTTP de la API, sin filtrar el de la pasarela. */
