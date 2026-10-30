@@ -50,7 +50,7 @@ _Fuente: `src/modules/clinical_ext/README.md:3`_
 |  |  | PATCH /referrals/{id}/counter-referral | CLINICIAN · PRACTITIONER | MEDIO | 20 |
 |  |  | PATCH /referrals/{id}/respond | CLINICIAN · PRACTITIONER | MEDIO | 3 |
 |  |  | GET /referrals/me | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 6 |
-|  |  | GET /referrals/target-services | CLINICIAN · PRACTITIONER | BAJO | 4 |
+|  |  | GET /referrals/target-services | CLINICIAN · PRACTITIONER | BAJO | 6 |
 |  |  | GET /referrals/targets | CLINICIAN · PRACTITIONER | BAJO | 5 |
 | `ctrl:VirtualEncountersController` | Operaciones de VirtualEncountersController que el README no asigna a un caso de uso | POST /virtual-encounters | CLINICIAN · PRACTITIONER | MEDIO | 4 |
 |  |  | PATCH /virtual-encounters/{id}/end | CLINICIAN · PRACTITIONER | MEDIO | 4 |
@@ -230,10 +230,10 @@ flowchart LR
   t25[("profiles.patient_profiles")]:::tabla
   t26[("profiles.person_account_links")]:::tabla
   t28[("practice.practices")]:::tabla
-  t29[("scheduling.practitioner_service_offerings")]:::tabla
-  t30[("terminology.catalog_concepts")]:::tabla
-  t32[("practice.practitioner_role_assignments")]:::tabla
-  t33[("profiles.health_practitioner_profiles")]:::tabla
+  t29[("profiles.health_practitioner_profiles")]:::tabla
+  t30[("scheduling.practitioner_service_offerings")]:::tabla
+  t31[("terminology.catalog_concepts")]:::tabla
+  t33[("practice.practitioner_role_assignments")]:::tabla
   t34[("profiles.persons")]:::tabla
   t36[("clinical_ext.virtual_encounters")]:::tabla
   t37[("clinical.encounter_participants")]:::tabla
@@ -252,7 +252,7 @@ flowchart LR
     o18["PATCH /referrals/{id}/respond"]:::op
     o21["GET /referrals/me"]:::op
     o27["GET /referrals/target-services"]:::op
-    o31["GET /referrals/targets"]:::op
+    o32["GET /referrals/targets"]:::op
   end
   subgraph s1["ctrl:VirtualEncountersController · Operaciones de VirtualEncountersController q…"]
     o35["POST /virtual-encounters"]:::op
@@ -312,15 +312,17 @@ flowchart LR
   o21 -->|"LEE"| t26
   a2 --> o27
   o27 -->|"LEE"| t23
+  o27 -->|"LEE"| t24
   o27 -->|"LEE"| t28
   o27 -->|"LEE"| t29
   o27 -->|"LEE"| t30
-  a2 --> o31
-  o31 -->|"LEE"| t24
-  o31 -->|"LEE"| t28
-  o31 -->|"LEE"| t32
-  o31 -->|"LEE"| t33
-  o31 -->|"LEE"| t34
+  o27 -->|"LEE"| t31
+  a2 --> o32
+  o32 -->|"LEE"| t24
+  o32 -->|"LEE"| t28
+  o32 -->|"LEE"| t33
+  o32 -->|"LEE"| t29
+  o32 -->|"LEE"| t34
   a2 --> o35
   o35 -->|"CREA"| t36
   o35 -->|"LEE"| t36
@@ -2130,6 +2132,7 @@ Servicios activos de un destino de derivación
 | 200 | — | Éxito |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Destino no encontrado |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Indique targetProfileId o targetTenantId. |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -2144,37 +2147,53 @@ flowchart TD
   n3 --> n4
   n5(["422 PRECONDITION_FAILED Indique targetProfileId o targetTenantId."]):::error
   n4 -->|"sí"| n5
-  n6{"targetProfileId"}:::decision
+  n6["Llama a ReferralTargetsRepository.isListablePractitioner"]:::llamada
   n4 -->|"no"| n6
-  n7["Llama a SchedulingOfferingsRepository.listOfferings"]:::llamada
-  n6 -->|"sí"| n7
-  n8[("LEE scheduling.practitioner_service_offerings")]:::efecto
+  n7[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n6 --> n7
+  n8["Llama a ReferralTargetsRepository.isActiveTenant"]:::llamada
   n7 --> n8
-  n9["Llama a SchedulingOfferingsRepository.findCatalogItems"]:::llamada
+  n9[("LEE directory.tenants")]:::efecto
   n8 --> n9
-  n10[("LEE billing.service_catalog")]:::efecto
+  n10["Llama a ReferralTargetsRepository.isListableOrganization"]:::llamada
   n9 --> n10
-  n11["Llama a PracticesRepository.findByTenant"]:::llamada
-  n6 -->|"no"| n11
-  n12[("LEE practice.practices")]:::efecto
+  n11[("LEE directory.tenants")]:::efecto
+  n10 --> n11
+  n12{"!profileListable || !tenantListable"}:::decision
   n11 --> n12
-  n13["Llama a ServiceCatalogRepository.searchPage"]:::llamada
-  n12 --> n13
-  n14[("LEE billing.service_catalog")]:::efecto
-  n13 --> n14
-  n15["Llama a ReferralsService.practicesById"]:::llamada
-  n10 --> n15
-  n14 --> n15
-  n16["Llama a PracticesRepository.findById"]:::llamada
+  n13(["404 NOT_FOUND Destino no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14{"targetProfileId"}:::decision
+  n12 -->|"no"| n14
+  n15["Llama a SchedulingOfferingsRepository.listOfferings"]:::llamada
+  n14 -->|"sí"| n15
+  n16[("LEE scheduling.practitioner_service_offerings")]:::efecto
   n15 --> n16
-  n17[("LEE practice.practices")]:::efecto
+  n17["Llama a SchedulingOfferingsRepository.findCatalogItems"]:::llamada
   n16 --> n17
-  n18["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n18[("LEE billing.service_catalog")]:::efecto
   n17 --> n18
-  n19[("LEE terminology.catalog_concepts")]:::efecto
-  n18 --> n19
-  n20(("200 Responde con éxito")):::ok
+  n19["Llama a PracticesRepository.findByTenant"]:::llamada
+  n14 -->|"no"| n19
+  n20[("LEE practice.practices")]:::efecto
   n19 --> n20
+  n21["Llama a ServiceCatalogRepository.searchPage"]:::llamada
+  n20 --> n21
+  n22[("LEE billing.service_catalog")]:::efecto
+  n21 --> n22
+  n23["Llama a ReferralsService.practicesById"]:::llamada
+  n18 --> n23
+  n22 --> n23
+  n24["Llama a PracticesRepository.findById"]:::llamada
+  n23 --> n24
+  n25[("LEE practice.practices")]:::efecto
+  n24 --> n25
+  n26["Llama a CatalogConceptsRepository.findByIds"]:::llamada
+  n25 --> n26
+  n27[("LEE terminology.catalog_concepts")]:::efecto
+  n26 --> n27
+  n28(("200 Responde con éxito")):::ok
+  n27 --> n28
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

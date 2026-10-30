@@ -3,13 +3,13 @@
 # Flujos del módulo `profiles`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 67 (61 con decisiones propias, 6 sin ellas)
+- **Operaciones:** 85 (78 con decisiones propias, 7 sin ellas)
 - Inventario de endpoints del módulo: [profiles](../endpoints/profiles.md)
 
 ## Proceso: Profiles Module (05)
 
-- **Código:** `profiles` · **Agrupación:** MIXTO · **Operaciones:** 67
-- **Actores:** CLINICIAN · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN · SUPERADMIN
+- **Código:** `profiles` · **Agrupación:** MIXTO · **Operaciones:** 85
+- **Actores:** ADMISSIONS_APPROVER · ADMISSIONS_REVIEWER · CLINICIAN · Cualquier sesión válida · PRACTITIONER · SECURITY_ADMIN · SUPERADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/profiles/README.md`
 
@@ -29,8 +29,26 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | POST /profiles/patients/me/dependent-requests/{id}/reject | Cualquier sesión válida | ALTO | 14 |
 |  |  | GET /profiles/patients/me/dependent-requests/incoming | Cualquier sesión válida | BAJO | 4 |
 |  |  | POST /profiles/patients/search | SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER | BAJO | 6 |
-| `P5 §3` | Clear the practitioner profile photo (the file is not deleted) | DELETE /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | ALTO | 16 |
-|  |  | PUT /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | ALTO | 18 |
+| `P5 §3` | Clear the practitioner profile photo (the file is not deleted) | DELETE /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | ALTO | 17 |
+|  |  | PUT /profiles/practitioners/{profileId}/photo | Cualquier sesión válida | ALTO | 19 |
+| `ctrl:AdmissionsController` | Operaciones de AdmissionsController que el README no asigna a un caso de uso | DESCONOCIDO /admissions | Cualquier sesión válida | BAJO | 0 |
+|  |  | GET /admissions | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 17 |
+|  |  | GET /admissions/{id} | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 18 |
+|  |  | POST /admissions/{id}/claim | ADMISSIONS_REVIEWER · SECURITY_ADMIN | ALTO | 40 |
+|  |  | POST /admissions/{id}/decision | ADMISSIONS_APPROVER · SECURITY_ADMIN | ALTO | 50 |
+|  |  | GET /admissions/{id}/documents/{fileId}/content | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 12 |
+|  |  | POST /admissions/{id}/documents/{fileId}/download-url | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 12 |
+|  |  | POST /admissions/{id}/items/{itemId}/review | ADMISSIONS_REVIEWER · SECURITY_ADMIN | MEDIO | 20 |
+|  |  | POST /admissions/{id}/reassign | ADMISSIONS_APPROVER · SECURITY_ADMIN | ALTO | 27 |
+|  |  | POST /admissions/{id}/reinstate | ADMISSIONS_APPROVER · SECURITY_ADMIN | MEDIO | 44 |
+|  |  | POST /admissions/{id}/release | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | MEDIO | 20 |
+|  |  | POST /admissions/{id}/request-info | ADMISSIONS_REVIEWER · SECURITY_ADMIN | ALTO | 40 |
+|  |  | POST /admissions/{id}/suspend | ADMISSIONS_APPROVER · SECURITY_ADMIN | MEDIO | 40 |
+|  |  | POST /admissions/expire-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 25 |
+|  |  | POST /admissions/search | ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN | BAJO | 17 |
+| `ctrl:OwnAdmissionController` | Operaciones de OwnAdmissionController que el README no asigna a un caso de uso | GET /profiles/practitioners/me/admission | Cualquier sesión válida | BAJO | 16 |
+|  |  | POST /profiles/practitioners/me/admission/resubmit | Cualquier sesión válida | ALTO | 38 |
+|  |  | POST /profiles/practitioners/me/admission/withdraw | Cualquier sesión válida | ALTO | 32 |
 | `ctrl:PatientAddressBookController` | Operaciones de PatientAddressBookController que el README no asigna a un caso de uso | GET /profiles/patients/me/addresses | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /profiles/patients/me/addresses | Cualquier sesión válida | BAJO | 3 |
 |  |  | DELETE /profiles/patients/me/addresses/{id} | Cualquier sesión válida | ALTO | 4 |
@@ -61,15 +79,15 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | POST /profiles/persons/{personId}/account-links | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /profiles/persons/{personId}/decease | SECURITY_ADMIN | MEDIO | 4 |
 | `ctrl:ProfilesPractitionersController` | Operaciones de ProfilesPractitionersController que el README no asigna a un caso de uso | GET /profiles/credentials | SECURITY_ADMIN | BAJO | 1 |
-|  |  | POST /profiles/credentials/{credentialId}/verify | SECURITY_ADMIN | MEDIO | 8 |
-|  |  | GET /profiles/practitioners | Cualquier sesión válida | BAJO | 4 |
-|  |  | POST /profiles/practitioners | SECURITY_ADMIN | MEDIO | 12 |
-|  |  | PATCH /profiles/practitioners/{profileId} | Cualquier sesión válida | ALTO | 26 |
+|  |  | POST /profiles/credentials/{credentialId}/verify | SECURITY_ADMIN | ALTO | 24 |
+|  |  | GET /profiles/practitioners | Cualquier sesión válida | BAJO | 12 |
+|  |  | POST /profiles/practitioners | SECURITY_ADMIN | ALTO | 35 |
+|  |  | PATCH /profiles/practitioners/{profileId} | Cualquier sesión válida | ALTO | 27 |
 |  |  | POST /profiles/practitioners/{profileId}/affiliations | SECURITY_ADMIN | MEDIO | 25 |
 |  |  | POST /profiles/practitioners/{profileId}/jurisdiction-authorizations | Cualquier sesión válida | ALTO | 5 |
 |  |  | POST /profiles/practitioners/{profileId}/specialties | Cualquier sesión válida | ALTO | 9 |
-|  |  | GET /profiles/practitioners/{profileId}/summary | Cualquier sesión válida | BAJO | 15 |
-|  |  | PATCH /profiles/practitioners/me | Cualquier sesión válida | ALTO | 26 |
+|  |  | GET /profiles/practitioners/{profileId}/summary | Cualquier sesión válida | BAJO | 16 |
+|  |  | PATCH /profiles/practitioners/me | Cualquier sesión válida | ALTO | 27 |
 |  |  | GET /profiles/practitioners/me/affiliations | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /profiles/practitioners/me/affiliations | Cualquier sesión válida | ALTO | 25 |
 |  |  | DELETE /profiles/practitioners/me/affiliations/{affiliationId} | Cualquier sesión válida | ALTO | 4 |
@@ -84,19 +102,23 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | DELETE /profiles/practitioners/me/specialties/{specialtyId} | Cualquier sesión válida | ALTO | 4 |
 |  |  | PATCH /profiles/practitioners/me/specialties/{specialtyId} | Cualquier sesión válida | ALTO | 7 |
 |  |  | PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary | Cualquier sesión válida | ALTO | 4 |
-|  |  | GET /profiles/practitioners/me/summary | Cualquier sesión válida | BAJO | 15 |
+|  |  | GET /profiles/practitioners/me/summary | Cualquier sesión válida | BAJO | 16 |
 |  |  | GET /profiles/practitioners/specialty-counts | Cualquier sesión válida | BAJO | 2 |
 | `ctrl:TenantPractitionerRequestsController` | Operaciones de TenantPractitionerRequestsController que el README no asigna a un caso de uso | GET /tenants/{tenantId}/practitioner-requests | Cualquier sesión válida | BAJO | 5 |
 |  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | Cualquier sesión válida | ALTO | 19 |
 |  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | Cualquier sesión válida | ALTO | 19 |
 |  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | Cualquier sesión válida | ALTO | 19 |
 
-### Diagrama 1 de 4 — etapas `H4 §C`, `P5 §3`, `ctrl:PatientAddressBookController`…
+### Diagrama 1 de 5 — etapas `H4 §C`, `P5 §3`, `ctrl:AdmissionsController`…
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a20(["SECURITY_ADMIN · SUPERADMIN · CLINICIAN · PRACTITIONER"]):::actor
+  a36(["ADMISSIONS_REVIEWER · ADMISSIONS_APPROVER · SECURITY_ADMIN"]):::actor
+  a45(["ADMISSIONS_REVIEWER · SECURITY_ADMIN"]):::actor
+  a48(["ADMISSIONS_APPROVER · SECURITY_ADMIN"]):::actor
+  a71(["SYSTEM · SECURITY_ADMIN"]):::actor
   t3[("common.identifiers")]:::tabla
   t4[("profiles.patient_portal_proxies")]:::tabla
   t5[("profiles.patient_profiles")]:::tabla
@@ -115,10 +137,16 @@ flowchart LR
   t28[("clinical.medication_requests")]:::tabla
   t29[("common.addresses")]:::tabla
   t30[("common.contact_points")]:::tabla
-  t40[("profiles.health_practitioner_profiles")]:::tabla
-  t42[("common.file_versions")]:::tabla
-  t43[("common.files")]:::tabla
-  t45[("profiles.patient_primary_practitioners")]:::tabla
+  t37[("common.file_versions")]:::tabla
+  t38[("common.files")]:::tabla
+  t39[("iam.users")]:::tabla
+  t40[("practice.practice_sites")]:::tabla
+  t49[("audit.verified_badges_history")]:::tabla
+  t50[("authz.roles")]:::tabla
+  t51[("authz.user_role_assignments")]:::tabla
+  t54[("practice.practitioner_role_assignments")]:::tabla
+  t72[("community.public_profiles")]:::tabla
+  t73[("community.verified_badges")]:::tabla
   t12[("+10 tablas más")]
   t15[("+9 tablas más")]
   t17[("+8 tablas más")]
@@ -130,28 +158,50 @@ flowchart LR
     o18["GET /profiles/patients/me/dependent-requests/incoming"]:::op
     o19["POST /profiles/patients/search"]:::op
   end
-  t31[("+10 tablas más")]
-  t33[("+12 tablas más")]
+  t31[("+11 tablas más")]
+  t33[("+13 tablas más")]
   subgraph s1["P5 §3 · Clear the practitioner profile photo (the file is not deleted)"]
     o24["DELETE /profiles/practitioners/{profileId}/photo"]:::op
     o32["PUT /profiles/practitioners/{profileId}/photo"]:::op
   end
-  subgraph s2["ctrl:PatientAddressBookController · Operaciones de PatientAddressBookController…"]
-    o34["GET /profiles/patients/me/addresses"]:::op
-    o35["POST /profiles/patients/me/addresses"]:::op
-    o36["DELETE /profiles/patients/me/addresses/{id}"]:::op
-    o37["PATCH /profiles/patients/me/addresses/{id}"]:::op
-    o38["PUT /profiles/patients/me/addresses/{id}/preferred"]:::op
+  t41[("+11 tablas más")]
+  t43[("+12 tablas más")]
+  t46[("+34 tablas más")]
+  t52[("+44 tablas más")]
+  t55[("+6 tablas más")]
+  t57[("+6 tablas más")]
+  t59[("+14 tablas más")]
+  t61[("+21 tablas más")]
+  t63[("+38 tablas más")]
+  t65[("+14 tablas más")]
+  t67[("+34 tablas más")]
+  t69[("+34 tablas más")]
+  t74[("+19 tablas más")]
+  t76[("+11 tablas más")]
+  subgraph s2["ctrl:AdmissionsController · Operaciones de AdmissionsController que el README n…"]
+    o34["DESCONOCIDO /admissions"]:::op
+    o35["GET /admissions"]:::op
+    o42["GET /admissions/{id}"]:::op
+    o44["POST /admissions/{id}/claim"]:::op
+    o47["POST /admissions/{id}/decision"]:::op
+    o53["GET /admissions/{id}/documents/{fileId}/content"]:::op
+    o56["POST /admissions/{id}/documents/{fileId}/download-url"]:::op
+    o58["POST /admissions/{id}/items/{itemId}/review"]:::op
+    o60["POST /admissions/{id}/reassign"]:::op
+    o62["POST /admissions/{id}/reinstate"]:::op
+    o64["POST /admissions/{id}/release"]:::op
+    o66["POST /admissions/{id}/request-info"]:::op
+    o68["POST /admissions/{id}/suspend"]:::op
+    o70["POST /admissions/expire-sweep"]:::op
+    o75["POST /admissions/search"]:::op
   end
-  subgraph s3["ctrl:PractitionerSignatureAssetsController · Operaciones de PractitionerSignatu…"]
-    o39["GET /profiles/practitioners/me/signature-assets"]:::op
-    o41["PUT /profiles/practitioners/me/signature-assets"]:::op
-  end
-  subgraph s4["ctrl:PrimaryPractitionerController · Operaciones de PrimaryPractitionerControll…"]
-    o44["DELETE /profiles/patients/me/primary-practitioner"]:::op
-    o46["GET /profiles/patients/me/primary-practitioner"]:::op
-    o47["PUT /profiles/patients/me/primary-practitioner"]:::op
-    o48["GET /profiles/practitioners/me/primary-patients"]:::op
+  t78[("+10 tablas más")]
+  t80[("+32 tablas más")]
+  t82[("+26 tablas más")]
+  subgraph s3["ctrl:OwnAdmissionController · Operaciones de OwnAdmissionController que el READ…"]
+    o77["GET /profiles/practitioners/me/admission"]:::op
+    o79["POST /profiles/practitioners/me/admission/resubmit"]:::op
+    o81["POST /profiles/practitioners/me/admission/withdraw"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -212,67 +262,240 @@ flowchart LR
   o32 -->|"LEE"| t30
   o32 -.-> t33
   a2 --> o34
-  o34 -->|"LEE"| t29
-  o34 -->|"LEE"| t5
-  o34 -->|"LEE"| t6
-  a2 --> o35
+  a36 --> o35
   o35 -->|"LEE"| t29
-  o35 -->|"LEE"| t5
-  o35 -->|"LEE"| t6
-  a2 --> o36
-  o36 -->|"ACTUALIZA"| t29
-  o36 -->|"LEE"| t29
-  o36 -->|"LEE"| t5
-  o36 -->|"LEE"| t6
-  a2 --> o37
-  o37 -->|"ACTUALIZA"| t29
-  o37 -->|"LEE"| t29
-  o37 -->|"LEE"| t5
-  o37 -->|"LEE"| t6
-  a2 --> o38
-  o38 -->|"LEE"| t29
-  o38 -->|"LEE"| t5
-  o38 -->|"LEE"| t6
-  a2 --> o39
-  o39 -->|"LEE"| t40
-  o39 -->|"LEE"| t6
-  a2 --> o41
-  o41 -->|"LEE"| t42
-  o41 -->|"LEE"| t43
-  o41 -->|"ACTUALIZA"| t40
-  o41 -->|"LEE"| t40
-  o41 -->|"LEE"| t6
-  a2 --> o44
-  o44 -->|"LEE"| t40
-  o44 -->|"ACTUALIZA"| t45
-  o44 -->|"LEE"| t45
-  o44 -->|"LEE"| t5
-  o44 -->|"LEE"| t6
-  a2 --> o46
-  o46 -->|"LEE"| t40
-  o46 -->|"LEE"| t45
-  o46 -->|"LEE"| t5
-  o46 -->|"LEE"| t6
-  a2 --> o47
-  o47 -->|"LEE"| t40
-  o47 -->|"ACTUALIZA"| t45
-  o47 -->|"CREA"| t45
-  o47 -->|"LEE"| t45
-  o47 -->|"LEE"| t5
-  o47 -->|"LEE"| t6
-  a2 --> o48
-  o48 -->|"LEE"| t40
-  o48 -->|"LEE"| t45
-  o48 -->|"LEE"| t5
-  o48 -->|"LEE"| t6
-  o48 -->|"LEE"| t7
+  o35 -->|"LEE"| t37
+  o35 -->|"LEE"| t38
+  o35 -->|"LEE"| t3
+  o35 -->|"LEE"| t39
+  o35 -->|"LEE"| t40
+  o35 -.-> t41
+  a36 --> o42
+  o42 -->|"LEE"| t29
+  o42 -->|"LEE"| t30
+  o42 -->|"LEE"| t37
+  o42 -->|"LEE"| t38
+  o42 -->|"LEE"| t3
+  o42 -->|"LEE"| t39
+  o42 -.-> t43
+  a45 --> o44
+  o44 -->|"LEE"| t29
+  o44 -->|"LEE"| t30
+  o44 -->|"LEE"| t37
+  o44 -->|"LEE"| t38
+  o44 -->|"LEE"| t3
+  o44 -->|"ACTUALIZA"| t9
+  o44 -.-> t46
+  a48 --> o47
+  o47 -->|"CREA"| t49
+  o47 -->|"LEE"| t50
+  o47 -->|"CREA"| t51
+  o47 -->|"LEE"| t51
+  o47 -->|"LEE"| t29
+  o47 -->|"LEE"| t30
+  o47 -.-> t52
+  a36 --> o53
+  o53 -->|"LEE"| t29
+  o53 -->|"LEE"| t37
+  o53 -->|"LEE"| t38
+  o53 -->|"LEE"| t3
+  o53 -->|"LEE"| t40
+  o53 -->|"LEE"| t54
+  o53 -.-> t55
+  a36 --> o56
+  o56 -->|"LEE"| t29
+  o56 -->|"LEE"| t37
+  o56 -->|"LEE"| t38
+  o56 -->|"LEE"| t3
+  o56 -->|"LEE"| t40
+  o56 -->|"LEE"| t54
+  o56 -.-> t57
+  a45 --> o58
+  o58 -->|"LEE"| t29
+  o58 -->|"LEE"| t30
+  o58 -->|"LEE"| t37
+  o58 -->|"LEE"| t38
+  o58 -->|"LEE"| t3
+  o58 -->|"LEE"| t39
+  o58 -.-> t59
+  a48 --> o60
+  o60 -->|"LEE"| t29
+  o60 -->|"LEE"| t30
+  o60 -->|"LEE"| t37
+  o60 -->|"LEE"| t38
+  o60 -->|"LEE"| t3
+  o60 -->|"LEE"| t39
+  o60 -.-> t61
+  a48 --> o62
+  o62 -->|"CREA"| t49
+  o62 -->|"LEE"| t50
+  o62 -->|"CREA"| t51
+  o62 -->|"LEE"| t51
+  o62 -->|"LEE"| t29
+  o62 -->|"LEE"| t30
+  o62 -.-> t63
+  a36 --> o64
+  o64 -->|"LEE"| t29
+  o64 -->|"LEE"| t30
+  o64 -->|"LEE"| t37
+  o64 -->|"LEE"| t38
+  o64 -->|"LEE"| t3
+  o64 -->|"LEE"| t39
+  o64 -.-> t65
+  a45 --> o66
+  o66 -->|"LEE"| t29
+  o66 -->|"LEE"| t30
+  o66 -->|"LEE"| t37
+  o66 -->|"LEE"| t38
+  o66 -->|"LEE"| t3
+  o66 -->|"ACTUALIZA"| t9
+  o66 -.-> t67
+  a48 --> o68
+  o68 -->|"CREA"| t49
+  o68 -->|"LEE"| t29
+  o68 -->|"LEE"| t30
+  o68 -->|"LEE"| t37
+  o68 -->|"LEE"| t38
+  o68 -->|"LEE"| t3
+  o68 -.-> t69
+  a71 --> o70
+  o70 -->|"CREA"| t49
+  o70 -->|"LEE"| t30
+  o70 -->|"ACTUALIZA"| t72
+  o70 -->|"LEE"| t72
+  o70 -->|"ACTUALIZA"| t73
+  o70 -->|"LEE"| t73
+  o70 -.-> t74
+  a36 --> o75
+  o75 -->|"LEE"| t29
+  o75 -->|"LEE"| t37
+  o75 -->|"LEE"| t38
+  o75 -->|"LEE"| t3
+  o75 -->|"LEE"| t39
+  o75 -->|"LEE"| t40
+  o75 -.-> t76
+  a2 --> o77
+  o77 -->|"LEE"| t29
+  o77 -->|"LEE"| t37
+  o77 -->|"LEE"| t38
+  o77 -->|"LEE"| t3
+  o77 -->|"LEE"| t40
+  o77 -->|"LEE"| t54
+  o77 -.-> t78
+  a2 --> o79
+  o79 -->|"LEE"| t29
+  o79 -->|"LEE"| t30
+  o79 -->|"LEE"| t37
+  o79 -->|"LEE"| t38
+  o79 -->|"LEE"| t3
+  o79 -->|"ACTUALIZA"| t9
+  o79 -.-> t80
+  a2 --> o81
+  o81 -->|"LEE"| t29
+  o81 -->|"LEE"| t30
+  o81 -->|"LEE"| t37
+  o81 -->|"LEE"| t38
+  o81 -->|"LEE"| t3
+  o81 -->|"ACTUALIZA"| t9
+  o81 -.-> t82
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 4 — etapas `ctrl:ProfilesPatientsController`
+### Diagrama 2 de 5 — etapas `ctrl:PatientAddressBookController`, `ctrl:PractitionerSignatureAssetsController`, `ctrl:PrimaryPractitionerController`
+
+```mermaid
+flowchart LR
+  a2(["Cualquier sesión válida"]):::actor
+  t3[("common.addresses")]:::tabla
+  t4[("profiles.patient_profiles")]:::tabla
+  t5[("profiles.person_account_links")]:::tabla
+  t11[("profiles.health_practitioner_profiles")]:::tabla
+  t13[("common.file_versions")]:::tabla
+  t14[("common.files")]:::tabla
+  t16[("profiles.patient_primary_practitioners")]:::tabla
+  t20[("profiles.persons")]:::tabla
+  subgraph s0["ctrl:PatientAddressBookController · Operaciones de PatientAddressBookController…"]
+    o1["GET /profiles/patients/me/addresses"]:::op
+    o6["POST /profiles/patients/me/addresses"]:::op
+    o7["DELETE /profiles/patients/me/addresses/{id}"]:::op
+    o8["PATCH /profiles/patients/me/addresses/{id}"]:::op
+    o9["PUT /profiles/patients/me/addresses/{id}/preferred"]:::op
+  end
+  subgraph s1["ctrl:PractitionerSignatureAssetsController · Operaciones de PractitionerSignatu…"]
+    o10["GET /profiles/practitioners/me/signature-assets"]:::op
+    o12["PUT /profiles/practitioners/me/signature-assets"]:::op
+  end
+  subgraph s2["ctrl:PrimaryPractitionerController · Operaciones de PrimaryPractitionerControll…"]
+    o15["DELETE /profiles/patients/me/primary-practitioner"]:::op
+    o17["GET /profiles/patients/me/primary-practitioner"]:::op
+    o18["PUT /profiles/patients/me/primary-practitioner"]:::op
+    o19["GET /profiles/practitioners/me/primary-patients"]:::op
+  end
+  a2 --> o1
+  o1 -->|"LEE"| t3
+  o1 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  a2 --> o6
+  o6 -->|"LEE"| t3
+  o6 -->|"LEE"| t4
+  o6 -->|"LEE"| t5
+  a2 --> o7
+  o7 -->|"ACTUALIZA"| t3
+  o7 -->|"LEE"| t3
+  o7 -->|"LEE"| t4
+  o7 -->|"LEE"| t5
+  a2 --> o8
+  o8 -->|"ACTUALIZA"| t3
+  o8 -->|"LEE"| t3
+  o8 -->|"LEE"| t4
+  o8 -->|"LEE"| t5
+  a2 --> o9
+  o9 -->|"LEE"| t3
+  o9 -->|"LEE"| t4
+  o9 -->|"LEE"| t5
+  a2 --> o10
+  o10 -->|"LEE"| t11
+  o10 -->|"LEE"| t5
+  a2 --> o12
+  o12 -->|"LEE"| t13
+  o12 -->|"LEE"| t14
+  o12 -->|"ACTUALIZA"| t11
+  o12 -->|"LEE"| t11
+  o12 -->|"LEE"| t5
+  a2 --> o15
+  o15 -->|"LEE"| t11
+  o15 -->|"ACTUALIZA"| t16
+  o15 -->|"LEE"| t16
+  o15 -->|"LEE"| t4
+  o15 -->|"LEE"| t5
+  a2 --> o17
+  o17 -->|"LEE"| t11
+  o17 -->|"LEE"| t16
+  o17 -->|"LEE"| t4
+  o17 -->|"LEE"| t5
+  a2 --> o18
+  o18 -->|"LEE"| t11
+  o18 -->|"ACTUALIZA"| t16
+  o18 -->|"CREA"| t16
+  o18 -->|"LEE"| t16
+  o18 -->|"LEE"| t4
+  o18 -->|"LEE"| t5
+  a2 --> o19
+  o19 -->|"LEE"| t11
+  o19 -->|"LEE"| t16
+  o19 -->|"LEE"| t4
+  o19 -->|"LEE"| t5
+  o19 -->|"LEE"| t20
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 3 de 5 — etapas `ctrl:ProfilesPatientsController`
 
 ```mermaid
 flowchart LR
@@ -441,255 +664,259 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 3 de 4 — etapas `ctrl:ProfilesPractitionersController`
+### Diagrama 4 de 5 — etapas `ctrl:ProfilesPractitionersController`
 
 ```mermaid
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
-  a11(["Cualquier sesión válida"]):::actor
+  a13(["Cualquier sesión válida"]):::actor
   t3[("profiles.professional_credentials")]:::tabla
-  t5[("authz.roles")]:::tabla
-  t6[("authz.user_role_assignments")]:::tabla
-  t7[("profiles.health_practitioner_profiles")]:::tabla
-  t8[("profiles.person_account_links")]:::tabla
-  t12[("profiles.persons")]:::tabla
-  t13[("profiles.practitioner_affiliations")]:::tabla
-  t14[("profiles.practitioner_specialties")]:::tabla
-  t16[("profiles.jurisdiction_authorizations")]:::tabla
-  t17[("profiles.person_profiles")]:::tabla
-  t20[("chart.clinical_note_headers")]:::tabla
-  t21[("chart.document_records")]:::tabla
-  t22[("clinical.encounters")]:::tabla
-  t23[("clinical.medication_requests")]:::tabla
-  t24[("common.addresses")]:::tabla
-  t25[("common.contact_points")]:::tabla
-  t28[("directory.tenant_memberships")]:::tabla
-  t29[("iam.devices")]:::tabla
-  t30[("messaging.in_app_notifications")]:::tabla
-  t31[("messaging.message_channels")]:::tabla
-  t32[("messaging.message_templates")]:::tabla
-  t35[("common.file_versions")]:::tabla
-  t36[("common.files")]:::tabla
-  t52[("audit.jurisdiction_authorizations_history")]:::tabla
-  t53[("identity_assurance.identity_verification_cases")]:::tabla
-  t56[("terminology.catalog_concepts")]:::tabla
-  t57[("terminology.concept_properties")]:::tabla
-  t58[("terminology.value_set_members")]:::tabla
-  t59[("terminology.value_set_versions")]:::tabla
-  t60[("terminology.value_sets")]:::tabla
-  t62[("scheduling.bookable_slots")]:::tabla
-  t9[("+2 tablas más")]
-  t18[("+6 tablas más")]
-  t26[("+20 tablas más")]
-  t33[("+19 tablas más")]
+  t5[("common.addresses")]:::tabla
+  t6[("common.contact_points")]:::tabla
+  t7[("common.file_versions")]:::tabla
+  t8[("common.files")]:::tabla
+  t9[("common.identifiers")]:::tabla
+  t10[("practice.practice_sites")]:::tabla
+  t14[("chart.clinical_note_headers")]:::tabla
+  t15[("chart.document_records")]:::tabla
+  t16[("clinical.encounters")]:::tabla
+  t17[("clinical.medication_requests")]:::tabla
+  t18[("community.public_profiles")]:::tabla
+  t19[("community.service_reviews")]:::tabla
+  t26[("directory.tenant_memberships")]:::tabla
+  t27[("iam.devices")]:::tabla
+  t28[("messaging.in_app_notifications")]:::tabla
+  t29[("messaging.message_channels")]:::tabla
+  t30[("messaging.message_templates")]:::tabla
+  t33[("profiles.health_practitioner_profiles")]:::tabla
+  t34[("profiles.jurisdiction_authorizations")]:::tabla
+  t35[("profiles.person_account_links")]:::tabla
+  t37[("profiles.practitioner_specialties")]:::tabla
+  t44[("profiles.practitioner_affiliations")]:::tabla
+  t53[("audit.jurisdiction_authorizations_history")]:::tabla
+  t54[("identity_assurance.identity_verification_cases")]:::tabla
+  t57[("terminology.catalog_concepts")]:::tabla
+  t58[("terminology.concept_properties")]:::tabla
+  t59[("terminology.value_set_members")]:::tabla
+  t60[("terminology.value_set_versions")]:::tabla
+  t61[("terminology.value_sets")]:::tabla
+  t63[("scheduling.bookable_slots")]:::tabla
+  t11[("+18 tablas más")]
+  t20[("+6 tablas más")]
+  t22[("+29 tablas más")]
+  t24[("+21 tablas más")]
+  t31[("+19 tablas más")]
   t38[("+3 tablas más")]
-  t40[("+9 tablas más")]
-  t42[("+20 tablas más")]
-  t45[("+19 tablas más")]
-  t63[("+1 tablas más")]
-  t66[("+1 tablas más")]
-  t69[("+9 tablas más")]
+  t40[("+10 tablas más")]
+  t42[("+21 tablas más")]
+  t46[("+19 tablas más")]
+  t64[("+1 tablas más")]
+  t67[("+1 tablas más")]
+  t70[("+10 tablas más")]
   subgraph s0["ctrl:ProfilesPractitionersController · Operaciones de ProfilesPractitionersCont…"]
     o1["GET /profiles/credentials"]:::op
     o4["POST /profiles/credentials/{credentialId}/verify"]:::op
-    o10["GET /profiles/practitioners"]:::op
-    o15["POST /profiles/practitioners"]:::op
-    o19["PATCH /profiles/practitioners/{profileId}"]:::op
-    o27["POST /profiles/practitioners/{profileId}/affiliations"]:::op
-    o34["POST /profiles/practitioners/{profileId}/jurisdiction-authorizations"]:::op
-    o37["POST /profiles/practitioners/{profileId}/specialties"]:::op
+    o12["GET /profiles/practitioners"]:::op
+    o21["POST /profiles/practitioners"]:::op
+    o23["PATCH /profiles/practitioners/{profileId}"]:::op
+    o25["POST /profiles/practitioners/{profileId}/affiliations"]:::op
+    o32["POST /profiles/practitioners/{profileId}/jurisdiction-authorizations"]:::op
+    o36["POST /profiles/practitioners/{profileId}/specialties"]:::op
     o39["GET /profiles/practitioners/{profileId}/summary"]:::op
     o41["PATCH /profiles/practitioners/me"]:::op
     o43["GET /profiles/practitioners/me/affiliations"]:::op
-    o44["POST /profiles/practitioners/me/affiliations"]:::op
-    o46["DELETE /profiles/practitioners/me/affiliations/{affiliationId}"]:::op
-    o47["PATCH /profiles/practitioners/me/affiliations/{affiliationId}"]:::op
-    o48["POST /profiles/practitioners/me/credentials"]:::op
-    o49["DELETE /profiles/practitioners/me/credentials/{credentialId}"]:::op
-    o50["PATCH /profiles/practitioners/me/credentials/{credentialId}"]:::op
-    o51["DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licens…"]:::op
-    o54["PATCH /profiles/practitioners/me/jurisdiction-authorizations/{license…"]:::op
-    o55["GET /profiles/practitioners/me/linkable-organizations"]:::op
-    o61["GET /profiles/practitioners/me/onboarding"]:::op
-    o64["DELETE /profiles/practitioners/me/specialties/{specialtyId}"]:::op
-    o65["PATCH /profiles/practitioners/me/specialties/{specialtyId}"]:::op
-    o67["PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary"]:::op
-    o68["GET /profiles/practitioners/me/summary"]:::op
-    o70["GET /profiles/practitioners/specialty-counts"]:::op
+    o45["POST /profiles/practitioners/me/affiliations"]:::op
+    o47["DELETE /profiles/practitioners/me/affiliations/{affiliationId}"]:::op
+    o48["PATCH /profiles/practitioners/me/affiliations/{affiliationId}"]:::op
+    o49["POST /profiles/practitioners/me/credentials"]:::op
+    o50["DELETE /profiles/practitioners/me/credentials/{credentialId}"]:::op
+    o51["PATCH /profiles/practitioners/me/credentials/{credentialId}"]:::op
+    o52["DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licens…"]:::op
+    o55["PATCH /profiles/practitioners/me/jurisdiction-authorizations/{license…"]:::op
+    o56["GET /profiles/practitioners/me/linkable-organizations"]:::op
+    o62["GET /profiles/practitioners/me/onboarding"]:::op
+    o65["DELETE /profiles/practitioners/me/specialties/{specialtyId}"]:::op
+    o66["PATCH /profiles/practitioners/me/specialties/{specialtyId}"]:::op
+    o68["PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary"]:::op
+    o69["GET /profiles/practitioners/me/summary"]:::op
+    o71["GET /profiles/practitioners/specialty-counts"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   a2 --> o4
   o4 -->|"LEE"| t5
-  o4 -->|"CREA"| t6
   o4 -->|"LEE"| t6
-  o4 -->|"ACTUALIZA"| t7
   o4 -->|"LEE"| t7
   o4 -->|"LEE"| t8
-  o4 -.-> t9
-  a11 --> o10
-  o10 -->|"LEE"| t7
-  o10 -->|"LEE"| t12
-  o10 -->|"LEE"| t13
-  o10 -->|"LEE"| t14
-  a2 --> o15
-  o15 -->|"CREA"| t7
-  o15 -->|"LEE"| t7
-  o15 -->|"CREA"| t16
-  o15 -->|"CREA"| t17
-  o15 -->|"CREA"| t12
-  o15 -->|"LEE"| t12
-  o15 -.-> t18
-  a11 --> o19
-  o19 -->|"LEE"| t20
-  o19 -->|"LEE"| t21
-  o19 -->|"LEE"| t22
-  o19 -->|"LEE"| t23
-  o19 -->|"LEE"| t24
-  o19 -->|"ACTUALIZA"| t25
-  o19 -.-> t26
-  a2 --> o27
-  o27 -->|"LEE"| t28
-  o27 -->|"ACTUALIZA"| t29
-  o27 -->|"LEE"| t29
-  o27 -->|"CREA"| t30
-  o27 -->|"LEE"| t31
-  o27 -->|"LEE"| t32
-  o27 -.-> t33
-  a11 --> o34
-  o34 -->|"LEE"| t35
-  o34 -->|"LEE"| t36
-  o34 -->|"LEE"| t7
-  o34 -->|"CREA"| t16
-  o34 -->|"LEE"| t8
-  a11 --> o37
-  o37 -->|"LEE"| t7
-  o37 -->|"LEE"| t8
-  o37 -->|"ACTUALIZA"| t14
-  o37 -->|"CREA"| t14
-  o37 -->|"LEE"| t14
-  o37 -->|"LEE"| t3
-  o37 -.-> t38
-  a11 --> o39
-  o39 -->|"LEE"| t20
-  o39 -->|"LEE"| t21
-  o39 -->|"LEE"| t22
-  o39 -->|"LEE"| t23
-  o39 -->|"LEE"| t24
-  o39 -->|"LEE"| t25
+  o4 -->|"LEE"| t9
+  o4 -->|"LEE"| t10
+  o4 -.-> t11
+  a13 --> o12
+  o12 -->|"LEE"| t14
+  o12 -->|"LEE"| t15
+  o12 -->|"LEE"| t16
+  o12 -->|"LEE"| t17
+  o12 -->|"LEE"| t18
+  o12 -->|"LEE"| t19
+  o12 -.-> t20
+  a2 --> o21
+  o21 -->|"LEE"| t5
+  o21 -->|"LEE"| t6
+  o21 -->|"LEE"| t7
+  o21 -->|"LEE"| t8
+  o21 -->|"LEE"| t9
+  o21 -->|"LEE"| t10
+  o21 -.-> t22
+  a13 --> o23
+  o23 -->|"LEE"| t14
+  o23 -->|"LEE"| t15
+  o23 -->|"LEE"| t16
+  o23 -->|"LEE"| t17
+  o23 -->|"LEE"| t5
+  o23 -->|"ACTUALIZA"| t6
+  o23 -.-> t24
+  a2 --> o25
+  o25 -->|"LEE"| t26
+  o25 -->|"ACTUALIZA"| t27
+  o25 -->|"LEE"| t27
+  o25 -->|"CREA"| t28
+  o25 -->|"LEE"| t29
+  o25 -->|"LEE"| t30
+  o25 -.-> t31
+  a13 --> o32
+  o32 -->|"LEE"| t7
+  o32 -->|"LEE"| t8
+  o32 -->|"LEE"| t33
+  o32 -->|"CREA"| t34
+  o32 -->|"LEE"| t35
+  a13 --> o36
+  o36 -->|"LEE"| t33
+  o36 -->|"LEE"| t35
+  o36 -->|"ACTUALIZA"| t37
+  o36 -->|"CREA"| t37
+  o36 -->|"LEE"| t37
+  o36 -->|"LEE"| t3
+  o36 -.-> t38
+  a13 --> o39
+  o39 -->|"LEE"| t14
+  o39 -->|"LEE"| t15
+  o39 -->|"LEE"| t16
+  o39 -->|"LEE"| t17
+  o39 -->|"LEE"| t5
+  o39 -->|"LEE"| t6
   o39 -.-> t40
-  a11 --> o41
-  o41 -->|"LEE"| t20
-  o41 -->|"LEE"| t21
-  o41 -->|"LEE"| t22
-  o41 -->|"LEE"| t23
-  o41 -->|"LEE"| t24
-  o41 -->|"ACTUALIZA"| t25
+  a13 --> o41
+  o41 -->|"LEE"| t14
+  o41 -->|"LEE"| t15
+  o41 -->|"LEE"| t16
+  o41 -->|"LEE"| t17
+  o41 -->|"LEE"| t5
+  o41 -->|"ACTUALIZA"| t6
   o41 -.-> t42
-  a11 --> o43
-  o43 -->|"LEE"| t7
-  o43 -->|"LEE"| t8
-  o43 -->|"LEE"| t13
-  a11 --> o44
-  o44 -->|"LEE"| t28
-  o44 -->|"ACTUALIZA"| t29
-  o44 -->|"LEE"| t29
-  o44 -->|"CREA"| t30
-  o44 -->|"LEE"| t31
-  o44 -->|"LEE"| t32
-  o44 -.-> t45
-  a11 --> o46
-  o46 -->|"LEE"| t7
-  o46 -->|"LEE"| t8
-  o46 -->|"BORRA"| t13
-  o46 -->|"LEE"| t13
-  a11 --> o47
-  o47 -->|"LEE"| t7
-  o47 -->|"LEE"| t8
-  o47 -->|"ACTUALIZA"| t13
-  o47 -->|"LEE"| t13
-  a11 --> o48
+  a13 --> o43
+  o43 -->|"LEE"| t33
+  o43 -->|"LEE"| t35
+  o43 -->|"LEE"| t44
+  a13 --> o45
+  o45 -->|"LEE"| t26
+  o45 -->|"ACTUALIZA"| t27
+  o45 -->|"LEE"| t27
+  o45 -->|"CREA"| t28
+  o45 -->|"LEE"| t29
+  o45 -->|"LEE"| t30
+  o45 -.-> t46
+  a13 --> o47
+  o47 -->|"LEE"| t33
+  o47 -->|"LEE"| t35
+  o47 -->|"BORRA"| t44
+  o47 -->|"LEE"| t44
+  a13 --> o48
+  o48 -->|"LEE"| t33
   o48 -->|"LEE"| t35
-  o48 -->|"LEE"| t36
-  o48 -->|"LEE"| t7
-  o48 -->|"LEE"| t8
-  o48 -->|"CREA"| t3
-  a11 --> o49
+  o48 -->|"ACTUALIZA"| t44
+  o48 -->|"LEE"| t44
+  a13 --> o49
   o49 -->|"LEE"| t7
   o49 -->|"LEE"| t8
-  o49 -->|"BORRA"| t3
-  o49 -->|"LEE"| t3
-  a11 --> o50
+  o49 -->|"LEE"| t33
+  o49 -->|"LEE"| t35
+  o49 -->|"CREA"| t3
+  a13 --> o50
+  o50 -->|"LEE"| t33
   o50 -->|"LEE"| t35
-  o50 -->|"LEE"| t36
-  o50 -->|"LEE"| t7
-  o50 -->|"LEE"| t8
-  o50 -->|"ACTUALIZA"| t3
+  o50 -->|"BORRA"| t3
   o50 -->|"LEE"| t3
-  a11 --> o51
-  o51 -->|"LEE"| t52
-  o51 -->|"LEE"| t53
+  a13 --> o51
   o51 -->|"LEE"| t7
-  o51 -->|"BORRA"| t16
-  o51 -->|"LEE"| t16
   o51 -->|"LEE"| t8
-  a11 --> o54
-  o54 -->|"LEE"| t35
-  o54 -->|"LEE"| t36
-  o54 -->|"LEE"| t53
-  o54 -->|"LEE"| t7
-  o54 -->|"LEE"| t16
-  o54 -->|"LEE"| t8
-  a11 --> o55
-  o55 -->|"LEE"| t56
-  o55 -->|"LEE"| t57
-  o55 -->|"LEE"| t58
-  o55 -->|"LEE"| t59
-  o55 -->|"LEE"| t60
-  a11 --> o61
-  o61 -->|"LEE"| t7
-  o61 -->|"LEE"| t16
-  o61 -->|"LEE"| t8
-  o61 -->|"LEE"| t13
-  o61 -->|"LEE"| t14
-  o61 -->|"LEE"| t62
-  o61 -.-> t63
-  a11 --> o64
-  o64 -->|"LEE"| t7
-  o64 -->|"LEE"| t8
-  o64 -->|"BORRA"| t14
-  o64 -->|"LEE"| t14
-  a11 --> o65
-  o65 -->|"LEE"| t7
-  o65 -->|"LEE"| t8
-  o65 -->|"ACTUALIZA"| t14
-  o65 -->|"LEE"| t14
-  o65 -->|"LEE"| t58
-  o65 -->|"LEE"| t59
-  o65 -.-> t66
-  a11 --> o67
-  o67 -->|"LEE"| t7
-  o67 -->|"LEE"| t8
-  o67 -->|"ACTUALIZA"| t14
-  o67 -->|"LEE"| t14
-  a11 --> o68
-  o68 -->|"LEE"| t20
-  o68 -->|"LEE"| t21
-  o68 -->|"LEE"| t22
-  o68 -->|"LEE"| t23
-  o68 -->|"LEE"| t24
-  o68 -->|"LEE"| t25
-  o68 -.-> t69
-  a11 --> o70
-  o70 -->|"LEE"| t7
-  o70 -->|"LEE"| t14
+  o51 -->|"LEE"| t33
+  o51 -->|"LEE"| t35
+  o51 -->|"ACTUALIZA"| t3
+  o51 -->|"LEE"| t3
+  a13 --> o52
+  o52 -->|"LEE"| t53
+  o52 -->|"LEE"| t54
+  o52 -->|"LEE"| t33
+  o52 -->|"BORRA"| t34
+  o52 -->|"LEE"| t34
+  o52 -->|"LEE"| t35
+  a13 --> o55
+  o55 -->|"LEE"| t7
+  o55 -->|"LEE"| t8
+  o55 -->|"LEE"| t54
+  o55 -->|"LEE"| t33
+  o55 -->|"LEE"| t34
+  o55 -->|"LEE"| t35
+  a13 --> o56
+  o56 -->|"LEE"| t57
+  o56 -->|"LEE"| t58
+  o56 -->|"LEE"| t59
+  o56 -->|"LEE"| t60
+  o56 -->|"LEE"| t61
+  a13 --> o62
+  o62 -->|"LEE"| t33
+  o62 -->|"LEE"| t34
+  o62 -->|"LEE"| t35
+  o62 -->|"LEE"| t44
+  o62 -->|"LEE"| t37
+  o62 -->|"LEE"| t63
+  o62 -.-> t64
+  a13 --> o65
+  o65 -->|"LEE"| t33
+  o65 -->|"LEE"| t35
+  o65 -->|"BORRA"| t37
+  o65 -->|"LEE"| t37
+  a13 --> o66
+  o66 -->|"LEE"| t33
+  o66 -->|"LEE"| t35
+  o66 -->|"ACTUALIZA"| t37
+  o66 -->|"LEE"| t37
+  o66 -->|"LEE"| t59
+  o66 -->|"LEE"| t60
+  o66 -.-> t67
+  a13 --> o68
+  o68 -->|"LEE"| t33
+  o68 -->|"LEE"| t35
+  o68 -->|"ACTUALIZA"| t37
+  o68 -->|"LEE"| t37
+  a13 --> o69
+  o69 -->|"LEE"| t14
+  o69 -->|"LEE"| t15
+  o69 -->|"LEE"| t16
+  o69 -->|"LEE"| t17
+  o69 -->|"LEE"| t5
+  o69 -->|"LEE"| t6
+  o69 -.-> t70
+  a13 --> o71
+  o71 -->|"LEE"| t33
+  o71 -->|"LEE"| t37
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 4 de 4 — etapas `ctrl:TenantPractitionerRequestsController`
+### Diagrama 5 de 5 — etapas `ctrl:TenantPractitionerRequestsController`
 
 ```mermaid
 flowchart LR
@@ -753,7 +980,1875 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /profiles/credentials/{credentialId}/verify
+#### 1. GET /admissions
+
+Bandeja de admisiones
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsReadService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a PersonAccountLinksRepository.findActivePersonIdsByUser"]:::llamada
+  n3 --> n4
+  n5[("LEE profiles.person_account_links")]:::efecto
+  n4 --> n5
+  n6{"q !== undefined && q !== '' && q.length ‹ 2"}:::decision
+  n5 --> n6
+  n7(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a PractitionerAdmissionsReadService.assignmentFilter"]:::llamada
+  n6 -->|"no"| n8
+  n9{"!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test( assignedTo, )"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11{"query.cursor"}:::decision
+  n9 -->|"no"| n11
+  n12{"typeof key.d !== 'string' || typeof key.i !== 'string'"}:::decision
+  n11 -->|"sí"| n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PractitionerAdmissionsRepository.listPage"]:::llamada
+  n12 -->|"no"| n14
+  n11 -->|"no"| n14
+  n15["Llama a PractitionerAdmissionsRepository.buildWhere"]:::llamada
+  n14 --> n15
+  n16{"filters.q"}:::decision
+  n15 --> n16
+  n17[("LEE common.identifiers · LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials")]:::efecto
+  n16 -->|"sí"| n17
+  n18[("LEE profiles.professional_credentials · LEE terminology.catalog_concepts · LEE common.identifiers · LEE profi…")]:::efecto
+  n17 --> n18
+  n16 -->|"no"| n18
+  n19["Llama a PractitionerAdmissionsRepository.countByStatus"]:::llamada
+  n18 --> n19
+  n20["Llama a PractitionerAdmissionsRepository.buildWhere"]:::llamada
+  n19 --> n20
+  n21{"filters.q"}:::decision
+  n20 --> n21
+  n22[("LEE common.identifiers · LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials")]:::efecto
+  n21 -->|"sí"| n22
+  n23[("LEE profiles.practitioner_admissions · LEE profiles.persons · LEE profiles.health_practitioner_profiles")]:::efecto
+  n22 --> n23
+  n21 -->|"no"| n23
+  n24["Llama a PractitionerAdmissionsReadService.summaries"]:::llamada
+  n23 --> n24
+  n25["Llama a PractitionerAdmissionReviewsRepository.findByAdmissions"]:::llamada
+  n24 --> n25
+  n26[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n25 --> n26
+  n27["Llama a PractitionerAdmissionChecklistService.requirementsOf"]:::llamada
+  n26 --> n27
+  n28["Llama a AdmissionRequirementsRepository.findActiveByType"]:::llamada
+  n27 --> n28
+  n29[("LEE profiles.admission_requirements")]:::efecto
+  n28 --> n29
+  n30["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n29 --> n30
+  n31["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n30 --> n31
+  n32[("LEE iam.users")]:::efecto
+  n31 --> n32
+  n33["Llama a PractitionerAdmissionsReadService.professionGroups"]:::llamada
+  n32 --> n33
+  n34[("LEE profiles.professional_credentials")]:::efecto
+  n33 --> n34
+  n35["Repite: por cada const row de rows"]:::bucle
+  n34 --> n35
+  n36{"own && own.length › 0"}:::decision
+  n35 -->|"cada elemento"| n36
+  n37["Llama a PractitionerAdmissionsReadService.liveSummary"]:::llamada
+  n36 -->|"no"| n37
+  n38["Llama a PractitionerAdmissionsRepository.findById"]:::llamada
+  n37 --> n38
+  n39[("LEE profiles.practitioner_admissions")]:::efecto
+  n38 --> n39
+  n40(("200 Responde con éxito")):::ok
+  n36 -->|"sí"| n40
+  n39 --> n40
+  n35 -->|"al terminar"| n40
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. GET /admissions/{id}
+
+Detalle de una admisión
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsReadService.detail"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerAdmissionsRepository.findById"]:::llamada
+  n3 --> n4
+  n5[("LEE profiles.practitioner_admissions")]:::efecto
+  n4 --> n5
+  n6{"!admission"}:::decision
+  n5 --> n6
+  n7(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n6 -->|"no"| n8
+  n9["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n8 --> n9
+  n10["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n9 --> n10
+  n11[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n10 --> n11
+  n12["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n11 --> n12
+  n13[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n12 --> n13
+  n14["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.practitioner_admission_events")]:::efecto
+  n14 --> n15
+  n16["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n15 --> n16
+  n17["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n16 --> n17
+  n18[("LEE common.files · LEE common.file_versions")]:::efecto
+  n17 --> n18
+  n19["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n18 --> n19
+  n20[("LEE profiles.persons")]:::efecto
+  n19 --> n20
+  n21["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n20 --> n21
+  n22[("LEE common.identifiers")]:::efecto
+  n21 --> n22
+  n23[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n22 --> n23
+  n24["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n23 --> n24
+  n25["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n24 --> n25
+  n26[("LEE iam.users")]:::efecto
+  n25 --> n26
+  n27["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n26 --> n27
+  n28[("LEE profiles.persons")]:::efecto
+  n27 --> n28
+  n29["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n28 --> n29
+  n30[("LEE common.identifiers")]:::efecto
+  n29 --> n30
+  n31["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n30 --> n31
+  n32[("LEE common.contact_points")]:::efecto
+  n31 --> n32
+  n33["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n32 --> n33
+  n34[("LEE common.addresses")]:::efecto
+  n33 --> n34
+  n35[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n34 --> n35
+  n36[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n35 --> n36
+  n37(("200 Responde con éxito")):::ok
+  n36 --> n37
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. POST /admissions/{id}/claim
+
+Tomar la admisión para revisarla
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.claim"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
+  n5 --> n6
+  n7["Llama a PractitionerAdmissionsService.loadLocked"]:::llamada
+  n8["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.practitioner_admissions")]:::efecto
+  n8 --> n9
+  n10{"!admission"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12{"status === 'EN_REVISION' && admission.assignedToUserId === caller.user.id"}:::decision
+  n10 -->|"no"| n12
+  n13["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n12 -->|"sí"| n13
+  n14["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n13 --> n14
+  n15["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n14 --> n15
+  n16[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n15 --> n16
+  n17["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n16 --> n17
+  n18[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n17 --> n18
+  n19["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n18 --> n19
+  n20[("LEE profiles.practitioner_admission_events")]:::efecto
+  n19 --> n20
+  n21["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n20 --> n21
+  n22["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n21 --> n22
+  n23[("LEE common.files · LEE common.file_versions")]:::efecto
+  n22 --> n23
+  n24["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n23 --> n24
+  n25[("LEE profiles.persons")]:::efecto
+  n24 --> n25
+  n26["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n25 --> n26
+  n27[("LEE common.identifiers")]:::efecto
+  n26 --> n27
+  n28[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n27 --> n28
+  n29["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n28 --> n29
+  n30["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n29 --> n30
+  n31[("LEE iam.users")]:::efecto
+  n30 --> n31
+  n32["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n31 --> n32
+  n33[("LEE profiles.persons")]:::efecto
+  n32 --> n33
+  n34["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n33 --> n34
+  n35[("LEE common.identifiers")]:::efecto
+  n34 --> n35
+  n36["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n35 --> n36
+  n37[("LEE common.contact_points")]:::efecto
+  n36 --> n37
+  n38["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n37 --> n38
+  n39[("LEE common.addresses")]:::efecto
+  n38 --> n39
+  n40[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n39 --> n40
+  n41[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n40 --> n41
+  n42["Llama a PractitionerAdmissionsService.assertVersion"]:::llamada
+  n41 --> n42
+  n12 -->|"no"| n42
+  n43{"admission.rowVersion !== expected"}:::decision
+  n42 --> n43
+  n44(["↩ (relanza el error capturado)"]):::error
+  n43 -->|"sí"| n44
+  n45["Llama a PractitionerAdmissionsService.assertTransition"]:::llamada
+  n43 -->|"no"| n45
+  n46{"!canTransition(action, from)"}:::decision
+  n45 --> n46
+  n47(["422 PRECONDITION_FAILED La acción no es válida desde el estado {from}"]):::error
+  n46 -->|"sí"| n47
+  n48["Llama a PractitionerAdmissionsRepository.setStatus"]:::llamada
+  n46 -->|"no"| n48
+  n49[("ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.…")]:::efecto
+  n48 --> n49
+  n50[("ACTUALIZA profiles.practitioner_admissions")]:::efecto
+  n49 --> n50
+  n51["Llama a PractitionerAdmissionsService.appendEvent"]:::llamada
+  n50 --> n51
+  n52["Llama a PractitionerAdmissionEventsRepository.append"]:::llamada
+  n51 --> n52
+  n53[("CREA profiles.practitioner_admission_events")]:::efecto
+  n52 --> n53
+  n54["Llama a PractitionerAdmissionChecklistService.materialize"]:::llamada
+  n53 --> n54
+  n55["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n54 --> n55
+  n56["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n55 --> n56
+  n57[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n56 --> n57
+  n58["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n57 --> n58
+  n59[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n58 --> n59
+  n60["Repite: por cada const row de view.evaluation.rows"]:::bucle
+  n59 --> n60
+  n61["Repite: por cada const item de row.items"]:::bucle
+  n60 -->|"cada elemento"| n61
+  n62{"!item.review"}:::decision
+  n61 -->|"cada elemento"| n62
+  n63["Llama a PractitionerAdmissionReviewsRepository.create"]:::llamada
+  n62 -->|"sí"| n63
+  n64[("CREA profiles.practitioner_admission_reviews")]:::efecto
+  n63 --> n64
+  n65{"mustReset"}:::decision
+  n64 --> n65
+  n62 -->|"no"| n65
+  n66["Llama a PractitionerAdmissionChecklistService.clearReview"]:::llamada
+  n65 -->|"sí"| n66
+  n67[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n66 --> n67
+  n68["Llama a PractitionerAdmissionChecklistService.applyEntityDecision"]:::llamada
+  n67 --> n68
+  n69{"type === 'LICENSE'"}:::decision
+  n68 --> n69
+  n70[("LEE profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations")]:::efecto
+  n69 -->|"sí"| n70
+  n71["… el resto del árbol (9 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /admissions/{id}/decision
+
+Resolver la admisión: VERIFIED o REJECTED
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Cuatro ojos: la resolución debe hacerla una persona distinta de quien revisó |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La resolución no recibe ítems: se revisan uno por uno en .../items/:itemId/review; PreconditionFailedException: La acción no es válida desde el estado {from}; PreconditionFailedException: El checklist no está completo: hay requisitos sin verificar o rechazados; PreconditionFailedException: Una matrícula verificada ya venció: no se puede verificar con ella |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.decide"]:::llamada
+  n2 --> n3
+  n4{"dto.items !== undefined && dto.items.length › 0"}:::decision
+  n3 --> n4
+  n5(["422 PRECONDITION_FAILED La resolución no recibe ítems: se revisan uno por uno en .../items/:itemId/review"]):::error
+  n4 -->|"sí"| n5
+  n6["Transacción: transactional(…)"]:::transaccion
+  n4 -->|"no"| n6
+  n7["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n6 --> n7
+  n8(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
+  n7 --> n8
+  n9["Llama a PractitionerAdmissionsService.loadLocked"]:::llamada
+  n10["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n9 --> n10
+  n11[("LEE profiles.practitioner_admissions")]:::efecto
+  n10 --> n11
+  n12{"!admission"}:::decision
+  n11 --> n12
+  n13(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n14 --> n15
+  n16["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n15 --> n16
+  n17[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n16 --> n17
+  n18["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n17 --> n18
+  n19[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n18 --> n19
+  n20["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n19 --> n20
+  n21[("LEE profiles.practitioner_admission_events")]:::efecto
+  n20 --> n21
+  n22["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n21 --> n22
+  n23["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n22 --> n23
+  n24[("LEE common.files · LEE common.file_versions")]:::efecto
+  n23 --> n24
+  n25["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n24 --> n25
+  n26[("LEE profiles.persons")]:::efecto
+  n25 --> n26
+  n27["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n26 --> n27
+  n28[("LEE common.identifiers")]:::efecto
+  n27 --> n28
+  n29[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n28 --> n29
+  n30["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n29 --> n30
+  n31["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n30 --> n31
+  n32[("LEE iam.users")]:::efecto
+  n31 --> n32
+  n33["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n32 --> n33
+  n34[("LEE profiles.persons")]:::efecto
+  n33 --> n34
+  n35["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n34 --> n35
+  n36[("LEE common.identifiers")]:::efecto
+  n35 --> n36
+  n37["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n36 --> n37
+  n38[("LEE common.contact_points")]:::efecto
+  n37 --> n38
+  n39["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n38 --> n39
+  n40[("LEE common.addresses")]:::efecto
+  n39 --> n40
+  n41[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n40 --> n41
+  n42[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n41 --> n42
+  n43{"status === target"}:::decision
+  n42 --> n43
+  n44["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n43 -->|"sí"| n44
+  n45["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n44 --> n45
+  n46["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n45 --> n46
+  n47[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n46 --> n47
+  n48["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n47 --> n48
+  n49[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n48 --> n49
+  n50["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n49 --> n50
+  n51[("LEE profiles.practitioner_admission_events")]:::efecto
+  n50 --> n51
+  n52["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n51 --> n52
+  n53["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n52 --> n53
+  n54[("LEE common.files · LEE common.file_versions")]:::efecto
+  n53 --> n54
+  n55["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n54 --> n55
+  n56[("LEE profiles.persons")]:::efecto
+  n55 --> n56
+  n57["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n56 --> n57
+  n58[("LEE common.identifiers")]:::efecto
+  n57 --> n58
+  n59[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n58 --> n59
+  n60["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n59 --> n60
+  n61["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n60 --> n61
+  n62[("LEE iam.users")]:::efecto
+  n61 --> n62
+  n63["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n62 --> n63
+  n64[("LEE profiles.persons")]:::efecto
+  n63 --> n64
+  n65["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n64 --> n65
+  n66[("LEE common.identifiers")]:::efecto
+  n65 --> n66
+  n67["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n66 --> n67
+  n68[("LEE common.contact_points")]:::efecto
+  n67 --> n68
+  n69["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n68 --> n69
+  n70[("LEE common.addresses")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 5. GET /admissions/{id}/documents/{fileId}/content
+
+Contenido de un documento de la admisión (URL firmada)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para abrir documentos de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Archivo no encontrado |
+| 410 | — | GoneException: {{ code: ErrorCode.PRECONDITION_FAILED, message: 'La URL del…} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionDocumentsService.open"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerAdmissionDocumentsService.assertAllowedRole"]:::llamada
+  n3 --> n4
+  n5{"!ok"}:::decision
+  n4 --> n5
+  n6(["403 FORBIDDEN Su rol no alcanza para abrir documentos de admisiones"]):::error
+  n5 -->|"sí"| n6
+  n7{"!query.signature || !Number.isFinite(expiry)"}:::decision
+  n5 -->|"no"| n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9{"presented.length !== expected.length || !timingSafeEqual(presented, expected)"}:::decision
+  n7 -->|"no"| n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11{"expiry ‹ now.getTime()"}:::decision
+  n9 -->|"no"| n11
+  n12(["410 {{ code: ErrorCode.PRECONDITION_FAILED, message: 'La URL del…}"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PractitionerAdmissionDocumentsService.assertFileBelongs"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerAdmissionsRepository.findById"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.practitioner_admissions")]:::efecto
+  n14 --> n15
+  n16{"!admission"}:::decision
+  n15 --> n16
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n16 -->|"no"| n18
+  n19[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n18 --> n19
+  n20["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n19 --> n20
+  n21[("LEE common.identifiers")]:::efecto
+  n20 --> n21
+  n22{"!live.items.some((item) =› item.fileId === fileId)"}:::decision
+  n21 --> n22
+  n23(["↩ (relanza el error capturado)"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n22 -->|"no"| n24
+  n25["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n24 --> n25
+  n26[("LEE common.files · LEE common.file_versions")]:::efecto
+  n25 --> n26
+  n27{"!facts"}:::decision
+  n26 --> n27
+  n28(["↩ (relanza el error capturado)"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a AdmissionFilesAdapter.downloadAuthorized"]:::llamada
+  n27 -->|"no"| n29
+  n30["Llama a FileUploadService.downloadForAuthorizedContext"]:::llamada
+  n29 --> n30
+  n31["Llama a FilesRepository.findById"]:::llamada
+  n30 --> n31
+  n32[("LEE common.files")]:::efecto
+  n31 --> n32
+  n33{"!file"}:::decision
+  n32 --> n33
+  n34(["404 NOT_FOUND Archivo no encontrado"]):::error
+  n33 -->|"sí"| n34
+  n35(("200 Responde con éxito")):::ok
+  n33 -->|"no"| n35
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 6. POST /admissions/{id}/documents/{fileId}/download-url
+
+URL firmada para abrir un documento de la admisión
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para abrir documentos de admisiones |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionDocumentsService.issueUrl"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerAdmissionDocumentsService.assertAllowedRole"]:::llamada
+  n3 --> n4
+  n5{"!ok"}:::decision
+  n4 --> n5
+  n6(["403 FORBIDDEN Su rol no alcanza para abrir documentos de admisiones"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PractitionerAdmissionDocumentsService.assertFileBelongs"]:::llamada
+  n5 -->|"no"| n7
+  n8["Llama a PractitionerAdmissionsRepository.findById"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.practitioner_admissions")]:::efecto
+  n8 --> n9
+  n10{"!admission"}:::decision
+  n9 --> n10
+  n11(["↩ (relanza el error capturado)"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n10 -->|"no"| n12
+  n13[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n12 --> n13
+  n14["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n13 --> n14
+  n15[("LEE common.identifiers")]:::efecto
+  n14 --> n15
+  n16{"!live.items.some((item) =› item.fileId === fileId)"}:::decision
+  n15 --> n16
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n16 -->|"no"| n18
+  n19["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n18 --> n19
+  n20[("LEE common.files · LEE common.file_versions")]:::efecto
+  n19 --> n20
+  n21{"!facts"}:::decision
+  n20 --> n21
+  n22(["↩ (relanza el error capturado)"]):::error
+  n21 -->|"sí"| n22
+  n23(("201 Responde con éxito")):::ok
+  n21 -->|"no"| n23
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. POST /admissions/{id}/items/{itemId}/review
+
+Revisar un ítem del checklist
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Sólo quien tomó la revisión puede actuar sobre sus ítems |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ítem de la admisión no encontrado; ResourceNotFoundException: Admisión no encontrada |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: La evidencia del ítem cambió desde que la revisó: vuelva a abrirla |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La admisión no está en revisión; PreconditionFailedException: La fecha de consulta de la fuente no puede ser futura; PreconditionFailedException: Verificar este ítem exige declarar la fuente consultada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.reviewItem"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
+  n5 --> n6
+  n7["Llama a PractitionerAdmissionReviewsRepository.findByIdForUpdate"]:::llamada
+  n8[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n7 --> n8
+  n9{"!review || review.admissionId !== admissionId"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Ítem de la admisión no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PractitionerAdmissionsRepository.findById"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE profiles.practitioner_admissions")]:::efecto
+  n11 --> n12
+  n13{"!admission"}:::decision
+  n12 --> n13
+  n14(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n13 -->|"no"| n15
+  n16[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n15 --> n16
+  n17["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n16 --> n17
+  n18[("LEE common.identifiers")]:::efecto
+  n17 --> n18
+  n19["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n18 --> n19
+  n20["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n19 --> n20
+  n21[("LEE common.files · LEE common.file_versions")]:::efecto
+  n20 --> n21
+  n22["Llama a PractitionerAdmissionEvidenceService.conceptNames"]:::llamada
+  n21 --> n22
+  n23["Llama a AdmissionForeignReadsAdapter.conceptNames"]:::llamada
+  n22 --> n23
+  n24[("LEE terminology.catalog_concepts")]:::efecto
+  n23 --> n24
+  n25["Llama a PractitionerAdmissionEvidenceService.practiceSites"]:::llamada
+  n24 --> n25
+  n26["Llama a AdmissionForeignReadsAdapter.practiceSites"]:::llamada
+  n25 --> n26
+  n27[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE common.addresses")]:::efecto
+  n26 --> n27
+  n28{"recorded === dto.decision && this.sameReview(review, dto) && live?.evidenceSha256 === review.evidenceSha256"}:::decision
+  n27 --> n28
+  n29["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n28 -->|"sí"| n29
+  n30["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n29 --> n30
+  n31["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n30 --> n31
+  n32[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n31 --> n32
+  n33["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n32 --> n33
+  n34[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n33 --> n34
+  n35["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n34 --> n35
+  n36[("LEE profiles.practitioner_admission_events")]:::efecto
+  n35 --> n36
+  n37["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n36 --> n37
+  n38["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n37 --> n38
+  n39[("LEE common.files · LEE common.file_versions")]:::efecto
+  n38 --> n39
+  n40["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n39 --> n40
+  n41[("LEE profiles.persons")]:::efecto
+  n40 --> n41
+  n42["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n41 --> n42
+  n43[("LEE common.identifiers")]:::efecto
+  n42 --> n43
+  n44[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n43 --> n44
+  n45["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n44 --> n45
+  n46["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n45 --> n46
+  n47[("LEE iam.users")]:::efecto
+  n46 --> n47
+  n48["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n47 --> n48
+  n49[("LEE profiles.persons")]:::efecto
+  n48 --> n49
+  n50["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n49 --> n50
+  n51[("LEE common.identifiers")]:::efecto
+  n50 --> n51
+  n52["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n51 --> n52
+  n53[("LEE common.contact_points")]:::efecto
+  n52 --> n53
+  n54["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n53 --> n54
+  n55[("LEE common.addresses")]:::efecto
+  n54 --> n55
+  n56[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n55 --> n56
+  n57[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n56 --> n57
+  n58{"review.rowVersion !== dto.expectedRowVersion"}:::decision
+  n57 --> n58
+  n28 -->|"no"| n58
+  n59(["↩ (relanza el error capturado)"]):::error
+  n58 -->|"sí"| n59
+  n60{"status !== 'EN_REVISION'"}:::decision
+  n58 -->|"no"| n60
+  n61(["422 PRECONDITION_FAILED La admisión no está en revisión"]):::error
+  n60 -->|"sí"| n61
+  n62["Llama a PractitionerAdmissionsService.assertAssignee"]:::llamada
+  n60 -->|"no"| n62
+  n63{"admission.assignedToUserId !== user.id"}:::decision
+  n62 --> n63
+  n64(["403 FORBIDDEN Sólo quien tomó la revisión puede actuar sobre sus ítems"]):::error
+  n63 -->|"sí"| n64
+  n65{"evidenceMoved"}:::decision
+  n63 -->|"no"| n65
+  n66(["409 CONCURRENCY_CONFLICT La evidencia del ítem cambió desde que la revisó: vuelva a abrirla"]):::error
+  n65 -->|"sí"| n66
+  n67["Llama a PractitionerAdmissionChecklistService.requirementsOf"]:::llamada
+  n65 -->|"no"| n67
+  n68["Llama a AdmissionRequirementsRepository.findActiveByType"]:::llamada
+  n67 --> n68
+  n69[("LEE profiles.admission_requirements")]:::efecto
+  n68 --> n69
+  n70["Llama a PractitionerAdmissionsService.sourceOf"]:::llamada
+  n69 --> n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. POST /admissions/{id}/reassign
+
+Pasar la revisión a otro revisor
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from}; PreconditionFailedException: El revisor indicado no existe o es el propio solicitante |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.reassign"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
+  n5 --> n6
+  n7["Llama a PractitionerAdmissionsService.loadLocked"]:::llamada
+  n8["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.practitioner_admissions")]:::efecto
+  n8 --> n9
+  n10{"!admission"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PractitionerAdmissionsService.assertVersion"]:::llamada
+  n10 -->|"no"| n12
+  n13{"admission.rowVersion !== expected"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PractitionerAdmissionsService.assertTransition"]:::llamada
+  n13 -->|"no"| n15
+  n16{"!canTransition(action, from)"}:::decision
+  n15 --> n16
+  n17(["422 PRECONDITION_FAILED La acción no es válida desde el estado {from}"]):::error
+  n16 -->|"sí"| n17
+  n18{"status !== 'EN_REVISION'"}:::decision
+  n16 -->|"no"| n18
+  n19["Llama a PractitionerAdmissionsService.assertTransition"]:::llamada
+  n18 -->|"sí"| n19
+  n20{"!canTransition(action, from)"}:::decision
+  n19 --> n20
+  n21(["422 PRECONDITION_FAILED La acción no es válida desde el estado {from}"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a PractitionerAdmissionsReadService.userExists"]:::llamada
+  n20 -->|"no"| n22
+  n18 -->|"no"| n22
+  n23["Llama a AdmissionForeignReadsAdapter.userExists"]:::llamada
+  n22 --> n23
+  n24[("LEE iam.users")]:::efecto
+  n23 --> n24
+  n25["Llama a PersonAccountLinksRepository.hasActiveLink"]:::llamada
+  n24 --> n25
+  n26[("LEE profiles.person_account_links")]:::efecto
+  n25 --> n26
+  n27{"!targetExists || targetIsApplicant"}:::decision
+  n26 --> n27
+  n28(["422 PRECONDITION_FAILED El revisor indicado no existe o es el propio solicitante"]):::error
+  n27 -->|"sí"| n28
+  n29{"status === 'ENVIADA'"}:::decision
+  n27 -->|"no"| n29
+  n30["Llama a PractitionerAdmissionsRepository.setStatus"]:::llamada
+  n29 -->|"sí"| n30
+  n31[("ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.…")]:::efecto
+  n30 --> n31
+  n32[("ACTUALIZA profiles.practitioner_admissions")]:::efecto
+  n31 --> n32
+  n29 -->|"no"| n32
+  n33["Llama a PractitionerAdmissionsService.appendEvent"]:::llamada
+  n32 --> n33
+  n34["Llama a PractitionerAdmissionEventsRepository.append"]:::llamada
+  n33 --> n34
+  n35[("CREA profiles.practitioner_admission_events")]:::efecto
+  n34 --> n35
+  n36["Llama a PractitionerAdmissionChecklistService.materialize"]:::llamada
+  n35 --> n36
+  n37["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n36 --> n37
+  n38["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n37 --> n38
+  n39[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n38 --> n39
+  n40["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n39 --> n40
+  n41[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n40 --> n41
+  n42["Repite: por cada const row de view.evaluation.rows"]:::bucle
+  n41 --> n42
+  n43["Repite: por cada const item de row.items"]:::bucle
+  n42 -->|"cada elemento"| n43
+  n44{"!item.review"}:::decision
+  n43 -->|"cada elemento"| n44
+  n45["Llama a PractitionerAdmissionReviewsRepository.create"]:::llamada
+  n44 -->|"sí"| n45
+  n46[("CREA profiles.practitioner_admission_reviews")]:::efecto
+  n45 --> n46
+  n47{"mustReset"}:::decision
+  n46 --> n47
+  n44 -->|"no"| n47
+  n48["Llama a PractitionerAdmissionChecklistService.clearReview"]:::llamada
+  n47 -->|"sí"| n48
+  n49[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n48 --> n49
+  n50["Llama a PractitionerAdmissionChecklistService.applyEntityDecision"]:::llamada
+  n49 --> n50
+  n51{"type === 'LICENSE'"}:::decision
+  n50 --> n51
+  n52[("LEE profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations")]:::efecto
+  n51 -->|"sí"| n52
+  n53{"decision === 'PENDING'"}:::decision
+  n52 --> n53
+  n54[("ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA p…")]:::efecto
+  n53 -->|"sí"| n54
+  n55[("ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA p…")]:::efecto
+  n53 -->|"no"| n55
+  n56{"type === 'CREDENTIAL'"}:::decision
+  n51 -->|"no"| n56
+  n57[("LEE profiles.professional_credentials · ACTUALIZA profiles.professional_credentials")]:::efecto
+  n56 -->|"sí"| n57
+  n58{"decision === 'PENDING'"}:::decision
+  n57 --> n58
+  n59[("ACTUALIZA profiles.professional_credentials · ACTUALIZA profiles.professional_credentials · ACTUALIZA profile…")]:::efecto
+  n58 -->|"sí"| n59
+  n60[("ACTUALIZA profiles.professional_credentials · ACTUALIZA profiles.professional_credentials · ACTUALIZA profile…")]:::efecto
+  n58 -->|"no"| n60
+  n61{"type === 'SPECIALTY'"}:::decision
+  n56 -->|"no"| n61
+  n62[("LEE profiles.practitioner_specialties · ACTUALIZA profiles.practitioner_specialties · ACTUALIZA profiles.prac…")]:::efecto
+  n61 -->|"sí"| n62
+  n63["Repite: por cada const review de view.reviews"]:::bucle
+  n54 --> n63
+  n55 --> n63
+  n59 --> n63
+  n60 --> n63
+  n62 --> n63
+  n61 -->|"no"| n63
+  n47 -->|"no"| n63
+  n43 -->|"al terminar"| n63
+  n42 -->|"al terminar"| n63
+  n64{"!wanted.has(`${review.requirementId}:${review.itemId}`)"}:::decision
+  n63 -->|"cada elemento"| n64
+  n65["Llama a PractitionerAdmissionReviewsRepository.remove"]:::llamada
+  n64 -->|"sí"| n65
+  n66[("BORRA profiles.practitioner_admission_reviews")]:::efecto
+  n65 --> n66
+  n67["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n66 --> n67
+  n64 -->|"no"| n67
+  n63 -->|"al terminar"| n67
+  n68["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n67 --> n68
+  n69[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n68 --> n69
+  n70["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n69 --> n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 9. POST /admissions/{id}/reinstate
+
+Reponer una verificación suspendida (devuelve el check)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from}; PreconditionFailedException: La verificación ya venció: el médico debe renovarla |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.reinstate"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
+  n5 --> n6
+  n7["Llama a PractitionerAdmissionsService.loadLocked"]:::llamada
+  n8["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.practitioner_admissions")]:::efecto
+  n8 --> n9
+  n10{"!admission"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n10 -->|"no"| n12
+  n13["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n12 --> n13
+  n14["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n14 --> n15
+  n16["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n15 --> n16
+  n17[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n16 --> n17
+  n18["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n17 --> n18
+  n19[("LEE profiles.practitioner_admission_events")]:::efecto
+  n18 --> n19
+  n20["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n19 --> n20
+  n21["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n20 --> n21
+  n22[("LEE common.files · LEE common.file_versions")]:::efecto
+  n21 --> n22
+  n23["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n22 --> n23
+  n24[("LEE profiles.persons")]:::efecto
+  n23 --> n24
+  n25["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n24 --> n25
+  n26[("LEE common.identifiers")]:::efecto
+  n25 --> n26
+  n27[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n26 --> n27
+  n28["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n27 --> n28
+  n29["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n28 --> n29
+  n30[("LEE iam.users")]:::efecto
+  n29 --> n30
+  n31["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n30 --> n31
+  n32[("LEE profiles.persons")]:::efecto
+  n31 --> n32
+  n33["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n32 --> n33
+  n34[("LEE common.identifiers")]:::efecto
+  n33 --> n34
+  n35["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n34 --> n35
+  n36[("LEE common.contact_points")]:::efecto
+  n35 --> n36
+  n37["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n36 --> n37
+  n38[("LEE common.addresses")]:::efecto
+  n37 --> n38
+  n39[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n38 --> n39
+  n40[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n39 --> n40
+  n41{"status === 'VERIFICADA'"}:::decision
+  n40 --> n41
+  n42["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n41 -->|"sí"| n42
+  n43["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n42 --> n43
+  n44["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n43 --> n44
+  n45[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n44 --> n45
+  n46["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n45 --> n46
+  n47[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n46 --> n47
+  n48["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n47 --> n48
+  n49[("LEE profiles.practitioner_admission_events")]:::efecto
+  n48 --> n49
+  n50["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n49 --> n50
+  n51["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n50 --> n51
+  n52[("LEE common.files · LEE common.file_versions")]:::efecto
+  n51 --> n52
+  n53["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n52 --> n53
+  n54[("LEE profiles.persons")]:::efecto
+  n53 --> n54
+  n55["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n54 --> n55
+  n56[("LEE common.identifiers")]:::efecto
+  n55 --> n56
+  n57[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n56 --> n57
+  n58["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n57 --> n58
+  n59["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n58 --> n59
+  n60[("LEE iam.users")]:::efecto
+  n59 --> n60
+  n61["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n60 --> n61
+  n62[("LEE profiles.persons")]:::efecto
+  n61 --> n62
+  n63["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n62 --> n63
+  n64[("LEE common.identifiers")]:::efecto
+  n63 --> n64
+  n65["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n64 --> n65
+  n66[("LEE common.contact_points")]:::efecto
+  n65 --> n66
+  n67["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n66 --> n67
+  n68[("LEE common.addresses")]:::efecto
+  n67 --> n68
+  n69[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n68 --> n69
+  n70[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (73 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  n41 -->|"no"| n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 10. POST /admissions/{id}/release
+
+Soltar una revisión tomada para que otro la tome
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.release"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.loadLocked"]:::llamada
+  n4 --> n5
+  n6["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n5 --> n6
+  n7[("LEE profiles.practitioner_admissions")]:::efecto
+  n6 --> n7
+  n8{"!admission"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n8 -->|"no"| n10
+  n11(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
+  n10 --> n11
+  n12["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n13(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
+  n12 --> n13
+  n14["Llama a PractitionerAdmissionsService.assertVersion"]:::llamada
+  n15{"admission.rowVersion !== expected"}:::decision
+  n14 --> n15
+  n16(["↩ (relanza el error capturado)"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PractitionerAdmissionsService.assertTransition"]:::llamada
+  n15 -->|"no"| n17
+  n18{"!canTransition(action, from)"}:::decision
+  n17 --> n18
+  n19(["422 PRECONDITION_FAILED La acción no es válida desde el estado {from}"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a PractitionerAdmissionsRepository.setStatus"]:::llamada
+  n18 -->|"no"| n20
+  n21[("ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.…")]:::efecto
+  n20 --> n21
+  n22[("ACTUALIZA profiles.practitioner_admissions")]:::efecto
+  n21 --> n22
+  n23["Llama a PractitionerAdmissionsService.appendEvent"]:::llamada
+  n22 --> n23
+  n24["Llama a PractitionerAdmissionEventsRepository.append"]:::llamada
+  n23 --> n24
+  n25[("CREA profiles.practitioner_admission_events")]:::efecto
+  n24 --> n25
+  n26["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n25 --> n26
+  n27["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n26 --> n27
+  n28["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n27 --> n28
+  n29[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n28 --> n29
+  n30["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n29 --> n30
+  n31[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n30 --> n31
+  n32["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n31 --> n32
+  n33[("LEE profiles.practitioner_admission_events")]:::efecto
+  n32 --> n33
+  n34["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n33 --> n34
+  n35["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n34 --> n35
+  n36[("LEE common.files · LEE common.file_versions")]:::efecto
+  n35 --> n36
+  n37["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n36 --> n37
+  n38[("LEE profiles.persons")]:::efecto
+  n37 --> n38
+  n39["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n38 --> n39
+  n40[("LEE common.identifiers")]:::efecto
+  n39 --> n40
+  n41[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n40 --> n41
+  n42["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n41 --> n42
+  n43["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n42 --> n43
+  n44[("LEE iam.users")]:::efecto
+  n43 --> n44
+  n45["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n44 --> n45
+  n46[("LEE profiles.persons")]:::efecto
+  n45 --> n46
+  n47["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n46 --> n47
+  n48[("LEE common.identifiers")]:::efecto
+  n47 --> n48
+  n49["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n48 --> n49
+  n50[("LEE common.contact_points")]:::efecto
+  n49 --> n50
+  n51["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n50 --> n51
+  n52[("LEE common.addresses")]:::efecto
+  n51 --> n52
+  n53[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n52 --> n53
+  n54[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n53 --> n54
+  n55(("200 Responde con éxito")):::ok
+  n54 --> n55
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 11. POST /admissions/{id}/request-info
+
+Pedir información al médico
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Sólo quien tomó la revisión puede actuar sobre sus ítems |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.requestInfo"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
+  n5 --> n6
+  n7["Llama a PractitionerAdmissionsService.loadLocked"]:::llamada
+  n8["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.practitioner_admissions")]:::efecto
+  n8 --> n9
+  n10{"!admission"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PractitionerAdmissionsService.assertVersion"]:::llamada
+  n10 -->|"no"| n12
+  n13{"admission.rowVersion !== expected"}:::decision
+  n12 --> n13
+  n14(["↩ (relanza el error capturado)"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a PractitionerAdmissionsService.assertTransition"]:::llamada
+  n13 -->|"no"| n15
+  n16{"!canTransition(action, from)"}:::decision
+  n15 --> n16
+  n17(["422 PRECONDITION_FAILED La acción no es válida desde el estado {from}"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a PractitionerAdmissionsService.assertAssignee"]:::llamada
+  n16 -->|"no"| n18
+  n19{"admission.assignedToUserId !== user.id"}:::decision
+  n18 --> n19
+  n20(["403 FORBIDDEN Sólo quien tomó la revisión puede actuar sobre sus ítems"]):::error
+  n19 -->|"sí"| n20
+  n21{"!NOT_BLANK(reason)"}:::decision
+  n19 -->|"no"| n21
+  n22(["↩ (relanza el error capturado)"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a PractitionerAdmissionChecklistService.materialize"]:::llamada
+  n21 -->|"no"| n23
+  n24["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n23 --> n24
+  n25["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n24 --> n25
+  n26[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n25 --> n26
+  n27["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n26 --> n27
+  n28[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n27 --> n28
+  n29["Repite: por cada const row de view.evaluation.rows"]:::bucle
+  n28 --> n29
+  n30["Repite: por cada const item de row.items"]:::bucle
+  n29 -->|"cada elemento"| n30
+  n31{"!item.review"}:::decision
+  n30 -->|"cada elemento"| n31
+  n32["Llama a PractitionerAdmissionReviewsRepository.create"]:::llamada
+  n31 -->|"sí"| n32
+  n33[("CREA profiles.practitioner_admission_reviews")]:::efecto
+  n32 --> n33
+  n34{"mustReset"}:::decision
+  n33 --> n34
+  n31 -->|"no"| n34
+  n35["Llama a PractitionerAdmissionChecklistService.clearReview"]:::llamada
+  n34 -->|"sí"| n35
+  n36[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n35 --> n36
+  n37["Llama a PractitionerAdmissionChecklistService.applyEntityDecision"]:::llamada
+  n36 --> n37
+  n38{"type === 'LICENSE'"}:::decision
+  n37 --> n38
+  n39[("LEE profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations")]:::efecto
+  n38 -->|"sí"| n39
+  n40{"decision === 'PENDING'"}:::decision
+  n39 --> n40
+  n41[("ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA p…")]:::efecto
+  n40 -->|"sí"| n41
+  n42[("ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA p…")]:::efecto
+  n40 -->|"no"| n42
+  n43{"type === 'CREDENTIAL'"}:::decision
+  n38 -->|"no"| n43
+  n44[("LEE profiles.professional_credentials · ACTUALIZA profiles.professional_credentials")]:::efecto
+  n43 -->|"sí"| n44
+  n45{"decision === 'PENDING'"}:::decision
+  n44 --> n45
+  n46[("ACTUALIZA profiles.professional_credentials · ACTUALIZA profiles.professional_credentials · ACTUALIZA profile…")]:::efecto
+  n45 -->|"sí"| n46
+  n47[("ACTUALIZA profiles.professional_credentials · ACTUALIZA profiles.professional_credentials · ACTUALIZA profile…")]:::efecto
+  n45 -->|"no"| n47
+  n48{"type === 'SPECIALTY'"}:::decision
+  n43 -->|"no"| n48
+  n49[("LEE profiles.practitioner_specialties · ACTUALIZA profiles.practitioner_specialties · ACTUALIZA profiles.prac…")]:::efecto
+  n48 -->|"sí"| n49
+  n50["Repite: por cada const review de view.reviews"]:::bucle
+  n41 --> n50
+  n42 --> n50
+  n46 --> n50
+  n47 --> n50
+  n49 --> n50
+  n48 -->|"no"| n50
+  n34 -->|"no"| n50
+  n30 -->|"al terminar"| n50
+  n29 -->|"al terminar"| n50
+  n51{"!wanted.has(`${review.requirementId}:${review.itemId}`)"}:::decision
+  n50 -->|"cada elemento"| n51
+  n52["Llama a PractitionerAdmissionReviewsRepository.remove"]:::llamada
+  n51 -->|"sí"| n52
+  n53[("BORRA profiles.practitioner_admission_reviews")]:::efecto
+  n52 --> n53
+  n54["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n53 --> n54
+  n51 -->|"no"| n54
+  n50 -->|"al terminar"| n54
+  n55["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n54 --> n55
+  n56[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n55 --> n56
+  n57["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n56 --> n57
+  n58[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n57 --> n58
+  n59["Repite: por cada const row de view.evaluation.rows"]:::bucle
+  n58 --> n59
+  n60["Repite: por cada const item de row.items"]:::bucle
+  n59 -->|"cada elemento"| n60
+  n61["Llama a PractitionerAdmissionsService.applyReview"]:::llamada
+  n60 -->|"cada elemento"| n61
+  n62[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n61 --> n62
+  n63{"state === 'VERIFIED' && detail.source"}:::decision
+  n62 --> n63
+  n64[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n63 -->|"sí"| n64
+  n65{"state !== 'VERIFIED'"}:::decision
+  n63 -->|"no"| n65
+  n66[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n65 -->|"sí"| n66
+  n67["Llama a PractitionerAdmissionsService.appendEvent"]:::llamada
+  n64 --> n67
+  n66 --> n67
+  n65 -->|"no"| n67
+  n68["Llama a PractitionerAdmissionEventsRepository.append"]:::llamada
+  n67 --> n68
+  n69[("CREA profiles.practitioner_admission_events")]:::efecto
+  n68 --> n69
+  n70["Llama a PractitionerAdmissionsRepository.setStatus"]:::llamada
+  n69 --> n70
+  n60 -->|"al terminar"| n70
+  n59 -->|"al terminar"| n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 12. POST /admissions/{id}/suspend
+
+Suspender una verificación (quita el check)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.suspend"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n4 --> n5
+  n6(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
+  n5 --> n6
+  n7["Llama a PractitionerAdmissionsService.loadLocked"]:::llamada
+  n8["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.practitioner_admissions")]:::efecto
+  n8 --> n9
+  n10{"!admission"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n10 -->|"no"| n12
+  n13["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n12 --> n13
+  n14["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n14 --> n15
+  n16["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n15 --> n16
+  n17[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n16 --> n17
+  n18["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n17 --> n18
+  n19[("LEE profiles.practitioner_admission_events")]:::efecto
+  n18 --> n19
+  n20["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n19 --> n20
+  n21["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n20 --> n21
+  n22[("LEE common.files · LEE common.file_versions")]:::efecto
+  n21 --> n22
+  n23["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n22 --> n23
+  n24[("LEE profiles.persons")]:::efecto
+  n23 --> n24
+  n25["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n24 --> n25
+  n26[("LEE common.identifiers")]:::efecto
+  n25 --> n26
+  n27[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n26 --> n27
+  n28["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n27 --> n28
+  n29["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n28 --> n29
+  n30[("LEE iam.users")]:::efecto
+  n29 --> n30
+  n31["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n30 --> n31
+  n32[("LEE profiles.persons")]:::efecto
+  n31 --> n32
+  n33["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n32 --> n33
+  n34[("LEE common.identifiers")]:::efecto
+  n33 --> n34
+  n35["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n34 --> n35
+  n36[("LEE common.contact_points")]:::efecto
+  n35 --> n36
+  n37["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n36 --> n37
+  n38[("LEE common.addresses")]:::efecto
+  n37 --> n38
+  n39[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n38 --> n39
+  n40[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n39 --> n40
+  n41{"status === 'SUSPENDIDA'"}:::decision
+  n40 --> n41
+  n42["Llama a PractitionerAdmissionsReadService.detailOf"]:::llamada
+  n41 -->|"sí"| n42
+  n43["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n42 --> n43
+  n44["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n43 --> n44
+  n45[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n44 --> n45
+  n46["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n45 --> n46
+  n47[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n46 --> n47
+  n48["Llama a PractitionerAdmissionEventsRepository.findByAdmission"]:::llamada
+  n47 --> n48
+  n49[("LEE profiles.practitioner_admission_events")]:::efecto
+  n48 --> n49
+  n50["Llama a PractitionerAdmissionEvidenceService.fileFacts"]:::llamada
+  n49 --> n50
+  n51["Llama a AdmissionForeignReadsAdapter.fileFacts"]:::llamada
+  n50 --> n51
+  n52[("LEE common.files · LEE common.file_versions")]:::efecto
+  n51 --> n52
+  n53["Llama a PractitionerAdmissionsReadService.practitionerBasics"]:::llamada
+  n52 --> n53
+  n54[("LEE profiles.persons")]:::efecto
+  n53 --> n54
+  n55["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n54 --> n55
+  n56[("LEE common.identifiers")]:::efecto
+  n55 --> n56
+  n57[("LEE profiles.professional_credentials · LEE profiles.health_practitioner_profiles")]:::efecto
+  n56 --> n57
+  n58["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n57 --> n58
+  n59["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n58 --> n59
+  n60[("LEE iam.users")]:::efecto
+  n59 --> n60
+  n61["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n60 --> n61
+  n62[("LEE profiles.persons")]:::efecto
+  n61 --> n62
+  n63["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n62 --> n63
+  n64[("LEE common.identifiers")]:::efecto
+  n63 --> n64
+  n65["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n64 --> n65
+  n66[("LEE common.contact_points")]:::efecto
+  n65 --> n66
+  n67["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n66 --> n67
+  n68[("LEE common.addresses")]:::efecto
+  n67 --> n68
+  n69[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n68 --> n69
+  n70[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (64 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  n41 -->|"no"| n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 13. POST /admissions/expire-sweep
+
+Barrido de vencimientos
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.expireSweep"]:::llamada
+  n2 --> n3
+  n4["Intenta"]:::intento
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.sweepLocked"]:::llamada
+  n4 --> n5
+  n6["Llama a PractitionerAdmissionsRepository.findExpired"]:::llamada
+  n5 --> n6
+  n7[("LEE profiles.practitioner_admissions")]:::efecto
+  n6 --> n7
+  n8["Llama a PractitionerAdmissionsRepository.findAbandoned"]:::llamada
+  n7 --> n8
+  n9[("LEE profiles.practitioner_admissions")]:::efecto
+  n8 --> n9
+  n10["Repite: por cada const id de expiredIds"]:::bucle
+  n9 --> n10
+  n11["Transacción: transactional(…)"]:::transaccion
+  n10 -->|"cada elemento"| n11
+  n12["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n11 --> n12
+  n13[("LEE profiles.practitioner_admissions")]:::efecto
+  n12 --> n13
+  n14["Llama a PractitionerAdmissionsRepository.setStatus"]:::llamada
+  n13 --> n14
+  n15[("ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.…")]:::efecto
+  n14 --> n15
+  n16["Llama a PractitionerVerificationProjector.projectNotVerified"]:::llamada
+  n15 --> n16
+  n17["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n16 --> n17
+  n18[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n17 --> n18
+  n19{"practitioner.verificationStatusConceptId === PROF.PRACT_VERIF_VERIFIED"}:::decision
+  n18 --> n19
+  n20[("ACTUALIZA profiles.health_practitioner_profiles · ACTUALIZA profiles.health_practitioner_profiles")]:::efecto
+  n19 -->|"sí"| n20
+  n21["Llama a PractitionerAdmissionsService.appendEvent"]:::llamada
+  n20 --> n21
+  n19 -->|"no"| n21
+  n22["Llama a PractitionerAdmissionEventsRepository.append"]:::llamada
+  n21 --> n22
+  n23[("CREA profiles.practitioner_admission_events")]:::efecto
+  n22 --> n23
+  n24["Repite: por cada const id de abandonedIds"]:::bucle
+  n23 --> n24
+  n10 -->|"al terminar"| n24
+  n25["Transacción: transactional(…)"]:::transaccion
+  n24 -->|"cada elemento"| n25
+  n26["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n25 --> n26
+  n27[("LEE profiles.practitioner_admissions")]:::efecto
+  n26 --> n27
+  n28["Llama a PractitionerAdmissionsRepository.setStatus"]:::llamada
+  n27 --> n28
+  n29[("ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.…")]:::efecto
+  n28 --> n29
+  n30["Llama a PractitionerAdmissionsService.appendEvent"]:::llamada
+  n29 --> n30
+  n31["Llama a PractitionerAdmissionEventsRepository.append"]:::llamada
+  n30 --> n31
+  n32[("CREA profiles.practitioner_admission_events")]:::efecto
+  n31 --> n32
+  n33(("200 Responde con éxito")):::ok
+  n32 --> n33
+  n24 -->|"al terminar"| n33
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 14. POST /admissions/search
+
+Bandeja de admisiones con los filtros en el cuerpo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsReadService.list"]:::llamada
+  n2 --> n3
+  n4["Llama a PersonAccountLinksRepository.findActivePersonIdsByUser"]:::llamada
+  n3 --> n4
+  n5[("LEE profiles.person_account_links")]:::efecto
+  n4 --> n5
+  n6{"q !== undefined && q !== '' && q.length ‹ 2"}:::decision
+  n5 --> n6
+  n7(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a PractitionerAdmissionsReadService.assignmentFilter"]:::llamada
+  n6 -->|"no"| n8
+  n9{"!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test( assignedTo, )"}:::decision
+  n8 --> n9
+  n10(["↩ (relanza el error capturado)"]):::error
+  n9 -->|"sí"| n10
+  n11{"query.cursor"}:::decision
+  n9 -->|"no"| n11
+  n12{"typeof key.d !== 'string' || typeof key.i !== 'string'"}:::decision
+  n11 -->|"sí"| n12
+  n13(["↩ (relanza el error capturado)"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a PractitionerAdmissionsRepository.listPage"]:::llamada
+  n12 -->|"no"| n14
+  n11 -->|"no"| n14
+  n15["Llama a PractitionerAdmissionsRepository.buildWhere"]:::llamada
+  n14 --> n15
+  n16{"filters.q"}:::decision
+  n15 --> n16
+  n17[("LEE common.identifiers · LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials")]:::efecto
+  n16 -->|"sí"| n17
+  n18[("LEE profiles.professional_credentials · LEE terminology.catalog_concepts · LEE common.identifiers · LEE profi…")]:::efecto
+  n17 --> n18
+  n16 -->|"no"| n18
+  n19["Llama a PractitionerAdmissionsRepository.countByStatus"]:::llamada
+  n18 --> n19
+  n20["Llama a PractitionerAdmissionsRepository.buildWhere"]:::llamada
+  n19 --> n20
+  n21{"filters.q"}:::decision
+  n20 --> n21
+  n22[("LEE common.identifiers · LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials")]:::efecto
+  n21 -->|"sí"| n22
+  n23[("LEE profiles.practitioner_admissions · LEE profiles.persons · LEE profiles.health_practitioner_profiles")]:::efecto
+  n22 --> n23
+  n21 -->|"no"| n23
+  n24["Llama a PractitionerAdmissionsReadService.summaries"]:::llamada
+  n23 --> n24
+  n25["Llama a PractitionerAdmissionReviewsRepository.findByAdmissions"]:::llamada
+  n24 --> n25
+  n26[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n25 --> n26
+  n27["Llama a PractitionerAdmissionChecklistService.requirementsOf"]:::llamada
+  n26 --> n27
+  n28["Llama a AdmissionRequirementsRepository.findActiveByType"]:::llamada
+  n27 --> n28
+  n29[("LEE profiles.admission_requirements")]:::efecto
+  n28 --> n29
+  n30["Llama a PractitionerAdmissionsReadService.userNames"]:::llamada
+  n29 --> n30
+  n31["Llama a AdmissionForeignReadsAdapter.userNames"]:::llamada
+  n30 --> n31
+  n32[("LEE iam.users")]:::efecto
+  n31 --> n32
+  n33["Llama a PractitionerAdmissionsReadService.professionGroups"]:::llamada
+  n32 --> n33
+  n34[("LEE profiles.professional_credentials")]:::efecto
+  n33 --> n34
+  n35["Repite: por cada const row de rows"]:::bucle
+  n34 --> n35
+  n36{"own && own.length › 0"}:::decision
+  n35 -->|"cada elemento"| n36
+  n37["Llama a PractitionerAdmissionsReadService.liveSummary"]:::llamada
+  n36 -->|"no"| n37
+  n38["Llama a PractitionerAdmissionsRepository.findById"]:::llamada
+  n37 --> n38
+  n39[("LEE profiles.practitioner_admissions")]:::efecto
+  n38 --> n39
+  n40(("200 Responde con éxito")):::ok
+  n36 -->|"sí"| n40
+  n39 --> n40
+  n35 -->|"al terminar"| n40
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. POST /profiles/credentials/{credentialId}/verify
 
 Verificar credencial profesional
 
@@ -762,9 +2857,9 @@ Verificar credencial profesional
 | 200 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no alcanza para esta acción de admisiones; InsufficientRoleException: Sólo quien tomó la revisión puede actuar sobre sus ítems |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Credencial no encontrada |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una credencial verificada debe declarar la fuente consultada; PreconditionFailedException: La credencial no está pendiente de verificación |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una credencial verificada debe declarar la fuente consultada; PreconditionFailedException: La credencial no está pendiente de verificación; PreconditionFailedException: Un título de una admisión abierta se verifica desde la revisión de la admisión (POST /admissions/:id/items/:itemId/review), con la huella de lo que se vio; PreconditionFailedException: La admisión no está en revisión: tómela antes de verificar sus títulos |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -798,49 +2893,67 @@ flowchart TD
   n13 --> n14
   n15[("ACTUALIZA profiles.professional_credentials")]:::efecto
   n14 -->|"sí"| n15
-  n16{"verified"}:::decision
+  n16{"!verified && dto.reason?.trim()"}:::decision
   n15 --> n16
   n14 -->|"no"| n16
-  n17["Llama a ProfessionalCredentialsRepository.countInStateExcept"]:::llamada
+  n17[("ACTUALIZA profiles.professional_credentials")]:::efecto
   n16 -->|"sí"| n17
-  n18[("LEE profiles.professional_credentials")]:::efecto
+  n18["Llama a PractitionerAdmissionsService.recordCredentialReview"]:::llamada
   n17 --> n18
-  n19{"pending === 0"}:::decision
+  n16 -->|"no"| n18
+  n19["Llama a PractitionerAdmissionsService.recordItemOutcome"]:::llamada
   n18 --> n19
-  n20["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
-  n19 -->|"sí"| n20
-  n21[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n20["Llama a PractitionerAdmissionsRepository.findOpenByPractitionerForUpdate"]:::llamada
+  n19 --> n20
+  n21[("LEE profiles.practitioner_admissions")]:::efecto
   n20 --> n21
-  n22{"practitioner"}:::decision
+  n22{"!admission"}:::decision
   n21 --> n22
-  n23[("ACTUALIZA profiles.health_practitioner_profiles · ACTUALIZA profiles.health_practitioner_profiles · ACTUALIZA…")]:::efecto
+  n23[("LEE profiles.health_practitioner_profiles")]:::efecto
   n22 -->|"sí"| n23
-  n24["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
+  n24{"input.gate"}:::decision
   n23 --> n24
-  n25[("LEE profiles.person_account_links")]:::efecto
-  n24 --> n25
-  n26{"link"}:::decision
+  n22 -->|"no"| n24
+  n25["Llama a PractitionerAdmissionsService.roleFor"]:::llamada
+  n24 -->|"sí"| n25
+  n26(["403 FORBIDDEN Su rol no alcanza para esta acción de admisiones"]):::error
   n25 --> n26
-  n27["Llama a PractitionerContextAdapter.ensurePractitionerRole"]:::llamada
-  n26 -->|"sí"| n27
-  n28["Llama a AuthzEffectiveRolesService.ensureRoleByCode"]:::llamada
-  n27 --> n28
-  n29[("LEE authz.roles")]:::efecto
-  n28 --> n29
-  n30["Llama a UserRoleAssignmentsRepository.findActive"]:::llamada
-  n29 --> n30
-  n31[("LEE authz.user_role_assignments")]:::efecto
-  n30 --> n31
-  n32["Llama a UserRoleAssignmentsRepository.create"]:::llamada
+  n27{"input.state === 'VERIFIED'"}:::decision
+  n28(["422 PRECONDITION_FAILED Un título de una admisión abierta se verifica desde la revisión de la admisión (POST…"]):::error
+  n27 -->|"sí"| n28
+  n29{"status !== 'EN_REVISION'"}:::decision
+  n27 -->|"no"| n29
+  n30(["422 PRECONDITION_FAILED La admisión no está en revisión: tómela antes de verificar sus títulos"]):::error
+  n29 -->|"sí"| n30
+  n31["Llama a PractitionerAdmissionsService.assertAssignee"]:::llamada
+  n29 -->|"no"| n31
+  n32{"admission.assignedToUserId !== user.id"}:::decision
   n31 --> n32
-  n33[("CREA authz.user_role_assignments")]:::efecto
-  n32 --> n33
-  n34(("200 Responde con éxito")):::ok
-  n33 --> n34
-  n26 -->|"no"| n34
-  n22 -->|"no"| n34
-  n19 -->|"no"| n34
-  n16 -->|"no"| n34
+  n33(["403 FORBIDDEN Sólo quien tomó la revisión puede actuar sobre sus ítems"]):::error
+  n32 -->|"sí"| n33
+  n34["Repite: por cada const row de view.evaluation.rows"]:::bucle
+  n32 -->|"no"| n34
+  n24 -->|"no"| n34
+  n35["Repite: por cada const item de row.items"]:::bucle
+  n34 -->|"cada elemento"| n35
+  n36["Llama a PractitionerAdmissionsService.applyReview"]:::llamada
+  n35 -->|"cada elemento"| n36
+  n37[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n36 --> n37
+  n38{"state === 'VERIFIED' && detail.source"}:::decision
+  n37 --> n38
+  n39[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n38 -->|"sí"| n39
+  n40{"state !== 'VERIFIED'"}:::decision
+  n38 -->|"no"| n40
+  n41[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n40 -->|"sí"| n41
+  n42(("200 Responde con éxito")):::ok
+  n39 --> n42
+  n41 --> n42
+  n40 -->|"no"| n42
+  n35 -->|"al terminar"| n42
+  n34 -->|"al terminar"| n42
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -849,7 +2962,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. GET /profiles/patients
+#### 16. GET /profiles/patients
 
 UC-05-13: listado paginado de pacientes
 
@@ -915,7 +3028,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /profiles/patients
+#### 17. POST /profiles/patients
 
 Alta de persona y perfil de paciente
 
@@ -967,7 +3080,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. GET /profiles/patients/{profileId}
+#### 18. GET /profiles/patients/{profileId}
 
 UC-05-14: ficha de filiación de un paciente (F-01)
 
@@ -1021,7 +3134,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /profiles/patients/{profileId}/identity-links
+#### 19. POST /profiles/patients/{profileId}/identity-links
 
 Vincular identidad externa de paciente (MPI)
 
@@ -1076,7 +3189,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /profiles/patients/{profileId}/portal-proxies
+#### 20. POST /profiles/patients/{profileId}/portal-proxies
 
 Otorgar proxy de portal a un representante
 
@@ -1136,7 +3249,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /profiles/patients/{profileId}/related-persons
+#### 21. POST /profiles/patients/{profileId}/related-persons
 
 Registrar persona relacionada / contacto de emergencia
 
@@ -1214,7 +3327,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. GET /profiles/patients/me
+#### 22. GET /profiles/patients/me
 
 Consultar los propios datos de filiación
 
@@ -1324,7 +3437,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. PATCH /profiles/patients/me
+#### 23. PATCH /profiles/patients/me
 
 Editar los propios datos de filiación
 
@@ -1501,7 +3614,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. GET /profiles/patients/me/addresses
+#### 24. GET /profiles/patients/me/addresses
 
 Listar las propias direcciones (la preferida primero)
 
@@ -1555,7 +3668,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /profiles/patients/me/addresses
+#### 25. POST /profiles/patients/me/addresses
 
 Guardar una dirección nueva
 
@@ -1598,7 +3711,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. DELETE /profiles/patients/me/addresses/{id}
+#### 26. DELETE /profiles/patients/me/addresses/{id}
 
 Quitar una dirección guardada o la del trabajo
 
@@ -1647,7 +3760,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. PATCH /profiles/patients/me/addresses/{id}
+#### 27. PATCH /profiles/patients/me/addresses/{id}
 
 Corregir una dirección (cierra la vigente y abre otra)
 
@@ -1715,7 +3828,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. PUT /profiles/patients/me/addresses/{id}/preferred
+#### 28. PUT /profiles/patients/me/addresses/{id}/preferred
 
 Marcar la dirección que se ofrece primero
 
@@ -1753,7 +3866,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. GET /profiles/patients/me/dependent-candidates
+#### 29. GET /profiles/patients/me/dependent-candidates
 
 Buscar por nombre a quién pedirle que deje representarla
 
@@ -1803,7 +3916,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /profiles/patients/me/dependent-requests
+#### 30. POST /profiles/patients/me/dependent-requests
 
 Pedir representar a una persona que ya tiene cuenta
 
@@ -1958,7 +4071,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. POST /profiles/patients/me/dependent-requests/{id}/accept
+#### 31. POST /profiles/patients/me/dependent-requests/{id}/accept
 
 Aceptar una solicitud de dependiente
 
@@ -2039,7 +4152,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /profiles/patients/me/dependent-requests/{id}/reject
+#### 32. POST /profiles/patients/me/dependent-requests/{id}/reject
 
 Rechazar una solicitud de dependiente
 
@@ -2100,7 +4213,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. POST /profiles/patients/me/dependents
+#### 33. POST /profiles/patients/me/dependents
 
 Registrar un dependiente (menor o adulto mayor tutelado)
 
@@ -2221,7 +4334,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. DELETE /profiles/patients/me/photo
+#### 34. DELETE /profiles/patients/me/photo
 
 Quitar la propia foto de perfil
 
@@ -2349,7 +4462,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. PUT /profiles/patients/me/photo
+#### 35. PUT /profiles/patients/me/photo
 
 Fijar la propia foto de perfil
 
@@ -2514,7 +4627,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. DELETE /profiles/patients/me/primary-practitioner
+#### 36. DELETE /profiles/patients/me/primary-practitioner
 
 Quitar el propio médico de cabecera
 
@@ -2555,7 +4668,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. GET /profiles/patients/me/primary-practitioner
+#### 37. GET /profiles/patients/me/primary-practitioner
 
 Consultar el propio médico de cabecera
 
@@ -2615,7 +4728,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. PUT /profiles/patients/me/primary-practitioner
+#### 38. PUT /profiles/patients/me/primary-practitioner
 
 Elegir o cambiar el propio médico de cabecera
 
@@ -2675,7 +4788,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. GET /profiles/patients/me/summary
+#### 39. GET /profiles/patients/me/summary
 
 Consultar el resumen propio
 
@@ -2727,7 +4840,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /profiles/patients/merge
+#### 40. POST /profiles/patients/merge
 
 Fusionar pacientes duplicados
 
@@ -2812,7 +4925,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /profiles/patients/merge/{eventId}/reverse
+#### 41. POST /profiles/patients/merge/{eventId}/reverse
 
 Revertir una fusión de pacientes
 
@@ -2888,7 +5001,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /profiles/patients/search
+#### 42. POST /profiles/patients/search
 
 UC-05-13: listado paginado de pacientes, con los filtros en el cuerpo
 
@@ -2957,7 +5070,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /profiles/persons/{personId}/account-links
+#### 43. POST /profiles/persons/{personId}/account-links
 
 Vincular cuenta de portal a una persona
 
@@ -3010,7 +5123,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /profiles/persons/{personId}/decease
+#### 44. POST /profiles/persons/{personId}/decease
 
 Registrar defunción y anonimización de una persona
 
@@ -3070,7 +5183,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. GET /profiles/practitioners
+#### 45. GET /profiles/practitioners
 
 Listar profesionales para la guía, con sus especialidades
 
@@ -3122,8 +5235,18 @@ flowchart TD
   n17 --> n18
   n19[("LEE profiles.practitioner_affiliations")]:::efecto
   n18 --> n19
-  n20(("200 Responde con éxito")):::ok
+  n20["Llama a PractitionerContextAdapter.directoryStats"]:::llamada
   n19 --> n20
+  n21[("LEE clinical.encounters · LEE clinical.medication_requests · LEE chart.clinical_note_headers · LEE chart.docu…")]:::efecto
+  n20 --> n21
+  n22["Llama a PractitionerAdmissionsReadService.verificationOf"]:::llamada
+  n21 --> n22
+  n23["Llama a PractitionerAdmissionsRepository.findCurrentByPractitioners"]:::llamada
+  n22 --> n23
+  n24[("LEE profiles.practitioner_admissions")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3132,7 +5255,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. POST /profiles/practitioners
+#### 46. POST /profiles/practitioners
 
 Alta de profesional de salud (workforce generalista)
 
@@ -3223,9 +5346,76 @@ flowchart TD
   n34 -->|"no"| n36
   n37[("CREA profiles.practitioner_specialties")]:::efecto
   n36 --> n37
-  n38(("201 Responde con éxito")):::ok
+  n38["Llama a PersonAccountLinksRepository.findActiveByPerson"]:::llamada
   n37 --> n38
   n29 -->|"al terminar"| n38
+  n39[("LEE profiles.person_account_links")]:::efecto
+  n38 --> n39
+  n40{"hasAccount"}:::decision
+  n39 --> n40
+  n41["Llama a PractitionerAdmissionsService.openForRegistration"]:::llamada
+  n40 -->|"sí"| n41
+  n42["Llama a PractitionerAdmissionsRepository.findOpenByPractitioner"]:::llamada
+  n41 --> n42
+  n43[("LEE profiles.practitioner_admissions")]:::efecto
+  n42 --> n43
+  n44["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n43 --> n44
+  n45[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n44 --> n45
+  n46["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n45 --> n46
+  n47[("LEE common.identifiers")]:::efecto
+  n46 --> n47
+  n48["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n47 --> n48
+  n49[("LEE profiles.persons")]:::efecto
+  n48 --> n49
+  n50["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n49 --> n50
+  n51[("LEE common.identifiers")]:::efecto
+  n50 --> n51
+  n52["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n51 --> n52
+  n53[("LEE common.contact_points")]:::efecto
+  n52 --> n53
+  n54["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n53 --> n54
+  n55[("LEE common.addresses")]:::efecto
+  n54 --> n55
+  n56[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n55 --> n56
+  n57["Llama a PractitionerAdmissionsRepository.create"]:::llamada
+  n56 --> n57
+  n58[("CREA profiles.practitioner_admissions")]:::efecto
+  n57 --> n58
+  n59["Llama a PractitionerAdmissionsService.appendEvent"]:::llamada
+  n58 --> n59
+  n60["Llama a PractitionerAdmissionEventsRepository.append"]:::llamada
+  n59 --> n60
+  n61[("CREA profiles.practitioner_admission_events")]:::efecto
+  n60 --> n61
+  n62["Llama a PractitionerAdmissionChecklistService.materialize"]:::llamada
+  n61 --> n62
+  n63["Repite: por cada const row de view.evaluation.rows"]:::bucle
+  n62 --> n63
+  n64["Repite: por cada const item de row.items"]:::bucle
+  n63 -->|"cada elemento"| n64
+  n65{"!item.review"}:::decision
+  n64 -->|"cada elemento"| n65
+  n66["Llama a PractitionerAdmissionReviewsRepository.create"]:::llamada
+  n65 -->|"sí"| n66
+  n67[("CREA profiles.practitioner_admission_reviews")]:::efecto
+  n66 --> n67
+  n68{"mustReset"}:::decision
+  n67 --> n68
+  n65 -->|"no"| n68
+  n69["Llama a PractitionerAdmissionChecklistService.clearReview"]:::llamada
+  n68 -->|"sí"| n69
+  n70[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n69 --> n70
+  n71["… el resto del árbol (29 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -3234,7 +5424,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. PATCH /profiles/practitioners/{profileId}
+#### 47. PATCH /profiles/practitioners/{profileId}
 
 Corregir el perfil profesional de otro (titular o plataforma)
 
@@ -3416,7 +5606,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /profiles/practitioners/{profileId}/affiliations
+#### 48. POST /profiles/practitioners/{profileId}/affiliations
 
 Registrar un consultorio de un profesional sin cuenta
 
@@ -3547,7 +5737,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
+#### 49. POST /profiles/practitioners/{profileId}/jurisdiction-authorizations
 
 Registrar/renovar autorización jurisdiccional (licencia)
 
@@ -3648,7 +5838,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. DELETE /profiles/practitioners/{profileId}/photo
+#### 50. DELETE /profiles/practitioners/{profileId}/photo
 
 Quitar la foto del perfil profesional
 
@@ -3737,7 +5927,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. PUT /profiles/practitioners/{profileId}/photo
+#### 51. PUT /profiles/practitioners/{profileId}/photo
 
 Fijar la foto del perfil profesional
 
@@ -3873,7 +6063,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. POST /profiles/practitioners/{profileId}/specialties
+#### 52. POST /profiles/practitioners/{profileId}/specialties
 
 Agregar especialidad con credencial de soporte
 
@@ -3980,7 +6170,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. GET /profiles/practitioners/{profileId}/summary
+#### 53. GET /profiles/practitioners/{profileId}/summary
 
 Consultar el perfil profesional de un colega (ficha de la guía)
 
@@ -4062,8 +6252,14 @@ flowchart TD
   n32 --> n33
   n34[("LEE common.identifiers")]:::efecto
   n33 --> n34
-  n35(("200 Responde con éxito")):::ok
+  n35["Llama a PractitionerAdmissionsReadService.verificationOf"]:::llamada
   n34 --> n35
+  n36["Llama a PractitionerAdmissionsRepository.findCurrentByPractitioners"]:::llamada
+  n35 --> n36
+  n37[("LEE profiles.practitioner_admissions")]:::efecto
+  n36 --> n37
+  n38(("200 Responde con éxito")):::ok
+  n37 --> n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4072,7 +6268,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. PATCH /profiles/practitioners/me
+#### 54. PATCH /profiles/practitioners/me
 
 Editar la presentación del propio perfil profesional
 
@@ -4255,7 +6451,356 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. GET /profiles/practitioners/me/affiliations
+#### 55. GET /profiles/practitioners/me/admission
+
+Estado de mi verificación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsReadService.own"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerAdmissionsReadService.currentOf"]:::llamada
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsReadService.ownPersonId"]:::llamada
+  n4 --> n5
+  n6["Llama a PersonAccountLinksRepository.findSelfActiveByUser"]:::llamada
+  n5 --> n6
+  n7[("LEE profiles.person_account_links")]:::efecto
+  n6 --> n7
+  n8[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n7 --> n8
+  n9["Llama a PractitionerAdmissionsRepository.findCurrentByPractitioners"]:::llamada
+  n8 --> n9
+  n10[("LEE profiles.practitioner_admissions")]:::efecto
+  n9 --> n10
+  n11{"!admission"}:::decision
+  n10 --> n11
+  n12(["↩ (relanza el error capturado)"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PractitionerAdmissionsReadService.ownOf"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n13 --> n14
+  n15["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n14 --> n15
+  n16[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n15 --> n16
+  n17["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n16 --> n17
+  n18[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n17 --> n18
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 56. POST /profiles/practitioners/me/admission/resubmit
+
+Reenviar mi solicitud
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No tiene una solicitud de verificación; ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from}; PreconditionFailedException: Llegó al tope de reenvíos de la solicitud; PreconditionFailedException: Debe aceptar la declaración para reenviar la solicitud |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.resubmit"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.ownLocked"]:::llamada
+  n4 --> n5
+  n6["Llama a PractitionerAdmissionsReadService.currentOf"]:::llamada
+  n5 --> n6
+  n7["Llama a PractitionerAdmissionsReadService.ownPersonId"]:::llamada
+  n6 --> n7
+  n8[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n7 --> n8
+  n9["Llama a PractitionerAdmissionsRepository.findCurrentByPractitioners"]:::llamada
+  n8 --> n9
+  n10[("LEE profiles.practitioner_admissions")]:::efecto
+  n9 --> n10
+  n11{"!current"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND No tiene una solicitud de verificación"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PractitionerAdmissionsService.loadLocked"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.practitioner_admissions")]:::efecto
+  n14 --> n15
+  n16{"!admission"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a PractitionerAdmissionsService.assertTransition"]:::llamada
+  n16 -->|"no"| n18
+  n19{"!canTransition(action, from)"}:::decision
+  n18 --> n19
+  n20(["422 PRECONDITION_FAILED La acción no es válida desde el estado {from}"]):::error
+  n19 -->|"sí"| n20
+  n21{"admission.resubmissionCount ›= config.maxResubmissions"}:::decision
+  n19 -->|"no"| n21
+  n22(["422 PRECONDITION_FAILED Llegó al tope de reenvíos de la solicitud"]):::error
+  n21 -->|"sí"| n22
+  n23{"!attestation"}:::decision
+  n21 -->|"no"| n23
+  n24(["422 PRECONDITION_FAILED Debe aceptar la declaración para reenviar la solicitud"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a PractitionerAdmissionChecklistService.materialize"]:::llamada
+  n23 -->|"no"| n25
+  n26["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n25 --> n26
+  n27["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n26 --> n27
+  n28[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n27 --> n28
+  n29["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n28 --> n29
+  n30[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n29 --> n30
+  n31["Repite: por cada const row de view.evaluation.rows"]:::bucle
+  n30 --> n31
+  n32["Repite: por cada const item de row.items"]:::bucle
+  n31 -->|"cada elemento"| n32
+  n33{"!item.review"}:::decision
+  n32 -->|"cada elemento"| n33
+  n34["Llama a PractitionerAdmissionReviewsRepository.create"]:::llamada
+  n33 -->|"sí"| n34
+  n35[("CREA profiles.practitioner_admission_reviews")]:::efecto
+  n34 --> n35
+  n36{"mustReset"}:::decision
+  n35 --> n36
+  n33 -->|"no"| n36
+  n37["Llama a PractitionerAdmissionChecklistService.clearReview"]:::llamada
+  n36 -->|"sí"| n37
+  n38[("ACTUALIZA profiles.practitioner_admission_reviews · ACTUALIZA profiles.practitioner_admission_reviews · ACTUA…")]:::efecto
+  n37 --> n38
+  n39["Llama a PractitionerAdmissionChecklistService.applyEntityDecision"]:::llamada
+  n38 --> n39
+  n40{"type === 'LICENSE'"}:::decision
+  n39 --> n40
+  n41[("LEE profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations")]:::efecto
+  n40 -->|"sí"| n41
+  n42{"decision === 'PENDING'"}:::decision
+  n41 --> n42
+  n43[("ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA p…")]:::efecto
+  n42 -->|"sí"| n43
+  n44[("ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA profiles.jurisdiction_authorizations · ACTUALIZA p…")]:::efecto
+  n42 -->|"no"| n44
+  n45{"type === 'CREDENTIAL'"}:::decision
+  n40 -->|"no"| n45
+  n46[("LEE profiles.professional_credentials · ACTUALIZA profiles.professional_credentials")]:::efecto
+  n45 -->|"sí"| n46
+  n47{"decision === 'PENDING'"}:::decision
+  n46 --> n47
+  n48[("ACTUALIZA profiles.professional_credentials · ACTUALIZA profiles.professional_credentials · ACTUALIZA profile…")]:::efecto
+  n47 -->|"sí"| n48
+  n49[("ACTUALIZA profiles.professional_credentials · ACTUALIZA profiles.professional_credentials · ACTUALIZA profile…")]:::efecto
+  n47 -->|"no"| n49
+  n50{"type === 'SPECIALTY'"}:::decision
+  n45 -->|"no"| n50
+  n51[("LEE profiles.practitioner_specialties · ACTUALIZA profiles.practitioner_specialties · ACTUALIZA profiles.prac…")]:::efecto
+  n50 -->|"sí"| n51
+  n52["Repite: por cada const review de view.reviews"]:::bucle
+  n43 --> n52
+  n44 --> n52
+  n48 --> n52
+  n49 --> n52
+  n51 --> n52
+  n50 -->|"no"| n52
+  n36 -->|"no"| n52
+  n32 -->|"al terminar"| n52
+  n31 -->|"al terminar"| n52
+  n53{"!wanted.has(`${review.requirementId}:${review.itemId}`)"}:::decision
+  n52 -->|"cada elemento"| n53
+  n54["Llama a PractitionerAdmissionReviewsRepository.remove"]:::llamada
+  n53 -->|"sí"| n54
+  n55[("BORRA profiles.practitioner_admission_reviews")]:::efecto
+  n54 --> n55
+  n56["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n55 --> n56
+  n53 -->|"no"| n56
+  n52 -->|"al terminar"| n56
+  n57["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n56 --> n57
+  n58[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n57 --> n58
+  n59["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n58 --> n59
+  n60[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n59 --> n60
+  n61["Llama a PractitionerAdmissionEvidenceService.buildSnapshot"]:::llamada
+  n60 --> n61
+  n62[("LEE profiles.persons")]:::efecto
+  n61 --> n62
+  n63["Llama a AdmissionForeignReadsAdapter.nationalIds"]:::llamada
+  n62 --> n63
+  n64[("LEE common.identifiers")]:::efecto
+  n63 --> n64
+  n65["Llama a AdmissionForeignReadsAdapter.contactPoints"]:::llamada
+  n64 --> n65
+  n66[("LEE common.contact_points")]:::efecto
+  n65 --> n66
+  n67["Llama a AdmissionForeignReadsAdapter.addresses"]:::llamada
+  n66 --> n67
+  n68[("LEE common.addresses")]:::efecto
+  n67 --> n68
+  n69[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n68 --> n69
+  n70["Llama a PractitionerAdmissionEvidenceService.conceptNames"]:::llamada
+  n69 --> n70
+  n71["… el resto del árbol (2 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 57. POST /profiles/practitioners/me/admission/withdraw
+
+Retirar mi solicitud (ENVIADA o INFORMACION_REQUERIDA)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No tiene una solicitud de verificación; ResourceNotFoundException: Admisión no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La acción no es válida desde el estado {from} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerAdmissionsService.withdraw"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a PractitionerAdmissionsService.ownLocked"]:::llamada
+  n4 --> n5
+  n6["Llama a PractitionerAdmissionsReadService.currentOf"]:::llamada
+  n5 --> n6
+  n7["Llama a PractitionerAdmissionsReadService.ownPersonId"]:::llamada
+  n6 --> n7
+  n8[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n7 --> n8
+  n9["Llama a PractitionerAdmissionsRepository.findCurrentByPractitioners"]:::llamada
+  n8 --> n9
+  n10[("LEE profiles.practitioner_admissions")]:::efecto
+  n9 --> n10
+  n11{"!current"}:::decision
+  n10 --> n11
+  n12(["404 NOT_FOUND No tiene una solicitud de verificación"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PractitionerAdmissionsService.loadLocked"]:::llamada
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerAdmissionsRepository.findByIdForUpdate"]:::llamada
+  n13 --> n14
+  n15[("LEE profiles.practitioner_admissions")]:::efecto
+  n14 --> n15
+  n16{"!admission"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Admisión no encontrada"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a PractitionerAdmissionsReadService.ownOf"]:::llamada
+  n16 -->|"no"| n18
+  n19["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n18 --> n19
+  n20["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n19 --> n20
+  n21[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n20 --> n21
+  n22["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n21 --> n22
+  n23[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n22 --> n23
+  n24{"status === 'RETIRADA'"}:::decision
+  n23 --> n24
+  n25["Llama a PractitionerAdmissionsReadService.ownOf"]:::llamada
+  n24 -->|"sí"| n25
+  n26["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n25 --> n26
+  n27["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n26 --> n27
+  n28[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n27 --> n28
+  n29["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n28 --> n29
+  n30[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n29 --> n30
+  n31["Llama a PractitionerAdmissionsService.assertTransition"]:::llamada
+  n30 --> n31
+  n24 -->|"no"| n31
+  n32{"!canTransition(action, from)"}:::decision
+  n31 --> n32
+  n33(["422 PRECONDITION_FAILED La acción no es válida desde el estado {from}"]):::error
+  n32 -->|"sí"| n33
+  n34["Llama a PractitionerAdmissionsRepository.setStatus"]:::llamada
+  n32 -->|"no"| n34
+  n35[("ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.…")]:::efecto
+  n34 --> n35
+  n36[("ACTUALIZA profiles.practitioner_admissions · ACTUALIZA profiles.practitioner_admissions")]:::efecto
+  n35 --> n36
+  n37["Llama a PractitionerAdmissionsService.appendEvent"]:::llamada
+  n36 --> n37
+  n38["Llama a PractitionerAdmissionEventsRepository.append"]:::llamada
+  n37 --> n38
+  n39[("CREA profiles.practitioner_admission_events")]:::efecto
+  n38 --> n39
+  n40["Llama a PractitionerAdmissionsReadService.ownOf"]:::llamada
+  n39 --> n40
+  n41["Llama a PractitionerAdmissionChecklistService.buildView"]:::llamada
+  n40 --> n41
+  n42["Llama a PractitionerAdmissionEvidenceService.collect"]:::llamada
+  n41 --> n42
+  n43[("LEE profiles.jurisdiction_authorizations · LEE profiles.professional_credentials · LEE profiles.practitioner_…")]:::efecto
+  n42 --> n43
+  n44["Llama a PractitionerAdmissionReviewsRepository.findByAdmission"]:::llamada
+  n43 --> n44
+  n45[("LEE profiles.practitioner_admission_reviews")]:::efecto
+  n44 --> n45
+  n46(("200 Responde con éxito")):::ok
+  n45 --> n46
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 58. GET /profiles/practitioners/me/affiliations
 
 Historial laboral propio (instituciones donde trabajó)
 
@@ -4303,7 +6848,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. POST /profiles/practitioners/me/affiliations
+#### 59. POST /profiles/practitioners/me/affiliations
 
 Registrar una afiliación institucional en el historial propio
 
@@ -4434,7 +6979,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 43. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
+#### 60. DELETE /profiles/practitioners/me/affiliations/{affiliationId}
 
 Quitar una afiliación del historial laboral propio
 
@@ -4490,7 +7035,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
+#### 61. PATCH /profiles/practitioners/me/affiliations/{affiliationId}
 
 Corregir una afiliación del historial laboral propio
 
@@ -4563,7 +7108,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. POST /profiles/practitioners/me/credentials
+#### 62. POST /profiles/practitioners/me/credentials
 
 Agregar un título propio (diplomado, maestría, doctorado…)
 
@@ -4669,7 +7214,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 46. DELETE /profiles/practitioners/me/credentials/{credentialId}
+#### 63. DELETE /profiles/practitioners/me/credentials/{credentialId}
 
 Retirar un título propio pendiente
 
@@ -4734,7 +7279,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. PATCH /profiles/practitioners/me/credentials/{credentialId}
+#### 64. PATCH /profiles/practitioners/me/credentials/{credentialId}
 
 Editar un título propio pendiente de verificación
 
@@ -4897,7 +7442,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+#### 65. DELETE /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 Retirar una matrícula propia pendiente de verificación
 
@@ -4974,7 +7519,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
+#### 66. PATCH /profiles/practitioners/me/jurisdiction-authorizations/{licenseId}
 
 Corregir una matrícula propia pendiente de verificación
 
@@ -5088,7 +7633,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. GET /profiles/practitioners/me/onboarding
+#### 67. GET /profiles/practitioners/me/onboarding
 
 Qué le falta al profesional para completar su alta
 
@@ -5149,7 +7694,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. GET /profiles/practitioners/me/primary-patients
+#### 68. GET /profiles/practitioners/me/primary-patients
 
 Listar los pacientes que me eligieron como médico de cabecera
 
@@ -5202,7 +7747,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. GET /profiles/practitioners/me/signature-assets
+#### 69. GET /profiles/practitioners/me/signature-assets
 
 Consultar las imágenes de firma y sello propias
 
@@ -5253,7 +7798,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 53. PUT /profiles/practitioners/me/signature-assets
+#### 70. PUT /profiles/practitioners/me/signature-assets
 
 Guardar o quitar las imágenes de firma y sello propias
 
@@ -5371,7 +7916,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 54. DELETE /profiles/practitioners/me/specialties/{specialtyId}
+#### 71. DELETE /profiles/practitioners/me/specialties/{specialtyId}
 
 Retirar una especialidad propia pendiente de verificación
 
@@ -5438,7 +7983,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 55. PATCH /profiles/practitioners/me/specialties/{specialtyId}
+#### 72. PATCH /profiles/practitioners/me/specialties/{specialtyId}
 
 Corregir una especialidad propia pendiente de verificación
 
@@ -5532,7 +8077,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 56. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
+#### 73. PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary
 
 Marcar una especialidad propia como la principal
 
@@ -5602,7 +8147,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 57. GET /profiles/practitioners/me/summary
+#### 74. GET /profiles/practitioners/me/summary
 
 Consultar el perfil profesional propio (trayectoria y actividad)
 
@@ -5688,8 +8233,14 @@ flowchart TD
   n34 --> n35
   n36[("LEE common.identifiers")]:::efecto
   n35 --> n36
-  n37(("200 Responde con éxito")):::ok
+  n37["Llama a PractitionerAdmissionsReadService.verificationOf"]:::llamada
   n36 --> n37
+  n38["Llama a PractitionerAdmissionsRepository.findCurrentByPractitioners"]:::llamada
+  n37 --> n38
+  n39[("LEE profiles.practitioner_admissions")]:::efecto
+  n38 --> n39
+  n40(("200 Responde con éxito")):::ok
+  n39 --> n40
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -5698,7 +8249,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 58. GET /tenants/{tenantId}/practitioner-requests
+#### 75. GET /tenants/{tenantId}/practitioner-requests
 
 Solicitudes de médicos que piden atender en la organización
 
@@ -5744,7 +8295,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 59. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
+#### 76. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve
 
 Aprobar la solicitud de un profesional
 
@@ -5826,7 +8377,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 60. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
+#### 77. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject
 
 Rechazar la solicitud de un profesional
 
@@ -5908,7 +8459,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 61. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
+#### 78. POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke
 
 Dar de baja un vínculo ya aprobado
 
@@ -5996,6 +8547,7 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 
 | Operación | Respuestas posibles | Tablas |
 |---|---|---|
+| DESCONOCIDO /admissions | 200, 401, 403, 429 | 0 |
 | GET /profiles/credentials | 200, 401, 403, 429 | 1 |
 | GET /profiles/patients/me/dependent-requests/incoming | 200, 401, 403, 429 | 4 |
 | GET /profiles/patients/me/dependents | 200, 401, 403, 429 | 5 |

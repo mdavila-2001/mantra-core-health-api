@@ -56,6 +56,12 @@ export enum ProceduresPerioperativeErrorReason {
    * existe en otra historia clínica.
    */
   PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT = 'PROCEDURE_NOT_FOUND_FOR_CASE_PATIENT',
+  /**
+   * El paciente que manda el cliente (al programar o corregir el caso, al
+   * registrar o consultar el histórico odontológico) no existe o no tiene
+   * atención en el tenant activo. Los dos casos responden igual.
+   */
+  PATIENT_NOT_FOUND_IN_TENANT = 'PATIENT_NOT_FOUND_IN_TENANT',
   REPORT_NOT_FOUND = 'REPORT_NOT_FOUND',
   REPORT_BELONGS_TO_ANOTHER_CASE = 'REPORT_BELONGS_TO_ANOTHER_CASE',
   REPORT_ALREADY_SIGNED = 'REPORT_ALREADY_SIGNED',

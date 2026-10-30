@@ -166,12 +166,45 @@ describe('CM-11 · alta de centro médico (integración)', () => {
     expect(Number(address.latitude)).toBeCloseTo(-17.78, 4);
     expect(Number(address.longitude)).toBeCloseTo(-63.18, 4);
 
-    // La sede aparece en el listado administrativo de la práctica.
+    // El dueño del centro (rol global USER, membresía OWNER) lista sus
+    // prácticas y las sedes de la suya en su tenant (A-6, #957/#984).
+    const practicas = await http()
+      .get('/practices')
+      .set(bearer(tokenPropio))
+      .set('X-Tenant-Id', propia.tenantId)
+      .expect(200);
+    expect(practicas.body.map((p: { id: string }) => p.id)).toContain(
+      practice.id,
+    );
     const sedes = await http()
       .get(`/practices/${practice.id}/sites`)
-      .set(bearer(ctx.adminToken))
+      .set(bearer(tokenPropio))
+      .set('X-Tenant-Id', propia.tenantId)
       .expect(200);
     expect(sedes.body.map((s: { id: string }) => s.id)).toContain(site.id);
+
+    // El dueño de otra organización, desde su tenant, no ve esa práctica:
+    // el mismo 404 que una práctica inexistente.
+    await http()
+      .get(`/practices/${practice.id}/sites`)
+      .set(bearer(tokenAjeno))
+      .set('X-Tenant-Id', ajena.tenantId)
+      .expect(404);
+    const ajenas = await http()
+      .get('/practices')
+      .set(bearer(tokenAjeno))
+      .set('X-Tenant-Id', ajena.tenantId)
+      .expect(200);
+    expect(ajenas.body.map((p: { id: string }) => p.id)).not.toContain(
+      practice.id,
+    );
+
+    // Y no puede ponerse el tenant ajeno en la cabecera.
+    const intruso = await http()
+      .get(`/practices/${practice.id}/sites`)
+      .set(bearer(tokenAjeno))
+      .set('X-Tenant-Id', propia.tenantId);
+    expect(intruso.status).toBe(403);
   });
 
   it('coordenadas fuera de rango → 400', async () => {

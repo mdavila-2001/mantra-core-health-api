@@ -3,8 +3,8 @@
 # Endpoints del módulo `payments`
 
 - **Bloque:** Financiero y ERP (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
-- **Operaciones:** 14 (14 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 1 · MEDIO 12 · BAJO 1
+- **Operaciones:** 18 (18 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 2 · MEDIO 12 · BAJO 4
 - **Tablas distintas que tocan:** 20
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/payments.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -15,17 +15,21 @@
 | 1 | POST | `/payments/callbacks/{callbackPath}` | Recibir el callback/webhook del gateway (idempotente) | ALTO | 7 | pública |
 | 2 | POST | `/payments/checkout-sessions` | Abrir una sesión de checkout con contexto de cajero | MEDIO | 5 | PAYMENTS_ADMIN, CASHIER |
 | 3 | POST | `/payments/fee-schedules` | Publicar una versión del tarifario | MEDIO | 3 | PAYMENTS_ADMIN |
-| 4 | POST | `/payments/intents` | Crear una intención de pago idempotente | MEDIO | 2 | PAYMENTS_ADMIN, CASHIER |
-| 5 | POST | `/payments/intents/{id}/fx-lock` | Bloquear el tipo de cambio de la intención | MEDIO | 4 | PAYMENTS_ADMIN |
-| 6 | POST | `/payments/intents/{id}/risk-assessment` | Registrar la evaluación de riesgo y 3-D Secure | MEDIO | 3 | PAYMENTS_ADMIN |
-| 7 | POST | `/payments/intents/{id}/splits` | Repartir el cobro entre cuentas conectadas | MEDIO | 3 | PAYMENTS_ADMIN |
-| 8 | POST | `/payments/intents/{id}/transactions` | Procesar la transacción contra el gateway (authorize/capture) | MEDIO | 5 | PAYMENTS_ADMIN, CASHIER |
-| 9 | POST | `/payments/payouts` | Ejecutar un payout a una cuenta conectada | MEDIO | 2 | PAYMENTS_ADMIN |
-| 10 | POST | `/payments/reconciliation-runs` | Conciliar gateway contra ledger y abrir excepciones | MEDIO | 5 | PAYMENTS_ADMIN |
-| 11 | POST | `/payments/settlements/import` | Importar la liquidación del gateway | MEDIO | 5 | PAYMENTS_ADMIN |
-| 12 | POST | `/payments/transactions/{id}/cancellation-requests` | Solicitar la anulación del cobro | MEDIO | 2 | PAYMENTS_ADMIN, CASHIER |
-| 13 | POST | `/payments/transactions/{id}/refunds` | Emitir un reembolso total o parcial | MEDIO | 3 | PAYMENTS_ADMIN |
-| 14 | POST | `/payments/transactions/{id}/status-inquiry` | Consultar el estado de la transacción en el gateway | BAJO | 1 | PAYMENTS_ADMIN |
+| 4 | POST | `/payments/gateway-dispatches/{intentId}/close` | Cerrar a mano una reserva de despacho | BAJO | 1 | PAYMENTS_ADMIN |
+| 5 | POST | `/payments/gateway-dispatches/{intentId}/reconcile` | Conciliar una reserva de despacho con la pasarela | BAJO | 5 | PAYMENTS_ADMIN |
+| 6 | GET | `/payments/gateway-dispatches/pending-reconciliation` | Reservas de despacho que requieren conciliación | BAJO | 1 | PAYMENTS_ADMIN |
+| 7 | POST | `/payments/gateway-webhooks` | Recibir un webhook de la pasarela de pagos (idempotente) | ALTO | 8 | pública |
+| 8 | POST | `/payments/intents` | Crear una intención de pago idempotente | MEDIO | 2 | PAYMENTS_ADMIN, CASHIER |
+| 9 | POST | `/payments/intents/{id}/fx-lock` | Bloquear el tipo de cambio de la intención | MEDIO | 4 | PAYMENTS_ADMIN |
+| 10 | POST | `/payments/intents/{id}/risk-assessment` | Registrar la evaluación de riesgo y 3-D Secure | MEDIO | 3 | PAYMENTS_ADMIN |
+| 11 | POST | `/payments/intents/{id}/splits` | Repartir el cobro entre cuentas conectadas | MEDIO | 3 | PAYMENTS_ADMIN |
+| 12 | POST | `/payments/intents/{id}/transactions` | Procesar la transacción contra el gateway (authorize/capture) | MEDIO | 7 | PAYMENTS_ADMIN, CASHIER |
+| 13 | POST | `/payments/payouts` | Ejecutar un payout a una cuenta conectada | MEDIO | 2 | PAYMENTS_ADMIN |
+| 14 | POST | `/payments/reconciliation-runs` | Conciliar gateway contra ledger y abrir excepciones | MEDIO | 5 | PAYMENTS_ADMIN |
+| 15 | POST | `/payments/settlements/import` | Importar la liquidación del gateway | MEDIO | 5 | PAYMENTS_ADMIN |
+| 16 | POST | `/payments/transactions/{id}/cancellation-requests` | Solicitar la anulación del cobro | MEDIO | 2 | PAYMENTS_ADMIN, CASHIER |
+| 17 | POST | `/payments/transactions/{id}/refunds` | Emitir un reembolso total o parcial | MEDIO | 3 | PAYMENTS_ADMIN |
+| 18 | POST | `/payments/transactions/{id}/status-inquiry` | Consultar el estado de la transacción en el gateway | BAJO | 1 | PAYMENTS_ADMIN |
 
 ---
 
@@ -42,7 +46,7 @@
 
 Recibir el callback/webhook del gateway (idempotente). Caso de uso UC-42-06: Recibir callback del gateway (idempotente). Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -53,17 +57,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/payments/controllers/payments-operations.controller.ts:95` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:445` |
-| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
-| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:425` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:1099` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:129` |
+| `payments.payment_transactions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback | `src/modules/payments/services/payments-transactions.service.ts:1079` |
 | `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findByGatewayRef | `src/modules/payments/repositories/payment-transactions.repository.ts:247` |
 | `payments.payment_webhook_events` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.recordWebhookEvent | `src/modules/payments/repositories/payment-transactions.repository.ts:360` |
 | `payments.payment_webhook_events` | LEE | LEE | DIRECTA | PaymentsOperationsController.applyCallback → PaymentsTransactionsService.applyCallback → PaymentTransactionsRepository.findWebhookEventByRef | `src/modules/payments/repositories/payment-transactions.repository.ts:343` |
@@ -79,11 +83,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `gatewayTransactionRef` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Referencia de la transacción en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:116` |
-| `outcome` | `string` | Sí | valores: CAPTURED, FAILED, AUTHORIZED | `@IsIn(['CAPTURED', 'FAILED', 'AUTHORIZED'])` | Resultado informado por el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:126` |
-| `authorizationCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código de autorización | `src/modules/payments/dto/payment-transaction.dto.ts:135` |
-| `signature` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Firma del proveedor para verificar el origen | `src/modules/payments/dto/payment-transaction.dto.ts:146` |
-| `timestamp` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Instante de emisión del evento (ISO-8601), firmado junto con el resto | `src/modules/payments/dto/payment-transaction.dto.ts:159` |
+| `gatewayTransactionRef` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Referencia de la transacción en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:141` |
+| `outcome` | `string` | Sí | valores: CAPTURED, FAILED, AUTHORIZED | `@IsIn(['CAPTURED', 'FAILED', 'AUTHORIZED'])` | Resultado informado por el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:151` |
+| `authorizationCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código de autorización | `src/modules/payments/dto/payment-transaction.dto.ts:160` |
+| `signature` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Firma del proveedor para verificar el origen | `src/modules/payments/dto/payment-transaction.dto.ts:171` |
+| `timestamp` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Instante de emisión del evento (ISO-8601), firmado junto con el resto | `src/modules/payments/dto/payment-transaction.dto.ts:184` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -112,12 +116,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `transactionId` | `string` | Sí | formato uuid | — | Transacción correlacionada | `src/modules/payments/dto/payment-transaction.dto.ts:170` |
-| `duplicate` | `boolean` | Sí | — | — | true si el callback ya se había aplicado antes | `src/modules/payments/dto/payment-transaction.dto.ts:178` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:184` |
-| `applied` | `boolean` | Sí | — | — | true si el evento cambió el estado local de la transacción | `src/modules/payments/dto/payment-transaction.dto.ts:193` |
-| `decision` | `string` | Sí | valores: aplicar, duplicado, obsoleto, contradiccion | — | Cómo se interpretó el evento frente al estado ya conocido | `src/modules/payments/dto/payment-transaction.dto.ts:202` |
-| `reconciliationRequired` | `boolean` | Sí | — | — | true si el proveedor afirmó algo incompatible con un estado terminal y hace falta conciliar | `src/modules/payments/dto/payment-transaction.dto.ts:211` |
+| `transactionId` | `string` | Sí | formato uuid | — | Transacción correlacionada | `src/modules/payments/dto/payment-transaction.dto.ts:195` |
+| `duplicate` | `boolean` | Sí | — | — | true si el callback ya se había aplicado antes | `src/modules/payments/dto/payment-transaction.dto.ts:203` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:209` |
+| `applied` | `boolean` | Sí | — | — | true si el evento cambió el estado local de la transacción | `src/modules/payments/dto/payment-transaction.dto.ts:218` |
+| `decision` | `string` | Sí | valores: aplicar, duplicado, obsoleto, contradiccion | — | Cómo se interpretó el evento frente al estado ya conocido | `src/modules/payments/dto/payment-transaction.dto.ts:227` |
+| `reconciliationRequired` | `boolean` | Sí | — | — | true si el proveedor afirmó algo incompatible con un estado terminal y hace falta conciliar | `src/modules/payments/dto/payment-transaction.dto.ts:236` |
 
 ### Respuestas posibles
 
@@ -157,7 +161,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Abrir una sesión de checkout con contexto de cajero. Caso de uso UC-42-02: Abrir sesión de checkout con contexto de cajero. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -169,20 +173,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-operations.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.cashier_payment_contexts` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.createCashierContext | `src/modules/payments/repositories/payment-flow.repository.ts:400` |
-| `payments.payment_checkout_sessions` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.createCheckoutSession | `src/modules/payments/repositories/payment-flow.repository.ts:369` |
+| `payments.cashier_payment_contexts` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.createCashierContext | `src/modules/payments/repositories/payment-flow.repository.ts:401` |
+| `payments.payment_checkout_sessions` | ESCRIBE | CREA | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.createCheckoutSession | `src/modules/payments/repositories/payment-flow.repository.ts:370` |
 | `payments.payment_debts` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession | `src/modules/payments/services/payments-checkout.service.ts:155` |
-| `payments.payment_debts` | LEE | LEE | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.findDebtForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:434` |
-| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.findIntentForCheckout | `src/modules/payments/repositories/payment-flow.repository.ts:454` |
+| `payments.payment_debts` | LEE | LEE | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.findDebtForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:435` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsOperationsController.openCheckout → PaymentsCheckoutService.openSession → PaymentFlowRepository.findIntentForCheckout | `src/modules/payments/repositories/payment-flow.repository.ts:455` |
 
 ### Cuerpo — DTO `OpenCheckoutSessionDto` · `application/json`
 
@@ -283,7 +287,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Publicar una versión del tarifario. Caso de uso UC-42-10: Publicar versión del tarifario. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -295,10 +299,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:115` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -386,7 +390,360 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 4. POST /payments/intents
+## 4. POST /payments/gateway-dispatches/{intentId}/close
+
+- **Origen:** CONTRATO
+- **Nombre:** Cerrar a mano una reserva de despacho
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PaymentsGatewayDispatchesController.close` — `src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:74`
+
+### Qué es y para qué sirve (negocio)
+
+Cerrar a mano una reserva de despacho. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /payments/gateway-dispatches/{intentId}/close` la atiende `PaymentsGatewayDispatchesController.close` (src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:74). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `CloseGatewayDispatchDto` (1 campo, 1 obligatorio). Delega en `PaymentsTransactionsService.closeGatewayDispatch`. Lee payments.payment_intents.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:74` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: intentId | `src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:74` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsGatewayDispatchesController.close → PaymentsTransactionsService.closeGatewayDispatch → PaymentIntentsRepository.findByIdAndTenantForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:151` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `intentId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `CloseGatewayDispatchDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | Sí | longitud mínima 10; longitud máxima 300; patrón runtime REASON_PATTERN | `@Transform(({ obj }: { obj: Record<string, unknown> }) => typeof obj.reason === 'string' ? obj.reason.trim() : obj.reason, )` `@IsString()` `@MaxLength(300)` `@Matches(REASON_PATTERN, { message: 'El motivo debe ser texto con al menos 10 letras (sin llaves, corchetes ni símbolos)', })` | Motivo del cierre, obligatorio: qué se comprobó contra la pasarela. Sin datos personales ni de pacientes. | `src/modules/payments/dto/payment-gateway-dispatch.dto.ts:44` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<ClosedGatewayDispatchDto>` · DTO `ClosedGatewayDispatchDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `paymentIntentId` | `string` | Sí | formato uuid | — | — | `src/modules/payments/dto/payment-gateway-dispatch.dto.ts:69` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | — | `src/modules/payments/dto/payment-gateway-dispatch.dto.ts:72` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: La intención no tiene una reserva de despacho que cerrar; ConflictException: La reserva de esta intención ya fue cerrada; ConflictException: La reserva puede seguir en vuelo: cerrarla ahora podría permitir un segundo cobro. Esperá a que requiera conciliación y no tenga actividad reciente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | PaymentsGatewayBusyException: {intentId} |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 42 — Payments — etapa `ctrl:PaymentsGatewayDispatchesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. POST /payments/gateway-dispatches/{intentId}/reconcile
+
+- **Origen:** CONTRATO
+- **Nombre:** Conciliar una reserva de despacho con la pasarela
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PaymentsGatewayDispatchesController.reconcile` — `src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:54`
+
+### Qué es y para qué sirve (negocio)
+
+Conciliar una reserva de despacho con la pasarela. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /payments/gateway-dispatches/{intentId}/reconcile` la atiende `PaymentsGatewayDispatchesController.reconcile` (src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:54). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Valida el cuerpo como `ReconcileGatewayDispatchDto` (1 campo, 1 obligatorio). Delega en `PaymentsTransactionsService.reconcileGatewayDispatch`. Lee payments.payment_checkout_sessions, payments.payment_debts, payments.payment_intents, payments.payment_transactions, payments.risk_assessments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:54` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: intentId | `src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:54` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `payments.payment_checkout_sessions` | LEE | LEE | DIRECTA | PaymentsGatewayDispatchesController.reconcile → PaymentsTransactionsService.reconcileGatewayDispatch → PaymentsTransactionsService.processViaGateway → PaymentsTransactionsService.processViaGatewayWithSlot → PaymentsTransactionsService.assertDebtAllowsCharge → PaymentFlowRepository.findCheckoutSessionsByIntentForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:470` |
+| `payments.payment_debts` | LEE | LEE | DIRECTA | PaymentsGatewayDispatchesController.reconcile → PaymentsTransactionsService.reconcileGatewayDispatch → PaymentsTransactionsService.processViaGateway → PaymentsTransactionsService.processViaGatewayWithSlot → PaymentsTransactionsService.assertDebtAllowsCharge → PaymentFlowRepository.findDebtByIdForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:482` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsGatewayDispatchesController.reconcile → PaymentsTransactionsService.reconcileGatewayDispatch → PaymentsTransactionsService.processViaGateway → PaymentsTransactionsService.processViaGatewayWithSlot → PaymentIntentsRepository.findByIdAndTenantForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:151` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsGatewayDispatchesController.reconcile → PaymentsTransactionsService.reconcileGatewayDispatch → PaymentsTransactionsService.processViaGateway → PaymentsTransactionsService.processViaGatewayWithSlot → PaymentsTransactionsService.assertNoBlockingOpenOperation → PaymentTransactionsRepository.findPendingByIntent | `src/modules/payments/repositories/payment-transactions.repository.ts:301` |
+| `payments.risk_assessments` | LEE | LEE | DIRECTA | PaymentsGatewayDispatchesController.reconcile → PaymentsTransactionsService.reconcileGatewayDispatch → PaymentsTransactionsService.processViaGateway → PaymentsTransactionsService.processViaGatewayWithSlot → PaymentsTransactionsService.assertRiskCleared → PaymentFlowRepository.findLatestRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:312` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `intentId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `ReconcileGatewayDispatchDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `paymentMethodType` | `string` | Sí | valores: qr, card, bank_transfer, wallet | `@IsIn(GATEWAY_PAYMENT_METHOD_TYPES as readonly string[])` | El MISMO medio de pago con el que se intentó el cobro la primera vez (no se persiste): con otro, la pasarela contesta `idempotency_key_reused`. | `src/modules/payments/dto/payment-gateway-dispatch.dto.ts:21` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "paymentMethodType": "qr"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "paymentMethodType": "qr"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<TransactionResponseDto>` · DTO `TransactionResponseDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:98` |
+| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-transaction.dto.ts:104` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:110` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:116` |
+| `gatewayTransactionRef` | `string` | No | — | — | Valor de gateway transaction ref mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:122` |
+| `gateway` | `PaymentIntentGatewayDto` | No | — | — | Cobro en la pasarela (sólo con `payments.via_gateway`). En ese caso no hay transacción local: `id` es el de la intención y `gatewayTransactionRef` el `pi_…` de la pasarela; el resultado llega por webhook. | `src/modules/payments/dto/payment-transaction.dto.ts:130` |
+| `gateway.paymentIntentId` | `string` | No | — | — | Identificador del cobro en la pasarela (`pi_…`) | `src/modules/payments/dto/payment-intent.dto.ts:164` |
+| `gateway.status` | `object` | No | valores: requires_action, processing, succeeded, failed, canceled, expired | — | Estado del cobro en la pasarela | `src/modules/payments/dto/payment-intent.dto.ts:180` |
+| `gateway.nextAction` | `object` | No | — | — | Qué tiene que hacer el pagador: mostrar el QR, transferir con una referencia o ir al formulario del banco | `src/modules/payments/dto/payment-intent.dto.ts:191` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: La pasarela no está activa: no hay despachos que conciliar; ConflictException: La intención ya fue cobrada; ConflictException: La intención no tiene un despacho pendiente de conciliar; ConflictException: La reserva de este cobro es más vieja que la memoria de la clave en la pasarela: reenviar podría crear un segundo cobro. Concilialo a mano contra la pasarela; ConflictException: La intención ya está en proceso y no tiene un cobro en la pasarela; ConflictException: La intención tiene una operación abierta en el gateway; ConflictException: El importe excede el saldo pendiente de la intención; ConflictException: La deuda ya tiene otro cobro en curso en la pasarela; ConflictException: El importe excede el saldo pendiente de la deuda |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La pasarela cobra en un solo paso: sólo admite la operación SALE; PreconditionFailedException: La intención está cancelada; PreconditionFailedException: La pasarela cobra el importe completo de la intención; PreconditionFailedException: La intención requiere evaluación de riesgo antes de cobrar; PreconditionFailedException: El motor de riesgo rechazó la intención; PreconditionFailedException: La evaluación de riesgo pide revisión humana antes de cobrar; PreconditionFailedException: El importe a procesar debe ser mayor que cero; PreconditionFailedException: La intención parece cobrar una deuda pero no se puede saber cuál: indicá sourceRefType "payment_debt" con el id de la deuda, o abrí una sesión de checkout; PreconditionFailedException: La deuda de la intención no existe; PreconditionFailedException: La deuda ya está saldada; PreconditionFailedException: La pasarela sólo cobra deudas en bolivianos (BOB) |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 42 — Payments — etapa `ctrl:PaymentsGatewayDispatchesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. GET /payments/gateway-dispatches/pending-reconciliation
+
+- **Origen:** CONTRATO
+- **Nombre:** Reservas de despacho que requieren conciliación
+- **Bloque:** Financiero y ERP
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PaymentsGatewayDispatchesController.listPending` — `src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:43`
+
+### Qué es y para qué sirve (negocio)
+
+Reservas de despacho que requieren conciliación. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`GET /payments/gateway-dispatches/pending-reconciliation` la atiende `PaymentsGatewayDispatchesController.listPending` (src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:43). Exige sesión con alguno de los roles PAYMENTS_ADMIN. Delega en `PaymentsTransactionsService.listGatewayDispatchesRequiringReconciliation`. Lee payments.payment_intents.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-gateway-dispatches.controller.ts:43` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsGatewayDispatchesController.listPending → PaymentsTransactionsService.listGatewayDispatchesRequiringReconciliation → PaymentsGatewayChargeService.listDispatchesRequiringReconciliation → PaymentIntentsRepository.findDispatchMarksByTenant | `src/modules/payments/repositories/payment-intents.repository.ts:167` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<PendingGatewayDispatchDto[]>` · DTO `PendingGatewayDispatchDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `paymentIntentId` | `string` | Sí | formato uuid | — | — | `src/modules/payments/dto/payment-gateway-dispatch.dto.ts:50` |
+| `ageMs` | `number` | No | admite null | — | Antigüedad de la reserva en milisegundos; ausente si su fecha no se puede leer. | `src/modules/payments/dto/payment-gateway-dispatch.dto.ts:57` |
+| `canReconcile` | `boolean` | Sí | — | — | `true` si todavía se puede reenviar con la misma clave (conciliar); `false` si hay que cerrarla a mano. | `src/modules/payments/dto/payment-gateway-dispatch.dto.ts:63` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 42 — Payments — etapa `ctrl:PaymentsGatewayDispatchesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. POST /payments/gateway-webhooks
+
+- **Origen:** CONTRATO
+- **Nombre:** Recibir un webhook de la pasarela de pagos (idempotente)
+- **Bloque:** Financiero y ERP
+- **Riesgo:** ALTO — Ruta pública que escribe en la base
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PaymentsGatewayWebhooksController.receive` — `src/modules/payments/controllers/payments-gateway-webhooks.controller.ts:32`
+
+### Qué es y para qué sirve (negocio)
+
+Recibir un webhook de la pasarela de pagos (idempotente). Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+
+### Cómo se atiende (sistema)
+
+`POST /payments/gateway-webhooks` la atiende `PaymentsGatewayWebhooksController.receive` (src/modules/payments/controllers/payments-gateway-webhooks.controller.ts:32). Es una ruta pública: no exige token. Delega en `PaymentsGatewayWebhookService.receive`. Crea filas en payments.payment_webhook_events. Actualiza payments.payment_checkout_sessions, payments.payment_debts, payments.payment_intents. Lee payments.payment_checkout_sessions, payments.payment_debts, payments.payment_intents, payments.payment_webhook_events.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | Ruta pública: no exige token | `src/modules/payments/controllers/payments-gateway-webhooks.controller.ts:32` |
+| RATE_LIMIT | Límite propio: Throttle({ default: { limit: 600, ttl: 60_000 } }) | `src/modules/payments/controllers/payments-gateway-webhooks.controller.ts:32` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `payments.payment_checkout_sessions` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsGatewayWebhooksController.receive → PaymentsGatewayWebhookService.receive → PaymentsGatewayWebhookService.applyIntentEvent → PaymentsGatewayWebhookService.settleDebt | `src/modules/payments/services/payments-gateway-webhook.service.ts:525` |
+| `payments.payment_checkout_sessions` | LEE | LEE | DIRECTA | PaymentsGatewayWebhooksController.receive → PaymentsGatewayWebhookService.receive → PaymentsGatewayWebhookService.applyIntentEvent → PaymentsGatewayWebhookService.settleDebt → PaymentFlowRepository.findCheckoutSessionsByIntentForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:470` |
+| `payments.payment_debts` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsGatewayWebhooksController.receive → PaymentsGatewayWebhookService.receive → PaymentsGatewayWebhookService.applyIntentEvent → PaymentsGatewayWebhookService.settleDebt | `src/modules/payments/services/payments-gateway-webhook.service.ts:514` |
+| `payments.payment_debts` | LEE | LEE | DIRECTA | PaymentsGatewayWebhooksController.receive → PaymentsGatewayWebhookService.receive → PaymentsGatewayWebhookService.applyIntentEvent → PaymentsGatewayWebhookService.settleDebt → PaymentFlowRepository.findDebtByIdForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:482` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsGatewayWebhooksController.receive → PaymentsGatewayWebhookService.receive → PaymentsGatewayWebhookService.applyIntentEvent | `src/modules/payments/services/payments-gateway-webhook.service.ts:380` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsGatewayWebhooksController.receive → PaymentsGatewayWebhookService.receive → PaymentsGatewayWebhookService.applyIntentEvent → PaymentIntentsRepository.findByGatewayIntentRefForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:227` |
+| `payments.payment_webhook_events` | ESCRIBE | CREA | DIRECTA | PaymentsGatewayWebhooksController.receive → PaymentsGatewayWebhookService.receive → PaymentsGatewayWebhookService.applyIntentEvent → PaymentTransactionsRepository.recordWebhookEvent | `src/modules/payments/repositories/payment-transactions.repository.ts:360` |
+| `payments.payment_webhook_events` | LEE | LEE | DIRECTA | PaymentsGatewayWebhooksController.receive → PaymentsGatewayWebhookService.receive → PaymentsGatewayWebhookService.applyIntentEvent → PaymentTransactionsRepository.findWebhookEventByRef | `src/modules/payments/repositories/payment-transactions.repository.ts:343` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<GatewayWebhookResultDto>` · DTO `GatewayWebhookResultDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `received` | `object` | Sí | — | — | Siempre `true`: el evento se verificó y se procesó (o se ignoró a propósito). | `src/modules/payments/dto/payment-gateway-webhook.dto.ts:10` |
+| `eventId` | `string` | Sí | formato uuid | — | Id del evento (`webhook-id`). | `src/modules/payments/dto/payment-gateway-webhook.dto.ts:16` |
+| `applied` | `boolean` | Sí | — | — | `true` si el evento cambió el estado local. | `src/modules/payments/dto/payment-gateway-webhook.dto.ts:22` |
+| `duplicate` | `boolean` | Sí | — | — | `true` si el evento ya estaba archivado: la reentrega no repite el efecto. | `src/modules/payments/dto/payment-gateway-webhook.dto.ts:28` |
+| `ignored` | `boolean` | Sí | — | — | `true` si el evento no corresponde a esta API (otro tipo de evento o un cobro desconocido no terminal). | `src/modules/payments/dto/payment-gateway-webhook.dto.ts:34` |
+| `reconciliationRequired` | `boolean` | Sí | — | — | `true` si el evento quedó archivado sin procesar para conciliación humana. | `src/modules/payments/dto/payment-gateway-webhook.dto.ts:40` |
+| `decision` | `string` | No | valores: aplicar, duplicado, obsoleto, contradiccion | — | Cómo se interpretó el evento contra el estado local. | `src/modules/payments/dto/payment-gateway-webhook.dto.ts:48` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT); UnauthorizedException: La marca de tiempo del webhook está fuera de la ventana permitida / Firma del webhook inválida |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: No hay una intención asociada al cobro informado |
+| 409 | `CONFLICT` | ConflictException: La referencia del cobro de la pasarela corresponde a más de una intención |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El evento es de otro modo (test/live) que la clave configurada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.SERVICE_UNAVAILABLE}; DomainException: {HttpStatus.BAD_REQUEST} |
+
+El árbol de decisión completo está en [flujos](../flujos/payments.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 42 — Payments — etapa `ctrl:PaymentsGatewayWebhooksController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 8. POST /payments/intents
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una intención de pago idempotente
@@ -399,7 +756,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Crear una intención de pago idempotente. Caso de uso UC-42-01: Crear intención de pago idempotente. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -411,34 +768,34 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-intents.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.createIntent → PaymentsIntentsService.createIntent → PaymentIntentsRepository.create | `src/modules/payments/repositories/payment-intents.repository.ts:72` |
-| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.createIntent → PaymentsIntentsService.createIntent → PaymentIntentsRepository.findByIdempotencyKey | `src/modules/payments/repositories/payment-intents.repository.ts:115` |
+| `payments.payment_intents` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.createIntent → PaymentsIntentsService.createIntent → PaymentIntentsRepository.create | `src/modules/payments/repositories/payment-intents.repository.ts:73` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.createIntent → PaymentsIntentsService.createIntent → PaymentIntentsRepository.findByIdempotencyKey | `src/modules/payments/repositories/payment-intents.repository.ts:116` |
 
 ### Cuerpo — DTO `CreatePaymentIntentDto` · `application/json`
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant propietario del cobro | `src/modules/payments/dto/payment-intent.dto.ts:32` |
-| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | Gateway a través del cual se cobrará | `src/modules/payments/dto/payment-intent.dto.ts:42` |
-| `amount` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | Importe a cobrar, como cadena decimal para no perder precisión | `src/modules/payments/dto/payment-intent.dto.ts:54` |
-| `currency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | Moneda ISO-4217 del cobro | `src/modules/payments/dto/payment-intent.dto.ts:64` |
-| `purpose` | `string` | Sí | valores: INVOICE, DEBT, OTHER | `@IsIn(PAYMENT_PURPOSES as readonly string[])` | Propósito del cobro | `src/modules/payments/dto/payment-intent.dto.ts:71` |
-| `idempotencyKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave de idempotencia del cliente. Repetirla devuelve el intent existente en lugar de cobrar dos veces. | `src/modules/payments/dto/payment-intent.dto.ts:83` |
-| `gatewayConnectionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Conexión concreta del gateway | `src/modules/payments/dto/payment-intent.dto.ts:94` |
-| `practiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Práctica que origina el cobro | `src/modules/payments/dto/payment-intent.dto.ts:105` |
-| `invoiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Factura que se está cobrando | `src/modules/payments/dto/payment-intent.dto.ts:116` |
-| `sourceRefType` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Tipo del recurso de origen (referencia polimórfica) | `src/modules/payments/dto/payment-intent.dto.ts:127` |
-| `sourceRefId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Id del recurso de origen | `src/modules/payments/dto/payment-intent.dto.ts:138` |
-| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Vencimiento del intent | `src/modules/payments/dto/payment-intent.dto.ts:149` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | Tenant propietario del cobro | `src/modules/payments/dto/payment-intent.dto.ts:36` |
+| `gatewayId` | `string` | Sí | formato uuid | `@IsUUID()` | Gateway a través del cual se cobrará | `src/modules/payments/dto/payment-intent.dto.ts:46` |
+| `amount` | `string` | Sí | patrón runtime BOUNDED_DECIMAL_REGEX | `@IsNumberString()` `@Matches(BOUNDED_DECIMAL_REGEX, { message: BOUNDED_DECIMAL_MESSAGE })` | Importe a cobrar, como cadena decimal para no perder precisión | `src/modules/payments/dto/payment-intent.dto.ts:58` |
+| `currency` | `string` | Sí | valores: BOB, USD | `@IsIn(['BOB', 'USD'])` | Moneda ISO-4217 del cobro | `src/modules/payments/dto/payment-intent.dto.ts:68` |
+| `purpose` | `string` | Sí | valores: INVOICE, DEBT, OTHER | `@IsIn(PAYMENT_PURPOSES as readonly string[])` | Propósito del cobro | `src/modules/payments/dto/payment-intent.dto.ts:75` |
+| `idempotencyKey` | `string` | Sí | longitud máxima 200 | `@IsString()` `@MaxLength(200)` | Clave de idempotencia del cliente. Repetirla devuelve el intent existente en lugar de cobrar dos veces. | `src/modules/payments/dto/payment-intent.dto.ts:87` |
+| `gatewayConnectionId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Conexión concreta del gateway | `src/modules/payments/dto/payment-intent.dto.ts:98` |
+| `practiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Práctica que origina el cobro | `src/modules/payments/dto/payment-intent.dto.ts:109` |
+| `invoiceId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Factura que se está cobrando | `src/modules/payments/dto/payment-intent.dto.ts:120` |
+| `sourceRefType` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Tipo del recurso de origen (referencia polimórfica) | `src/modules/payments/dto/payment-intent.dto.ts:131` |
+| `sourceRefId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Id del recurso de origen | `src/modules/payments/dto/payment-intent.dto.ts:142` |
+| `expiresAt` | `string` | No | formato date-time | `@IsOptional()` `@IsISO8601()` | Vencimiento del intent | `src/modules/payments/dto/payment-intent.dto.ts:153` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -478,12 +835,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-intent.dto.ts:158` |
-| `tenantId` | `string` | Sí | formato uuid | — | Identificador asociado a tenant. | `src/modules/payments/dto/payment-intent.dto.ts:164` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-intent.dto.ts:170` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Concepto de estado del intent | `src/modules/payments/dto/payment-intent.dto.ts:176` |
-| `idempotencyKey` | `string` | Sí | — | — | Clave de idempotencia con la que se creó | `src/modules/payments/dto/payment-intent.dto.ts:182` |
-| `reused` | `boolean` | Sí | — | — | true si la petición reutilizó un intent ya existente (reintento idempotente) | `src/modules/payments/dto/payment-intent.dto.ts:191` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-intent.dto.ts:200` |
+| `tenantId` | `string` | Sí | formato uuid | — | Identificador asociado a tenant. | `src/modules/payments/dto/payment-intent.dto.ts:206` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-intent.dto.ts:212` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Concepto de estado del intent | `src/modules/payments/dto/payment-intent.dto.ts:218` |
+| `idempotencyKey` | `string` | Sí | — | — | Clave de idempotencia con la que se creó | `src/modules/payments/dto/payment-intent.dto.ts:224` |
+| `reused` | `boolean` | Sí | — | — | true si la petición reutilizó un intent ya existente (reintento idempotente) | `src/modules/payments/dto/payment-intent.dto.ts:233` |
 
 ### Respuestas posibles
 
@@ -493,6 +850,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La pasarela sólo cobra en bolivianos (BOB); PreconditionFailedException: El importe no se puede expresar en centavos enteros positivos; PreconditionFailedException: La pasarela admite cobros que vencen entre 60 segundos y 24 horas |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/payments.md).
@@ -512,7 +870,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 5. POST /payments/intents/{id}/fx-lock
+## 9. POST /payments/intents/{id}/fx-lock
 
 - **Origen:** CONTRATO
 - **Nombre:** Bloquear el tipo de cambio de la intención
@@ -525,7 +883,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Bloquear el tipo de cambio de la intención. Caso de uso UC-42-03: Bloquear tipo de cambio. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -537,20 +895,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-intents.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:75` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.fx_rate_locks` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentFlowRepository.createFxLock | `src/modules/payments/repositories/payment-flow.repository.ts:249` |
-| `payments.fx_rate_locks` | LEE | LEE | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentFlowRepository.findActiveFxLock | `src/modules/payments/repositories/payment-flow.repository.ts:272` |
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate | `src/modules/payments/services/payments-intents.service.ts:217` |
-| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
+| `payments.fx_rate_locks` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentFlowRepository.createFxLock | `src/modules/payments/repositories/payment-flow.repository.ts:250` |
+| `payments.fx_rate_locks` | LEE | LEE | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentFlowRepository.findActiveFxLock | `src/modules/payments/repositories/payment-flow.repository.ts:273` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate | `src/modules/payments/services/payments-intents.service.ts:233` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.lockFxRate → PaymentsIntentsService.lockFxRate → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:129` |
 
 ### Parámetros
 
@@ -611,7 +969,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
-| 409 | `CONFLICT` | ConflictException: La intención ya tiene un bloqueo de cambio vigente |
+| 409 | `CONFLICT` | ConflictException: La intención ya tiene un cobro en la pasarela; no admite este cambio; ConflictException: La intención ya tiene un bloqueo de cambio vigente |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El bloqueo de cambio exige monedas distintas; PreconditionFailedException: Solo se puede bloquear el cambio de una intención pendiente |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -629,7 +987,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 6. POST /payments/intents/{id}/risk-assessment
+## 10. POST /payments/intents/{id}/risk-assessment
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar la evaluación de riesgo y 3-D Secure
@@ -642,7 +1000,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Registrar la evaluación de riesgo y 3-D Secure. Caso de uso UC-42-04: Evaluar riesgo y 3-D Secure. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -654,19 +1012,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-intents.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:93` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk | `src/modules/payments/services/payments-intents.service.ts:274` |
-| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
-| `payments.risk_assessments` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk → PaymentFlowRepository.createRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:289` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk | `src/modules/payments/services/payments-intents.service.ts:305` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:129` |
+| `payments.risk_assessments` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.assessRisk → PaymentsIntentsService.assessRisk → PaymentFlowRepository.createRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:290` |
 
 ### Parámetros
 
@@ -725,6 +1083,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
+| 409 | `CONFLICT` | ConflictException: La intención ya tiene un cobro en la pasarela; no admite este cambio |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/payments.md).
@@ -744,7 +1103,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 7. POST /payments/intents/{id}/splits
+## 11. POST /payments/intents/{id}/splits
 
 - **Origen:** CONTRATO
 - **Nombre:** Repartir el cobro entre cuentas conectadas
@@ -757,7 +1116,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Repartir el cobro entre cuentas conectadas. Caso de uso UC-42-11: Reparto multi-party. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -769,19 +1128,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-intents.controller.ts:131` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:131` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
-| `payments.payment_splits` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentFlowRepository.createSplit | `src/modules/payments/repositories/payment-flow.repository.ts:326` |
-| `payments.payment_splits` | LEE | LEE | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentFlowRepository.findSplitsByIntent | `src/modules/payments/repositories/payment-flow.repository.ts:355` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:129` |
+| `payments.payment_splits` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentFlowRepository.createSplit | `src/modules/payments/repositories/payment-flow.repository.ts:327` |
+| `payments.payment_splits` | LEE | LEE | DIRECTA | PaymentsIntentsController.addSplit → PaymentsIntentsService.addSplit → PaymentFlowRepository.findSplitsByIntent | `src/modules/payments/repositories/payment-flow.repository.ts:356` |
 
 ### Parámetros
 
@@ -842,7 +1201,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
-| 409 | `CONFLICT` | ConflictException: Los repartos superan el importe de la intención |
+| 409 | `CONFLICT` | ConflictException: La intención ya tiene un cobro en la pasarela; no admite este cambio; ConflictException: Los repartos superan el importe de la intención |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un reparto por importe exige `amount`; PreconditionFailedException: Un reparto por porcentaje exige `percentage`; PreconditionFailedException: El reparto debe ser un importe positivo |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -860,7 +1219,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 8. POST /payments/intents/{id}/transactions
+## 12. POST /payments/intents/{id}/transactions
 
 - **Origen:** CONTRATO
 - **Nombre:** Procesar la transacción contra el gateway (authorize/capture)
@@ -873,11 +1232,11 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Procesar la transacción contra el gateway (authorize/capture). Caso de uso UC-42-05: Procesar transacción (authorize/capture/sale). Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
-`POST /payments/intents/{id}/transactions` la atiende `PaymentsIntentsController.processTransaction` (src/modules/payments/controllers/payments-intents.controller.ts:111). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `ProcessTransactionDto` (4 campos, 1 obligatorio). Delega en `PaymentsTransactionsService.processTransaction`. Crea filas en payments.payment_transactions. Actualiza payments.payment_intents. Lee payments.payment_intents, payments.payment_transactions, payments.risk_assessments.
+`POST /payments/intents/{id}/transactions` la atiende `PaymentsIntentsController.processTransaction` (src/modules/payments/controllers/payments-intents.controller.ts:111). Exige sesión con alguno de los roles PAYMENTS_ADMIN, CASHIER. Valida el cuerpo como `ProcessTransactionDto` (5 campos, 1 obligatorio). Delega en `PaymentsTransactionsService.processTransaction`. Crea filas en payments.payment_transactions. Actualiza payments.payment_intents. Lee payments.payment_checkout_sessions, payments.payment_debts, payments.payment_intents, payments.payment_transactions, payments.risk_assessments.
 
 ### Requerimientos
 
@@ -885,21 +1244,23 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-intents.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-intents.controller.ts:111` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction | `src/modules/payments/services/payments-transactions.service.ts:235` |
-| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:128` |
+| `payments.payment_checkout_sessions` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentsTransactionsService.processViaGateway → PaymentsTransactionsService.processViaGatewayWithSlot → PaymentsTransactionsService.assertDebtAllowsCharge → PaymentFlowRepository.findCheckoutSessionsByIntentForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:470` |
+| `payments.payment_debts` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentsTransactionsService.processViaGateway → PaymentsTransactionsService.processViaGatewayWithSlot → PaymentsTransactionsService.assertDebtAllowsCharge → PaymentFlowRepository.findDebtByIdForUpdate | `src/modules/payments/repositories/payment-flow.repository.ts:482` |
+| `payments.payment_intents` | ESCRIBE | ACTUALIZA | POR_TIPO | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction | `src/modules/payments/services/payments-transactions.service.ts:209` |
+| `payments.payment_intents` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentIntentsRepository.findByIdForUpdate | `src/modules/payments/repositories/payment-intents.repository.ts:129` |
 | `payments.payment_transactions` | ESCRIBE | CREA | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentTransactionsRepository.create | `src/modules/payments/repositories/payment-transactions.repository.ts:197` |
-| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentTransactionsRepository.findPendingByIntent | `src/modules/payments/repositories/payment-transactions.repository.ts:301` |
-| `payments.risk_assessments` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentFlowRepository.findLatestRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:311` |
+| `payments.payment_transactions` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentsTransactionsService.assertNoBlockingOpenOperation → PaymentTransactionsRepository.findPendingByIntent | `src/modules/payments/repositories/payment-transactions.repository.ts:301` |
+| `payments.risk_assessments` | LEE | LEE | DIRECTA | PaymentsIntentsController.processTransaction → PaymentsTransactionsService.processTransaction → PaymentsTransactionsService.assertRiskCleared → PaymentFlowRepository.findLatestRiskAssessment | `src/modules/payments/repositories/payment-flow.repository.ts:312` |
 
 ### Parámetros
 
@@ -911,10 +1272,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `operation` | `string` | Sí | valores: AUTHORIZE, CAPTURE, SALE | `@IsIn(TRANSACTION_OPERATIONS as readonly string[])` | Operación a ejecutar | `src/modules/payments/dto/payment-transaction.dto.ts:40` |
-| `amount` | `string` | No | patrón runtime POSITIVE_MONEY_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a procesar. Si se omite se toma el del intent. | `src/modules/payments/dto/payment-transaction.dto.ts:52` |
-| `gatewayTransactionRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia devuelta por el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:61` |
-| `authorizationCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código de autorización del emisor | `src/modules/payments/dto/payment-transaction.dto.ts:70` |
+| `operation` | `string` | Sí | valores: AUTHORIZE, CAPTURE, SALE | `@IsIn(TRANSACTION_OPERATIONS as readonly string[])` | Operación a ejecutar | `src/modules/payments/dto/payment-transaction.dto.ts:45` |
+| `amount` | `string` | No | patrón runtime POSITIVE_MONEY_REGEX | `@IsOptional()` `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a procesar. Si se omite se toma el del intent. | `src/modules/payments/dto/payment-transaction.dto.ts:57` |
+| `gatewayTransactionRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia devuelta por el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:66` |
+| `authorizationCode` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | Código de autorización del emisor | `src/modules/payments/dto/payment-transaction.dto.ts:75` |
+| `paymentMethodType` | `string` | No | valores: qr, card, bank_transfer, wallet | `@IsOptional()` `@IsIn(GATEWAY_PAYMENT_METHOD_TYPES as readonly string[])` | Medio de pago en la pasarela. Obligatorio sólo con `payments.via_gateway` encendido; sin el flag se ignora. | `src/modules/payments/dto/payment-transaction.dto.ts:87` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -931,7 +1293,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
   "operation": "AUTHORIZE",
   "amount": "150.00",
   "gatewayTransactionRef": "valor-ejemplo",
-  "authorizationCode": "CODIGO_EJEMPLO"
+  "authorizationCode": "CODIGO_EJEMPLO",
+  "paymentMethodType": "qr"
 }
 ```
 
@@ -941,11 +1304,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:81` |
-| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-transaction.dto.ts:87` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:93` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:99` |
-| `gatewayTransactionRef` | `string` | No | — | — | Valor de gateway transaction ref mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:105` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:98` |
+| `paymentIntentId` | `string` | Sí | formato uuid | — | Identificador asociado a payment intent. | `src/modules/payments/dto/payment-transaction.dto.ts:104` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:110` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:116` |
+| `gatewayTransactionRef` | `string` | No | — | — | Valor de gateway transaction ref mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:122` |
+| `gateway` | `PaymentIntentGatewayDto` | No | — | — | Cobro en la pasarela (sólo con `payments.via_gateway`). En ese caso no hay transacción local: `id` es el de la intención y `gatewayTransactionRef` el `pi_…` de la pasarela; el resultado llega por webhook. | `src/modules/payments/dto/payment-transaction.dto.ts:130` |
+| `gateway.paymentIntentId` | `string` | No | — | — | Identificador del cobro en la pasarela (`pi_…`) | `src/modules/payments/dto/payment-intent.dto.ts:164` |
+| `gateway.status` | `object` | No | valores: requires_action, processing, succeeded, failed, canceled, expired | — | Estado del cobro en la pasarela | `src/modules/payments/dto/payment-intent.dto.ts:180` |
+| `gateway.nextAction` | `object` | No | — | — | Qué tiene que hacer el pagador: mostrar el QR, transferir con una referencia o ir al formulario del banco | `src/modules/payments/dto/payment-intent.dto.ts:191` |
 
 ### Respuestas posibles
 
@@ -956,8 +1323,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Intención de pago no encontrada |
-| 409 | `CONFLICT` | ConflictException: La intención ya fue cobrada; ConflictException: La intención tiene una operación abierta en el gateway; ConflictException: El importe excede el saldo pendiente de la intención; ConflictException: La captura excede el importe autorizado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La intención está cancelada; PreconditionFailedException: La intención requiere evaluación de riesgo antes de cobrar; PreconditionFailedException: El motor de riesgo rechazó la intención; PreconditionFailedException: El importe a procesar debe ser mayor que cero |
+| 409 | `CONFLICT` | ConflictException: La intención ya fue cobrada; ConflictException: La intención no tiene un despacho pendiente de conciliar; ConflictException: La reserva de este cobro es más vieja que la memoria de la clave en la pasarela: reenviar podría crear un segundo cobro. Concilialo a mano contra la pasarela; ConflictException: La intención ya está en proceso y no tiene un cobro en la pasarela; ConflictException: La intención tiene una operación abierta en el gateway; ConflictException: El importe excede el saldo pendiente de la intención; ConflictException: La deuda ya tiene otro cobro en curso en la pasarela; ConflictException: El importe excede el saldo pendiente de la deuda; ConflictException: La intención se cobra a través de la pasarela; no admite una operación directa contra el proveedor; ConflictException: La captura excede el importe autorizado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La pasarela cobra en un solo paso: sólo admite la operación SALE; PreconditionFailedException: La intención está cancelada; PreconditionFailedException: La pasarela cobra el importe completo de la intención; PreconditionFailedException: La intención requiere evaluación de riesgo antes de cobrar; PreconditionFailedException: El motor de riesgo rechazó la intención; PreconditionFailedException: La evaluación de riesgo pide revisión humana antes de cobrar; PreconditionFailedException: El importe a procesar debe ser mayor que cero; PreconditionFailedException: La intención parece cobrar una deuda pero no se puede saber cuál: indicá sourceRefType "payment_debt" con el id de la deuda, o abrí una sesión de checkout; PreconditionFailedException: La deuda de la intención no existe; PreconditionFailedException: La deuda ya está saldada; PreconditionFailedException: La pasarela sólo cobra deudas en bolivianos (BOB) |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/payments.md).
@@ -977,7 +1344,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 9. POST /payments/payouts
+## 13. POST /payments/payouts
 
 - **Origen:** CONTRATO
 - **Nombre:** Ejecutar un payout a una cuenta conectada
@@ -990,7 +1357,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Ejecutar un payout a una cuenta conectada. Caso de uso UC-42-13: Ejecutar payout a cuenta conectada. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1002,10 +1369,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:149` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1108,7 +1475,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 10. POST /payments/reconciliation-runs
+## 14. POST /payments/reconciliation-runs
 
 - **Origen:** CONTRATO
 - **Nombre:** Conciliar gateway contra ledger y abrir excepciones
@@ -1121,7 +1488,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Conciliar gateway contra ledger y abrir excepciones. Caso de uso UC-42-14: Conciliar gateway vs ledger. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1133,10 +1500,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:166` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1243,7 +1610,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 11. POST /payments/settlements/import
+## 15. POST /payments/settlements/import
 
 - **Origen:** CONTRATO
 - **Nombre:** Importar la liquidación del gateway
@@ -1256,7 +1623,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Importar la liquidación del gateway. Caso de uso UC-42-12: Importar liquidación del gateway. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1268,10 +1635,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-operations.controller.ts:132` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1376,7 +1743,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 12. POST /payments/transactions/{id}/cancellation-requests
+## 16. POST /payments/transactions/{id}/cancellation-requests
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitar la anulación del cobro
@@ -1389,7 +1756,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Solicitar la anulación del cobro. Caso de uso UC-42-09: Solicitar anulación. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1401,11 +1768,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN, CASHIER | `src/modules/payments/controllers/payments-transactions.controller.ts:80` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-transactions.controller.ts:80` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1424,10 +1791,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-transaction.dto.ts:284` |
-| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión del gateway sobre la que se pide la anulación | `src/modules/payments/dto/payment-transaction.dto.ts:294` |
-| `requestNumber` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Número de solicitud, único por tenant | `src/modules/payments/dto/payment-transaction.dto.ts:305` |
-| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Detalle del motivo | `src/modules/payments/dto/payment-transaction.dto.ts:314` |
+| `tenantId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/payments/dto/payment-transaction.dto.ts:309` |
+| `gatewayConnectionId` | `string` | Sí | formato uuid | `@IsUUID()` | Conexión del gateway sobre la que se pide la anulación | `src/modules/payments/dto/payment-transaction.dto.ts:319` |
+| `requestNumber` | `string` | Sí | longitud máxima 100 | `@IsString()` `@MaxLength(100)` | Número de solicitud, único por tenant | `src/modules/payments/dto/payment-transaction.dto.ts:330` |
+| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Detalle del motivo | `src/modules/payments/dto/payment-transaction.dto.ts:339` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1456,9 +1823,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:325` |
-| `requestNumber` | `string` | Sí | — | — | Valor de request number mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:331` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:337` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:350` |
+| `requestNumber` | `string` | Sí | — | — | Valor de request number mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:356` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:362` |
 
 ### Respuestas posibles
 
@@ -1486,7 +1853,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 13. POST /payments/transactions/{id}/refunds
+## 17. POST /payments/transactions/{id}/refunds
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir un reembolso total o parcial
@@ -1499,7 +1866,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Emitir un reembolso total o parcial. Caso de uso UC-42-08: Reembolso total o parcial. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1511,11 +1878,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-transactions.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-transactions.controller.ts:62` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1535,9 +1902,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `amount` | `string` | Sí | patrón runtime POSITIVE_MONEY_REGEX | `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a reembolsar (parcial o total) | `src/modules/payments/dto/payment-transaction.dto.ts:225` |
-| `gatewayRefundRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del reembolso en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:236` |
-| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo libre del reembolso | `src/modules/payments/dto/payment-transaction.dto.ts:245` |
+| `amount` | `string` | Sí | patrón runtime POSITIVE_MONEY_REGEX | `@IsNumberString()` `@Matches(POSITIVE_MONEY_REGEX, { message: POSITIVE_MONEY_MESSAGE })` | Importe a reembolsar (parcial o total) | `src/modules/payments/dto/payment-transaction.dto.ts:250` |
+| `gatewayRefundRef` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | Referencia del reembolso en el gateway | `src/modules/payments/dto/payment-transaction.dto.ts:261` |
+| `reasonText` | `string` | No | longitud máxima 500 | `@IsOptional()` `@IsString()` `@MaxLength(500)` | Motivo libre del reembolso | `src/modules/payments/dto/payment-transaction.dto.ts:270` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1563,10 +1930,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:256` |
-| `paymentTransactionId` | `string` | Sí | formato uuid | — | Identificador asociado a payment transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:262` |
-| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:268` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:274` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:281` |
+| `paymentTransactionId` | `string` | Sí | formato uuid | — | Identificador asociado a payment transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:287` |
+| `amount` | `string` | Sí | — | — | Valor de amount mantenido por la instancia. | `src/modules/payments/dto/payment-transaction.dto.ts:293` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:299` |
 
 ### Respuestas posibles
 
@@ -1597,7 +1964,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 ---
 
-## 14. POST /payments/transactions/{id}/status-inquiry
+## 18. POST /payments/transactions/{id}/status-inquiry
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el estado de la transacción en el gateway
@@ -1610,7 +1977,7 @@ El árbol de decisión completo está en [flujos](../flujos/payments.md).
 
 Consultar el estado de la transacción en el gateway. Caso de uso UC-42-07: Consulta independiente de estado. Dentro del módulo (descripción del modelo, en inglés): «A provider-agnostic payment layer supporting multiple gateways (card, wallet, bank transfer, local rails).» Dominio: Financiero y ERP.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payments/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_42_payments.puml:18`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:31`)
 
 ### Cómo se atiende (sistema)
 
@@ -1622,9 +1989,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/payment
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PAYMENTS_ADMIN | `src/modules/payments/controllers/payments-transactions.controller.ts:41` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/payments/controllers/payments-transactions.controller.ts:41` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
 
 ### Tablas que afecta
 
@@ -1646,9 +2013,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `transactionId` | `string` | Sí | formato uuid | — | Identificador asociado a transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:346` |
-| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:352` |
-| `reconciled` | `boolean` | Sí | — | — | true si la consulta cambió el estado local | `src/modules/payments/dto/payment-transaction.dto.ts:358` |
+| `transactionId` | `string` | Sí | formato uuid | — | Identificador asociado a transaction. | `src/modules/payments/dto/payment-transaction.dto.ts:371` |
+| `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | `src/modules/payments/dto/payment-transaction.dto.ts:377` |
+| `reconciled` | `boolean` | Sí | — | — | true si la consulta cambió el estado local | `src/modules/payments/dto/payment-transaction.dto.ts:383` |
 
 ### Respuestas posibles
 

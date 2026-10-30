@@ -98,8 +98,6 @@ Content-Type: application/json
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PublicBranchAvailabilityResponseDto>` | No |
 | 400 | Operación completada correctamente. | `Promise<PublicBranchAvailabilityResponseDto>` | No |
-| 401 | Operación completada correctamente. | `Promise<PublicBranchAvailabilityResponseDto>` | No |
-| 403 | Operación completada correctamente. | `Promise<PublicBranchAvailabilityResponseDto>` | No |
 | 404 | Operación completada correctamente. | `Promise<PublicBranchAvailabilityResponseDto>` | No |
 | 409 | Operación completada correctamente. | `Promise<PublicBranchAvailabilityResponseDto>` | No |
 | 413 | Operación completada correctamente. | `Promise<PublicBranchAvailabilityResponseDto>` | No |
@@ -275,8 +273,6 @@ Host: localhost:3000
 |---:|---|---|---|
 | 200 | Operación completada correctamente. | `Promise<PublicPharmacyBranchPageDto>` | No |
 | 400 | Consulta completada correctamente. | `Promise<PublicPharmacyBranchPageDto>` | No |
-| 401 | Consulta completada correctamente. | `Promise<PublicPharmacyBranchPageDto>` | No |
-| 403 | Consulta completada correctamente. | `Promise<PublicPharmacyBranchPageDto>` | No |
 | 404 | Consulta completada correctamente. | `Promise<PublicPharmacyBranchPageDto>` | No |
 | 429 | Consulta completada correctamente. | `Promise<PublicPharmacyBranchPageDto>` | No |
 | 500 | Consulta completada correctamente. | `Promise<PublicPharmacyBranchPageDto>` | No |

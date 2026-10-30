@@ -40,17 +40,17 @@
 | [post_shares](#post_shares) | Registra compartidos de publicaciones para conocer cómo circula contenido público entre usuarios. | 11 | 6 | 0 | COINCIDE |
 | [prestige_awards](#prestige_awards) | Registra reconocimientos otorgados a perfiles para comunicar logros o contribuciones comunitarias. | 17 | 6 | 0 | COINCIDE |
 | [prestige_scores](#prestige_scores) | Mantiene puntajes de reputación o participación asociados a perfiles según reglas del producto. | 16 | 4 | 2 | COINCIDE |
-| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 180 | COINCIDE |
+| [public_profiles](#public_profiles) | Publica perfiles de descubrimiento y reputación de prestadores sanitarios, separados del expediente clínico. | 20 | 12 | 189 | COINCIDE |
 | [reactions](#reactions) | Registra reacciones de usuarios a contenido comunitario para expresar interacción social. | 10 | 6 | 16 | COINCIDE |
 | [review_dimension_scores](#review_dimension_scores) | Desglosa puntuaciones de reseñas por dimensión para resumir la experiencia de atención. | 5 | 2 | 4 | COINCIDE |
 | [review_responses](#review_responses) | Conserva respuestas de prestadores a reseñas para sostener interacción y gestión de reputación. | 11 | 5 | 4 | COINCIDE |
-| [service_reviews](#service_reviews) | Registra reseñas sobre prestadores y servicios, con verificación de experiencia cuando corresponde y sin publicar identificadores de encuentros. | 17 | 11 | 24 | COINCIDE |
+| [service_reviews](#service_reviews) | Registra reseñas sobre prestadores y servicios, con verificación de experiencia cuando corresponde y sin publicar identificadores de encuentros. | 17 | 11 | 25 | COINCIDE |
 | [social_follows](#social_follows) | Relaciona usuarios que siguen perfiles para personalizar descubrimiento y actualizaciones públicas. | 11 | 7 | 17 | COINCIDE |
 | [social_notifications](#social_notifications) | Genera avisos sobre interacciones sociales para que usuarios conozcan menciones, respuestas o actividad relevante. | 16 | 8 | 1 | COINCIDE |
 | [social_posts](#social_posts) | Conserva publicaciones públicas de profesionales y organizaciones para informar y facilitar su descubrimiento, sin incorporarlas a la historia clínica. | 16 | 10 | 24 | COINCIDE |
 | [topics](#topics) | Define temas comunitarios para clasificar contenido y espacios de conversación. | 12 | 7 | 2 | COINCIDE |
 | [user_blocks](#user_blocks) | Registra bloqueos entre usuarios para controlar interacciones y seguridad en espacios comunitarios. | 10 | 6 | 36 | COINCIDE |
-| [verified_badges](#verified_badges) | Representa insignias de verificación pública para indicar atributos revisados de perfiles sanitarios. | 15 | 7 | 46 | COINCIDE |
+| [verified_badges](#verified_badges) | Representa insignias de verificación pública para indicar atributos revisados de perfiles sanitarios. | 15 | 7 | 56 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -2892,7 +2892,7 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: public_profiles; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `PublicProfiles` — `src/modules/community/entities/public_profiles.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 180 operaciones
+- **Resumen:** 20 columnas · 12 índices · 9 FK salientes · 32 entrantes · 189 operaciones
 
 #### Columnas
 
@@ -3129,6 +3129,15 @@ Publica perfiles de descubrimiento y reputación de prestadores sanitarios, sepa
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
 | GET /practitioners/me/role-assignments | LEE | DIRECTA |
+| POST /admissions/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/expire-sweep | ACTUALIZA | POR_TIPO |
+| POST /admissions/expire-sweep | LEE | DIRECTA |
+| GET /profiles/practitioners | LEE | POR_SQL |
 | POST /public/profiles/f/{slug}/branch-availability | LEE | POR_SQL |
 | GET /public/profiles/f/{slug}/branches | LEE | POR_SQL |
 | GET /public/profiles/f/{slug}/products | LEE | POR_SQL |
@@ -3412,7 +3421,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: service_reviews; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `ServiceReviews` — `src/modules/community/entities/service_reviews.entity.ts`
-- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 3 entrantes · 24 operaciones
+- **Resumen:** 17 columnas · 11 índices · 9 FK salientes · 3 entrantes · 25 operaciones
 
 #### Columnas
 
@@ -3503,6 +3512,7 @@ Registra reseñas sobre prestadores y servicios, con verificación de experienci
 | GET /public/search/practitioners | LEE | POR_SQL |
 | GET /s/{slug} | LEE | POR_SQL |
 | GET /diagnostic-units/search | LEE | DIRECTA |
+| GET /profiles/practitioners | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -3989,7 +3999,7 @@ Representa insignias de verificación pública para indicar atributos revisados 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_19_community.puml: verified_badges`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_19_community.puml` · **DDL:** `SQL/19_community/02_tables.sql`
 - **Entidad del ORM:** `VerifiedBadges` — `src/modules/community/entities/verified_badges.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 7 FK salientes · 1 entrantes · 46 operaciones
+- **Resumen:** 15 columnas · 7 índices · 7 FK salientes · 1 entrantes · 56 operaciones
 
 #### Columnas
 
@@ -4086,6 +4096,16 @@ Representa insignias de verificación pública para indicar atributos revisados 
 | POST /internal/identity/checks/{id}/results | ACTUALIZA | POR_TIPO |
 | POST /internal/identity/checks/{id}/results | CREA | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
+| POST /admissions/{id}/decision | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/decision | CREA | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/reinstate | CREA | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | ACTUALIZA | POR_TIPO |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/expire-sweep | ACTUALIZA | POR_TIPO |
+| POST /admissions/expire-sweep | LEE | DIRECTA |
 
 #### Gobierno
 

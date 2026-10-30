@@ -607,6 +607,89 @@
       "routes": [
         "GET /billing/service-catalog/:id/image"
       ]
+    },
+    {
+      "reason": "Libreta de direcciones y médico de cabecera del paciente de la sesión: las rutas son `me`, la persona sale del vínculo activo de la cuenta (`resolveOwnPersonId`) y cada `:id` se busca entre las direcciones de esa persona (`findOwn`), así que un id ajeno responde el mismo 404 que uno inexistente. La lista de pacientes que eligieron al profesional sale del perfil profesional de la sesión. Un rol global dejaría fuera al paciente, que es quien las usa.",
+      "evidence": [
+        "src/modules/profiles/application/services/patient-address-book.service.ts#resolveOwnPersonId",
+        "src/modules/profiles/application/services/patient-address-book.service.ts#findOwn",
+        "src/modules/profiles/application/services/primary-practitioner.service.ts#resolveOwnPatientId",
+        "src/modules/profiles/application/services/primary-practitioner.service.ts#resolveOwnPractitionerId"
+      ],
+      "routes": [
+        "DELETE /profiles/patients/me/addresses/:id",
+        "DELETE /profiles/patients/me/primary-practitioner",
+        "GET /profiles/patients/me/addresses",
+        "GET /profiles/patients/me/primary-practitioner",
+        "GET /profiles/practitioners/me/primary-patients",
+        "PATCH /profiles/patients/me/addresses/:id",
+        "POST /profiles/patients/me/addresses",
+        "PUT /profiles/patients/me/addresses/:id/preferred",
+        "PUT /profiles/patients/me/primary-practitioner"
+      ]
+    },
+    {
+      "reason": "Corrección del perfil profesional por `:profileId`: `ProfileOwnershipService.assertOwnsPractitionerProfile` exige ser el titular del perfil o tener SECURITY_ADMIN/SUPERADMIN **global** (un rol concedido dentro de una organización no cuenta: `isPlatform` lo evalúa con `roleAuthorizesInTenant` sin tenant); a cualquier otro, 403. Un `@Roles` de plataforma dejaría fuera al titular.",
+      "evidence": [
+        "src/modules/profiles/application/services/profiles-practitioners.service.ts#updatePractitionerProfile",
+        "src/modules/profiles/application/services/profile-ownership.service.ts#assertOwnsPractitionerProfile",
+        "src/modules/profiles/application/services/profile-ownership.service.ts#isPlatform"
+      ],
+      "routes": [
+        "PATCH /profiles/practitioners/:profileId"
+      ]
+    },
+    {
+      "reason": "Documentos y requisitos para operar de una farmacia o un laboratorio (P50/P51): `assertAuthorized` evalúa el rol de plataforma con su ámbito (`roleAuthorizesInTenant`) o la membresía en ESA organización —OWNER/ADMIN para completar documentos, pertenecer para leer los requisitos—; cualquier otro recibe 403. Un rol global dejaría fuera al dueño de la organización.",
+      "evidence": [
+        "src/modules/directory/services/tenant-document-completion.service.ts#assertAuthorized",
+        "src/modules/directory/services/tenant-document-completion.service.ts#complete",
+        "src/modules/directory/services/tenant-document-completion.service.ts#readiness"
+      ],
+      "routes": [
+        "GET /tenants/:tenantId/laboratory-readiness",
+        "GET /tenants/:tenantId/pharmacy-readiness",
+        "POST /tenants/:tenantId/affiliation-documents"
+      ]
+    },
+    {
+      "reason": "Chat del pedido de farmacia: lo abre el paciente titular del pedido o el PHARMACY_STAFF con el rol vigente en el tenant activo (`roleAuthorizesInTenant`) cuando la farmacia del pedido es de ese tenant; cualquier otro recibe el mismo 404 que un pedido inexistente.",
+      "evidence": [
+        "src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts#openConversation"
+      ],
+      "routes": [
+        "POST /pharmacy/orders/:id/conversation"
+      ]
+    },
+    {
+      "reason": "Vitrinas de organización que la sesión puede atender en la mensajería: el sujeto sale de la sesión y la lista se arma con la misma regla que autoriza actuar como la vitrina (`mayAttendTargetType` y las membresías del actor); no recibe identificadores y sólo devuelve vitrinas públicas de organizaciones.",
+      "evidence": [
+        "src/modules/community/services/community-social-read.service.ts#listAttendableOrganizationShowcases"
+      ],
+      "routes": [
+        "GET /community/profiles/organization-showcases/me"
+      ]
+    },
+    {
+      "reason": "Especialidades del arancel del profesional de la sesión: se calculan desde `actor.practitionerProfileId` (vacío si la cuenta no es profesional); no recibe identificadores y devuelve sólo nombres del arancel con su recuento, sin PHI.",
+      "evidence": [
+        "src/modules/billing/services/procedure-import.service.ts#listMySpecialties"
+      ],
+      "routes": [
+        "GET /billing/service-catalog/procedure-specialties/mine"
+      ]
+    },
+    {
+      "reason": "Admisión del propio médico: las rutas son `me`, la admisión sale del perfil profesional del vínculo SELF y ACTIVO de la cuenta (`currentOf`/`ownLocked`), nunca de la URL ni del cuerpo, así que nadie lee, reenvía ni retira la de otro; sin perfil profesional responde 404. Un rol global dejaría fuera al médico en verificación, que es quien la usa.",
+      "evidence": [
+        "src/modules/profiles/application/services/practitioner-admissions-read.service.ts#currentOf",
+        "src/modules/profiles/application/services/practitioner-admissions.service.ts#ownLocked"
+      ],
+      "routes": [
+        "GET /profiles/practitioners/me/admission",
+        "POST /profiles/practitioners/me/admission/resubmit",
+        "POST /profiles/practitioners/me/admission/withdraw"
+      ]
     }
   ]
 }

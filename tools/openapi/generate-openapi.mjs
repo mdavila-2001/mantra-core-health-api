@@ -146,6 +146,11 @@ const KNOWN_PUBLIC_OPERATIONS = [
   ['post', '/iam/auth/upload-registration-logo'],
   ['get', '/public/profiles/o/{slug}/services'],
   ['get', '/public/profiles/f/{slug}/products'],
+  // P34 y P37 (`pharmacy-public.controller.ts` y `public-catalog.controller.ts`,
+  // las tres con `@Public()`): farmacias abiertas ahora y sucursales de una ficha.
+  ['get', '/public/pharmacies/open-now'],
+  ['get', '/public/profiles/f/{slug}/branches'],
+  ['post', '/public/profiles/f/{slug}/branch-availability'],
   // Borradores del alta y eventos del embudo de onboarding: llevan `@Public()` en
   // `iam-onboarding-drafts.controller.ts` (líneas 24, 41 y 59) y en
   // `telemetry-onboarding-analytics.controller.ts` (línea 31). Entraron en `test`
@@ -157,6 +162,12 @@ const KNOWN_PUBLIC_OPERATIONS = [
   // Calle desde el punto del mapa en el alta (`reverse-geocoding.controller.ts`,
   // `@Public()`, 2026-10-26).
   ['post', '/public/geo/reverse'],
+  // Receta compartida por enlace (`prescription-shares-public.controller.ts`) y
+  // receptor de webhooks de la pasarela de pagos
+  // (`payments-gateway-webhooks.controller.ts`, firma verificada en el servicio):
+  // llevan `@Public()` y entraron sin sumarse acá (2026-10-30).
+  ['get', '/public/prescription-shares/{token}'],
+  ['post', '/payments/gateway-webhooks'],
 ];
 
 function markPublicOperations(document) {
