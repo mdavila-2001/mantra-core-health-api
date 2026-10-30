@@ -102,4 +102,6 @@ export enum PaymentsErrorReason {
   GATEWAY_WEBHOOK_MODE_MISMATCH = 'GATEWAY_WEBHOOK_MODE_MISMATCH',
   /** El cuerpo del webhook no tiene la forma del contrato. */
   GATEWAY_WEBHOOK_MALFORMED = 'GATEWAY_WEBHOOK_MALFORMED',
+  /** Más de una intención (de uno o varios tenants) tiene la misma referencia `pi_…`: no se aplica a ninguna. */
+  GATEWAY_WEBHOOK_INTENT_REF_AMBIGUOUS = 'GATEWAY_WEBHOOK_INTENT_REF_AMBIGUOUS',
 }

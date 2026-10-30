@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { LockMode } from '@mikro-orm/core';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { PaymentIntents } from '../entities';
-import { createdBy } from '../../../common';
+import { ConflictException, createdBy } from '../../../common';
+import { PaymentsErrorReason } from '../payments.error-reasons';
 
 /** Alta de una intención de pago (UC-42-01). */
 export interface CreateIntentData {
@@ -133,19 +134,61 @@ export class PaymentIntentsRepository {
   }
 
   /**
-   * Intención asociada a un cobro de la pasarela (`pi_…`), con `FOR UPDATE`.
+   * Intención asociada a un cobro de la pasarela (`pi_…`), con `FOR UPDATE`, y
+   * deja la transacción **fijada al tenant de esa intención**.
    *
    * La referencia es única por cobro de la pasarela (se asocia una sola vez y
    * la pasarela no repite ids); el bloqueo serializa los webhooks concurrentes
    * del mismo cobro.
+   *
+   * El receptor de webhooks es `@Public()`: no hay actor ni, por tanto,
+   * `app.current_tenant_id` (el `TenantContextInterceptor` devuelve antes de
+   * fijarlo), y la política `tenant_isolation` es fail-closed, así que con un rol
+   * sin `BYPASSRLS` la intención sería invisible. Se resuelve así, sin confiar en
+   * nada que venga del cuerpo y **sólo después de haber verificado la firma**
+   * (lo garantiza el servicio, que llama a este método tras `verify`):
+   *
+   * 1. una única consulta, mínima (`id` y `tenant_id` de las filas con esa
+   *    referencia), bajo la elevación SYSTEM local a la transacción, que se baja
+   *    en cuanto la consulta termina;
+   * 2. con el tenant del dueño resuelto, se fija `app.current_tenant_id` y todo
+   *    lo demás (el bloqueo de la intención, la deuda, las sesiones) corre
+   *    acotado a ese tenant por la propia base.
+   *
+   * Si la referencia la tienen intenciones de más de un tenant (el DDL no impone
+   * UNIQUE sobre `gateway_intent_ref`), no se elige una: falla cerrado con `409`.
+   * Las variables se fijan con `set_config(..., true)`: viven sólo en esta
+   * transacción y no se filtran a la conexión del pool.
+   *
+   * @throws ConflictException si la referencia pertenece a más de una intención.
    */
-  findByGatewayIntentRefForUpdate(
+  async findByGatewayIntentRefForUpdate(
     em: EntityManager,
     gatewayIntentRef: string,
   ): Promise<PaymentIntents | null> {
+    await em.execute("select set_config('app.system_context', 'true', true)");
+    const owners = await em.execute<{ id: string; tenant_id: string }[]>(
+      'select id, tenant_id from payments.payment_intents where gateway_intent_ref = ? limit 2',
+      [gatewayIntentRef],
+    );
+    await em.execute("select set_config('app.system_context', 'false', true)");
+
+    if (owners.length === 0) return null;
+    if (owners.length > 1) {
+      throw new ConflictException(
+        'La referencia del cobro de la pasarela corresponde a más de una intención',
+        undefined,
+        PaymentsErrorReason.GATEWAY_WEBHOOK_INTENT_REF_AMBIGUOUS,
+      );
+    }
+
+    const tenantId = owners[0].tenant_id;
+    await em.execute("select set_config('app.current_tenant_id', ?, true)", [
+      tenantId,
+    ]);
     return em.findOne(
       PaymentIntents,
-      { gatewayIntentRef },
+      { gatewayIntentRef, tenantId },
       { lockMode: LockMode.PESSIMISTIC_WRITE },
     );
   }
