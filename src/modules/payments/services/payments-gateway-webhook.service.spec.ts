@@ -320,7 +320,10 @@ describe('PaymentsGatewayWebhookService', () => {
 
   describe('límite', () => {
     describe('M1: una intención de deuda SIN sesión de checkout no se da por aplicada', () => {
-      const debtIntent = { sourceRefType: 'payment_debt', sourceRefId: 'debt-1' };
+      const debtIntent = {
+        sourceRefType: 'payment_debt',
+        sourceRefId: 'debt-1',
+      };
 
       it('succeeded: la intención se asienta, la deuda NO se toca y el evento queda para conciliar con su motivo', async () => {
         const d = build(config(), { intent: debtIntent });
@@ -343,7 +346,9 @@ describe('PaymentsGatewayWebhookService', () => {
         expect(archived?.payloadJson.reconciliation).toEqual({
           reason: 'debt_without_checkout_session',
         });
-        expect(JSON.stringify(d.logs)).toContain('debt_without_checkout_session');
+        expect(JSON.stringify(d.logs)).toContain(
+          'debt_without_checkout_session',
+        );
       });
 
       it('la reentrega del mismo evento sigue marcada para conciliar', async () => {
@@ -384,9 +389,9 @@ describe('PaymentsGatewayWebhookService', () => {
           reconciliationRequired: false,
         });
         expect(d.events.get(`pay-gateway:${EVENT_A}`)?.processed).toBe(true);
-        expect(d.events.get(`pay-gateway:${EVENT_A}`)?.payloadJson).not.toHaveProperty(
-          'reconciliation',
-        );
+        expect(
+          d.events.get(`pay-gateway:${EVENT_A}`)?.payloadJson,
+        ).not.toHaveProperty('reconciliation');
       });
 
       it('cobro que excede el saldo: conserva el motivo en el evento archivado', async () => {

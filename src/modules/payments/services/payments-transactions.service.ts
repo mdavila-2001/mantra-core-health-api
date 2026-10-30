@@ -366,15 +366,10 @@ export class PaymentsTransactionsService {
       // Una intención de otro tenant responde igual que una inexistente (mismo
       // 404, mismo mensaje, sin `details`): el servicio no se apoya en RLS, que
       // con `RLS_ENFORCE=false` no existe. Ver `assertResourceInTenant`.
-      const found = assertResourceInTenant(
-        loaded,
-        loaded?.tenantId,
-        tenantId,
-        {
-          message: 'Intención de pago no encontrada',
-          reason: PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
-        },
-      );
+      const found = assertResourceInTenant(loaded, loaded?.tenantId, tenantId, {
+        message: 'Intención de pago no encontrada',
+        reason: PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+      });
       this.assertIntentOpen(found, intentId);
       if (dto.amount && compareAmounts(dto.amount, found.amount) !== 0) {
         throw new PreconditionFailedException(

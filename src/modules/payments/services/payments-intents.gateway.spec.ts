@@ -170,7 +170,11 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
       ) => sessions.filter((x) => x.paymentIntentId === intentId),
       findInFlightGatewayIntentsOnDebt: async (
         _tx: unknown,
-        scope: { tenantId: string; paymentDebtId: string; excludeIntentId: string },
+        scope: {
+          tenantId: string;
+          paymentDebtId: string;
+          excludeIntentId: string;
+        },
       ) =>
         [...store.values()].filter(
           (r) =>
@@ -971,7 +975,11 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
       await d.transactions.processTransaction(a.id, sale(), actor);
       double.calls.length = 0;
 
-      const again = await d.transactions.processTransaction(a.id, sale(), actor);
+      const again = await d.transactions.processTransaction(
+        a.id,
+        sale(),
+        actor,
+      );
 
       expect(double.calls.map((c) => c.method)).toEqual(['GET']);
       expect(again.gateway?.paymentIntentId).toMatch(/^pi_/u);
@@ -1088,20 +1096,17 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
         { currencyCode: 'USD' },
         PaymentsErrorReason.PAYMENT_GATEWAY_CURRENCY_NOT_SUPPORTED,
       ],
-    ])(
-      'deuda %s: 422 y cero llamadas',
-      async (_name, patch, reason) => {
-        const d = build(true);
-        const { row } = await created(d);
-        d.assess(row.id, 'APPROVE');
-        Object.assign(d.debts.get(DEBT_ID)!, patch);
+    ])('deuda %s: 422 y cero llamadas', async (_name, patch, reason) => {
+      const d = build(true);
+      const { row } = await created(d);
+      d.assess(row.id, 'APPROVE');
+      Object.assign(d.debts.get(DEBT_ID)!, patch);
 
-        await expect(
-          d.transactions.processTransaction(row.id, sale(), actor),
-        ).rejects.toMatchObject({ status: 422, reason });
-        expect(double.calls).toHaveLength(0);
-      },
-    );
+      await expect(
+        d.transactions.processTransaction(row.id, sale(), actor),
+      ).rejects.toMatchObject({ status: 422, reason });
+      expect(double.calls).toHaveLength(0);
+    });
 
     it('la deuda de la intención no existe: 422 PAYMENT_DEBT_NOT_FOUND (no se cobra algo que no se podrá saldar)', async () => {
       const d = build(true);

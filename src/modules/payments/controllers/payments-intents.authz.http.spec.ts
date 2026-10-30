@@ -83,7 +83,9 @@ describe('POST /payments/intents/:id/transactions (via_gateway) — autorizació
       warn: () => undefined,
       error: () => undefined,
     };
-    const em = { transactional: async (cb: (tx: unknown) => unknown) => cb({}) };
+    const em = {
+      transactional: async (cb: (tx: unknown) => unknown) => cb({}),
+    };
     const intentsRepo = {
       // Como el repositorio real: por UUID, sin mirar el tenant.
       findByIdForUpdate: async (_tx: unknown, id: string) =>

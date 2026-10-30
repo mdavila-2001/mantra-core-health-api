@@ -491,7 +491,8 @@ export class PaymentsGatewayWebhookService {
     }
 
     const debtIds = [...new Set(sessions.map((s) => s.paymentDebtId))];
-    if (debtIds.length !== 1) return { settled: false, reason: 'several_debts' };
+    if (debtIds.length !== 1)
+      return { settled: false, reason: 'several_debts' };
 
     const debt = await this.flowRepo.findDebtByIdForUpdate(tx, debtIds[0]);
     if (

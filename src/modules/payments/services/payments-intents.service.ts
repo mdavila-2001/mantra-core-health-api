@@ -272,7 +272,8 @@ export class PaymentsIntentsService {
 
       // Un DECLINE pasa la intención a `failed`; con el cobro ya creado en la
       // pasarela eso dejaría un cobro vivo contra una intención dada por perdida.
-      if (dto.decision === 'DECLINE') this.assertNotDispatched(intent, intentId);
+      if (dto.decision === 'DECLINE')
+        this.assertNotDispatched(intent, intentId);
 
       const riskLevel = this.deriveRiskLevel(dto.riskScore);
       const assessment = this.flowRepo.createRiskAssessment(tx, {

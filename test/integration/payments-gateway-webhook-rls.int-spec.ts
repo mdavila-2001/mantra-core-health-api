@@ -123,8 +123,10 @@ describeIt('Receptor de webhooks bajo RLS con un rol NOBYPASSRLS', () => {
     error: () => undefined,
   };
 
-  const q = async <T = Record<string, any>>(sql: string, params: unknown[] = []) =>
-    (await su.query(sql, params)).rows as T[];
+  const q = async <T = Record<string, any>>(
+    sql: string,
+    params: unknown[] = [],
+  ) => (await su.query(sql, params)).rows as T[];
 
   beforeAll(async () => {
     admin = new Client({ ...PG, database: 'postgres' });
@@ -196,6 +198,17 @@ describeIt('Receptor de webhooks bajo RLS con un rol NOBYPASSRLS', () => {
     await app?.close(true);
     await su?.end();
     if (admin) {
+      // El pool cierra sus sockets de forma asíncrona: terminar un backend que el
+      // pool todavía conserva ocioso emite un error sin manejar. Se espera por
+      // condición a que no quede ninguna conexión de esta base antes de tirarla.
+      for (let i = 0; i < 100; i += 1) {
+        const open = await admin.query(
+          `select count(*)::int as n from pg_stat_activity where datname = $1 and pid <> pg_backend_pid()`,
+          [DB_NAME],
+        );
+        if (open.rows[0].n === 0) break;
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
       await admin.query(
         `select pg_terminate_backend(pid) from pg_stat_activity where datname = $1 and pid <> pg_backend_pid()`,
         [DB_NAME],
@@ -435,9 +448,7 @@ describeIt('Receptor de webhooks bajo RLS con un rol NOBYPASSRLS', () => {
         .filter((r) => r.status === 'rejected')
         .map((r) => String((r as PromiseRejectedResult).reason)),
     ).toEqual([]);
-    const values = results.map(
-      (r) => (r as PromiseFulfilledResult<any>).value,
-    );
+    const values = results.map((r) => (r as PromiseFulfilledResult<any>).value);
     expect(values.filter((v) => v.applied === true)).toHaveLength(1);
     expect(values.filter((v) => v.duplicate === true)).toHaveLength(9);
     const snap = await snapshot(s);
@@ -526,9 +537,10 @@ describeIt('Receptor de webhooks bajo RLS con un rol NOBYPASSRLS', () => {
       );
       expect(other.status_concept_id).toBe(CONCEPTS.PI_PENDING);
       expect(
-        await q(`select 1 from payments.payment_webhook_events where related_intent_id = any($1)`, [
-          [a.intentId, clone.id],
-        ]),
+        await q(
+          `select 1 from payments.payment_webhook_events where related_intent_id = any($1)`,
+          [[a.intentId, clone.id]],
+        ),
       ).toHaveLength(0);
     });
   });

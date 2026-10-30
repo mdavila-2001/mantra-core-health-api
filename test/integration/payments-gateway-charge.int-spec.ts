@@ -322,6 +322,17 @@ describeIt(
       await double.stop();
       await orm?.close(true);
       if (admin) {
+        // El pool cierra sus sockets de forma asíncrona: terminar un backend que el
+        // pool todavía conserva ocioso emite un error sin manejar. Se espera por
+        // condición a que no quede ninguna conexión de esta base antes de tirarla.
+        for (let i = 0; i < 100; i += 1) {
+          const open = await admin.query(
+            `select count(*)::int as n from pg_stat_activity where datname = $1 and pid <> pg_backend_pid()`,
+            [DB_NAME],
+          );
+          if (open.rows[0].n === 0) break;
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
         // Sólo la base propia (nombre con prefijo y sufijo aleatorio de esta corrida).
         await admin.query(
           `select pg_terminate_backend(pid) from pg_stat_activity where datname = $1 and pid <> pg_backend_pid()`,
@@ -1376,11 +1387,7 @@ describeIt(
       });
 
       it('deuda saldada: 422 y cero llamadas', async () => {
-        const c = await createIntent(
-          on,
-          {},
-          { status: CONCEPTS.DEBT_SETTLED },
-        );
+        const c = await createIntent(on, {}, { status: CONCEPTS.DEBT_SETTLED });
         await assess(c.id, 'APPROVE');
 
         await expectDomainError(
