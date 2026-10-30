@@ -16,25 +16,27 @@ import { PublicPharmacyBranchesRepository } from '../../src/modules/public/infra
 
 /**
  * A1 (26/10/2026) — la regla única de existencias por sede, contra PostgreSQL
- * real: lotes si la sede los lleva, lo declarado en el catálogo si no; nunca lo
- * marcado «no tengo» ni un borrador.
+ * real: lotes si el producto tiene posición en la sede, lo declarado en el
+ * catálogo si no; nunca lo marcado «no tengo» ni un borrador. La decisión es
+ * por producto (D-06-3): que la sede lleve lotes de unos no apaga los demás.
  *
  * Datos: sólo sintéticos, marcados con `A1-<sufijo>`, creados y retirados por
  * la prueba.
  *
  * Escenario: una farmacia verificada con dos sedes.
- * - **Lotes**: tiene una ubicación activa con posiciones → manda el libro.
+ * - **Lotes**: tiene una ubicación activa con posiciones de algunos productos:
+ *   en esos manda el libro, en los demás el catálogo.
  * - **Declarada**: no tiene ninguna posición → manda el catálogo.
  *
- * | Producto      | Catálogo                       | Libro (sede Lotes) | Lotes | Declarada |
- * |---------------|--------------------------------|--------------------|-------|-----------|
- * | `pDecl3`      | stock 3                        | —                  | no    | sí (3)    |
- * | `pSinConteo`  | sin conteo (NULL)              | —                  | no    | sí (null) |
- * | `pCero`       | stock 0                        | —                  | no    | no        |
- * | `pNoTengo`    | «no tengo», stock 5            | 7                  | no    | no        |
- * | `pLotes`      | sin conteo                     | 4                  | sí (4)| sí (null) |
- * | `pLotesCero`  | stock 9                        | 0                  | no    | sí (9)    |
- * | `pBorrador`   | borrador, stock 5              | 6                  | no    | no        |
+ * | Producto      | Catálogo             | Libro (sede Lotes) | Lotes     | Declarada |
+ * |---------------|----------------------|--------------------|-----------|-----------|
+ * | `pDecl3`      | stock 3              | —                  | sí (3)    | sí (3)    |
+ * | `pSinConteo`  | sin conteo (NULL)    | —                  | sí (null) | sí (null) |
+ * | `pCero`       | stock 0              | —                  | no        | no        |
+ * | `pNoTengo`    | «no tengo», stock 5  | 7                  | no        | no        |
+ * | `pLotes`      | sin conteo           | 4                  | sí (4)    | sí (null) |
+ * | `pLotesCero`  | stock 9              | 0                  | no        | sí (9)    |
+ * | `pBorrador`   | borrador, stock 5    | 6                  | no        | no        |
  */
 describe('A1 · existencias por sede: lotes o catálogo (DB real)', () => {
   let orm: MikroORM;
@@ -259,7 +261,7 @@ describe('A1 · existencias por sede: lotes o catálogo (DB real)', () => {
   const name = (productId: string) =>
     products.find(([p]) => p === productId)?.[1];
 
-  it('la regla, sola: cada sede usa su fuente y nunca ofrece «no tengo» ni borradores', async () => {
+  it('la regla, sola: cada producto usa su fuente y nunca ofrece «no tengo» ni borradores', async () => {
     const a = siteProductAvailabilitySql();
     const rows = await all<{
       site_id: string;
@@ -283,7 +285,13 @@ describe('A1 · existencias por sede: lotes o catálogo (DB real)', () => {
         ])
         .sort();
 
-    expect(at(ids.sLotes)).toEqual([['Paracetamol lotes', '4', 'LEDGER']]);
+    expect(at(ids.sLotes)).toEqual(
+      [
+        ['Gasa sin conteo', null, 'DECLARED'],
+        ['Paracetamol lotes', '4', 'LEDGER'],
+        ['Venda declarada', '3', 'DECLARED'],
+      ].sort(),
+    );
     expect(at(ids.sDecl)).toEqual(
       [
         ['Gasa sin conteo', null, 'DECLARED'],
@@ -294,7 +302,7 @@ describe('A1 · existencias por sede: lotes o catálogo (DB real)', () => {
     );
   });
 
-  it('P37: la receta encuentra lo declarado en la sede sin lotes y lo del libro en la sede con lotes', async () => {
+  it('P37: la receta encuentra lo del libro donde hay posición y lo declarado donde no', async () => {
     const service = new PublicPharmacyBranchesService(
       orm.em as never,
       new PublicCatalogRepository(),
@@ -314,9 +322,12 @@ describe('A1 · existencias por sede: lotes o catálogo (DB real)', () => {
         .matches.map((m) => m.term)
         .sort(),
     ).toEqual(['paracetamol', 'venda']);
-    expect(bySite.get(ids.sLotes)!.matches.map((m) => m.term)).toEqual([
-      'paracetamol',
-    ]);
+    expect(
+      bySite
+        .get(ids.sLotes)!
+        .matches.map((m) => m.term)
+        .sort(),
+    ).toEqual(['paracetamol', 'venda']);
   });
 
   it('P31: el catálogo público rotula «hay» si alguna sede lo tiene', async () => {
@@ -357,7 +368,9 @@ describe('A1 · existencias por sede: lotes o catálogo (DB real)', () => {
       .sort();
     expect(got).toEqual(
       [
+        ['Lotes', 'Gasa sin conteo', null],
         ['Lotes', 'Paracetamol lotes', '4'],
+        ['Lotes', 'Venda declarada', '3'],
         ['Declarada', 'Gasa sin conteo', null],
         ['Declarada', 'Ibuprofeno agotado', '9'],
         ['Declarada', 'Paracetamol lotes', null],
