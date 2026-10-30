@@ -1,3 +1,5 @@
+import { exceedsQuantity } from './prescription-balance';
+
 /**
  * Motivos por los que un pedido no respeta la receta (FAR-03). Cada uno es el
  * `reason` de un 422 `PRECONDITION_FAILED`.
@@ -141,8 +143,9 @@ export function evaluatePrescriptionOrder(
   for (const [conceptId, lines] of linesByDrug) {
     const remaining = remainingByDrug.get(conceptId);
     if (remaining === null || remaining === undefined) continue;
-    const requested = lines.reduce((sum, line) => sum + line.quantity, 0);
-    if (requested > remaining) {
+    // Exacta: con decimales, `0.3 − 0.1` y un pedido de `0.2` no lo supera.
+    const requested = lines.map((line) => line.quantity);
+    if (exceedsQuantity(requested, remaining)) {
       return {
         reason: 'QUANTITY_EXCEEDS_PRESCRIPTION',
         productIds: lines.map((line) => line.productId),

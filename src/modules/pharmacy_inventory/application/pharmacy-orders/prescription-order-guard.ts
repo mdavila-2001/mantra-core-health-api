@@ -4,6 +4,7 @@ import { PreconditionFailedException } from '../../../../common';
 import {
   isComparableUnit,
   remainingQuantity,
+  sumQuantities,
 } from '../../domain/prescription-balance';
 import {
   evaluatePrescriptionOrder,
@@ -167,7 +168,7 @@ export class PrescriptionOrderGuard {
       const unit = units.size === 1 ? [...units][0] : null;
       const quantity = group.some((item) => item.quantity === null)
         ? null
-        : group.reduce((sum, item) => sum + (item.quantity ?? 0), 0);
+        : sumQuantities(group.map((item) => item.quantity ?? 0));
       return { conceptId, unit, quantity };
     });
 
