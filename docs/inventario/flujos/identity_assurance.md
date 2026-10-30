@@ -36,8 +36,8 @@ _Fuente: `src/modules/identity_assurance/README.md:3`_
 |  |  | POST /identity/verification-cases/{id}/manual-review | SECURITY_ADMIN | MEDIO | 7 |
 |  |  | POST /identity/verification-cases/expire-sweep | SYSTEM · SECURITY_ADMIN | MEDIO | 11 |
 | `ctrl:IdentityChecksController` | Operaciones de IdentityChecksController que el README no asigna a un caso de uso | POST /identity/checks/{id}/attempts | SECURITY_ADMIN | MEDIO | 8 |
-|  |  | POST /identity/checks/{id}/results | SECURITY_ADMIN | MEDIO | 33 |
-| `ctrl:IdentityManualReviewController` | Operaciones de IdentityManualReviewController que el README no asigna a un caso de uso | POST /identity/manual-review/{id}/decision | SECURITY_ADMIN | MEDIO | 35 |
+|  |  | POST /identity/checks/{id}/results | SECURITY_ADMIN | ALTO | 50 |
+| `ctrl:IdentityManualReviewController` | Operaciones de IdentityManualReviewController que el README no asigna a un caso de uso | POST /identity/manual-review/{id}/decision | SECURITY_ADMIN | ALTO | 52 |
 | `ctrl:IdentityPoliciesController` | Operaciones de IdentityPoliciesController que el README no asigna a un caso de uso | POST /identity/verification-policies | SECURITY_ADMIN | MEDIO | 1 |
 | `ctrl:IdentitySelfServiceController` | Operaciones de IdentitySelfServiceController que el README no asigna a un caso de uso | POST /identity/me/identity-verification | Cualquier sesión válida | ALTO | 15 |
 |  |  | POST /identity/me/practitioner/identity-verification | Cualquier sesión válida | ALTO | 16 |
@@ -47,7 +47,7 @@ _Fuente: `src/modules/identity_assurance/README.md:3`_
 |  |  | GET /identity/me/verification-cases/{caseId} | Cualquier sesión válida | BAJO | 8 |
 |  |  | GET /identity/me/verification-types | Cualquier sesión válida | BAJO | 4 |
 | `ctrl:IdentityWorkerController` | Operaciones de IdentityWorkerController que el README no asigna a un caso de uso | POST /internal/identity/checks/{id}/attempts | SYSTEM · SECURITY_ADMIN | MEDIO | 8 |
-|  |  | POST /internal/identity/checks/{id}/results | SYSTEM · SECURITY_ADMIN | MEDIO | 33 |
+|  |  | POST /internal/identity/checks/{id}/results | SYSTEM · SECURITY_ADMIN | ALTO | 50 |
 |  |  | GET /internal/identity/checks/dispatchable | SYSTEM · SECURITY_ADMIN | BAJO | 6 |
 |  |  | POST /internal/identity/evidence/lifecycle-scan | SYSTEM | ALTO | 36 |
 |  |  | POST /internal/identity/evidence/storage-purge-review | SYSTEM | MEDIO | 21 |
@@ -58,7 +58,7 @@ _Fuente: `src/modules/identity_assurance/README.md:3`_
 flowchart LR
   a2(["SECURITY_ADMIN"]):::actor
   a39(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a51(["Cualquier sesión válida"]):::actor
+  a53(["Cualquier sesión válida"]):::actor
   t3[("audit.verified_badges_history")]:::tabla
   t4[("community.public_profiles")]:::tabla
   t5[("community.verified_badges")]:::tabla
@@ -81,10 +81,12 @@ flowchart LR
   t36[("identity_assurance.identity_manual_review_cases")]:::tabla
   t42[("identity_assurance.identity_verification_attempts")]:::tabla
   t45[("common.addresses")]:::tabla
-  t52[("iam.authentication_credentials")]:::tabla
-  t53[("iam.email_verifications")]:::tabla
-  t62[("identity_assurance.identity_check_results")]:::tabla
-  t67[("profiles.health_practitioner_profiles")]:::tabla
+  t46[("common.contact_points")]:::tabla
+  t47[("common.identifiers")]:::tabla
+  t54[("iam.authentication_credentials")]:::tabla
+  t55[("iam.email_verifications")]:::tabla
+  t64[("identity_assurance.identity_check_results")]:::tabla
+  t69[("profiles.health_practitioner_profiles")]:::tabla
   t7[("+5 tablas más")]
   subgraph s0["ctrl:IdentityAssertionsController · Operaciones de IdentityAssertionsController…"]
     o1["POST /identity/assertions/{id}/revoke"]:::op
@@ -110,32 +112,32 @@ flowchart LR
     o38["POST /identity/verification-cases/expire-sweep"]:::op
   end
   t43[("+2 tablas más")]
-  t46[("+27 tablas más")]
+  t48[("+44 tablas más")]
   subgraph s3["ctrl:IdentityChecksController · Operaciones de IdentityChecksController que el…"]
     o41["POST /identity/checks/{id}/attempts"]:::op
     o44["POST /identity/checks/{id}/results"]:::op
   end
-  t48[("+29 tablas más")]
+  t50[("+46 tablas más")]
   subgraph s4["ctrl:IdentityManualReviewController · Operaciones de IdentityManualReviewContro…"]
-    o47["POST /identity/manual-review/{id}/decision"]:::op
+    o49["POST /identity/manual-review/{id}/decision"]:::op
   end
   subgraph s5["ctrl:IdentityPoliciesController · Operaciones de IdentityPoliciesController que…"]
-    o49["POST /identity/verification-policies"]:::op
+    o51["POST /identity/verification-policies"]:::op
   end
-  t54[("+9 tablas más")]
-  t56[("+10 tablas más")]
-  t58[("+11 tablas más")]
-  t60[("+9 tablas más")]
-  t63[("+1 tablas más")]
-  t65[("+2 tablas más")]
+  t56[("+9 tablas más")]
+  t58[("+10 tablas más")]
+  t60[("+11 tablas más")]
+  t62[("+9 tablas más")]
+  t65[("+1 tablas más")]
+  t67[("+2 tablas más")]
   subgraph s6["ctrl:IdentitySelfServiceController · Operaciones de IdentitySelfServiceControll…"]
-    o50["POST /identity/me/identity-verification"]:::op
-    o55["POST /identity/me/practitioner/identity-verification"]:::op
-    o57["POST /identity/me/practitioner/license-verification"]:::op
-    o59["POST /identity/me/tenants/{tenantId}/verification"]:::op
-    o61["GET /identity/me/verification-cases"]:::op
-    o64["GET /identity/me/verification-cases/{caseId}"]:::op
-    o66["GET /identity/me/verification-types"]:::op
+    o52["POST /identity/me/identity-verification"]:::op
+    o57["POST /identity/me/practitioner/identity-verification"]:::op
+    o59["POST /identity/me/practitioner/license-verification"]:::op
+    o61["POST /identity/me/tenants/{tenantId}/verification"]:::op
+    o63["GET /identity/me/verification-cases"]:::op
+    o66["GET /identity/me/verification-cases/{caseId}"]:::op
+    o68["GET /identity/me/verification-types"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -227,74 +229,74 @@ flowchart LR
   a2 --> o44
   o44 -->|"CREA"| t3
   o44 -->|"LEE"| t45
-  o44 -->|"ACTUALIZA"| t4
-  o44 -->|"LEE"| t4
-  o44 -->|"ACTUALIZA"| t5
-  o44 -->|"CREA"| t5
-  o44 -.-> t46
-  a2 --> o47
-  o47 -->|"CREA"| t3
-  o47 -->|"LEE"| t45
-  o47 -->|"ACTUALIZA"| t4
-  o47 -->|"LEE"| t4
-  o47 -->|"ACTUALIZA"| t5
-  o47 -->|"CREA"| t5
-  o47 -.-> t48
+  o44 -->|"LEE"| t46
+  o44 -->|"LEE"| t29
+  o44 -->|"LEE"| t30
+  o44 -->|"LEE"| t47
+  o44 -.-> t48
   a2 --> o49
-  o49 -->|"CREA"| t19
-  a51 --> o50
-  o50 -->|"LEE"| t29
-  o50 -->|"LEE"| t30
-  o50 -->|"LEE"| t52
-  o50 -->|"LEE"| t53
-  o50 -->|"CREA"| t24
-  o50 -->|"CREA"| t21
-  o50 -.-> t54
-  a51 --> o55
-  o55 -->|"LEE"| t29
-  o55 -->|"LEE"| t30
-  o55 -->|"LEE"| t52
-  o55 -->|"LEE"| t53
-  o55 -->|"CREA"| t24
-  o55 -->|"CREA"| t21
-  o55 -.-> t56
-  a51 --> o57
+  o49 -->|"CREA"| t3
+  o49 -->|"LEE"| t45
+  o49 -->|"LEE"| t46
+  o49 -->|"LEE"| t29
+  o49 -->|"LEE"| t30
+  o49 -->|"LEE"| t47
+  o49 -.-> t50
+  a2 --> o51
+  o51 -->|"CREA"| t19
+  a53 --> o52
+  o52 -->|"LEE"| t29
+  o52 -->|"LEE"| t30
+  o52 -->|"LEE"| t54
+  o52 -->|"LEE"| t55
+  o52 -->|"CREA"| t24
+  o52 -->|"CREA"| t21
+  o52 -.-> t56
+  a53 --> o57
   o57 -->|"LEE"| t29
   o57 -->|"LEE"| t30
-  o57 -->|"LEE"| t52
-  o57 -->|"LEE"| t53
+  o57 -->|"LEE"| t54
+  o57 -->|"LEE"| t55
   o57 -->|"CREA"| t24
   o57 -->|"CREA"| t21
   o57 -.-> t58
-  a51 --> o59
+  a53 --> o59
   o59 -->|"LEE"| t29
   o59 -->|"LEE"| t30
-  o59 -->|"LEE"| t6
-  o59 -->|"LEE"| t52
-  o59 -->|"LEE"| t53
+  o59 -->|"LEE"| t54
+  o59 -->|"LEE"| t55
   o59 -->|"CREA"| t24
+  o59 -->|"CREA"| t21
   o59 -.-> t60
-  a51 --> o61
-  o61 -->|"LEE"| t62
-  o61 -->|"LEE"| t24
-  o61 -->|"LEE"| t21
-  o61 -->|"LEE"| t36
-  o61 -->|"LEE"| t15
-  o61 -->|"LEE"| t16
-  o61 -.-> t63
-  a51 --> o64
-  o64 -->|"LEE"| t6
-  o64 -->|"LEE"| t62
-  o64 -->|"LEE"| t24
-  o64 -->|"LEE"| t21
-  o64 -->|"LEE"| t36
-  o64 -->|"LEE"| t15
-  o64 -.-> t65
-  a51 --> o66
+  a53 --> o61
+  o61 -->|"LEE"| t29
+  o61 -->|"LEE"| t30
+  o61 -->|"LEE"| t6
+  o61 -->|"LEE"| t54
+  o61 -->|"LEE"| t55
+  o61 -->|"CREA"| t24
+  o61 -.-> t62
+  a53 --> o63
+  o63 -->|"LEE"| t64
+  o63 -->|"LEE"| t24
+  o63 -->|"LEE"| t21
+  o63 -->|"LEE"| t36
+  o63 -->|"LEE"| t15
+  o63 -->|"LEE"| t16
+  o63 -.-> t65
+  a53 --> o66
+  o66 -->|"LEE"| t6
+  o66 -->|"LEE"| t64
+  o66 -->|"LEE"| t24
+  o66 -->|"LEE"| t21
+  o66 -->|"LEE"| t36
   o66 -->|"LEE"| t15
-  o66 -->|"LEE"| t67
-  o66 -->|"LEE"| t16
-  o66 -->|"LEE"| t17
+  o66 -.-> t67
+  a53 --> o68
+  o68 -->|"LEE"| t15
+  o68 -->|"LEE"| t69
+  o68 -->|"LEE"| t16
+  o68 -->|"LEE"| t17
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -306,32 +308,32 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["SYSTEM · SECURITY_ADMIN"]):::actor
-  a18(["SYSTEM"]):::actor
+  a20(["SYSTEM"]):::actor
   t3[("directory.tenant_memberships")]:::tabla
   t4[("identity_assurance.identity_checks")]:::tabla
   t5[("identity_assurance.identity_verification_attempts")]:::tabla
   t6[("identity_assurance.identity_verification_cases")]:::tabla
   t9[("audit.verified_badges_history")]:::tabla
   t10[("common.addresses")]:::tabla
-  t11[("community.public_profiles")]:::tabla
-  t12[("community.verified_badges")]:::tabla
-  t15[("profiles.jurisdiction_authorizations")]:::tabla
-  t16[("profiles.person_account_links")]:::tabla
-  t19[("audio_assets.audio_assets")]:::tabla
-  t20[("common.file_derivatives")]:::tabla
-  t21[("common.file_versions")]:::tabla
-  t22[("common.files")]:::tabla
+  t11[("common.contact_points")]:::tabla
+  t12[("common.file_versions")]:::tabla
+  t13[("common.files")]:::tabla
+  t14[("common.identifiers")]:::tabla
+  t17[("profiles.jurisdiction_authorizations")]:::tabla
+  t18[("profiles.person_account_links")]:::tabla
+  t21[("audio_assets.audio_assets")]:::tabla
+  t22[("common.file_derivatives")]:::tabla
   t25[("cross_store_consistency.deletion_targets")]:::tabla
   t26[("identity_assurance.identity_evidence_records")]:::tabla
   t7[("+2 tablas más")]
-  t13[("+27 tablas más")]
+  t15[("+44 tablas más")]
   t23[("+30 tablas más")]
   t27[("+15 tablas más")]
   subgraph s0["ctrl:IdentityWorkerController · Operaciones de IdentityWorkerController que el…"]
     o1["POST /internal/identity/checks/{id}/attempts"]:::op
     o8["POST /internal/identity/checks/{id}/results"]:::op
-    o14["GET /internal/identity/checks/dispatchable"]:::op
-    o17["POST /internal/identity/evidence/lifecycle-scan"]:::op
+    o16["GET /internal/identity/checks/dispatchable"]:::op
+    o19["POST /internal/identity/evidence/lifecycle-scan"]:::op
     o24["POST /internal/identity/evidence/storage-purge-review"]:::op
   end
   a2 --> o1
@@ -345,29 +347,29 @@ flowchart LR
   a2 --> o8
   o8 -->|"CREA"| t9
   o8 -->|"LEE"| t10
-  o8 -->|"ACTUALIZA"| t11
   o8 -->|"LEE"| t11
-  o8 -->|"ACTUALIZA"| t12
-  o8 -->|"CREA"| t12
-  o8 -.-> t13
-  a2 --> o14
-  o14 -->|"LEE"| t3
-  o14 -->|"LEE"| t4
-  o14 -->|"LEE"| t5
-  o14 -->|"LEE"| t6
-  o14 -->|"LEE"| t15
-  o14 -->|"LEE"| t16
-  a18 --> o17
-  o17 -->|"LEE"| t19
-  o17 -->|"BORRA"| t20
-  o17 -->|"LEE"| t20
-  o17 -->|"BORRA"| t21
-  o17 -->|"LEE"| t21
-  o17 -->|"BORRA"| t22
-  o17 -.-> t23
-  a18 --> o24
-  o24 -->|"LEE"| t19
+  o8 -->|"LEE"| t12
+  o8 -->|"LEE"| t13
+  o8 -->|"LEE"| t14
+  o8 -.-> t15
+  a2 --> o16
+  o16 -->|"LEE"| t3
+  o16 -->|"LEE"| t4
+  o16 -->|"LEE"| t5
+  o16 -->|"LEE"| t6
+  o16 -->|"LEE"| t17
+  o16 -->|"LEE"| t18
+  a20 --> o19
+  o19 -->|"LEE"| t21
+  o19 -->|"BORRA"| t22
+  o19 -->|"LEE"| t22
+  o19 -->|"BORRA"| t12
+  o19 -->|"LEE"| t12
+  o19 -->|"BORRA"| t13
+  o19 -.-> t23
+  a20 --> o24
   o24 -->|"LEE"| t21
+  o24 -->|"LEE"| t12
   o24 -->|"LEE"| t25
   o24 -->|"LEE"| t26
   o24 -->|"LEE"| t5

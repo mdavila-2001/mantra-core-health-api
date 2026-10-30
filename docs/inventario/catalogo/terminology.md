@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 155 | COINCIDE |
+| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 176 | COINCIDE |
 | [catalog_import_batches](#catalog_import_batches) | Agrupa importaciones de terminología para trazar la carga de fuentes externas y sus resultados. | 13 | 6 | 3 | COINCIDE |
 | [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 19 | COINCIDE |
 | [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 16 | COINCIDE |
@@ -196,7 +196,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: catalog_concepts`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CatalogConcepts` — `src/modules/terminology/entities/catalog_concepts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 155 operaciones
+- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 176 operaciones
 
 #### Columnas
 
@@ -2817,6 +2817,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
@@ -2888,15 +2890,34 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /pharmacy/orders/{id}/reject | LEE | DIRECTA |
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
+| GET /pharmacy/prescription-shares/{token} | LEE | DIRECTA |
 | GET /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
 | PATCH /practices/{practiceId}/healthcare-services/{id} | LEE | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| GET /admissions | LEE | DIRECTA |
+| GET /admissions/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/claim | LEE | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| GET /admissions/{id}/documents/{fileId}/content | LEE | DIRECTA |
+| POST /admissions/{id}/documents/{fileId}/download-url | LEE | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | LEE | DIRECTA |
+| POST /admissions/{id}/reassign | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/release | LEE | DIRECTA |
+| POST /admissions/{id}/request-info | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/search | LEE | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
 | GET /profiles/patients/me | LEE | POR_SQL |
 | PATCH /profiles/patients/me | LEE | POR_SQL |
 | DELETE /profiles/patients/me/photo | LEE | POR_SQL |
 | PUT /profiles/patients/me/photo | LEE | POR_SQL |
+| POST /profiles/practitioners | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | POR_SQL |
+| GET /profiles/practitioners/me/admission | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | POR_SQL |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
 | GET /promotions/me | LEE | DIRECTA |

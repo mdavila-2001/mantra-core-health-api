@@ -35,7 +35,7 @@ _Fuente: `src/modules/accounting/README.md:3`_
 |  |  | GET /accounting/open-items | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 6 |
 | `ctrl:AccountingExchangeRateController` | Operaciones de AccountingExchangeRateController que el README no asigna a un caso de uso | POST /accounting/exchange-rates | SYSTEM | MEDIO | 3 |
 | `ctrl:AccountingFiscalController` | Operaciones de AccountingFiscalController que el README no asigna a un caso de uso | POST /accounting/fiscal-periods/{id}/lock | SECURITY_ADMIN | MEDIO | 4 |
-|  |  | POST /accounting/fiscal-years | SECURITY_ADMIN | MEDIO | 4 |
+|  |  | POST /accounting/fiscal-years | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | MEDIO | 4 |
 | `ctrl:AccountingLedgerController` | Operaciones de AccountingLedgerController que el README no asigna a un caso de uso | GET /accounting/accounts | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 3 |
 |  |  | POST /accounting/accounts | SECURITY_ADMIN | MEDIO | 3 |
 |  |  | GET /accounting/balance-sheet | SECURITY_ADMIN · ACCOUNTING_APPROVER · PRACTITIONER | BAJO | 5 |
@@ -218,7 +218,7 @@ flowchart LR
   o44 -->|"LEE"| t7
   o44 -->|"LEE"| t34
   o44 -->|"LEE"| t23
-  a2 --> o45
+  a22 --> o45
   o45 -->|"CREA"| t7
   o45 -->|"CREA"| t34
   o45 -->|"LEE"| t34
@@ -1831,7 +1831,7 @@ Abrir un ejercicio fiscal y sus periodos
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Solo la administración de la práctica o el médico titular de su consultorio pueden abrir el ejercicio fiscal |
 | 409 | `CONFLICT` | ConflictException: El ejercicio ya existe en la práctica |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -1852,27 +1852,36 @@ flowchart TD
   n6 --> n7
   n8[("LEE practice.practices")]:::efecto
   n7 --> n8
-  n9["Llama a FiscalRepository.findYearByCode"]:::llamada
+  n9["Llama a FiscalService.assertCanOpenFiscalYear"]:::llamada
   n8 --> n9
-  n10[("LEE accounting.fiscal_years")]:::efecto
+  n10["Llama a PracticeTenantLookupService.isOwnOffice"]:::llamada
   n9 --> n10
-  n11{"clash"}:::decision
+  n11["Llama a PracticesRepository.findById"]:::llamada
   n10 --> n11
-  n12(["409 CONFLICT El ejercicio ya existe en la práctica"]):::error
-  n11 -->|"sí"| n12
-  n13["Llama a FiscalRepository.createYear"]:::llamada
-  n11 -->|"no"| n13
-  n14[("CREA accounting.fiscal_years")]:::efecto
-  n13 --> n14
-  n15["Repite: por cada const p de dto.periods"]:::bucle
+  n12[("LEE practice.practices")]:::efecto
+  n11 --> n12
+  n13(["403 FORBIDDEN Solo la administración de la práctica o el médico titular de su consultorio pueden abrir el eje…"]):::error
+  n12 --> n13
+  n14["Llama a FiscalRepository.findYearByCode"]:::llamada
+  n15[("LEE accounting.fiscal_years")]:::efecto
   n14 --> n15
-  n16["Llama a FiscalRepository.createPeriod"]:::llamada
-  n15 -->|"cada elemento"| n16
-  n17[("CREA accounting.fiscal_periods")]:::efecto
-  n16 --> n17
-  n18(("201 Responde con éxito")):::ok
-  n17 --> n18
-  n15 -->|"al terminar"| n18
+  n16{"clash"}:::decision
+  n15 --> n16
+  n17(["409 CONFLICT El ejercicio ya existe en la práctica"]):::error
+  n16 -->|"sí"| n17
+  n18["Llama a FiscalRepository.createYear"]:::llamada
+  n16 -->|"no"| n18
+  n19[("CREA accounting.fiscal_years")]:::efecto
+  n18 --> n19
+  n20["Repite: por cada const p de dto.periods"]:::bucle
+  n19 --> n20
+  n21["Llama a FiscalRepository.createPeriod"]:::llamada
+  n20 -->|"cada elemento"| n21
+  n22[("CREA accounting.fiscal_periods")]:::efecto
+  n21 --> n22
+  n23(("201 Responde con éxito")):::ok
+  n22 --> n23
+  n20 -->|"al terminar"| n23
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
