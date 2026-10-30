@@ -10,3 +10,7 @@ export * from './practitioner-support-assignments.repository';
 export * from './inventory-items.repository';
 export * from './inventory-movements.repository';
 export * from './practice-organization-read.repository';
+export * from './structure-rules.repository';
+export * from './space-unit-assignments.repository';
+export * from './site-declared-capacities.repository';
+export * from './retire-blockers.repository';

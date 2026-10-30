@@ -164,6 +164,8 @@ export class OrganizationPracticeProvisioningService {
         operationalStatusConceptId: PRAC.SITE_OP_PLANNED,
         addressId: address.id,
         managingTenantId: tenantId,
+        // F1: la sede pertenece al tenant de su práctica (NOT NULL desde v4.2.67).
+        tenantId,
         statusConceptId: PRAC.SITE_ACTIVE,
         actorUserId: actor.id,
       });

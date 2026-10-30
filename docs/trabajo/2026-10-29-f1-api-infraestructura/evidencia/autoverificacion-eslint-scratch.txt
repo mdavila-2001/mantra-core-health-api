@@ -1,0 +1,2 @@
+# AUTOVERIFICACIÓN FUERA DEL GATE: eslint del repo (config copiada) sobre los archivos TS que tocan F0+F1 (no es yarn lint)
+EXIT=0
