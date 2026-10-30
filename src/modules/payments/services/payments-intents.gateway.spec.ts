@@ -911,14 +911,14 @@ describe('Cobro de M42 detrás de payments.via_gateway', () => {
       expect(double.calls).toHaveLength(0);
     });
 
-    it('sin tenant resuelto (p. ej. SUPERADMIN sin X-Tenant-Id): 412 TENANT_REQUIRED y cero llamadas — nunca «cualquier tenant»', async () => {
+    it('sin tenant resuelto (p. ej. SUPERADMIN sin X-Tenant-Id): 422 TENANT_REQUIRED y cero llamadas — nunca «cualquier tenant»', async () => {
       const d = build(true);
       const row = await approvedIntent(d);
 
       await expect(
         d.transactions.processTransaction(row.id, sale(), actor, null),
       ).rejects.toMatchObject({
-        status: 412,
+        status: 422,
         details: { reason: 'TENANT_REQUIRED' },
       });
 

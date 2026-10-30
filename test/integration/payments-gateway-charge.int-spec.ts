@@ -5,7 +5,13 @@ import { join } from 'node:path';
 import { MikroORM } from '@mikro-orm/postgresql';
 import { ReflectMetadataProvider } from '@mikro-orm/decorators/legacy';
 import { Client } from 'pg';
-import { CONCEPTS, type AuthenticatedUser } from '../../src/common';
+import {
+  CONCEPTS,
+  runWithTenant,
+  type AuthenticatedUser,
+} from '../../src/common';
+import { PaymentCheckoutSessions } from '../../src/modules/payments/entities/payment_checkout_sessions.entity';
+import { PaymentDebts } from '../../src/modules/payments/entities/payment_debts.entity';
 import { PaymentIntents } from '../../src/modules/payments/entities/payment_intents.entity';
 import { PaymentTransactions } from '../../src/modules/payments/entities/payment_transactions.entity';
 import { RiskAssessments } from '../../src/modules/payments/entities/risk_assessments.entity';
@@ -84,6 +90,9 @@ const TABLES = [
   'payment_intents',
   'payment_transactions',
   'risk_assessments',
+  // La compuerta previa contra la deuda (M2) lee la deuda y las sesiones de checkout.
+  'payment_debts',
+  'payment_checkout_sessions',
 ] as const;
 
 const DDL_DIR = join(process.cwd(), 'database', 'SQL', '42_payments');
@@ -202,6 +211,14 @@ describeIt(
         logger as never,
         client,
       );
+      const transactionsService = new PaymentsTransactionsService(
+        orm.em as never,
+        intentsRepo,
+        flowRepo,
+        txRepo,
+        logger as never,
+        charge,
+      );
       return {
         charge,
         intents: new PaymentsIntentsService(
@@ -211,14 +228,19 @@ describeIt(
           logger as never,
           charge,
         ),
-        transactions: new PaymentsTransactionsService(
-          orm.em as never,
-          intentsRepo,
-          flowRepo,
-          txRepo,
-          logger as never,
-          charge,
-        ),
+        transactions: {
+          // El `TenantContextInterceptor` fija el tenant del actor antes del
+          // servicio; aquí se hace lo mismo.
+          processTransaction: (
+            id: string,
+            body: ProcessTransactionDto,
+            who: AuthenticatedUser,
+            tenant: string = TENANT,
+          ) =>
+            runWithTenant(tenant, () =>
+              transactionsService.processTransaction(id, body, who),
+            ),
+        },
       };
     }
     let on: ReturnType<typeof build>;
@@ -244,7 +266,13 @@ describeIt(
         user: PG.user,
         password: PG.password,
         dbName: DB_NAME,
-        entities: [PaymentIntents, PaymentTransactions, RiskAssessments],
+        entities: [
+          PaymentIntents,
+          PaymentTransactions,
+          RiskAssessments,
+          PaymentDebts,
+          PaymentCheckoutSessions,
+        ],
         metadataProvider: ReflectMetadataProvider,
         metadataCache: { enabled: false },
         allowGlobalContext: true,
@@ -333,12 +361,42 @@ describeIt(
       ...over,
     });
 
-    /** Crea la intención con el `createIntent` REAL. */
+    /** Deuda real que la intención cobra (la compuerta M2 la mide). */
+    async function insertDebt(
+      id: string,
+      over: { tenantId?: string; outstanding?: string; status?: string } = {},
+    ): Promise<void> {
+      await run(
+        `insert into payments.payment_debts
+           (id, tenant_id, gateway_connection_id, debtor_business_partner_id, internal_debt_number, currency_code,
+            total_amount, outstanding_amount, due_at, status_concept_id, created_at, updated_at)
+         values (?, ?, ?, ?, ?, 'BOB', '1000.000000', ?, now() + interval '7 days', ?, now(), now())`,
+        [
+          id,
+          over.tenantId ?? TENANT,
+          randomUUID(),
+          randomUUID(),
+          `D-${id.slice(0, 8)}`,
+          over.outstanding ?? '1000.000000',
+          over.status ?? CONCEPTS.DEBT_PENDING,
+        ],
+      );
+    }
+
+    /** Crea la intención con el `createIntent` REAL (y la deuda que cobra, con saldo holgado). */
     async function createIntent(
       svc: ReturnType<typeof build> = on,
       over: Partial<CreatePaymentIntentDto> = {},
+      debt: { outstanding?: string; status?: string } | false = {},
     ): Promise<Created> {
       const dto = intentDto(over);
+      if (debt && dto.sourceRefType === 'payment_debt' && dto.sourceRefId) {
+        const [exists] = await rows(
+          `select 1 from payments.payment_debts where id = ?`,
+          [dto.sourceRefId],
+        );
+        if (!exists) await insertDebt(dto.sourceRefId, debt);
+      }
       const res = await svc.intents.createIntent(dto, actor);
       return {
         id: res.id,
@@ -478,7 +536,7 @@ describeIt(
     }
 
     // ------------------------------------------------------------------- DDL
-    it('el DDL aplicado es el real: las 4 tablas, el índice único de la clave de idempotencia y las claves foráneas internas', async () => {
+    it('el DDL aplicado es el real: las 6 tablas, el índice único de la clave de idempotencia y las claves foráneas internas', async () => {
       const unique = await rows(
         `select indexdef from pg_indexes where schemaname = 'payments' and indexname = 'uq_payment_intents_idempotency_key'`,
       );
@@ -1214,6 +1272,148 @@ describeIt(
     });
 
     // ------------------------------------------------ (7) flag apagado
+    describe('(8) M3: otro tenant no cobra la intención ajena', () => {
+      it('con el UUID de una intención de OTRO tenant: 404 como si no existiera, cero llamadas a la pasarela y la fila intacta', async () => {
+        const c = await approved();
+        const before = await snapshot(c);
+        const foreignTenant = randomUUID();
+
+        const error = await expectDomainError(
+          on.transactions.processTransaction(
+            c.id,
+            sale(),
+            actor,
+            foreignTenant,
+          ),
+          404,
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
+        const missing = await expectDomainError(
+          on.transactions.processTransaction(
+            randomUUID(),
+            sale(),
+            actor,
+            foreignTenant,
+          ),
+          404,
+          PaymentsErrorReason.PAYMENT_INTENT_NOT_FOUND,
+        );
+
+        expect(error.getResponse()).toEqual(missing.getResponse());
+        expect(double.calls).toHaveLength(0);
+        const after = await snapshot(c);
+        expect(after.intent).toEqual(before.intent);
+        expect(after.transactions).toEqual([]);
+      });
+
+      it('el dueño sí cobra la misma intención (control)', async () => {
+        const c = await approved();
+        await on.transactions.processTransaction(c.id, sale(), actor, TENANT);
+        expect(postsFor(c)).toHaveLength(1);
+      });
+    });
+
+    describe('(9) M2: compuerta previa contra la deuda (BD real)', () => {
+      const sameDebt = async () => {
+        const sourceRefId = randomUUID();
+        const a = await createIntent(on, { sourceRefId });
+        const b = await createIntent(on, { sourceRefId });
+        await assess(a.id, 'APPROVE');
+        await assess(b.id, 'APPROVE');
+        return { a, b, sourceRefId };
+      };
+
+      it('dos intenciones con claves distintas sobre la MISMA deuda: la segunda es 409 y la pasarela sólo recibe el cobro de la primera', async () => {
+        const { a, b } = await sameDebt();
+        await on.transactions.processTransaction(a.id, sale(), actor);
+        double.calls.length = 0;
+
+        await expectDomainError(
+          on.transactions.processTransaction(b.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_DEBT_HAS_OPEN_CHARGE,
+        );
+
+        expect(double.calls).toHaveLength(0);
+        expect((await snapshot(b)).intent.gateway_intent_ref).toBeNull();
+      });
+
+      it('el reintento de la primera (ya despachada) no se bloquea: consulta, sin segundo cobro', async () => {
+        const { a } = await sameDebt();
+        await on.transactions.processTransaction(a.id, sale(), actor);
+        double.calls.length = 0;
+
+        await on.transactions.processTransaction(a.id, sale(), actor);
+
+        expect(double.postCalls).toHaveLength(0);
+        expect(double.calls.map((x) => x.method)).toEqual(['GET']);
+      });
+
+      it('si el primer cobro terminó sin pagarse, la deuda se puede cobrar de nuevo', async () => {
+        const { a, b } = await sameDebt();
+        await on.transactions.processTransaction(a.id, sale(), actor);
+        await run(
+          `update payments.payment_intents set status_concept_id = ? where id = ?`,
+          [CONCEPTS.PI_FAILED, a.id],
+        );
+
+        await on.transactions.processTransaction(b.id, sale(), actor);
+
+        expect(postsFor(b)).toHaveLength(1);
+      });
+
+      it('importe mayor que el saldo de la deuda: 409 y cero llamadas', async () => {
+        const c = await createIntent(on, {}, { outstanding: '149.999999' });
+        await assess(c.id, 'APPROVE');
+
+        await expectDomainError(
+          on.transactions.processTransaction(c.id, sale(), actor),
+          409,
+          PaymentsErrorReason.PAYMENT_GATEWAY_AMOUNT_EXCEEDS_DEBT,
+        );
+
+        expect(double.calls).toHaveLength(0);
+      });
+
+      it('deuda saldada: 422 y cero llamadas', async () => {
+        const c = await createIntent(
+          on,
+          {},
+          { status: CONCEPTS.DEBT_SETTLED },
+        );
+        await assess(c.id, 'APPROVE');
+
+        await expectDomainError(
+          on.transactions.processTransaction(c.id, sale(), actor),
+          422,
+          PaymentsErrorReason.PAYMENT_DEBT_ALREADY_SETTLED,
+        );
+
+        expect(double.calls).toHaveLength(0);
+      });
+    });
+
+    describe('(10) m5: una intención ya despachada no admite DECLINE ni fx-lock', () => {
+      it('DECLINE posterior al despacho: 409 y la intención sigue pendiente con su pi_…', async () => {
+        const c = await approved();
+        await on.transactions.processTransaction(c.id, sale(), actor);
+
+        await expectDomainError(
+          on.intents.assessRisk(
+            c.id,
+            { riskScore: '99', decision: 'DECLINE' },
+            actor,
+          ),
+          409,
+          PaymentsErrorReason.PAYMENT_INTENT_VIA_GATEWAY,
+        );
+
+        const snap = await snapshot(c);
+        expect(snap.intent.status_concept_id).toBe(CONCEPTS.PI_PENDING);
+        expect(snap.intent.gateway_intent_ref).toMatch(/^pi_/u);
+      });
+    });
+
     describe('(7) flag apagado: el camino de siempre no llama a la pasarela y no cambia', () => {
       it('createIntent acepta lo que la pasarela no podría cobrar (USD) y no llama a nadie', async () => {
         const c = await createIntent(off, { currency: 'USD' });

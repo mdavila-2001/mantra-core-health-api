@@ -261,7 +261,12 @@ describeIt('PaymentsGatewayWebhookService contra PostgreSQL real', () => {
   }
 
   async function seed(
-    over: { amount?: string; outstanding?: string; withDebt?: boolean } = {},
+    over: {
+      amount?: string;
+      outstanding?: string;
+      withDebt?: boolean;
+      withSession?: boolean;
+    } = {},
   ): Promise<Seed> {
     const s: Seed = {
       intentId: randomUUID(),
@@ -318,23 +323,56 @@ describeIt('PaymentsGatewayWebhookService contra PostgreSQL real', () => {
           CONCEPTS.DEBT_IN_CHECKOUT,
         ],
       );
-      await run(
-        `insert into payments.payment_checkout_sessions
-           (id, tenant_id, gateway_connection_id, payment_debt_id, payment_intent_id, session_token_hash, redirect_url,
-            expires_at, status_concept_id, created_at, updated_at)
-         values (?, ?, ?, ?, ?, ?, 'https://checkout.example/s', now() + interval '1 hour', ?, now(), now())`,
-        [
-          s.sessionId,
-          s.tenantId,
-          randomUUID(),
-          s.debtId,
-          s.intentId,
-          randomBytes(16).toString('hex'),
-          CONCEPTS.CHECKOUT_OPEN,
-        ],
-      );
+      if (over.withSession !== false) await insertSession(s, s.intentId, s.sessionId);
     }
     return s;
+  }
+
+  /** Sesión de checkout abierta de una intención sobre la deuda de la semilla. */
+  async function insertSession(s: Seed, intentId: string, sessionId: string) {
+    await run(
+      `insert into payments.payment_checkout_sessions
+         (id, tenant_id, gateway_connection_id, payment_debt_id, payment_intent_id, session_token_hash, redirect_url,
+          expires_at, status_concept_id, created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, 'https://checkout.example/s', now() + interval '1 hour', ?, now(), now())`,
+      [
+        sessionId,
+        s.tenantId,
+        randomUUID(),
+        s.debtId,
+        intentId,
+        randomBytes(16).toString('hex'),
+        CONCEPTS.CHECKOUT_OPEN,
+      ],
+    );
+  }
+
+  /** Segunda intención del mismo tenant sobre la misma deuda, con su propia sesión abierta. */
+  async function addSecondIntent(s: Seed) {
+    const second = {
+      intentId: randomUUID(),
+      ref: `pi_${randomBytes(8).toString('hex')}`,
+      sessionId: randomUUID(),
+    };
+    await run(
+      `insert into payments.payment_intents
+         (id, tenant_id, gateway_id, purpose_concept_id, source_ref_type, source_ref_id, amount, currency_concept_id,
+          idempotency_key, gateway_intent_ref, status_concept_id, created_at, updated_at)
+       values (?, ?, ?, ?, 'payment_debt', ?, '150.00', ?, ?, ?, ?, now(), now())`,
+      [
+        second.intentId,
+        s.tenantId,
+        s.gatewayId,
+        CONCEPTS.PAY_PURPOSE_DEBT,
+        s.debtId,
+        CONCEPTS.CURRENCY_BOB,
+        `it-${second.intentId}`,
+        second.ref,
+        CONCEPTS.PI_PENDING,
+      ],
+    );
+    await insertSession(s, second.intentId, second.sessionId);
+    return second;
   }
 
   function webhook(
@@ -617,6 +655,64 @@ describeIt('PaymentsGatewayWebhookService contra PostgreSQL real', () => {
       const retry = await service.receive(webhook(s, { amountMinor: 10000 }));
       expect(retry.applied).toBe(true);
       expect((await snapshot(s)).debt.outstanding).toBe('50.000000');
+    });
+  });
+
+  describe('(7) M1: intención de deuda SIN sesión de checkout', () => {
+    it('succeeded: la intención se asienta, la deuda NO se toca y el evento queda en la cola de conciliación con su motivo', async () => {
+      const s = await seed({ withSession: false });
+
+      const res = await service.receive(webhook(s));
+
+      expect(res).toMatchObject({
+        applied: true,
+        reconciliationRequired: true,
+      });
+      const snap = await snapshot(s);
+      expect(snap.intent.status_concept_id).toBe(CONCEPTS.PI_SUCCEEDED);
+      expect(snap.debt.outstanding).toBe('150.000000');
+      expect(snap.debt.status_concept_id).toBe(CONCEPTS.DEBT_IN_CHECKOUT);
+      expect(snap.events).toHaveLength(1);
+      expect(snap.events[0].processed).toBe(false);
+      const [reason] = await rows(
+        `select payload_json->'reconciliation'->>'reason' as reason from payments.payment_webhook_events where related_intent_id = ?`,
+        [s.intentId],
+      );
+      expect(reason.reason).toBe('debt_without_checkout_session');
+    });
+  });
+
+  describe('(8) m6: liberar el checkout de una intención no pisa el de otra', () => {
+    it('failed de la primera: la deuda sigue IN_CHECKOUT mientras la segunda tiene su sesión abierta; failed de la segunda la libera', async () => {
+      const s = await seed();
+      const second = await addSecondIntent(s);
+
+      await service.receive(webhook(s, { type: 'payment_intent.failed' }));
+
+      let debt = (
+        await rows(
+          `select status_concept_id from payments.payment_debts where id = ?`,
+          [s.debtId],
+        )
+      )[0];
+      expect(debt.status_concept_id).toBe(CONCEPTS.DEBT_IN_CHECKOUT);
+      const open = await rows(
+        `select id from payments.payment_checkout_sessions where payment_debt_id = ? and status_concept_id = ?`,
+        [s.debtId, CONCEPTS.CHECKOUT_OPEN],
+      );
+      expect(open.map((r) => r.id)).toEqual([second.sessionId]);
+
+      await service.receive(
+        webhook({ ...s, ref: second.ref }, { type: 'payment_intent.failed' }),
+      );
+
+      debt = (
+        await rows(
+          `select status_concept_id from payments.payment_debts where id = ?`,
+          [s.debtId],
+        )
+      )[0];
+      expect(debt.status_concept_id).toBe(CONCEPTS.DEBT_PENDING);
     });
   });
 
