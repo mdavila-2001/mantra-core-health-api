@@ -1,8 +1,6 @@
 {
   "roles": [],
-  "routes": [
-    "POST /integrations/messages\\:outbound"
-  ],
+  "routes": [],
   "reviewed": [
     {
       "reason": "Respuesta fija de saludo: no lee ni escribe datos.",
@@ -709,6 +707,95 @@
         "POST /org/support-engagement-requests/:id/decision",
         "POST /org/support-engagements/:id/end",
         "POST /org/team/invitations"
+      ]
+    },
+    {
+      "reason": "Estructura del establecimiento (F1): sedes, unidades clínicas, espacios, datos regulatorios, habilitaciones y capacidad declarada. `StructureAccessService` decide: la fila tiene que ser del tenant activo (404 si no); leer exige miembro activo o plataforma (`assertCanRead`); escribir la estructura de una sede, admin de la organización o de la sucursal de esa sede (`assertCanWriteSite`); lo de nivel organización, OWNER/ADMIN de toda la organización o plataforma (`assertCanAdministerOrganization`). El dueño de una organización entra con rol global USER, así que un `@Roles` lo dejaría afuera.",
+      "evidence": [
+        "src/modules/practice/services/structure-access.service.ts#assertCanWriteSite",
+        "src/modules/practice/services/structure-access.service.ts#assertCanAdministerOrganization",
+        "src/modules/practice/services/care-spaces-admin.service.ts#writableSite",
+        "src/modules/practice/services/clinical-units-admin.service.ts#writable",
+        "src/modules/practice/services/site-establishment.service.ts#updateRegulatory",
+        "src/modules/practice/services/practice-sites.service.ts#decommissionSite"
+      ],
+      "routes": [
+        "DELETE /care-spaces/:id/unit-assignments/:assignmentId",
+        "DELETE /practices/:practiceId/sites/:siteId",
+        "GET /clinical-units/:id",
+        "PATCH /care-spaces/:id",
+        "PATCH /clinical-units/:id",
+        "PATCH /site-licenses/:id",
+        "PATCH /sites/:siteId/regulatory",
+        "POST /care-spaces/:id/lifecycle",
+        "POST /care-spaces/:id/move",
+        "POST /care-spaces/:id/unit-assignments",
+        "POST /clinical-units/:id/lifecycle",
+        "POST /practices/:practiceId/sites",
+        "POST /sites/:siteId/care-spaces",
+        "POST /sites/:siteId/care-spaces/bulk",
+        "POST /sites/:siteId/care-spaces/import",
+        "POST /sites/:siteId/clinical-units",
+        "POST /sites/:siteId/declared-capacities",
+        "POST /sites/:siteId/licenses"
+      ]
+    },
+    {
+      "reason": "Operación de infraestructura (F2–F5): disponibilidad, higiene, aislamiento, bloqueos y limpieza de espacios; internación y censo; bloques de quirófano; tarifas y cargos por estancia; ubicación contable de activos y centros de costo; equipos diagnósticos. Cada caso de uso llama a `InfrastructureAccessService.assertCan`/`assertSiteLevel` (evaluador de §0.3: tenant, alcance y rol de membresía sobre el recurso) antes de escribir; un recurso de otro tenant responde 404 y sin permiso, 403.",
+      "evidence": [
+        "src/modules/practice/services/infrastructure-access.service.ts",
+        "src/modules/practice/services/ops/use-cases/change-availability.use-case.ts",
+        "src/modules/practice/services/ops/use-cases/cleaning-order.use-cases.ts#load",
+        "src/modules/clinical/services/inpatient/adt.use-cases.ts",
+        "src/modules/procedures_perioperative/services/or/or.use-cases.ts",
+        "src/modules/billing/services/space-charges.service.ts#assertPractice",
+        "src/modules/accounting/services/space-accounting.service.ts",
+        "src/modules/diagnostic_units/services/equipment-f5a.service.ts#authorize"
+      ],
+      "routes": [
+        "PATCH /accounting/infrastructure-items/:id",
+        "PATCH /clinical/placement-incidents/:id",
+        "PATCH /diagnostic-equipment/:id",
+        "POST /accounting/cost-centers/:id/unit-link",
+        "POST /billing/charge-captures/:id/void",
+        "POST /billing/encounters/:encounterId/bed-day-charges/run",
+        "POST /billing/space-tariffs",
+        "POST /billing/space-tariffs/:id/close",
+        "POST /care-space-blocks/:id/cancel",
+        "POST /care-space-blocks/:id/end",
+        "POST /care-spaces/:id/availability",
+        "POST /care-spaces/:id/hygiene",
+        "POST /care-spaces/:id/isolation",
+        "POST /census-days/:id/adjustments",
+        "POST /cleaning-orders/:id/assign",
+        "POST /cleaning-orders/:id/cancel",
+        "POST /cleaning-orders/:id/finish",
+        "POST /cleaning-orders/:id/inspect",
+        "POST /cleaning-orders/:id/start",
+        "POST /clinical/admissions",
+        "POST /clinical/bed-compatibility",
+        "POST /clinical/bed-swaps",
+        "POST /clinical/encounter-locations/:id/cancel",
+        "POST /clinical/encounters/:id/bed-assignment",
+        "POST /clinical/encounters/:id/bed-compatibility",
+        "POST /clinical/encounters/:id/discharge",
+        "POST /clinical/encounters/:id/transfer",
+        "POST /diagnostic-equipment/:id/resource",
+        "POST /or-blocks/:id/cancel",
+        "POST /or-blocks/:id/release",
+        "POST /sites/:siteId/census/:date/close",
+        "POST /sites/:siteId/cleaning-orders",
+        "POST /sites/:siteId/or-blocks"
+      ]
+    },
+    {
+      "reason": "Catálogo de infraestructura hospitalaria: formas, funciones, reglas y ciclo de vida, conceptos y reglas globales que no leen datos de ningún tenant. Lectura con sesión, sin rol: la necesita toda pantalla de estructura.",
+      "evidence": [
+        "src/modules/practice/controllers/infrastructure-catalog.controller.ts#catalog",
+        "src/modules/practice/services/infrastructure-read.service.ts#catalog"
+      ],
+      "routes": [
+        "GET /practice/infrastructure-catalog"
       ]
     }
   ]

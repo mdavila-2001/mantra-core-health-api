@@ -23,6 +23,7 @@
     "proxy-addr@npm:^2.0.7": "2.0.8"
   },
   "scripts": {
+    "alovida:coverage:test": "node --test tools/alovida/coverage-report.test.mjs",
     "build": "node scripts/with-heap.mjs nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

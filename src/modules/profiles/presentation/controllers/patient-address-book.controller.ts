@@ -22,6 +22,7 @@ import {
   Audited,
   CurrentUser,
   type AuthenticatedUser,
+  Roles,
 } from '../../../../common';
 import { PatientAddressBookService } from '../../application/services/patient-address-book.service';
 import {
@@ -37,6 +38,9 @@ import {
  * URL, y cada `:id` se busca **entre las direcciones de esa persona** — un id
  * ajeno responde 404 igual que uno inexistente. Cada escritura devuelve la
  * libreta releída, para que la pantalla no tenga que adivinar el orden.
+ *
+ * `@Roles()` vacío en cada ruta (O3-3): sin rol global, para que todo titular
+ * con perfil de paciente pueda usarla.
  */
 @ApiTags('profiles-patients')
 @ApiBearerAuth()
@@ -45,6 +49,7 @@ export class PatientAddressBookController {
   constructor(private readonly addressBook: PatientAddressBookService) {}
 
   @Get()
+  @Roles()
   @AccessLogged({ resourceType: 'PATIENT_ADDRESS_BOOK', patient: 'actor' })
   @ApiOperation({
     summary: 'Listar las propias direcciones (la preferida primero)',
@@ -56,6 +61,7 @@ export class PatientAddressBookController {
 
   @Audited({ action: 'PATIENT_ADDRESS_SAVED', entity: 'patient_address' })
   @Post()
+  @Roles()
   @ApiOperation({ summary: 'Guardar una dirección nueva' })
   @ApiCreatedResponse({ type: PatientAddressDto, isArray: true })
   create(
@@ -71,6 +77,7 @@ export class PatientAddressBookController {
     entityId: 'param:id',
   })
   @Patch(':id')
+  @Roles()
   @ApiOperation({
     summary: 'Corregir una dirección (cierra la vigente y abre otra)',
   })
@@ -89,6 +96,7 @@ export class PatientAddressBookController {
     entityId: 'param:id',
   })
   @Delete(':id')
+  @Roles()
   @ApiOperation({ summary: 'Quitar una dirección guardada o la del trabajo' })
   @ApiOkResponse({ type: PatientAddressDto, isArray: true })
   remove(
@@ -104,6 +112,7 @@ export class PatientAddressBookController {
     entityId: 'param:id',
   })
   @Put(':id/preferred')
+  @Roles()
   @ApiOperation({ summary: 'Marcar la dirección que se ofrece primero' })
   @ApiOkResponse({ type: PatientAddressDto, isArray: true })
   prefer(

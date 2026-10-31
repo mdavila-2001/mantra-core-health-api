@@ -66,6 +66,11 @@ const DEFAULT_PAGE_LIMIT = 50;
 /**
  * Endpoints sociales del módulo Community: perfiles públicos, posts, comentarios,
  * reacciones, bookmarks, follows y bloqueos. Capa fina que delega en el servicio.
+ *
+ * Las rutas con `@Roles()` vacío (O3-3) no piden rol global: escribir exige
+ * actuar con un perfil propio (`assertActsAsProfile`, sin atajo de plataforma),
+ * las listas privadas exigen ser su titular (`assertOwnProfile`) y las lecturas
+ * de contenido pasan por `canViewPost` y los bloqueos.
  */
 @ApiTags('community-social')
 @ApiBearerAuth()
@@ -130,6 +135,7 @@ export class CommunitySocialController {
     entityId: 'result.id',
   })
   @Put('profiles/me')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Crear o actualizar la vitrina pública propia' })
   upsertOwnProfile(
@@ -193,6 +199,7 @@ export class CommunitySocialController {
     entityId: 'result.id',
   })
   @Post('profiles/:profileId/posts')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar un post con hashtags, media y menciones' })
   publishPost(
@@ -210,6 +217,7 @@ export class CommunitySocialController {
     entityId: 'result.id',
   })
   @Post('comments')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Comentar (hilo anidado) con contadores' })
   createComment(
@@ -225,6 +233,7 @@ export class CommunitySocialController {
     entity: 'reaction',
   })
   @Put('reactions')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Reaccionar a contenido (upsert una reacción por actor/objeto)',
@@ -243,6 +252,7 @@ export class CommunitySocialController {
     entityId: 'result.id',
   })
   @Post('bookmarks')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Guardar un bookmark en una colección' })
   bookmark(
@@ -259,6 +269,7 @@ export class CommunitySocialController {
     entityId: 'result.id',
   })
   @Post('follows')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Seguir un objeto social' })
   follow(
@@ -275,6 +286,7 @@ export class CommunitySocialController {
     entityId: 'result.id',
   })
   @Post('blocks')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Bloquear a un usuario' })
   block(
@@ -297,6 +309,7 @@ export class CommunitySocialController {
     entity: 'social_follow',
   })
   @Delete('follows')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Dejar de seguir un objeto social' })
   unfollow(
@@ -312,6 +325,7 @@ export class CommunitySocialController {
     entity: 'bookmark',
   })
   @Delete('bookmarks')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Quitar un marcador' })
   unbookmark(
@@ -327,6 +341,7 @@ export class CommunitySocialController {
     entity: 'user_block',
   })
   @Delete('blocks')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Levantar un bloqueo' })
   unblock(
@@ -370,6 +385,7 @@ export class CommunitySocialController {
    * la pantalla los dibuja distinto.
    */
   @Get('profiles/:profileId/auto-reply')
+  @Roles()
   @ApiOperation({ summary: 'Respuesta automática por inactividad del perfil' })
   getAutoReply(
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -391,6 +407,7 @@ export class CommunitySocialController {
     entityId: 'result.id',
   })
   @Put('profiles/:profileId/auto-reply')
+  @Roles()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Configurar la respuesta automática del perfil' })
   upsertAutoReply(
@@ -403,6 +420,7 @@ export class CommunitySocialController {
 
   /** Ficha del perfil, con sellos de verificación y prestigio. */
   @Get('profiles/:profileId')
+  @Roles()
   @ApiOperation({ summary: 'Ficha de un perfil público' })
   getProfile(
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -413,6 +431,7 @@ export class CommunitySocialController {
 
   /** Muro del perfil, filtrado por lo que el lector puede ver. */
   @Get('profiles/:profileId/posts')
+  @Roles()
   @ApiOperation({ summary: 'Publicaciones de un perfil' })
   listProfilePosts(
     @Param('profileId', ParseUUIDPipe) profileId: string,
@@ -430,6 +449,7 @@ export class CommunitySocialController {
 
   /** Publicación con sus adjuntos, etiquetas y menciones. */
   @Get('posts/:postId')
+  @Roles()
   @ApiOperation({ summary: 'Publicación con media, hashtags y menciones' })
   getPost(
     @Param('postId', ParseUUIDPipe) postId: string,
@@ -441,6 +461,7 @@ export class CommunitySocialController {
 
   /** Hilo de comentarios de una publicación. */
   @Get('posts/:postId/comments')
+  @Roles()
   @ApiOperation({ summary: 'Comentarios de una publicación (hilo anidado)' })
   listPostComments(
     @Param('postId', ParseUUIDPipe) postId: string,
@@ -466,6 +487,7 @@ export class CommunitySocialController {
    * `CommonFilesController` para `links` contra `:id/content`.
    */
   @Get('comments/media/:fileId/content')
+  @Roles()
   @Header('Cache-Control', 'private, no-store')
   @ApiOperation({
     summary: 'Descargar el adjunto de un comentario (imagen, sticker o GIF)',
@@ -487,6 +509,7 @@ export class CommunitySocialController {
 
   /** Resumen de reacciones de una publicación. */
   @Get('posts/:postId/reactions')
+  @Roles()
   @ApiOperation({
     summary: 'Reacciones de una publicación, agrupadas por tipo',
   })
@@ -500,6 +523,7 @@ export class CommunitySocialController {
 
   /** Seguimientos emitidos por un perfil. Sólo su titular. */
   @Get('follows')
+  @Roles()
   @ApiOperation({ summary: 'Seguimientos activos de un perfil' })
   listFollows(
     @Query('followerProfileId', ParseUUIDPipe) followerProfileId: string,
@@ -515,6 +539,7 @@ export class CommunitySocialController {
 
   /** Marcadores del propio perfil. */
   @Get('bookmarks')
+  @Roles()
   @ApiOperation({ summary: 'Marcadores guardados por un perfil' })
   listBookmarks(
     @Query('profileId', ParseUUIDPipe) profileId: string,
@@ -532,6 +557,7 @@ export class CommunitySocialController {
 
   /** Bloqueos emitidos por el propio perfil. */
   @Get('blocks')
+  @Roles()
   @ApiOperation({ summary: 'Bloqueos emitidos por un perfil' })
   listBlocks(
     @Query('profileId', ParseUUIDPipe) profileId: string,
