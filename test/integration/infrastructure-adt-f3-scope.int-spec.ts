@@ -7,6 +7,7 @@ import {
 } from './harness';
 import { DELEG } from '../../src/modules/delegated_access/delegated_access.concepts';
 import { CLIN } from '../../src/modules/clinical/clinical.concepts';
+import { DIR } from '../../src/modules/directory/directory.concepts';
 import {
   armarPlanta,
   como,
@@ -204,5 +205,60 @@ describe('Infraestructura F3 · alcance por unidad (fail-closed)', () => {
       .get(`/clinical/encounters/${id}/stay`)
       .set(como(org))
       .expect(404);
+  });
+
+  it('estancia sin movimientos de una sucursal con sedes A y B: permiso sólo en A → denegado', async () => {
+    const branchId = randomUUID();
+    await q(
+      `insert into directory.branches (id, tenant_id, code, name, branch_type_concept_id, status_concept_id, created_at, updated_at)
+       values (?, ?, ?, 'Sucursal', ?, ?, now(), now())`,
+      [
+        branchId,
+        org.tenantId,
+        `BR-${tag}`,
+        DIR.BRANCH_TYPE_CLINIC,
+        DIR.BRANCH_ACTIVE,
+      ],
+    );
+    const sedeB = await http()
+      .post(`/practices/${org.practiceId}/sites`)
+      .set(como(org))
+      .send({ code: `S2-${tag}`, name: 'Sede B' })
+      .expect(201);
+    await q(
+      'update practice.practice_sites set branch_id = ? where id in (?, ?)',
+      [branchId, org.siteId, sedeB.body.id],
+    );
+    const soloA = await crearPersonal(
+      ctx,
+      org,
+      `F3SX-${tag}`,
+      DELEG.ASSIGN_ROLE_ADMISSION,
+      { site: org.siteId },
+    );
+    const id = randomUUID();
+    await q(
+      `insert into clinical.encounters (id, patient_profile_id, tenant_id, branch_id, class_concept_id, status_concept_id, start_at, created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, now(), now(), now())`,
+      [
+        id,
+        patient.patientProfileId,
+        org.tenantId,
+        branchId,
+        CLIN.ENCOUNTER_CLASS_INPATIENT,
+        CLIN.ENCOUNTER_IN_PROGRESS,
+      ],
+    );
+    const res = await http()
+      .get(`/clinical/encounters/${id}/stay`)
+      .set(como(soloA));
+    expect([403, 404]).toContain(res.status);
+    expect(res.body.encounter).toBeUndefined();
+    // Con permiso en las dos sedes (OWNER = admin de la organización) sí se lee.
+    const owner = await http()
+      .get(`/clinical/encounters/${id}/stay`)
+      .set(como(org))
+      .expect(200);
+    expect(owner.body.encounter.id).toBe(id);
   });
 });
