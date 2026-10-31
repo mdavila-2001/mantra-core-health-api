@@ -1,5 +1,0 @@
-$ yarn test:integration --runInBand --verbose test/integration/practice-structure-tenancy.int-spec.ts  (fb32c83c)
-Test Suites: 1 passed, 1 total
-Tests:       7 passed, 7 total
-Time:        18.548 s, estimated 29 s
-EXIT=0
