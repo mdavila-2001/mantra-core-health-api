@@ -91,6 +91,7 @@ function build() {
           equipment: await scope.equipment(t, id),
         })),
         announceChanges: mockFn().mockResolvedValue(undefined),
+        authorizeDestination: mockFn().mockResolvedValue(undefined),
       } as any,
     ),
   );

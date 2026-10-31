@@ -75,7 +75,7 @@ describe('EquipmentF5aService · alcance de un equipo puntual (revisión F5a)', 
   it('mover a otra sala exige el permiso de escritura sobre el destino', async () => {
     const { svc, tx, access } = build({ id: 'e1' });
     await runWithTenant(T1, () =>
-      svc.authorizeDestination(tx as any, actor, 'room-2'),
+      svc.authorizeDestination(tx as any, actor, 'room-2', 'site-1'),
     );
     expect(access.assertCan).toHaveBeenCalledWith(
       actor,
@@ -84,5 +84,26 @@ describe('EquipmentF5aService · alcance de un equipo puntual (revisión F5a)', 
       tx,
       T1,
     );
+  });
+
+  it('desubicar (destino null) exige nivel sede, no alcanza el permiso de la sala', async () => {
+    const { svc, tx, access } = build({ id: 'e1', careSpaceId: 'room-1' });
+    await runWithTenant(T1, () =>
+      svc.authorizeDestination(tx as any, actor, null, 'site-1'),
+    );
+    expect(access.assertSiteLevel).toHaveBeenCalledWith(
+      actor,
+      'f5a.equipment.write',
+      'site-1',
+      tx,
+      T1,
+    );
+    expect(access.assertCan).not.toHaveBeenCalled();
+    access.assertSiteLevel.mockRejectedValue(new Error('403'));
+    await expect(
+      runWithTenant(T1, () =>
+        svc.authorizeDestination(tx as any, actor, null, 'site-1'),
+      ),
+    ).rejects.toThrow('403');
   });
 });

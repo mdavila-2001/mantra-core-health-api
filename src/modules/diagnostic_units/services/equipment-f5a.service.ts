@@ -181,7 +181,7 @@ export class EquipmentF5aService {
 
   /**
    * Mover el equipo a otra sala exige el permiso también sobre la sala de
-   * destino (403/404).
+   * destino (403/404); sacarlo de toda sala, nivel sede.
    *
    * @param tx - Contexto.
    * @param actor - Actor.
@@ -190,8 +190,21 @@ export class EquipmentF5aService {
   async authorizeDestination(
     tx: EntityManager,
     actor: AuthenticatedUser,
-    careSpaceId: string,
+    careSpaceId: string | null,
+    practiceSiteId: string,
   ): Promise<void> {
+    // Sacar el equipo de su sala (destino null) lo deja fuera de todo
+    // alcance de espacio: exige nivel sede (revisión de seguridad F5a).
+    if (!careSpaceId) {
+      await this.access.assertSiteLevel(
+        actor,
+        'f5a.equipment.write',
+        practiceSiteId,
+        tx,
+        requireTenantId(),
+      );
+      return;
+    }
     await this.access.assertCan(
       actor,
       'f5a.equipment.write',
