@@ -13,6 +13,7 @@ import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
+import { FrontendRoutesSeedService } from '../../modules/read_models/seed/frontend-routes-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
@@ -307,6 +308,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly searchIndex?: CommunitySearchIndexService,
     @Optional()
     private readonly toolRegistry?: ToolRegistrySeedService,
+    @Optional()
+    private readonly frontendRoutes?: FrontendRoutesSeedService,
   ) {
     this.logger.setContext(SeedBootstrapService.name);
     const environment = loadSeedBootEnv();
@@ -744,6 +747,20 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
               name: 'registro de herramientas de plataforma',
               kind: 'content' as const,
               run: () => this.toolRegistry!.run(),
+            },
+          ]
+        : []),
+      // Mapa «pantalla → superficie → dominio» (`read_models.frontend_routes`) que
+      // el panel de uso y errores usa para resolver cada `route_template`. Sólo
+      // necesita los conceptos `read_models:*` del catálogo. Contenido: sin él
+      // `GET /admin/analytics/parts` devuelve todo en `unmapped`, nada más.
+      ...(this.frontendRoutes
+        ? [
+            {
+              id: 'partes-del-frontend',
+              name: 'partes del frontend (superficies y rutas)',
+              kind: 'content' as const,
+              run: () => this.frontendRoutes!.run(),
             },
           ]
         : []),
