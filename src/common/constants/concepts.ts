@@ -258,6 +258,17 @@ export const CONCEPT_DEFS: Readonly<Record<string, ConceptDef>> = {
     'Health practitioner',
   ),
   ROLE_CLINICIAN: def('iam:role:clinician', 'CLINICIAN', 'Clinician'),
+  /**
+   * Personal de apoyo hospitalario (secretaria). Lo concede su propio alta
+   * (`POST /iam/auth/register-support-staff`): dice quién es la cuenta, no a qué
+   * accede. El acceso a cada hospital, doctor y piso sale de sus vínculos
+   * aceptados (`delegated_access`), nunca de este rol.
+   */
+  ROLE_SUPPORT_STAFF: def(
+    'iam:role:support-staff',
+    'SUPPORT_STAFF',
+    'Hospital support staff',
+  ),
 
   // --- Bloqueo de cuenta (iam.account_lockouts.*) ---
   LOCK_REASON_FAILED_ATTEMPTS: def(
