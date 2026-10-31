@@ -61,7 +61,12 @@ describe('GET /admin/analytics/heatmap (contrato HTTP, repositorio doblado)', ()
       { target: 'button#guardar', clicks: 7, repeated: 2, dead: 0 },
     ]),
     sizes: mockFn(async () => [{ screen_size: 'escritorio', clicks: 12 }]),
-    scroll: mockFn(async () => ({ pages: 0, measured: 0, subjects: 0, reached: Array(10).fill(0) })),
+    scroll: mockFn(async () => ({
+      pages: 0,
+      measured: 0,
+      subjects: 0,
+      reached: Array(10).fill(0),
+    })),
     views: mockFn(async () => 0),
   };
   const logger = { setContext: jest.fn(), warn: jest.fn(), error: jest.fn() };
@@ -164,8 +169,28 @@ describe('GET /admin/analytics/heatmap (contrato HTTP, repositorio doblado)', ()
           repeated: 2,
         });
         expect(res.body.cells).toEqual([
-          { column: 0, row: 0, x: 0.025, y: 0.025, clicks: 6, rage: 0, dead: 0, value: 6, share: 0.75 },
-          { column: 19, row: 19, x: 0.975, y: 0.975, clicks: 2, rage: 0, dead: 0, value: 2, share: 0.25 },
+          {
+            column: 0,
+            row: 0,
+            x: 0.025,
+            y: 0.025,
+            clicks: 6,
+            rage: 0,
+            dead: 0,
+            value: 6,
+            share: 0.75,
+          },
+          {
+            column: 19,
+            row: 19,
+            x: 0.975,
+            y: 0.975,
+            clicks: 2,
+            rage: 0,
+            dead: 0,
+            value: 2,
+            share: 0.25,
+          },
         ]);
         for (const cell of res.body.cells) {
           expect(cell.x).toBeGreaterThanOrEqual(0);
@@ -314,7 +339,11 @@ describe('GET /admin/analytics/heatmap (contrato HTTP, repositorio doblado)', ()
 
     it('X-5: SUPERADMIN sin tenant agrega entre organizaciones y, con 0 personas distintas, suprime todo (minSample 5)', async () => {
       const res = await get(BASE, 'SUPERADMIN', null).expect(200);
-      expect(res.body.scope).toEqual({ level: 'platform', tenantId: null, minSample: 5 });
+      expect(res.body.scope).toEqual({
+        level: 'platform',
+        tenantId: null,
+        minSample: 5,
+      });
       expect(res.body.cells).toEqual([]);
       expect(res.body.byElement).toEqual([]);
       expect(res.body.totals.clicks).toBeNull();
@@ -323,7 +352,14 @@ describe('GET /admin/analytics/heatmap (contrato HTTP, repositorio doblado)', ()
     });
 
     it('X-5: con suficientes personas distintas en plataforma, las celdas pequeñas se suprimen y las demás salen', async () => {
-      repo.totals.mockImplementationOnce(async () => ({ clicks: 12, positioned: 8, keyboard: 3, repeated: 2, dead: 0, subjects: 9 }));
+      repo.totals.mockImplementationOnce(async () => ({
+        clicks: 12,
+        positioned: 8,
+        keyboard: 3,
+        repeated: 2,
+        dead: 0,
+        subjects: 9,
+      }));
       repo.cells.mockImplementationOnce(async () => [
         { col: 0, row: 0, clicks: 6, rage: 0, dead: 0, subjects: 6 },
         { col: 19, row: 19, clicks: 2, rage: 0, dead: 0, subjects: 2 },

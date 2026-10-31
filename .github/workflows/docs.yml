@@ -1,5 +1,12 @@
-name: Documentación
+name: CI · API
 
+# Este es el CI de la API, no sólo el de la documentación: compila, verifica
+# tipos, lint, auditoría de dependencias, pruebas unitarias e integración,
+# contratos y, al final, el portal. Se llamó «Documentación» porque nació en la
+# fase 16 del plan de documentación; el nombre viejo escondía que un rojo acá
+# es un rojo de la API. El archivo conserva su ruta (`docs.yml`) para no romper
+# referencias ni el historial de ejecuciones.
+#
 # Fase 16 del plan de documentación. Convierte la documentación en parte
 # obligatoria del producto: un PR que rompe el contrato OpenAPI/AsyncAPI, deja
 # un enlace roto, o hace fallar `mkdocs build --strict`, no puede mergearse.
@@ -19,9 +26,16 @@ name: Documentación
 # que el trabajo llegue en el momento en que sirve —antes de mergear— sin
 # duplicar cada corrida con el `push` que sigue al merge. `workflow_dispatch`
 # queda para lanzar la batería a mano sobre una rama cuando haga falta.
+#
+# `push` a `dev` vuelve desde el 31/10/2026: el job corre en `ubuntu-latest`
+# (ver abajo), así que la duplicación con el PR ya no ocupa la máquina del
+# equipo, y `dev` necesita su propia ejecución para saber si lo integrado —un
+# merge puede combinar dos PRs verdes que juntos fallan— sigue en verde.
 on:
   pull_request:
     branches: [master, dev]
+  push:
+    branches: [dev]
   workflow_dispatch:
 
 # Mínimo privilegio para el GITHUB_TOKEN (MCH-031). Ningún paso escribe en el
@@ -241,6 +255,12 @@ jobs:
 
       - name: Guardrails ALOVIDA — antipatrones prohibidos por las reglas canónicas
         run: yarn alovida:guardrails
+
+      # O3-3 / H-1: ningún endpoint de escritura sin @Roles, @Public ni revisión documentada.
+      - name: ORPHAN_ENDPOINT — mutantes sin @Roles, @Public ni revisión documentada
+        run: |
+          node --test tools/alovida/coverage-report.test.mjs
+          node tools/alovida/coverage-report.mjs --fail-on-orphan
 
       # El inventario (`inventario/`, `docs/inventario/`) se genera desde el código Y
       # desde el repo del modelo (propósito, dominio y tablas de cada módulo), así que
@@ -495,6 +515,60 @@ jobs:
           # (deja historial de sólo inserción: ver test/integration/disposable-database.ts).
           ALLOW_PERMANENT_TEST_RESIDUE: "yes"
         run: yarn test:integration --ci
+
+      # H-6 · la API compilada ARRANCA y responde, no sólo compila. Levanta
+      # `dist/src/main.js` (lo que despliega la imagen) contra los mismos
+      # almacenes de `services:` y el esquema ya materializado, y corre la misma
+      # prueba de humo que se lanza tras cada despliegue
+      # (`scripts/smoke/post-deploy-smoke.mjs`): /health y /readiness en 200 con
+      # `status: ok`. Sin cuentas de prueba sembradas no hace login: eso queda
+      # para el humo contra un entorno desplegado (SMOKE_ACCOUNTS).
+      #
+      # El arranque siembra el catálogo núcleo (SEED_ON_BOOT por defecto), por eso
+      # la espera de /health es generosa. Si falla, el paso imprime el final del
+      # log de la API: la causa de un arranque roto está ahí, no en el humo.
+      - name: Arranque real de la API y prueba de humo (/health, /readiness)
+        env:
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: mantra
+          DB_PASSWORD: mantra
+          DB_NAME: mantra_redesa_health
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          POSTGRES_USER: mantra
+          POSTGRES_PASSWORD: mantra
+          POSTGRES_DB: mantra_redesa_health
+          MONGODB_URI: mongodb://localhost:27017/mantra_redesa_health_document_store
+          MONGO_DB: mantra_redesa_health_document_store
+          REDIS_HOST: localhost
+          REDIS_PORT: "6379"
+          OPENSEARCH_NODE: http://localhost:9200
+          MINIO_ENDPOINT: localhost
+          MINIO_PORT: "9000"
+          MINIO_ACCESS_KEY: mantra
+          MINIO_SECRET_KEY: mantra12345678
+          MINIO_BUCKET: mantra-redesa-health-files-ci
+          JWT_SECRET: ci-only-secret-not-a-real-credential
+          MFA_ENCRYPTION_KEY: ci-only-secret-not-a-real-credential
+          PORT: "3000"
+          SMOKE_BASE_URL: http://127.0.0.1:3000
+          SMOKE_WAIT_SECONDS: "300"
+        run: |
+          node dist/src/main.js > "$RUNNER_TEMP/api-smoke.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/api-smoke.pid"
+          if ! node scripts/smoke/post-deploy-smoke.mjs; then
+            echo "::error::La API no pasó la prueba de humo. Últimas líneas de su log:"
+            tail -n 200 "$RUNNER_TEMP/api-smoke.log"
+            exit 1
+          fi
+
+      - name: Detener la API de la prueba de humo
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/api-smoke.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/api-smoke.pid")" 2>/dev/null || true
+          fi
 
       - name: Generar documentación detallada de endpoints
         run: yarn docs:endpoints:generate

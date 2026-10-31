@@ -19,13 +19,19 @@ describe('sanitizeClientMessage (sin PII, sin stack)', () => {
   });
   it('quita un JWT completo y la query string de una URL', () => {
     const jwt = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.firma_larga_aqui';
-    const out = sanitizeClientMessage(`GET /pacientes?nombre=Ana&token=${jwt} falló`)!;
+    const out = sanitizeClientMessage(
+      `GET /pacientes?nombre=Ana&token=${jwt} falló`,
+    )!;
     expect(out).not.toMatch(/eyJ|nombre=Ana|token=/);
   });
   it('se queda con la primera línea (sin stack) y topa a 500', () => {
-    const out = sanitizeClientMessage(`TypeError: x\n    at foo (a.js:1:1)\n    at bar`)!;
+    const out = sanitizeClientMessage(
+      `TypeError: x\n    at foo (a.js:1:1)\n    at bar`,
+    )!;
     expect(out).toBe('TypeError: x');
-    expect(sanitizeClientMessage('zx '.repeat(400))!.length).toBeLessThanOrEqual(500);
+    expect(
+      sanitizeClientMessage('zx '.repeat(400))!.length,
+    ).toBeLessThanOrEqual(500);
   });
   it('vacío o nulo → null', () => {
     expect(sanitizeClientMessage(undefined)).toBeNull();
@@ -42,7 +48,9 @@ describe('rutas e identificadores', () => {
     expect(safeRouteOrNull(undefined)).toBeNull();
   });
   it('la ruta de API pierde la query y rechaza ids largos o caracteres raros', () => {
-    expect(safeApiRouteOrNull('/admin/analytics/errors?x=1')).toBe('/admin/analytics/errors');
+    expect(safeApiRouteOrNull('/admin/analytics/errors?x=1')).toBe(
+      '/admin/analytics/errors',
+    );
     expect(safeApiRouteOrNull('/pacientes/12345')).toBeNull();
     expect(safeApiRouteOrNull('sin-barra')).toBeNull();
     expect(safeApiRouteOrNull("/a'b")).toBeNull();
@@ -59,14 +67,26 @@ describe('rutas e identificadores', () => {
 });
 
 describe('clientErrorFingerprint', () => {
-  const base = { errorClass: 'JS', errorType: 'TypeError', message: 'x', route: '/a' };
+  const base = {
+    errorClass: 'JS',
+    errorType: 'TypeError',
+    message: 'x',
+    route: '/a',
+  };
   it('es estable y de 16 hex', () => {
-    expect(clientErrorFingerprint(base)).toBe(clientErrorFingerprint({ ...base }));
+    expect(clientErrorFingerprint(base)).toBe(
+      clientErrorFingerprint({ ...base }),
+    );
     expect(clientErrorFingerprint(base)).toMatch(/^[0-9a-f]{16}$/);
   });
   it('cambia con clase, tipo, mensaje o ruta', () => {
     const fp = clientErrorFingerprint(base);
-    for (const over of [{ errorClass: 'HTTP' }, { errorType: 'RangeError' }, { message: 'y' }, { route: '/b' }]) {
+    for (const over of [
+      { errorClass: 'HTTP' },
+      { errorType: 'RangeError' },
+      { message: 'y' },
+      { route: '/b' },
+    ]) {
       expect(clientErrorFingerprint({ ...base, ...over })).not.toBe(fp);
     }
   });

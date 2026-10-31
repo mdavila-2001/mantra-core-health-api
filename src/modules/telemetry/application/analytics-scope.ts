@@ -70,7 +70,9 @@ export function resolveAnalyticsScope(
     );
   }
   const floor = platformMinSampleFloor();
-  const asked = Number.isInteger(requestedMinSample) ? requestedMinSample! : floor;
+  const asked = Number.isInteger(requestedMinSample)
+    ? requestedMinSample!
+    : floor;
   return {
     platform: true,
     minSample: Math.min(MAX_MIN_SAMPLE, Math.max(floor, asked)),
@@ -78,9 +80,11 @@ export function resolveAnalyticsScope(
 }
 
 /** Ventana de la consulta, o 422 `VALIDATION_FAILED` con `details.reason`. */
-export function windowOrThrow(
-  input: { from?: string; to?: string; interval?: Interval },
-): AnalyticsWindow {
+export function windowOrThrow(input: {
+  from?: string;
+  to?: string;
+  interval?: Interval;
+}): AnalyticsWindow {
   try {
     return resolveWindow(input);
   } catch (error) {

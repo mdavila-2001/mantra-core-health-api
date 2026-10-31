@@ -511,9 +511,9 @@ describe('TelemetryEventsService', () => {
         );
         expect(usedKey).not.toBe('k1');
         expect(scope).toBeNull();
-        expect(d.eventsRepo.insertAnonymous.mock.calls[0][1].eventIdempotencyKey).toBe(
-          usedKey,
-        );
+        expect(
+          d.eventsRepo.insertAnonymous.mock.calls[0][1].eventIdempotencyKey,
+        ).toBe(usedKey);
       });
 
       it('Límite: en producción sin secreto el evento anónimo no se deduplica (clave aleatoria)', async () => {
@@ -874,14 +874,21 @@ describe('TelemetryEventsService', () => {
           { events: [ev('k-dup'), ev('k-ok')] },
           actor,
         );
-        expect(res).toMatchObject({ inserted: 1, skipped: 1, eventIds: ['e2'] });
+        expect(res).toMatchObject({
+          inserted: 1,
+          skipped: 1,
+          eventIds: ['e2'],
+        });
         expect(d.eventsRepo.insertAnonymous).toHaveBeenCalledTimes(2);
       });
 
       it('un duplicado perdido en la carrera no escribe propiedades ni cuenta como insertado', async () => {
         const d = setup();
         d.eventsRepo.insertAnonymous.mockResolvedValue(null);
-        const res = await d.service.captureActivityEvents({ events: [ev('k')] }, actor);
+        const res = await d.service.captureActivityEvents(
+          { events: [ev('k')] },
+          actor,
+        );
         expect(res).toMatchObject({ inserted: 0, skipped: 1, eventIds: [] });
         expect(d.propertiesRepo.create).not.toHaveBeenCalled();
       });

@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
@@ -32,7 +39,8 @@ export class TelemetryClientErrorsController {
   @TenantAgnostic()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Registra un lote de errores del cliente (saneados en el servidor)',
+    summary:
+      'Registra un lote de errores del cliente (saneados en el servidor)',
   })
   @ApiOkResponse({ type: ClientErrorsResponseDto })
   capture(@Body() dto: CaptureClientErrorsDto, @Req() request: Request) {
