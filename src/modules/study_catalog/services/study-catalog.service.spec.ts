@@ -21,6 +21,7 @@ const row = (id: string, over: Record<string, unknown> = {}) => ({
     catalog_version: '2026-10-31',
     source_file: 'laboratorio.json',
     source_ids: ['loinc-2.83'],
+    section: { codigo: 'HEMATO', nombre: 'Hematología' },
     specimen: {
       codigo: 'SUERO',
       nombre: 'Suero',
@@ -35,6 +36,9 @@ function build(rows: any[]) {
   const repo = {
     findPage: mockFn(() => Promise.resolve(rows)),
     countComponents: mockFn(() => Promise.resolve(new Map([['a', 3]]))),
+    findComponentNames: mockFn(() =>
+      Promise.resolve(new Map([['a', ['Leucocitos', 'Hemoglobina']]])),
+    ),
     findTargets: mockFn((_em: unknown, type: string) =>
       Promise.resolve(
         type === STUDY.REL_HAS_MODALITY ? new Map([['b', 'mod-1']]) : new Map(),
@@ -94,6 +98,40 @@ describe('StudyCatalogService.list', () => {
     expect(item.modalityConceptId).toBe('mod-1');
     expect(item.componentsSelectable).toBe(false);
     expect(item.specimenHint).toBeNull();
+  });
+
+  it('laboratorio: sección y nombres de componentes; sin campos de imagen', async () => {
+    const { service, repo } = build([row('a')]);
+    const [item] = (await service.list({ tokens: [], limit: 5 })).items;
+    expect(item.section).toEqual({ code: 'HEMATO', name: 'Hematología' });
+    expect(item.componentNames).toEqual(['Leucocitos', 'Hemoglobina']);
+    expect(item.regionCode).toBeNull();
+    expect(item.requiresLaterality).toBeNull();
+    expect(repo.findComponentNames.mock.calls[0][1]).toEqual(['a']);
+    expect(repo.findComponentNames.mock.calls[0][2]).toBe(60);
+  });
+
+  it('imagen: región y lateralidad sembradas; sección null y sin componentes', async () => {
+    const { service } = build([
+      row('b', {
+        family: 'IMAGING',
+        props: { region_code: 'TORAX', requires_laterality: true },
+      }),
+    ]);
+    const [item] = (await service.list({ tokens: [], limit: 5 })).items;
+    expect(item).toMatchObject({
+      section: null,
+      componentNames: [],
+      regionCode: 'TORAX',
+      requiresLaterality: true,
+    });
+  });
+
+  it('dato no sembrado: null / []', async () => {
+    const { service } = build([row('b', { family: 'IMAGING', props: {} })]);
+    const [item] = (await service.list({ tokens: [], limit: 5 })).items;
+    expect(item.regionCode).toBeNull();
+    expect(item.requiresLaterality).toBeNull();
   });
 
   it('omite un concepto del value set que no sabe clasificar, en vez de inventarle familia', async () => {

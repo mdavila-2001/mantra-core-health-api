@@ -31,6 +31,9 @@ import type {
 /** Sistema de codificación de los conceptos del catálogo. */
 const CODE_SYSTEM = 'mantra-core-internal';
 
+/** Tope de nombres de componentes que viajan por renglón de la lista. */
+export const MAX_COMPONENT_NAMES = 60;
+
 const str = (v: unknown): string | null => (typeof v === 'string' ? v : null);
 const bool = (v: unknown): boolean | null =>
   typeof v === 'boolean' ? v : null;
@@ -235,10 +238,12 @@ export class StudyCatalogService {
     rows: StudyRow[],
   ): Promise<StudyCatalogItemDto[]> {
     const ids = rows.map((r) => r.id);
-    const [counts, modalities, sites] = await Promise.all([
+    const labIds = rows.filter((r) => r.family === 'LAB').map((r) => r.id);
+    const [counts, modalities, sites, names] = await Promise.all([
       this.repo.countComponents(em, ids),
       this.repo.findTargets(em, STUDY.REL_HAS_MODALITY, ids),
       this.repo.findTargets(em, STUDY.REL_HAS_BODY_SITE, ids),
+      this.repo.findComponentNames(em, labIds, MAX_COMPONENT_NAMES),
     ]);
     return rows.flatMap((r) => {
       // Sin familia no hay a qué pantalla mandarlo: un concepto del value set que el
@@ -248,6 +253,9 @@ export class StudyCatalogService {
       const count = counts.get(r.id) ?? 0;
       const sp = p.specimen as Record<string, unknown> | undefined;
       const sourceFile = str(p.source_file);
+      const sec = p.section as Record<string, unknown> | undefined;
+      const secCode = str(sec?.codigo);
+      const imaging = r.family === 'IMAGING';
       return [
         {
           conceptId: r.id,
@@ -274,6 +282,13 @@ export class StudyCatalogService {
             version: str(p.catalog_version),
             sourceIds: strings(p.source_ids),
           },
+          section:
+            r.family === 'LAB' && secCode
+              ? { code: secCode, name: str(sec?.nombre) ?? secCode }
+              : null,
+          componentNames: names.get(r.id) ?? [],
+          regionCode: imaging ? str(p.region_code) : null,
+          requiresLaterality: imaging ? bool(p.requires_laterality) : null,
         },
       ];
     });

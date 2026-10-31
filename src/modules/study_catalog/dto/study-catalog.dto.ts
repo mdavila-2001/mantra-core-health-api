@@ -26,6 +26,14 @@ export class StudyProvenanceDto {
   @ApiProperty({ type: [String] }) sourceIds!: string[];
 }
 
+/** Sección del laboratorio a la que pertenece un análisis. */
+export class StudySectionDto {
+  /** Código de la sección (`HEMATO`). */
+  @ApiProperty() code!: string;
+  /** Nombre en castellano (`Hematología`). */
+  @ApiProperty() name!: string;
+}
+
 /** Un estudio del catálogo en la lista. */
 export class StudyCatalogItemDto {
   /** Concepto del estudio: es el `codeConceptId` que se manda al pedirlo. */
@@ -55,6 +63,15 @@ export class StudyCatalogItemDto {
   bodySiteConceptId!: string | null;
   /** De dónde sale el renglón. */
   @ApiProperty({ type: StudyProvenanceDto }) provenance!: StudyProvenanceDto;
+  /** Sección de laboratorio; `null` en imagen y en estudios sin sección sembrada. */
+  @ApiPropertyOptional({ type: StudySectionDto, nullable: true })
+  section!: StudySectionDto | null;
+  /** Nombres de los componentes directos del panel (máx. 60, en su orden); `[]` si no tiene. */
+  @ApiProperty({ type: [String] }) componentNames!: string[];
+  /** Código de la región por defecto del estudio (`TORAX`); `null` fuera de imagen. */
+  @ApiPropertyOptional({ nullable: true }) regionCode!: string | null;
+  /** Si el estudio exige lateralidad; `null` fuera de imagen. */
+  @ApiPropertyOptional({ nullable: true }) requiresLaterality!: boolean | null;
 }
 
 /** Página del catálogo. */

@@ -29,6 +29,9 @@ const LIST_PROPERTIES = [
   'catalog_version',
   'source_file',
   'source_ids',
+  'section',
+  'region_code',
+  'requires_laterality',
 ];
 
 /** Fila cruda de un estudio, con sus propiedades pivotadas. */
@@ -226,6 +229,43 @@ export class StudyCatalogRepository {
       'all',
     );
     return new Map(rows.map((r) => [r.id, Number(r.n)]));
+  }
+
+  /**
+   * Nombres (castellano) de los componentes directos de cada panel, en el orden
+   * del panel y hasta `perPanel` por panel (la lista no trae el detalle).
+   */
+  async findComponentNames(
+    em: EntityManager,
+    panelIds: string[],
+    perPanel: number,
+  ): Promise<Map<string, string[]>> {
+    if (panelIds.length === 0) return new Map();
+    const rows = await em
+      .getConnection()
+      .execute<{ panel: string; name: string }[]>(
+        `SELECT t.panel, t.name FROM (
+           SELECT r.target_concept_id AS panel,
+                  coalesce(es.value, cc.display) AS name,
+                  row_number() OVER (PARTITION BY r.target_concept_id
+                                     ORDER BY r.ordinal NULLS LAST, cc.code) AS rn,
+                  r.ordinal, cc.code
+             FROM terminology.concept_relationships r
+             JOIN terminology.catalog_concepts cc ON cc.id = r.source_concept_id
+             LEFT JOIN LATERAL (
+               SELECT d.value FROM terminology.concept_designations d
+                WHERE d.concept_id = cc.id AND d.language_concept_id = ? AND d.preferred IS TRUE
+                ORDER BY d.created_at, d.id LIMIT 1) es ON TRUE
+            WHERE r.relationship_type_concept_id = ? AND r.target_concept_id = ANY(ARRAY[?]::uuid[])) t
+          WHERE t.rn <= ?
+          ORDER BY t.panel, t.rn`,
+        [CONCEPTS.LANG_ES, CONCEPTS.REL_PART_OF, panelIds, perPanel],
+        'all',
+      );
+    const out = new Map<string, string[]>();
+    for (const r of rows)
+      out.set(r.panel, [...(out.get(r.panel) ?? []), r.name]);
+    return out;
   }
 
   /** Destino de una relación de catálogo (modalidad, región, muestra) por estudio. */
