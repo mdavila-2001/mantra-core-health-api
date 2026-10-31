@@ -79,6 +79,8 @@ export function createCatalogService(d: CatalogServiceDoubles) {
         describe: async () => null,
         hasActiveResource: async () => false,
         announceLinked: async () => undefined,
+        names: async () => new Map(),
+        announceTemplateCareSpace: async () => undefined,
       },
     ),
     new CreateBookingPolicyUseCase(em, catalogRepo, access, logger),

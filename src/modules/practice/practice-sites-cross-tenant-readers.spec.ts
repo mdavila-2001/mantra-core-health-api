@@ -27,6 +27,8 @@ const KNOWN_READERS: Record<string, string> = {
     'F5f: práctica del espacio o de la unidad que se liga (JOIN por practice_site_id), comparada con el tenant activo y la práctica del activo o del centro de costo (404 / 422).',
   'diagnostic_units/services/equipment-f5a.service.ts':
     'F5a: sede de práctica y zona horaria de la sede de la unidad de un equipo ya acotado al tenant (DiagnosticUnitScopeService); la sede se autoriza enseguida con assertCan.',
+  'scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts':
+    'R0/F5d: práctica de la sede de un espacio (LEFT JOIN por practice_site_id) para comparar con la práctica del recurso; el tenant del espacio se compara con el del recurso antes (404).',
   'delegated_access/services/assignment-targets.ts':
     'F5g: comprueba que la sede de una asignación sea del tenant de la membresía (compara tenant_id; 404 si no).',
   'clinical/services/inpatient/inpatient-read.use-cases.ts':

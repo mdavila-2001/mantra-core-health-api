@@ -134,13 +134,17 @@ function buildCatalog() {
       describe: async (_tx: unknown, id: string) => ({
         tenantId: TENANT,
         practiceSiteId: 'site-1',
+        practiceId: 'p-1',
         functionCode: 'SPACE_FN_OPERATING_ROOM',
+        allowOverlap: false,
         schedulable: true,
         active: true,
         id,
       }),
       hasActiveResource: async () => false,
       announceLinked: async () => undefined,
+      names: async () => new Map(),
+      announceTemplateCareSpace: async () => undefined,
     },
   });
   return {

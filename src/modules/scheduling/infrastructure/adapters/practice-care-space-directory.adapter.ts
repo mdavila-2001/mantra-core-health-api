@@ -29,14 +29,18 @@ export class PracticeCareSpaceDirectoryAdapter implements CareSpaceDirectoryPort
       {
         tenant_id: string;
         practice_site_id: string;
+        practice_id: string | null;
         space_type_concept_id: string;
         status_concept_id: string;
         valid_from: string | null;
         valid_to: string | null;
       }[]
     >(
-      `SELECT tenant_id, practice_site_id, space_type_concept_id, status_concept_id, valid_from, valid_to
-         FROM practice.care_spaces WHERE id = ?`,
+      `SELECT c.tenant_id, c.practice_site_id, ps.practice_id, c.space_type_concept_id,
+              c.status_concept_id, c.valid_from, c.valid_to
+         FROM practice.care_spaces c
+         LEFT JOIN practice.practice_sites ps ON ps.id = c.practice_site_id
+        WHERE c.id = ?`,
       [careSpaceId],
       'all',
     );
@@ -47,7 +51,11 @@ export class PracticeCareSpaceDirectoryAdapter implements CareSpaceDirectoryPort
     return {
       tenantId: row.tenant_id,
       practiceSiteId: row.practice_site_id,
+      practiceId: row.practice_id,
       functionCode,
+      allowOverlap: functionCode
+        ? (FUNCTION_PROFILE_BY_CODE.get(functionCode)?.allowOverlap ?? false)
+        : false,
       schedulable: functionCode
         ? (FUNCTION_PROFILE_BY_CODE.get(functionCode)?.schedulable ?? false)
         : false,
@@ -69,6 +77,43 @@ export class PracticeCareSpaceDirectoryAdapter implements CareSpaceDirectoryPort
       'all',
     );
     return rows.length > 0;
+  }
+
+  /** @inheritdoc */
+  async names(
+    tx: EntityManager,
+    careSpaceIds: readonly string[],
+  ): Promise<Map<string, { id: string; code: string; name: string }>> {
+    if (careSpaceIds.length === 0) return new Map();
+    const rows = await tx.execute<{ id: string; code: string; name: string }[]>(
+      'SELECT id, code, name FROM practice.care_spaces WHERE id = ANY(?::uuid[])',
+      [`{${[...new Set(careSpaceIds)].join(',')}}`],
+      'all',
+    );
+    return new Map(rows.map((r) => [r.id, r]));
+  }
+
+  /** @inheritdoc */
+  async announceTemplateCareSpace(
+    tx: EntityManager,
+    input: {
+      tenantId: string;
+      templateId: string;
+      careSpaceId: string | null;
+      actorUserId: string;
+    },
+  ): Promise<void> {
+    await this.outbox.publishDomainEvent(tx, {
+      tenantId: input.tenantId,
+      eventType: 'scheduling.template.care_space_set',
+      aggregateType: 'scheduling.schedule_templates',
+      aggregateId: input.templateId,
+      payloadJson: {
+        templateId: input.templateId,
+        careSpaceId: input.careSpaceId,
+      },
+      actorUserId: input.actorUserId,
+    });
   }
 
   /** @inheritdoc */

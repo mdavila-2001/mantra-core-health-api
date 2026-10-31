@@ -130,6 +130,8 @@ export interface CreateTemplateData {
    * Identificador asociado a resource.
    */
   resourceId: string;
+  /** F5d: consultorio que ocupa la plantilla. */
+  careSpaceId?: string;
   /**
    * Valor de name mantenido por la instancia.
    */
@@ -414,6 +416,7 @@ export class SchedulingCatalogRepository {
         slotMinutes: data.slotMinutes,
         flexibleHours: data.flexibleHours ?? false,
         bookingPolicyId: data.bookingPolicyId,
+        ...(data.careSpaceId ? { careSpaceId: data.careSpaceId } : {}),
         statusConceptId: data.statusConceptId,
         ...createdBy(data.actorUserId),
       },
@@ -601,6 +604,54 @@ export class SchedulingCatalogRepository {
    * @param exceptResourceId - Recurso que se está editando, si se excluye.
    * @returns Las franjas, con su recurso, su zona y la vigencia de su plantilla.
    */
+  /**
+   * Franjas de las plantillas publicadas que ocupan un consultorio (§F5d),
+   * salvo la plantilla indicada.
+   *
+   * @param em - Contexto.
+   * @param careSpaceId - Consultorio.
+   * @param publishedStatusConceptId - Estado publicado.
+   * @param exceptTemplateId - Plantilla a excluir (la que se edita).
+   */
+  async findRulesByCareSpace(
+    em: EntityManager,
+    careSpaceId: string,
+    publishedStatusConceptId: string,
+    exceptTemplateId?: string,
+  ): Promise<
+    {
+      rule: ScheduleRules;
+      templateName: string;
+      timeZone?: string;
+      validTo?: Date;
+    }[]
+  > {
+    const templates = (
+      await em.find(ScheduleTemplates, {
+        careSpaceId,
+        statusConceptId: publishedStatusConceptId,
+      })
+    ).filter((t) => t.id !== exceptTemplateId);
+    if (templates.length === 0) return [];
+    const resources = await em.find(SchedulableResources, {
+      id: { $in: [...new Set(templates.map((t) => t.resourceId))] },
+    });
+    const zone = new Map(resources.map((r) => [r.id, r.timeZone]));
+    const byId = new Map(templates.map((t) => [t.id, t]));
+    const bands = await em.find(ScheduleRules, {
+      scheduleTemplateId: { $in: templates.map((t) => t.id) },
+    });
+    return bands.map((rule) => {
+      const t = byId.get(rule.scheduleTemplateId)!;
+      return {
+        rule,
+        templateName: t.name,
+        timeZone: zone.get(t.resourceId),
+        validTo: t.validTo,
+      };
+    });
+  }
+
   async findRulesByResourceOwner(
     em: EntityManager,
     resourceRefId: string,

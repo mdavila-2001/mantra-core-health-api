@@ -104,4 +104,10 @@ export enum SchedulingErrorReason {
 
   // Tiempo del profesional cruzando todas sus agendas (REGLA MADRE AG-1).
   PRACTITIONER_NOT_AVAILABLE = 'PRACTITIONER_NOT_AVAILABLE',
+  /** F5d: el consultorio de la plantilla no es un consultorio/sala de procedimiento/imagen agendable (422). */
+  TEMPLATE_CARE_SPACE_INVALID_FUNCTION = 'TEMPLATE_CARE_SPACE_INVALID_FUNCTION',
+  /** F5d: el consultorio es de otra práctica que el recurso de la agenda (422). */
+  TEMPLATE_CARE_SPACE_SITE_MISMATCH = 'TEMPLATE_CARE_SPACE_SITE_MISMATCH',
+  /** F5d: otra plantilla publicada ocupa el mismo consultorio a la misma hora (422). */
+  TEMPLATE_RULE_OVERLAP_CARE_SPACE = 'TEMPLATE_RULE_OVERLAP_CARE_SPACE',
 }
