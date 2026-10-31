@@ -271,7 +271,7 @@ export class TelemetryEventsService {
         const occurredAt = item.occurredAt
           ? new Date(item.occurredAt)
           : new Date();
-        const event = this.eventsRepo.create(tx, {
+        const eventData = {
           eventSchemaDefinitionId: item.eventSchemaDefinitionId,
           analyticsSubjectId: anonymous ? undefined : item.analyticsSubjectId,
           userId: anonymous ? undefined : actor.id,
@@ -289,8 +289,22 @@ export class TelemetryEventsService {
           // Un correlationId elegido por el cliente religaría el evento anónimo con
           // eventos identificados: no se guarda.
           correlationId: anonymous ? undefined : item.correlationId,
-        });
-        await tx.flush();
+        };
+        // El evento anónimo se inserta bajo SAVEPOINT: si dos lotes concurrentes
+        // traen la misma clave, el índice único parcial rechaza al segundo y ese
+        // evento cuenta como duplicado sin tumbar el lote (hallazgo 2, F0).
+        let event: { id: string };
+        if (anonymous) {
+          const insertedId = await this.eventsRepo.insertAnonymous(tx, eventData);
+          if (insertedId === null) {
+            skipped += 1;
+            continue;
+          }
+          event = { id: insertedId };
+        } else {
+          event = this.eventsRepo.create(tx, eventData);
+        }
+        if (!anonymous) await tx.flush();
         eventIds.push(event.id);
 
         for (const prop of properties) {

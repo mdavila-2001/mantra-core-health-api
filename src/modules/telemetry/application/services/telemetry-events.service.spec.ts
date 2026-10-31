@@ -45,6 +45,7 @@ function build() {
     findByIdempotencyKey: mockFn(),
     findById: mockFn(),
     create: mockFn(),
+    insertAnonymous: mockFn(),
   };
   const propertiesRepo = { create: mockFn() };
   const journeysRepo = {
@@ -394,7 +395,7 @@ describe('TelemetryEventsService', () => {
         d.schemasRepo.findById.mockResolvedValue(anonSchema());
         d.purposesRepo.findById.mockResolvedValue({ requiresConsent: false });
         d.consentsRepo.findLatest.mockResolvedValue(null);
-        d.eventsRepo.create.mockReturnValue({ id: 'e-anon' });
+        d.eventsRepo.insertAnonymous.mockResolvedValue('e-anon');
         return d;
       };
 
@@ -416,7 +417,7 @@ describe('TelemetryEventsService', () => {
 
         expect(res).toMatchObject({ inserted: 1, skipped: 0 });
         expect(res.sessionJourneyId).toBeUndefined();
-        const row = d.eventsRepo.create.mock.calls[0][1];
+        const row = d.eventsRepo.insertAnonymous.mock.calls[0][1];
         expect(row.userId).toBeUndefined();
         expect(row.sessionId).toBeUndefined();
         expect(row.analyticsSubjectId).toBeUndefined();
@@ -452,7 +453,7 @@ describe('TelemetryEventsService', () => {
         );
 
         expect(res).toMatchObject({ inserted: 0, skipped: 1 });
-        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.insertAnonymous).not.toHaveBeenCalled();
       });
 
       it('el correlationId del cliente no se guarda en un evento anónimo', async () => {
@@ -471,7 +472,7 @@ describe('TelemetryEventsService', () => {
           actor,
         );
         expect(
-          d.eventsRepo.create.mock.calls[0][1].correlationId,
+          d.eventsRepo.insertAnonymous.mock.calls[0][1].correlationId,
         ).toBeUndefined();
       });
 
@@ -493,7 +494,7 @@ describe('TelemetryEventsService', () => {
           actor,
         );
 
-        expect(d.eventsRepo.create.mock.calls[0][1].eventName).toBe(
+        expect(d.eventsRepo.insertAnonymous.mock.calls[0][1].eventName).toBe(
           'pagina_vista_anonima',
         );
         // La clave del cliente no se guarda tal cual: se acota por un hash a
@@ -510,7 +511,7 @@ describe('TelemetryEventsService', () => {
         );
         expect(usedKey).not.toBe('k1');
         expect(scope).toBeNull();
-        expect(d.eventsRepo.create.mock.calls[0][1].eventIdempotencyKey).toBe(
+        expect(d.eventsRepo.insertAnonymous.mock.calls[0][1].eventIdempotencyKey).toBe(
           usedKey,
         );
       });
@@ -592,7 +593,7 @@ describe('TelemetryEventsService', () => {
         );
 
         expect(res).toMatchObject({ inserted: 0, skipped: 1 });
-        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.insertAnonymous).not.toHaveBeenCalled();
       });
 
       it.each([
@@ -621,7 +622,7 @@ describe('TelemetryEventsService', () => {
         );
 
         expect(error.reason).toBe(TelemetryErrorReason.ANONYMOUS_ROUTE_INVALID);
-        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.insertAnonymous).not.toHaveBeenCalled();
       });
 
       it('Error 422: el esquema anónimo no admite propiedades', async () => {
@@ -645,7 +646,7 @@ describe('TelemetryEventsService', () => {
         expect(error.reason).toBe(
           TelemetryErrorReason.EVENT_PROPERTY_NOT_ALLOWED,
         );
-        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.insertAnonymous).not.toHaveBeenCalled();
       });
 
       it('Autorización negativa: un evento con sujeto sigue descartado sin consentimiento aunque el propósito no lo exija', async () => {
@@ -669,7 +670,7 @@ describe('TelemetryEventsService', () => {
         );
 
         expect(res).toMatchObject({ inserted: 0, skipped: 1 });
-        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.insertAnonymous).not.toHaveBeenCalled();
       });
 
       it('Autorización negativa: el sujeto de otro usuario sigue respondiendo 404', async () => {
@@ -695,7 +696,7 @@ describe('TelemetryEventsService', () => {
         );
 
         expect(error).toBeInstanceOf(ResourceNotFoundException);
-        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.insertAnonymous).not.toHaveBeenCalled();
       });
 
       it('Autorización negativa: un propósito sin dato de requires_consent exige consentimiento', async () => {
@@ -737,7 +738,7 @@ describe('TelemetryEventsService', () => {
         );
 
         expect(res).toMatchObject({ inserted: 0, skipped: 1 });
-        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.insertAnonymous).not.toHaveBeenCalled();
       });
 
       it('Lote mixto sin decisión: entra la vista anónima y se descarta el clic', async () => {
@@ -751,7 +752,7 @@ describe('TelemetryEventsService', () => {
           }),
         );
         d.consentsRepo.findLatest.mockResolvedValue(null);
-        d.eventsRepo.create.mockReturnValue({ id: 'e-anon' });
+        d.eventsRepo.insertAnonymous.mockResolvedValue('e-anon');
 
         const res = await d.service.captureActivityEvents(
           {
@@ -767,7 +768,7 @@ describe('TelemetryEventsService', () => {
         );
 
         expect(res).toMatchObject({ inserted: 1, skipped: 1 });
-        expect(d.eventsRepo.create).toHaveBeenCalledTimes(1);
+        expect(d.eventsRepo.insertAnonymous).toHaveBeenCalledTimes(1);
       });
 
       it('un esquema DEPRECATED descarta el evento y no tumba el resto del lote', async () => {
@@ -783,6 +784,7 @@ describe('TelemetryEventsService', () => {
 
         expect(res).toMatchObject({ inserted: 0, skipped: 1 });
         expect(d.eventsRepo.create).not.toHaveBeenCalled();
+        expect(d.eventsRepo.insertAnonymous).not.toHaveBeenCalled();
       });
     });
 
@@ -840,6 +842,49 @@ describe('TelemetryEventsService', () => {
           actor,
         ),
       ).rejects.toBeInstanceOf(ResourceNotFoundException);
+    });
+
+    describe('idempotencia anónima concurrente (hallazgo 2)', () => {
+      const ANON_SCHEMA = 'anon-schema';
+      const anonSchema = {
+        id: ANON_SCHEMA,
+        eventName: 'pagina_vista_anonima',
+        purposeDefinitionId: SEED.platformUsageAggregatePurposeId,
+        propertySchemaJson: { type: 'object', properties: {} },
+      };
+      const setup = () => {
+        const d = build();
+        d.schemasRepo.findById.mockResolvedValue(anonSchema);
+        d.purposesRepo.findById.mockResolvedValue({ requiresConsent: false });
+        d.eventsRepo.findByIdempotencyKey.mockResolvedValue(null);
+        return d;
+      };
+      const ev = (key: string) => ({
+        eventSchemaDefinitionId: ANON_SCHEMA,
+        eventIdempotencyKey: key,
+        routeTemplate: '/inicio',
+      });
+
+      it('si el índice único rechaza al evento (carrera con otro lote), cuenta skipped y el resto del lote sigue', async () => {
+        const d = setup();
+        d.eventsRepo.insertAnonymous
+          .mockResolvedValueOnce(null)
+          .mockResolvedValueOnce('e2');
+        const res = await d.service.captureActivityEvents(
+          { events: [ev('k-dup'), ev('k-ok')] },
+          actor,
+        );
+        expect(res).toMatchObject({ inserted: 1, skipped: 1, eventIds: ['e2'] });
+        expect(d.eventsRepo.insertAnonymous).toHaveBeenCalledTimes(2);
+      });
+
+      it('un duplicado perdido en la carrera no escribe propiedades ni cuenta como insertado', async () => {
+        const d = setup();
+        d.eventsRepo.insertAnonymous.mockResolvedValue(null);
+        const res = await d.service.captureActivityEvents({ events: [ev('k')] }, actor);
+        expect(res).toMatchObject({ inserted: 0, skipped: 1, eventIds: [] });
+        expect(d.propertiesRepo.create).not.toHaveBeenCalled();
+      });
     });
 
     describe('gobernanza de propiedades (TEL-03)', () => {
