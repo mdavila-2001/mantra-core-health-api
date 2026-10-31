@@ -115,6 +115,28 @@ describe('PharmacyBulkController', () => {
     ).toHaveLength(0);
   });
 
+  it('dryRun is a strict boolean or absent: 0, "", null, strings, [] and {} are a 400 through the global pipe', async () => {
+    const pipe = createGlobalValidationPipe();
+    const send = (extra: Record<string, unknown>) =>
+      pipe.transform(
+        { mode: 'UPSERT', rows: [{ name: 'x' }], ...extra },
+        { type: 'body', metatype: BulkRequestDto },
+      ) as Promise<BulkRequestDto>;
+    for (const bad of [0, 1, null, 'true', 'false', '0', '1', '', [], {}]) {
+      await expect(send({ dryRun: bad })).rejects.toMatchObject({
+        status: 400,
+      });
+    }
+    await expect(send({ dryRun: true })).resolves.toMatchObject({
+      dryRun: true,
+    });
+    await expect(send({ dryRun: false })).resolves.toMatchObject({
+      dryRun: false,
+    });
+    const absent = await send({});
+    expect(absent.dryRun).toBeUndefined();
+  });
+
   it('the global validation pipe lets the rows through as plain objects', async () => {
     const pipe = createGlobalValidationPipe();
     const body = (await pipe.transform(

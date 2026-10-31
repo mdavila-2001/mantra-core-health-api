@@ -190,6 +190,17 @@ describe('PharmacyBulkService', () => {
     }
   });
 
+  it('a dryRun that is not a boolean never writes: 400 before any row runs', async () => {
+    for (const bad of [0, null, '', 'false', 1, [], {}]) {
+      const d = build();
+      await expect(
+        run(d, 'UPSERT', [{ code: 'A' }], bad as unknown as boolean),
+      ).rejects.toMatchObject({ status: 400 });
+      expect(d.em.transactional).not.toHaveBeenCalled();
+      expect(d.handler.findExisting.mock.calls).toHaveLength(0);
+    }
+  });
+
   it('translates a domain exception of the usual services into the row reason', async () => {
     const d = build();
     const response = await run(d, 'UPSERT', [

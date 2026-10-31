@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { plainToInstance } from 'class-transformer';
 import { validate, type ValidationError } from 'class-validator';
@@ -61,6 +61,11 @@ export class PharmacyBulkService {
     handler: BulkHandler<Existing, CreateRow, UpdateRow>,
     actor: AuthenticatedUser,
   ): Promise<BulkResponseDto> {
+    // El DTO ya rechaza un `dryRun` que no sea booleano; si algo llega sin
+    // pasar por el pipe, tampoco se escribe por error.
+    if (body.dryRun !== undefined && typeof body.dryRun !== 'boolean') {
+      throw new BadRequestException('dryRun debe ser true o false');
+    }
     const dryRun = body.dryRun === true;
     this.logger.info(
       {

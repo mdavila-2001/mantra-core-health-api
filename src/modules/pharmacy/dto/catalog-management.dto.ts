@@ -4,7 +4,6 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsBoolean,
   IsInt,
   IsOptional,
   IsString,
@@ -15,6 +14,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
+import { IsStrictBoolean } from './strict-boolean';
 import {
   CATEGORY_NAME_MAX,
   STOCK_MAX,
@@ -64,7 +64,7 @@ export class InventoryLineDto {
   /** «Hay / no hay», sin conteo. */
   @ApiPropertyOptional()
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   inStock?: boolean;
 }
 

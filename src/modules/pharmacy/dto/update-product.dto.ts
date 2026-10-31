@@ -3,7 +3,6 @@ import {
   ArrayMaxSize,
   ArrayUnique,
   IsArray,
-  IsBoolean,
   IsIn,
   IsInt,
   IsOptional,
@@ -14,6 +13,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { IsStrictBoolean } from './strict-boolean';
 import { CATALOG_STATUSES, IsCatalogMoney } from './catalog-fields.dto';
 import {
   CATEGORY_NAME_MAX,
@@ -105,7 +105,7 @@ export class UpdateProductDto {
     type: Boolean,
   })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   requiresPrescription?: boolean | null;
 
   /*
@@ -157,7 +157,7 @@ export class UpdateProductDto {
       '`false` = «no lo tengo»; `true` vuelve a tenerlo (si el conteo estaba en 0 queda «sin conteo»). Junto con `stock` es 422.',
   })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   inStock?: boolean;
 
   /** Publicado, borrador o retirado. */

@@ -4,7 +4,6 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsBoolean,
   IsIn,
   IsNotEmpty,
   IsNumber,
@@ -14,7 +13,9 @@ import {
   Max,
   MaxLength,
   Min,
+  ValidateIf,
 } from 'class-validator';
+import { IsStrictBoolean } from './strict-boolean';
 import { CATEGORY_NAME_MAX } from '../services/pharmacy-catalog-rules';
 import { IsCatalogMoney } from './catalog-fields.dto';
 import { UpdateProductDto } from './update-product.dto';
@@ -52,10 +53,13 @@ export class BulkRequestDto {
 
   /**
    * Con `true` no escribe nada y responde lo que habría pasado con cada fila.
+   * Booleano estricto o ausente: `0`, `""`, `null`, `"true"`, `[]` o `{}` son un
+   * 400 y no se escribe nada (una vista previa mal tipada no puede cargar).
    */
-  @ApiPropertyOptional({ default: false })
-  @IsOptional()
-  @IsBoolean()
+  @ApiPropertyOptional({ type: Boolean, default: false })
+  // `@IsOptional()` dejaría pasar `null`: sólo la ausencia omite la regla.
+  @ValidateIf((_body: unknown, value: unknown) => value !== undefined)
+  @IsStrictBoolean()
   dryRun?: boolean;
 
   /**
@@ -227,13 +231,13 @@ export class BulkSiteRowDto {
    * Si la sede acepta retiro en mostrador.
    */
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   pickupAvailable?: boolean;
 
   /**
    * Si la sede hace envíos a domicilio.
    */
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   homeDeliveryAvailable?: boolean;
 }

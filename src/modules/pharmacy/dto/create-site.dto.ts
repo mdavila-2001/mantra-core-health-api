@@ -1,12 +1,12 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger';
 import {
-  IsBoolean,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { IsStrictBoolean } from './strict-boolean';
 
 /** Cuerpo de `POST /pharmacies/{pharmacyId}/sites` (UC-24-02). */
 @ApiSchema({ name: 'PharmacyCreateSiteDto' })
@@ -80,7 +80,7 @@ export class CreateSiteDto {
    */
   @ApiPropertyOptional({ description: 'Ofrece entrega a domicilio' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   homeDeliveryAvailable?: boolean;
 
   /**
@@ -88,6 +88,6 @@ export class CreateSiteDto {
    */
   @ApiPropertyOptional({ description: 'Ofrece retiro en tienda' })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   pickupAvailable?: boolean;
 }
