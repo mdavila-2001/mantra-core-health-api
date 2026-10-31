@@ -1061,6 +1061,38 @@ describe('MedicalGroupsService', () => {
       expect(d.members.size).toBe(0);
     });
 
+    it('quien ya no está vinculado a la práctica del grupo no lo modifica (404)', async () => {
+      const d = build();
+      const created = await d.service.create(baseDto(team), creator);
+      d.practiceTenantLookup.findActivePracticeIdsForPractitioner.mockResolvedValue(
+        [],
+      );
+      const memberId = created.members.find((m) => !m.isCreator)!.id;
+
+      await expect(
+        d.service.update(created.id, { locationText: 'Otro' }, creator),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      await expect(
+        d.service.addMember(
+          created.id,
+          {
+            practitionerProfileId: 'pract-persona',
+            roleTitle: 'Instrumentista',
+            agreedPaymentAmount: '80.00',
+          },
+          creator,
+        ),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      await expect(
+        d.service.removeMember(created.id, memberId, creator),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      await expect(
+        d.service.remove(created.id, creator),
+      ).rejects.toBeInstanceOf(ResourceNotFoundException);
+      expect(d.groups.size).toBe(1);
+      expect(d.members.size).toBe(2);
+    });
+
     it('un grupo ya realizado no se edita ni se elimina', async () => {
       const d = build();
       const created = await d.service.create(baseDto(), creator);
