@@ -578,11 +578,19 @@ export class PharmacyOrdersUseCases {
     id: string,
     actor: AuthenticatedUser,
   ): Promise<PharmacyOrderDto> {
-    const tenantId = requireTenantId();
-
     let em = this.em.fork();
     let order = await this.ordersRepo.findOrderById(em, id, ORDER_STATUS_IDS);
     if (!order) throw orderNotFound(id);
+
+    const isOwner =
+      actor.patientProfileId !== undefined &&
+      order.patientProfileId === actor.patientProfileId;
+    // Al titular lo acota `patient_profile_id`: su pedido es de una farmacia de
+    // otro tenant y lo abre con o sin tenant activo. Al resto lo acota el
+    // tenant, que se lee sin exigirlo: exigirlo antes del 404 diría a un
+    // tercero sin tenant si el pedido existe (como en `openConversation`).
+    const tenantId = isOwner ? undefined : getCurrentTenantId();
+    if (!isOwner && tenantId === undefined) throw orderNotFound(id);
 
     // El aislamiento precede tanto a la composición como a la expiración perezosa.
     const [pharmacy] = await this.ordersRepo.findPharmaciesByIdsInTenant(
@@ -592,9 +600,6 @@ export class PharmacyOrdersUseCases {
     );
     if (!pharmacy) throw orderNotFound(id);
 
-    const isOwner =
-      actor.patientProfileId !== undefined &&
-      order.patientProfileId === actor.patientProfileId;
     const isStaff = actor.roles.some((role) => STAFF_READ_ROLES.includes(role));
     if (
       !isOwner &&
@@ -619,7 +624,7 @@ export class PharmacyOrdersUseCases {
     // el pedido cae en el mismo 404 que uno inexistente.
     const [dto] = await this.composeOrders(
       em,
-      isOwner ? undefined : tenantId,
+      tenantId,
       [order],
       isOwner ? 'owner' : 'staff',
     );

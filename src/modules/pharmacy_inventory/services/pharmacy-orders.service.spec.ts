@@ -1178,6 +1178,140 @@ describe('PharmacyOrdersService', () => {
       );
     });
 
+    describe('cross-tenant pharmacy (H3-02)', () => {
+      /** Farmacia del tenant `tenant-a`; el filtro de tenant se aplica de verdad. */
+      function withTenantScopedPharmacies(d: ReturnType<typeof build>) {
+        d.ordersRepo.findPharmaciesByIdsInTenant.mockImplementation(
+          async (_em: unknown, tenantId: string | undefined) =>
+            tenantId === undefined || tenantId === PHARMACY.tenantId
+              ? [PHARMACY]
+              : [],
+        );
+      }
+
+      it('the owner patient reads the order although the pharmacy belongs to another tenant', async () => {
+        const d = build();
+        withReading(d, order(), []);
+        withTenantScopedPharmacies(d);
+
+        const res = await runWithTenant('tenant-patient', () =>
+          d.service.getOrder('order-1', patient),
+        );
+
+        expect(res.id).toBe('order-1');
+        // La vista del titular no acota la farmacia por el tenant del request.
+        expect(
+          d.ordersRepo.findPharmaciesByIdsInTenant,
+        ).toHaveBeenNthCalledWith(1, d.fork, undefined, ['ph-1']);
+        expect(d.settlements.forOrders).toHaveBeenCalledWith(
+          d.fork,
+          patient.id,
+          ['order-1'],
+        );
+        expect(d.tenantAdministration.canAdminister).not.toHaveBeenCalled();
+      });
+
+      it('the owner patient reads the order even without an active tenant', async () => {
+        const d = build();
+        withReading(d, order(), []);
+        withTenantScopedPharmacies(d);
+
+        const res = await d.service.getOrder('order-1', patient);
+
+        expect(res.id).toBe('order-1');
+      });
+
+      it('the pharmacy staff of the owning tenant still reads it', async () => {
+        const d = build();
+        withReading(d, order(), []);
+        withTenantScopedPharmacies(d);
+        const pharmacyStaff = {
+          id: 'user-ph',
+          roles: ['PHARMACY_STAFF'],
+        } as any;
+
+        const res = await runWithTenant('tenant-a', () =>
+          d.service.getOrder('order-1', pharmacyStaff),
+        );
+
+        expect(res.id).toBe('order-1');
+        expect(
+          d.ordersRepo.findPharmaciesByIdsInTenant,
+        ).toHaveBeenNthCalledWith(1, d.fork, 'tenant-a', ['ph-1']);
+        expect(d.settlements.forOrders).not.toHaveBeenCalled();
+      });
+
+      it('another patient gets 404 even with the pharmacy in the same tenant', async () => {
+        const d = build();
+        withReading(d, order({ patientProfileId: 'pat-2' }), []);
+        withTenantScopedPharmacies(d);
+        d.tenantAdministration.canAdminister.mockResolvedValue(false);
+
+        await expect(
+          runWithTenant('tenant-a', () =>
+            d.service.getOrder('order-1', patient),
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        await expect(
+          runWithTenant('tenant-b', () =>
+            d.service.getOrder('order-1', patient),
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        // El tercero sí queda acotado al tenant del request.
+        expect(d.ordersRepo.findPharmaciesByIdsInTenant).toHaveBeenCalledWith(
+          d.fork,
+          'tenant-b',
+          ['ph-1'],
+        );
+        expect(d.settlements.forOrders).not.toHaveBeenCalled();
+      });
+
+      it('a third party without the owner claim gets 404 from another tenant', async () => {
+        const d = build();
+        withReading(d, order(), []);
+        withTenantScopedPharmacies(d);
+        const thirdParty = { id: 'user-x', roles: ['PHARMACY_STAFF'] } as any;
+
+        await expect(
+          runWithTenant('tenant-b', () =>
+            d.service.getOrder('order-1', thirdParty),
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.settlements.forOrders).not.toHaveBeenCalled();
+      });
+
+      it('without an active tenant a non-owner gets the same 404 as a missing order', async () => {
+        const d = build();
+        withTenantScopedPharmacies(d);
+        const thirdParty = { id: 'user-x', roles: ['PHARMACY_STAFF'] } as any;
+
+        d.ordersRepo.findOrderById.mockResolvedValue(order());
+        const existing = await d.service
+          .getOrder('order-1', thirdParty)
+          .catch((e: unknown) => e);
+        const otherPatient = await d.service
+          .getOrder('order-1', { ...patient, patientProfileId: 'pat-2' })
+          .catch((e: unknown) => e);
+
+        d.ordersRepo.findOrderById.mockResolvedValue(null);
+        const missing = await d.service
+          .getOrder('order-1', thirdParty)
+          .catch((e: unknown) => e);
+
+        expect(existing).toBeInstanceOf(ResourceNotFoundException);
+        expect(otherPatient).toBeInstanceOf(ResourceNotFoundException);
+        // Ni 422 de tenant ni otro detalle: la existencia no se filtra.
+        expect((existing as any).getResponse()).toEqual(
+          (missing as any).getResponse(),
+        );
+        expect((otherPatient as any).getResponse()).toEqual(
+          (missing as any).getResponse(),
+        );
+        expect(d.ordersRepo.findPharmaciesByIdsInTenant).not.toHaveBeenCalled();
+        expect(d.tenantAdministration.canAdminister).not.toHaveBeenCalled();
+      });
+    });
+
     it('lazily expires an overdue order before serving it', async () => {
       const d = build();
       const overdue = order({ expiresAt: new Date(Date.now() - 1_000) });
