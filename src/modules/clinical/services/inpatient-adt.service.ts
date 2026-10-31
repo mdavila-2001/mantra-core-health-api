@@ -53,6 +53,21 @@ export class InpatientAdtService {
   compatibility(...a: Parameters<InpatientReadUseCases['compatibility']>) {
     return this.reads.compatibility(...a);
   }
+  prospectiveCompatibility(
+    ...a: Parameters<InpatientReadUseCases['prospectiveCompatibility']>
+  ) {
+    return this.reads.prospectiveCompatibility(...a);
+  }
+  currentStayOfPatient(
+    ...a: Parameters<InpatientReadUseCases['currentStayOfPatient']>
+  ) {
+    return this.reads.currentStayOfPatient(...a);
+  }
+  attendingPractitioners(
+    ...a: Parameters<InpatientReadUseCases['attendingPractitioners']>
+  ) {
+    return this.reads.attendingPractitioners(...a);
+  }
   stay(...a: Parameters<InpatientReadUseCases['stay']>) {
     return this.reads.stay(...a);
   }

@@ -34,6 +34,11 @@ import {
   ISOLATION,
   codeFor,
 } from '../../domain/ops/ops-catalog';
+import type { CleaningStatusCode } from '../../domain/ops/ops-catalog';
+import {
+  allowedCleaningActions,
+  cleaningInspectionRequired,
+} from '../../domain/ops/cleaning-rules';
 import { PRAC } from '../../practice.concepts';
 import { codeOf } from '../structure-input';
 import {
@@ -133,6 +138,7 @@ export class OpsCellBuilder {
     space: CareSpaces,
     practiceId: string,
     withPatient = false,
+    actions: string[] = [],
   ): Promise<BedBoardCellDto> {
     const snap = await this.core.snapshot(tx, space, practiceId);
     const chain = await this.opsRepo.chain(tx, space.id);
@@ -145,6 +151,14 @@ export class OpsCellBuilder {
       ]);
       if (row) patient = patientBadge(row);
     }
+    const [owner] = await tx.execute<{ clinical_unit_id: string }[]>(
+      `SELECT clinical_unit_id FROM practice.space_unit_assignments
+        WHERE care_space_id = ? AND role_concept_id = ?
+          AND valid_from <= now() AND (valid_to IS NULL OR valid_to > now())
+        ORDER BY valid_from DESC LIMIT 1`,
+      [space.id, PRAC.SPACE_UNIT_ROLE_OWNER],
+      'all',
+    );
     return this.cell(
       space,
       snap,
@@ -152,6 +166,11 @@ export class OpsCellBuilder {
       order?.id ?? null,
       last.get(space.id) ?? null,
       patient,
+      {
+        unitId: owner?.clinical_unit_id ?? space.clinicalUnitId ?? null,
+        actions,
+        clinical: withPatient,
+      },
     );
   }
 
@@ -175,6 +194,12 @@ export class OpsCellBuilder {
     openOrderId: string | null,
     lastEventAt: Date | null,
     patient?: BedPatientDto,
+    extra: {
+      unitId?: string | null;
+      actions?: string[];
+      /** El actor tiene rol clínico (`PATIENT_VIEWERS`). */
+      clinical?: boolean;
+    } = {},
   ): BedBoardCellDto {
     return {
       id: space.id,
@@ -215,6 +240,8 @@ export class OpsCellBuilder {
         code: snap.occupancy.code,
         since: iso(snap.occupancy.since),
         encounterId: patient ? snap.occupancy.encounterId : null,
+        encounterLocationId:
+          patient || extra.clinical ? snap.occupancy.locationId : null,
         ...(patient ? { patient } : {}),
       },
       v2Code: snap.v2Code,
@@ -222,6 +249,8 @@ export class OpsCellBuilder {
       openCleaningOrderId: openOrderId,
       lastEventAt: iso(lastEventAt),
       opsVersion: space.opsVersion,
+      unitId: extra.unitId ?? space.clinicalUnitId ?? null,
+      actions: extra.actions ?? [],
     };
   }
 
@@ -256,9 +285,15 @@ export class OpsCellBuilder {
    */
   order(
     o: CleaningOrders,
-    space: { code: string; name: string },
+    space: { code: string; name: string; terminalCleaningRequired?: boolean },
     now = new Date(),
+    ctx: {
+      settingsInspectionRequired?: boolean;
+      allows?: (permission: string) => boolean;
+    } = {},
   ): CleaningOrderDto {
+    const status =
+      (codeFor(CLEANING_STATUS, o.statusConceptId) as string) ?? '';
     return {
       id: o.id,
       careSpaceId: o.careSpaceId,
@@ -271,7 +306,7 @@ export class OpsCellBuilder {
         (codeFor(CLEANING_TRIGGER, o.triggerConceptId) as string) ?? '',
       priorityCode:
         (codeFor(CLEANING_PRIORITY, o.priorityConceptId) as string) ?? '',
-      statusCode: (codeFor(CLEANING_STATUS, o.statusConceptId) as string) ?? '',
+      statusCode: status,
       requestedAt: iso(o.requestedAt) as string,
       dueAt: iso(o.dueAt),
       assignedUserId: o.assignedUserId ?? null,
@@ -293,6 +328,15 @@ export class OpsCellBuilder {
         ),
       ),
       rowVersion: o.rowVersion,
+      allowedTransitions: status
+        ? allowedCleaningActions(status as CleaningStatusCode, ctx.allows)
+        : [],
+      inspectionRequired: cleaningInspectionRequired({
+        terminal:
+          o.cleaningTypeConceptId === CLEANING_TYPE.CLEAN_TERMINAL ||
+          !!space.terminalCleaningRequired,
+        settingsInspectionRequired: !!ctx.settingsInspectionRequired,
+      }),
     };
   }
 

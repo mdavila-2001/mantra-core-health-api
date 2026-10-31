@@ -517,4 +517,21 @@ describe('translateInfraWriteError (§0.2)', () => {
       expect(w.getStatus()).toBe(403);
     });
   });
+
+  describe('acciones permitidas (allowedActions, lo que la UI refleja)', () => {
+    it('Limpieza de sede: limpia pero no bloquea; sin roles, nada', async () => {
+      const { svc } = build();
+      const scope = { base: [], grants: [], globals: [] } as any;
+      const keeper = svc.allowedActions(
+        new Set(['HOUSEKEEPING'] as any),
+        false,
+        scope,
+      );
+      expect(keeper).toEqual(
+        expect.arrayContaining(['f2.board.read', 'f2.cleaning.work']),
+      );
+      expect(keeper).not.toContain('f2.availability.admin');
+      expect(svc.allowedActions(new Set(), false, scope)).toEqual([]);
+    });
+  });
 });

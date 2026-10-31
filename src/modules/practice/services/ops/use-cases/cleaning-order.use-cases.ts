@@ -65,7 +65,7 @@ export class CreateCleaningOrderUseCase {
     req: OpsRequest,
   ): Promise<CleaningOrderDto> {
     return this.em.transactional(async (tx) => {
-      const { target } = await this.access.assertCan(
+      const { target, roles } = await this.access.assertCan(
         req.actor,
         'f2.cleaning.create',
         { careSpaceId: dto.careSpaceId },
@@ -99,12 +99,38 @@ export class CreateCleaningOrderUseCase {
           reasonText: dto.note,
         },
       );
-      return this.cells.order(order, space);
+      return orderView(this.core, this.access, this.cells, tx, {
+        order,
+        space,
+        target,
+        roles,
+      });
     });
   }
 }
 
 /** Lo cargado de una orden para una transición. */
+/** Vista de una orden con transiciones del actor y exigencia de inspección. */
+async function orderView(
+  core: CareSpaceOpsCore,
+  access: InfrastructureAccessService,
+  cells: OpsCellBuilder,
+  tx: EntityManager,
+  loaded: {
+    order: CleaningOrders;
+    space: CareSpaces;
+    target: ResolvedTarget;
+    roles: Set<InfraRole>;
+  },
+): Promise<CleaningOrderDto> {
+  const settings = await core.settings(tx, loaded.target.site.practiceId);
+  const isOR = loaded.space.spaceTypeConceptId === PRAC.SPACE_FN_OPERATING_ROOM;
+  return cells.order(loaded.order, loaded.space, new Date(), {
+    settingsInspectionRequired: settings.inspectionRequired,
+    allows: (k) => access.can(k, loaded.roles, isOR),
+  });
+}
+
 interface LoadedOrder {
   order: CleaningOrders;
   space: CareSpaces;
@@ -164,6 +190,14 @@ abstract class CleaningOrderTransition {
     ) as CleaningStatusCode;
     enforce(judgeCleaningTransition(from, this.action, failed));
     return { order, space, target, roles, from };
+  }
+
+  /** Vista de la orden con sus transiciones y si exige inspección. */
+  protected async view(
+    tx: EntityManager,
+    loaded: Pick<LoadedOrder, 'order' | 'space' | 'target' | 'roles'>,
+  ): Promise<CleaningOrderDto> {
+    return orderView(this.core, this.access, this.cells, tx, loaded);
   }
 
   /** Cierra la transición: versión, historia, evento y observadores. */
@@ -262,7 +296,7 @@ export class AssignCleaningOrderUseCase extends CleaningOrderTransition {
       }
       loaded.order.assignedUserId = userId ?? undefined;
       await this.seal(tx, loaded, OPS_EVENTS.cleaningAssigned, req);
-      return this.cells.order(loaded.order, loaded.space);
+      return this.view(tx, loaded);
     });
   }
 }
@@ -292,7 +326,7 @@ export class StartCleaningOrderUseCase extends CleaningOrderTransition {
       loaded.order.assignedUserId ??= req.actor.id;
       await this.seal(tx, loaded, OPS_EVENTS.cleaningStarted, req);
       await this.moveHygiene(tx, loaded, req);
-      return this.cells.order(loaded.order, loaded.space);
+      return this.view(tx, loaded);
     });
   }
 }
@@ -320,7 +354,7 @@ export class FinishCleaningOrderUseCase extends CleaningOrderTransition {
       loaded.order.finishedByUserId = req.actor.id;
       await this.seal(tx, loaded, OPS_EVENTS.cleaningFinished, req);
       await this.moveHygiene(tx, loaded, req);
-      return this.cells.order(loaded.order, loaded.space);
+      return this.view(tx, loaded);
     });
   }
 }
@@ -412,7 +446,7 @@ export class InspectCleaningOrderUseCase extends CleaningOrderTransition {
         }
       }
       await this.moveHygiene(tx, loaded, req, failed);
-      return { order: this.cells.order(order, space), nextOrderId };
+      return { order: await this.view(tx, loaded), nextOrderId };
     });
   }
 }
@@ -440,7 +474,7 @@ export class CancelCleaningOrderUseCase extends CleaningOrderTransition {
       loaded.order.statusConceptId = CLEANING_STATUS.CLN_CANCELLED;
       loaded.order.cancelReason = reason;
       await this.seal(tx, loaded, OPS_EVENTS.cleaningCancelled, req);
-      return this.cells.order(loaded.order, loaded.space);
+      return this.view(tx, loaded);
     });
   }
 }

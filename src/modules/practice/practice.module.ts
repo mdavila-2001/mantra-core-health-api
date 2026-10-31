@@ -70,6 +70,8 @@ import { RunBlocksTickUseCase } from './services/ops/use-cases/run-blocks-tick.u
 import { INFRA_F2_POLICY } from './policies/infra-f2.policy';
 import { INFRA_F5_ASSETS_POLICY } from './policies/infra-f5-assets.policy';
 import { SpaceAssetsController } from './controllers/space-assets.controller';
+import { InfrastructureAccessController } from './controllers/infrastructure-access.controller';
+import { InfrastructureAccessMeService } from './services/infrastructure-access-me.service';
 import { SpaceAssetsReadService } from './services/space-assets-read.service';
 import {
   PracticesRepository,
@@ -160,6 +162,7 @@ import {
     PractitionerInvitationsController,
     CareSpaceOpsController,
     SpaceAssetsController,
+    InfrastructureAccessController,
   ],
   providers: [
     // Repositorios
@@ -231,6 +234,7 @@ import {
     },
     InfrastructureAccessService,
     SpaceAssetsReadService,
+    InfrastructureAccessMeService,
     CareSpaceOpsCore,
     OpsCellBuilder,
     CleaningOrderObservers,

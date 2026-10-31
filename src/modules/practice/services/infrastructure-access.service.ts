@@ -53,6 +53,11 @@ export class InfraPolicyRegistry {
     }
   }
 
+  /** Claves registradas, ordenadas. */
+  keys(): string[] {
+    return [...this.actions.keys()].sort();
+  }
+
   /**
    * Regla de una acción.
    *
@@ -314,6 +319,28 @@ export class InfrastructureAccessService {
         spaceChain: [],
       },
     );
+  }
+
+  /**
+   * Acciones registradas (con alguno de los prefijos) que esos roles permiten
+   * sobre el objetivo: lo que la UI refleja en cada celda. La API sigue
+   * decidiendo en cada endpoint.
+   *
+   * @param roles - Roles sobre el objetivo.
+   * @param isOperatingRoom - El objetivo es un quirófano.
+   * @param scope - Alcance del actor (roles globales).
+   * @param prefixes - Prefijos de acción (`f2.`, `f3.`).
+   */
+  allowedActions(
+    roles: ReadonlySet<InfraRole>,
+    isOperatingRoom: boolean,
+    scope: ActorScope,
+    prefixes: readonly string[] = ['f2.', 'f3.'],
+  ): string[] {
+    return this.registry
+      .keys()
+      .filter((k) => prefixes.some((p) => k.startsWith(p)))
+      .filter((k) => this.can(k, roles, isOperatingRoom, scope));
   }
 
   /**

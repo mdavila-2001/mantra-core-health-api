@@ -356,6 +356,14 @@ export class OccupancyAxisDto {
   encounterId?: string | null;
   @ApiPropertyOptional({ type: BedPatientDto })
   patient?: BedPatientDto;
+  @ApiPropertyOptional({
+    format: 'uuid',
+    nullable: true,
+    type: String,
+    description:
+      'Ubicación ADT vigente; sólo con rol clínico (igual que patient)',
+  })
+  encounterLocationId?: string | null;
 }
 
 /** Celda del tablero (§F2.3 `BedBoardCell`). */
@@ -379,6 +387,20 @@ export class BedBoardCellDto {
   @ApiProperty({ nullable: true, type: String, format: 'date-time' })
   lastEventAt!: string | null;
   @ApiProperty() opsVersion!: number;
+  @ApiProperty({
+    nullable: true,
+    type: String,
+    format: 'uuid',
+    description:
+      'Unidad dueña de la cama (vínculo OWNER vigente o la del espacio)',
+  })
+  unitId!: string | null;
+  @ApiProperty({
+    type: [String],
+    description:
+      'Acciones de F2/F3 que el actor puede hacer sobre esta cama (lo que la UI refleja; la API decide en cada endpoint)',
+  })
+  actions!: string[];
 }
 
 /** Recuentos de una unidad en el tablero. */
@@ -406,6 +428,7 @@ export class BedBoardUnitDto {
 
 /** `GET /sites/:siteId/bed-board`. */
 export class BedBoardDto {
+  @ApiProperty({ format: 'uuid' }) siteId!: string;
   @ApiProperty({ format: 'date-time' }) generatedAt!: string;
   @ApiProperty({ nullable: true, type: String, format: 'date-time' })
   lastEventAt!: string | null;
@@ -430,6 +453,11 @@ export class CareSpaceBlockDto {
   @ApiProperty({ nullable: true, type: String }) endNote!: string | null;
   @ApiProperty({ nullable: true, type: String }) cancelReason!: string | null;
   @ApiProperty() rowVersion!: number;
+  @ApiPropertyOptional({
+    description:
+      'Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación',
+  })
+  requestId?: string;
 }
 
 /** Orden de limpieza (sin datos de paciente). */
@@ -465,6 +493,23 @@ export class CleaningOrderDto {
   previousOrderId!: string | null;
   @ApiProperty() ageMinutes!: number;
   @ApiProperty() rowVersion!: number;
+  @ApiProperty({
+    type: [String],
+    enum: ['assign', 'start', 'finish', 'inspect', 'cancel'],
+    description:
+      'Transiciones que admite el estado y que el actor puede hacer (la API decide en cada endpoint)',
+  })
+  allowedTransitions!: string[];
+  @ApiProperty({
+    description:
+      'La orden exige inspección: terminal (tipo o bandera del espacio) o ajuste de la práctica',
+  })
+  inspectionRequired!: boolean;
+  @ApiPropertyOptional({
+    description:
+      'Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación',
+  })
+  requestId?: string;
 }
 
 /** `GET /sites/:siteId/cleaning-orders`. */
@@ -516,12 +561,22 @@ export class AvailabilityResultDto {
     description: 'Compromisos en la ventana (con acknowledgeConflicts)',
   })
   conflicts?: Record<string, unknown>[];
+  @ApiPropertyOptional({
+    description:
+      'Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación',
+  })
+  requestId?: string;
 }
 
 /** Respuesta de `POST …/hygiene`. */
 export class HygieneResultDto {
   @ApiProperty({ type: BedBoardCellDto }) cell!: BedBoardCellDto;
   @ApiProperty({ format: 'uuid' }) cleaningOrderId!: string;
+  @ApiPropertyOptional({
+    description:
+      'Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación',
+  })
+  requestId?: string;
 }
 
 /** Bloqueo de cohorte en una cama hermana. */
@@ -537,6 +592,11 @@ export class IsolationResultDto {
   companionBlocks!: CompanionBlockDto[];
   @ApiPropertyOptional({ nullable: true, type: String, format: 'uuid' })
   cleaningOrderId?: string | null;
+  @ApiPropertyOptional({
+    description:
+      'Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación',
+  })
+  requestId?: string;
 }
 
 /** Respuesta del tick de bloqueos. */

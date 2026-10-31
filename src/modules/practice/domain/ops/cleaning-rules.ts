@@ -34,6 +34,46 @@ const TRANSITIONS: Record<
   },
 };
 
+/** Permiso de §0.3 que exige cada transición. */
+export const CLEANING_PERMISSION: Readonly<Record<CleaningAction, string>> = {
+  assign: 'f2.cleaning.assign',
+  start: 'f2.cleaning.work',
+  finish: 'f2.cleaning.work',
+  inspect: 'f2.cleaning.inspect',
+  cancel: 'f2.cleaning.cancel',
+};
+
+/**
+ * Transiciones que admite una orden en `from`, filtradas por lo que el actor
+ * puede (`allows` con el permiso de cada una). Sin `allows`, sólo por estado.
+ *
+ * @param from - Estado actual.
+ * @param allows - ¿El actor tiene el permiso?
+ */
+export function allowedCleaningActions(
+  from: CleaningStatusCode,
+  allows?: (permission: string) => boolean,
+): CleaningAction[] {
+  return (Object.keys(TRANSITIONS) as CleaningAction[]).filter(
+    (a) =>
+      TRANSITIONS[a].from.includes(from) &&
+      (!allows || allows(CLEANING_PERMISSION[a])),
+  );
+}
+
+/**
+ * ¿La orden exige inspección antes de quedar lista? Una terminal (por tipo o
+ * por la bandera del espacio) o la práctica con `inspectionRequired`.
+ *
+ * @param input - Tipo, bandera del espacio y ajuste de la práctica.
+ */
+export function cleaningInspectionRequired(input: {
+  terminal: boolean;
+  settingsInspectionRequired: boolean;
+}): boolean {
+  return input.terminal || input.settingsInspectionRequired;
+}
+
 /**
  * ¿Se puede aplicar `action` a una orden en `from`? 409
  * `CLEANING_ORDER_INVALID_TRANSITION` con `details.from/to` si no.

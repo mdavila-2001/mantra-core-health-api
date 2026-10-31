@@ -11,6 +11,7 @@ import {
   Post,
   Query,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -28,6 +29,7 @@ import {
   Roles,
   requireTenantId,
   type AuthenticatedUser,
+  RequestIdBodyInterceptor,
 } from '../../../common';
 import {
   BedBoardReadService,
@@ -87,6 +89,7 @@ interface HeaderSink {
 @ApiTags('practice-operations')
 @ApiBearerAuth()
 @Controller()
+@UseInterceptors(RequestIdBodyInterceptor)
 export class CareSpaceOpsController {
   constructor(
     private readonly read: BedBoardReadService,
