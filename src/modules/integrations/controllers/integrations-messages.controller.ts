@@ -49,13 +49,19 @@ export class IntegrationsMessagesController {
     private readonly messagingService: IntegrationsMessagingService,
   ) {}
 
-  /** UC-12-05. Productor de negocio (usuario autenticado). */
+  /**
+   * UC-12-05. El actor del caso de uso es un servicio de negocio (productor),
+   * no una persona: lo encola el sistema o la administración de seguridad, igual
+   * que el resto de las acciones de esta clase. Sin `@Roles`, cualquier sesión
+   * con tenant activo podía encolar un mensaje sobre una conexión del tenant.
+   */
   @Audited({
     action: 'INTEGRATION_OUTBOUND_MESSAGE_ENQUEUED',
     entity: 'outbound_message',
     entityId: 'result.id',
   })
   @Post('messages\\:outbound')
+  @Roles('SYSTEM', 'SECURITY_ADMIN')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Encolar un mensaje saliente (idempotente)' })
   enqueueOutbound(
