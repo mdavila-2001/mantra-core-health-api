@@ -37,6 +37,7 @@ import {
   ClinicalPrescriptionExpiryController,
 } from './controllers';
 import { ClinicalRecordAccessGuard } from './guards';
+import { STUDY_CATALOG_PORT } from './study-catalog.port';
 import {
   CareEpisodesService,
   EncountersService,
@@ -44,6 +45,10 @@ import {
   EncounterSealGuardService,
   ObservationsService,
   ServiceRequestsService,
+  ServiceRequestDetailService,
+  ServiceRequestReadService,
+  RequisitionsService,
+  TerminologyStudyCatalogAdapter,
   DiagnosticReportsService,
   ConditionsService,
   AllergyIntolerancesService,
@@ -287,6 +292,13 @@ import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
     EncounterSealGuardService,
     ObservationsService,
     ServiceRequestsService,
+    // v4.2.82: detalle de la orden (V1–V9), lectura (C5) y requisición (C4). El
+    // puerto del catálogo de estudios lo implementa por defecto `terminology.*`;
+    // `study_catalog` puede sustituir la clase sin tocar la validación.
+    ServiceRequestDetailService,
+    ServiceRequestReadService,
+    RequisitionsService,
+    { provide: STUDY_CATALOG_PORT, useClass: TerminologyStudyCatalogAdapter },
     DiagnosticReportsService,
     ConditionsService,
     AllergyIntolerancesService,
@@ -339,6 +351,8 @@ import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
     ProceduresService,
     ReceivedServicesProjector,
     ServiceRequestsService,
+    // El receptor (diagnostics) lee el detalle pedido de la orden.
+    ServiceRequestDetailService,
     EncountersRepository,
     ClinicalReadService,
     ClinicalRecordAccessGuard,

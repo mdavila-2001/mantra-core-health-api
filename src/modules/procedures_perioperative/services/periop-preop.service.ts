@@ -223,7 +223,7 @@ export class PeriopPreopService {
             // laboratorio/imagen desde la ficha; una orden preoperatoria se
             // justifica por el caso quirúrgico, no por si el paciente ya se
             // hizo el mismo estudio antes.
-            { duplicatePolicy: 'skip' },
+            { duplicatePolicy: 'skip', catalog: 'skip' },
           )
         ).id;
 

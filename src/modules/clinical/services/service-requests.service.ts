@@ -30,7 +30,12 @@ import { OutboxService } from '../../messaging/services';
 import {
   DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
   DuplicateStudyDetector,
+  type DuplicateStudyScope,
 } from './duplicate-study-detector';
+import {
+  ServiceRequestDetailService,
+  type PreparedStudyDetail,
+} from './service-request-detail.service';
 import { DiagnosticStudyOfferings } from '../../diagnostic_units/entities';
 // P43: la orden puede declarar de qué formulario médico cerrado sale.
 import { FormInstanceOriginValidator } from '../../forms/services/form-instance-origin.validator';
@@ -55,6 +60,19 @@ export interface CreateServiceRequestOptions {
    * `PeriopPreopService` (la orden preoperatoria se justifica por el caso).
    */
   duplicatePolicy?: 'enforce' | 'skip';
+  /**
+   * `'enforce'` (default): el estudio debe ser de `service-request-code` y
+   * su categoría la del catálogo (V1, V2). `'skip'`: para callers internos con
+   * códigos que no son del catálogo de estudios (`PeriopPreopService`).
+   */
+  catalog?: 'enforce' | 'skip';
+  /** `POST /clinical/requisitions`: agrupa los renglones de una misma solicitud. */
+  requisitionId?: string;
+  /**
+   * Transacción abierta por quien llama (la requisición: N renglones atómicos).
+   * Sin ella, `create` abre la suya.
+   */
+  transaction?: EntityManager;
 }
 
 /** UC-08-05: creación de órdenes de servicio (service_request) en estado activo. */
@@ -75,6 +93,7 @@ export class ServiceRequestsService {
    * @param performerSelection - Reglas del modo de ejecutor (centros médicos).
    * @param siteNames - Nombre de la sede sugerida, para el paciente.
    * @param basedOnNotes - Notas que motivan la orden (P40).
+   * @param detail - Validación y lectura del detalle (muestra, componentes, imagen; v4.2.82).
    */
   constructor(
     private readonly em: EntityManager,
@@ -89,6 +108,7 @@ export class ServiceRequestsService {
     private readonly performerSelection: PerformerSelectionValidator,
     private readonly siteNames: SuggestedSiteNamesReader,
     private readonly basedOnNotes: ServiceRequestNotesService,
+    private readonly detail: ServiceRequestDetailService,
   ) {
     this.logger.setContext(ServiceRequestsService.name);
   }
@@ -124,6 +144,11 @@ export class ServiceRequestsService {
     }
 
     const codeConceptId = await this.resolveCodeConceptId(em, dto);
+    const scope: DuplicateStudyScope = {
+      bodySiteConceptId: dto.bodySiteConceptId,
+      lateralityConceptId: dto.lateralityConceptId,
+      componentConceptIds: dto.componentConceptIds,
+    };
     const windowDays = dto.windowDays ?? DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS;
     const now = new Date();
 
@@ -134,6 +159,7 @@ export class ServiceRequestsService {
         codeConceptId,
         windowDays,
         now,
+        scope,
       ),
       this.duplicateStudyDetector.findPendingReport(
         em,
@@ -155,6 +181,7 @@ export class ServiceRequestsService {
           windowDays,
           tenantId,
           now,
+          scope,
         );
       if (activa) {
         return {
@@ -268,10 +295,27 @@ export class ServiceRequestsService {
       },
       'Placing service request',
     );
-    const categoryConceptId = this.resolveCategoryConceptId(dto);
+    const declaredCategoryConceptId = this.resolveCategoryConceptId(dto);
     const basedOnNoteIds = dto.basedOnNoteIds ?? [];
-    return this.em.transactional(async (tx) => {
+    const inTransaction = <T>(work: (tx: EntityManager) => Promise<T>) =>
+      options.transaction
+        ? work(options.transaction)
+        : this.em.transactional(work);
+    return inTransaction(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
+      // v4.2.82: V1–V9 contra el catálogo, antes de escribir nada.
+      const prepared = await this.detail.prepare(
+        tx,
+        {
+          codeConceptId: dto.codeConceptId,
+          categoryConceptId: declaredCategoryConceptId,
+          specimenTypeConceptId: dto.specimenTypeConceptId,
+          componentConceptIds: dto.componentConceptIds,
+          imaging: dto.imaging,
+        },
+        { catalog: options.catalog },
+      );
+      const categoryConceptId = prepared.categoryConceptId;
       // P40: las notas citadas, del mismo paciente y encuentro; 422 antes de escribir.
       if (basedOnNoteIds.length > 0) {
         await this.basedOnNotes.assertUsable(
@@ -302,7 +346,12 @@ export class ServiceRequestsService {
           dto.requesterProfileId ?? actor.practitionerProfileId,
       });
 
-      const decision = await this.resolveDuplicateDecision(tx, dto, options);
+      const decision = await this.resolveDuplicateDecision(
+        tx,
+        dto,
+        options,
+        prepared,
+      );
       // F5b: punto de toma de la sede sugerida (422 si no lo es); sin pedido
       // explícito, en laboratorio, el primer punto disponible de la sede.
       const point = await this.resolveCollectionPoint(
@@ -333,9 +382,26 @@ export class ServiceRequestsService {
         suggestedCareSpaceId: point?.id,
         previousDiagnosticReportId: decision.previousDiagnosticReportId,
         duplicateOverrideReason: decision.duplicateOverrideReason,
+        requisitionId: options.requisitionId,
+        specimenTypeConceptId: prepared.specimenTypeConceptId,
+        modalityConceptId: prepared.modalityConceptId,
+        bodySiteConceptId: prepared.bodySiteConceptId,
+        lateralityConceptId: prepared.lateralityConceptId,
+        contrastConceptId: prepared.contrastConceptId,
         actorUserId: actor.id,
       });
       await tx.flush();
+      // Los componentes marcados, después de la orden (misma razón que las
+      // notas: no son relación del ORM) y con el custodio de la orden.
+      if (prepared.componentConceptIds.length > 0) {
+        await this.detail.writeComponents(
+          tx,
+          sr,
+          prepared.componentConceptIds,
+          actor.id,
+        );
+        await tx.flush();
+      }
       // Después del flush de la orden: el vínculo no es una relación del ORM,
       // así que el orden de los INSERT no lo garantiza la unidad de trabajo.
       if (basedOnNoteIds.length > 0) {
@@ -406,10 +472,19 @@ export class ServiceRequestsService {
         );
       }
 
+      const view = (await this.detail.describe(tx, [sr])).get(sr.id);
       return {
         id: sr.id,
         patientProfileId: sr.patientProfileId,
         formInstanceId: sr.formInstanceId ?? null,
+        requisitionId: sr.requisitionId ?? null,
+        codeConceptId: sr.codeConceptId,
+        codeDisplay: view?.codeDisplay,
+        specimenTypeConceptId: sr.specimenTypeConceptId ?? null,
+        specimenTypeDisplay: view?.specimenTypeDisplay ?? null,
+        components: view?.components ?? [],
+        componentsSpecified: view?.componentsSpecified ?? false,
+        imaging: view?.imaging ?? null,
         category: analysisCategoryOf(sr.categoryConceptId),
         basedOnNoteIds: [...basedOnNoteIds],
         status: sr.statusConceptId,
@@ -480,6 +555,7 @@ export class ServiceRequestsService {
     tx: EntityManager,
     dto: CreateServiceRequestDto,
     options: CreateServiceRequestOptions,
+    prepared: PreparedStudyDetail,
   ): Promise<{
     statusConceptId: string;
     previousDiagnosticReportId?: string;
@@ -489,12 +565,19 @@ export class ServiceRequestsService {
       return { statusConceptId: CLIN.SERVICE_REQUEST_ACTIVE };
     }
 
+    // V10: la clave incluye región, lateralidad y componentes cuando viajan.
+    const scope: DuplicateStudyScope = {
+      bodySiteConceptId: prepared.bodySiteConceptId,
+      lateralityConceptId: prepared.lateralityConceptId,
+      componentConceptIds: prepared.componentConceptIds,
+    };
     const match = await this.duplicateStudyDetector.findDuplicate(
       tx,
       dto.patientProfileId,
       dto.codeConceptId,
       DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
       new Date(),
+      scope,
     );
 
     if (match) {
@@ -545,6 +628,7 @@ export class ServiceRequestsService {
           DEFAULT_DUPLICATE_STUDY_WINDOW_DAYS,
           dto.custodianTenantId,
           new Date(),
+          scope,
         );
       if (activa) {
         if (

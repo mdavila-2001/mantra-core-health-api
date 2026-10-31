@@ -127,6 +127,32 @@ export class ServiceRequests {
   @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
   formInstanceId?: string;
 
+  @Property({ fieldName: 'requisition_id', type: 'uuid', nullable: true })
+  requisitionId?: string;
+
+  @Property({
+    fieldName: 'specimen_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  specimenTypeConceptId?: string;
+
+  @Property({ fieldName: 'modality_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  modalityConceptId?: string;
+
+  @Property({ fieldName: 'body_site_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  bodySiteConceptId?: string;
+
+  @Property({
+    fieldName: 'laterality_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  lateralityConceptId?: string;
+
+  @Property({ fieldName: 'contrast_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  contrastConceptId?: string;
+
   /**
    * Fecha y hora en que se creó el registro.
    */

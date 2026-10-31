@@ -32,6 +32,7 @@ import { PROCEDURES_PERIOPERATIVE_CONCEPT_SEEDS } from '../../modules/procedures
 import { PHARMA_LAB_CONCEPT_SEEDS } from '../../modules/pharma_lab/pharma_lab.concepts';
 import { PLATFORM_OPS_CONCEPT_SEEDS } from '../../modules/platform_ops/platform_ops.concepts';
 import { ALLERGY_CONCEPT_SEEDS } from './data/allergies/allergy.concepts';
+import { STUDY_CATALOG_CONCEPT_SEEDS } from '../../modules/study_catalog/study_catalog.concepts';
 
 /**
  * Agregador central de los conceptos declarados por cada módulo de dominio.
@@ -78,4 +79,5 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...SURVEYS_CONCEPT_SEEDS,
   ...ALLERGY_CONCEPT_SEEDS,
   ...PLATFORM_OPS_CONCEPT_SEEDS,
+  ...STUDY_CATALOG_CONCEPT_SEEDS,
 ];

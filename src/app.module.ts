@@ -113,6 +113,7 @@ import { RedisThrottlerStorage } from './common/security/redis-throttler.storage
 import { PublicCacheInterceptor } from './common/http/public-cache.interceptor';
 import { PublicCacheStore } from './common/http/public-cache.store';
 import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
+import { StudyCatalogModule } from './modules/study_catalog/study_catalog.module';
 
 /**
  * Configura las dependencias NestJS de app.
@@ -266,6 +267,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     DocumentStoreModule,
     RedisRuntimeModule,
     SearchPlatformModule,
+    StudyCatalogModule,
   ],
   controllers: [AppController],
   providers: [
