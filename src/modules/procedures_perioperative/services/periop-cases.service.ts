@@ -1,4 +1,5 @@
 import { OperatingRoomValidator } from './or/operating-room.validator';
+import { CaseOrViewBuilder, type CaseOrFields } from './or/case-or-view';
 import { assertChecklistPhase } from './or/checklist-gates';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -224,6 +225,8 @@ export class PeriopCasesService {
     private readonly clinicalScope: AuthzClinicalScopeService,
     // F4 (§F4.3): validaciones 1–7 del quirófano (espacio real, recurso, bloques).
     private readonly orValidator: OperatingRoomValidator,
+    // F4 (§F4.3): sala, bloque, check-list, eventos y recambio en las lecturas.
+    private readonly orView?: CaseOrViewBuilder,
   ) {
     this.logger.setContext(PeriopCasesService.name);
   }
@@ -1025,7 +1028,11 @@ export class PeriopCasesService {
       }),
       this.casesRepo.countCasesMatching(this.em, tenantId, filters),
     ]);
-    return { items: cases.map((c) => this.toSummary(c)), total };
+    const or = (await this.orView?.fields(cases, tenantId)) ?? new Map();
+    return {
+      items: cases.map((c) => this.toSummary(c, or.get(c.id))),
+      total,
+    };
   }
 
   /**
@@ -1108,8 +1115,15 @@ export class PeriopCasesService {
       }
     }
 
+    const or = (await this.orView?.fields([surgicalCase], tenantId))?.get(
+      surgicalCase.id,
+    );
+    const orDetail = this.orView
+      ? await this.orView.detail(surgicalCase, actor, tenantId)
+      : { checklist: null, roomEvents: [], turnoverCleaning: null };
     return {
-      case: this.toSummary(surgicalCase),
+      case: this.toSummary(surgicalCase, or),
+      ...orDetail,
       diagnoses: diagnoses.map((d) => ({
         id: d.id,
         conditionId: d.conditionId,
@@ -1255,17 +1269,37 @@ export class PeriopCasesService {
    * antiguas sin ellas, así que se proyectan como opcionales en vez de afirmar
    * algo que la tabla no garantiza.
    */
-  private toSummary(surgicalCase: {
-    id: string;
-    caseNumber: string;
-    patientProfileId: string;
-    primarySurgeonProfileId?: string;
-    operatingRoomId?: string;
-    statusConceptId: string;
-    scheduledStartAt?: Date;
-    scheduledEndAt?: Date;
-  }): CaseSummaryDto {
+  private toSummary(
+    surgicalCase: {
+      id: string;
+      caseNumber: string;
+      patientProfileId: string;
+      primarySurgeonProfileId?: string;
+      operatingRoomId?: string;
+      statusConceptId: string;
+      scheduledStartAt?: Date;
+      scheduledEndAt?: Date;
+      encounterId?: string;
+      reservedStartAt?: Date;
+      reservedEndAt?: Date;
+      prepMinutes?: number;
+      cleanupMinutes?: number;
+    },
+    or?: CaseOrFields,
+  ): CaseSummaryDto {
     return {
+      ...(or
+        ? {
+            operatingRoom: or.operatingRoom,
+            block: or.block,
+            caseType: or.caseType,
+            encounterId: surgicalCase.encounterId ?? null,
+            reservedStartAt: surgicalCase.reservedStartAt ?? null,
+            reservedEndAt: surgicalCase.reservedEndAt ?? null,
+            prepMinutes: surgicalCase.prepMinutes ?? null,
+            cleanupMinutes: surgicalCase.cleanupMinutes ?? null,
+          }
+        : {}),
       id: surgicalCase.id,
       caseNumber: surgicalCase.caseNumber,
       patientProfileId: surgicalCase.patientProfileId,

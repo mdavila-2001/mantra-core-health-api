@@ -168,7 +168,19 @@ export class OperatingRoomsReadUseCases {
     const rooms = allowed.filter(
       (r) => !q.operatingRoomId || r.id === q.operatingRoomId,
     );
-    const result = [];
+    const result: {
+      operatingRoomId: string;
+      code: string;
+      sessionMinutes: number;
+      touchMinutes: number;
+      roomUtilizationPct: number | null;
+      turnoverMinutesP50: number | null;
+      blocks: {
+        allocated: number;
+        released: number;
+        blockUtilizationPct: number | null;
+      };
+    }[] = [];
     for (const r of rooms) {
       const blocks = await em.find(OperatingRoomBlocks, {
         operatingRoomId: r.id,
@@ -239,6 +251,24 @@ export class OperatingRoomsReadUseCases {
         },
       });
     }
-    return { from: q.from, to: q.to, rooms: result };
+    const sum = (f: (r: (typeof result)[number]) => number): number =>
+      result.reduce((a, r) => a + f(r), 0);
+    const totalSession = sum((r) => r.sessionMinutes);
+    const totalTouch = sum((r) => r.touchMinutes);
+    const totalAvailable = sum((r) => r.blocks.allocated - r.blocks.released);
+    return {
+      from: q.from,
+      to: q.to,
+      asOf: new Date().toISOString(),
+      totals: {
+        sessionMinutes: totalSession,
+        touchMinutes: totalTouch,
+        roomUtilizationPct:
+          totalSession > 0 ? (totalTouch / totalSession) * 100 : null,
+        blockUtilizationPct:
+          totalAvailable > 0 ? (totalTouch / totalAvailable) * 100 : null,
+      },
+      rooms: result,
+    };
   }
 }
