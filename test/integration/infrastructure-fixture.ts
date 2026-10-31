@@ -165,11 +165,14 @@ export async function crearPersonal(
         : DELEG.SCOPE_SPACE;
   await q(
     `insert into delegated_access.organization_user_assignments
-       (id, tenant_membership_id, practice_id, practice_site_id, clinical_unit_id, care_space_id,
-        assignment_role_concept_id, access_scope_concept_id, valid_from, status_concept_id,
-        created_at, updated_at)
-     values (gen_random_uuid(), ?, ?, ?, ?, ?, ?, ?, now() - interval '1 minute', ?, now(), now())`,
+       (id, tenant_id, tenant_membership_id, practice_id, practice_site_id, clinical_unit_id,
+        care_space_id, assignment_role_concept_id, access_scope_concept_id, valid_from,
+        status_concept_id, created_at, updated_at)
+     values (gen_random_uuid(), ?, ?, ?, ?, ?, ?, ?, ?, now() - interval '1 minute', ?, now(), now())`,
     [
+      // El tenant de la asignación es el de su membresía: lo exige el
+      // trigger `support_tenant_consistency` (v4.2.79).
+      org.tenantId,
       membershipId,
       org.practiceId,
       'site' in scope ? scope.site : null,
