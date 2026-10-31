@@ -68,6 +68,7 @@ function build() {
     forOrders: mockFn(async () => new Map()),
     activeClaimForDispensation: mockFn(async () => undefined),
   };
+  const detail = { describe: mockFn().mockResolvedValue(new Map()) };
   const service = new DiagnosticsPatientResultsService(
     em as any,
     ordersRepo as any,
@@ -79,8 +80,10 @@ function build() {
     logger as any,
     settlements as any,
     siteNames as any,
+    detail as any,
   );
   return {
+    detail,
     siteNames,
     service,
     ordersRepo,
@@ -204,6 +207,89 @@ describe('DiagnosticsPatientResultsService · listOwnOrders', () => {
       CLIN.SERVICE_REQUEST_CATEGORY_PROCEDURE,
     );
     expect(Object.keys(proc).sort()).toEqual(Object.keys(lab).sort());
+  });
+
+  it('trae el detalle del pedido (requisición, muestra, componentes, imagen) y el mismo resumen que el receptor', async () => {
+    const { service, ordersRepo, detail, fork } = build();
+    ordersRepo.findOrdersForPatientPortal.mockResolvedValue([
+      {
+        ...order('lab-1'),
+        requisitionId: 'req-1',
+        specimenTypeConceptId: 'sp-1',
+      },
+      {
+        ...order('img-1'),
+        categoryConceptId: DIAG.SERVICE_REQUEST_CATEGORY_IMAGING,
+      },
+      order('viejo-1'),
+    ]);
+    detail.describe.mockResolvedValue(
+      new Map([
+        [
+          'lab-1',
+          {
+            codeDisplay: 'Hemograma',
+            specimenTypeDisplay: 'Sangre',
+            components: [
+              { conceptId: 'c1', display: 'Hemoglobina', ordinal: 1 },
+              { conceptId: 'c2', display: 'Leucocitos', ordinal: 2 },
+            ],
+            componentsSpecified: true,
+            imaging: null,
+          },
+        ],
+        [
+          'img-1',
+          {
+            codeDisplay: 'Radiografía de mano',
+            specimenTypeDisplay: null,
+            components: [],
+            componentsSpecified: false,
+            imaging: {
+              modalityConceptId: 'm',
+              modalityDisplay: 'Rayos X',
+              bodySiteConceptId: 'b',
+              bodySiteDisplay: 'Mano',
+              lateralityConceptId: 'l',
+              lateralityDisplay: 'Izquierda',
+              contrastConceptId: null,
+              contrastDisplay: null,
+            },
+          },
+        ],
+      ]),
+    );
+
+    const res = await service.listOwnOrders(USER, 50);
+
+    expect(detail.describe).toHaveBeenCalledWith(fork, expect.any(Array));
+    const [lab, img, viejo] = res.items;
+    expect(lab).toMatchObject({
+      requisitionId: 'req-1',
+      codeDisplay: 'Hemograma',
+      specimenTypeConceptId: 'sp-1',
+      specimenTypeDisplay: 'Sangre',
+      componentsSpecified: true,
+      imaging: null,
+      summary: 'Hemograma · 2 componentes',
+    });
+    expect(lab.components.map((c) => c.display)).toEqual([
+      'Hemoglobina',
+      'Leucocitos',
+    ]);
+    expect(img.summary).toBe('Radiografía de mano · Mano · Izquierda');
+    expect(img.imaging?.modalityDisplay).toBe('Rayos X');
+    // Una orden anterior al detalle: campos nulos/vacíos, nunca ausentes.
+    expect(viejo).toMatchObject({
+      requisitionId: null,
+      codeDisplay: null,
+      specimenTypeConceptId: null,
+      specimenTypeDisplay: null,
+      components: [],
+      componentsSpecified: false,
+      imaging: null,
+      summary: 'Estudio',
+    });
   });
 
   it('pide una fila de más y avisa que la lista quedó recortada', async () => {

@@ -1,5 +1,7 @@
 import { PatientSettlementService } from '../../insurance/application/services/patient-settlement.service';
 import { SuggestedSiteNamesReader } from '../../clinical/services/suggested-site-names.reader';
+import { ServiceRequestDetailService } from '../../clinical/services/service-request-detail.service';
+import { summaryOf } from './diagnostics-reception.service';
 import { analysisCategoryOf } from '../../clinical/service-request-category';
 import { unavailableSettlement } from '../../insurance/presentation/dto/patient-settlement.dto';
 import { Injectable } from '@nestjs/common';
@@ -102,6 +104,7 @@ export class DiagnosticsPatientResultsService {
    * @param logger - Registro estructurado.
    * @param settlements - Liquidación del seguro de cada orden diagnóstica.
    * @param siteNames - Nombre de la sede que el médico sugirió, para mostrarle al paciente un nombre y no un uuid.
+   * @param detail - Detalle de la orden (muestra, componentes, imagen): el mismo que ve el receptor.
    * @param fileUpload - Bytes de un archivo ya autorizado por contexto (CL-40).
    */
   constructor(
@@ -115,6 +118,7 @@ export class DiagnosticsPatientResultsService {
     private readonly logger: PinoLogger,
     private readonly settlements: PatientSettlementService,
     private readonly siteNames: SuggestedSiteNamesReader,
+    private readonly detail: ServiceRequestDetailService,
     private readonly fileUpload?: FileUploadService,
   ) {
     this.logger.setContext(DiagnosticsPatientResultsService.name);
@@ -190,39 +194,56 @@ export class DiagnosticsPatientResultsService {
     const truncated = rows.length > limit;
     const page = rows.slice(0, limit);
 
-    const [settlements, preparation, reportByOrder, suggestedSiteNames] =
-      await Promise.all([
-        // La liquidación del seguro es de las órdenes diagnósticas: una orden de
-        // procedimiento no tiene reclamo y no se le inventa una liquidación.
-        this.settlements.forOrders(
-          em,
-          actor.id,
-          'DIAGNOSTIC',
-          page
-            .filter((order) =>
-              DIAGNOSTIC_CATEGORIES.includes(order.categoryConceptId ?? ''),
-            )
-            .map((order) => order.id),
-        ),
-        this.preparationByConcept(
-          em,
-          page.map((order) => order.codeConceptId),
-        ),
-        this.releasedReportByOrder(
-          em,
-          page.map((order) => order.id),
-        ),
-        // Una sola lectura por página: el paciente ve el nombre, no el uuid.
-        this.siteNames.namesFor(
-          em,
-          page.map((order) => order.suggestedPracticeSiteId),
-        ),
-      ]);
+    const [
+      settlements,
+      preparation,
+      reportByOrder,
+      suggestedSiteNames,
+      details,
+    ] = await Promise.all([
+      // La liquidación del seguro es de las órdenes diagnósticas: una orden de
+      // procedimiento no tiene reclamo y no se le inventa una liquidación.
+      this.settlements.forOrders(
+        em,
+        actor.id,
+        'DIAGNOSTIC',
+        page
+          .filter((order) =>
+            DIAGNOSTIC_CATEGORIES.includes(order.categoryConceptId ?? ''),
+          )
+          .map((order) => order.id),
+      ),
+      this.preparationByConcept(
+        em,
+        page.map((order) => order.codeConceptId),
+      ),
+      this.releasedReportByOrder(
+        em,
+        page.map((order) => order.id),
+      ),
+      // Una sola lectura por página: el paciente ve el nombre, no el uuid.
+      this.siteNames.namesFor(
+        em,
+        page.map((order) => order.suggestedPracticeSiteId),
+      ),
+      // Mismo detalle que ve el receptor: muestra, componentes, imagen.
+      this.detail.describe(em, page),
+    ]);
 
     const items: PatientOrderSummaryDto[] = page.map((order) => {
       const reportId = reportByOrder.get(order.id);
+      const view = details.get(order.id);
+      const codeDisplay = view?.codeDisplay ?? null;
       return {
         id: order.id,
+        requisitionId: order.requisitionId ?? null,
+        codeDisplay,
+        specimenTypeConceptId: order.specimenTypeConceptId ?? null,
+        specimenTypeDisplay: view?.specimenTypeDisplay ?? null,
+        components: view?.components ?? [],
+        componentsSpecified: view?.componentsSpecified ?? false,
+        imaging: view?.imaging ?? null,
+        summary: summaryOf(codeDisplay, view),
         ...(settlements.get(order.id) ?? unavailableSettlement()),
         encounterId: order.encounterId,
         codeConceptId: order.codeConceptId,
