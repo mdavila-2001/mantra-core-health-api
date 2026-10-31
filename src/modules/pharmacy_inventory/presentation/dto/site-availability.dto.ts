@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { IsStrictBoolean } from '../../../pharmacy/dto/strict-boolean';
 
 /**
@@ -60,4 +68,19 @@ export class SiteAvailabilityResponseDto {
    */
   @ApiProperty({ format: 'date-time' })
   stockUpdatedAt!: string;
+}
+
+/**
+ * Fila de `POST /pharmacies/:pharmacyId/sites/:siteId/availability/bulk`: un
+ * producto de la farmacia, por su código, en la sucursal de la ruta. Es el
+ * cuerpo del `PUT` de una sede con el código en lugar del id.
+ */
+export class BulkSiteAvailabilityRowDto extends SetSiteAvailabilityDto {
+  /**
+   * Código del producto en el catálogo de la farmacia: la clave de la fila.
+   */
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  productCode!: string;
 }

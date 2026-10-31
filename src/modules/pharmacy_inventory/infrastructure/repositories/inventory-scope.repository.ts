@@ -73,6 +73,15 @@ export class InventoryScopeRepository {
     return em.findOne(PharmacyProducts, { id: productId, pharmacyId });
   }
 
+  /** Producto de una farmacia por su código; `null` si no tiene ninguno con ese código. */
+  findProductByCodeInPharmacy(
+    em: EntityManager,
+    productCode: string,
+    pharmacyId: string,
+  ): Promise<PharmacyProducts | null> {
+    return em.findOne(PharmacyProducts, { productCode, pharmacyId });
+  }
+
   /** Producto por id, sin acotar: el llamador resuelve de qué farmacia es. */
   findProduct(
     em: EntityManager,
