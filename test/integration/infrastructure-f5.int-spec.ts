@@ -371,6 +371,97 @@ describe('Infraestructura F5 · integración', () => {
       [equipment],
     );
     expect(still.care_space_id).toBe(room.body.id);
+
+    // F5a lecturas y recurso: detalle, estación MWL, RES_EQUIPMENT (409 si ya existe).
+    const detail = await http()
+      .get(`/diagnostic-equipment/${equipment}`)
+      .set(admin)
+      .expect(200);
+    expect(detail.body).toMatchObject({
+      id: equipment,
+      siteId: orgA.siteId,
+      aeTitle: 'RX_SALA_1',
+      careSpace: {
+        id: room.body.id,
+        code: `RX-${tag}`,
+        path: expect.stringContaining('Sala de rayos'),
+      },
+      schedulableResourceId: null,
+    });
+    await http()
+      .get(`/diagnostic-equipment/${equipment}`)
+      .set(como(orgB))
+      .expect(404);
+    const mwl = await http()
+      .get(`/diagnostic-equipment/${equipment}/mwl-station`)
+      .set(admin)
+      .expect(200);
+    expect(mwl.body).toEqual({
+      scheduledStationAETitle: 'RX_SALA_1',
+      scheduledStationName: 'RX1',
+      spsLocation: `RX-${tag}`,
+    });
+    const res = await http()
+      .post(`/diagnostic-equipment/${equipment}/resource`)
+      .set(admin)
+      .expect(201);
+    const [r] = await q(
+      `select resource_ref_type, resource_ref_id, tenant_id, resource_type_concept_id from scheduling.schedulable_resources where id = ?`,
+      [res.body.resourceId],
+    );
+    expect(r).toMatchObject({
+      resource_ref_type: 'diagnostic_equipment',
+      resource_ref_id: equipment,
+      tenant_id: orgA.tenantId,
+    });
+    const dup = await http()
+      .post(`/diagnostic-equipment/${equipment}/resource`)
+      .set(admin)
+      .expect(409);
+    expect(dup.body.reason).toBe('RESOURCE_ALREADY_EXISTS_FOR_EQUIPMENT');
+    await http()
+      .post(`/diagnostic-equipment/${equipment}/resource`)
+      .set(como(orgB))
+      .expect(404);
+
+    // Mantenimiento: sólo estado operativo; la sala no (403). Enfermería no lee (403).
+    const maint = await crearPersonal(
+      ctx,
+      orgA,
+      `F5MT-${tag}`,
+      DELEG.ASSIGN_ROLE_MAINTENANCE,
+      { site: orgA.siteId },
+    );
+    await http()
+      .patch(`/diagnostic-equipment/${equipment}`)
+      .set(como(maint))
+      .send({ operationalStatusConceptId: DUNIT.EQUIPMENT_MAINTENANCE })
+      .expect(200);
+    await http()
+      .patch(`/diagnostic-equipment/${equipment}`)
+      .set(como(maint))
+      .send({ stationName: 'X' })
+      .expect(403);
+    const nurseE = await crearPersonal(
+      ctx,
+      orgA,
+      `F5NE-${tag}`,
+      DELEG.ASSIGN_ROLE_NURSE,
+      { site: orgA.siteId },
+    );
+    await http()
+      .get(`/diagnostic-equipment/${equipment}`)
+      .set(como(nurseE))
+      .expect(403);
+    const evs = await q(
+      `select event_type from messaging.domain_events where aggregate_id = ? order by occurred_at`,
+      [equipment],
+    );
+    expect(evs.map((e: any) => e.event_type)).toEqual([
+      'diagnostic_units.equipment.located',
+      'diagnostic_units.equipment.resource_linked',
+      'diagnostic_units.equipment.status_changed',
+    ]);
   });
 
   it('F5g: alcance SPACE con espacio propio 201; segundo jefe vigente de la unidad → 409; espacio de otro tenant → 404', async () => {

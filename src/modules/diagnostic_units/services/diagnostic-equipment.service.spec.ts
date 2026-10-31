@@ -86,6 +86,12 @@ function build() {
       scope,
       equipmentRepo,
       logger as any,
+      {
+        authorize: mockFn(async (t: any, id: string) => ({
+          equipment: await scope.equipment(t, id),
+        })),
+        announceChanges: mockFn().mockResolvedValue(undefined),
+      } as any,
     ),
   );
   return { service, tx, unitsRepo, sitesRepo, equipmentRepo };
