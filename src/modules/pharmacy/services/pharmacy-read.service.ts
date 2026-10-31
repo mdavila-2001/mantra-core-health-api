@@ -473,10 +473,16 @@ export class PharmacyReadService {
       now,
     );
 
-    // Lo marcado «no tengo» (o con conteo en 0) no se ofrece en la sede (P47).
-    const products = await this.readRepo.findSellableProductsByIds(
-      em,
-      unique(prices.map((price) => price.pharmacyProductId)),
+    // Lo marcado «no tengo» no se ofrece (P47), y de lo demás sólo lo que la
+    // sede tiene según la regla por sede: la misma que leen el buscador y el
+    // pedido, así un precio no ofrece lo que la sede no puede vender.
+    const priced = unique(prices.map((price) => price.pharmacyProductId));
+    const [sellable, availableAtSite] = await Promise.all([
+      this.readRepo.findSellableProductsByIds(em, priced),
+      this.readRepo.findAvailableProductIdsAtSite(em, site.id, priced),
+    ]);
+    const products = sellable.filter((product) =>
+      availableAtSite.has(product.id),
     );
     const concepts = await this.readRepo.findConcepts(
       em,
