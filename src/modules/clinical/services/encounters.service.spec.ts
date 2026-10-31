@@ -104,6 +104,7 @@ function build() {
  */
 const encounter = () => ({
   id: 'enc1',
+  tenantId: 't1',
   patientProfileId: 'p1',
   episodeId: undefined,
   statusConceptId: CLIN.ENCOUNTER_IN_PROGRESS,
@@ -201,6 +202,11 @@ describe('EncountersService', () => {
       );
       expect(res.participantIds).toEqual(['part1']);
       expect(res.locationIds).toEqual(['loc1']);
+      // F3: encounter_locations.tenant_id es NOT NULL; sin él, 23502.
+      expect(d.encountersRepo.createLocation).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: 't1', encounterId: 'enc1' }),
+      );
     });
 
     it('deja la relación asistencial de los profesionales del encuentro dentro de la transacción (REQ-16-035)', async () => {

@@ -212,6 +212,7 @@ export class EncountersService {
       const locationIds: string[] = [];
       if (dto.location) {
         const location = this.encountersRepo.createLocation(tx, {
+          tenantId: encounter.tenantId,
           encounterId: encounter.id,
           practiceSiteId: dto.location.practiceSiteId,
           clinicalUnitId: dto.location.clinicalUnitId,
