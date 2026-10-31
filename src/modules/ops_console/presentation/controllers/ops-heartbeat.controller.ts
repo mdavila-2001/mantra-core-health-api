@@ -5,7 +5,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Roles } from '../../../../common';
+import { NotAudited, Roles } from '../../../../common';
 import { OpsInstancesService } from '../../application/ops-instances.service';
 import { HeartbeatAcceptedDto, HeartbeatDto } from '../dto/ops-heartbeat.dto';
 
@@ -29,8 +29,9 @@ import { HeartbeatAcceptedDto, HeartbeatDto } from '../dto/ops-heartbeat.dto';
  * - Idempotente: repetirlo sobrescribe el último latido de esa instancia.
  * - Almacén: Redis (hash `ops:heartbeat:v1`). Si falla, 503 y el worker
  *   reintenta en su siguiente intervalo.
- * - No lleva `@Audited` ni se mide en `/admin/ops/traffic`
- *   (`EXCLUDED_HTTP_PATHS`): 25 workers × 4/min no aportan valor ahí.
+ * - Lleva `@NotAudited` (señal de vida sin actor humano, 25 workers × 4/min) y no se
+ *   mide en `/admin/ops/traffic`
+ *   (`EXCLUDED_HTTP_PATHS`): ahí tampoco aportan valor.
  *
  * La lectura está en {@link OpsInstancesController} (`GET
  * /admin/ops/instances/liveness`).
@@ -43,6 +44,9 @@ export class OpsHeartbeatController {
 
   @Post('heartbeats')
   @Roles('SYSTEM')
+  @NotAudited(
+    'Señal de vida de un worker (principal SYSTEM, sin persona): sólo sobrescribe el último latido en Redis, no toca Postgres ni datos de personas; sellarla en audit_log sería ruido de 25 workers cada 15 s.',
+  )
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({
     summary: 'Registrar el latido de una instancia (sólo workers, rol SYSTEM)',
