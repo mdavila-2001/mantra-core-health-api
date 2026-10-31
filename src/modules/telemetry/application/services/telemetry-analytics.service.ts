@@ -213,11 +213,16 @@ export class TelemetryAnalyticsService {
       scope: this.scopeView(scope),
       points: rows.map((row) => ({
         bucket: iso(row.bucket),
-        events: Number(row.events),
+        events: this.tooSmall(scope, Number(row.sample)) ? null : Number(row.events),
         sessions: this.tooSmall(scope, Number(row.sample))
           ? null
           : Number(row.sessions),
       })),
+      notMeasured: this.suppressedNote(
+        scope,
+        'cubo(s) de la serie',
+        rows.filter((r) => this.tooSmall(scope, Number(r.sample))).length,
+      ),
       note: 'Las sesiones por cubo no se suman: una sesión que cruza dos cubos cuenta en ambos.',
     };
   }
@@ -232,7 +237,12 @@ export class TelemetryAnalyticsService {
       query.route,
     );
     const ratingByMetric = new Map<string, Record<string, number>>();
+    const hiddenRatings = new Set<string>();
     for (const row of ratings) {
+      if (this.tooSmall(scope, row.subjects)) {
+        hiddenRatings.add(row.metric_concept_id);
+        continue;
+      }
       const bucket = ratingByMetric.get(row.metric_concept_id) ?? {};
       bucket[code(row.rating_concept_id)] = row.n;
       ratingByMetric.set(row.metric_concept_id, bucket);
@@ -244,6 +254,11 @@ export class TelemetryAnalyticsService {
       window: this.windowView(scope, query),
       scope: this.scopeView(scope),
       route: query.route ?? null,
+      notMeasured: this.suppressedNote(
+        scope,
+        'métrica(s) de web vitals',
+        percentiles.filter((r) => this.tooSmall(scope, r.subjects)).length,
+      ),
       method:
         'percentile_cont sobre todas las muestras de la ventana (no promedio de percentiles)',
       metrics: percentiles.map((row) => {
@@ -251,11 +266,13 @@ export class TelemetryAnalyticsService {
         return {
           metric,
           unit: METRIC_UNIT[metric] ?? null,
-          samples: row.samples,
-          p50: this.tooSmall(scope, row.samples) ? null : num(row.p50),
-          p75: this.tooSmall(scope, row.samples) ? null : num(row.p75),
-          p95: this.tooSmall(scope, row.samples) ? null : num(row.p95),
-          ratings: ratingByMetric.get(row.metric_concept_id) ?? {},
+          samples: this.tooSmall(scope, row.subjects) ? null : row.samples,
+          p50: this.tooSmall(scope, row.subjects) ? null : num(row.p50),
+          p75: this.tooSmall(scope, row.subjects) ? null : num(row.p75),
+          p95: this.tooSmall(scope, row.subjects) ? null : num(row.p95),
+          ratings: hiddenRatings.has(row.metric_concept_id) || this.tooSmall(scope, row.subjects)
+            ? null
+            : (ratingByMetric.get(row.metric_concept_id) ?? {}),
           deprecated:
             metric === 'FID' ? 'Sustituida por INP en Core Web Vitals' : null,
         };
@@ -266,8 +283,8 @@ export class TelemetryAnalyticsService {
             unit: METRIC_UNIT[query.metric!],
             routes: byRoute.map((row) => ({
               route: row.route,
-              samples: row.samples,
-              p75: this.tooSmall(scope, row.samples) ? null : num(row.p75),
+              samples: this.tooSmall(scope, row.subjects) ? null : row.samples,
+              p75: this.tooSmall(scope, row.subjects) ? null : num(row.p75),
             })),
           }
         : null,
@@ -412,7 +429,12 @@ export class TelemetryAnalyticsService {
     };
   }
 
-  async pipelineHealth(query: WindowQuery, tenantId: string | AnalyticsActorScope) {
+  /**
+   * Sólo por organización: sus conteos (eventos, contextos, bots) no pasan por
+   * `minSample`, así que no hay alcance plataforma (un actor de plataforma indica
+   * `X-Tenant-Id`).
+   */
+  async pipelineHealth(query: WindowQuery, tenantId: string) {
     const scope = this.scope(query, tenantId);
     const { ingest, clients } = await this.repo.pipelineHealth(scope);
     const lastReceived = ingest?.last_received_at

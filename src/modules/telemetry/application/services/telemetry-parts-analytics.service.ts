@@ -174,7 +174,7 @@ export class TelemetryPartsAnalyticsService {
         const vit: Record<string, { p75: number | null; samples: number }> = {};
         for (const v of vitals) {
           const hit = v.rows.find((x) => x.route === part.routePattern);
-          if (hit) vit[v.name] = { p75: this.small(actor, hit.samples) ? null : num(hit.p75), samples: hit.samples };
+          if (hit) vit[v.name] = { p75: this.small(actor, hit.subjects) ? null : num(hit.p75), samples: this.small(actor, hit.subjects) ? null : hit.samples };
         }
         return {
           routeCode: part.routeCode,
@@ -188,7 +188,7 @@ export class TelemetryPartsAnalyticsService {
           users: this.small(actor, acc.users) ? null : acc.users,
           anonymousEvents: acc.anonymous,
           dwellMs: d
-            ? { samples: d.samples, p50: this.small(actor, d.samples) ? null : num(d.p50), p75: this.small(actor, d.samples) ? null : num(d.p75) }
+            ? { samples: this.small(actor, d.subjects) ? null : d.samples, p50: this.small(actor, d.subjects) ? null : num(d.p50), p75: this.small(actor, d.subjects) ? null : num(d.p75) }
             : null,
           errors: errs,
           errorRate: rate(errs, acc.views),
@@ -254,16 +254,16 @@ export class TelemetryPartsAnalyticsService {
       scope: this.scopeView(actor),
       part: { routeCode: part.routeCode, routePattern: part.routePattern, pageTitle: part.pageTitle, surface: part.surface, domain: part.domain, status: part.active ? 'ACTIVE' : 'DEPRECATED' },
       totals: { ...total, users: this.small(actor, total.users) ? null : total.users, anonymousEvents: total.anonymous },
-      dwellMs: d ? { samples: d.samples, p50: this.small(actor, d.samples) ? null : num(d.p50), p75: this.small(actor, d.samples) ? null : num(d.p75) } : null,
+      dwellMs: d ? { samples: this.small(actor, d.subjects) ? null : d.samples, p50: this.small(actor, d.subjects) ? null : num(d.p50), p75: this.small(actor, d.subjects) ? null : num(d.p75) } : null,
       viewsSeries: series.map((s) => ({ bucket: iso(s.bucket), views: Number(s.views) })),
       screenSizes: sizes.filter((s) => !this.small(actor, s.users)).map((s) => ({ screenSize: s.screen_size, events: s.events })),
       keyActions: actions.filter((a) => !this.small(actor, a.users)).map((a) => ({ target: a.target, clicks: a.clicks })),
       vitals: percentiles.map((p) => ({
         metric: metricName.get(p.metric_concept_id) ?? p.metric_concept_id,
-        samples: p.samples,
-        p50: this.small(actor, p.samples) ? null : num(p.p50),
-        p75: this.small(actor, p.samples) ? null : num(p.p75),
-        p95: this.small(actor, p.samples) ? null : num(p.p95),
+        samples: this.small(actor, p.subjects) ? null : p.samples,
+        p50: this.small(actor, p.subjects) ? null : num(p.p50),
+        p75: this.small(actor, p.subjects) ? null : num(p.p75),
+        p95: this.small(actor, p.subjects) ? null : num(p.p95),
       })),
       recentErrors: errs.map((e) => ({ fingerprint: e.fingerprint, errorType: e.error_type, sanitizedMessage: e.sanitized_message, count: e.count, lastSeen: iso(e.last_seen) })),
       notMeasured: [

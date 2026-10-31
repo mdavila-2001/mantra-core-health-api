@@ -157,11 +157,11 @@ function actorScope(
  * Analítica de producto y RUM para el portal administrativo. Sólo lectura, con
  * ventana obligatoria (máx. 92 días) y agregados calculados en el backend.
  * Toda lectura se acota al tenant que resolvió el guard. Las lecturas de
- * AGREGADOS (`overview`, `timeseries`, `web-vitals`, `pipeline-health`,
+ * AGREGADOS (`overview`, `timeseries`, `web-vitals`,
  * `devices`) llevan `@PlatformScopeOptional()` a nivel de método: un rol de
  * plataforma global sin `X-Tenant-Id` agrega entre organizaciones y los grupos con
  * menos de `minSample` sujetos se suprimen (X-5). Las de nivel individuo
- * (`sessions`, `funnels/:id/report`) siguen exigiendo organización.
+ * (`sessions`, `funnels/:id/report`, `pipeline-health`) siguen exigiendo organización.
  * La ingesta sigue en `/telemetry/*`; esto no la sustituye.
  */
 @ApiTags('telemetry-analytics')
@@ -247,16 +247,12 @@ export class TelemetryAnalyticsController {
 
   @Get('pipeline-health')
   @Roles(...ANALYTICS_READ_ROLES)
-  @PlatformScopeOptional()
   @ApiOperation({
     summary:
       'Frescura, latencia de ingesta, desfase de reloj; lo no medido se declara',
   })
-  pipelineHealth(
-    @Query() query: AnalyticsWindowQueryDto,
-    @CurrentUser() user?: AuthenticatedUser,
-  ) {
-    return this.analytics.pipelineHealth(query, actorScope(user, query.minSample));
+  pipelineHealth(@Query() query: AnalyticsWindowQueryDto) {
+    return this.analytics.pipelineHealth(query, requireTenantId());
   }
 
   @Get('sessions')

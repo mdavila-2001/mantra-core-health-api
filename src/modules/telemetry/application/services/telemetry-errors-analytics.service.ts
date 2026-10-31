@@ -76,7 +76,7 @@ export class TelemetryErrorsAnalyticsService {
       : { level: 'tenant', tenantId: actor.tenantId ?? null, minSample: null };
   }
 
-  async errors(query: ErrorsQuery, actor: AnalyticsActorScope) {
+  async errors(query: ErrorsQuery, actor: AnalyticsActorScope, includeCorrelation = false) {
     const registry = await this.registry();
     const scope = this.scope(query, actor, registry);
     const [totals, byRoute, byClass, byHttpStatus, byApiRoute, series, s9, views] =
@@ -168,14 +168,19 @@ export class TelemetryErrorsAnalyticsService {
         method: r.method,
         route: r.route,
         errors: r.errors,
-        lastRequestId: r.last_request_id,
+        lastRequestId: includeCorrelation ? r.last_request_id : null,
       })),
       series: series.map((r) => ({ bucket: iso(r.bucket), errors: Number(r.errors) })),
-      notMeasured,
+      notMeasured: [
+        ...notMeasured,
+        ...(includeCorrelation
+          ? []
+          : [{ metric: 'lastRequestId', reason: 'Los request_id sólo se muestran a PLATFORM_ADMIN, SECURITY_ADMIN, DPO y SUPERADMIN.' }]),
+      ],
     };
   }
 
-  async fingerprints(query: ErrorsQuery, actor: AnalyticsActorScope) {
+  async fingerprints(query: ErrorsQuery, actor: AnalyticsActorScope, includeCorrelation = false) {
     const registry = await this.registry();
     const scope = this.scope(query, actor, registry);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
@@ -203,7 +208,7 @@ export class TelemetryErrorsAnalyticsService {
               const part = registry.resolve(x.route);
               return { routeCode: part?.routeCode ?? null, routeTemplate: x.route, errors: x.n };
             }),
-          lastRequestId: r.last_request_id,
+          lastRequestId: includeCorrelation ? r.last_request_id : null,
           versions: r.versions,
           affectedUsers: this.users(actor, r.users),
           trend: {
@@ -213,7 +218,9 @@ export class TelemetryErrorsAnalyticsService {
           },
         };
       }),
-      notMeasured: [],
+      notMeasured: includeCorrelation
+        ? []
+        : [{ metric: 'lastRequestId', reason: 'Los request_id sólo se muestran a PLATFORM_ADMIN, SECURITY_ADMIN, DPO y SUPERADMIN.' }],
     };
   }
 

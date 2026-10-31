@@ -69,8 +69,9 @@ export class TelemetryPartsRepository {
   /** Tiempo en pantalla (`ms_en_pagina` de `pagina_abandonada`), p50/p75 por ruta. */
   dwellByRoute(scope: PartsScope) {
     const { where, params } = this.where(scope);
-    return this.sql<{ route: string; samples: number; p50: string | null; p75: string | null }>(
+    return this.sql<{ route: string; samples: number; subjects: number; p50: string | null; p75: string | null }>(
       `SELECT e.route_template AS route, count(*)::int AS samples,
+              count(DISTINCT coalesce(e.user_id::text, e.analytics_subject_id::text, e.session_id::text))::int AS subjects,
               percentile_cont(0.5) WITHIN GROUP (ORDER BY p.value_number)::text AS p50,
               percentile_cont(0.75) WITHIN GROUP (ORDER BY p.value_number)::text AS p75
          FROM telemetry.user_activity_events e

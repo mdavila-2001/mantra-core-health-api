@@ -146,7 +146,7 @@ export class TelemetryAnalyticsRepository {
               count(DISTINCT analytics_subject_id)::int AS subjects,
               count(*) FILTER (WHERE event_name IN ('pagina_vista', 'page_view'))::int AS page_views,
               max(occurred_at) AS last_event_at,
-              (count(DISTINCT user_id) + count(*) FILTER (WHERE user_id IS NULL))::int AS sample
+              count(DISTINCT coalesce(user_id::text, analytics_subject_id::text, session_id::text))::int AS sample
          FROM telemetry.user_activity_events
         WHERE ${where}`,
       params,
@@ -159,7 +159,7 @@ export class TelemetryAnalyticsRepository {
     }>(
       `SELECT coalesce(route_template, '(sin ruta)') AS route,
               count(*)::int AS events, count(DISTINCT session_id)::int AS sessions,
-              (count(DISTINCT user_id) + count(*) FILTER (WHERE user_id IS NULL))::int AS sample
+              count(DISTINCT coalesce(user_id::text, analytics_subject_id::text, session_id::text))::int AS sample
          FROM telemetry.user_activity_events
         WHERE ${where}
         GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT ${TOP_LIMIT}`,
@@ -172,7 +172,7 @@ export class TelemetryAnalyticsRepository {
       sample: number;
     }>(
       `SELECT event_name, count(*)::int AS events, count(DISTINCT session_id)::int AS sessions,
-              (count(DISTINCT user_id) + count(*) FILTER (WHERE user_id IS NULL))::int AS sample
+              count(DISTINCT coalesce(user_id::text, analytics_subject_id::text, session_id::text))::int AS sample
          FROM telemetry.user_activity_events
         WHERE ${where}
         GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT ${TOP_LIMIT}`,
@@ -193,7 +193,7 @@ export class TelemetryAnalyticsRepository {
        ), counts AS (
          SELECT date_trunc('${unit}', occurred_at, 'UTC') AS bucket,
                 count(*)::int AS events, count(DISTINCT session_id)::int AS sessions,
-                (count(DISTINCT user_id) + count(*) FILTER (WHERE user_id IS NULL))::int AS sample
+                count(DISTINCT coalesce(user_id::text, analytics_subject_id::text, session_id::text))::int AS sample
            FROM telemetry.user_activity_events
           WHERE ${where}
           GROUP BY 1
@@ -223,11 +223,13 @@ export class TelemetryAnalyticsRepository {
     const percentiles = await this.sql<{
       metric_concept_id: string;
       samples: number;
+      subjects: number;
       p50: string | null;
       p75: string | null;
       p95: string | null;
     }>(
       `SELECT w.metric_concept_id, count(*)::int AS samples,
+              count(DISTINCT coalesce(w.analytics_subject_id::text, w.session_journey_id::text))::int AS subjects,
               percentile_cont(0.50) WITHIN GROUP (ORDER BY w.metric_value)::text AS p50,
               percentile_cont(0.75) WITHIN GROUP (ORDER BY w.metric_value)::text AS p75,
               percentile_cont(0.95) WITHIN GROUP (ORDER BY w.metric_value)::text AS p95
@@ -241,8 +243,10 @@ export class TelemetryAnalyticsRepository {
       metric_concept_id: string;
       rating_concept_id: string | null;
       n: number;
+      subjects: number;
     }>(
-      `SELECT w.metric_concept_id, w.rating_concept_id, count(*)::int AS n
+      `SELECT w.metric_concept_id, w.rating_concept_id, count(*)::int AS n,
+              count(DISTINCT coalesce(w.analytics_subject_id::text, w.session_journey_id::text))::int AS subjects
          FROM telemetry.web_vitals w
         WHERE ${filter}
         GROUP BY 1, 2`,
@@ -259,8 +263,9 @@ export class TelemetryAnalyticsRepository {
       'w.session_journey_id',
       scope.tenantId,
     );
-    return this.sql<{ route: string; samples: number; p75: string | null }>(
+    return this.sql<{ route: string; samples: number; subjects: number; p75: string | null }>(
       `SELECT coalesce(w.route_template, '(sin ruta)') AS route, count(*)::int AS samples,
+              count(DISTINCT coalesce(w.analytics_subject_id::text, w.session_journey_id::text))::int AS subjects,
               percentile_cont(0.75) WITHIN GROUP (ORDER BY w.metric_value)::text AS p75
          FROM telemetry.web_vitals w
         WHERE ${base.where} AND ${tenant.sql}
@@ -520,8 +525,9 @@ export class TelemetryAnalyticsRepository {
                   min(coalesce(nullif(k.display, ''), k.code, cc.${column}::text,
                                '${DEVICE_UNSPECIFIED}')) AS label,
                   count(*)::int AS contexts,
-                  count(DISTINCT cc.session_journey_id)::int AS sample
+                  count(DISTINCT s.k)::int AS sample
              FROM telemetry.client_contexts cc
+             CROSS JOIN LATERAL (SELECT coalesce(cc.analytics_subject_id::text, cc.session_id::text) AS k) s
              LEFT JOIN terminology.catalog_concepts k ON k.id = cc.${column}
             WHERE ${where} AND cc.is_bot IS NOT TRUE
             GROUP BY 1
@@ -539,8 +545,9 @@ export class TelemetryAnalyticsRepository {
       `SELECT code, code AS label, contexts, sample FROM (
          SELECT coalesce(nullif(btrim(cc.app_version), ''), '${DEVICE_UNSPECIFIED}') AS code,
                 count(*)::int AS contexts,
-                count(DISTINCT cc.session_journey_id)::int AS sample
+                count(DISTINCT s.k)::int AS sample
            FROM telemetry.client_contexts cc
+          CROSS JOIN LATERAL (SELECT coalesce(cc.analytics_subject_id::text, cc.session_id::text) AS k) s
           WHERE ${where} AND cc.is_bot IS NOT TRUE
           GROUP BY 1
        ) d

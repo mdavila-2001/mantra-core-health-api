@@ -7,6 +7,13 @@ import { TelemetryErrorsAnalyticsService } from '../../application/services/tele
 import { ErrorsQueryDto } from '../dto/analytics-errors-query.dto';
 import { ANALYTICS_RAW_ROLES, ANALYTICS_READ_ROLES } from './telemetry-analytics.controller';
 
+/** Roles que pueden ver identificadores de correlación (`request_id`). */
+export function canSeeCorrelation(user: AuthenticatedUser): boolean {
+  return user.roles.some(
+    (role) => (ANALYTICS_RAW_ROLES as readonly string[]).includes(role) || role === 'SUPERADMIN',
+  );
+}
+
 /**
  * Errores del cliente (H3.S1.M3). Sólo lectura: cada método declara
  * `@PlatformScopeOptional()` por su cuenta (nunca en la clase) para que un rol
@@ -23,7 +30,7 @@ export class TelemetryErrorsAnalyticsController {
   @PlatformScopeOptional()
   @ApiOperation({ summary: 'Errores del cliente: totales, por parte, clase, estado HTTP y ruta de API' })
   summary(@Query() query: ErrorsQueryDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.errors.errors(query, resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample));
+    return this.errors.errors(query, resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample), canSeeCorrelation(user));
   }
 
   @Get('fingerprints')
@@ -31,7 +38,7 @@ export class TelemetryErrorsAnalyticsController {
   @PlatformScopeOptional()
   @ApiOperation({ summary: 'Top de huellas de error con tendencia' })
   fingerprints(@Query() query: ErrorsQueryDto, @CurrentUser() user: AuthenticatedUser) {
-    return this.errors.fingerprints(query, resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample));
+    return this.errors.fingerprints(query, resolveAnalyticsScope(user, ANALYTICS_READ_ROLES, query.minSample), canSeeCorrelation(user));
   }
 
   @Get('routes-not-found')
@@ -51,7 +58,7 @@ export class TelemetryErrorsAnalyticsController {
     @Query() query: ErrorsQueryDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    const raw = user.roles.some((role) => (ANALYTICS_RAW_ROLES as readonly string[]).includes(role) || role === 'SUPERADMIN');
+    const raw = canSeeCorrelation(user);
     return this.errors.fingerprint(
       fingerprint.slice(0, 32),
       query,
