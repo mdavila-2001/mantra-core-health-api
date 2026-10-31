@@ -22,6 +22,7 @@ import {
   PLATFORM_SCOPE_OPTIONAL_KEY,
   isPlatformScopeRequest,
 } from './platform-scope';
+import { ROLES_KEY } from '../auth/roles.decorator';
 import { IS_PUBLIC_KEY } from '../auth/public.decorator';
 import { forbiddenWithReason } from '../errors/reasoned-http-exceptions';
 import { SystemErrorReason } from '../errors/system-error-reasons';
@@ -132,7 +133,11 @@ export class TenantContextInterceptor implements NestInterceptor {
       PLATFORM_SCOPE_OPTIONAL_KEY,
       [context.getHandler(), context.getClass()],
     );
-    if (isPlatformScopeRequest(platformScope, request, user))
+    const routeRoles = this.reflector.getAllAndOverride<readonly string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (isPlatformScopeRequest(platformScope, request, user, routeRoles))
       return this.runSystemSweep(next);
 
     const tenantId =

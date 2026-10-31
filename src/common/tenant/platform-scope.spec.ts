@@ -19,6 +19,8 @@ const user = (over: Partial<AuthenticatedUser>): AuthenticatedUser => ({
   ...over,
 });
 
+const ROUTE_ROLES = ['PLATFORM_ADMIN', 'GOVERNANCE_ADMIN'];
+
 describe('alcance de plataforma (H2)', () => {
   it('no amplía PRIVILEGED_TENANT_ROLES', () => {
     expect([...PRIVILEGED_TENANT_ROLES].sort()).toEqual([
@@ -61,9 +63,9 @@ describe('alcance de plataforma (H2)', () => {
   describe('isPlatformScopeRequest', () => {
     const platform = user({ roles: ['PLATFORM_ADMIN'] });
     it('ruta marcada, rol global, sin cabecera → true', () => {
-      expect(isPlatformScopeRequest(true, { headers: {} }, platform)).toBe(
-        true,
-      );
+      expect(
+        isPlatformScopeRequest(true, { headers: {} }, platform, ROUTE_ROLES),
+      ).toBe(true);
     });
     it('cabecera vacía cuenta como ausente', () => {
       expect(
@@ -71,6 +73,7 @@ describe('alcance de plataforma (H2)', () => {
           true,
           { headers: { 'x-tenant-id': '' } },
           platform,
+          ROUTE_ROLES,
         ),
       ).toBe(true);
     });
@@ -80,13 +83,19 @@ describe('alcance de plataforma (H2)', () => {
           true,
           { headers: { 'x-tenant-id': 'tenant-A' } },
           platform,
+          ROUTE_ROLES,
         ),
       ).toBe(false);
     });
     it('ruta sin marcar → false', () => {
-      expect(isPlatformScopeRequest(undefined, { headers: {} }, platform)).toBe(
-        false,
-      );
+      expect(
+        isPlatformScopeRequest(
+          undefined,
+          { headers: {} },
+          platform,
+          ROUTE_ROLES,
+        ),
+      ).toBe(false);
     });
     it('rol de negocio → false', () => {
       expect(
@@ -94,8 +103,26 @@ describe('alcance de plataforma (H2)', () => {
           true,
           { headers: {} },
           user({ roles: ['BUSINESS_ADMIN'] }),
+          ROUTE_ROLES,
         ),
       ).toBe(false);
+    });
+    it('rol de plataforma global que la ruta no acepta + rol de la ruta sólo acotado a un tenant → false', () => {
+      const mixed = user({
+        roles: ['DATA_PLATFORM_ADMIN', 'PLATFORM_ADMIN'],
+        scopedRoles: { 'tenant-A': ['PLATFORM_ADMIN'] },
+      } as any);
+      expect(
+        isPlatformScopeRequest(true, { headers: {} }, mixed, ROUTE_ROLES),
+      ).toBe(false);
+    });
+    it('ruta sin @Roles declarados → false (cierra en falso)', () => {
+      expect(
+        isPlatformScopeRequest(true, { headers: {} }, platform, undefined),
+      ).toBe(false);
+      expect(isPlatformScopeRequest(true, { headers: {} }, platform, [])).toBe(
+        false,
+      );
     });
     it('SUPERADMIN conserva su propio camino → false', () => {
       expect(
@@ -103,6 +130,7 @@ describe('alcance de plataforma (H2)', () => {
           true,
           { headers: {} },
           user({ roles: ['SUPERADMIN'] }),
+          ROUTE_ROLES,
         ),
       ).toBe(false);
     });
@@ -113,7 +141,11 @@ describe('alcance de plataforma (H2)', () => {
     const build = (marked: boolean) =>
       new TenantContextInterceptor(em, {
         getAllAndOverride: (key: string) =>
-          key === PLATFORM_SCOPE_OPTIONAL_KEY ? marked : false,
+          key === PLATFORM_SCOPE_OPTIONAL_KEY
+            ? marked
+            : key === 'requiredRoles'
+              ? ROUTE_ROLES
+              : false,
       } as any);
     const ctx = (
       headers: Record<string, string>,

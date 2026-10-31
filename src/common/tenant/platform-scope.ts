@@ -35,10 +35,21 @@ export const PLATFORM_SCOPE_OPTIONAL_KEY = 'platformScopeOptional';
 export const PlatformScopeOptional = (): ClassDecorator & MethodDecorator =>
   SetMetadata(PLATFORM_SCOPE_OPTIONAL_KEY, true);
 
-/** Si el actor tiene algún rol de plataforma como rol global. */
-export function hasPlatformScope(user: AuthenticatedUser | undefined): boolean {
-  return PLATFORM_SCOPE_ROLES.some((role) =>
-    roleAuthorizesInTenant(user, role, undefined),
+/**
+ * Si el actor tiene como rol **global** algún rol de plataforma. Con
+ * `routeRoles`, además ese mismo rol tiene que figurar entre los que la ruta
+ * acepta: así el alcance plataforma lo concede el rol que abre la puerta y no
+ * otro rol de plataforma sin relación con la ruta (que dejaría pasar a quien
+ * sólo satisface `@Roles` con una asignación acotada a un tenant).
+ */
+export function hasPlatformScope(
+  user: AuthenticatedUser | undefined,
+  routeRoles?: readonly string[],
+): boolean {
+  return PLATFORM_SCOPE_ROLES.some(
+    (role) =>
+      (routeRoles === undefined || routeRoles.includes(role)) &&
+      roleAuthorizesInTenant(user, role, undefined),
   );
 }
 
@@ -51,8 +62,11 @@ export function isPlatformScopeRequest(
   marked: unknown,
   request: Pick<Request, 'headers'>,
   user: AuthenticatedUser,
+  routeRoles: readonly string[] | undefined,
 ): boolean {
-  if (marked !== true || !hasPlatformScope(user)) return false;
+  // Cierra en falso si la ruta no declara `@Roles`: sin lista no hay qué cruzar.
+  if (marked !== true || !routeRoles?.length) return false;
+  if (!hasPlatformScope(user, routeRoles)) return false;
   // SUPERADMIN/SYSTEM conservan su resolución propia (tenant por ruta/cuerpo/query).
   if (hasPrivilegedTenantRole(user)) return false;
   const header = request.headers['x-tenant-id'];

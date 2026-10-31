@@ -137,10 +137,10 @@ describe('/admin/ops: alcance de plataforma sin X-Tenant-Id (HTTP)', () => {
   });
 
   it.each(['DATA_PLATFORM_ADMIN'])(
-    '%s global no está en OPS_READ_ROLES: pasa el alcance pero la ruta manda → 403 ROLE_INSUFFICIENT',
+    '%s global no está en OPS_READ_ROLES: no obtiene alcance plataforma ni pasa la ruta → 403',
     async (role) => {
       const res = await get([role]).expect(403);
-      expect(res.body.reason).toBe('ROLE_INSUFFICIENT');
+      expect(res.body.reason).toBe('TENANT_AMBIGUOUS');
       expect(traffic).not.toHaveBeenCalled();
     },
   );

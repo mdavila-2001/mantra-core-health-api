@@ -92,7 +92,11 @@ describe('TenantScopeGuard: @PlatformScopeOptional (H2)', () => {
   const guardFor = (marked: boolean) =>
     new TenantScopeGuard({
       getAllAndOverride: fn((key: unknown) =>
-        key === 'platformScopeOptional' ? marked : false,
+        key === 'platformScopeOptional'
+          ? marked
+          : key === 'requiredRoles'
+            ? ['PLATFORM_ADMIN', 'GOVERNANCE_ADMIN']
+            : false,
       ),
     } as never);
   const two = ['tenant-A', 'tenant-B'];
@@ -107,17 +111,33 @@ describe('TenantScopeGuard: @PlatformScopeOptional (H2)', () => {
     expect(request.resolvedTenantId).toBeUndefined();
   });
 
-  it.each(['DATA_PLATFORM_ADMIN', 'GOVERNANCE_ADMIN'])(
-    '%s global sin cabecera → pasa',
-    (role) => {
-      const { context } = contextFor({
-        id: 'p1',
-        roles: [role],
-        tenantIds: two,
-      });
-      expect(guardFor(true).canActivate(context)).toBe(true);
-    },
-  );
+  it('GOVERNANCE_ADMIN global (rol que la ruta acepta) sin cabecera → pasa', () => {
+    const { context } = contextFor({
+      id: 'p1',
+      roles: ['GOVERNANCE_ADMIN'],
+      tenantIds: two,
+    });
+    expect(guardFor(true).canActivate(context)).toBe(true);
+  });
+
+  it('DATA_PLATFORM_ADMIN global que la ruta no acepta → sin alcance plataforma (TENANT_AMBIGUOUS)', () => {
+    const { context } = contextFor({
+      id: 'p1',
+      roles: ['DATA_PLATFORM_ADMIN'],
+      tenantIds: two,
+    });
+    expect(() => guardFor(true).canActivate(context)).toThrow();
+  });
+
+  it('rol de plataforma global ajeno a la ruta + rol de la ruta sólo acotado a un tenant → no hay alcance plataforma', () => {
+    const { context } = contextFor({
+      id: 'p1',
+      roles: ['DATA_PLATFORM_ADMIN'],
+      scopedRoles: { 'tenant-A': ['PLATFORM_ADMIN'] },
+      tenantIds: two,
+    } as never);
+    expect(() => guardFor(true).canActivate(context)).toThrow();
+  });
 
   it('con cabecera de tenant propio → resuelve ese tenant', () => {
     const { context, request } = contextFor(

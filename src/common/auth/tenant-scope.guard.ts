@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { ROLES_KEY } from './roles.decorator';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { IS_TENANT_AGNOSTIC_KEY } from '../tenant/tenant-agnostic.decorator';
 import {
@@ -70,7 +71,12 @@ export class TenantScopeGuard implements CanActivate {
       PLATFORM_SCOPE_OPTIONAL_KEY,
       [context.getHandler(), context.getClass()],
     );
-    if (isPlatformScopeRequest(platformScope, request, user)) return true;
+    const routeRoles = this.reflector.getAllAndOverride<readonly string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (isPlatformScopeRequest(platformScope, request, user, routeRoles))
+      return true;
 
     request.resolvedTenantId = resolveRequestTenantId(request, user);
     return true;
