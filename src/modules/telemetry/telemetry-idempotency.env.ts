@@ -8,7 +8,7 @@
  * elegir con poca variación) se podría reconstruir probando candidatos y
  * volvería a ligar el evento con la persona.
  *
- * Sin secreto en producción **no se deduplica** (cada evento recibe una clave
+ * Sin secreto fuera de `development` y `test` **no se deduplica** (cada evento recibe una clave
  * aleatoria): es preferible un reenvío repetido a un evento re-identificable.
  */
 const DEV_IDEMPOTENCY_SECRET =
@@ -21,5 +21,11 @@ export function loadAnonymousIdempotencySecret(): string | null {
   if (configured !== undefined && configured.length >= MIN_SECRET_LENGTH) {
     return configured;
   }
-  return process.env.NODE_ENV === 'production' ? null : DEV_IDEMPOTENCY_SECRET;
+  // El secreto de desarrollo es público (está en el repositorio): sólo vale donde
+  // no hay datos reales. Staging o cualquier otro entorno sin secreto propio no
+  // deduplica, igual que producción.
+  const env = process.env.NODE_ENV;
+  return env === 'development' || env === 'test'
+    ? DEV_IDEMPOTENCY_SECRET
+    : null;
 }

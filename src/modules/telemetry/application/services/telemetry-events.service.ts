@@ -37,6 +37,7 @@ import type {
   SessionJourneys,
   UserActivityEvents,
 } from '../../entities';
+import { SEED } from '../../../../common/constants/concepts';
 import { TelemetryErrorReason } from '../../telemetry.error-reasons';
 import { loadAnonymousIdempotencySecret } from '../../telemetry-idempotency.env';
 import {
@@ -174,11 +175,14 @@ export class TelemetryEventsService {
         }
 
         if (schema.statusConceptId === TELE.SCHEMA_DEPRECATED) {
-          throw new PreconditionFailedException(
-            'El esquema de evento está obsoleto; use la versión vigente',
+          // Un cliente ya desplegado con el id de la versión anterior no debe
+          // perder el resto del lote: el evento se descarta, se cuenta y se avisa.
+          this.logger.warn(
             { eventSchemaDefinitionId: item.eventSchemaDefinitionId },
-            TelemetryErrorReason.EVENT_SCHEMA_NOT_ACTIVE,
+            'Evento descartado: esquema obsoleto',
           );
+          skipped += 1;
+          continue;
         }
 
         // Referencias del cuerpo: se comprueban antes del gate y antes de
@@ -282,7 +286,9 @@ export class TelemetryEventsService {
           routeTemplate: item.routeTemplate,
           occurredAt,
           receivedAt: new Date(),
-          correlationId: item.correlationId,
+          // Un correlationId elegido por el cliente religaría el evento anónimo con
+          // eventos identificados: no se guarda.
+          correlationId: anonymous ? undefined : item.correlationId,
         });
         await tx.flush();
         eventIds.push(event.id);
@@ -788,6 +794,12 @@ export class TelemetryEventsService {
     tx: EntityManager,
     purposeDefinitionId: string,
   ): Promise<boolean> {
+    // Lista cerrada: sólo el propósito de uso agregado puede recibir eventos sin
+    // consentimiento. Un propósito creado o editado después con
+    // `requires_consent = false` NO pasa a aceptar eventos anónimos por eso.
+    if (purposeDefinitionId !== SEED.platformUsageAggregatePurposeId) {
+      return false;
+    }
     const purpose = await this.purposesRepo.findById(tx, purposeDefinitionId);
     return purpose?.requiresConsent === false;
   }

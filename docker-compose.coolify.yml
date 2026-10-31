@@ -785,6 +785,7 @@ services:
       # `time_series.service_sli_series`. Un valor inválido hace fallar el arranque.
       OBSERVABILITY_HTTP_SLI_ENABLED: ${OBSERVABILITY_HTTP_SLI_ENABLED:-true}
       OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS: ${OBSERVABILITY_HTTP_SLI_FLUSH_SECONDS:-60}
+      TELEMETRY_IDEMPOTENCY_SECRET: ${TELEMETRY_IDEMPOTENCY_SECRET:-}
     deploy:
       resources: *api-resources
     volumes:

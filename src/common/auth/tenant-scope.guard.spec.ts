@@ -126,7 +126,11 @@ describe('TenantScopeGuard: @PlatformScopeOptional (H2)', () => {
       roles: ['DATA_PLATFORM_ADMIN'],
       tenantIds: two,
     });
-    expect(() => guardFor(true).canActivate(context)).toThrow();
+    expect(() => guardFor(true).canActivate(context)).toThrow(
+      expect.objectContaining({
+        response: expect.objectContaining({ reason: 'TENANT_AMBIGUOUS' }),
+      }),
+    );
   });
 
   it('rol de plataforma global ajeno a la ruta + rol de la ruta sólo acotado a un tenant → no hay alcance plataforma', () => {
@@ -136,7 +140,11 @@ describe('TenantScopeGuard: @PlatformScopeOptional (H2)', () => {
       scopedRoles: { 'tenant-A': ['PLATFORM_ADMIN'] },
       tenantIds: two,
     } as never);
-    expect(() => guardFor(true).canActivate(context)).toThrow();
+    expect(() => guardFor(true).canActivate(context)).toThrow(
+      expect.objectContaining({
+        response: expect.objectContaining({ reason: 'TENANT_AMBIGUOUS' }),
+      }),
+    );
   });
 
   it('con cabecera de tenant propio → resuelve ese tenant', () => {

@@ -20,6 +20,7 @@ import {
   CaptureActivityEventsDto,
   CreateClientContextDto,
 } from '../../presentation/dto';
+import { SEED } from '../../../../common/constants/concepts';
 import { TELE } from '../../telemetry.concepts';
 import { TelemetryErrorReason } from '../../telemetry.error-reasons';
 
@@ -383,7 +384,7 @@ describe('TelemetryEventsService', () => {
         schemaWith({
           id: ANON_SCHEMA,
           eventName: 'pagina_vista_anonima',
-          purposeDefinitionId: 'p-anon',
+          purposeDefinitionId: SEED.platformUsageAggregatePurposeId,
           propertySchemaJson: { type: 'object', properties: {} },
           ...over,
         });
@@ -428,6 +429,50 @@ describe('TelemetryEventsService', () => {
         expect(d.webAnalytics.trackActivityEvents).toHaveBeenCalledWith([], {
           tenantId: undefined,
         });
+      });
+
+      it('un propósito con requires_consent=false que NO es el de uso agregado sigue exigiendo consentimiento', async () => {
+        const d = withoutConsentDecision();
+        d.schemasRepo.findById.mockResolvedValue({
+          ...anonSchema(),
+          purposeDefinitionId: 'otro-proposito-sin-consentimiento',
+        });
+        d.purposesRepo.findById.mockResolvedValue({ requiresConsent: false });
+
+        const res = await d.service.captureActivityEvents(
+          {
+            events: [
+              {
+                eventSchemaDefinitionId: ANON_SCHEMA,
+                routeTemplate: '/inicio',
+              },
+            ],
+          },
+          actor,
+        );
+
+        expect(res).toMatchObject({ inserted: 0, skipped: 1 });
+        expect(d.eventsRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('el correlationId del cliente no se guarda en un evento anónimo', async () => {
+        const d = withoutConsentDecision();
+        d.eventsRepo.findByIdempotencyKey.mockResolvedValue(null);
+        await d.service.captureActivityEvents(
+          {
+            events: [
+              {
+                eventSchemaDefinitionId: ANON_SCHEMA,
+                routeTemplate: '/inicio',
+                correlationId: '11111111-1111-4111-8111-111111111111',
+              },
+            ],
+          },
+          actor,
+        );
+        expect(
+          d.eventsRepo.create.mock.calls[0][1].correlationId,
+        ).toBeUndefined();
       });
 
       it('Límite: otro nombre de evento se guarda con el del esquema y la clave se acota a los anónimos', async () => {
@@ -701,7 +746,9 @@ describe('TelemetryEventsService', () => {
           Promise.resolve(id === ANON_SCHEMA ? anonSchema() : schemaWith()),
         );
         d.purposesRepo.findById.mockImplementation((_tx: unknown, id: string) =>
-          Promise.resolve({ requiresConsent: id !== 'p-anon' }),
+          Promise.resolve({
+            requiresConsent: id !== SEED.platformUsageAggregatePurposeId,
+          }),
         );
         d.consentsRepo.findLatest.mockResolvedValue(null);
         d.eventsRepo.create.mockReturnValue({ id: 'e-anon' });
@@ -723,21 +770,18 @@ describe('TelemetryEventsService', () => {
         expect(d.eventsRepo.create).toHaveBeenCalledTimes(1);
       });
 
-      it('412: un esquema DEPRECATED ya no acepta eventos', async () => {
+      it('un esquema DEPRECATED descarta el evento y no tumba el resto del lote', async () => {
         const d = build();
         d.schemasRepo.findById.mockResolvedValue(
           schemaWith({ statusConceptId: TELE.SCHEMA_DEPRECATED }),
         );
 
-        const error = await failure(
-          d.service.captureActivityEvents(
-            { events: [{ eventSchemaDefinitionId: 's1' }] },
-            actor,
-          ),
+        const res = await d.service.captureActivityEvents(
+          { events: [{ eventSchemaDefinitionId: 's1' }] },
+          actor,
         );
 
-        expect(error).toBeInstanceOf(PreconditionFailedException);
-        expect(error.reason).toBe(TelemetryErrorReason.EVENT_SCHEMA_NOT_ACTIVE);
+        expect(res).toMatchObject({ inserted: 0, skipped: 1 });
         expect(d.eventsRepo.create).not.toHaveBeenCalled();
       });
     });

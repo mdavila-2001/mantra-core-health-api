@@ -200,7 +200,15 @@ describe('alcance de plataforma (H2)', () => {
           ),
           { handle: () => of(1) },
         ),
-      ).toThrow();
+      ).toThrow(
+        expect.objectContaining({
+          response: expect.objectContaining({
+            reason: expect.stringMatching(
+              /^TENANT_(AMBIGUOUS|MEMBERSHIP_REQUIRED)$/u,
+            ),
+          }),
+        }),
+      );
     });
 
     it('BUSINESS_ADMIN sin cabecera y 2 membresías → sigue 403', () => {
@@ -208,7 +216,15 @@ describe('alcance de plataforma (H2)', () => {
         build(true).intercept(ctx({}, user({ roles: ['BUSINESS_ADMIN'] })), {
           handle: () => of(1),
         }),
-      ).toThrow();
+      ).toThrow(
+        expect.objectContaining({
+          response: expect.objectContaining({
+            reason: expect.stringMatching(
+              /^TENANT_(AMBIGUOUS|MEMBERSHIP_REQUIRED)$/u,
+            ),
+          }),
+        }),
+      );
     });
 
     it('ruta sin marcar: PLATFORM_ADMIN sin cabecera y 2 membresías → 403', () => {
@@ -216,7 +232,15 @@ describe('alcance de plataforma (H2)', () => {
         build(false).intercept(ctx({}, user({ roles: ['PLATFORM_ADMIN'] })), {
           handle: () => of(1),
         }),
-      ).toThrow();
+      ).toThrow(
+        expect.objectContaining({
+          response: expect.objectContaining({
+            reason: expect.stringMatching(
+              /^TENANT_(AMBIGUOUS|MEMBERSHIP_REQUIRED)$/u,
+            ),
+          }),
+        }),
+      );
     });
   });
 });
