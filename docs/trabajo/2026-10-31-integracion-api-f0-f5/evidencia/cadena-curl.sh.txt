@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# Cadena curl F0/F1 contra la API local (:3000) y la base local. Datos sintéticos (@example.test).
+# Los tokens nunca se imprimen.
+set -uo pipefail
+cd /home/user/mantra-core-health-api
+eval "$(/home/user/scripts/api-login.sh)" >/dev/null
+export PGPASSWORD=$(grep -E '^DB_PASSWORD=' .env | cut -d= -f2-)
+SQL() { echo "\$ psql: $1"; psql -h localhost -p 5433 -U mantra -d alovida -At -c "$1"; }
+SUF=$(python3 -c 'import uuid;print(uuid.uuid4().hex[:8])')
+PW="S3cret-$SUF"
+# req METHOD PATH TOKENVAR TENANT [IFMATCH] [BODY]
+req() {
+  local m=$1 p=$2 tok=$3 ten=$4 ifm=$5 body=${6:-}
+  local args=(-sS -o /tmp/claude-0/-home-user/f19241b2-e466-53c2-a2df-a87267a67063/scratchpad/resp.json -w '%{http_code}' -X "$m" "$API$p" -H 'content-type: application/json')
+  [[ -n $tok ]] && args+=(-H "authorization: Bearer ${!tok}")
+  [[ -n $ten ]] && args+=(-H "x-tenant-id: $ten")
+  [[ -n $ifm ]] && args+=(-H "if-match: $ifm")
+  [[ -n $body ]] && args+=(--data "$body")
+  CODE=$(curl "${args[@]}")
+  RESP=$(cat /tmp/claude-0/-home-user/f19241b2-e466-53c2-a2df-a87267a67063/scratchpad/resp.json)
+  echo "\$ curl -X $m $p ${ten:+[X-Tenant-Id ${ten:0:8}…]} ${ifm:+[If-Match $ifm]} ${body:+$body}"
+  echo "→ HTTP $CODE $(echo "$RESP" | jq -c 'del(.accessToken,.refreshToken)? // .' 2>/dev/null | cut -c1-700)"
+}
+j() { echo "$RESP" | jq -r "$1"; }
+ORGANIZACION() {
+  local L=$1; local email="e2e-int-${L,,}-$SUF@example.test"
+  req POST /iam/auth/register-organization "" "" "" "{\"organization\":{\"code\":\"E2EINT_${L}_${SUF^^}\",\"legalName\":\"Hospital E2E $L $SUF\",\"tenantType\":\"HOSPITAL\",\"countryConceptId\":\"$CBO\",\"jurisdictionConceptId\":\"$JSCZ\"},\"owner\":{\"email\":\"$email\",\"password\":\"$PW\",\"name\":\"Duena\",\"lastName\":\"$L\"}}"
+  eval "TEN_$L=$(j .tenantId)"
+  req POST /iam/auth/login "" "" "" "{\"email\":\"$email\",\"password\":\"$PW\"}"
+  eval "TOK_$L=$(j .accessToken)"
+  local t; eval "t=\$TEN_$L"
+  req POST /practices SECURITY_ADMIN_TOKEN "" "" "{\"tenantId\":\"$t\",\"code\":\"E2EINT-P-$L-$SUF\",\"name\":\"Hospital $L\",\"timeZone\":\"America/La_Paz\"}"
+  eval "PRA_$L=$(j .id)"
+}
+CBO=$1; JSCZ=$2
+echo "## 1. Dos organizaciones (A y B), cada una con su OWNER, y una práctica por organización"
+ORGANIZACION A; ORGANIZACION B
+echo; echo "## 2. Sede de A (OWNER de A)"
+req POST /practices/$PRA_A/sites TOK_A "$TEN_A" "" "{\"code\":\"E2EINT-S-A-$SUF\",\"name\":\"Sede A\"}"; SITE=$(j .id)
+SQL "select tenant_id='$TEN_A' as tenant_ok, practice_id='$PRA_A' as practica_ok, name from practice.practice_sites where id='$SITE'"
+req GET /sites/$SITE/structure TOK_A "$TEN_A" ""
+echo; echo "## 3. Área (LOC_FORM_AREA) y espacio (consultorio) bajo el área"
+req POST /sites/$SITE/care-spaces TOK_A "$TEN_A" "" "{\"code\":\"AR1-$SUF\",\"name\":\"Area 1\",\"formCode\":\"LOC_FORM_AREA\",\"functionCode\":\"SPACE_FN_AREA_GENERIC\",\"activate\":true}"; AR1=$(j .id)
+req POST /sites/$SITE/care-spaces TOK_A "$TEN_A" "" "{\"code\":\"AR2-$SUF\",\"name\":\"Area 2\",\"formCode\":\"LOC_FORM_AREA\",\"functionCode\":\"SPACE_FN_AREA_GENERIC\",\"activate\":true}"; AR2=$(j .id)
+req POST /sites/$SITE/care-spaces TOK_A "$TEN_A" "" "{\"code\":\"C1-$SUF\",\"name\":\"Consultorio 1\",\"formCode\":\"LOC_FORM_ROOM\",\"functionCode\":\"SPACE_FN_OFFICE_ADMIN\",\"parentSpaceId\":\"$AR1\",\"activate\":true}"; SP=$(j .id); RV=$(j .rowVersion)
+SQL "select code, tenant_id='$TEN_A' as tenant_ok, parent_space_id='$AR1' as padre_ok, row_version, ops_version from practice.care_spaces where id in ('$AR1','$AR2','$SP') order by code"
+SQL "select count(*) as historia from audit.care_spaces_history where care_space_id='$SP'"
+SQL "select count(*) as sello from audit.audit_log where action='CARE_SPACE_CREATED' and entity_id='$SP'"
+req GET /care-spaces/$SP TOK_A "$TEN_A" ""
+echo; echo "## 4. Editar con If-Match"
+req PATCH /care-spaces/$SP TOK_A "$TEN_A" "" '{"name":"Consultorio 1 (editado)"}'
+req PATCH /care-spaces/$SP TOK_A "$TEN_A" "99" '{"name":"Consultorio 1 (editado)"}'
+req PATCH /care-spaces/$SP TOK_A "$TEN_A" "W/\"$RV\"" '{"name":"Consultorio 1 (editado)"}'; RV=$(j .rowVersion)
+SQL "select name, row_version from practice.care_spaces where id='$SP'"
+req GET /care-spaces/$SP TOK_A "$TEN_A" ""; echo "relectura: name=$(j .name) rowVersion=$(j .rowVersion)"
+echo; echo "## 5. Mover el espacio al Área 2 (y ciclo rechazado)"
+AR1RV=$(psql -h localhost -p 5433 -U mantra -d alovida -At -c "select row_version from practice.care_spaces where id='$AR1'")
+req POST /care-spaces/$SP/move TOK_A "$TEN_A" "$RV" "{\"parentSpaceId\":\"$AR2\"}"; RV=$(j .rowVersion)
+SQL "select parent_space_id='$AR2' as movido, row_version from practice.care_spaces where id='$SP'"
+req GET /care-spaces/$SP TOK_A "$TEN_A" ""; echo "relectura: parentSpaceId=$(j .parentSpaceId) path=$(echo "$RESP" | jq -c '.path // empty' | cut -c1-200)"
+AR2RV=$(psql -h localhost -p 5433 -U mantra -d alovida -At -c "select row_version from practice.care_spaces where id='$AR2'")
+req POST /care-spaces/$AR2/move TOK_A "$TEN_A" "$AR2RV" "{\"parentSpaceId\":\"$SP\"}"
+echo; echo "## 6. Retirar el Área 2 con un hijo activo: bloqueado"
+req GET /care-spaces/$AR2/retire-check TOK_A "$TEN_A" ""
+req POST /care-spaces/$AR2/lifecycle TOK_A "$TEN_A" "$AR2RV" '{"action":"retire","reason":"remodelacion"}'
+SQL "select status_concept_id, valid_to is null as sigue_vigente from practice.care_spaces where id='$AR2'"
+echo; echo "## 7. Retirar la hoja (el consultorio): permitido"
+req POST /care-spaces/$SP/lifecycle TOK_A "$TEN_A" "$RV" '{"action":"retire","reason":"baja del consultorio"}'
+SQL "select valid_to is not null as retirado, row_version from practice.care_spaces where id='$SP'"
+req GET /care-spaces/$SP/history TOK_A "$TEN_A" ""
+echo; echo "## 8. Desde la organización B: 404 sobre todo lo de A"
+SNAP="select string_agg(id||':'||row_version||':'||name, ',' order by id) from practice.care_spaces where practice_site_id='$SITE'"
+BEFORE=$(psql -h localhost -p 5433 -U mantra -d alovida -At -c "$SNAP")
+req GET /care-spaces/$AR1 TOK_B "$TEN_B" ""
+req GET /sites/$SITE/structure TOK_B "$TEN_B" ""
+req PATCH /care-spaces/$AR1 TOK_B "$TEN_B" "1" '{"name":"x"}'
+req POST /care-spaces/$AR1/move TOK_B "$TEN_B" "1" '{"parentSpaceId":null}'
+req POST /care-spaces/$AR1/lifecycle TOK_B "$TEN_B" "1" '{"action":"retire","reason":"x"}'
+req POST /sites/$SITE/care-spaces TOK_B "$TEN_B" "" "{\"code\":\"X-$SUF\",\"name\":\"x\",\"formCode\":\"LOC_FORM_AREA\",\"functionCode\":\"SPACE_FN_AREA_GENERIC\"}"
+req POST /practices/$PRA_A/sites TOK_B "$TEN_B" "" "{\"code\":\"X-$SUF\",\"name\":\"x\"}"
+echo "# token de B con X-Tenant-Id de A (suplantar el tenant):"
+req GET /care-spaces/$AR1 TOK_B "$TEN_A" ""
+AFTER=$(psql -h localhost -p 5433 -U mantra -d alovida -At -c "$SNAP")
+echo "nada cambió en A: $([[ "$BEFORE" == "$AFTER" ]] && echo SI || echo NO)"
+SQL "select count(*) from practice.care_spaces where code='X-$SUF'"

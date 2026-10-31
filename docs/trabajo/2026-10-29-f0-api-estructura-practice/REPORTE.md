@@ -64,3 +64,11 @@ Salidas completas en `evidencia/`:
 4. Vendoreo desde `de23caf` (commiteado), no del árbol de trabajo del modelo.
 5. `GET /sites/:siteId/care-spaces` ya respondía 404 cruzado; no se cambió. Abrirla a «miembro del tenant» es F1.
 6. `gen_entities` se corrió sólo para 04/14/53. Con `all` aparecen ~30 entidades nuevas y otras 45 con cambios de columnas en otros módulos: es fuera de alcance para F0 y está anotado para F1/MODELO.
+
+## Actualización 2026-10-31 (integrador de la API)
+
+Los gates que este reporte dejó pendientes se corrieron por primera vez en
+[2026-10-31-integracion-api-f0-f5](../2026-10-31-integracion-api-f0-f5/REPORTE.md): typecheck, lint,
+build, unitarios de `practice`/`audit-trail`/`module-layering` y el int-spec
+`practice-structure-tenancy` (7/7) y `practice-infrastructure` (11/11) en verde, más la cadena HTTP real con 404 cruzado. Ese reporte
+tiene el peldaño vigente; lo de arriba queda como registro histórico del 2026-10-29.

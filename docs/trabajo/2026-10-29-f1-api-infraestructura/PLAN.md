@@ -118,3 +118,11 @@
 | El modelo cambia en paralelo (f1b, licencias) | entidades desfasadas | vendorear sólo commits; re-vendorear al aparecer el commit |
 | f1b: `audit.*_history` sólo SELECT/INSERT, y `HistoryRepository.append` hace UPDATE de `valid_to` | escritura de historia rota con `mantra_app` | avisado al orquestador; no se cambia `append` sin decisión |
 | RLS en `practice_sites` y lecturas cruzadas | listados vacíos con `RLS_ENFORCE=true` | inventario + spec + evidencia psql con `mantra_app` |
+
+## Actualización 2026-10-31 (integrador de la API)
+
+Los gates que este reporte dejó pendientes se corrieron por primera vez en
+[2026-10-31-integracion-api-f0-f5](../2026-10-31-integracion-api-f0-f5/REPORTE.md): typecheck, lint,
+build, unitarios de `practice`/`audit-trail`/`module-layering` y el int-spec
+`practice-structure-tenancy` (7/7) y `practice-infrastructure` (11/11) en verde, más la cadena HTTP real con 404 cruzado. Ese reporte
+tiene el peldaño vigente; lo de arriba queda como registro histórico del 2026-10-29.

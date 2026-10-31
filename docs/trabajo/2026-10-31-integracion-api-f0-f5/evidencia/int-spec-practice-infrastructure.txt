@@ -1,0 +1,5 @@
+$ yarn test:integration --runInBand --verbose test/integration/practice-infrastructure.int-spec.ts  (fb32c83c)
+Test Suites: 1 passed, 1 total
+Tests:       11 passed, 11 total
+Time:        15.006 s, estimated 22 s
+EXIT=0
