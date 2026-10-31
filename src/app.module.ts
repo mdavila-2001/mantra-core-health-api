@@ -46,6 +46,9 @@ import { audioEnvSchema } from './modules/audio_assets/audio.env';
 import { admissionsEnvSchema } from './modules/profiles/domain/admissions/admissions.config';
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
+import { GovernanceAdminModule } from './modules/governance_admin/governance_admin.module';
+import { RuntimePiecesModule } from './modules/platform_ops/runtime_pieces/runtime_pieces.module';
+import { UiVisibilityModule } from './modules/ui_visibility/ui_visibility.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { BulkImportModule } from './modules/bulk_import/bulk-import.module';
 import { ChartModule } from './modules/chart/chart.module';
@@ -201,6 +204,9 @@ import { StudyCatalogModule } from './modules/study_catalog/study_catalog.module
     AuthzModule,
     ConsentModule,
     AccountingModule,
+    GovernanceAdminModule,
+    UiVisibilityModule,
+    RuntimePiecesModule,
     AdsModule,
     AuditModule,
     AudioAssetsModule,

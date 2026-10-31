@@ -6672,12 +6672,16 @@ flowchart TD
   n24 --> n25
   n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n27["Llama a PublicSearchRepository.practiceIdByTenant"]:::llamada
   n26 --> n27
-  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n28[("LEE practice.practices")]:::efecto
   n27 --> n28
-  n29(("200 Responde con éxito")):::ok
+  n29["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n28 --> n29
+  n30[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7201,12 +7205,16 @@ flowchart TD
   n24 --> n25
   n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n27["Llama a PublicSearchRepository.practiceIdByTenant"]:::llamada
   n26 --> n27
-  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n28[("LEE practice.practices")]:::efecto
   n27 --> n28
-  n29(("200 Responde con éxito")):::ok
+  n29["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n28 --> n29
+  n30[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7279,12 +7287,16 @@ flowchart TD
   n24 --> n25
   n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n27["Llama a PublicSearchRepository.practiceIdByTenant"]:::llamada
   n26 --> n27
-  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n28[("LEE practice.practices")]:::efecto
   n27 --> n28
-  n29(("200 Responde con éxito")):::ok
+  n29["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n28 --> n29
+  n30[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7357,12 +7369,16 @@ flowchart TD
   n24 --> n25
   n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n27["Llama a PublicSearchRepository.practiceIdByTenant"]:::llamada
   n26 --> n27
-  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n28[("LEE practice.practices")]:::efecto
   n27 --> n28
-  n29(("200 Responde con éxito")):::ok
+  n29["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n28 --> n29
+  n30[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7997,12 +8013,16 @@ flowchart TD
   n26 --> n27
   n28[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n27 --> n28
-  n29["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n29["Llama a PublicSearchRepository.practiceIdByTenant"]:::llamada
   n28 --> n29
-  n30[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n30[("LEE practice.practices")]:::efecto
   n29 --> n30
-  n31(("200 Responde con éxito")):::ok
+  n31["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n30 --> n31
+  n32[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n31 --> n32
+  n33(("200 Responde con éxito")):::ok
+  n32 --> n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -9352,12 +9372,16 @@ flowchart TD
   n24 --> n25
   n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n27["Llama a PublicSearchRepository.practiceIdByTenant"]:::llamada
   n26 --> n27
-  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n28[("LEE practice.practices")]:::efecto
   n27 --> n28
-  n29(("200 Responde con éxito")):::ok
+  n29["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n28 --> n29
+  n30[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

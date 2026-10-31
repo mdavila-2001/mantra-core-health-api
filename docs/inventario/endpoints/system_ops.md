@@ -3,8 +3,8 @@
 # Endpoints del módulo `system_ops`
 
 - **Bloque:** Operaciones de Plataforma (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
-- **Operaciones:** 24 (24 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 1 · MEDIO 23 · BAJO 0
+- **Operaciones:** 35 (29 en el contrato, 6 sólo en el código)
+- **Riesgo:** ALTO 1 · MEDIO 23 · BAJO 11
 - **Tablas distintas que tocan:** 47
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/system-ops.md` (generado aparte por `yarn docs:endpoints:generate`)
 
@@ -15,27 +15,38 @@
 | 1 | POST | `/admin/governance/anonymization-rules` | Definir una regla de anonimización | MEDIO | 3 | SECURITY_ADMIN |
 | 2 | POST | `/admin/governance/assessments/{id}/findings` | Abrir un hallazgo sobre una evaluación | MEDIO | 3 | SECURITY_ADMIN |
 | 3 | POST | `/admin/governance/assessments/{id}/remediation-plans` | Crear un plan de remediación con sus acciones | MEDIO | 5 | SECURITY_ADMIN |
-| 4 | POST | `/admin/governance/cross-border-transfers` | Registrar una transferencia transfronteriza (append-only) | MEDIO | 2 | SECURITY_ADMIN |
-| 5 | POST | `/admin/governance/drafts` | Guardar un draft record genérico | MEDIO | 1 | SECURITY_ADMIN |
-| 6 | POST | `/admin/governance/drafts/{id}/publish` | Publicar un draft record y materializarlo | MEDIO | 3 | SECURITY_ADMIN |
-| 7 | POST | `/admin/governance/entity-registry` | Registrar dominio, clasificación y catalogar entidad + campos | MEDIO | 7 | SECURITY_ADMIN |
-| 8 | PATCH | `/admin/governance/entity-registry/{id}/retention` | Aplicar una política de retención a una entidad | MEDIO | 4 | SECURITY_ADMIN |
-| 9 | PATCH | `/admin/governance/entity-registry/{id}/write-policy` | Vincular una política de escritura a una entidad | MEDIO | 4 | SECURITY_ADMIN |
-| 10 | PATCH | `/admin/governance/field-registry/{id}` | Asignar regla de anonimización / masking a un campo | MEDIO | 3 | SECURITY_ADMIN |
-| 11 | PATCH | `/admin/governance/findings/{id}` | Actualizar un hallazgo (estado / owner) | MEDIO | 2 | SECURITY_ADMIN |
-| 12 | POST | `/admin/governance/legal-holds` | Colocar un legal hold sobre un objetivo | MEDIO | 3 | SECURITY_ADMIN |
-| 13 | POST | `/admin/governance/legal-holds/{id}/release` | Levantar un legal hold ACTIVE | MEDIO | 3 | SECURITY_ADMIN |
-| 14 | POST | `/admin/governance/operational-frameworks` | Publicar un framework operativo con sus controles | MEDIO | 3 | SECURITY_ADMIN |
-| 15 | POST | `/admin/governance/remediation-actions/{id}/verify` | Verificar y cerrar una acción de remediación | MEDIO | 6 | SECURITY_ADMIN |
-| 16 | POST | `/admin/governance/residency-policies` | Definir una política de residencia de datos | MEDIO | 3 | SECURITY_ADMIN |
-| 17 | POST | `/admin/governance/retention-policies` | Definir una política de retención con base legal | MEDIO | 3 | SECURITY_ADMIN |
-| 18 | POST | `/admin/governance/tenant-residency-bindings` | Vincular un tenant a una política de residencia | MEDIO | 4 | SECURITY_ADMIN |
-| 19 | POST | `/admin/governance/workload-assessments` | Iniciar una evaluación de workload | MEDIO | 2 | SECURITY_ADMIN |
-| 20 | PUT | `/admin/governance/workload-assessments/{id}/control-results` | Registrar (UPSERT) resultados de control de una evaluación | MEDIO | 4 | SECURITY_ADMIN |
-| 21 | POST | `/admin/governance/write-policies` | Definir una política de escritura | MEDIO | 3 | SECURITY_ADMIN |
-| 22 | POST | `/admin/ops/backup-policies` | Definir una política de backup (RPO/RTO/inmutabilidad) | MEDIO | 1 | SECURITY_ADMIN |
-| 23 | POST | `/internal/governance/retention-executions/run` | Ejecutar un barrido de retención (excluye objetivos bajo legal hold) | ALTO | 38 | SECURITY_ADMIN |
-| 24 | POST | `/internal/ops/restore-test-runs` | Registrar una prueba de restauración con evidencia | MEDIO | 2 | SECURITY_ADMIN |
+| 4 | GET | `/admin/governance/change-log` | Cambios de gobierno de datos: quién cambió qué y cuándo | BAJO | 2 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 5 | POST | `/admin/governance/cross-border-transfers` | Registrar una transferencia transfronteriza (append-only) | MEDIO | 2 | SECURITY_ADMIN |
+| 6 | GET | `/admin/governance/domains` | — | BAJO | 2 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 7 | POST | `/admin/governance/drafts` | Guardar un draft record genérico | MEDIO | 1 | SECURITY_ADMIN |
+| 8 | POST | `/admin/governance/drafts/{id}/publish` | Publicar un draft record y materializarlo | MEDIO | 3 | SECURITY_ADMIN |
+| 9 | GET | `/admin/governance/entity-registry` | Entidades declaradas en el registro de gobierno (dominio, clasificación, PII/PHI) | BAJO | 6 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 10 | POST | `/admin/governance/entity-registry` | Registrar dominio, clasificación y catalogar entidad + campos | MEDIO | 7 | SECURITY_ADMIN |
+| 11 | GET | `/admin/governance/entity-registry/{id}/fields` | Campos declarados de una entidad, con su marca PII/PHI y su enmascaramiento | BAJO | 5 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 12 | PATCH | `/admin/governance/entity-registry/{id}/retention` | Aplicar una política de retención a una entidad | MEDIO | 4 | SECURITY_ADMIN |
+| 13 | PATCH | `/admin/governance/entity-registry/{id}/write-policy` | Vincular una política de escritura a una entidad | MEDIO | 4 | SECURITY_ADMIN |
+| 14 | PATCH | `/admin/governance/field-registry/{id}` | Asignar regla de anonimización / masking a un campo | MEDIO | 3 | SECURITY_ADMIN |
+| 15 | PATCH | `/admin/governance/findings/{id}` | Actualizar un hallazgo (estado / owner) | MEDIO | 2 | SECURITY_ADMIN |
+| 16 | GET | `/admin/governance/legal-holds` | — | BAJO | 2 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DPO, AUDITOR |
+| 17 | POST | `/admin/governance/legal-holds` | Colocar un legal hold sobre un objetivo | MEDIO | 3 | SECURITY_ADMIN |
+| 18 | POST | `/admin/governance/legal-holds/{id}/release` | Levantar un legal hold ACTIVE | MEDIO | 3 | SECURITY_ADMIN |
+| 19 | GET | `/admin/governance/mutability` | — | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 20 | GET | `/admin/governance/mutability/{schema}/{table}` | — | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 21 | GET | `/admin/governance/mutability/summary` | — | BAJO | 1 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 22 | POST | `/admin/governance/operational-frameworks` | Publicar un framework operativo con sus controles | MEDIO | 3 | SECURITY_ADMIN |
+| 23 | GET | `/admin/governance/policies` | Políticas de gobierno (escritura, retención, anonimización, residencia) en una lista paginada | BAJO | 5 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 24 | GET | `/admin/governance/policies/{policyType}/{id}` | Una política: ajustes, estado y a qué tablas o columnas se aplica | BAJO | 8 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 25 | POST | `/admin/governance/remediation-actions/{id}/verify` | Verificar y cerrar una acción de remediación | MEDIO | 6 | SECURITY_ADMIN |
+| 26 | POST | `/admin/governance/residency-policies` | Definir una política de residencia de datos | MEDIO | 3 | SECURITY_ADMIN |
+| 27 | GET | `/admin/governance/retention-executions` | — | BAJO | 4 | SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD |
+| 28 | POST | `/admin/governance/retention-policies` | Definir una política de retención con base legal | MEDIO | 3 | SECURITY_ADMIN |
+| 29 | POST | `/admin/governance/tenant-residency-bindings` | Vincular un tenant a una política de residencia | MEDIO | 4 | SECURITY_ADMIN |
+| 30 | POST | `/admin/governance/workload-assessments` | Iniciar una evaluación de workload | MEDIO | 2 | SECURITY_ADMIN |
+| 31 | PUT | `/admin/governance/workload-assessments/{id}/control-results` | Registrar (UPSERT) resultados de control de una evaluación | MEDIO | 4 | SECURITY_ADMIN |
+| 32 | POST | `/admin/governance/write-policies` | Definir una política de escritura | MEDIO | 3 | SECURITY_ADMIN |
+| 33 | POST | `/admin/ops/backup-policies` | Definir una política de backup (RPO/RTO/inmutabilidad) | MEDIO | 1 | SECURITY_ADMIN |
+| 34 | POST | `/internal/governance/retention-executions/run` | Ejecutar un barrido de retención (excluye objetivos bajo legal hold) | ALTO | 38 | SECURITY_ADMIN |
+| 35 | POST | `/internal/ops/restore-test-runs` | Registrar una prueba de restauración con evidencia | MEDIO | 2 | SECURITY_ADMIN |
 
 ---
 
@@ -52,7 +63,7 @@
 
 Definir una regla de anonimización. Caso de uso UC-11-04: Definir regla de anonimización. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:66`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -64,10 +75,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:137` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -152,7 +163,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 Abrir un hallazgo sobre una evaluación. Caso de uso UC-11-13: Abrir hallazgo. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:74`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:79`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -164,11 +175,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:108` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:108` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -266,7 +277,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Crear un plan de remediación con sus acciones. Caso de uso UC-11-13: Crear plan + acciones de remediación. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:75`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:80`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -278,11 +289,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:126` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:126` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -386,7 +397,84 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. POST /admin/governance/cross-border-transfers
+## 4. GET /admin/governance/change-log
+
+- **Origen:** CONTRATO
+- **Nombre:** Cambios de gobierno de datos: quién cambió qué y cuándo
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `GovernanceReadController.changeLog` — `src/modules/system_ops/controllers/governance-read.controller.ts:99`
+
+### Qué es y para qué sirve (negocio)
+
+Cambios de gobierno de datos: quién cambió qué y cuándo. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/change-log` la atiende `GovernanceReadController.changeLog` (src/modules/system_ops/controllers/governance-read.controller.ts:99). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `GovernanceReadService.changeLog`. Lee system_ops.governance_change_log, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/controllers/governance-read.controller.ts:99` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/system_ops/controllers/governance-read.controller.ts:99` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.governance_change_log` | LEE | LEE | POR_SQL | GovernanceReadController.changeLog → GovernanceReadService.changeLog → GovernanceReadRepository.changeLog | `src/modules/system_ops/repositories/governance-read.repository.ts:303` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | GovernanceReadController.changeLog → GovernanceReadService.changeLog → GovernanceReadRepository.changeLog | `src/modules/system_ops/repositories/governance-read.repository.ts:303` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | `nextCursor` de la página anterior |
+| `targetType` | query | No | `string` | Tipo de objeto cambiado (`entity_registry`, `write_policies`…) |
+| `targetId` | query | No | `string` | Objeto cambiado |
+| `changedBy` | query | No | `string` | Actor del cambio |
+| `from` | query | No | `string` | Desde (ISO 8601, incluido). Sin rango, los últimos 30 días |
+| `to` | query | No | `string` | Hasta (ISO 8601, excluido) |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: «to» debe ser posterior a «from» |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:GovernanceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. POST /admin/governance/cross-border-transfers
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una transferencia transfronteriza (append-only)
@@ -399,7 +487,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar una transferencia transfronteriza (append-only). Caso de uso UC-11-07: Registrar transferencia transfronteriza (append-only). Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:66`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:71`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -411,10 +499,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/residency.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -493,7 +581,77 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 5. POST /admin/governance/drafts
+## 6. GET /admin/governance/domains
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `GovernanceOperationsReadController.domains` — `src/modules/system_ops/controllers/governance-operations-read.controller.ts:48`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/domains` la atiende `GovernanceOperationsReadController.domains` (src/modules/system_ops/controllers/governance-operations-read.controller.ts:48). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `GovernanceOperationsReadService.domains`. Lee system_ops.data_domains, system_ops.entity_registry.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/controllers/governance-operations-read.controller.ts:48` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.data_domains` | LEE | LEE | POR_SQL | GovernanceOperationsReadController.domains → GovernanceOperationsReadService.domains → GovernanceOperationsReadRepository.domains | `src/modules/system_ops/repositories/governance-operations-read.repository.ts:109` |
+| `system_ops.entity_registry` | LEE | LEE | POR_SQL | GovernanceOperationsReadController.domains → GovernanceOperationsReadService.domains → GovernanceOperationsReadRepository.domains | `src/modules/system_ops/repositories/governance-operations-read.repository.ts:109` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `DomainListQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:GovernanceOperationsReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. POST /admin/governance/drafts
 
 - **Origen:** CONTRATO
 - **Nombre:** Guardar un draft record genérico
@@ -506,7 +664,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Guardar un draft record genérico. Caso de uso UC-11-15: Guardar draft genérico. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:78`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:83`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -518,10 +676,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/draft.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -597,7 +755,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. POST /admin/governance/drafts/{id}/publish
+## 8. POST /admin/governance/drafts/{id}/publish
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar un draft record y materializarlo
@@ -610,7 +768,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Publicar un draft record y materializarlo. Caso de uso UC-11-15: Publicar draft y materializarlo. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:79`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:84`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -622,11 +780,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/draft.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/draft.controller.ts:50` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -698,7 +856,88 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 7. POST /admin/governance/entity-registry
+## 9. GET /admin/governance/entity-registry
+
+- **Origen:** CONTRATO
+- **Nombre:** Entidades declaradas en el registro de gobierno (dominio, clasificación, PII/PHI)
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `GovernanceReadController.entityRegistry` — `src/modules/system_ops/controllers/governance-read.controller.ts:110`
+
+### Qué es y para qué sirve (negocio)
+
+Entidades declaradas en el registro de gobierno (dominio, clasificación, PII/PHI). Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/entity-registry` la atiende `GovernanceReadController.entityRegistry` (src/modules/system_ops/controllers/governance-read.controller.ts:110). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `GovernanceReadService.entityRegistry`. Lee system_ops.data_classifications, system_ops.data_domains, system_ops.entity_registry, system_ops.field_registry, system_ops.retention_policies, system_ops.write_policies.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/controllers/governance-read.controller.ts:110` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/system_ops/controllers/governance-read.controller.ts:110` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.data_classifications` | LEE | LEE | POR_SQL | GovernanceReadController.entityRegistry → GovernanceReadService.entityRegistry → GovernanceReadRepository.entityRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:349` |
+| `system_ops.data_domains` | LEE | LEE | POR_SQL | GovernanceReadController.entityRegistry → GovernanceReadService.entityRegistry → GovernanceReadRepository.entityRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:349` |
+| `system_ops.entity_registry` | LEE | LEE | POR_SQL | GovernanceReadController.entityRegistry → GovernanceReadService.entityRegistry → GovernanceReadRepository.entityRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:349` |
+| `system_ops.field_registry` | LEE | LEE | POR_SQL | GovernanceReadController.entityRegistry → GovernanceReadService.entityRegistry → GovernanceReadRepository.entityRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:349` |
+| `system_ops.retention_policies` | LEE | LEE | POR_SQL | GovernanceReadController.entityRegistry → GovernanceReadService.entityRegistry → GovernanceReadRepository.entityRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:349` |
+| `system_ops.write_policies` | LEE | LEE | POR_SQL | GovernanceReadController.entityRegistry → GovernanceReadService.entityRegistry → GovernanceReadRepository.entityRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:349` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | `nextCursor` de la página anterior |
+| `schema` | query | No | `string` | Schema de PostgreSQL |
+| `q` | query | No | `string` | Busca en `schema.tabla`, sin mayúsculas |
+| `domain` | query | No | `string` | Código del dominio de datos |
+| `classification` | query | No | `string` | Código de la clasificación |
+| `containsPii` | query | No | `boolean` | Sólo las entidades marcadas (o no) como PII |
+| `containsPhi` | query | No | `boolean` | Sólo las entidades marcadas (o no) como PHI |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:GovernanceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 10. POST /admin/governance/entity-registry
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar dominio, clasificación y catalogar entidad + campos
@@ -711,7 +950,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar dominio, clasificación y catalogar entidad + campos. Caso de uso UC-11-01: Registrar dominio, clasificación y catalogar entidad + campos. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:56`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:61`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -723,10 +962,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:48` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -871,7 +1110,83 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 ---
 
-## 8. PATCH /admin/governance/entity-registry/{id}/retention
+## 11. GET /admin/governance/entity-registry/{id}/fields
+
+- **Origen:** CONTRATO
+- **Nombre:** Campos declarados de una entidad, con su marca PII/PHI y su enmascaramiento
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `GovernanceReadController.fields` — `src/modules/system_ops/controllers/governance-read.controller.ts:120`
+
+### Qué es y para qué sirve (negocio)
+
+Campos declarados de una entidad, con su marca PII/PHI y su enmascaramiento. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/entity-registry/{id}/fields` la atiende `GovernanceReadController.fields` (src/modules/system_ops/controllers/governance-read.controller.ts:120). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `GovernanceReadService.fieldRegistry`. Lee system_ops.anonymization_rules, system_ops.data_classifications, system_ops.entity_registry, system_ops.field_registry, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/controllers/governance-read.controller.ts:120` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/system_ops/controllers/governance-read.controller.ts:120` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.anonymization_rules` | LEE | LEE | POR_SQL | GovernanceReadController.fields → GovernanceReadService.fieldRegistry → GovernanceReadRepository.fieldRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:391` |
+| `system_ops.data_classifications` | LEE | LEE | POR_SQL | GovernanceReadController.fields → GovernanceReadService.fieldRegistry → GovernanceReadRepository.fieldRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:391` |
+| `system_ops.entity_registry` | LEE | LEE | POR_SQL | GovernanceReadController.fields → GovernanceReadService.fieldRegistry → GovernanceReadRepository.entityExists | `src/modules/system_ops/repositories/governance-read.repository.ts:371` |
+| `system_ops.field_registry` | LEE | LEE | POR_SQL | GovernanceReadController.fields → GovernanceReadService.fieldRegistry → GovernanceReadRepository.fieldRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:391` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | GovernanceReadController.fields → GovernanceReadService.fieldRegistry → GovernanceReadRepository.fieldRegistry | `src/modules/system_ops/repositories/governance-read.repository.ts:391` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | `nextCursor` de la página anterior |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Entidad del registro no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:GovernanceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 12. PATCH /admin/governance/entity-registry/{id}/retention
 
 - **Origen:** CONTRATO
 - **Nombre:** Aplicar una política de retención a una entidad
@@ -884,7 +1199,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 Aplicar una política de retención a una entidad. Caso de uso UC-11-03: Aplicar retención a una entidad (razón obligatoria). Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:60`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:65`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -896,11 +1211,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/governance-catalog.controller.ts:119` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -975,7 +1290,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 ---
 
-## 9. PATCH /admin/governance/entity-registry/{id}/write-policy
+## 13. PATCH /admin/governance/entity-registry/{id}/write-policy
 
 - **Origen:** CONTRATO
 - **Nombre:** Vincular una política de escritura a una entidad
@@ -988,7 +1303,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 Vincular una política de escritura a una entidad. Caso de uso UC-11-02: Vincular política de escritura a una entidad. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:58`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:63`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1000,11 +1315,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/governance-catalog.controller.ts:84` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1078,7 +1393,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 ---
 
-## 10. PATCH /admin/governance/field-registry/{id}
+## 14. PATCH /admin/governance/field-registry/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Asignar regla de anonimización / masking a un campo
@@ -1091,7 +1406,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 Asignar regla de anonimización / masking a un campo. Caso de uso UC-11-04: Asignar regla / masking a un campo. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1103,11 +1418,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:154` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/governance-catalog.controller.ts:154` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1182,7 +1497,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 ---
 
-## 11. PATCH /admin/governance/findings/{id}
+## 15. PATCH /admin/governance/findings/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Actualizar un hallazgo (estado / owner)
@@ -1195,7 +1510,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 Actualizar un hallazgo (estado / owner). Caso de uso UC-11-14: Actualizar hallazgo. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:77`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:82`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1207,11 +1522,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:162` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:162` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1279,7 +1594,77 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. POST /admin/governance/legal-holds
+## 16. GET /admin/governance/legal-holds
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `GovernanceOperationsReadController.legalHolds` — `src/modules/system_ops/controllers/governance-operations-read.controller.ts:60`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/legal-holds` la atiende `GovernanceOperationsReadController.legalHolds` (src/modules/system_ops/controllers/governance-operations-read.controller.ts:60). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DPO, AUDITOR. Delega en `GovernanceOperationsReadService.legalHolds`. Lee system_ops.legal_holds, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DPO, AUDITOR | `src/modules/system_ops/controllers/governance-operations-read.controller.ts:60` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.legal_holds` | LEE | LEE | POR_SQL | GovernanceOperationsReadController.legalHolds → GovernanceOperationsReadService.legalHolds → GovernanceOperationsReadRepository.legalHolds | `src/modules/system_ops/repositories/governance-operations-read.repository.ts:145` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | GovernanceOperationsReadController.legalHolds → GovernanceOperationsReadService.legalHolds → GovernanceOperationsReadRepository.legalHolds | `src/modules/system_ops/repositories/governance-operations-read.repository.ts:145` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `LegalHoldListQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:GovernanceOperationsReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 17. POST /admin/governance/legal-holds
 
 - **Origen:** CONTRATO
 - **Nombre:** Colocar un legal hold sobre un objetivo
@@ -1292,7 +1677,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Colocar un legal hold sobre un objetivo. Caso de uso UC-11-08: Colocar legal hold. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:67`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:72`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1304,10 +1689,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/legal-hold.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1383,7 +1768,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. POST /admin/governance/legal-holds/{id}/release
+## 18. POST /admin/governance/legal-holds/{id}/release
 
 - **Origen:** CONTRATO
 - **Nombre:** Levantar un legal hold ACTIVE
@@ -1396,7 +1781,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Levantar un legal hold ACTIVE. Caso de uso UC-11-08: Levantar legal hold ACTIVE. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:73`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1408,11 +1793,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/legal-hold.controller.ts:55` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/legal-hold.controller.ts:55` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1480,7 +1865,270 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. POST /admin/governance/operational-frameworks
+## 19. GET /admin/governance/mutability
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `MutabilityController.list` — `src/modules/system_ops/mutability/controllers/mutability.controller.ts:34`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/mutability` la atiende `MutabilityController.list` (src/modules/system_ops/mutability/controllers/mutability.controller.ts:34). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `MutabilityCatalogService.list`. Lee system_ops.entity_registry.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:34` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:34` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.entity_registry` | LEE | LEE | DIRECTA | MutabilityController.list → MutabilityCatalogService.list → MutabilityCatalogService.registeredKeys → MutabilityRegistryReader.registeredKeys | `src/modules/system_ops/mutability/services/mutability-registry.reader.ts:17` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `ListMutabilityQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MutabilityPageDto>` · DTO `MutabilityPageDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<MutabilityItemDto>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:189` |
+| `items[].schema` | `string` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:99` |
+| `items[].table` | `string` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:100` |
+| `items[].database` | `string` | Sí | valores: main, pay | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:101` |
+| `items[].writeMode` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof WRITE_MODES)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:102` |
+| `items[].writeModeLevel` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof EVIDENCE_LEVELS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:103` |
+| `items[].disposition` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof DISPOSITIONS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:104` |
+| `items[].dispositionLevel` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof EVIDENCE_LEVELS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:105` |
+| `items[].retention` | `MutabilityRetentionDto` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:107` |
+| `items[].retention.days` | `number` | Sí | admite null | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:90` |
+| `items[].retention.source` | `string` | Sí | admite null | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:92` |
+| `items[].retention.status` | `string` | Sí | valores: PENDIENTE_DE_CUMPLIMIENTO | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:94` |
+| `items[].legalHold` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof LEGAL_HOLD_STATES)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:108` |
+| `items[].legalHoldLevel` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof EVIDENCE_LEVELS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:109` |
+| `items[].contradictions` | `number` | Sí | — | — | Contradicciones registradas (no resueltas) | `src/modules/system_ops/mutability/dto/mutability.dto.ts:111` |
+| `items[].gaps` | `number` | Sí | — | — | Brechas: declarado sin imponer | `src/modules/system_ops/mutability/dto/mutability.dto.ts:112` |
+| `items[].registered` | `boolean` | Sí | admite null | — | ¿Está en system_ops.entity_registry? `null` si no se pudo consultar | `src/modules/system_ops/mutability/dto/mutability.dto.ts:119` |
+| `nextCursor` | `string` | Sí | admite null | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:190` |
+| `limit` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:191` |
+| `total` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:192` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:MutabilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 20. GET /admin/governance/mutability/{schema}/{table}
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `MutabilityController.detail` — `src/modules/system_ops/mutability/controllers/mutability.controller.ts:57`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/mutability/{schema}/{table}` la atiende `MutabilityController.detail` (src/modules/system_ops/mutability/controllers/mutability.controller.ts:57). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `MutabilityCatalogService.detail`. Lee system_ops.entity_registry.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:57` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:57` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.entity_registry` | LEE | LEE | DIRECTA | MutabilityController.detail → MutabilityCatalogService.detail → MutabilityCatalogService.registeredKeys → MutabilityRegistryReader.registeredKeys | `src/modules/system_ops/mutability/services/mutability-registry.reader.ts:17` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `schema` | path | Sí | `string` | — |
+| `table` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MutabilityDetailDto>` · DTO `MutabilityDetailDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `evidence` | `array<object>` | Sí | — | — | Toda la evidencia, con su fuente exacta | `src/modules/system_ops/mutability/dto/mutability.dto.ts:198` |
+| `findings` | `array<object>` | Sí | — | — | Contradicciones (no resueltas) y brechas | `src/modules/system_ops/mutability/dto/mutability.dto.ts:200` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: La tabla no está en el catálogo de mutabilidad |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:MutabilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 21. GET /admin/governance/mutability/summary
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `MutabilityController.summary` — `src/modules/system_ops/mutability/controllers/mutability.controller.ts:46`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/mutability/summary` la atiende `MutabilityController.summary` (src/modules/system_ops/mutability/controllers/mutability.controller.ts:46). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `MutabilityCatalogService.summary`. Lee system_ops.entity_registry.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:46` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:46` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.entity_registry` | LEE | LEE | DIRECTA | MutabilityController.summary → MutabilityCatalogService.summary → MutabilityCatalogService.registeredKeys → MutabilityRegistryReader.registeredKeys | `src/modules/system_ops/mutability/services/mutability-registry.reader.ts:17` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<MutabilitySummaryDto>` · DTO `MutabilitySummaryDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `totalTables` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:149` |
+| `byWriteMode` | `array<MutabilityModeCountDto>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:151` |
+| `byWriteMode[].writeMode` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof WRITE_MODES)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:129` |
+| `byWriteMode[].byEvidence` | `object` | Sí | — | — | Cuántas de ellas con cada nivel de evidencia. | `src/modules/system_ops/mutability/dto/mutability.dto.ts:132` |
+| `byEvidence` | `array<MutabilityLevelCountDto>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:153` |
+| `byEvidence[].level` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof EVIDENCE_LEVELS)[number] | `src/modules/system_ops/mutability/dto/mutability.dto.ts:136` |
+| `decided` | `MutabilityRatioDto` | Sí | — | — | Tablas con modo distinto de UNKNOWN | `src/modules/system_ops/mutability/dto/mutability.dto.ts:158` |
+| `decided.numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
+| `decided.denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `enforcedByDatabase` | `MutabilityRatioDto` | Sí | — | — | Tablas con el modo impuesto por la base de datos | `src/modules/system_ops/mutability/dto/mutability.dto.ts:163` |
+| `enforcedByDatabase.numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
+| `enforcedByDatabase.denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `withContradictions` | `MutabilityRatioDto` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:165` |
+| `withContradictions.numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
+| `withContradictions.denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `withGaps` | `MutabilityRatioDto` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:166` |
+| `withGaps.numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
+| `withGaps.denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `findingCodes` | `array<MutabilityFindingCodeDto>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:168` |
+| `findingCodes[].code` | `string` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:140` |
+| `findingCodes[].kind` | `string` | Sí | valores: CONTRADICTION, GAP | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:141` |
+| `findingCodes[].findings` | `number` | Sí | — | — | Hallazgos con ese código | `src/modules/system_ops/mutability/dto/mutability.dto.ts:143` |
+| `findingCodes[].tables` | `number` | Sí | — | — | Tablas afectadas | `src/modules/system_ops/mutability/dto/mutability.dto.ts:144` |
+| `disposition` | `array<object>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:170` |
+| `legalHold` | `array<object>` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:172` |
+| `withDeclaredPeriod` | `number` | Sí | — | — | Tablas con plazo declarado por una fuente | `src/modules/system_ops/mutability/dto/mutability.dto.ts:174` |
+| `pendingCompliance` | `number` | Sí | — | — | Tablas con retención aún PENDIENTE_DE_CUMPLIMIENTO | `src/modules/system_ops/mutability/dto/mutability.dto.ts:178` |
+| `registered` | `MutabilityRatioDto` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:180` |
+| `registered.numerator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:124` |
+| `registered.denominator` | `number` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:125` |
+| `sources` | `object` | Sí | — | — | — | `src/modules/system_ops/mutability/dto/mutability.dto.ts:182` |
+| `generatedFrom` | `object` | Sí | — | — | Desde qué fuentes se generó el catálogo | `src/modules/system_ops/mutability/dto/mutability.dto.ts:184` |
+| `generatedFrom.modelRoot` | `string` | Sí | — | — | — | sin fuente |
+| `generatedFrom.inventoryRoot` | `string` | Sí | — | — | — | sin fuente |
+| `generatedFrom.note` | `string` | Sí | — | — | — | sin fuente |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:MutabilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 22. POST /admin/governance/operational-frameworks
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar un framework operativo con sus controles
@@ -1493,7 +2141,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Publicar un framework operativo con sus controles. Caso de uso UC-11-11: Publicar framework con controles (jerárquicos). Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:71`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:76`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1505,10 +2153,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:52` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1611,7 +2259,164 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. POST /admin/governance/remediation-actions/{id}/verify
+## 23. GET /admin/governance/policies
+
+- **Origen:** CONTRATO
+- **Nombre:** Políticas de gobierno (escritura, retención, anonimización, residencia) en una lista paginada
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `GovernanceReadController.policies` — `src/modules/system_ops/controllers/governance-read.controller.ts:78`
+
+### Qué es y para qué sirve (negocio)
+
+Políticas de gobierno (escritura, retención, anonimización, residencia) en una lista paginada. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/policies` la atiende `GovernanceReadController.policies` (src/modules/system_ops/controllers/governance-read.controller.ts:78). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `GovernanceReadService.policies`. Lee system_ops.anonymization_rules, system_ops.data_residency_policies, system_ops.retention_policies, system_ops.write_policies, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/controllers/governance-read.controller.ts:78` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/system_ops/controllers/governance-read.controller.ts:78` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.anonymization_rules` | LEE | LEE | POR_SQL | GovernanceReadController.policies → GovernanceReadService.policies → GovernanceReadRepository.policies → GovernanceReadRepository.policiesCte | `src/modules/system_ops/repositories/governance-read.repository.ts:132` |
+| `system_ops.data_residency_policies` | LEE | LEE | POR_SQL | GovernanceReadController.policies → GovernanceReadService.policies → GovernanceReadRepository.policies → GovernanceReadRepository.policiesCte | `src/modules/system_ops/repositories/governance-read.repository.ts:132` |
+| `system_ops.retention_policies` | LEE | LEE | POR_SQL | GovernanceReadController.policies → GovernanceReadService.policies → GovernanceReadRepository.policies → GovernanceReadRepository.policiesCte | `src/modules/system_ops/repositories/governance-read.repository.ts:132` |
+| `system_ops.write_policies` | LEE | LEE | POR_SQL | GovernanceReadController.policies → GovernanceReadService.policies → GovernanceReadRepository.policies → GovernanceReadRepository.policiesCte | `src/modules/system_ops/repositories/governance-read.repository.ts:132` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | GovernanceReadController.policies → GovernanceReadService.policies → GovernanceReadRepository.policies → GovernanceReadRepository.policiesCte | `src/modules/system_ops/repositories/governance-read.repository.ts:132` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `limit` | query | No | `number` | — |
+| `cursor` | query | No | `string` | `nextCursor` de la página anterior |
+| `type` | query | No | `string` | — |
+| `state` | query | No | `string` | Código del estado (concepto), p. ej. `ACTIVE` |
+| `q` | query | No | `string` | Busca en código y nombre, sin mayúsculas |
+| `sort` | query | No | `string` | — |
+| `order` | query | No | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:GovernanceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 24. GET /admin/governance/policies/{policyType}/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Una política: ajustes, estado y a qué tablas o columnas se aplica
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `GovernanceReadController.policy` — `src/modules/system_ops/controllers/governance-read.controller.ts:88`
+
+### Qué es y para qué sirve (negocio)
+
+Una política: ajustes, estado y a qué tablas o columnas se aplica. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/policies/{policyType}/{id}` la atiende `GovernanceReadController.policy` (src/modules/system_ops/controllers/governance-read.controller.ts:88). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `GovernanceReadService.policy`. Lee system_ops.anonymization_rules, system_ops.data_classifications, system_ops.data_residency_policies, system_ops.entity_registry, system_ops.field_registry, system_ops.retention_policies, system_ops.write_policies, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/controllers/governance-read.controller.ts:88` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/system_ops/controllers/governance-read.controller.ts:88` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.anonymization_rules` | LEE | LEE | POR_SQL | GovernanceReadController.policy → GovernanceReadService.policy → GovernanceReadRepository.policyDetail | `src/modules/system_ops/repositories/governance-read.repository.ts:230` |
+| `system_ops.data_classifications` | LEE | LEE | POR_SQL | GovernanceReadController.policy → GovernanceReadService.policy → GovernanceReadRepository.policyDetail | `src/modules/system_ops/repositories/governance-read.repository.ts:237` |
+| `system_ops.data_residency_policies` | LEE | LEE | POR_SQL | GovernanceReadController.policy → GovernanceReadService.policy → GovernanceReadRepository.policyDetail | `src/modules/system_ops/repositories/governance-read.repository.ts:237` |
+| `system_ops.entity_registry` | LEE | LEE | POR_SQL | GovernanceReadController.policy → GovernanceReadService.policy → GovernanceReadRepository.appliedTo | `src/modules/system_ops/repositories/governance-read.repository.ts:262` |
+| `system_ops.field_registry` | LEE | LEE | POR_SQL | GovernanceReadController.policy → GovernanceReadService.policy → GovernanceReadRepository.appliedTo | `src/modules/system_ops/repositories/governance-read.repository.ts:266` |
+| `system_ops.retention_policies` | LEE | LEE | POR_SQL | GovernanceReadController.policy → GovernanceReadService.policy → GovernanceReadRepository.policyDetail | `src/modules/system_ops/repositories/governance-read.repository.ts:221` |
+| `system_ops.write_policies` | LEE | LEE | POR_SQL | GovernanceReadController.policy → GovernanceReadService.policy → GovernanceReadRepository.policyDetail | `src/modules/system_ops/repositories/governance-read.repository.ts:211` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | GovernanceReadController.policy → GovernanceReadService.policy → GovernanceReadRepository.policyDetail | `src/modules/system_ops/repositories/governance-read.repository.ts:211` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `policyType` | path | Sí | `string` | — |
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Política no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:GovernanceReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. POST /admin/governance/remediation-actions/{id}/verify
 
 - **Origen:** CONTRATO
 - **Nombre:** Verificar y cerrar una acción de remediación
@@ -1624,7 +2429,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Verificar y cerrar una acción de remediación. Caso de uso UC-11-14: Verificar acción (cierra hallazgo/plan si procede). Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:76`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:81`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1636,11 +2441,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:144` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1713,7 +2518,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. POST /admin/governance/residency-policies
+## 26. POST /admin/governance/residency-policies
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir una política de residencia de datos
@@ -1726,7 +2531,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir una política de residencia de datos. Caso de uso UC-11-06: Definir política de residencia. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:64`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1738,10 +2543,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/residency.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1825,7 +2630,80 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 17. POST /admin/governance/retention-policies
+## 27. GET /admin/governance/retention-executions
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Operaciones de Plataforma
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `GovernanceOperationsReadController.retentionExecutions` — `src/modules/system_ops/controllers/governance-operations-read.controller.ts:73`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+
+### Cómo se atiende (sistema)
+
+`GET /admin/governance/retention-executions` la atiende `GovernanceOperationsReadController.retentionExecutions` (src/modules/system_ops/controllers/governance-operations-read.controller.ts:73). Exige sesión con alguno de los roles SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD. Delega en `GovernanceOperationsReadService.retentionExecutions`. Lee system_ops.entity_registry, system_ops.retention_executions, system_ops.retention_policies, terminology.catalog_concepts.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PLATFORM_ADMIN, GOVERNANCE_ADMIN, DATA_GOVERNANCE_ADMIN, DATA_PLATFORM_ADMIN, DPO, AUDITOR, DATA_STEWARD | `src/modules/system_ops/controllers/governance-operations-read.controller.ts:73` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `system_ops.entity_registry` | LEE | LEE | POR_SQL | GovernanceOperationsReadController.retentionExecutions → GovernanceOperationsReadService.retentionExecutions → GovernanceOperationsReadRepository.retentionExecutions | `src/modules/system_ops/repositories/governance-operations-read.repository.ts:189` |
+| `system_ops.retention_executions` | LEE | LEE | POR_SQL | GovernanceOperationsReadController.retentionExecutions → GovernanceOperationsReadService.retentionExecutions → GovernanceOperationsReadRepository.retentionExecutions | `src/modules/system_ops/repositories/governance-operations-read.repository.ts:189` |
+| `system_ops.retention_policies` | LEE | LEE | POR_SQL | GovernanceOperationsReadController.retentionExecutions → GovernanceOperationsReadService.retentionExecutions → GovernanceOperationsReadRepository.retentionExecutions | `src/modules/system_ops/repositories/governance-operations-read.repository.ts:189` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | GovernanceOperationsReadController.retentionExecutions → GovernanceOperationsReadService.retentionExecutions → GovernanceOperationsReadRepository.retentionExecutions | `src/modules/system_ops/repositories/governance-operations-read.repository.ts:189` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `RetentionExecutionListQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | BadRequestException: «to» debe ser posterior a «from» |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo `system_ops` (11) — Data Governance & System Operations — etapa `ctrl:GovernanceOperationsReadController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 28. POST /admin/governance/retention-policies
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir una política de retención con base legal
@@ -1838,7 +2716,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir una política de retención con base legal. Caso de uso UC-11-03: Definir política de retención (base legal). Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:59`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:64`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1850,10 +2728,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -1929,7 +2807,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 ---
 
-## 18. POST /admin/governance/tenant-residency-bindings
+## 29. POST /admin/governance/tenant-residency-bindings
 
 - **Origen:** CONTRATO
 - **Nombre:** Vincular un tenant a una política de residencia
@@ -1942,7 +2820,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 Vincular un tenant a una política de residencia. Caso de uso UC-11-06: Vincular tenant a política de residencia. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:65`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:70`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -1954,10 +2832,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/residency.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2032,7 +2910,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 19. POST /admin/governance/workload-assessments
+## 30. POST /admin/governance/workload-assessments
 
 - **Origen:** CONTRATO
 - **Nombre:** Iniciar una evaluación de workload
@@ -2045,7 +2923,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Iniciar una evaluación de workload. Caso de uso UC-11-12: Iniciar evaluación de workload. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:72`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:77`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2057,10 +2935,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:71` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2141,7 +3019,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 20. PUT /admin/governance/workload-assessments/{id}/control-results
+## 31. PUT /admin/governance/workload-assessments/{id}/control-results
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar (UPSERT) resultados de control de una evaluación
@@ -2154,7 +3032,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar (UPSERT) resultados de control de una evaluación. Caso de uso UC-11-12: Registrar (UPSERT) resultados de control. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:73`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:78`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2166,11 +3044,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/assessment.controller.ts:88` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/system_ops/controllers/assessment.controller.ts:88` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2258,7 +3136,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /admin/governance/write-policies
+## 32. POST /admin/governance/write-policies
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir una política de escritura
@@ -2271,7 +3149,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Definir una política de escritura. Caso de uso UC-11-02: Definir política de escritura. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:57`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:62`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2283,10 +3161,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/governance-catalog.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2371,7 +3249,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 ---
 
-## 22. POST /admin/ops/backup-policies
+## 33. POST /admin/ops/backup-policies
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir una política de backup (RPO/RTO/inmutabilidad)
@@ -2384,7 +3262,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 Definir una política de backup (RPO/RTO/inmutabilidad). Caso de uso UC-11-09: Definir política de backup (RPO/RTO/inmutabilidad). Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:69`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:74`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2396,10 +3274,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/backup.controller.ts:25` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2482,7 +3360,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 ---
 
-## 23. POST /internal/governance/retention-executions/run
+## 34. POST /internal/governance/retention-executions/run
 
 - **Origen:** CONTRATO
 - **Nombre:** Ejecutar un barrido de retención (excluye objetivos bajo legal hold)
@@ -2495,7 +3373,7 @@ El árbol de decisión completo está en [flujos](../flujos/system_ops.md).
 
 Ejecutar un barrido de retención (excluye objetivos bajo legal hold). Caso de uso UC-11-05: Ejecutar barrido de retención (excluye objetivos bajo legal hold). Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:63`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:68`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2507,10 +3385,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/retention-execution.controller.ts:28` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 
@@ -2626,7 +3504,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. POST /internal/ops/restore-test-runs
+## 35. POST /internal/ops/restore-test-runs
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una prueba de restauración con evidencia
@@ -2639,7 +3517,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar una prueba de restauración con evidencia. Caso de uso UC-11-10: Registrar prueba de restauración con evidencia. Dentro del módulo (descripción del modelo, en inglés): «A control tower over the data: a registry of every table with its sensitivity, retention rules and allowed write operations, plus anonymization rules and a generic draft store.» Dominio: Operaciones de Plataforma.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:70`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_ops/README.md:75`) · MODELO (`Mantra Core Health Context/modules/diagram_11_system_ops.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:32`)
 
 ### Cómo se atiende (sistema)
 
@@ -2651,10 +3529,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/system_
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/system_ops/controllers/restore-test.controller.ts:28` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:282` |
-| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:180` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:296` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:201` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:149` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:157` |
 
 ### Tablas que afecta
 

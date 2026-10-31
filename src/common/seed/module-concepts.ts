@@ -2,6 +2,9 @@ import type { ConceptSeed } from './concept-seed';
 import { DIRECTORY_CONCEPT_SEEDS } from '../../modules/directory/directory.concepts';
 import { PROFILES_CONCEPT_SEEDS } from '../../modules/profiles/profiles.concepts';
 import { SURVEYS_CONCEPT_SEEDS } from '../../modules/surveys/surveys.concepts';
+import { AUTHZ_GOVERNANCE_CONCEPT_SEEDS } from '../../modules/authz/authz-governance.concepts';
+import { GOVERNANCE_ADMIN_CONCEPT_SEEDS } from '../../modules/governance_admin/governance_admin.constants';
+import { RUNTIME_PIECES_CONCEPT_SEEDS } from '../../modules/platform_ops/runtime_pieces/runtime-pieces.concepts';
 import { AUTHZ_CONCEPT_SEEDS } from '../../modules/authz/authz.concepts';
 import { CONSENT_CONCEPT_SEEDS } from '../../modules/consent/consent.concepts';
 import { FORMS_CONCEPT_SEEDS } from '../../modules/forms/forms.concepts';
@@ -49,6 +52,9 @@ export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...DIRECTORY_CONCEPT_SEEDS,
   ...PROFILES_CONCEPT_SEEDS,
   ...AUTHZ_CONCEPT_SEEDS,
+  ...AUTHZ_GOVERNANCE_CONCEPT_SEEDS,
+  ...GOVERNANCE_ADMIN_CONCEPT_SEEDS,
+  ...RUNTIME_PIECES_CONCEPT_SEEDS,
   ...CONSENT_CONCEPT_SEEDS,
   ...FORMS_CONCEPT_SEEDS,
   ...CLINICAL_CONCEPT_SEEDS,

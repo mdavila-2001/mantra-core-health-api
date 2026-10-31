@@ -20,3 +20,4 @@ export * from './authz-responses.dto';
 export * from './authz-me.dto';
 export * from './authz-admin.dto';
 export * from './authz-governance.dto';
+export * from './authz-governance-ext.dto';

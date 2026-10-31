@@ -2,7 +2,7 @@
 
 # Catálogo del schema `clinical_ext`
 
-- **Tablas:** 13 · **Columnas:** 201 (48 con descripción: 23.9 %) · **Índices:** 101
+- **Tablas:** 14 · **Columnas:** 249 (86 con descripción: 34.5 %) · **Índices:** 112
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,9 +10,10 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [care_gaps](#care_gaps) | Identifica brechas entre la atención esperada y la documentada para apoyar seguimiento preventivo o de continuidad. | 14 | 7 | 6 | COINCIDE |
+| [care_gaps](#care_gaps) | Identifica brechas entre la atención esperada y la documentada para apoyar seguimiento preventivo o de continuidad. | 14 | 8 | 6 | COINCIDE |
 | [care_team_members](#care_team_members) | Relaciona profesionales y otros participantes con equipos de cuidado para documentar composición y vigencia del equipo. | 14 | 7 | 3 | COINCIDE |
 | [care_teams](#care_teams) | Representa equipos de atención responsables de coordinar el cuidado de pacientes a través de encuentros y servicios. | 14 | 9 | 3 | COINCIDE |
+| [cds_rule_versions](#cds_rule_versions) | sin propósito | 10 | 4 | 0 | SIN_ENTIDAD |
 | [cds_rules](#cds_rules) | Define reglas de soporte a decisiones clínicas que pueden evaluar datos del paciente y presentar recomendaciones o alertas. | 16 | 8 | 7 | COINCIDE |
 | [clinical_alerts](#clinical_alerts) | Mantiene alertas clínicas asociadas a pacientes o atención para hacer visibles condiciones que requieren consideración del equipo. | 20 | 11 | 3 | COINCIDE |
 | [drug_interactions](#drug_interactions) | Cataloga interacciones entre medicamentos para apoyar controles de seguridad farmacológica durante la prescripción. | 14 | 6 | 4 | COINCIDE |
@@ -21,14 +22,48 @@
 | [order_sets](#order_sets) | Define conjuntos reutilizables de órdenes clínicas para apoyar flujos frecuentes de atención con componentes coordinados. | 14 | 7 | 3 | COINCIDE |
 | [prescription_favorites](#prescription_favorites) | Guarda selecciones frecuentes de prescripción para facilitar la captura de órdenes recurrentes por profesionales autorizados. | 16 | 8 | 5 | COINCIDE |
 | [reference_ranges](#reference_ranges) | Conserva rangos de referencia clínicos para contextualizar la interpretación de mediciones y resultados. | 18 | 6 | 0 | COINCIDE |
-| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 19 | 13 | 15 | DIVERGE |
+| [referrals](#referrals) | Registra derivaciones de pacientes entre profesionales o servicios para apoyar continuidad de atención. | 57 | 19 | 19 | COINCIDE |
 | [virtual_encounters](#virtual_encounters) | Representa encuentros clínicos realizados por canales virtuales y conserva su contexto dentro de la atención del paciente. | 14 | 6 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 3 — 2 tablas
+### Familia 1 de 3 — 3 tablas
+
+```mermaid
+erDiagram
+  clinical_ext_cds_rule_versions["clinical_ext.cds_rule_versions"] {
+    uuid id PK
+    uuid cds_rule_id FK
+    uuid severity_concept_id FK
+    uuid approved_by_user_id FK
+    uuid created_by_user_id FK
+  }
+  clinical_ext_cds_rules["clinical_ext.cds_rules"] {
+    uuid id PK
+    uuid tenant_id FK
+    uuid rule_type_concept_id FK
+    uuid severity_concept_id FK
+    uuid status_concept_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  clinical_ext_clinical_alerts["clinical_ext.clinical_alerts"] {
+    uuid id PK
+    uuid patient_profile_id FK
+    uuid encounter_id FK
+    uuid alert_type_concept_id FK
+    uuid severity_concept_id FK
+    uuid trigger_concept_id FK
+    uuid rule_id FK
+    uuid status_concept_id FK
+  }
+  clinical_ext_cds_rule_versions }o--|| clinical_ext_cds_rules : "cds_rule_id"
+  clinical_ext_clinical_alerts }o--o| clinical_ext_cds_rules : "rule_id"
+```
+
+### Familia 2 de 3 — 2 tablas
 
 ```mermaid
 erDiagram
@@ -53,32 +88,6 @@ erDiagram
     uuid updated_by_user_id FK
   }
   clinical_ext_care_team_members }o--|| clinical_ext_care_teams : "care_team_id"
-```
-
-### Familia 2 de 3 — 2 tablas
-
-```mermaid
-erDiagram
-  clinical_ext_cds_rules["clinical_ext.cds_rules"] {
-    uuid id PK
-    uuid tenant_id FK
-    uuid rule_type_concept_id FK
-    uuid severity_concept_id FK
-    uuid status_concept_id FK
-    uuid created_by_user_id FK
-    uuid updated_by_user_id FK
-  }
-  clinical_ext_clinical_alerts["clinical_ext.clinical_alerts"] {
-    uuid id PK
-    uuid patient_profile_id FK
-    uuid encounter_id FK
-    uuid alert_type_concept_id FK
-    uuid severity_concept_id FK
-    uuid trigger_concept_id FK
-    uuid rule_id FK
-    uuid status_concept_id FK
-  }
-  clinical_ext_clinical_alerts }o--o| clinical_ext_cds_rules : "rule_id"
 ```
 
 ### Familia 3 de 3 — 2 tablas
@@ -121,7 +130,7 @@ Identifica brechas entre la atención esperada y la documentada para apoyar segu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml: care_gaps`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` · **DDL:** `SQL/18_clinical_ext/02_tables.sql`
 - **Entidad del ORM:** `CareGaps` — `src/modules/clinical_ext/entities/care_gaps.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 0 entrantes · 6 operaciones
+- **Resumen:** 14 columnas · 8 índices · 6 FK salientes · 0 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -164,6 +173,13 @@ Identifica brechas entre la atención esperada y la documentada para apoyar segu
 | `ix_care_gaps_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_care_gaps_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_gaps_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_care_gaps_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_gaps_patient_profile_id_updated_at` | no | patient_profile_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
+| `uq_care_gaps_open_logical_key` | sí | patient_profile_id, gap_type_concept_id, (COALESCE(measure_concept_id, '00000000-0000-0000-0000-000000000000'::uuid)) donde WHERE closed_at IS NULL | Garantiza que no se repita la combinación (patient_profile_id, gap_type_concept_id) _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE closed_at IS NULL _(ESTRUCTURAL)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_care_gaps_open_logical_key` | UNIQUE INDEX | UNIQUE INDEX ("patient_profile_id", "gap_type_concept_id", COALESCE(measure_concept_id, '00000000-0000-0000-0000-000000000000'::uuid)) WHERE closed_at IS NULL |
 
 #### Operaciones que la tocan
 
@@ -346,6 +362,75 @@ Representa equipos de atención responsables de coordinar el cuidado de paciente
 
 ---
 
+### cds_rule_versions
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` · **DDL:** `SQL/18_clinical_ext/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 10 columnas · 4 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `cds_rule_id` | `uuid` | Clave foránea → clinical_ext.cds_rules.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 3 | `version_number` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `logic_json` | `jsonb` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `message_template` | `text` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `severity_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `approved_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 8 | `approved_at` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 9 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | cds_rule_id | clinical_ext.cds_rules (id) | fk_cds_rule_versions_cds_rule_id |
+| hacia | severity_concept_id | terminology.catalog_concepts (id) | fk_cds_rule_versions_severity_concept_id |
+| hacia | approved_by_user_id | iam.users (id) | fk_cds_rule_versions_approved_by_user_id |
+| hacia | created_by_user_id | iam.users (id) | fk_cds_rule_versions_created_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `uq_cds_rule_versions_rule_version` | sí | cds_rule_id, version_number | Garantiza que no se repita la combinación (cds_rule_id, version_number) _(DOCUMENTO)_; Soporta la clave foránea fk_cds_rule_versions_cds_rule_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cds_rule_versions_severity_concept_id` | no | severity_concept_id | Soporta la clave foránea fk_cds_rule_versions_severity_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cds_rule_versions_approved_by_user_id` | no | approved_by_user_id | Soporta la clave foránea fk_cds_rule_versions_approved_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_cds_rule_versions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_cds_rule_versions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_cds_rule_versions_rule_version` | UNIQUE INDEX | UNIQUE INDEX ("cds_rule_id", "version_number") |
+| `ck_cds_rule_versions_number` | CHECK | CHECK ("version_number" >= 1) |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### cds_rules
 
 #### Vista general
@@ -355,7 +440,7 @@ Define reglas de soporte a decisiones clínicas que pueden evaluar datos del pac
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml: cds_rules`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` · **DDL:** `SQL/18_clinical_ext/02_tables.sql`
 - **Entidad del ORM:** `CdsRules` — `src/modules/clinical_ext/entities/cds_rules.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 2 entrantes · 7 operaciones
+- **Resumen:** 16 columnas · 8 índices · 6 FK salientes · 3 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -389,6 +474,7 @@ Define reglas de soporte a decisiones clínicas que pueden evaluar datos del pac
 | hacia | created_by_user_id | iam.users (id) | fk_cds_rules_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_cds_rules_updated_by_user_id |
 | desde | id | clinical_ext.clinical_alerts (rule_id) | fk_clinical_alerts_rule_id |
+| desde | id | clinical_ext.cds_rule_versions (cds_rule_id) | fk_cds_rule_versions_cds_rule_id |
 | desde | id | audit.cds_rules_history (cds_rule_id) | fk_cds_rules_history_cds_rule_id |
 
 #### Índices
@@ -995,7 +1081,7 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml: referrals`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` · **DDL:** `SQL/18_clinical_ext/02_tables.sql`
 - **Entidad del ORM:** `Referrals` — `src/modules/clinical_ext/entities/referrals.entity.ts`
-- **Resumen:** 19 columnas · 13 índices · 12 FK salientes · 1 entrantes · 15 operaciones
+- **Resumen:** 57 columnas · 19 índices · 17 FK salientes · 1 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -1013,13 +1099,51 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 | 10 | `reason_text` | `text` | Opcional | _sin dato_ | coincide |
 | 11 | `priority_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 12 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 13 | `valid_until` | `date` | Opcional | _sin dato_ | coincide |
-| 14 | `responded_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
-| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:225`)_ | coincide |
-| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:231`)_ | coincide |
-| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:249`)_ | coincide |
+| 13 | `referral_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Tipo de derivación (tratamiento, consulta, estudio, procedimiento, segunda opinión). Concepto `CEXT.REFERRAL_TYPE_*`. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:55`)_ | coincide |
+| 14 | `target_service_catalog_id` | `uuid` | Clave foránea → billing.service_catalog.id; Opcional | Servicio puntual del destino al que se deriva. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:65`)_ | coincide |
+| 15 | `valid_until` | `date` | Opcional | _sin dato_ | coincide |
+| 16 | `responded_at` | `timestamptz` | Opcional | _sin dato_ | coincide |
+| 17 | `target_branch_id` | `uuid` | Clave foránea → directory.branches.id; Opcional | Sede u organización médica destino (FK → directory.branches). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:121`)_ | coincide |
+| 18 | `target_external_name` | `varchar(200)` | Opcional | Doctor u organización destino fuera de la plataforma. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:127`)_ | coincide |
+| 19 | `target_external_contact` | `varchar(200)` | Opcional | Contacto del destino externo. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:137`)_ | coincide |
+| 20 | `requested_service_text` | `varchar(500)` | Opcional | Servicio específico pedido. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:147`)_ | coincide |
+| 21 | `requested_service_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | Servicio codificado (FK → terminology.catalog_concepts). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:157`)_ | coincide |
+| 22 | `diagnosis_text` | `text` | Opcional | Diagnóstico presuntivo o definitivo. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:167`)_ | coincide |
+| 23 | `clinical_summary` | `text` | Opcional | Resumen clínico. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:173`)_ | coincide |
+| 24 | `treatment_given_text` | `text` | Opcional | Tratamiento realizado antes de derivar. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:183`)_ | coincide |
+| 25 | `informed_consent_id` | `uuid` | Clave foránea → consent.treatment_informed_consents.id; Opcional | Consentimiento informado asociado (FK → consent.treatment_informed_consents). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:193`)_ | coincide |
+| 26 | `reject_reason` | `text` | Opcional | Motivo del rechazo del destino. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:199`)_ | coincide |
+| 27 | `counter_referral_text` | `text` | Opcional | Contrarreferencia: lo que el destino devuelve. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:205`)_ | coincide |
+| 28 | `counter_referral_at` | `timestamptz` | Opcional | Cuándo se registró la contrarreferencia. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:215`)_ | coincide |
+| 29 | `transfer_required` | `boolean` | Opcional | ¿El paciente se traslada físicamente? (v4274) _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:225`)_ | coincide |
+| 30 | `transport_mode` | `varchar(24)` | Opcional | Medio de transporte (CHECK ck_referrals_transport_mode). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:235`)_ | coincide |
+| 31 | `transport_detail` | `varchar(200)` | Opcional | Placa o identificación de la unidad, o el detalle de OTHER. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:245`)_ | coincide |
+| 32 | `companion_name` | `varchar(200)` | Opcional | Familiar o acompañante. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:255`)_ | coincide |
+| 33 | `companion_relationship` | `varchar(80)` | Opcional | Parentesco del acompañante. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:265`)_ | coincide |
+| 34 | `companion_phone` | `varchar(40)` | Opcional | Teléfono del acompañante. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:275`)_ | coincide |
+| 35 | `escort_professional_name` | `varchar(200)` | Opcional | Personal de salud que acompaña. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:285`)_ | coincide |
+| 36 | `escort_professional_role` | `varchar(80)` | Opcional | Rol del personal de salud que acompaña. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:295`)_ | coincide |
+| 37 | `departure_condition` | `varchar(16)` | Opcional | Estado del paciente al salir (STABLE, UNSTABLE, CRITICAL). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:305`)_ | coincide |
+| 38 | `vitals_recorded_at` | `timestamptz` | Opcional | Momento de la toma de signos vitales. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:315`)_ | coincide |
+| 39 | `vital_systolic_bp` | `smallint` | Opcional | Presión sistólica (mmHg), 40–300. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:325`)_ | coincide |
+| 40 | `vital_diastolic_bp` | `smallint` | Opcional | Presión diastólica (mmHg), 20–200, menor que la sistólica. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:335`)_ | coincide |
+| 41 | `vital_heart_rate` | `smallint` | Opcional | Frecuencia cardiaca (lpm), 20–300. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:345`)_ | coincide |
+| 42 | `vital_respiratory_rate` | `smallint` | Opcional | Frecuencia respiratoria (rpm), 4–80. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:355`)_ | coincide |
+| 43 | `vital_temperature_c` | `numeric(4,1)` | Opcional | Temperatura (°C), 30.0–45.0. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:365`)_ | coincide |
+| 44 | `vital_oxygen_saturation` | `smallint` | Opcional | Saturación de oxígeno (%), 50–100. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:375`)_ | coincide |
+| 45 | `vital_glasgow` | `smallint` | Opcional | Escala de Glasgow, 3–15. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:385`)_ | coincide |
+| 46 | `receiver_contacted` | `boolean` | Opcional | Se avisó al receptor antes de salir. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:395`)_ | coincide |
+| 47 | `receiver_contact_name` | `varchar(200)` | Opcional | Quién recibió el aviso. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:405`)_ | coincide |
+| 48 | `receiver_contacted_at` | `timestamptz` | Opcional | Cuándo se avisó al receptor. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:415`)_ | coincide |
+| 49 | `departed_at` | `timestamptz` | Opcional | Salida del paciente. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:425`)_ | coincide |
+| 50 | `arrived_at` | `timestamptz` | Opcional | Llegada del paciente (la registra el destino). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:435`)_ | coincide |
+| 51 | `arrival_condition` | `varchar(16)` | Opcional | Estado del paciente al llegar (STABLE, UNSTABLE, CRITICAL, DECEASED). _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:445`)_ | coincide |
+| 52 | `arrival_notes` | `text` | Opcional | Observaciones de la llegada. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:455`)_ | coincide |
+| 53 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:465`)_ | coincide |
+| 54 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/clinical_ext/entities/referrals.entity.ts:471`)_ | coincide |
+| 55 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 56 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 57 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/clinical_ext/entities/referrals.entity.ts:489`)_ | coincide |
 
 #### Relaciones
 
@@ -1035,6 +1159,11 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 | hacia | reason_concept_id | terminology.catalog_concepts (id) | fk_referrals_reason_concept_id |
 | hacia | priority_concept_id | terminology.catalog_concepts (id) | fk_referrals_priority_concept_id |
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_referrals_status_concept_id |
+| hacia | target_branch_id | directory.branches (id) | fk_referrals_target_branch_id |
+| hacia | requested_service_concept_id | terminology.catalog_concepts (id) | fk_referrals_requested_service_concept_id |
+| hacia | informed_consent_id | consent.treatment_informed_consents (id) | fk_referrals_informed_consent_id |
+| hacia | referral_type_concept_id | terminology.catalog_concepts (id) | fk_referrals_referral_type_concept_id |
+| hacia | target_service_catalog_id | billing.service_catalog (id) | fk_referrals_target_service_catalog_id |
 | hacia | created_by_user_id | iam.users (id) | fk_referrals_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_referrals_updated_by_user_id |
 | desde | id | audit.referrals_history (referral_id) | fk_referrals_history_referral_id |
@@ -1053,24 +1182,52 @@ Registra derivaciones de pacientes entre profesionales o servicios para apoyar c
 | `ix_referrals_reason_concept_id` | no | reason_concept_id | Soporta la clave foránea fk_referrals_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_priority_concept_id` | no | priority_concept_id | Soporta la clave foránea fk_referrals_priority_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_referrals_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_referrals_referral_type_concept_id` | no | referral_type_concept_id | Soporta la clave foránea fk_referrals_referral_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_referrals_target_service_catalog_id` | no | target_service_catalog_id | Soporta la clave foránea fk_referrals_target_service_catalog_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_referrals_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_referrals_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_referrals_patient_profile_id_updated_at` | no | patient_profile_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
+| `ix_referrals_target_branch` | no | target_branch_id | Soporta la clave foránea fk_referrals_target_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_referrals_requested_service_concept_id` | no | requested_service_concept_id | Soporta la clave foránea fk_referrals_requested_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_referrals_informed_consent_id` | no | informed_consent_id | Soporta la clave foránea fk_referrals_informed_consent_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «informed_consent_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_referrals_source_encounter_target_specialty` | sí | source_encounter_id, target_profile_id, specialty_concept_id donde WHERE source_encounter_id IS NOT NULL AND target_profile_id IS NOT NULL AND specialty_concept_id IS NOT NULL | Garantiza que no se repita la combinación (source_encounter_id, target_profile_id, specialty_concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_referrals_source_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE source_encounter_id IS NOT NULL AND target_profile_id IS NOT NULL AND specialty_concept_id IS NOT NULL _(ESTRUCTURAL)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_referrals_source_encounter_target_specialty` | UNIQUE INDEX | UNIQUE INDEX ("source_encounter_id", "target_profile_id", "specialty_concept_id") WHERE source_encounter_id IS NOT NULL AND target_profile_id IS NOT NULL AND specialty_concept_id IS NOT NULL |
+| `ck_referrals_transport_mode` | CHECK | CHECK ("transport_mode" IN ('AMBULANCE_BASIC','AMBULANCE_ADVANCED','AIR_AMBULANCE','RIVER','PRIVATE_VEHICLE','PUBLIC_TRANSPORT','ON_FOOT','OTHER')) |
+| `ck_referrals_departure_condition` | CHECK | CHECK ("departure_condition" IN ('STABLE','UNSTABLE','CRITICAL')) |
+| `ck_referrals_arrival_condition` | CHECK | CHECK ("arrival_condition" IN ('STABLE','UNSTABLE','CRITICAL','DECEASED')) |
+| `ck_referrals_vital_systolic_bp_range` | CHECK | CHECK ("vital_systolic_bp" BETWEEN 40 AND 300) |
+| `ck_referrals_vital_diastolic_bp_range` | CHECK | CHECK ("vital_diastolic_bp" BETWEEN 20 AND 200) |
+| `ck_referrals_vital_heart_rate_range` | CHECK | CHECK ("vital_heart_rate" BETWEEN 20 AND 300) |
+| `ck_referrals_vital_respiratory_rate_range` | CHECK | CHECK ("vital_respiratory_rate" BETWEEN 4 AND 80) |
+| `ck_referrals_vital_temperature_c_range` | CHECK | CHECK ("vital_temperature_c" BETWEEN 30.0 AND 45.0) |
+| `ck_referrals_vital_oxygen_saturation_range` | CHECK | CHECK ("vital_oxygen_saturation" BETWEEN 50 AND 100) |
+| `ck_referrals_vital_glasgow_range` | CHECK | CHECK ("vital_glasgow" BETWEEN 3 AND 15) |
+| `ck_referrals_vital_bp_order` | CHECK | CHECK (("vital_diastolic_bp" IS NULL OR "vital_systolic_bp" IS NULL OR "vital_diastolic_bp" < "vital_systolic_bp")) |
+| `ck_referrals_arrival_after_departure` | CHECK | CHECK (("arrived_at" IS NULL OR "departed_at" IS NULL OR "arrived_at" >= "departed_at")) |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/admissions | LEE | POR_SQL |
 | GET /referrals | LEE | DIRECTA |
 | POST /referrals | CREA | DIRECTA |
 | POST /referrals | LEE | DIRECTA |
 | GET /referrals/{id} | LEE | DIRECTA |
+| PATCH /referrals/{id}/arrival | ACTUALIZA | POR_TIPO |
+| PATCH /referrals/{id}/arrival | LEE | DIRECTA |
 | PATCH /referrals/{id}/cancel | ACTUALIZA | POR_TIPO |
 | PATCH /referrals/{id}/cancel | LEE | DIRECTA |
 | PATCH /referrals/{id}/counter-referral | ACTUALIZA | POR_TIPO |
 | PATCH /referrals/{id}/counter-referral | LEE | DIRECTA |
 | PATCH /referrals/{id}/respond | ACTUALIZA | POR_TIPO |
 | PATCH /referrals/{id}/respond | LEE | DIRECTA |
+| PATCH /referrals/{id}/transfer | LEE | DIRECTA |
 | GET /referrals/me | LEE | DIRECTA |
 | POST /consent/encounters/{encounterId}/informed-consent | ACTUALIZA | POR_TIPO |
 | POST /consent/treatment-informed-consents | ACTUALIZA | POR_TIPO |
@@ -1136,12 +1293,18 @@ Representa encuentros clínicos realizados por canales virtuales y conserva su c
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_virtual_encounters_encounter_id` | no | encounter_id | Soporta la clave foránea fk_virtual_encounters_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_virtual_encounters_encounter_id` | sí | encounter_id | Garantiza que no se repita la combinación (encounter_id) _(DOCUMENTO)_; Soporta la clave foránea fk_virtual_encounters_encounter_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «encounter_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_virtual_encounters_platform_concept_id` | no | platform_concept_id | Soporta la clave foránea fk_virtual_encounters_platform_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_virtual_encounters_recording_file_id` | no | recording_file_id | Soporta la clave foránea fk_virtual_encounters_recording_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_virtual_encounters_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_virtual_encounters_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_virtual_encounters_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_virtual_encounters_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_virtual_encounters_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_virtual_encounters_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_virtual_encounters_encounter_id` | UNIQUE INDEX | UNIQUE INDEX ("encounter_id") |
 
 #### Operaciones que la tocan
 

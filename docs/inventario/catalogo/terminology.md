@@ -2,7 +2,7 @@
 
 # Catálogo del schema `terminology`
 
-- **Tablas:** 15 · **Columnas:** 187 (57 con descripción: 30.5 %) · **Índices:** 88
+- **Tablas:** 16 · **Columnas:** 214 (57 con descripción: 26.6 %) · **Índices:** 103
 - **Dominio:** Núcleo y Terminología
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,27 +10,28 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 176 | COINCIDE |
+| [catalog_concepts](#catalog_concepts) | Almacena conceptos normalizados de catálogos sanitarios que se referencian desde los registros clínicos y administrativos. | 16 | 8 | 228 | COINCIDE |
 | [catalog_import_batches](#catalog_import_batches) | Agrupa importaciones de terminología para trazar la carga de fuentes externas y sus resultados. | 13 | 6 | 3 | COINCIDE |
 | [code_system_versions](#code_system_versions) | Registra versiones de sistemas de códigos para preservar el contexto temporal de conceptos clínicos. | 14 | 6 | 19 | COINCIDE |
 | [code_systems](#code_systems) | Define sistemas de codificación sanitaria que permiten interpretar identificadores clínicos de forma interoperable. | 15 | 8 | 16 | COINCIDE |
-| [concept_designations](#concept_designations) | Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos para su búsqueda y presentación. | 11 | 5 | 20 | COINCIDE |
+| [concept_designations](#concept_designations) | Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos para su búsqueda y presentación. | 11 | 5 | 38 | COINCIDE |
 | [concept_maps](#concept_maps) | Mantiene correspondencias entre conceptos o sistemas de códigos para facilitar intercambio y normalización semántica. | 12 | 6 | 3 | COINCIDE |
-| [concept_properties](#concept_properties) | Registra propiedades descriptivas de conceptos para ampliar su significado sin duplicar el concepto principal. | 10 | 3 | 27 | COINCIDE |
-| [concept_relationships](#concept_relationships) | Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonamiento sobre terminología clínica. | 10 | 5 | 10 | DIVERGE |
+| [concept_properties](#concept_properties) | Registra propiedades descriptivas de conceptos para ampliar su significado sin duplicar el concepto principal. | 10 | 3 | 41 | COINCIDE |
+| [concept_relationship_evidence](#concept_relationship_evidence) | sin propósito | 23 | 10 | 1 | COINCIDE |
+| [concept_relationships](#concept_relationships) | Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonamiento sobre terminología clínica. | 14 | 10 | 15 | COINCIDE |
 | [tenant_catalog_policies](#tenant_catalog_policies) | Define políticas de catálogo por tenant para gobernar qué terminologías se habilitan en cada organización sanitaria. | 14 | 6 | 3 | COINCIDE |
 | [tenant_concept_config](#tenant_concept_config) | Guarda configuraciones de conceptos por tenant para permitir ajustes locales sin alterar el concepto canónico compartido. | 12 | 5 | 3 | COINCIDE |
 | [terminology_sources](#terminology_sources) | Identifica fuentes de terminología sanitaria para registrar procedencia y gobierno de los catálogos clínicos. | 14 | 7 | 4 | COINCIDE |
-| [value_set_members](#value_set_members) | Asocia conceptos concretos a versiones de un conjunto de valores para delimitar sus opciones válidas. | 10 | 5 | 48 | COINCIDE |
+| [value_set_members](#value_set_members) | Asocia conceptos concretos a versiones de un conjunto de valores para delimitar sus opciones válidas. | 10 | 5 | 60 | COINCIDE |
 | [value_set_rules](#value_set_rules) | Describe reglas de inclusión o selección de miembros de conjuntos de valores usadas por catálogos clínicos. | 12 | 5 | 2 | COINCIDE |
-| [value_set_versions](#value_set_versions) | Preserva versiones de conjuntos de valores para reproducir qué opciones estaban vigentes al capturar información. | 12 | 6 | 45 | COINCIDE |
-| [value_sets](#value_sets) | Define conjuntos de conceptos permitidos que pueden utilizar formularios y procesos clínicos como vocabularios controlados. | 12 | 7 | 44 | COINCIDE |
+| [value_set_versions](#value_set_versions) | Preserva versiones de conjuntos de valores para reproducir qué opciones estaban vigentes al capturar información. | 12 | 6 | 52 | COINCIDE |
+| [value_sets](#value_sets) | Define conjuntos de conceptos permitidos que pueden utilizar formularios y procesos clínicos como vocabularios controlados. | 12 | 7 | 51 | COINCIDE |
 
 ## Diagrama entidad-relación
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 1 — 15 tablas
+### Familia 1 de 1 — 16 tablas
 
 ```mermaid
 erDiagram
@@ -88,11 +89,23 @@ erDiagram
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
   }
+  terminology_concept_relationship_evidence["terminology.concept_relationship_evidence"] {
+    uuid id PK
+    uuid concept_relationship_id FK
+    uuid terminology_source_id FK
+    uuid code_system_version_id FK
+    uuid evidence_tier_concept_id FK
+    uuid frequency_concept_id FK
+    uuid sex_concept_id FK
+    uuid pregnancy_applicability_concept_id FK
+  }
   terminology_concept_relationships["terminology.concept_relationships"] {
     uuid id PK
     uuid source_concept_id FK
     uuid target_concept_id FK
     uuid relationship_type_concept_id FK
+    uuid best_evidence_tier_concept_id FK
+    uuid frequency_concept_id FK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
   }
@@ -165,9 +178,20 @@ erDiagram
   terminology_concept_maps }o--o| terminology_catalog_concepts : "equivalence_concept_id"
   terminology_concept_maps }o--o| terminology_catalog_concepts : "state_concept_id"
   terminology_concept_properties }o--|| terminology_catalog_concepts : "concept_id"
+  terminology_concept_relationship_evidence }o--|| terminology_concept_relationships : "concept_relationship_id"
+  terminology_concept_relationship_evidence }o--|| terminology_terminology_sources : "terminology_source_id"
+  terminology_concept_relationship_evidence }o--|| terminology_code_system_versions : "code_system_version_id"
+  terminology_concept_relationship_evidence }o--|| terminology_catalog_concepts : "evidence_tier_concept_id"
+  terminology_concept_relationship_evidence }o--o| terminology_catalog_concepts : "frequency_concept_id"
+  terminology_concept_relationship_evidence }o--o| terminology_catalog_concepts : "sex_concept_id"
+  terminology_concept_relationship_evidence }o--o| terminology_catalog_concepts : "pregnancy_applicability_conce…"
+  terminology_concept_relationship_evidence }o--o| terminology_catalog_concepts : "care_level_concept_id"
+  terminology_concept_relationship_evidence }o--o| terminology_catalog_concepts : "line_of_therapy_concept_id"
   terminology_concept_relationships }o--|| terminology_catalog_concepts : "source_concept_id"
   terminology_concept_relationships }o--|| terminology_catalog_concepts : "target_concept_id"
   terminology_concept_relationships }o--|| terminology_catalog_concepts : "relationship_type_concept_id"
+  terminology_concept_relationships }o--o| terminology_catalog_concepts : "best_evidence_tier_concept_id"
+  terminology_concept_relationships }o--o| terminology_catalog_concepts : "frequency_concept_id"
   terminology_tenant_catalog_policies }o--|| terminology_value_sets : "value_set_id"
   terminology_tenant_catalog_policies }o--o| terminology_catalog_concepts : "mode_concept_id"
   terminology_tenant_concept_config }o--|| terminology_catalog_concepts : "concept_id"
@@ -196,7 +220,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: catalog_concepts`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CatalogConcepts` — `src/modules/terminology/entities/catalog_concepts.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2522 entrantes · 176 operaciones
+- **Resumen:** 16 columnas · 8 índices · 5 FK salientes · 2656 entrantes · 228 operaciones
 
 #### Columnas
 
@@ -243,6 +267,14 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | terminology.concept_relationships (source_concept_id) | fk_concept_relationships_source_concept_id |
 | desde | id | terminology.concept_relationships (target_concept_id) | fk_concept_relationships_target_concept_id |
 | desde | id | terminology.concept_relationships (relationship_type_concept_id) | fk_concept_relationships_relationship_type_concept_id |
+| desde | id | terminology.concept_relationships (best_evidence_tier_concept_id) | fk_concept_relationships_best_evidence_tier_concept_id |
+| desde | id | terminology.concept_relationships (frequency_concept_id) | fk_concept_relationships_frequency_concept_id |
+| desde | id | terminology.concept_relationship_evidence (evidence_tier_concept_id) | fk_concept_relationship_evidence_evidence_tier_concept_id |
+| desde | id | terminology.concept_relationship_evidence (frequency_concept_id) | fk_concept_relationship_evidence_frequency_concept_id |
+| desde | id | terminology.concept_relationship_evidence (sex_concept_id) | fk_concept_relationship_evidence_sex_concept_id |
+| desde | id | terminology.concept_relationship_evidence (pregnancy_applicability_concept_id) | fk_concept_relationship_evidence_pregnancy_applicabili_541e3040 |
+| desde | id | terminology.concept_relationship_evidence (care_level_concept_id) | fk_concept_relationship_evidence_care_level_concept_id |
+| desde | id | terminology.concept_relationship_evidence (line_of_therapy_concept_id) | fk_concept_relationship_evidence_line_of_therapy_concept_id |
 | desde | id | terminology.value_sets (jurisdiction_concept_id) | fk_value_sets_jurisdiction_concept_id |
 | desde | id | terminology.value_sets (state_concept_id) | fk_value_sets_state_concept_id |
 | desde | id | terminology.value_set_versions (state_concept_id) | fk_value_set_versions_state_concept_id |
@@ -281,6 +313,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | iam.api_key_scopes (scope_concept_id) | fk_api_key_scopes_scope_concept_id |
 | desde | id | iam.account_lockouts (reason_concept_id) | fk_account_lockouts_reason_concept_id |
 | desde | id | iam.account_lockouts (status_concept_id) | fk_account_lockouts_status_concept_id |
+| desde | id | iam.session_policies (scope_concept_id) | fk_session_policies_scope_concept_id |
+| desde | id | iam.session_policies (status_concept_id) | fk_session_policies_status_concept_id |
 | desde | id | common.identifiers (owner_type_concept_id) | fk_identifiers_owner_type_concept_id |
 | desde | id | common.identifiers (use_concept_id) | fk_identifiers_use_concept_id |
 | desde | id | common.identifiers (type_concept_id) | fk_identifiers_type_concept_id |
@@ -294,6 +328,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | common.addresses (use_concept_id) | fk_addresses_use_concept_id |
 | desde | id | common.addresses (type_concept_id) | fk_addresses_type_concept_id |
 | desde | id | common.addresses (administrative_area_concept_id) | fk_addresses_administrative_area_concept_id |
+| desde | id | common.addresses (administrative_area_2_concept_id) | fk_addresses_administrative_area_2_concept_id |
 | desde | id | common.addresses (municipality_concept_id) | fk_addresses_municipality_concept_id |
 | desde | id | common.addresses (country_concept_id) | fk_addresses_country_concept_id |
 | desde | id | common.files (category_concept_id) | fk_files_category_concept_id |
@@ -323,8 +358,11 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | directory.tenant_memberships (tenant_role_concept_id) | fk_tenant_memberships_tenant_role_concept_id |
 | desde | id | directory.tenant_memberships (status_concept_id) | fk_tenant_memberships_status_concept_id |
 | desde | id | directory.tenant_memberships (access_scope_concept_id) | fk_tenant_memberships_access_scope_concept_id |
+| desde | id | directory.tenant_memberships (workday_concept_id) | fk_tenant_memberships_workday_concept_id |
+| desde | id | directory.tenant_memberships (origin_concept_id) | fk_tenant_memberships_origin_concept_id |
 | desde | id | directory.branch_memberships (local_role_concept_id) | fk_branch_memberships_local_role_concept_id |
 | desde | id | directory.branch_memberships (status_concept_id) | fk_branch_memberships_status_concept_id |
+| desde | id | directory.branch_memberships (workday_concept_id) | fk_branch_memberships_workday_concept_id |
 | desde | id | directory.tenant_affiliation_documents (document_type_concept_id) | fk_tenant_affiliation_documents_document_type_concept_id |
 | desde | id | directory.tenant_affiliation_documents (issuing_authority_concept_id) | fk_tenant_affiliation_documents_issuing_authority_concept_id |
 | desde | id | directory.tenant_affiliation_documents (verification_status_concept_id) | fk_tenant_affiliation_documents_verification_status_concept_id |
@@ -333,6 +371,9 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | directory.tenant_legal_representatives (status_concept_id) | fk_tenant_legal_representatives_status_concept_id |
 | desde | id | directory.tenant_web_configs (primary_language_concept_id) | fk_tenant_web_configs_primary_language_concept_id |
 | desde | id | directory.tenant_web_configs (status_concept_id) | fk_tenant_web_configs_status_concept_id |
+| desde | id | directory.affiliation_invitations (kind_concept_id) | fk_affiliation_invitations_kind_concept_id |
+| desde | id | directory.affiliation_invitations (status_concept_id) | fk_affiliation_invitations_status_concept_id |
+| desde | id | directory.affiliation_invitation_uses (outcome_concept_id) | fk_affiliation_invitation_uses_outcome_concept_id |
 | desde | id | profiles.persons (person_status_concept_id) | fk_persons_person_status_concept_id |
 | desde | id | profiles.persons (administrative_gender_concept_id) | fk_persons_administrative_gender_concept_id |
 | desde | id | profiles.persons (sex_at_birth_concept_id) | fk_persons_sex_at_birth_concept_id |
@@ -389,6 +430,10 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | authz.permissions (action_concept_id) | fk_permissions_action_concept_id |
 | desde | id | authz.permissions (default_scope_concept_id) | fk_permissions_default_scope_concept_id |
 | desde | id | authz.permissions (state_concept_id) | fk_permissions_state_concept_id |
+| desde | id | authz.permissions (sensitivity_concept_id) | fk_permissions_sensitivity_concept_id |
+| desde | id | authz.permissions (approval_mode_concept_id) | fk_permissions_approval_mode_concept_id |
+| desde | id | authz.permissions (purpose_of_use_concept_id) | fk_permissions_purpose_of_use_concept_id |
+| desde | id | authz.permissions (legal_basis_concept_id) | fk_permissions_legal_basis_concept_id |
 | desde | id | authz.roles (base_role_concept_id) | fk_roles_base_role_concept_id |
 | desde | id | authz.roles (scope_concept_id) | fk_roles_scope_concept_id |
 | desde | id | authz.roles (state_concept_id) | fk_roles_state_concept_id |
@@ -510,6 +555,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | clinical.service_requests (intent_concept_id) | fk_service_requests_intent_concept_id |
 | desde | id | clinical.service_requests (priority_concept_id) | fk_service_requests_priority_concept_id |
 | desde | id | clinical.service_requests (status_concept_id) | fk_service_requests_status_concept_id |
+| desde | id | clinical.service_requests (performer_selection_concept_id) | fk_service_requests_performer_selection_concept_id |
 | desde | id | clinical.diagnostic_reports (code_concept_id) | fk_diagnostic_reports_code_concept_id |
 | desde | id | clinical.diagnostic_reports (category_concept_id) | fk_diagnostic_reports_category_concept_id |
 | desde | id | clinical.diagnostic_reports (lifecycle_status_concept_id) | fk_diagnostic_reports_lifecycle_status_concept_id |
@@ -535,6 +581,10 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | clinical.immunizations (vaccine_concept_id) | fk_immunizations_vaccine_concept_id |
 | desde | id | clinical.immunizations (status_concept_id) | fk_immunizations_status_concept_id |
 | desde | id | clinical.immunizations (route_concept_id) | fk_immunizations_route_concept_id |
+| desde | id | clinical.received_services (service_type_concept_id) | fk_received_services_service_type_concept_id |
+| desde | id | clinical.received_services (service_concept_id) | fk_received_services_service_concept_id |
+| desde | id | clinical.received_services (status_concept_id) | fk_received_services_status_concept_id |
+| desde | id | clinical.received_services (outcome_concept_id) | fk_received_services_outcome_concept_id |
 | desde | id | clinical.appointments (type_concept_id) | fk_appointments_type_concept_id |
 | desde | id | clinical.appointments (status_concept_id) | fk_appointments_status_concept_id |
 | desde | id | clinical.appointments (channel_concept_id) | fk_appointments_channel_concept_id |
@@ -751,6 +801,10 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | audit.ad_accounts_history (change_reason_concept_id) | fk_ad_accounts_history_change_reason_concept_id |
 | desde | id | audit.campaigns_history (operation_concept_id) | fk_campaigns_history_operation_concept_id |
 | desde | id | audit.campaigns_history (change_reason_concept_id) | fk_campaigns_history_change_reason_concept_id |
+| desde | id | audit.insurance_products_history (operation_concept_id) | fk_insurance_products_history_operation_concept_id |
+| desde | id | audit.insurance_products_history (change_reason_concept_id) | fk_insurance_products_history_change_reason_concept_id |
+| desde | id | audit.procedure_cases_history (operation_concept_id) | fk_procedure_cases_history_operation_concept_id |
+| desde | id | audit.procedure_cases_history (change_reason_concept_id) | fk_procedure_cases_history_change_reason_concept_id |
 | desde | id | audit.ad_sets_history (operation_concept_id) | fk_ad_sets_history_operation_concept_id |
 | desde | id | audit.ad_sets_history (change_reason_concept_id) | fk_ad_sets_history_change_reason_concept_id |
 | desde | id | audit.ads_history (operation_concept_id) | fk_ads_history_operation_concept_id |
@@ -951,6 +1005,10 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | practice.practice_sites (physical_type_concept_id) | fk_practice_sites_physical_type_concept_id |
 | desde | id | practice.practice_sites (operational_status_concept_id) | fk_practice_sites_operational_status_concept_id |
 | desde | id | practice.practice_sites (status_concept_id) | fk_practice_sites_status_concept_id |
+| desde | id | practice.practice_sites (subsector_concept_id) | fk_practice_sites_subsector_concept_id |
+| desde | id | practice.practice_sites (care_level_concept_id) | fk_practice_sites_care_level_concept_id |
+| desde | id | practice.practice_sites (facility_typology_concept_id) | fk_practice_sites_facility_typology_concept_id |
+| desde | id | practice.practice_sites (sedes_department_concept_id) | fk_practice_sites_sedes_department_concept_id |
 | desde | id | practice.clinical_units (unit_type_concept_id) | fk_clinical_units_unit_type_concept_id |
 | desde | id | practice.clinical_units (specialty_concept_id) | fk_clinical_units_specialty_concept_id |
 | desde | id | practice.clinical_units (service_mode_concept_id) | fk_clinical_units_service_mode_concept_id |
@@ -958,6 +1016,19 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | practice.care_spaces (space_type_concept_id) | fk_care_spaces_space_type_concept_id |
 | desde | id | practice.care_spaces (operational_status_concept_id) | fk_care_spaces_operational_status_concept_id |
 | desde | id | practice.care_spaces (status_concept_id) | fk_care_spaces_status_concept_id |
+| desde | id | practice.care_spaces (form_concept_id) | fk_care_spaces_form_concept_id |
+| desde | id | practice.care_spaces (asepsis_concept_id) | fk_care_spaces_asepsis_concept_id |
+| desde | id | practice.care_spaces (pressure_concept_id) | fk_care_spaces_pressure_concept_id |
+| desde | id | practice.care_spaces (sex_restriction_concept_id) | fk_care_spaces_sex_restriction_concept_id |
+| desde | id | practice.care_spaces (age_group_concept_id) | fk_care_spaces_age_group_concept_id |
+| desde | id | practice.care_spaces (bed_category_concept_id) | fk_care_spaces_bed_category_concept_id |
+| desde | id | practice.space_unit_assignments (role_concept_id) | fk_space_unit_assignments_role_concept_id |
+| desde | id | practice.site_declared_capacities (capacity_kind_concept_id) | fk_site_declared_capacities_capacity_kind_concept_id |
+| desde | id | practice.space_form_parent_rules (parent_form_concept_id) | fk_space_form_parent_rules_parent_form_concept_id |
+| desde | id | practice.space_form_parent_rules (child_form_concept_id) | fk_space_form_parent_rules_child_form_concept_id |
+| desde | id | practice.facility_typology_rules (typology_concept_id) | fk_facility_typology_rules_typology_concept_id |
+| desde | id | practice.facility_typology_rules (space_function_concept_id) | fk_facility_typology_rules_space_function_concept_id |
+| desde | id | practice.facility_typology_rules (rule_concept_id) | fk_facility_typology_rules_rule_concept_id |
 | desde | id | practice.healthcare_services (service_concept_id) | fk_healthcare_services_service_concept_id |
 | desde | id | practice.healthcare_services (specialty_concept_id) | fk_healthcare_services_specialty_concept_id |
 | desde | id | practice.healthcare_services (status_concept_id) | fk_healthcare_services_status_concept_id |
@@ -970,6 +1041,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | practice.practice_accreditations (accreditation_type_concept_id) | fk_practice_accreditations_accreditation_type_concept_id |
 | desde | id | practice.practice_accreditations (verification_status_concept_id) | fk_practice_accreditations_verification_status_concept_id |
 | desde | id | practice.practice_settings (category_concept_id) | fk_practice_settings_category_concept_id |
+| desde | id | practice.practitioner_location_assignments (status_concept_id) | fk_practitioner_location_assignments_status_concept_id |
 | desde | id | chart.clinical_note_headers (note_type_concept_id) | fk_clinical_note_headers_note_type_concept_id |
 | desde | id | chart.clinical_note_headers (lifecycle_status_concept_id) | fk_clinical_note_headers_lifecycle_status_concept_id |
 | desde | id | chart.clinical_note_headers (patient_release_status_concept_id) | fk_clinical_note_headers_patient_release_status_concept_id |
@@ -1105,6 +1177,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | clinical_ext.referrals (reason_concept_id) | fk_referrals_reason_concept_id |
 | desde | id | clinical_ext.referrals (priority_concept_id) | fk_referrals_priority_concept_id |
 | desde | id | clinical_ext.referrals (status_concept_id) | fk_referrals_status_concept_id |
+| desde | id | clinical_ext.referrals (requested_service_concept_id) | fk_referrals_requested_service_concept_id |
+| desde | id | clinical_ext.referrals (referral_type_concept_id) | fk_referrals_referral_type_concept_id |
 | desde | id | clinical_ext.clinical_alerts (alert_type_concept_id) | fk_clinical_alerts_alert_type_concept_id |
 | desde | id | clinical_ext.clinical_alerts (severity_concept_id) | fk_clinical_alerts_severity_concept_id |
 | desde | id | clinical_ext.clinical_alerts (trigger_concept_id) | fk_clinical_alerts_trigger_concept_id |
@@ -1114,6 +1188,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | clinical_ext.cds_rules (rule_type_concept_id) | fk_cds_rules_rule_type_concept_id |
 | desde | id | clinical_ext.cds_rules (severity_concept_id) | fk_cds_rules_severity_concept_id |
 | desde | id | clinical_ext.cds_rules (status_concept_id) | fk_cds_rules_status_concept_id |
+| desde | id | clinical_ext.cds_rule_versions (severity_concept_id) | fk_cds_rule_versions_severity_concept_id |
 | desde | id | clinical_ext.drug_interactions (substance_a_concept_id) | fk_drug_interactions_substance_a_concept_id |
 | desde | id | clinical_ext.drug_interactions (substance_b_concept_id) | fk_drug_interactions_substance_b_concept_id |
 | desde | id | clinical_ext.drug_interactions (severity_concept_id) | fk_drug_interactions_severity_concept_id |
@@ -1226,6 +1301,9 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | community.feedback_ticket_events (to_status_concept_id) | fk_feedback_ticket_events_to_status_concept_id |
 | desde | id | community.feedback_ticket_events (event_type_concept_id) | fk_feedback_ticket_events_event_type_concept_id |
 | desde | id | community.comment_media (media_role_concept_id) | fk_comment_media_media_role_concept_id |
+| desde | id | community.conversation_assignments (status_concept_id) | fk_conversation_assignments_status_concept_id |
+| desde | id | community.reply_templates (category_concept_id) | fk_reply_templates_category_concept_id |
+| desde | id | community.reply_templates (status_concept_id) | fk_reply_templates_status_concept_id |
 | desde | id | diagnostics.specimens (specimen_type_concept_id) | fk_specimens_specimen_type_concept_id |
 | desde | id | diagnostics.specimens (body_site_concept_id) | fk_specimens_body_site_concept_id |
 | desde | id | diagnostics.specimens (collection_method_concept_id) | fk_specimens_collection_method_concept_id |
@@ -1356,6 +1434,20 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | diagnostic_units.diagnostic_equipment (operational_status_concept_id) | fk_diagnostic_equipment_operational_status_concept_id |
 | desde | id | diagnostic_units.diagnostic_unit_accreditations (accreditation_concept_id) | fk_diagnostic_unit_accreditations_accreditation_concept_id |
 | desde | id | diagnostic_units.diagnostic_unit_accreditations (verification_status_concept_id) | fk_diagnostic_unit_accreditations_verification_status__ca2f963c |
+| desde | id | diagnostic_units.unit_medical_visitors (identity_verification_concept_id) | fk_unit_medical_visitors_identity_verification_concept_id |
+| desde | id | diagnostic_units.unit_medical_visitors (contract_verification_concept_id) | fk_unit_medical_visitors_contract_verification_concept_id |
+| desde | id | diagnostic_units.unit_medical_visitors (credential_verification_concept_id) | fk_unit_medical_visitors_credential_verification_concept_id |
+| desde | id | diagnostic_units.unit_medical_visitors (status_concept_id) | fk_unit_medical_visitors_status_concept_id |
+| desde | id | diagnostic_units.unit_visit_requests (modality_concept_id) | fk_unit_visit_requests_modality_concept_id |
+| desde | id | diagnostic_units.unit_visit_requests (status_concept_id) | fk_unit_visit_requests_status_concept_id |
+| desde | id | diagnostic_units.unit_visit_request_events (action_concept_id) | fk_unit_visit_request_events_action_concept_id |
+| desde | id | diagnostic_units.unit_visit_request_events (previous_status_concept_id) | fk_unit_visit_request_events_previous_status_concept_id |
+| desde | id | diagnostic_units.unit_visit_request_events (new_status_concept_id) | fk_unit_visit_request_events_new_status_concept_id |
+| desde | id | diagnostic_units.unit_visit_records (modality_concept_id) | fk_unit_visit_records_modality_concept_id |
+| desde | id | diagnostic_units.unit_visit_records (visitor_attendance_concept_id) | fk_unit_visit_records_visitor_attendance_concept_id |
+| desde | id | diagnostic_units.unit_visit_records (doctor_attendance_concept_id) | fk_unit_visit_records_doctor_attendance_concept_id |
+| desde | id | diagnostic_units.unit_visit_records (confirmation_concept_id) | fk_unit_visit_records_confirmation_concept_id |
+| desde | id | diagnostic_units.unit_visit_ratings (kind_concept_id) | fk_unit_visit_ratings_kind_concept_id |
 | desde | id | pharmacy.pharmacies (pharmacy_type_concept_id) | fk_pharmacies_pharmacy_type_concept_id |
 | desde | id | pharmacy.pharmacies (ownership_type_concept_id) | fk_pharmacies_ownership_type_concept_id |
 | desde | id | pharmacy.pharmacies (default_currency_concept_id) | fk_pharmacies_default_currency_concept_id |
@@ -1365,6 +1457,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | pharmacy.pharmacy_sites (dispensing_mode_concept_id) | fk_pharmacy_sites_dispensing_mode_concept_id |
 | desde | id | pharmacy.pharmacy_sites (controlled_substance_capability_concept_id) | fk_pharmacy_sites_controlled_substance_capability_concept_id |
 | desde | id | pharmacy.pharmacy_sites (status_concept_id) | fk_pharmacy_sites_status_concept_id |
+| desde | id | pharmacy.pharmacy_on_call_shifts (source_concept_id) | fk_pharmacy_on_call_shifts_source_concept_id |
+| desde | id | pharmacy.pharmacy_on_call_shifts (status_concept_id) | fk_pharmacy_on_call_shifts_status_concept_id |
 | desde | id | pharmacy.pharmacy_licenses (license_type_concept_id) | fk_pharmacy_licenses_license_type_concept_id |
 | desde | id | pharmacy.pharmacy_licenses (jurisdiction_concept_id) | fk_pharmacy_licenses_jurisdiction_concept_id |
 | desde | id | pharmacy.pharmacy_licenses (verification_status_concept_id) | fk_pharmacy_licenses_verification_status_concept_id |
@@ -1425,6 +1519,12 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | insurance.insurance_brokers (status_concept_id) | fk_insurance_brokers_status_concept_id |
 | desde | id | insurance.broker_carrier_agreements (commission_model_concept_id) | fk_broker_carrier_agreements_commission_model_concept_id |
 | desde | id | insurance.broker_carrier_agreements (status_concept_id) | fk_broker_carrier_agreements_status_concept_id |
+| desde | id | insurance.broker_carrier_agreements (representation_mode_concept_id) | fk_broker_carrier_agreements_representation_mode_concept_id |
+| desde | id | insurance.broker_carrier_agreements (relationship_type_concept_id) | fk_broker_carrier_agreements_relationship_type_concept_id |
+| desde | id | insurance.insurance_terms_conditions (service_concept_id) | fk_insurance_terms_conditions_service_concept_id |
+| desde | id | insurance.insurance_terms_conditions (jurisdiction_concept_id) | fk_insurance_terms_conditions_jurisdiction_concept_id |
+| desde | id | insurance.insurance_terms_conditions (client_type_concept_id) | fk_insurance_terms_conditions_client_type_concept_id |
+| desde | id | insurance.insurance_terms_conditions (status_concept_id) | fk_insurance_terms_conditions_status_concept_id |
 | desde | id | insurance.employer_groups (status_concept_id) | fk_employer_groups_status_concept_id |
 | desde | id | insurance.insurance_products (product_type_concept_id) | fk_insurance_products_product_type_concept_id |
 | desde | id | insurance.insurance_products (market_segment_concept_id) | fk_insurance_products_market_segment_concept_id |
@@ -1442,6 +1542,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | insurance.network_provider_memberships (participation_level_concept_id) | fk_network_provider_memberships_participation_level_concept_id |
 | desde | id | insurance.network_provider_memberships (verification_status_concept_id) | fk_network_provider_memberships_verification_status_concept_id |
 | desde | id | insurance.network_provider_memberships (status_concept_id) | fk_network_provider_memberships_status_concept_id |
+| desde | id | insurance.practitioner_insurer_requests (status_concept_id) | fk_practitioner_insurer_requests_status_concept_id |
 | desde | id | insurance.insurance_campaigns (campaign_type_concept_id) | fk_insurance_campaigns_campaign_type_concept_id |
 | desde | id | insurance.insurance_campaigns (target_condition_concept_id) | fk_insurance_campaigns_target_condition_concept_id |
 | desde | id | insurance.insurance_campaigns (status_concept_id) | fk_insurance_campaigns_status_concept_id |
@@ -1560,12 +1661,24 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | delegated_access.organization_user_assignments (assignment_role_concept_id) | fk_organization_user_assignments_assignment_role_concept_id |
 | desde | id | delegated_access.organization_user_assignments (access_scope_concept_id) | fk_organization_user_assignments_access_scope_concept_id |
 | desde | id | delegated_access.organization_user_assignments (status_concept_id) | fk_organization_user_assignments_status_concept_id |
+| desde | id | delegated_access.organization_user_assignments (origin_concept_id) | fk_organization_user_assignments_origin_concept_id |
+| desde | id | delegated_access.organization_user_assignments (owner_kind_concept_id) | fk_organization_user_assignments_owner_kind_concept_id |
+| desde | id | delegated_access.organization_user_assignments (identity_method_concept_id) | fk_organization_user_assignments_identity_method_concept_id |
+| desde | id | delegated_access.organization_user_assignments (suspension_reason_concept_id) | fk_organization_user_assignments_suspension_reason_concept_id |
 | desde | id | delegated_access.delegated_permission_sets (delegate_type_concept_id) | fk_delegated_permission_sets_delegate_type_concept_id |
 | desde | id | delegated_access.delegated_permission_sets (status_concept_id) | fk_delegated_permission_sets_status_concept_id |
 | desde | id | delegated_access.practitioner_delegate_assignments (delegate_role_concept_id) | fk_practitioner_delegate_assignments_delegate_role_concept_id |
 | desde | id | delegated_access.practitioner_delegate_assignments (patient_scope_concept_id) | fk_practitioner_delegate_assignments_patient_scope_concept_id |
 | desde | id | delegated_access.practitioner_delegate_assignments (appointment_scope_concept_id) | fk_practitioner_delegate_assignments_appointment_scope_5c233325 |
 | desde | id | delegated_access.practitioner_delegate_assignments (status_concept_id) | fk_practitioner_delegate_assignments_status_concept_id |
+| desde | id | delegated_access.practitioner_delegate_assignments (reply_disclosure_concept_id) | fk_practitioner_delegate_assignments_reply_disclosure__d918f1cb |
+| desde | id | delegated_access.shared_access_links (resource_type_concept_id) | fk_shared_access_links_resource_type_concept_id |
+| desde | id | delegated_access.shared_access_links (scope_concept_id) | fk_shared_access_links_scope_concept_id |
+| desde | id | delegated_access.shared_access_links (recipient_kind_concept_id) | fk_shared_access_links_recipient_kind_concept_id |
+| desde | id | delegated_access.shared_access_links (purpose_of_use_concept_id) | fk_shared_access_links_purpose_of_use_concept_id |
+| desde | id | delegated_access.shared_access_links (status_concept_id) | fk_shared_access_links_status_concept_id |
+| desde | id | delegated_access.shared_access_link_uses (action_concept_id) | fk_shared_access_link_uses_action_concept_id |
+| desde | id | delegated_access.shared_access_link_uses (outcome_concept_id) | fk_shared_access_link_uses_outcome_concept_id |
 | desde | id | delegated_access.delegated_access_grants (grant_type_concept_id) | fk_delegated_access_grants_grant_type_concept_id |
 | desde | id | delegated_access.delegated_access_grants (purpose_of_use_concept_id) | fk_delegated_access_grants_purpose_of_use_concept_id |
 | desde | id | delegated_access.delegated_access_grants (resource_type_concept_id) | fk_delegated_access_grants_resource_type_concept_id |
@@ -1574,6 +1687,38 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | delegated_access.delegated_access_approval_requests (status_concept_id) | fk_delegated_access_approval_requests_status_concept_id |
 | desde | id | delegated_access.delegation_events (event_type_concept_id) | fk_delegation_events_event_type_concept_id |
 | desde | id | delegated_access.delegation_events (reason_concept_id) | fk_delegation_events_reason_concept_id |
+| desde | id | delegated_access.role_templates (status_concept_id) | fk_role_templates_status_concept_id |
+| desde | id | delegated_access.support_scope_grants (target_kind_concept_id) | fk_support_scope_grants_target_kind_concept_id |
+| desde | id | delegated_access.support_scope_grants (expansion_mode_concept_id) | fk_support_scope_grants_expansion_mode_concept_id |
+| desde | id | delegated_access.support_scope_grants (status_concept_id) | fk_support_scope_grants_status_concept_id |
+| desde | id | delegated_access.support_scope_grants (effect_concept_id) | fk_support_scope_grants_effect_concept_id |
+| desde | id | delegated_access.engagement_requests (direction_concept_id) | fk_engagement_requests_direction_concept_id |
+| desde | id | delegated_access.engagement_requests (status_concept_id) | fk_engagement_requests_status_concept_id |
+| desde | id | delegated_access.engagement_request_items (target_kind_concept_id) | fk_engagement_request_items_target_kind_concept_id |
+| desde | id | delegated_access.engagement_request_items (decision_concept_id) | fk_engagement_request_items_decision_concept_id |
+| desde | id | delegated_access.governance_rules (rule_kind_concept_id) | fk_governance_rules_rule_kind_concept_id |
+| desde | id | delegated_access.governance_rules (status_concept_id) | fk_governance_rules_status_concept_id |
+| desde | id | delegated_access.sod_rules (scope_concept_id) | fk_sod_rules_scope_concept_id |
+| desde | id | delegated_access.sod_rules (action_concept_id) | fk_sod_rules_action_concept_id |
+| desde | id | delegated_access.sod_rules (status_concept_id) | fk_sod_rules_status_concept_id |
+| desde | id | delegated_access.sod_exceptions (status_concept_id) | fk_sod_exceptions_status_concept_id |
+| desde | id | delegated_access.four_eyes_requests (kind_concept_id) | fk_four_eyes_requests_kind_concept_id |
+| desde | id | delegated_access.four_eyes_requests (approver_kind_concept_id) | fk_four_eyes_requests_approver_kind_concept_id |
+| desde | id | delegated_access.four_eyes_requests (status_concept_id) | fk_four_eyes_requests_status_concept_id |
+| desde | id | delegated_access.access_review_campaigns (kind_concept_id) | fk_access_review_campaigns_kind_concept_id |
+| desde | id | delegated_access.access_review_campaigns (uncertified_action_concept_id) | fk_access_review_campaigns_uncertified_action_concept_id |
+| desde | id | delegated_access.access_review_campaigns (status_concept_id) | fk_access_review_campaigns_status_concept_id |
+| desde | id | delegated_access.access_review_items (reviewer_kind_concept_id) | fk_access_review_items_reviewer_kind_concept_id |
+| desde | id | delegated_access.access_review_items (decision_concept_id) | fk_access_review_items_decision_concept_id |
+| desde | id | delegated_access.lifecycle_cases (kind_concept_id) | fk_lifecycle_cases_kind_concept_id |
+| desde | id | delegated_access.lifecycle_cases (status_concept_id) | fk_lifecycle_cases_status_concept_id |
+| desde | id | delegated_access.handover_items (item_kind_concept_id) | fk_handover_items_item_kind_concept_id |
+| desde | id | delegated_access.handover_items (status_concept_id) | fk_handover_items_status_concept_id |
+| desde | id | delegated_access.patient_restriction_flags (flag_concept_id) | fk_patient_restriction_flags_flag_concept_id |
+| desde | id | delegated_access.patient_restriction_flags (status_concept_id) | fk_patient_restriction_flags_status_concept_id |
+| desde | id | delegated_access.access_decision_log (effect_concept_id) | fk_access_decision_log_effect_concept_id |
+| desde | id | delegated_access.access_anomalies (kind_concept_id) | fk_access_anomalies_kind_concept_id |
+| desde | id | delegated_access.access_anomalies (status_concept_id) | fk_access_anomalies_status_concept_id |
 | desde | id | read_models.portal_surfaces (portal_type_concept_id) | fk_portal_surfaces_portal_type_concept_id |
 | desde | id | read_models.portal_surfaces (status_concept_id) | fk_portal_surfaces_status_concept_id |
 | desde | id | read_models.frontend_routes (purpose_of_use_concept_id) | fk_frontend_routes_purpose_of_use_concept_id |
@@ -1933,6 +2078,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | scheduling.calendar_absences (approval_status_concept_id) | fk_calendar_absences_approval_status_concept_id |
 | desde | id | scheduling.calendar_absences (status_concept_id) | fk_calendar_absences_status_concept_id |
 | desde | id | scheduling.appointment_payment_states (status_concept_id) | fk_appointment_payment_states_status_concept_id |
+| desde | id | scheduling.appointment_payment_receipts (review_status_concept_id) | fk_appointment_payment_receipts_review_status_concept_id |
 | desde | id | payments.payment_gateways (gateway_type_concept_id) | fk_payment_gateways_gateway_type_concept_id |
 | desde | id | payments.payment_gateways (state_concept_id) | fk_payment_gateways_state_concept_id |
 | desde | id | payments.gateway_connections (environment_concept_id) | fk_gateway_connections_environment_concept_id |
@@ -2496,6 +2642,15 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | marketing.campaign_schedules (missed_run_policy_concept_id) | fk_campaign_schedules_missed_run_policy_concept_id |
 | desde | id | marketing.campaign_schedules (overlap_policy_concept_id) | fk_campaign_schedules_overlap_policy_concept_id |
 | desde | id | marketing.campaign_schedules (status_concept_id) | fk_campaign_schedules_status_concept_id |
+| desde | id | marketing.insights_campaigns (currency_concept_id) | fk_insights_campaigns_currency_concept_id |
+| desde | id | marketing.insights_campaigns (status_concept_id) | fk_insights_campaigns_status_concept_id |
+| desde | id | marketing.insights_creatives (status_concept_id) | fk_insights_creatives_status_concept_id |
+| desde | id | marketing.insights_data_sources (status_concept_id) | fk_insights_data_sources_status_concept_id |
+| desde | id | marketing.insights_alert_rules (severity_concept_id) | fk_insights_alert_rules_severity_concept_id |
+| desde | id | marketing.insights_alerts (severity_concept_id) | fk_insights_alerts_severity_concept_id |
+| desde | id | marketing.insights_alerts (status_concept_id) | fk_insights_alerts_status_concept_id |
+| desde | id | marketing.insights_alert_transitions (from_status_concept_id) | fk_insights_alert_transitions_from_status_concept_id |
+| desde | id | marketing.insights_alert_transitions (to_status_concept_id) | fk_insights_alert_transitions_to_status_concept_id |
 | desde | id | promotions.loyalty_programs (program_type_concept_id) | fk_loyalty_programs_program_type_concept_id |
 | desde | id | promotions.loyalty_programs (currency_concept_id) | fk_loyalty_programs_currency_concept_id |
 | desde | id | promotions.loyalty_programs (expiry_policy_concept_id) | fk_loyalty_programs_expiry_policy_concept_id |
@@ -2693,11 +2848,14 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | desde | id | procedures_perioperative.operating_room_utilization_events (turnover_category_concept_id) | fk_operating_room_utilization_events_turnover_category_c499a812 |
 | desde | id | procedures_perioperative.sterility_verification_checks (check_type_concept_id) | fk_sterility_verification_checks_check_type_concept_id |
 | desde | id | procedures_perioperative.sterility_verification_checks (result_concept_id) | fk_sterility_verification_checks_result_concept_id |
+| desde | id | surveys.survey_templates (owner_type_concept_id) | fk_survey_templates_owner_type_concept_id |
 | desde | id | surveys.survey_templates (status_concept_id) | fk_survey_templates_status_concept_id |
 | desde | id | surveys.survey_versions (publication_status_concept_id) | fk_survey_versions_publication_status_concept_id |
 | desde | id | surveys.survey_questions (answer_type_concept_id) | fk_survey_questions_answer_type_concept_id |
 | desde | id | surveys.survey_assignments (target_type_concept_id) | fk_survey_assignments_target_type_concept_id |
+| desde | id | surveys.survey_invitations (subject_type_concept_id) | fk_survey_invitations_subject_type_concept_id |
 | desde | id | surveys.survey_invitations (status_concept_id) | fk_survey_invitations_status_concept_id |
+| desde | id | surveys.survey_invitation_reminders (channel_concept_id) | fk_survey_invitation_reminders_channel_concept_id |
 | desde | id | medical_groups.group_members (agreed_payment_currency_concept_id) | fk_group_members_agreed_payment_currency_concept_id |
 | desde | id | pharma_lab.doctor_visit_blocks (status_concept_id) | fk_doctor_visit_blocks_status_concept_id |
 | desde | id | pharma_lab.doctor_visit_policies (status_concept_id) | fk_doctor_visit_policies_status_concept_id |
@@ -2774,16 +2932,30 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /accounting/cost-centers | LEE | POR_SQL |
+| POST /accounting/cost-centers/{id}/unit-link | LEE | POR_SQL |
+| GET /accounting/infrastructure-items | LEE | POR_SQL |
+| PATCH /accounting/infrastructure-items/{id} | LEE | POR_SQL |
 | GET /readiness | LEE | POR_SQL |
+| GET /audit/data-access/summary | LEE | POR_SQL |
+| GET /privacy/dsar | LEE | POR_SQL |
+| GET /privacy/dsar/{id} | LEE | POR_SQL |
+| GET /admin/catalogs/services/scopes | LEE | DIRECTA |
 | POST /billing/service-catalog/import-procedures | LEE | POR_SQL |
 | GET /billing/service-catalog/procedure-specialties/mine | LEE | POR_SQL |
 | GET /billing/service-catalog/procedures | LEE | POR_SQL |
+| GET /billing/space-tariffs | LEE | POR_SQL |
+| POST /billing/space-tariffs | LEE | POR_SQL |
+| POST /billing/space-tariffs/{id}/close | LEE | POR_SQL |
 | GET /patient-spending/me | LEE | POR_SQL |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /charts/me/encounters/{id}/pdf | LEE | DIRECTA |
 | GET /clinical/prescriptions/{id}/pdf | LEE | DIRECTA |
+| POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
+| GET /sites/{siteId}/attending-practitioners | LEE | POR_SQL |
 | GET /referrals/target-services | LEE | DIRECTA |
 | GET /f/{slug} | LEE | POR_SQL |
 | POST /internal/community/search/reindex | LEE | POR_SQL |
@@ -2802,13 +2974,18 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | ACTUALIZA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /admin/governance/jobs | LEE | POR_SQL |
+| GET /me/support-agenda | LEE | POR_SQL |
+| GET /diagnostic-equipment/{id} | LEE | POR_SQL |
 | GET /diagnostic-units | LEE | DIRECTA |
 | GET /diagnostic-units/{id} | LEE | DIRECTA |
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
 | GET /diagnostic-units/administration | LEE | DIRECTA |
 | GET /diagnostic-units/search | LEE | DIRECTA |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
 | POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
+| POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
 | POST /admin/tenants | LEE | DIRECTA |
 | POST /admin/tenants/{tenantId}/verification | LEE | DIRECTA |
 | POST /tenants/{tenantId}/affiliation-documents | LEE | DIRECTA |
@@ -2816,6 +2993,8 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | GET /tenants/{tenantId}/laboratory-readiness | LEE | DIRECTA |
 | GET /tenants/{tenantId}/pharmacy-readiness | LEE | DIRECTA |
 | GET /tenants/me | LEE | DIRECTA |
+| GET /admin/governance/data-quality/rules | LEE | POR_SQL |
+| GET /admin/governance/data-quality/rules/{id} | LEE | POR_SQL |
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
@@ -2860,9 +3039,13 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | GET /practitioner-settlement-batches/{id} | LEE | DIRECTA |
 | GET /prior-authorization-requests/{id} | LEE | DIRECTA |
 | GET /prior-authorization-requests/inbox | LEE | DIRECTA |
+| GET /marketing/insights/alert-rules | LEE | POR_SQL |
+| GET /marketing/insights/alert-workflow | LEE | POR_SQL |
+| GET /marketing/insights/catalog | LEE | POR_SQL |
 | GET /medical-centers/search | LEE | DIRECTA |
 | GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
 | GET /medical-groups/patients/{patientProfileId}/conditions | LEE | DIRECTA |
+| GET /admin/ops/instances/liveness | LEE | POR_SQL |
 | POST /pharmacies/{pharmacyId}/products | LEE | DIRECTA |
 | PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
 | GET /pharmacy/catalog-products | LEE | DIRECTA |
@@ -2877,6 +3060,7 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | GET /pharmacy-inventory/availability | LEE | DIRECTA |
+| GET /pharmacy-inventory/availability/medications | LEE | DIRECTA |
 | GET /pharmacy-inventory/sites/{siteId}/stock | LEE | DIRECTA |
 | GET /pharmacy/orders | LEE | DIRECTA |
 | POST /pharmacy/orders | LEE | DIRECTA |
@@ -2891,10 +3075,18 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | POST /pharmacy/orders/{id}/review | LEE | DIRECTA |
 | GET /pharmacy/orders/me | LEE | DIRECTA |
 | GET /pharmacy/prescription-shares/{token} | LEE | DIRECTA |
+| POST /admin/ops/runtime-pieces/discover | LEE | POR_SQL |
+| GET /care-spaces/{id}/equipment | LEE | POR_SQL |
+| GET /care-spaces/{id}/stock | LEE | POR_SQL |
 | GET /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
 | PATCH /practices/{practiceId}/healthcare-services/{id} | LEE | DIRECTA |
 | GET /practices/{practiceId}/organization | LEE | DIRECTA |
+| GET /sites/{siteId}/diagnostic-equipment | LEE | POR_SQL |
+| GET /procedure-cases | LEE | POR_SQL |
+| GET /procedure-cases/{id} | LEE | POR_SQL |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| GET /sites/{siteId}/or-blocks | LEE | POR_SQL |
+| POST /sites/{siteId}/or-blocks | LEE | POR_SQL |
 | GET /admissions | LEE | DIRECTA |
 | GET /admissions/{id} | LEE | DIRECTA |
 | POST /admissions/{id}/claim | LEE | DIRECTA |
@@ -2927,8 +3119,26 @@ Almacena conceptos normalizados de catálogos sanitarios que se referencian desd
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
 | GET /scheduling/bookings | LEE | DIRECTA |
+| GET /clinical/study-catalog | LEE | POR_SQL |
+| GET /clinical/study-catalog/{conceptId} | LEE | POR_SQL |
+| GET /admin/governance/change-log | LEE | POR_SQL |
+| GET /admin/governance/entity-registry/{id}/fields | LEE | POR_SQL |
+| GET /admin/governance/legal-holds | LEE | POR_SQL |
+| GET /admin/governance/policies | LEE | POR_SQL |
+| GET /admin/governance/policies/{policyType}/{id} | LEE | POR_SQL |
+| GET /admin/governance/retention-executions | LEE | POR_SQL |
 | POST /admin/governance/tenant-residency-bindings | LEE | DIRECTA |
 | POST /internal/governance/retention-executions/run | LEE | DIRECTA |
+| GET /admin/analytics/devices | LEE | POR_SQL |
+| GET /admin/catalogs/glossary | LEE | DIRECTA |
+| POST /admin/catalogs/glossary | CREA | DIRECTA |
+| POST /admin/catalogs/glossary | LEE | DIRECTA |
+| GET /admin/catalogs/glossary/{conceptId} | LEE | DIRECTA |
+| PATCH /admin/catalogs/glossary/{conceptId} | LEE | DIRECTA |
+| POST /admin/catalogs/glossary/{conceptId}/deactivate | ACTUALIZA | POR_TIPO |
+| POST /admin/catalogs/glossary/{conceptId}/deactivate | LEE | DIRECTA |
+| POST /admin/catalogs/glossary/{conceptId}/reactivate | ACTUALIZA | POR_TIPO |
+| POST /admin/catalogs/glossary/{conceptId}/reactivate | LEE | DIRECTA |
 | GET /terminology/CodeSystem/$lookup | LEE | DIRECTA |
 | POST /terminology/ConceptMap/$translate | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
@@ -3046,7 +3256,7 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: code_system_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `CodeSystemVersions` — `src/modules/terminology/entities/code_system_versions.entity.ts`
-- **Resumen:** 14 columnas · 6 índices · 4 FK salientes · 2 entrantes · 19 operaciones
+- **Resumen:** 14 columnas · 6 índices · 4 FK salientes · 3 entrantes · 19 operaciones
 
 #### Columnas
 
@@ -3076,6 +3286,7 @@ Registra versiones de sistemas de códigos para preservar el contexto temporal d
 | hacia | created_by_user_id | iam.users (id) | fk_code_system_versions_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_code_system_versions_updated_by_user_id |
 | desde | id | terminology.catalog_concepts (code_system_version_id) | fk_catalog_concepts_code_system_version_id |
+| desde | id | terminology.concept_relationship_evidence (code_system_version_id) | fk_concept_relationship_evidence_code_system_version_id |
 | desde | id | terminology.catalog_import_batches (code_system_version_id) | fk_catalog_import_batches_code_system_version_id |
 
 #### Índices
@@ -3243,7 +3454,7 @@ Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_designations`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptDesignations` — `src/modules/terminology/entities/concept_designations.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 20 operaciones
+- **Resumen:** 11 columnas · 5 índices · 5 FK salientes · 0 entrantes · 38 operaciones
 
 #### Columnas
 
@@ -3285,17 +3496,34 @@ Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/requisitions | LEE | DIRECTA |
 | POST /clinical/service-requests | LEE | DIRECTA |
+| GET /clinical/service-requests/{id} | LEE | DIRECTA |
 | POST /clinical/service-requests/duplicate-check | LEE | DIRECTA |
 | POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| GET /diagnostic-results/me/orders | LEE | DIRECTA |
+| GET /diagnostics/service-requests/{id} | LEE | DIRECTA |
+| POST /diagnostics/service-requests/inbox | LEE | DIRECTA |
+| POST /diagnostics/service-requests/worklist | LEE | DIRECTA |
 | GET /insurance-claims/{id} | LEE | DIRECTA |
+| PATCH /pharmacies/{pharmacyId}/products/{productId} | LEE | DIRECTA |
 | GET /public/medications | LEE | POR_SQL |
 | GET /public/medications/{conceptId}/availability | LEE | POR_SQL |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| GET /clinical/study-catalog | LEE | POR_SQL |
+| GET /clinical/study-catalog/{conceptId} | LEE | POR_SQL |
 | GET /system-context/dynamic-enums | LEE | DIRECTA |
+| GET /admin/catalogs/glossary | LEE | DIRECTA |
+| POST /admin/catalogs/glossary | CREA | DIRECTA |
+| POST /admin/catalogs/glossary | LEE | DIRECTA |
+| GET /admin/catalogs/glossary/{conceptId} | LEE | DIRECTA |
+| PATCH /admin/catalogs/glossary/{conceptId} | CREA | DIRECTA |
+| PATCH /admin/catalogs/glossary/{conceptId} | LEE | DIRECTA |
+| POST /admin/catalogs/glossary/{conceptId}/deactivate | LEE | DIRECTA |
+| POST /admin/catalogs/glossary/{conceptId}/reactivate | LEE | DIRECTA |
 | GET /terminology/CodeSystem/$lookup | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
@@ -3304,6 +3532,7 @@ Conserva nombres, términos y designaciones lingüísticas asociadas a conceptos
 | POST /terminology/concepts/{conceptId}/designations | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
 | GET /terminology/concepts/glossary-graph | LEE | DIRECTA |
+| GET /terminology/value-sets/{id}/$expand | LEE | POR_SQL |
 | GET /terminology/value-sets/$glossary-facets | LEE | POR_SQL |
 
 #### Gobierno
@@ -3402,7 +3631,7 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_properties`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptProperties` — `src/modules/terminology/entities/concept_properties.entity.ts`
-- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 27 operaciones
+- **Resumen:** 10 columnas · 3 índices · 3 FK salientes · 0 entrantes · 41 operaciones
 
 #### Columnas
 
@@ -3443,6 +3672,8 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 | GET /billing/service-catalog/procedure-specialties | LEE | POR_SQL |
 | GET /billing/service-catalog/procedure-specialties/mine | LEE | POR_SQL |
 | GET /billing/service-catalog/procedures | LEE | POR_SQL |
+| POST /clinical/requisitions | LEE | POR_SQL |
+| POST /clinical/service-requests | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | ACTUALIZA | POR_TIPO |
@@ -3453,7 +3684,19 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 | GET /pharmacy/catalog-products | LEE | DIRECTA |
 | GET /practices/{practiceId}/healthcare-services | LEE | POR_SQL |
 | PATCH /practices/{practiceId}/healthcare-services/{id} | LEE | POR_SQL |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
+| GET /clinical/study-catalog | LEE | POR_SQL |
+| GET /clinical/study-catalog/{conceptId} | LEE | POR_SQL |
+| GET /admin/catalogs/glossary | LEE | DIRECTA |
+| POST /admin/catalogs/glossary | CREA | DIRECTA |
+| POST /admin/catalogs/glossary | LEE | DIRECTA |
+| GET /admin/catalogs/glossary/{conceptId} | LEE | DIRECTA |
+| PATCH /admin/catalogs/glossary/{conceptId} | ACTUALIZA | POR_TIPO |
+| PATCH /admin/catalogs/glossary/{conceptId} | CREA | DIRECTA |
+| PATCH /admin/catalogs/glossary/{conceptId} | LEE | DIRECTA |
+| POST /admin/catalogs/glossary/{conceptId}/deactivate | LEE | DIRECTA |
+| POST /admin/catalogs/glossary/{conceptId}/reactivate | LEE | DIRECTA |
 | GET /terminology/CodeSystem/$lookup | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
@@ -3481,6 +3724,100 @@ Registra propiedades descriptivas de conceptos para ampliar su significado sin d
 
 ---
 
+### concept_relationship_evidence
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
+- **Entidad del ORM:** `ConceptRelationshipEvidence` — `src/modules/terminology/entities/concept_relationship_evidence.entity.ts`
+- **Resumen:** 23 columnas · 10 índices · 9 FK salientes · 0 entrantes · 1 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `concept_relationship_id` | `uuid` | Clave foránea → terminology.concept_relationships.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `terminology_source_id` | `uuid` | Clave foránea → terminology.terminology_sources.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `code_system_version_id` | `uuid` | Clave foránea → terminology.code_system_versions.id; Obligatoria | _sin dato_ | coincide |
+| 5 | `evidence_tier_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 6 | `source_reference` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 7 | `citation_text` | `text` | Opcional | _sin dato_ | coincide |
+| 8 | `citation_locator` | `varchar` | Opcional | _sin dato_ | coincide |
+| 9 | `frequency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `frequency_numerator` | `integer` | Opcional | _sin dato_ | coincide |
+| 11 | `frequency_denominator` | `integer` | Opcional | _sin dato_ | coincide |
+| 12 | `statistic_value` | `numeric` | Opcional | _sin dato_ | coincide |
+| 13 | `sex_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 14 | `age_min_days` | `integer` | Opcional | _sin dato_ | coincide |
+| 15 | `age_max_days` | `integer` | Opcional | _sin dato_ | coincide |
+| 16 | `pregnancy_applicability_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 17 | `care_level_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 18 | `line_of_therapy_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 19 | `valid_from` | `date` | Obligatoria | _sin dato_ | coincide |
+| 20 | `valid_to` | `date` | Opcional | _sin dato_ | coincide |
+| 21 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 22 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 23 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | concept_relationship_id | terminology.concept_relationships (id) | fk_concept_relationship_evidence_concept_relationship_id |
+| hacia | terminology_source_id | terminology.terminology_sources (id) | fk_concept_relationship_evidence_terminology_source_id |
+| hacia | code_system_version_id | terminology.code_system_versions (id) | fk_concept_relationship_evidence_code_system_version_id |
+| hacia | evidence_tier_concept_id | terminology.catalog_concepts (id) | fk_concept_relationship_evidence_evidence_tier_concept_id |
+| hacia | frequency_concept_id | terminology.catalog_concepts (id) | fk_concept_relationship_evidence_frequency_concept_id |
+| hacia | sex_concept_id | terminology.catalog_concepts (id) | fk_concept_relationship_evidence_sex_concept_id |
+| hacia | pregnancy_applicability_concept_id | terminology.catalog_concepts (id) | fk_concept_relationship_evidence_pregnancy_applicabili_541e3040 |
+| hacia | care_level_concept_id | terminology.catalog_concepts (id) | fk_concept_relationship_evidence_care_level_concept_id |
+| hacia | line_of_therapy_concept_id | terminology.catalog_concepts (id) | fk_concept_relationship_evidence_line_of_therapy_concept_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ux_concept_relationship_evidence_natural_key` | sí | concept_relationship_id, terminology_source_id, source_reference | Garantiza que no se repita la combinación (concept_relationship_id, terminology_source_id, source_reference) _(DOCUMENTO)_; Soporta la clave foránea fk_concept_relationship_evidence_concept_relationship_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationship_evidence_concept_relationship_id` | no | concept_relationship_id | Soporta la clave foránea fk_concept_relationship_evidence_concept_relationship_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationship_evidence_terminology_source_id` | no | terminology_source_id | Soporta la clave foránea fk_concept_relationship_evidence_terminology_source_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationship_evidence_code_system_version_id` | no | code_system_version_id | Soporta la clave foránea fk_concept_relationship_evidence_code_system_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationship_evidence_evidence_tier_concept_id` | no | evidence_tier_concept_id | Soporta la clave foránea fk_concept_relationship_evidence_evidence_tier_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationship_evidence_frequency_concept_id` | no | frequency_concept_id | Soporta la clave foránea fk_concept_relationship_evidence_frequency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationship_evidence_sex_concept_id` | no | sex_concept_id | Soporta la clave foránea fk_concept_relationship_evidence_sex_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationship_evidence_pregnancy_applicabili_1eca2256` | no | pregnancy_applicability_concept_id | Soporta la clave foránea fk_concept_relationship_evidence_pregnancy_applicabili_541e3040: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationship_evidence_care_level_concept_id` | no | care_level_concept_id | Soporta la clave foránea fk_concept_relationship_evidence_care_level_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationship_evidence_line_of_therapy_concept_id` | no | line_of_therapy_concept_id | Soporta la clave foránea fk_concept_relationship_evidence_line_of_therapy_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_concept_relationship_evidence_natural_key` | UNIQUE INDEX | UNIQUE INDEX ("concept_relationship_id", "terminology_source_id", "source_reference") |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | POR_SQL |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### concept_relationships
 
 #### Vista general
@@ -3490,7 +3827,7 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: concept_relationships`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ConceptRelationships` — `src/modules/terminology/entities/concept_relationships.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 5 FK salientes · 0 entrantes · 10 operaciones
+- **Resumen:** 14 columnas · 10 índices · 7 FK salientes · 1 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -3501,11 +3838,15 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 | 3 | `target_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 4 | `relationship_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
 | 5 | `ordinal` | `integer` | Opcional | _sin dato_ | coincide |
-| 6 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationships.entity.ts:62`)_ | coincide |
-| 7 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationships.entity.ts:68`)_ | coincide |
-| 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 9 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 10 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/terminology/entities/concept_relationships.entity.ts:86`)_ | coincide |
+| 6 | `strength_score` | `numeric` | Opcional | _sin dato_ | coincide |
+| 7 | `evidence_count` | `integer` | Opcional | _sin dato_ | coincide |
+| 8 | `best_evidence_tier_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 9 | `frequency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationships.entity.ts:62`)_ | coincide |
+| 11 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/terminology/entities/concept_relationships.entity.ts:68`)_ | coincide |
+| 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/terminology/entities/concept_relationships.entity.ts:86`)_ | coincide |
 
 #### Relaciones
 
@@ -3514,8 +3855,11 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 | hacia | source_concept_id | terminology.catalog_concepts (id) | fk_concept_relationships_source_concept_id |
 | hacia | target_concept_id | terminology.catalog_concepts (id) | fk_concept_relationships_target_concept_id |
 | hacia | relationship_type_concept_id | terminology.catalog_concepts (id) | fk_concept_relationships_relationship_type_concept_id |
+| hacia | best_evidence_tier_concept_id | terminology.catalog_concepts (id) | fk_concept_relationships_best_evidence_tier_concept_id |
+| hacia | frequency_concept_id | terminology.catalog_concepts (id) | fk_concept_relationships_frequency_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_concept_relationships_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_concept_relationships_updated_by_user_id |
+| desde | id | terminology.concept_relationship_evidence (concept_relationship_id) | fk_concept_relationship_evidence_concept_relationship_id |
 
 #### Índices
 
@@ -3526,14 +3870,30 @@ Expresa relaciones semánticas entre conceptos para navegación, mapeo y razonam
 | `ix_concept_relationships_relationship_type_concept_id` | no | relationship_type_concept_id | Soporta la clave foránea fk_concept_relationships_relationship_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «relationship_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_concept_relationships_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_concept_relationships_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_concept_relationships_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_concept_relationships_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationships_best_evidence_tier_concept_id` | no | best_evidence_tier_concept_id | Soporta la clave foránea fk_concept_relationships_best_evidence_tier_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_concept_relationships_frequency_concept_id` | no | frequency_concept_id | Soporta la clave foránea fk_concept_relationships_frequency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_concept_relationships_natural_key` | sí | source_concept_id, target_concept_id, relationship_type_concept_id | Garantiza que no se repita la combinación (source_concept_id, target_concept_id, relationship_type_concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_concept_relationships_source_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «source_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_concept_relationships_source_type_strength` | no | source_concept_id, relationship_type_concept_id, ("strength_score" DESC) | _sin uso detectado estáticamente_ |
+| `ix_concept_relationships_target_type_strength` | no | target_concept_id, relationship_type_concept_id, ("strength_score" DESC) | _sin uso detectado estáticamente_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_concept_relationships_natural_key` | UNIQUE INDEX | UNIQUE INDEX ("source_concept_id", "target_concept_id", "relationship_type_concept_id") |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/requisitions | LEE | POR_SQL |
+| POST /clinical/service-requests | LEE | POR_SQL |
 | POST /admin/content-packs/{code}/apply | BORRA | POR_TIPO |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
+| GET /clinical/study-catalog | LEE | POR_SQL |
+| GET /clinical/study-catalog/{conceptId} | LEE | POR_SQL |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
@@ -3707,7 +4067,7 @@ Identifica fuentes de terminología sanitaria para registrar procedencia y gobie
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: terminology_sources`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `TerminologySources` — `src/modules/terminology/entities/terminology_sources.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 5 FK salientes · 2 entrantes · 4 operaciones
+- **Resumen:** 14 columnas · 7 índices · 5 FK salientes · 3 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -3738,6 +4098,7 @@ Identifica fuentes de terminología sanitaria para registrar procedencia y gobie
 | hacia | created_by_user_id | iam.users (id) | fk_terminology_sources_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_terminology_sources_updated_by_user_id |
 | desde | id | terminology.code_systems (source_id) | fk_code_systems_source_id |
+| desde | id | terminology.concept_relationship_evidence (terminology_source_id) | fk_concept_relationship_evidence_terminology_source_id |
 | desde | id | terminology.catalog_import_batches (source_id) | fk_catalog_import_batches_source_id |
 
 #### Índices
@@ -3790,7 +4151,7 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_set_members`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSetMembers` — `src/modules/terminology/entities/value_set_members.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 48 operaciones
+- **Resumen:** 10 columnas · 5 índices · 4 FK salientes · 0 entrantes · 60 operaciones
 
 #### Columnas
 
@@ -3836,6 +4197,8 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/requisitions | LEE | POR_SQL |
+| POST /clinical/service-requests | LEE | POR_SQL |
 | GET /public/search | LEE | DIRECTA |
 | GET /public/search/diagnostic-units | LEE | DIRECTA |
 | GET /public/search/insurers | LEE | DIRECTA |
@@ -3854,12 +4217,14 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
 | POST /practices/{practiceId}/healthcare-services | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
 | GET /profiles/patients | LEE | DIRECTA |
 | POST /profiles/patients/me/dependents | LEE | DIRECTA |
 | POST /profiles/patients/search | LEE | DIRECTA |
@@ -3873,6 +4238,14 @@ Asocia conceptos concretos a versiones de un conjunto de valores para delimitar 
 | PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
+| GET /clinical/study-catalog | LEE | POR_SQL |
+| GET /clinical/study-catalog/{conceptId} | LEE | POR_SQL |
+| POST /admin/catalogs/glossary | CREA | DIRECTA |
+| POST /admin/catalogs/glossary | LEE | POR_SQL |
+| POST /admin/catalogs/glossary/{conceptId}/deactivate | ACTUALIZA | POR_TIPO |
+| POST /admin/catalogs/glossary/{conceptId}/deactivate | LEE | DIRECTA |
+| POST /admin/catalogs/glossary/{conceptId}/reactivate | ACTUALIZA | POR_TIPO |
+| POST /admin/catalogs/glossary/{conceptId}/reactivate | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
 | POST /terminology/concepts/{conceptId}/$deprecate | ACTUALIZA | POR_TIPO |
@@ -3977,7 +4350,7 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_set_versions`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSetVersions` — `src/modules/terminology/entities/value_set_versions.entity.ts`
-- **Resumen:** 12 columnas · 6 índices · 4 FK salientes · 3 entrantes · 45 operaciones
+- **Resumen:** 12 columnas · 6 índices · 4 FK salientes · 3 entrantes · 52 operaciones
 
 #### Columnas
 
@@ -4030,6 +4403,8 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/requisitions | LEE | POR_SQL |
+| POST /clinical/service-requests | LEE | POR_SQL |
 | GET /public/search | LEE | DIRECTA |
 | GET /public/search/diagnostic-units | LEE | DIRECTA |
 | GET /public/search/insurers | LEE | DIRECTA |
@@ -4047,11 +4422,13 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
 | GET /profiles/patients | LEE | DIRECTA |
 | POST /profiles/patients/me/dependents | LEE | DIRECTA |
 | POST /profiles/patients/search | LEE | DIRECTA |
@@ -4065,6 +4442,9 @@ Preserva versiones de conjuntos de valores para reproducir qué opciones estaban
 | PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
+| GET /clinical/study-catalog | LEE | POR_SQL |
+| GET /clinical/study-catalog/{conceptId} | LEE | POR_SQL |
+| POST /admin/catalogs/glossary | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |
@@ -4099,7 +4479,7 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_03_terminology.puml: value_sets`
 - **Dominio:** Núcleo y Terminología · **Diagrama:** `Mantra Core Health Context/modules/diagram_03_terminology.puml` · **DDL:** `SQL/03_terminology/02_tables.sql`
 - **Entidad del ORM:** `ValueSets` — `src/modules/terminology/entities/value_sets.entity.ts`
-- **Resumen:** 12 columnas · 7 índices · 4 FK salientes · 25 entrantes · 44 operaciones
+- **Resumen:** 12 columnas · 7 índices · 4 FK salientes · 25 entrantes · 51 operaciones
 
 #### Columnas
 
@@ -4175,6 +4555,8 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| POST /clinical/requisitions | LEE | POR_SQL |
+| POST /clinical/service-requests | LEE | POR_SQL |
 | GET /public/search | LEE | DIRECTA |
 | GET /public/search/diagnostic-units | LEE | DIRECTA |
 | GET /public/search/insurers | LEE | DIRECTA |
@@ -4192,11 +4574,13 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 | POST /iam/auth/register-organization | LEE | DIRECTA |
 | POST /iam/auth/register-patient | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | LEE | DIRECTA |
+| POST /iam/auth/register-support-staff | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
 | POST /identity/checks/{id}/results | LEE | DIRECTA |
 | POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
 | POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /pharmacy/pharmacies/{id}/contacts | LEE | DIRECTA |
+| POST /procedure-cases/{id}/preoperative-orders | LEE | POR_SQL |
 | GET /profiles/patients | LEE | DIRECTA |
 | POST /profiles/patients/me/dependents | LEE | DIRECTA |
 | POST /profiles/patients/search | LEE | DIRECTA |
@@ -4208,6 +4592,9 @@ Define conjuntos de conceptos permitidos que pueden utilizar formularios y proce
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /profiles/practitioners/me/linkable-organizations | LEE | DIRECTA |
 | PATCH /profiles/practitioners/me/specialties/{specialtyId} | LEE | DIRECTA |
+| GET /clinical/study-catalog | LEE | POR_SQL |
+| GET /clinical/study-catalog/{conceptId} | LEE | POR_SQL |
+| POST /admin/catalogs/glossary | LEE | DIRECTA |
 | GET /terminology/concepts | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId} | LEE | DIRECTA |
 | GET /terminology/concepts/{conceptId}/glossary-neighborhood | LEE | DIRECTA |

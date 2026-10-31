@@ -3,12 +3,12 @@
 # Flujos del módulo `insurance`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 72 (62 con decisiones propias, 10 sin ellas)
+- **Operaciones:** 78 (68 con decisiones propias, 10 sin ellas)
 - Inventario de endpoints del módulo: [insurance](../endpoints/insurance.md)
 
 ## Proceso: src / modules / insurance
 
-- **Código:** `insurance` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 72
+- **Código:** `insurance` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 78
 - **Actores:** BILLING · BILLING_OPERATOR · CLINICIAN · Cualquier sesión válida · FINANCE · PATIENT · PRACTITIONER · Público (sin sesión) · SCHEDULING_ADMIN · SCHEDULING_AGENT · SECURITY_ADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/insurance/README.md`
@@ -82,10 +82,16 @@ _Fuente: `src/modules/insurance/README.md:3`_
 | `ctrl:InsurerPatientsController` | Operaciones de InsurerPatientsController que el README no asigna a un caso de uso | POST /insurance/patients/conversation | Cualquier sesión válida | ALTO | 16 |
 |  |  | GET /insurance/patients/options | Cualquier sesión válida | BAJO | 2 |
 |  |  | POST /insurance/patients/search | Cualquier sesión válida | ALTO | 13 |
+| `ctrl:InsurerPractitionerRequestsController` | Operaciones de InsurerPractitionerRequestsController que el README no asigna a un caso de uso | GET /insurance/practitioner-requests | Cualquier sesión válida | BAJO | 5 |
+|  |  | POST /insurance/practitioner-requests/{id}/approve | Cualquier sesión válida | ALTO | 6 |
+|  |  | POST /insurance/practitioner-requests/{id}/reject | Cualquier sesión válida | ALTO | 6 |
 | `ctrl:InsurerReceivedClaimsController` | Operaciones de InsurerReceivedClaimsController que el README no asigna a un caso de uso | GET /insurance/received-claims | Cualquier sesión válida | BAJO | 15 |
 |  |  | POST /insurance/received-claims/{id}/decision | Cualquier sesión válida | ALTO | 28 |
 | `ctrl:MyClaimsController` | Operaciones de MyClaimsController que el README no asigna a un caso de uso | GET /insurance/my-claims | Cualquier sesión válida | BAJO | 19 |
 | `ctrl:PractitionerInsuranceNetworksController` | Operaciones de PractitionerInsuranceNetworksController que el README no asigna a un caso de uso | GET /practitioners/{profileId}/insurance-networks | SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRACTITIONER · CLINICIAN · PATIENT | BAJO | 4 |
+| `ctrl:PractitionerInsurerRequestsController` | Operaciones de PractitionerInsurerRequestsController que el README no asigna a un caso de uso | GET /practitioners/me/insurer-requests | PRACTITIONER | BAJO | 2 |
+|  |  | POST /practitioners/me/insurer-requests | PRACTITIONER | MEDIO | 3 |
+|  |  | POST /practitioners/me/insurer-requests/{id}/withdraw | PRACTITIONER | MEDIO | 3 |
 | `ctrl:PractitionerSettlementBatchesController` | Operaciones de PractitionerSettlementBatchesController que el README no asigna a un caso de uso | GET /practitioner-settlement-batches | Cualquier sesión válida | BAJO | 10 |
 |  |  | POST /practitioner-settlement-batches | Cualquier sesión válida | ALTO | 13 |
 |  |  | GET /practitioner-settlement-batches/{id} | Cualquier sesión válida | BAJO | 11 |
@@ -680,14 +686,15 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 4 de 4 — etapas `ctrl:InsurerPatientsController`, `ctrl:InsurerReceivedClaimsController`, `ctrl:MyClaimsController`…
+### Diagrama 4 de 4 — etapas `ctrl:InsurerPatientsController`, `ctrl:InsurerPractitionerRequestsController`, `ctrl:InsurerReceivedClaimsController`…
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a29(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
-  a46(["BILLING · FINANCE"]):::actor
-  a58(["SECURITY_ADMIN"]):::actor
+  a35(["SECURITY_ADMIN · SCHEDULING_ADMIN · SCHEDULING_AGENT · PRAC…"]):::actor
+  a40(["PRACTITIONER"]):::actor
+  a56(["BILLING · FINANCE"]):::actor
+  a68(["SECURITY_ADMIN"]):::actor
   t3[("audit.data_access_log")]:::tabla
   t4[("common.contact_points")]:::tabla
   t5[("community.conversation_participants")]:::tabla
@@ -696,26 +703,29 @@ flowchart LR
   t10[("insurance.insurance_carriers")]:::tabla
   t12[("community.public_profiles")]:::tabla
   t13[("iam.users")]:::tabla
-  t16[("clinical.encounters")]:::tabla
-  t17[("diagnostic_units.diagnostic_units")]:::tabla
-  t18[("insurance.claim_adjudication_versions")]:::tabla
-  t21[("clinical.service_requests")]:::tabla
-  t22[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  e24>"~null"]:::evento
-  t26[("insurance.claim_disputes")]:::tabla
-  t30[("insurance.network_provider_memberships")]:::tabla
-  t31[("insurance.provider_networks")]:::tabla
-  t32[("practice.practitioner_role_assignments")]:::tabla
-  t34[("insurance.insurance_claims")]:::tabla
-  t35[("insurance.insurance_reconciliation_batches")]:::tabla
-  t36[("insurance.insurance_reconciliation_items")]:::tabla
-  t39[("insurance.claim_line_adjudications")]:::tabla
-  t40[("insurance.claim_reversals")]:::tabla
-  t41[("insurance.insurance_claim_lines")]:::tabla
-  t47[("insurance.insurance_plans")]:::tabla
-  t48[("insurance.insurance_products")]:::tabla
-  t51[("insurance.patient_coverages")]:::tabla
-  t59[("practice.practices")]:::tabla
+  t16[("insurance.practitioner_insurer_requests")]:::tabla
+  t17[("profiles.health_practitioner_profiles")]:::tabla
+  t18[("profiles.persons")]:::tabla
+  t22[("clinical.encounters")]:::tabla
+  t23[("diagnostic_units.diagnostic_units")]:::tabla
+  t24[("insurance.claim_adjudication_versions")]:::tabla
+  t27[("clinical.service_requests")]:::tabla
+  t28[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  e30>"~null"]:::evento
+  t32[("insurance.claim_disputes")]:::tabla
+  t36[("insurance.network_provider_memberships")]:::tabla
+  t37[("insurance.provider_networks")]:::tabla
+  t38[("practice.practitioner_role_assignments")]:::tabla
+  t44[("insurance.insurance_claims")]:::tabla
+  t45[("insurance.insurance_reconciliation_batches")]:::tabla
+  t46[("insurance.insurance_reconciliation_items")]:::tabla
+  t49[("insurance.claim_line_adjudications")]:::tabla
+  t50[("insurance.claim_reversals")]:::tabla
+  t51[("insurance.insurance_claim_lines")]:::tabla
+  t57[("insurance.insurance_plans")]:::tabla
+  t58[("insurance.insurance_products")]:::tabla
+  t61[("insurance.patient_coverages")]:::tabla
+  t69[("practice.practices")]:::tabla
   t7[("+10 tablas más")]
   t14[("+7 tablas más")]
   subgraph s0["ctrl:InsurerPatientsController · Operaciones de InsurerPatientsController que e…"]
@@ -723,40 +733,50 @@ flowchart LR
     o8["GET /insurance/patients/options"]:::op
     o11["POST /insurance/patients/search"]:::op
   end
-  t19[("+9 tablas más")]
-  t23[("+22 tablas más")]
-  subgraph s1["ctrl:InsurerReceivedClaimsController · Operaciones de InsurerReceivedClaimsCont…"]
-    o15["GET /insurance/received-claims"]:::op
-    o20["POST /insurance/received-claims/{id}/decision"]:::op
+  subgraph s1["ctrl:InsurerPractitionerRequestsController · Operaciones de InsurerPractitioner…"]
+    o15["GET /insurance/practitioner-requests"]:::op
+    o19["POST /insurance/practitioner-requests/{id}/approve"]:::op
+    o20["POST /insurance/practitioner-requests/{id}/reject"]:::op
   end
-  t27[("+13 tablas más")]
-  subgraph s2["ctrl:MyClaimsController · Operaciones de MyClaimsController que el README no as…"]
-    o25["GET /insurance/my-claims"]:::op
+  t25[("+9 tablas más")]
+  t29[("+22 tablas más")]
+  subgraph s2["ctrl:InsurerReceivedClaimsController · Operaciones de InsurerReceivedClaimsCont…"]
+    o21["GET /insurance/received-claims"]:::op
+    o26["POST /insurance/received-claims/{id}/decision"]:::op
   end
-  subgraph s3["ctrl:PractitionerInsuranceNetworksController · Operaciones de PractitionerInsur…"]
-    o28["GET /practitioners/{profileId}/insurance-networks"]:::op
+  t33[("+13 tablas más")]
+  subgraph s3["ctrl:MyClaimsController · Operaciones de MyClaimsController que el README no as…"]
+    o31["GET /insurance/my-claims"]:::op
   end
-  t37[("+4 tablas más")]
-  t42[("+7 tablas más")]
-  t44[("+5 tablas más")]
-  subgraph s4["ctrl:PractitionerSettlementBatchesController · Operaciones de PractitionerSettl…"]
-    o33["GET /practitioner-settlement-batches"]:::op
-    o38["POST /practitioner-settlement-batches"]:::op
-    o43["GET /practitioner-settlement-batches/{id}"]:::op
+  subgraph s4["ctrl:PractitionerInsuranceNetworksController · Operaciones de PractitionerInsur…"]
+    o34["GET /practitioners/{profileId}/insurance-networks"]:::op
   end
-  t49[("+8 tablas más")]
+  subgraph s5["ctrl:PractitionerInsurerRequestsController · Operaciones de PractitionerInsurer…"]
+    o39["GET /practitioners/me/insurer-requests"]:::op
+    o41["POST /practitioners/me/insurer-requests"]:::op
+    o42["POST /practitioners/me/insurer-requests/{id}/withdraw"]:::op
+  end
+  t47[("+4 tablas más")]
   t52[("+7 tablas más")]
-  t54[("+12 tablas más")]
-  t56[("+7 tablas más")]
-  subgraph s5["ctrl:PriorAuthController · Operaciones de PriorAuthController que el README no…"]
-    o45["POST /prior-authorization-requests"]:::op
-    o50["GET /prior-authorization-requests/{id}"]:::op
-    o53["POST /prior-authorization-requests/{id}/determinations"]:::op
-    o55["GET /prior-authorization-requests/inbox"]:::op
+  t54[("+5 tablas más")]
+  subgraph s6["ctrl:PractitionerSettlementBatchesController · Operaciones de PractitionerSettl…"]
+    o43["GET /practitioner-settlement-batches"]:::op
+    o48["POST /practitioner-settlement-batches"]:::op
+    o53["GET /practitioner-settlement-batches/{id}"]:::op
   end
-  subgraph s6["ctrl:ReconciliationController · Operaciones de ReconciliationController que el…"]
-    o57["POST /reconciliation-batches"]:::op
-    o60["POST /reconciliation-batches/{id}/items"]:::op
+  t59[("+8 tablas más")]
+  t62[("+7 tablas más")]
+  t64[("+12 tablas más")]
+  t66[("+7 tablas más")]
+  subgraph s7["ctrl:PriorAuthController · Operaciones de PriorAuthController que el README no…"]
+    o55["POST /prior-authorization-requests"]:::op
+    o60["GET /prior-authorization-requests/{id}"]:::op
+    o63["POST /prior-authorization-requests/{id}/determinations"]:::op
+    o65["GET /prior-authorization-requests/inbox"]:::op
+  end
+  subgraph s8["ctrl:ReconciliationController · Operaciones de ReconciliationController que el…"]
+    o67["POST /reconciliation-batches"]:::op
+    o70["POST /reconciliation-batches/{id}/items"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -778,102 +798,133 @@ flowchart LR
   o11 -->|"LEE"| t10
   o11 -.-> t14
   a2 --> o15
+  o15 -->|"LEE"| t9
+  o15 -->|"LEE"| t10
   o15 -->|"LEE"| t16
   o15 -->|"LEE"| t17
-  o15 -->|"LEE"| t9
-  o15 -->|"LEE"| t13
   o15 -->|"LEE"| t18
-  o15 -->|"LEE"| t10
-  o15 -.-> t19
+  a2 --> o19
+  o19 -->|"LEE"| t9
+  o19 -->|"LEE"| t10
+  o19 -->|"ACTUALIZA"| t16
+  o19 -->|"LEE"| t16
+  o19 -->|"LEE"| t17
+  o19 -->|"LEE"| t18
   a2 --> o20
-  o20 -->|"LEE"| t16
-  o20 -->|"LEE"| t21
-  o20 -->|"LEE"| t22
-  o20 -->|"LEE"| t17
   o20 -->|"LEE"| t9
-  o20 -->|"LEE"| t13
-  o20 -.-> t23
-  o20 -->|"evento"| e24
-  a2 --> o25
-  o25 -->|"LEE"| t16
-  o25 -->|"LEE"| t17
-  o25 -->|"LEE"| t13
-  o25 -->|"LEE"| t18
-  o25 -->|"LEE"| t26
-  o25 -->|"LEE"| t10
-  o25 -.-> t27
-  a29 --> o28
-  o28 -->|"LEE"| t10
-  o28 -->|"LEE"| t30
-  o28 -->|"LEE"| t31
-  o28 -->|"LEE"| t32
-  a2 --> o33
-  o33 -->|"LEE"| t17
-  o33 -->|"LEE"| t18
-  o33 -->|"LEE"| t10
-  o33 -->|"LEE"| t34
-  o33 -->|"LEE"| t35
-  o33 -->|"LEE"| t36
-  o33 -.-> t37
-  a2 --> o38
-  o38 -->|"LEE"| t9
-  o38 -->|"LEE"| t18
-  o38 -->|"LEE"| t39
-  o38 -->|"LEE"| t40
-  o38 -->|"LEE"| t10
-  o38 -->|"LEE"| t41
-  o38 -.-> t42
+  o20 -->|"LEE"| t10
+  o20 -->|"ACTUALIZA"| t16
+  o20 -->|"LEE"| t16
+  o20 -->|"LEE"| t17
+  o20 -->|"LEE"| t18
+  a2 --> o21
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t23
+  o21 -->|"LEE"| t9
+  o21 -->|"LEE"| t13
+  o21 -->|"LEE"| t24
+  o21 -->|"LEE"| t10
+  o21 -.-> t25
+  a2 --> o26
+  o26 -->|"LEE"| t22
+  o26 -->|"LEE"| t27
+  o26 -->|"LEE"| t28
+  o26 -->|"LEE"| t23
+  o26 -->|"LEE"| t9
+  o26 -->|"LEE"| t13
+  o26 -.-> t29
+  o26 -->|"evento"| e30
+  a2 --> o31
+  o31 -->|"LEE"| t22
+  o31 -->|"LEE"| t23
+  o31 -->|"LEE"| t13
+  o31 -->|"LEE"| t24
+  o31 -->|"LEE"| t32
+  o31 -->|"LEE"| t10
+  o31 -.-> t33
+  a35 --> o34
+  o34 -->|"LEE"| t10
+  o34 -->|"LEE"| t36
+  o34 -->|"LEE"| t37
+  o34 -->|"LEE"| t38
+  a40 --> o39
+  o39 -->|"LEE"| t10
+  o39 -->|"LEE"| t16
+  a40 --> o41
+  o41 -->|"LEE"| t10
+  o41 -->|"CREA"| t16
+  o41 -->|"LEE"| t16
+  a40 --> o42
+  o42 -->|"LEE"| t10
+  o42 -->|"ACTUALIZA"| t16
+  o42 -->|"LEE"| t16
   a2 --> o43
-  o43 -->|"LEE"| t17
-  o43 -->|"LEE"| t9
-  o43 -->|"LEE"| t18
+  o43 -->|"LEE"| t23
+  o43 -->|"LEE"| t24
   o43 -->|"LEE"| t10
-  o43 -->|"LEE"| t34
-  o43 -->|"LEE"| t35
-  o43 -.-> t44
-  a46 --> o45
-  o45 -->|"LEE"| t21
-  o45 -->|"LEE"| t22
-  o45 -->|"LEE"| t17
-  o45 -->|"LEE"| t9
-  o45 -->|"LEE"| t47
-  o45 -->|"LEE"| t48
-  o45 -.-> t49
-  a46 --> o50
-  o50 -->|"LEE"| t22
-  o50 -->|"LEE"| t9
-  o50 -->|"LEE"| t10
-  o50 -->|"LEE"| t47
-  o50 -->|"LEE"| t48
-  o50 -->|"LEE"| t51
-  o50 -.-> t52
-  a46 --> o53
-  o53 -->|"LEE"| t21
-  o53 -->|"LEE"| t22
-  o53 -->|"LEE"| t17
+  o43 -->|"LEE"| t44
+  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t46
+  o43 -.-> t47
+  a2 --> o48
+  o48 -->|"LEE"| t9
+  o48 -->|"LEE"| t24
+  o48 -->|"LEE"| t49
+  o48 -->|"LEE"| t50
+  o48 -->|"LEE"| t10
+  o48 -->|"LEE"| t51
+  o48 -.-> t52
+  a2 --> o53
+  o53 -->|"LEE"| t23
   o53 -->|"LEE"| t9
+  o53 -->|"LEE"| t24
   o53 -->|"LEE"| t10
-  o53 -->|"LEE"| t47
+  o53 -->|"LEE"| t44
+  o53 -->|"LEE"| t45
   o53 -.-> t54
-  a46 --> o55
-  o55 -->|"LEE"| t22
+  a56 --> o55
+  o55 -->|"LEE"| t27
+  o55 -->|"LEE"| t28
+  o55 -->|"LEE"| t23
   o55 -->|"LEE"| t9
-  o55 -->|"LEE"| t10
-  o55 -->|"LEE"| t47
-  o55 -->|"LEE"| t48
-  o55 -->|"LEE"| t51
-  o55 -.-> t56
-  a58 --> o57
-  o57 -->|"LEE"| t10
-  o57 -->|"CREA"| t35
-  o57 -->|"LEE"| t59
-  a58 --> o60
-  o60 -->|"LEE"| t18
+  o55 -->|"LEE"| t57
+  o55 -->|"LEE"| t58
+  o55 -.-> t59
+  a56 --> o60
+  o60 -->|"LEE"| t28
+  o60 -->|"LEE"| t9
   o60 -->|"LEE"| t10
-  o60 -->|"LEE"| t34
-  o60 -->|"LEE"| t35
-  o60 -->|"CREA"| t36
-  o60 -->|"LEE"| t59
+  o60 -->|"LEE"| t57
+  o60 -->|"LEE"| t58
+  o60 -->|"LEE"| t61
+  o60 -.-> t62
+  a56 --> o63
+  o63 -->|"LEE"| t27
+  o63 -->|"LEE"| t28
+  o63 -->|"LEE"| t23
+  o63 -->|"LEE"| t9
+  o63 -->|"LEE"| t10
+  o63 -->|"LEE"| t57
+  o63 -.-> t64
+  a56 --> o65
+  o65 -->|"LEE"| t28
+  o65 -->|"LEE"| t9
+  o65 -->|"LEE"| t10
+  o65 -->|"LEE"| t57
+  o65 -->|"LEE"| t58
+  o65 -->|"LEE"| t61
+  o65 -.-> t66
+  a68 --> o67
+  o67 -->|"LEE"| t10
+  o67 -->|"CREA"| t45
+  o67 -->|"LEE"| t69
+  a68 --> o70
+  o70 -->|"LEE"| t24
+  o70 -->|"LEE"| t10
+  o70 -->|"LEE"| t44
+  o70 -->|"LEE"| t45
+  o70 -->|"CREA"| t46
+  o70 -->|"LEE"| t69
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -5151,7 +5202,191 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. GET /insurance/received-claims
+#### 47. GET /insurance/practitioner-requests
+
+Solicitudes de profesionales que piden trabajar con la aseguradora activa
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {accessDenied} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerInsurerRequestsService.listReceived"]:::llamada
+  n2 --> n3
+  n4["Llama a InsurerContextService.resolve"]:::llamada
+  n3 --> n4
+  n5["Llama a CatalogRepository.findCarrierByTenantId"]:::llamada
+  n4 --> n5
+  n6[("LEE insurance.insurance_carriers")]:::efecto
+  n5 --> n6
+  n7{"!carrier"}:::decision
+  n6 --> n7
+  n8(["403 FORBIDDEN {accessDenied}"]):::error
+  n7 -->|"sí"| n8
+  n9{"!canAdminister && !hasRole"}:::decision
+  n7 -->|"no"| n9
+  n10(["403 FORBIDDEN {accessDenied}"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a PractitionerInsurerRequestsRepository.listByCarrier"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE insurance.practitioner_insurer_requests")]:::efecto
+  n11 --> n12
+  n13["Llama a PractitionerInsurerRequestsRepository.findPractitionerCards"]:::llamada
+  n12 --> n13
+  n14[("LEE profiles.persons · LEE profiles.health_practitioner_profiles")]:::efecto
+  n13 --> n14
+  n15(("200 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 48. POST /insurance/practitioner-requests/{id}/approve
+
+Aprobar la solicitud de un profesional
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {accessDenied} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud ya fue decidida o retirada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerInsurerRequestsService.approve"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerInsurerRequestsService.decide"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a InsurerContextService.resolve"]:::llamada
+  n5 --> n6
+  n7["Llama a CatalogRepository.findCarrierByTenantId"]:::llamada
+  n6 --> n7
+  n8[("LEE insurance.insurance_carriers")]:::efecto
+  n7 --> n8
+  n9{"!carrier"}:::decision
+  n8 --> n9
+  n10(["403 FORBIDDEN {accessDenied}"]):::error
+  n9 -->|"sí"| n10
+  n11{"!canAdminister && !hasRole"}:::decision
+  n9 -->|"no"| n11
+  n12(["403 FORBIDDEN {accessDenied}"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PractitionerInsurerRequestsRepository.findForCarrier"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE insurance.practitioner_insurer_requests")]:::efecto
+  n13 --> n14
+  n15{"!row"}:::decision
+  n14 --> n15
+  n16(["404 NOT_FOUND Solicitud no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17{"row.statusConceptId !== INS.PRACTITIONER_REQUEST_PENDING"}:::decision
+  n15 -->|"no"| n17
+  n18(["422 PRECONDITION_FAILED La solicitud ya fue decidida o retirada"]):::error
+  n17 -->|"sí"| n18
+  n19[("ACTUALIZA insurance.practitioner_insurer_requests · ACTUALIZA insurance.practitioner_insurer_requests · ACTUA…")]:::efecto
+  n17 -->|"no"| n19
+  n20["Llama a PractitionerInsurerRequestsRepository.findPractitionerCards"]:::llamada
+  n19 --> n20
+  n21[("LEE profiles.persons · LEE profiles.health_practitioner_profiles")]:::efecto
+  n20 --> n21
+  n22(("200 Responde con éxito")):::ok
+  n21 --> n22
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 49. POST /insurance/practitioner-requests/{id}/reject
+
+Rechazar la solicitud de un profesional
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {accessDenied} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La solicitud ya fue decidida o retirada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerInsurerRequestsService.reject"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerInsurerRequestsService.decide"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a InsurerContextService.resolve"]:::llamada
+  n5 --> n6
+  n7["Llama a CatalogRepository.findCarrierByTenantId"]:::llamada
+  n6 --> n7
+  n8[("LEE insurance.insurance_carriers")]:::efecto
+  n7 --> n8
+  n9{"!carrier"}:::decision
+  n8 --> n9
+  n10(["403 FORBIDDEN {accessDenied}"]):::error
+  n9 -->|"sí"| n10
+  n11{"!canAdminister && !hasRole"}:::decision
+  n9 -->|"no"| n11
+  n12(["403 FORBIDDEN {accessDenied}"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PractitionerInsurerRequestsRepository.findForCarrier"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE insurance.practitioner_insurer_requests")]:::efecto
+  n13 --> n14
+  n15{"!row"}:::decision
+  n14 --> n15
+  n16(["404 NOT_FOUND Solicitud no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17{"row.statusConceptId !== INS.PRACTITIONER_REQUEST_PENDING"}:::decision
+  n15 -->|"no"| n17
+  n18(["422 PRECONDITION_FAILED La solicitud ya fue decidida o retirada"]):::error
+  n17 -->|"sí"| n18
+  n19[("ACTUALIZA insurance.practitioner_insurer_requests · ACTUALIZA insurance.practitioner_insurer_requests · ACTUA…")]:::efecto
+  n17 -->|"no"| n19
+  n20["Llama a PractitionerInsurerRequestsRepository.findPractitionerCards"]:::llamada
+  n19 --> n20
+  n21[("LEE profiles.persons · LEE profiles.health_practitioner_profiles")]:::efecto
+  n20 --> n21
+  n22(("200 Responde con éxito")):::ok
+  n21 --> n22
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 50. GET /insurance/received-claims
 
 Solicitudes de seguro recibidas por la aseguradora activa
 
@@ -5247,7 +5482,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. POST /insurance/received-claims/{id}/decision
+#### 51. POST /insurance/received-claims/{id}/decision
 
 Dictaminar una solicitud recibida (definitivo)
 
@@ -5419,7 +5654,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. POST /patient-coverages
+#### 52. POST /patient-coverages
 
 Registrar cobertura de paciente y dependientes
 
@@ -5491,7 +5726,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. GET /patient-coverages/by-patient/{patientProfileId}
+#### 53. GET /patient-coverages/by-patient/{patientProfileId}
 
 Seguros de una persona, para quien cobra
 
@@ -5536,7 +5771,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. GET /practitioner-settlement-batches
+#### 54. GET /practitioner-settlement-batches
 
 Listar los lotes de liquidación del alcance del actor
 
@@ -5610,7 +5845,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. POST /practitioner-settlement-batches
+#### 55. POST /practitioner-settlement-batches
 
 Generar (o repetir) el lote de liquidación del período
 
@@ -5720,7 +5955,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 53. GET /practitioner-settlement-batches/{id}
+#### 56. GET /practitioner-settlement-batches/{id}
 
 Consultar un lote de liquidación
 
@@ -5808,7 +6043,199 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 54. POST /prior-authorization-requests
+#### 57. GET /practitioners/me/insurer-requests
+
+Mis solicitudes a aseguradoras
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerInsurerRequestsService.listOwn"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerInsurerRequestsService.requirePractitioner"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Llama a PractitionerInsurerRequestsRepository.listByPractitioner"]:::llamada
+  n5 -->|"no"| n7
+  n8[("LEE insurance.practitioner_insurer_requests")]:::efecto
+  n7 --> n8
+  n9["Llama a PractitionerInsurerRequestsService.carrierMap"]:::llamada
+  n8 --> n9
+  n10["Llama a PractitionerInsurerRequestsRepository.findCarriers"]:::llamada
+  n9 --> n10
+  n11[("LEE insurance.insurance_carriers")]:::efecto
+  n10 --> n11
+  n12(("200 Responde con éxito")):::ok
+  n11 --> n12
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 58. POST /practitioners/me/insurer-requests
+
+Pedir trabajar con aseguradoras
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: Ya pidió trabajar con esas aseguradoras |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: Alguna de las aseguradoras indicadas no existe o no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerInsurerRequestsService.requestOwn"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerInsurerRequestsService.requirePractitioner"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Intenta"]:::intento
+  n5 -->|"no"| n7
+  n8["Llama a PractitionerInsurerRequestsService.requestWithin"]:::llamada
+  n7 --> n8
+  n9["Llama a PractitionerInsurerRequestsRepository.findCarriers"]:::llamada
+  n8 --> n9
+  n10[("LEE insurance.insurance_carriers")]:::efecto
+  n9 --> n10
+  n11{"unknown.length › 0"}:::decision
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED Alguna de las aseguradoras indicadas no existe o no está activa"]):::error
+  n11 -->|"sí"| n12
+  n13["Repite: por cada const carrierId de carrierIds"]:::bucle
+  n11 -->|"no"| n13
+  n14["Llama a PractitionerInsurerRequestsRepository.findLivePair"]:::llamada
+  n13 -->|"cada elemento"| n14
+  n15[("LEE insurance.practitioner_insurer_requests")]:::efecto
+  n14 --> n15
+  n16["Llama a PractitionerInsurerRequestsRepository.create"]:::llamada
+  n15 --> n16
+  n17[("CREA insurance.practitioner_insurer_requests")]:::efecto
+  n16 --> n17
+  n18{"error instanceof UniqueConstraintViolationException"}:::decision
+  n7 -->|"si falla"| n18
+  n19(["409 CONFLICT Ya pidió trabajar con esas aseguradoras"]):::error
+  n18 -->|"sí"| n19
+  n20(["↩ (relanza el error capturado)"]):::error
+  n18 -->|"no"| n20
+  n21{"result.requested.length === 0"}:::decision
+  n17 --> n21
+  n13 -->|"al terminar"| n21
+  n22(["409 CONFLICT Ya pidió trabajar con esas aseguradoras"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a PractitionerInsurerRequestsService.listOwn"]:::llamada
+  n21 -->|"no"| n23
+  n24["Llama a PractitionerInsurerRequestsService.requirePractitioner"]:::llamada
+  n23 --> n24
+  n25{"!actor.practitionerProfileId"}:::decision
+  n24 --> n25
+  n26(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a PractitionerInsurerRequestsRepository.listByPractitioner"]:::llamada
+  n25 -->|"no"| n27
+  n28[("LEE insurance.practitioner_insurer_requests")]:::efecto
+  n27 --> n28
+  n29["Llama a PractitionerInsurerRequestsService.carrierMap"]:::llamada
+  n28 --> n29
+  n30["Llama a PractitionerInsurerRequestsRepository.findCarriers"]:::llamada
+  n29 --> n30
+  n31[("LEE insurance.insurance_carriers")]:::efecto
+  n30 --> n31
+  n32(("201 Responde con éxito")):::ok
+  n31 --> n32
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 59. POST /practitioners/me/insurer-requests/{id}/withdraw
+
+Retirar una solicitud pendiente a una aseguradora
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Solicitud no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene un perfil profesional asociado; PreconditionFailedException: Sólo se puede retirar una solicitud pendiente |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a PractitionerInsurerRequestsService.withdrawOwn"]:::llamada
+  n2 --> n3
+  n4["Llama a PractitionerInsurerRequestsService.requirePractitioner"]:::llamada
+  n3 --> n4
+  n5{"!actor.practitionerProfileId"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED La cuenta no tiene un perfil profesional asociado"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a PractitionerInsurerRequestsRepository.findOwn"]:::llamada
+  n7 --> n8
+  n9[("LEE insurance.practitioner_insurer_requests")]:::efecto
+  n8 --> n9
+  n10{"!row"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Solicitud no encontrada"]):::error
+  n10 -->|"sí"| n11
+  n12{"row.statusConceptId !== INS.PRACTITIONER_REQUEST_PENDING"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED Sólo se puede retirar una solicitud pendiente"]):::error
+  n12 -->|"sí"| n13
+  n14[("ACTUALIZA insurance.practitioner_insurer_requests · ACTUALIZA insurance.practitioner_insurer_requests · ACTUA…")]:::efecto
+  n12 -->|"no"| n14
+  n15["Llama a PractitionerInsurerRequestsService.carrierMap"]:::llamada
+  n14 --> n15
+  n16["Llama a PractitionerInsurerRequestsRepository.findCarriers"]:::llamada
+  n15 --> n16
+  n17[("LEE insurance.insurance_carriers")]:::efecto
+  n16 --> n17
+  n18(("200 Responde con éxito")):::ok
+  n17 --> n18
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 60. POST /prior-authorization-requests
 
 Solicitar autorización previa con items
 
@@ -5979,7 +6406,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 55. GET /prior-authorization-requests/{id}
+#### 61. GET /prior-authorization-requests/{id}
 
 Detalle de una solicitud de aprobación (aseguradora)
 
@@ -6076,7 +6503,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 56. POST /prior-authorization-requests/{id}/determinations
+#### 62. POST /prior-authorization-requests/{id}/determinations
 
 Emitir determinación de autorización previa
 
@@ -6232,7 +6659,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 57. GET /prior-authorization-requests/inbox
+#### 63. GET /prior-authorization-requests/inbox
 
 Bandeja de solicitudes de aprobación (aseguradora)
 
@@ -6314,7 +6741,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 58. POST /provider-networks
+#### 64. POST /provider-networks
 
 Alta de red de prestadores (soporte)
 
@@ -6358,7 +6785,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 59. POST /provider-networks/{id}/memberships
+#### 65. POST /provider-networks/{id}/memberships
 
 Alta de membresía de prestador en la red
 
@@ -6411,7 +6838,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 60. GET /public/portability/verify/{manifestHash}
+#### 66. GET /public/portability/verify/{manifestHash}
 
 Verificar la autenticidad de un certificado de portabilidad por su sello
 
@@ -6459,7 +6886,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 61. POST /reconciliation-batches
+#### 67. POST /reconciliation-batches
 
 Abrir lote de conciliación
 
@@ -6504,7 +6931,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 62. POST /reconciliation-batches/{id}/items
+#### 68. POST /reconciliation-batches/{id}/items
 
 Agregar ítem de conciliación al lote
 

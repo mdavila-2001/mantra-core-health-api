@@ -3,12 +3,12 @@
 # Flujos del módulo `clinical`
 
 - **Procesos:** 1 · **Máquinas de estado:** 1
-- **Operaciones:** 42 (38 con decisiones propias, 4 sin ellas)
+- **Operaciones:** 62 (58 con decisiones propias, 4 sin ellas)
 - Inventario de endpoints del módulo: [clinical](../endpoints/clinical.md)
 
 ## Proceso: Módulo Clinical (08) — Core Clinical Record, Orders & Encounter Logistics
 
-- **Código:** `clinical` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 42
+- **Código:** `clinical` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 62
 - **Actores:** CLINICIAN · Cualquier sesión válida · PATIENT · PRACTITIONER · Público (sin sesión) · SECURITY_ADMIN · SYSTEM · SYSTEM_WORKER
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/clinical/README.md`
@@ -23,18 +23,38 @@ _Fuente: `src/modules/clinical/README.md:3`_
 
 | Etapa | Descripción | Operación | Quién actúa | Riesgo | Tablas |
 |---|---|---|---|---|---|
+| `ctrl:ClinicalAdtController` | Operaciones de ClinicalAdtController que el README no asigna a un caso de uso | POST /clinical/admissions | Cualquier sesión válida | ALTO | 29 |
+|  |  | POST /clinical/bed-compatibility | Cualquier sesión válida | BAJO | 16 |
+|  |  | POST /clinical/bed-swaps | Cualquier sesión válida | ALTO | 21 |
+|  |  | POST /clinical/encounter-locations/{id}/cancel | Cualquier sesión válida | ALTO | 13 |
+|  |  | POST /clinical/encounters/{id}/bed-assignment | Cualquier sesión válida | ALTO | 21 |
+|  |  | POST /clinical/encounters/{id}/bed-compatibility | Cualquier sesión válida | BAJO | 13 |
+|  |  | POST /clinical/encounters/{id}/discharge | Cualquier sesión válida | ALTO | 26 |
+|  |  | GET /clinical/encounters/{id}/stay | Cualquier sesión válida | BAJO | 28 |
+|  |  | POST /clinical/encounters/{id}/transfer | Cualquier sesión válida | ALTO | 21 |
+|  |  | GET /clinical/patients/{id}/inpatient-stay | Cualquier sesión válida | BAJO | 30 |
+|  |  | PATCH /clinical/placement-incidents/{id} | Cualquier sesión válida | ALTO | 12 |
+|  |  | GET /sites/{siteId}/attending-practitioners | Cualquier sesión válida | BAJO | 9 |
+|  |  | GET /sites/{siteId}/inpatients | Cualquier sesión válida | BAJO | 9 |
+| `ctrl:ClinicalCensusController` | Operaciones de ClinicalCensusController que el README no asigna a un caso de uso | POST /census-days/{id}/adjustments | Cualquier sesión válida | ALTO | 13 |
+|  |  | POST /internal/clinical/census-close-tick | SYSTEM · SYSTEM_WORKER | MEDIO | 15 |
+|  |  | GET /sites/{siteId}/census | Cualquier sesión válida | BAJO | 11 |
+|  |  | POST /sites/{siteId}/census/{date}/close | Cualquier sesión válida | ALTO | 15 |
+|  |  | GET /sites/{siteId}/inpatient-indicators | Cualquier sesión válida | BAJO | 10 |
 | `ctrl:ClinicalEncountersController` | Operaciones de ClinicalEncountersController que el README no asigna a un caso de uso | POST /clinical/care-episodes | CLINICIAN · PRACTITIONER | MEDIO | 2 |
 |  |  | GET /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER · PATIENT | BAJO | 22 |
 |  |  | POST /clinical/encounters/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 21 |
 |  |  | POST /clinical/encounters/{id}/close | CLINICIAN · PRACTITIONER | MEDIO | 40 |
-|  |  | POST /clinical/encounters/check-in | CLINICIAN · PRACTITIONER | MEDIO | 29 |
+|  |  | POST /clinical/encounters/check-in | CLINICIAN · PRACTITIONER | MEDIO | 31 |
 | `ctrl:ClinicalMedicalAspectsController` | Operaciones de ClinicalMedicalAspectsController que el README no asigna a un caso de uso | GET /clinical/me/medical-aspects | Cualquier sesión válida | BAJO | 3 |
 |  |  | PUT /clinical/me/medical-aspects | Cualquier sesión válida | ALTO | 4 |
 | `ctrl:ClinicalObservationsController` | Operaciones de ClinicalObservationsController que el README no asigna a un caso de uso | POST /clinical/observations | CLINICIAN · PRACTITIONER | MEDIO | 7 |
 |  |  | PATCH /clinical/observations/{id}/amend | CLINICIAN · PRACTITIONER | MEDIO | 20 |
 | `ctrl:ClinicalOrdersController` | Operaciones de ClinicalOrdersController que el README no asigna a un caso de uso | POST /clinical/diagnostic-reports | CLINICIAN · PRACTITIONER | MEDIO | 3 |
 |  |  | POST /clinical/diagnostic-reports/{id}/release | CLINICIAN · PRACTITIONER | BAJO | 17 |
-|  |  | POST /clinical/service-requests | CLINICIAN · PRACTITIONER | MEDIO | 29 |
+|  |  | POST /clinical/requisitions | CLINICIAN · PRACTITIONER | MEDIO | 37 |
+|  |  | POST /clinical/service-requests | CLINICIAN · PRACTITIONER | MEDIO | 36 |
+|  |  | GET /clinical/service-requests/{id} | CLINICIAN · PRACTITIONER | BAJO | 24 |
 |  |  | POST /clinical/service-requests/duplicate-check | CLINICIAN · PRACTITIONER | BAJO | 26 |
 | `ctrl:ClinicalPrescriptionExpiryController` | Operaciones de ClinicalPrescriptionExpiryController que el README no asigna a un caso de uso | POST /clinical/internal/prescription-expiry-notices | SYSTEM · SYSTEM_WORKER | MEDIO | 13 |
 | `ctrl:ClinicalPrescriptionPoliciesController` | Operaciones de ClinicalPrescriptionPoliciesController que el README no asigna a un caso de uso | GET /clinical/prescription-signature-policies | CLINICIAN · SECURITY_ADMIN | BAJO | 1 |
@@ -66,261 +86,523 @@ _Fuente: `src/modules/clinical/README.md:3`_
 |  |  | POST /clinical/procedures | CLINICIAN · PRACTITIONER | MEDIO | 7 |
 |  |  | POST /clinical/procedures/{id}/attachments | CLINICIAN · PRACTITIONER | MEDIO | 21 |
 
-### Diagrama 1 de 2 — etapas `ctrl:ClinicalEncountersController`, `ctrl:ClinicalMedicalAspectsController`, `ctrl:ClinicalObservationsController`…
+### Diagrama 1 de 3 — etapas `ctrl:ClinicalAdtController`, `ctrl:ClinicalCensusController`, `ctrl:ClinicalEncountersController`…
 
 ```mermaid
 flowchart LR
-  a2(["CLINICIAN · PRACTITIONER"]):::actor
-  a5(["CLINICIAN · PRACTITIONER · PATIENT"]):::actor
-  a23(["Cualquier sesión válida"]):::actor
-  a52(["SYSTEM · SYSTEM_WORKER"]):::actor
-  a59(["CLINICIAN · SECURITY_ADMIN"]):::actor
-  a66(["Público (sin sesión)"]):::actor
-  a69(["PATIENT"]):::actor
-  t3[("clinical.care_episodes")]:::tabla
-  t6[("authz.access_policies")]:::tabla
-  t7[("authz.care_relationships")]:::tabla
-  t8[("authz.clinical_access_grants")]:::tabla
-  t9[("authz.field_permissions")]:::tabla
-  t10[("authz.patient_legal_representations")]:::tabla
-  t11[("authz.permissions")]:::tabla
-  t18[("audit.audit_log")]:::tabla
-  t19[("billing.invoices")]:::tabla
-  t20[("clinical.appointments")]:::tabla
-  t24[("clinical.patient_reported_health_statements")]:::tabla
-  t25[("profiles.patient_profiles")]:::tabla
-  t26[("profiles.person_account_links")]:::tabla
-  t29[("clinical.encounters")]:::tabla
-  t30[("clinical.observation_components")]:::tabla
-  t31[("clinical.observation_notes")]:::tabla
-  t32[("clinical.observation_performers")]:::tabla
-  t33[("clinical.observation_reference_ranges")]:::tabla
-  t34[("clinical.observations")]:::tabla
-  t39[("clinical.diagnostic_reports")]:::tabla
-  t40[("clinical.service_requests")]:::tabla
-  t44[("billing.service_catalog")]:::tabla
-  t45[("chart.clinical_note_headers")]:::tabla
-  t46[("clinical.service_request_notes")]:::tabla
-  e48>"ServiceRequestPlaced"]:::evento
-  t53[("clinical.medication_requests")]:::tabla
-  t54[("iam.devices")]:::tabla
-  t55[("messaging.in_app_notifications")]:::tabla
-  t56[("messaging.message_channels")]:::tabla
-  t60[("clinical.prescription_signature_policies")]:::tabla
-  t67[("profiles.jurisdiction_authorizations")]:::tabla
-  t70[("common.addresses")]:::tabla
-  t71[("practice.healthcare_services")]:::tabla
-  t72[("practice.practice_sites")]:::tabla
-  t73[("practice.practices")]:::tabla
-  t76[("billing.invoice_lines")]:::tabla
-  t77[("clinical.received_services")]:::tabla
-  t78[("procedures_perioperative.procedure_cases")]:::tabla
-  t79[("procedures_perioperative.procedure_charge_items")]:::tabla
-  t81[("audit.conditions_history")]:::tabla
-  t82[("audit.data_access_log")]:::tabla
-  t83[("clinical.allergy_intolerances")]:::tabla
-  t84[("clinical.allergy_reactions")]:::tabla
-  t85[("clinical.conditions")]:::tabla
-  t12[("+16 tablas más")]
-  t14[("+15 tablas más")]
-  t16[("+34 tablas más")]
-  t21[("+23 tablas más")]
-  subgraph s0["ctrl:ClinicalEncountersController · Operaciones de ClinicalEncountersController…"]
-    o1["POST /clinical/care-episodes"]:::op
-    o4["GET /clinical/encounters/{id}/attachments"]:::op
-    o13["POST /clinical/encounters/{id}/attachments"]:::op
-    o15["POST /clinical/encounters/{id}/close"]:::op
-    o17["POST /clinical/encounters/check-in"]:::op
-  end
-  subgraph s1["ctrl:ClinicalMedicalAspectsController · Operaciones de ClinicalMedicalAspectsCo…"]
-    o22["GET /clinical/me/medical-aspects"]:::op
-    o27["PUT /clinical/me/medical-aspects"]:::op
-  end
-  t35[("+1 tablas más")]
-  t37[("+14 tablas más")]
-  subgraph s2["ctrl:ClinicalObservationsController · Operaciones de ClinicalObservationsContro…"]
-    o28["POST /clinical/observations"]:::op
-    o36["PATCH /clinical/observations/{id}/amend"]:::op
-  end
-  t42[("+11 tablas más")]
-  t47[("+23 tablas más")]
-  t50[("+20 tablas más")]
-  subgraph s3["ctrl:ClinicalOrdersController · Operaciones de ClinicalOrdersController que el…"]
-    o38["POST /clinical/diagnostic-reports"]:::op
-    o41["POST /clinical/diagnostic-reports/{id}/release"]:::op
-    o43["POST /clinical/service-requests"]:::op
-    o49["POST /clinical/service-requests/duplicate-check"]:::op
+  a2(["Cualquier sesión válida"]):::actor
+  a59(["SYSTEM · SYSTEM_WORKER"]):::actor
+  a69(["CLINICIAN · PRACTITIONER"]):::actor
+  a71(["CLINICIAN · PRACTITIONER · PATIENT"]):::actor
+  t3[("clinical_ext.referrals")]:::tabla
+  t4[("clinical.care_episodes")]:::tabla
+  t5[("clinical.encounter_locations")]:::tabla
+  e7>"~eventType"]:::evento
+  t9[("clinical.encounters")]:::tabla
+  t10[("clinical.patient_admission_footprints")]:::tabla
+  t11[("delegated_access.organization_user_assignments")]:::tabla
+  t12[("directory.branch_memberships")]:::tabla
+  t13[("directory.tenant_memberships")]:::tabla
+  t16[("clinical.placement_incidents")]:::tabla
+  t23[("practice.care_spaces")]:::tabla
+  t26[("chart.care_plan_activities")]:::tabla
+  t27[("chart.care_plans")]:::tabla
+  t28[("chart.clinical_note_headers")]:::tabla
+  t29[("chart.clinical_note_versions")]:::tabla
+  t30[("chart.document_record_files")]:::tabla
+  t31[("chart.document_records")]:::tabla
+  t34[("authz.access_policies")]:::tabla
+  t35[("authz.care_relationships")]:::tabla
+  t36[("authz.clinical_access_grants")]:::tabla
+  t37[("authz.field_permissions")]:::tabla
+  t38[("authz.patient_legal_representations")]:::tabla
+  t39[("authz.permissions")]:::tabla
+  t46[("messaging.domain_events")]:::tabla
+  t49[("practice.clinical_units")]:::tabla
+  t50[("practice.practice_sites")]:::tabla
+  t55[("clinical.inpatient_census_adjustments")]:::tabla
+  t56[("clinical.inpatient_census_days")]:::tabla
+  t60[("clinical.inpatient_census_entries")]:::tabla
+  t78[("audit.audit_log")]:::tabla
+  t79[("billing.invoices")]:::tabla
+  t80[("clinical.appointments")]:::tabla
+  t83[("clinical.patient_reported_health_statements")]:::tabla
+  t84[("profiles.patient_profiles")]:::tabla
+  t85[("profiles.person_account_links")]:::tabla
+  t6[("+23 tablas más")]
+  t14[("+10 tablas más")]
+  t17[("+15 tablas más")]
+  t19[("+7 tablas más")]
+  t21[("+15 tablas más")]
+  t24[("+7 tablas más")]
+  t32[("+20 tablas más")]
+  t40[("+22 tablas más")]
+  t42[("+15 tablas más")]
+  t44[("+24 tablas más")]
+  t47[("+6 tablas más")]
+  t51[("+3 tablas más")]
+  t53[("+3 tablas más")]
+  subgraph s0["ctrl:ClinicalAdtController · Operaciones de ClinicalAdtController que el README…"]
+    o1["POST /clinical/admissions"]:::op
+    o8["POST /clinical/bed-compatibility"]:::op
+    o15["POST /clinical/bed-swaps"]:::op
+    o18["POST /clinical/encounter-locations/{id}/cancel"]:::op
+    o20["POST /clinical/encounters/{id}/bed-assignment"]:::op
+    o22["POST /clinical/encounters/{id}/bed-compatibility"]:::op
+    o25["POST /clinical/encounters/{id}/discharge"]:::op
+    o33["GET /clinical/encounters/{id}/stay"]:::op
+    o41["POST /clinical/encounters/{id}/transfer"]:::op
+    o43["GET /clinical/patients/{id}/inpatient-stay"]:::op
+    o45["PATCH /clinical/placement-incidents/{id}"]:::op
+    o48["GET /sites/{siteId}/attending-practitioners"]:::op
+    o52["GET /sites/{siteId}/inpatients"]:::op
   end
   t57[("+7 tablas más")]
-  subgraph s4["ctrl:ClinicalPrescriptionExpiryController · Operaciones de ClinicalPrescription…"]
-    o51["POST /clinical/internal/prescription-expiry-notices"]:::op
+  t61[("+9 tablas más")]
+  t63[("+5 tablas más")]
+  t65[("+9 tablas más")]
+  t67[("+4 tablas más")]
+  subgraph s1["ctrl:ClinicalCensusController · Operaciones de ClinicalCensusController que el…"]
+    o54["POST /census-days/{id}/adjustments"]:::op
+    o58["POST /internal/clinical/census-close-tick"]:::op
+    o62["GET /sites/{siteId}/census"]:::op
+    o64["POST /sites/{siteId}/census/{date}/close"]:::op
+    o66["GET /sites/{siteId}/inpatient-indicators"]:::op
   end
-  subgraph s5["ctrl:ClinicalPrescriptionPoliciesController · Operaciones de ClinicalPrescripti…"]
-    o58["GET /clinical/prescription-signature-policies"]:::op
-    o61["POST /clinical/prescription-signature-policies"]:::op
-    o62["POST /clinical/prescription-signature-policies/{id}/deactivate"]:::op
+  t72[("+16 tablas más")]
+  t74[("+15 tablas más")]
+  t76[("+34 tablas más")]
+  t81[("+25 tablas más")]
+  subgraph s2["ctrl:ClinicalEncountersController · Operaciones de ClinicalEncountersController…"]
+    o68["POST /clinical/care-episodes"]:::op
+    o70["GET /clinical/encounters/{id}/attachments"]:::op
+    o73["POST /clinical/encounters/{id}/attachments"]:::op
+    o75["POST /clinical/encounters/{id}/close"]:::op
+    o77["POST /clinical/encounters/check-in"]:::op
   end
-  t64[("+24 tablas más")]
-  subgraph s6["ctrl:ClinicalPrescriptionsController · Operaciones de ClinicalPrescriptionsCont…"]
-    o63["GET /clinical/prescriptions/{id}/pdf"]:::op
-  end
-  subgraph s7["ctrl:ClinicalPrescriptionsPublicController · Operaciones de ClinicalPrescriptio…"]
-    o65["GET /public/prescriptions/{id}/verify"]:::op
-  end
-  t74[("+1 tablas más")]
-  subgraph s8["ctrl:ClinicalProcedureCentersController · Operaciones de ClinicalProcedureCente…"]
-    o68["GET /clinical/me/procedure-centers"]:::op
-  end
-  t86[("+3 tablas más")]
-  subgraph s9["ctrl:ClinicalReadController · Operaciones de ClinicalReadController que el READ…"]
-    o75["GET /clinical/patients/{patientProfileId}/received-services"]:::op
-    o80["GET /clinical/patients/{patientProfileId}/summary"]:::op
+  subgraph s3["ctrl:ClinicalMedicalAspectsController · Operaciones de ClinicalMedicalAspectsCo…"]
+    o82["GET /clinical/me/medical-aspects"]:::op
+    o86["PUT /clinical/me/medical-aspects"]:::op
   end
   a2 --> o1
-  o1 -->|"CREA"| t3
   o1 -->|"LEE"| t3
-  a5 --> o4
-  o4 -->|"LEE"| t6
-  o4 -->|"LEE"| t7
-  o4 -->|"LEE"| t8
-  o4 -->|"LEE"| t9
-  o4 -->|"LEE"| t10
-  o4 -->|"LEE"| t11
-  o4 -.-> t12
-  a2 --> o13
-  o13 -->|"LEE"| t6
-  o13 -->|"LEE"| t7
-  o13 -->|"LEE"| t8
-  o13 -->|"LEE"| t9
-  o13 -->|"LEE"| t10
-  o13 -->|"LEE"| t11
-  o13 -.-> t14
+  o1 -->|"CREA"| t4
+  o1 -->|"LEE"| t4
+  o1 -->|"CREA"| t5
+  o1 -->|"ACTUALIZA"| t5
+  o1 -->|"LEE"| t5
+  o1 -.-> t6
+  o1 -->|"evento"| e7
+  a2 --> o8
+  o8 -->|"LEE"| t5
+  o8 -->|"LEE"| t9
+  o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t11
+  o8 -->|"LEE"| t12
+  o8 -->|"LEE"| t13
+  o8 -.-> t14
   a2 --> o15
-  o15 -->|"LEE"| t6
-  o15 -->|"LEE"| t7
-  o15 -->|"LEE"| t8
+  o15 -->|"ACTUALIZA"| t5
+  o15 -->|"CREA"| t5
+  o15 -->|"LEE"| t5
   o15 -->|"LEE"| t9
-  o15 -->|"LEE"| t10
+  o15 -->|"CREA"| t16
   o15 -->|"LEE"| t11
-  o15 -.-> t16
-  a2 --> o17
-  o17 -->|"CREA"| t18
-  o17 -->|"LEE"| t18
-  o17 -->|"CREA"| t7
-  o17 -->|"LEE"| t7
-  o17 -->|"ACTUALIZA"| t19
-  o17 -->|"LEE"| t20
-  o17 -.-> t21
-  a23 --> o22
-  o22 -->|"LEE"| t24
-  o22 -->|"LEE"| t25
-  o22 -->|"LEE"| t26
-  a23 --> o27
-  o27 -->|"CREA"| t24
-  o27 -->|"LEE"| t24
-  o27 -->|"LEE"| t25
-  o27 -->|"LEE"| t26
-  a2 --> o28
-  o28 -->|"LEE"| t29
-  o28 -->|"CREA"| t30
-  o28 -->|"CREA"| t31
-  o28 -->|"CREA"| t32
-  o28 -->|"CREA"| t33
-  o28 -->|"CREA"| t34
-  o28 -.-> t35
-  a2 --> o36
-  o36 -->|"LEE"| t6
-  o36 -->|"LEE"| t7
-  o36 -->|"LEE"| t8
-  o36 -->|"LEE"| t9
-  o36 -->|"LEE"| t10
-  o36 -->|"LEE"| t11
-  o36 -.-> t37
-  a2 --> o38
-  o38 -->|"CREA"| t39
-  o38 -->|"ACTUALIZA"| t40
-  o38 -->|"LEE"| t40
+  o15 -.-> t17
+  o15 -->|"evento"| e7
+  a2 --> o18
+  o18 -->|"ACTUALIZA"| t5
+  o18 -->|"LEE"| t5
+  o18 -->|"LEE"| t9
+  o18 -->|"LEE"| t11
+  o18 -->|"LEE"| t12
+  o18 -->|"LEE"| t13
+  o18 -.-> t19
+  o18 -->|"evento"| e7
+  a2 --> o20
+  o20 -->|"ACTUALIZA"| t5
+  o20 -->|"CREA"| t5
+  o20 -->|"LEE"| t5
+  o20 -->|"LEE"| t9
+  o20 -->|"CREA"| t16
+  o20 -->|"LEE"| t11
+  o20 -.-> t21
+  o20 -->|"evento"| e7
+  a2 --> o22
+  o22 -->|"LEE"| t5
+  o22 -->|"LEE"| t9
+  o22 -->|"LEE"| t11
+  o22 -->|"LEE"| t12
+  o22 -->|"LEE"| t13
+  o22 -->|"LEE"| t23
+  o22 -.-> t24
+  a2 --> o25
+  o25 -->|"LEE"| t26
+  o25 -->|"LEE"| t27
+  o25 -->|"LEE"| t28
+  o25 -->|"LEE"| t29
+  o25 -->|"LEE"| t30
+  o25 -->|"LEE"| t31
+  o25 -.-> t32
+  o25 -->|"evento"| e7
+  a2 --> o33
+  o33 -->|"LEE"| t34
+  o33 -->|"LEE"| t35
+  o33 -->|"LEE"| t36
+  o33 -->|"LEE"| t37
+  o33 -->|"LEE"| t38
+  o33 -->|"LEE"| t39
+  o33 -.-> t40
   a2 --> o41
-  o41 -->|"LEE"| t6
-  o41 -->|"LEE"| t7
-  o41 -->|"LEE"| t8
+  o41 -->|"ACTUALIZA"| t5
+  o41 -->|"CREA"| t5
+  o41 -->|"LEE"| t5
   o41 -->|"LEE"| t9
-  o41 -->|"LEE"| t10
+  o41 -->|"CREA"| t16
   o41 -->|"LEE"| t11
   o41 -.-> t42
+  o41 -->|"evento"| e7
   a2 --> o43
-  o43 -->|"LEE"| t44
-  o43 -->|"LEE"| t45
+  o43 -->|"LEE"| t34
+  o43 -->|"LEE"| t35
+  o43 -->|"LEE"| t36
+  o43 -->|"LEE"| t37
+  o43 -->|"LEE"| t38
   o43 -->|"LEE"| t39
-  o43 -->|"LEE"| t29
-  o43 -->|"CREA"| t46
-  o43 -->|"CREA"| t40
-  o43 -.-> t47
-  o43 -->|"evento"| e48
-  a2 --> o49
-  o49 -->|"LEE"| t6
-  o49 -->|"LEE"| t7
-  o49 -->|"LEE"| t8
-  o49 -->|"LEE"| t9
-  o49 -->|"LEE"| t10
-  o49 -->|"LEE"| t11
-  o49 -.-> t50
-  a52 --> o51
-  o51 -->|"LEE"| t53
-  o51 -->|"ACTUALIZA"| t54
-  o51 -->|"LEE"| t54
-  o51 -->|"CREA"| t55
-  o51 -->|"LEE"| t55
-  o51 -->|"LEE"| t56
-  o51 -.-> t57
+  o43 -.-> t44
+  a2 --> o45
+  o45 -->|"ACTUALIZA"| t16
+  o45 -->|"LEE"| t16
+  o45 -->|"LEE"| t11
+  o45 -->|"LEE"| t12
+  o45 -->|"LEE"| t13
+  o45 -->|"CREA"| t46
+  o45 -.-> t47
+  o45 -->|"evento"| e7
+  a2 --> o48
+  o48 -->|"LEE"| t11
+  o48 -->|"LEE"| t12
+  o48 -->|"LEE"| t13
+  o48 -->|"LEE"| t23
+  o48 -->|"LEE"| t49
+  o48 -->|"LEE"| t50
+  o48 -.-> t51
+  a2 --> o52
+  o52 -->|"LEE"| t5
+  o52 -->|"LEE"| t9
+  o52 -->|"LEE"| t11
+  o52 -->|"LEE"| t12
+  o52 -->|"LEE"| t13
+  o52 -->|"LEE"| t23
+  o52 -.-> t53
+  a2 --> o54
+  o54 -->|"CREA"| t55
+  o54 -->|"LEE"| t55
+  o54 -->|"LEE"| t56
+  o54 -->|"LEE"| t11
+  o54 -->|"LEE"| t12
+  o54 -->|"LEE"| t13
+  o54 -.-> t57
+  o54 -->|"evento"| e7
   a59 --> o58
-  o58 -->|"LEE"| t60
-  a59 --> o61
-  o61 -->|"CREA"| t60
-  a59 --> o62
-  o62 -->|"ACTUALIZA"| t60
-  o62 -->|"LEE"| t60
-  a5 --> o63
-  o63 -->|"LEE"| t6
-  o63 -->|"LEE"| t7
-  o63 -->|"LEE"| t8
-  o63 -->|"LEE"| t9
-  o63 -->|"LEE"| t10
-  o63 -->|"LEE"| t11
-  o63 -.-> t64
-  a66 --> o65
-  o65 -->|"LEE"| t53
-  o65 -->|"LEE"| t67
+  o58 -->|"LEE"| t5
+  o58 -->|"LEE"| t9
+  o58 -->|"CREA"| t56
+  o58 -->|"LEE"| t56
+  o58 -->|"CREA"| t60
+  o58 -->|"LEE"| t11
+  o58 -.-> t61
+  o58 -->|"evento"| e7
+  a2 --> o62
+  o62 -->|"LEE"| t5
+  o62 -->|"LEE"| t9
+  o62 -->|"LEE"| t55
+  o62 -->|"LEE"| t56
+  o62 -->|"LEE"| t11
+  o62 -->|"LEE"| t12
+  o62 -.-> t63
+  a2 --> o64
+  o64 -->|"LEE"| t5
+  o64 -->|"LEE"| t9
+  o64 -->|"CREA"| t56
+  o64 -->|"LEE"| t56
+  o64 -->|"CREA"| t60
+  o64 -->|"LEE"| t11
+  o64 -.-> t65
+  o64 -->|"evento"| e7
+  a2 --> o66
+  o66 -->|"LEE"| t55
+  o66 -->|"LEE"| t56
+  o66 -->|"LEE"| t11
+  o66 -->|"LEE"| t12
+  o66 -->|"LEE"| t13
+  o66 -->|"LEE"| t23
+  o66 -.-> t67
   a69 --> o68
-  o68 -->|"LEE"| t40
-  o68 -->|"LEE"| t70
-  o68 -->|"LEE"| t71
-  o68 -->|"LEE"| t72
-  o68 -->|"LEE"| t73
-  o68 -->|"LEE"| t25
-  o68 -.-> t74
-  a5 --> o75
-  o75 -->|"LEE"| t76
-  o75 -->|"LEE"| t19
-  o75 -->|"LEE"| t77
-  o75 -->|"LEE"| t72
-  o75 -->|"LEE"| t78
-  o75 -->|"LEE"| t79
-  a5 --> o80
-  o80 -->|"LEE"| t81
-  o80 -->|"CREA"| t82
-  o80 -->|"LEE"| t83
-  o80 -->|"LEE"| t84
-  o80 -->|"LEE"| t3
-  o80 -->|"LEE"| t85
-  o80 -.-> t86
+  o68 -->|"CREA"| t4
+  o68 -->|"LEE"| t4
+  a71 --> o70
+  o70 -->|"LEE"| t34
+  o70 -->|"LEE"| t35
+  o70 -->|"LEE"| t36
+  o70 -->|"LEE"| t37
+  o70 -->|"LEE"| t38
+  o70 -->|"LEE"| t39
+  o70 -.-> t72
+  a69 --> o73
+  o73 -->|"LEE"| t34
+  o73 -->|"LEE"| t35
+  o73 -->|"LEE"| t36
+  o73 -->|"LEE"| t37
+  o73 -->|"LEE"| t38
+  o73 -->|"LEE"| t39
+  o73 -.-> t74
+  a69 --> o75
+  o75 -->|"LEE"| t34
+  o75 -->|"LEE"| t35
+  o75 -->|"LEE"| t36
+  o75 -->|"LEE"| t37
+  o75 -->|"LEE"| t38
+  o75 -->|"LEE"| t39
+  o75 -.-> t76
+  a69 --> o77
+  o77 -->|"CREA"| t78
+  o77 -->|"LEE"| t78
+  o77 -->|"CREA"| t35
+  o77 -->|"LEE"| t35
+  o77 -->|"ACTUALIZA"| t79
+  o77 -->|"LEE"| t80
+  o77 -.-> t81
+  a2 --> o82
+  o82 -->|"LEE"| t83
+  o82 -->|"LEE"| t84
+  o82 -->|"LEE"| t85
+  a2 --> o86
+  o86 -->|"CREA"| t83
+  o86 -->|"LEE"| t83
+  o86 -->|"LEE"| t84
+  o86 -->|"LEE"| t85
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 2 de 2 — etapas `ctrl:ClinicalRecordsController`
+### Diagrama 2 de 3 — etapas `ctrl:ClinicalObservationsController`, `ctrl:ClinicalOrdersController`, `ctrl:ClinicalPrescriptionExpiryController`…
+
+```mermaid
+flowchart LR
+  a2(["CLINICIAN · PRACTITIONER"]):::actor
+  a37(["SYSTEM · SYSTEM_WORKER"]):::actor
+  a44(["CLINICIAN · SECURITY_ADMIN"]):::actor
+  a49(["CLINICIAN · PRACTITIONER · PATIENT"]):::actor
+  a52(["Público (sin sesión)"]):::actor
+  a55(["PATIENT"]):::actor
+  t3[("clinical.encounters")]:::tabla
+  t4[("clinical.observation_components")]:::tabla
+  t5[("clinical.observation_notes")]:::tabla
+  t6[("clinical.observation_performers")]:::tabla
+  t7[("clinical.observation_reference_ranges")]:::tabla
+  t8[("clinical.observations")]:::tabla
+  t11[("authz.access_policies")]:::tabla
+  t12[("authz.care_relationships")]:::tabla
+  t13[("authz.clinical_access_grants")]:::tabla
+  t14[("authz.field_permissions")]:::tabla
+  t15[("authz.patient_legal_representations")]:::tabla
+  t16[("authz.permissions")]:::tabla
+  t19[("clinical.diagnostic_reports")]:::tabla
+  t20[("clinical.service_requests")]:::tabla
+  t24[("billing.service_catalog")]:::tabla
+  t25[("chart.clinical_note_headers")]:::tabla
+  t26[("clinical.service_request_components")]:::tabla
+  e28>"ServiceRequestPlaced"]:::evento
+  e29>"clinical.service_request.collection_point_suggest…"]:::evento
+  t38[("clinical.medication_requests")]:::tabla
+  t39[("iam.devices")]:::tabla
+  t40[("messaging.in_app_notifications")]:::tabla
+  t41[("messaging.message_channels")]:::tabla
+  t45[("clinical.prescription_signature_policies")]:::tabla
+  t53[("profiles.jurisdiction_authorizations")]:::tabla
+  t56[("common.addresses")]:::tabla
+  t57[("practice.healthcare_services")]:::tabla
+  t58[("practice.practice_sites")]:::tabla
+  t59[("practice.practices")]:::tabla
+  t60[("profiles.patient_profiles")]:::tabla
+  t63[("billing.invoice_lines")]:::tabla
+  t64[("billing.invoices")]:::tabla
+  t65[("clinical.received_services")]:::tabla
+  t66[("procedures_perioperative.procedure_cases")]:::tabla
+  t67[("procedures_perioperative.procedure_charge_items")]:::tabla
+  t69[("audit.conditions_history")]:::tabla
+  t70[("audit.data_access_log")]:::tabla
+  t71[("clinical.allergy_intolerances")]:::tabla
+  t72[("clinical.allergy_reactions")]:::tabla
+  t73[("clinical.care_episodes")]:::tabla
+  t74[("clinical.conditions")]:::tabla
+  t9[("+1 tablas más")]
+  t17[("+14 tablas más")]
+  subgraph s0["ctrl:ClinicalObservationsController · Operaciones de ClinicalObservationsContro…"]
+    o1["POST /clinical/observations"]:::op
+    o10["PATCH /clinical/observations/{id}/amend"]:::op
+  end
+  t22[("+11 tablas más")]
+  t27[("+31 tablas más")]
+  t31[("+30 tablas más")]
+  t33[("+18 tablas más")]
+  t35[("+20 tablas más")]
+  subgraph s1["ctrl:ClinicalOrdersController · Operaciones de ClinicalOrdersController que el…"]
+    o18["POST /clinical/diagnostic-reports"]:::op
+    o21["POST /clinical/diagnostic-reports/{id}/release"]:::op
+    o23["POST /clinical/requisitions"]:::op
+    o30["POST /clinical/service-requests"]:::op
+    o32["GET /clinical/service-requests/{id}"]:::op
+    o34["POST /clinical/service-requests/duplicate-check"]:::op
+  end
+  t42[("+7 tablas más")]
+  subgraph s2["ctrl:ClinicalPrescriptionExpiryController · Operaciones de ClinicalPrescription…"]
+    o36["POST /clinical/internal/prescription-expiry-notices"]:::op
+  end
+  subgraph s3["ctrl:ClinicalPrescriptionPoliciesController · Operaciones de ClinicalPrescripti…"]
+    o43["GET /clinical/prescription-signature-policies"]:::op
+    o46["POST /clinical/prescription-signature-policies"]:::op
+    o47["POST /clinical/prescription-signature-policies/{id}/deactivate"]:::op
+  end
+  t50[("+24 tablas más")]
+  subgraph s4["ctrl:ClinicalPrescriptionsController · Operaciones de ClinicalPrescriptionsCont…"]
+    o48["GET /clinical/prescriptions/{id}/pdf"]:::op
+  end
+  subgraph s5["ctrl:ClinicalPrescriptionsPublicController · Operaciones de ClinicalPrescriptio…"]
+    o51["GET /public/prescriptions/{id}/verify"]:::op
+  end
+  t61[("+1 tablas más")]
+  subgraph s6["ctrl:ClinicalProcedureCentersController · Operaciones de ClinicalProcedureCente…"]
+    o54["GET /clinical/me/procedure-centers"]:::op
+  end
+  t75[("+3 tablas más")]
+  subgraph s7["ctrl:ClinicalReadController · Operaciones de ClinicalReadController que el READ…"]
+    o62["GET /clinical/patients/{patientProfileId}/received-services"]:::op
+    o68["GET /clinical/patients/{patientProfileId}/summary"]:::op
+  end
+  a2 --> o1
+  o1 -->|"LEE"| t3
+  o1 -->|"CREA"| t4
+  o1 -->|"CREA"| t5
+  o1 -->|"CREA"| t6
+  o1 -->|"CREA"| t7
+  o1 -->|"CREA"| t8
+  o1 -.-> t9
+  a2 --> o10
+  o10 -->|"LEE"| t11
+  o10 -->|"LEE"| t12
+  o10 -->|"LEE"| t13
+  o10 -->|"LEE"| t14
+  o10 -->|"LEE"| t15
+  o10 -->|"LEE"| t16
+  o10 -.-> t17
+  a2 --> o18
+  o18 -->|"CREA"| t19
+  o18 -->|"ACTUALIZA"| t20
+  o18 -->|"LEE"| t20
+  a2 --> o21
+  o21 -->|"LEE"| t11
+  o21 -->|"LEE"| t12
+  o21 -->|"LEE"| t13
+  o21 -->|"LEE"| t14
+  o21 -->|"LEE"| t15
+  o21 -->|"LEE"| t16
+  o21 -.-> t22
+  a2 --> o23
+  o23 -->|"LEE"| t24
+  o23 -->|"LEE"| t25
+  o23 -->|"LEE"| t19
+  o23 -->|"LEE"| t3
+  o23 -->|"CREA"| t26
+  o23 -->|"LEE"| t26
+  o23 -.-> t27
+  o23 -->|"evento"| e28
+  o23 -->|"evento"| e29
+  a2 --> o30
+  o30 -->|"LEE"| t24
+  o30 -->|"LEE"| t25
+  o30 -->|"LEE"| t19
+  o30 -->|"LEE"| t3
+  o30 -->|"CREA"| t26
+  o30 -->|"LEE"| t26
+  o30 -.-> t31
+  o30 -->|"evento"| e28
+  o30 -->|"evento"| e29
+  a2 --> o32
+  o32 -->|"LEE"| t11
+  o32 -->|"LEE"| t12
+  o32 -->|"LEE"| t13
+  o32 -->|"LEE"| t14
+  o32 -->|"LEE"| t15
+  o32 -->|"LEE"| t16
+  o32 -.-> t33
+  a2 --> o34
+  o34 -->|"LEE"| t11
+  o34 -->|"LEE"| t12
+  o34 -->|"LEE"| t13
+  o34 -->|"LEE"| t14
+  o34 -->|"LEE"| t15
+  o34 -->|"LEE"| t16
+  o34 -.-> t35
+  a37 --> o36
+  o36 -->|"LEE"| t38
+  o36 -->|"ACTUALIZA"| t39
+  o36 -->|"LEE"| t39
+  o36 -->|"CREA"| t40
+  o36 -->|"LEE"| t40
+  o36 -->|"LEE"| t41
+  o36 -.-> t42
+  a44 --> o43
+  o43 -->|"LEE"| t45
+  a44 --> o46
+  o46 -->|"CREA"| t45
+  a44 --> o47
+  o47 -->|"ACTUALIZA"| t45
+  o47 -->|"LEE"| t45
+  a49 --> o48
+  o48 -->|"LEE"| t11
+  o48 -->|"LEE"| t12
+  o48 -->|"LEE"| t13
+  o48 -->|"LEE"| t14
+  o48 -->|"LEE"| t15
+  o48 -->|"LEE"| t16
+  o48 -.-> t50
+  a52 --> o51
+  o51 -->|"LEE"| t38
+  o51 -->|"LEE"| t53
+  a55 --> o54
+  o54 -->|"LEE"| t20
+  o54 -->|"LEE"| t56
+  o54 -->|"LEE"| t57
+  o54 -->|"LEE"| t58
+  o54 -->|"LEE"| t59
+  o54 -->|"LEE"| t60
+  o54 -.-> t61
+  a49 --> o62
+  o62 -->|"LEE"| t63
+  o62 -->|"LEE"| t64
+  o62 -->|"LEE"| t65
+  o62 -->|"LEE"| t58
+  o62 -->|"LEE"| t66
+  o62 -->|"LEE"| t67
+  a49 --> o68
+  o68 -->|"LEE"| t69
+  o68 -->|"CREA"| t70
+  o68 -->|"LEE"| t71
+  o68 -->|"LEE"| t72
+  o68 -->|"LEE"| t73
+  o68 -->|"LEE"| t74
+  o68 -.-> t75
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 3 de 3 — etapas `ctrl:ClinicalRecordsController`
 
 ```mermaid
 flowchart LR
@@ -577,7 +859,255 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /clinical/allergy-intolerances
+#### 1. POST /census-days/{id}/adjustments
+
+Ajustar un día de censo cerrado
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite ajustar el censo de esa unidad |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Día de censo no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientCensusService.adjust"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientCensusUseCases.adjust"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6[("LEE clinical.inpatient_census_days")]:::efecto
+  n5 --> n6
+  n7{"!day || day.tenantId !== req.tenantId"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Día de censo no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n9 --> n10
+  n11[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n10 --> n11
+  n12{"!filter.allowsUnit(day.clinicalUnitId)"}:::decision
+  n11 --> n12
+  n13(["403 FORBIDDEN Su rol no permite ajustar el censo de esa unidad"]):::error
+  n12 -->|"sí"| n13
+  n14{"day.statusConceptId !== CLIN.CENSUS_CLOSED"}:::decision
+  n12 -->|"no"| n14
+  n15(["↩ (relanza el error capturado)"]):::error
+  n14 -->|"sí"| n15
+  n16{"!dto.reasonText?.trim()"}:::decision
+  n14 -->|"no"| n16
+  n17(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"sí"| n17
+  n18{"!field"}:::decision
+  n16 -->|"no"| n18
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 -->|"sí"| n19
+  n20[("LEE clinical.inpatient_census_adjustments · CREA clinical.inpatient_census_adjustments")]:::efecto
+  n18 -->|"no"| n20
+  n21["Llama a AdtSupport.flush"]:::llamada
+  n20 --> n21
+  n22["Intenta"]:::intento
+  n21 --> n22
+  n23(["↩ (relanza el error capturado)"]):::error
+  n22 -->|"si falla"| n23
+  n24["Llama a AdtSupport.publish"]:::llamada
+  n22 --> n24
+  n25["Intenta"]:::intento
+  n24 --> n25
+  n26>"Evento ~eventType"]:::evento
+  n25 --> n26
+  n27(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"si falla"| n27
+  n28(("201 Responde con éxito")):::ok
+  n26 --> n28
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. POST /clinical/admissions
+
+Internar a un paciente
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado; ResourceNotFoundException: Derivación no encontrada; ResourceNotFoundException: Episodio de cuidado no encontrado; ResourceNotFoundException: Paciente no encontrado |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El ingreso de un paciente sin vínculo previo exige origen e identidad verificada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.admit"]:::llamada
+  n2 --> n3
+  n4["Llama a AdmitPatientUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n5 --> n6
+  n7["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n6 --> n7
+  n8{"'careSpaceId' in target"}:::decision
+  n7 --> n8
+  n9{"!found || found.tenantId !== tenantId"}:::decision
+  n8 -->|"sí"| n9
+  n10(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n9 -->|"sí"| n10
+  n11{"'unitId' in target"}:::decision
+  n8 -->|"no"| n11
+  n12{"!found || found.tenantId !== tenantId"}:::decision
+  n11 -->|"sí"| n12
+  n13(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n12 -->|"sí"| n13
+  n14{"!site || site.tenantId !== tenantId"}:::decision
+  n9 -->|"no"| n14
+  n12 -->|"no"| n14
+  n11 -->|"no"| n14
+  n15(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a InfrastructureAccessService.decide"]:::llamada
+  n14 -->|"no"| n16
+  n17(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n16 --> n17
+  n18["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n19["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n18 --> n19
+  n20{"'careSpaceId' in target"}:::decision
+  n19 --> n20
+  n21{"!found || found.tenantId !== tenantId"}:::decision
+  n20 -->|"sí"| n21
+  n22(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23{"'unitId' in target"}:::decision
+  n20 -->|"no"| n23
+  n24{"!found || found.tenantId !== tenantId"}:::decision
+  n23 -->|"sí"| n24
+  n25(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n24 -->|"sí"| n25
+  n26{"!site || site.tenantId !== tenantId"}:::decision
+  n21 -->|"no"| n26
+  n24 -->|"no"| n26
+  n23 -->|"no"| n26
+  n27(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n26 -->|"sí"| n27
+  n28["Llama a InfrastructureAccessService.decide"]:::llamada
+  n26 -->|"no"| n28
+  n29(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n28 --> n29
+  n30["Llama a InfrastructureAccessService.decide"]:::llamada
+  n31["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n30 --> n31
+  n32{"!rule"}:::decision
+  n31 --> n32
+  n33(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n32 -->|"sí"| n33
+  n34(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n32 -->|"no"| n34
+  n35["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
+  n36["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
+  n35 --> n36
+  n37[("LEE profiles.patient_profiles")]:::efecto
+  n36 --> n37
+  n38["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
+  n37 --> n38
+  n39[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
+  n38 --> n39
+  n40["Llama a AdmitPatientUseCase.footprintFor"]:::llamada
+  n39 --> n40
+  n41{"!this.access.can('f3.adt.admit_without_footprint', levelRoles, false)"}:::decision
+  n40 --> n41
+  n42(["↩ (relanza el error capturado)"]):::error
+  n41 -->|"sí"| n42
+  n43{"!(await this.scope.canAdmitWithoutFootprint( tx, dto.patientProfileId, req.tenantId, ))"}:::decision
+  n41 -->|"no"| n43
+  n44(["↩ (relanza el error capturado)"]):::error
+  n43 -->|"sí"| n44
+  n45{"!dto.admissionOriginCode || !dto.identityVerification"}:::decision
+  n43 -->|"no"| n45
+  n46(["422 PRECONDITION_FAILED El ingreso de un paciente sin vínculo previo exige origen e identidad verificada"]):::error
+  n45 -->|"sí"| n46
+  n47{"dto.referralId"}:::decision
+  n45 -->|"no"| n47
+  n48[("LEE clinical_ext.referrals")]:::efecto
+  n47 -->|"sí"| n48
+  n49{"!r?.ok"}:::decision
+  n48 --> n49
+  n50(["404 NOT_FOUND Derivación no encontrada"]):::error
+  n49 -->|"sí"| n50
+  n51["Llama a InpatientRepository.inpatientInProgress"]:::llamada
+  n49 -->|"no"| n51
+  n47 -->|"no"| n51
+  n52[("LEE clinical.encounters")]:::efecto
+  n51 --> n52
+  n53{"await this.repo.inpatientInProgress( tx, dto.patientProfileId, req.tenantId, )"}:::decision
+  n52 --> n53
+  n54(["↩ (relanza el error capturado)"]):::error
+  n53 -->|"sí"| n54
+  n55{"episodeId"}:::decision
+  n53 -->|"no"| n55
+  n56[("LEE clinical.care_episodes")]:::efecto
+  n55 -->|"sí"| n56
+  n57{"!ep || ep.tenantId !== req.tenantId || ep.patientProfileId !== dto.patientProfileId"}:::decision
+  n56 --> n57
+  n58(["404 NOT_FOUND Episodio de cuidado no encontrado"]):::error
+  n57 -->|"sí"| n58
+  n59{"dto.openEpisode !== false"}:::decision
+  n55 -->|"no"| n59
+  n60[("CREA clinical.care_episodes")]:::efecto
+  n59 -->|"sí"| n60
+  n61["Llama a AdtSupport.flush"]:::llamada
+  n60 --> n61
+  n62["Intenta"]:::intento
+  n61 --> n62
+  n63(["↩ (relanza el error capturado)"]):::error
+  n62 -->|"si falla"| n63
+  n64[("CREA clinical.encounters")]:::efecto
+  n57 -->|"no"| n64
+  n62 --> n64
+  n59 -->|"no"| n64
+  n65["Llama a AdtSupport.flush"]:::llamada
+  n64 --> n65
+  n66["Intenta"]:::intento
+  n65 --> n66
+  n67(["↩ (relanza el error capturado)"]):::error
+  n66 -->|"si falla"| n67
+  n68{"footprint"}:::decision
+  n66 --> n68
+  n69["Llama a AdmitPatientUseCase.recordFootprint"]:::llamada
+  n68 -->|"sí"| n69
+  n70["Intenta"]:::intento
+  n69 --> n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. POST /clinical/allergy-intolerances
 
 Registrar una alergia con reacciones
 
@@ -642,7 +1172,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. GET /clinical/allergy-intolerances/{id}/attachments
+#### 4. GET /clinical/allergy-intolerances/{id}/attachments
 
 Listar los adjuntos de una alergia
 
@@ -748,7 +1278,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /clinical/allergy-intolerances/{id}/attachments
+#### 5. POST /clinical/allergy-intolerances/{id}/attachments
 
 Adjuntar un archivo ya subido a una alergia
 
@@ -872,7 +1402,268 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /clinical/care-episodes
+#### 6. POST /clinical/bed-compatibility
+
+Compatibilidad prospectiva de una cama con un paciente
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado; ResourceNotFoundException: Paciente no encontrado; ResourceNotFoundException: Cama no encontrada en la sede |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.prospectiveCompatibility"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientReadUseCases.prospectiveCompatibility"]:::llamada
+  n3 --> n4
+  n5["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n4 --> n5
+  n6["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n5 --> n6
+  n7{"'careSpaceId' in target"}:::decision
+  n6 --> n7
+  n8{"!found || found.tenantId !== tenantId"}:::decision
+  n7 -->|"sí"| n8
+  n9(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"'unitId' in target"}:::decision
+  n7 -->|"no"| n10
+  n11{"!found || found.tenantId !== tenantId"}:::decision
+  n10 -->|"sí"| n11
+  n12(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13{"!site || site.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n13
+  n11 -->|"no"| n13
+  n10 -->|"no"| n13
+  n14(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a InfrastructureAccessService.decide"]:::llamada
+  n13 -->|"no"| n15
+  n16(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n15 --> n16
+  n17["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
+  n18["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
+  n17 --> n18
+  n19[("LEE profiles.patient_profiles")]:::efecto
+  n18 --> n19
+  n20["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
+  n19 --> n20
+  n21[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
+  n20 --> n21
+  n22{"!(await this.patients.isPatientInTenant( em, input.patientProfileId, req.tenantId, ))"}:::decision
+  n21 --> n22
+  n23(["404 NOT_FOUND Paciente no encontrado"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a AdtSupport.compatibilityFor"]:::llamada
+  n22 -->|"no"| n24
+  n25{"state.formCode !== 'LOC_FORM_BED'"}:::decision
+  n24 --> n25
+  n26(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"sí"| n26
+  n27{"options.siteId && state.practiceSiteId !== options.siteId"}:::decision
+  n25 -->|"no"| n27
+  n28(["404 NOT_FOUND Cama no encontrada en la sede"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a InpatientRepository.bedContext"]:::llamada
+  n27 -->|"no"| n29
+  n30[("LEE practice.space_unit_assignments · LEE practice.care_spaces")]:::efecto
+  n29 --> n30
+  n31["Llama a InpatientRepository.patient"]:::llamada
+  n30 --> n31
+  n32[("LEE profiles.patient_profiles · LEE profiles.person_profiles · LEE profiles.persons")]:::efecto
+  n31 --> n32
+  n33["Llama a InpatientRepository.roommates"]:::llamada
+  n32 --> n33
+  n34[("LEE clinical.encounter_locations · LEE practice.care_spaces · LEE clinical.encounters · LEE profiles.patient_…")]:::efecto
+  n33 --> n34
+  n35(("200 Responde con éxito")):::ok
+  n34 --> n35
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 7. POST /clinical/bed-swaps
+
+Intercambiar camas entre dos pacientes
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado; ResourceNotFoundException: Cama no encontrada en la sede |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.swap"]:::llamada
+  n2 --> n3
+  n4["Llama a SwapBedsUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6{"dto.encounterAId === dto.encounterBId"}:::decision
+  n5 --> n6
+  n7(["↩ (relanza el error capturado)"]):::error
+  n6 -->|"sí"| n7
+  n8["Llama a AdtSupport.encounter"]:::llamada
+  n6 -->|"no"| n8
+  n9[("LEE clinical.encounters")]:::efecto
+  n8 --> n9
+  n10{"!enc || enc.tenantId !== tenantId"}:::decision
+  n9 --> n10
+  n11(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a AdtSupport.encounter"]:::llamada
+  n10 -->|"no"| n12
+  n13[("LEE clinical.encounters")]:::efecto
+  n12 --> n13
+  n14{"!enc || enc.tenantId !== tenantId"}:::decision
+  n13 --> n14
+  n15(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n14 -->|"sí"| n15
+  n16["Llama a AdtSupport.activeBed"]:::llamada
+  n14 -->|"no"| n16
+  n17[("LEE clinical.encounter_locations")]:::efecto
+  n16 --> n17
+  n18["Llama a AdtSupport.activeBed"]:::llamada
+  n17 --> n18
+  n19[("LEE clinical.encounter_locations")]:::efecto
+  n18 --> n19
+  n20{"!la || !lb"}:::decision
+  n19 --> n20
+  n21(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n20 -->|"no"| n22
+  n23["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n22 --> n23
+  n24{"'careSpaceId' in target"}:::decision
+  n23 --> n24
+  n25{"!found || found.tenantId !== tenantId"}:::decision
+  n24 -->|"sí"| n25
+  n26(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n25 -->|"sí"| n26
+  n27{"'unitId' in target"}:::decision
+  n24 -->|"no"| n27
+  n28{"!found || found.tenantId !== tenantId"}:::decision
+  n27 -->|"sí"| n28
+  n29(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n28 -->|"sí"| n29
+  n30{"!site || site.tenantId !== tenantId"}:::decision
+  n25 -->|"no"| n30
+  n28 -->|"no"| n30
+  n27 -->|"no"| n30
+  n31(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n30 -->|"sí"| n31
+  n32["Llama a InfrastructureAccessService.decide"]:::llamada
+  n30 -->|"no"| n32
+  n33(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n32 --> n33
+  n34["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n35["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n34 --> n35
+  n36{"'careSpaceId' in target"}:::decision
+  n35 --> n36
+  n37{"!found || found.tenantId !== tenantId"}:::decision
+  n36 -->|"sí"| n37
+  n38(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n37 -->|"sí"| n38
+  n39{"'unitId' in target"}:::decision
+  n36 -->|"no"| n39
+  n40{"!found || found.tenantId !== tenantId"}:::decision
+  n39 -->|"sí"| n40
+  n41(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n40 -->|"sí"| n41
+  n42{"!site || site.tenantId !== tenantId"}:::decision
+  n37 -->|"no"| n42
+  n40 -->|"no"| n42
+  n39 -->|"no"| n42
+  n43(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a InfrastructureAccessService.decide"]:::llamada
+  n42 -->|"no"| n44
+  n45(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n44 --> n45
+  n46["Llama a InfrastructureAccessService.can"]:::llamada
+  n47["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n46 --> n47
+  n48{"!rule"}:::decision
+  n47 --> n48
+  n49(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n48 -->|"sí"| n49
+  n50["Repite: por cada const [enc, bed, other] de [ [a, bedB, b], [b, bedA, a], ] as const"]:::bucle
+  n48 -->|"no"| n50
+  n51["Llama a AdtSupport.compatibility"]:::llamada
+  n50 -->|"cada elemento"| n51
+  n52["Llama a AdtSupport.compatibilityFor"]:::llamada
+  n51 --> n52
+  n53{"state.formCode !== 'LOC_FORM_BED'"}:::decision
+  n52 --> n53
+  n54(["↩ (relanza el error capturado)"]):::error
+  n53 -->|"sí"| n54
+  n55{"options.siteId && state.practiceSiteId !== options.siteId"}:::decision
+  n53 -->|"no"| n55
+  n56(["404 NOT_FOUND Cama no encontrada en la sede"]):::error
+  n55 -->|"sí"| n56
+  n57["Llama a AdtSupport.close"]:::llamada
+  n55 -->|"no"| n57
+  n50 -->|"al terminar"| n57
+  n58[("ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounte…")]:::efecto
+  n57 --> n58
+  n59["Llama a AdtSupport.flush"]:::llamada
+  n58 --> n59
+  n60["Intenta"]:::intento
+  n59 --> n60
+  n61(["↩ (relanza el error capturado)"]):::error
+  n60 -->|"si falla"| n61
+  n62["Llama a AdtSupport.close"]:::llamada
+  n60 --> n62
+  n63[("ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounte…")]:::efecto
+  n62 --> n63
+  n64["Llama a AdtSupport.flush"]:::llamada
+  n63 --> n64
+  n65["Intenta"]:::intento
+  n64 --> n65
+  n66(["↩ (relanza el error capturado)"]):::error
+  n65 -->|"si falla"| n66
+  n67["Llama a AdtSupport.place"]:::llamada
+  n65 --> n67
+  n68{"!verdict.ok"}:::decision
+  n67 --> n68
+  n69(["↩ (relanza el error capturado)"]):::error
+  n68 -->|"sí"| n69
+  n70{"verdict.forced.length › 0 && !input.canOverride"}:::decision
+  n68 -->|"no"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 -->|"sí"| n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 8. POST /clinical/care-episodes
 
 Abrir un episodio de cuidado
 
@@ -916,7 +1707,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /clinical/conditions
+#### 9. POST /clinical/conditions
 
 Registrar una condición/diagnóstico
 
@@ -1005,7 +1796,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /clinical/conditions/{id}/attachments
+#### 10. POST /clinical/conditions/{id}/attachments
 
 Adjuntar un archivo ya subido a una condición
 
@@ -1127,7 +1918,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /clinical/conditions/{id}/change-status
+#### 11. POST /clinical/conditions/{id}/change-status
 
 Cambiar el estado clínico de una condición
 
@@ -1225,7 +2016,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /clinical/conditions/{id}/verification
+#### 12. POST /clinical/conditions/{id}/verification
 
 Confirmar o refutar un diagnóstico presuntivo
 
@@ -1371,7 +2162,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. POST /clinical/diagnostic-reports
+#### 13. POST /clinical/diagnostic-reports
 
 Emitir un reporte diagnóstico desde la orden
 
@@ -1420,7 +2211,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /clinical/diagnostic-reports/{id}/release
+#### 14. POST /clinical/diagnostic-reports/{id}/release
 
 Liberar los resultados de un reporte diagnóstico
 
@@ -1480,7 +2271,170 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. GET /clinical/encounters/{id}/attachments
+#### 15. POST /clinical/encounter-locations/{id}/cancel
+
+Anular una reserva o un traslado
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Ubicación no encontrada; ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado; ResourceNotFoundException: Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.cancelLocation"]:::llamada
+  n2 --> n3
+  n4["Llama a CancelLocationUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6[("LEE clinical.encounter_locations")]:::efecto
+  n5 --> n6
+  n7{"!loc || loc.tenantId !== req.tenantId || !loc.careSpaceId"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Ubicación no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n9 --> n10
+  n11{"'careSpaceId' in target"}:::decision
+  n10 --> n11
+  n12{"!found || found.tenantId !== tenantId"}:::decision
+  n11 -->|"sí"| n12
+  n13(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14{"'unitId' in target"}:::decision
+  n11 -->|"no"| n14
+  n15{"!found || found.tenantId !== tenantId"}:::decision
+  n14 -->|"sí"| n15
+  n16(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17{"!site || site.tenantId !== tenantId"}:::decision
+  n12 -->|"no"| n17
+  n15 -->|"no"| n17
+  n14 -->|"no"| n17
+  n18(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a InfrastructureAccessService.decide"]:::llamada
+  n17 -->|"no"| n19
+  n20(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n19 --> n20
+  n21["Llama a AdtSupport.encounter"]:::llamada
+  n22[("LEE clinical.encounters")]:::efecto
+  n21 --> n22
+  n23{"!enc || enc.tenantId !== tenantId"}:::decision
+  n22 --> n23
+  n24(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n23 -->|"sí"| n24
+  n25{"loc.locationStatusConceptId === CLIN.LOCATION_RESERVED && !loc.periodEnd"}:::decision
+  n23 -->|"no"| n25
+  n26["Llama a AdtSupport.close"]:::llamada
+  n25 -->|"sí"| n26
+  n27[("ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounte…")]:::efecto
+  n26 --> n27
+  n28["Llama a AdtSupport.flush"]:::llamada
+  n27 --> n28
+  n29["Intenta"]:::intento
+  n28 --> n29
+  n30(["↩ (relanza el error capturado)"]):::error
+  n29 -->|"si falla"| n30
+  n31["Llama a AdtSupport.publish"]:::llamada
+  n29 --> n31
+  n32["Intenta"]:::intento
+  n31 --> n32
+  n33>"Evento ~eventType"]:::evento
+  n32 --> n33
+  n34(["↩ (relanza el error capturado)"]):::error
+  n32 -->|"si falla"| n34
+  n35{"!isTransfer"}:::decision
+  n33 --> n35
+  n25 -->|"no"| n35
+  n36(["↩ (relanza el error capturado)"]):::error
+  n35 -->|"sí"| n36
+  n37{"loc.periodStart && now.getTime() - loc.periodStart.getTime() › windowMin * 60_000"}:::decision
+  n35 -->|"no"| n37
+  n38(["↩ (relanza el error capturado)"]):::error
+  n37 -->|"sí"| n38
+  n39[("LEE clinical.encounter_locations")]:::efecto
+  n37 -->|"no"| n39
+  n40{"!prev?.careSpaceId"}:::decision
+  n39 --> n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n40 -->|"no"| n42
+  n43["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n42 --> n43
+  n44{"'careSpaceId' in target"}:::decision
+  n43 --> n44
+  n45{"!found || found.tenantId !== tenantId"}:::decision
+  n44 -->|"sí"| n45
+  n46(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n45 -->|"sí"| n46
+  n47{"'unitId' in target"}:::decision
+  n44 -->|"no"| n47
+  n48{"!found || found.tenantId !== tenantId"}:::decision
+  n47 -->|"sí"| n48
+  n49(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n48 -->|"sí"| n49
+  n50{"!site || site.tenantId !== tenantId"}:::decision
+  n45 -->|"no"| n50
+  n48 -->|"no"| n50
+  n47 -->|"no"| n50
+  n51(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n50 -->|"sí"| n51
+  n52["Llama a InfrastructureAccessService.decide"]:::llamada
+  n50 -->|"no"| n52
+  n53(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n52 --> n53
+  n54{"prevState.occupancy !== 'OCC_FREE' || prevState.availability !== 'SPACE_OP_AVAILABLE'"}:::decision
+  n55(["↩ (relanza el error capturado)"]):::error
+  n54 -->|"sí"| n55
+  n56["Llama a AdtSupport.close"]:::llamada
+  n54 -->|"no"| n56
+  n57[("ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounte…")]:::efecto
+  n56 --> n57
+  n58["Llama a AdtSupport.flush"]:::llamada
+  n57 --> n58
+  n59["Intenta"]:::intento
+  n58 --> n59
+  n60(["↩ (relanza el error capturado)"]):::error
+  n59 -->|"si falla"| n60
+  n61[("ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounte…")]:::efecto
+  n59 --> n61
+  n62["Llama a AdtSupport.flush"]:::llamada
+  n61 --> n62
+  n63["Intenta"]:::intento
+  n62 --> n63
+  n64(["↩ (relanza el error capturado)"]):::error
+  n63 -->|"si falla"| n64
+  n65["Llama a AdtSupport.publish"]:::llamada
+  n63 --> n65
+  n66["Intenta"]:::intento
+  n65 --> n66
+  n67>"Evento ~eventType"]:::evento
+  n66 --> n67
+  n68(["↩ (relanza el error capturado)"]):::error
+  n66 -->|"si falla"| n68
+  n69(("200 Responde con éxito")):::ok
+  n67 --> n69
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 16. GET /clinical/encounters/{id}/attachments
 
 Listar los adjuntos de un encuentro
 
@@ -1586,7 +2540,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /clinical/encounters/{id}/attachments
+#### 17. POST /clinical/encounters/{id}/attachments
 
 Adjuntar un archivo ya subido a un encuentro
 
@@ -1710,7 +2664,244 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /clinical/encounters/{id}/close
+#### 18. POST /clinical/encounters/{id}/bed-assignment
+
+Asignar o reservar cama
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.assignBed"]:::llamada
+  n2 --> n3
+  n4["Llama a AssignBedUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a AdtSupport.encounter"]:::llamada
+  n5 --> n6
+  n7[("LEE clinical.encounters")]:::efecto
+  n6 --> n7
+  n8{"!enc || enc.tenantId !== tenantId"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n8 -->|"no"| n10
+  n11["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n10 --> n11
+  n12{"'careSpaceId' in target"}:::decision
+  n11 --> n12
+  n13{"!found || found.tenantId !== tenantId"}:::decision
+  n12 -->|"sí"| n13
+  n14(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15{"'unitId' in target"}:::decision
+  n12 -->|"no"| n15
+  n16{"!found || found.tenantId !== tenantId"}:::decision
+  n15 -->|"sí"| n16
+  n17(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n16 -->|"sí"| n17
+  n18{"!site || site.tenantId !== tenantId"}:::decision
+  n13 -->|"no"| n18
+  n16 -->|"no"| n18
+  n15 -->|"no"| n18
+  n19(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a InfrastructureAccessService.decide"]:::llamada
+  n18 -->|"no"| n20
+  n21(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n20 --> n21
+  n22{"encounter.statusConceptId !== CLIN.ENCOUNTER_IN_PROGRESS"}:::decision
+  n23(["↩ (relanza el error capturado)"]):::error
+  n22 -->|"sí"| n23
+  n24["Llama a AdtSupport.activeBed"]:::llamada
+  n22 -->|"no"| n24
+  n25[("LEE clinical.encounter_locations")]:::efecto
+  n24 --> n25
+  n26{"await this.support.activeBed(tx, encounterId)"}:::decision
+  n25 --> n26
+  n27(["↩ (relanza el error capturado)"]):::error
+  n26 -->|"sí"| n27
+  n28[("LEE clinical.encounter_locations")]:::efecto
+  n26 -->|"no"| n28
+  n29{"reservation && dto.mode === 'ASSIGN'"}:::decision
+  n28 --> n29
+  n30["Llama a AdtSupport.close"]:::llamada
+  n29 -->|"sí"| n30
+  n31[("ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounte…")]:::efecto
+  n30 --> n31
+  n32["Llama a AdtSupport.flush"]:::llamada
+  n31 --> n32
+  n33["Intenta"]:::intento
+  n32 --> n33
+  n34(["↩ (relanza el error capturado)"]):::error
+  n33 -->|"si falla"| n34
+  n35["Llama a AdtSupport.place"]:::llamada
+  n33 --> n35
+  n29 -->|"no"| n35
+  n36{"!verdict.ok"}:::decision
+  n35 --> n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"sí"| n37
+  n38{"verdict.forced.length › 0 && !input.canOverride"}:::decision
+  n36 -->|"no"| n38
+  n39(["↩ (relanza el error capturado)"]):::error
+  n38 -->|"sí"| n39
+  n40["Llama a InpatientRepository.bedContext"]:::llamada
+  n38 -->|"no"| n40
+  n41[("LEE practice.space_unit_assignments · LEE practice.care_spaces")]:::efecto
+  n40 --> n41
+  n42[("CREA clinical.encounter_locations")]:::efecto
+  n41 --> n42
+  n43["Llama a AdtSupport.flush"]:::llamada
+  n42 --> n43
+  n44["Intenta"]:::intento
+  n43 --> n44
+  n45(["↩ (relanza el error capturado)"]):::error
+  n44 -->|"si falla"| n45
+  n46{"verdict.forced.length › 0"}:::decision
+  n44 --> n46
+  n47[("CREA clinical.placement_incidents")]:::efecto
+  n46 -->|"sí"| n47
+  n48["Llama a AdtSupport.flush"]:::llamada
+  n47 --> n48
+  n49["Intenta"]:::intento
+  n48 --> n49
+  n50(["↩ (relanza el error capturado)"]):::error
+  n49 -->|"si falla"| n50
+  n51[("ACTUALIZA clinical.encounter_locations")]:::efecto
+  n49 --> n51
+  n52["Llama a AdtSupport.flush"]:::llamada
+  n51 --> n52
+  n53["Intenta"]:::intento
+  n52 --> n53
+  n54(["↩ (relanza el error capturado)"]):::error
+  n53 -->|"si falla"| n54
+  n55["Llama a AdtSupport.publish"]:::llamada
+  n53 --> n55
+  n56["Intenta"]:::intento
+  n55 --> n56
+  n57>"Evento ~eventType"]:::evento
+  n56 --> n57
+  n58(["↩ (relanza el error capturado)"]):::error
+  n56 -->|"si falla"| n58
+  n59["Llama a InfrastructureAccessService.can"]:::llamada
+  n57 --> n59
+  n46 -->|"no"| n59
+  n60["Llama a InfraPolicyRegistry.rule"]:::llamada
+  n59 --> n60
+  n61{"!rule"}:::decision
+  n60 --> n61
+  n62(["500 INTERNAL Acción de infraestructura no registrada: {action}"]):::error
+  n61 -->|"sí"| n62
+  n63["Llama a AdtSupport.publish"]:::llamada
+  n61 -->|"no"| n63
+  n64["Intenta"]:::intento
+  n63 --> n64
+  n65>"Evento ~eventType"]:::evento
+  n64 --> n65
+  n66(["↩ (relanza el error capturado)"]):::error
+  n64 -->|"si falla"| n66
+  n67(("200 Responde con éxito")):::ok
+  n65 --> n67
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 19. POST /clinical/encounters/{id}/bed-compatibility
+
+Compatibilidad de una cama con el encuentro
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado; ResourceNotFoundException: Cama no encontrada en la sede |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.compatibility"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientReadUseCases.compatibility"]:::llamada
+  n3 --> n4
+  n5["Llama a AdtSupport.encounter"]:::llamada
+  n4 --> n5
+  n6[("LEE clinical.encounters")]:::efecto
+  n5 --> n6
+  n7{"!enc || enc.tenantId !== tenantId"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n9 --> n10
+  n11{"'careSpaceId' in target"}:::decision
+  n10 --> n11
+  n12{"!found || found.tenantId !== tenantId"}:::decision
+  n11 -->|"sí"| n12
+  n13(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14{"'unitId' in target"}:::decision
+  n11 -->|"no"| n14
+  n15{"!found || found.tenantId !== tenantId"}:::decision
+  n14 -->|"sí"| n15
+  n16(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17{"!site || site.tenantId !== tenantId"}:::decision
+  n12 -->|"no"| n17
+  n15 -->|"no"| n17
+  n14 -->|"no"| n17
+  n18(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a InfrastructureAccessService.decide"]:::llamada
+  n17 -->|"no"| n19
+  n20(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n19 --> n20
+  n21["Llama a AdtSupport.compatibility"]:::llamada
+  n22["Llama a AdtSupport.compatibilityFor"]:::llamada
+  n21 --> n22
+  n23{"state.formCode !== 'LOC_FORM_BED'"}:::decision
+  n22 --> n23
+  n24(["↩ (relanza el error capturado)"]):::error
+  n23 -->|"sí"| n24
+  n25{"options.siteId && state.practiceSiteId !== options.siteId"}:::decision
+  n23 -->|"no"| n25
+  n26(["404 NOT_FOUND Cama no encontrada en la sede"]):::error
+  n25 -->|"sí"| n26
+  n27(("200 Responde con éxito")):::ok
+  n25 -->|"no"| n27
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 20. POST /clinical/encounters/{id}/close
 
 Cerrar un encuentro en curso (gatilla facturación)
 
@@ -1840,7 +3031,405 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /clinical/encounters/check-in
+#### 21. POST /clinical/encounters/{id}/discharge
+
+Dar de alta (egreso)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.discharge"]:::llamada
+  n2 --> n3
+  n4["Llama a DischargePatientUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a AdtSupport.encounter"]:::llamada
+  n5 --> n6
+  n7[("LEE clinical.encounters")]:::efecto
+  n6 --> n7
+  n8{"!enc || enc.tenantId !== tenantId"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a AdtSupport.activeBed"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE clinical.encounter_locations")]:::efecto
+  n10 --> n11
+  n12{"bed"}:::decision
+  n11 --> n12
+  n13["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n12 -->|"sí"| n13
+  n14["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n13 --> n14
+  n15{"'careSpaceId' in target"}:::decision
+  n14 --> n15
+  n16{"!found || found.tenantId !== tenantId"}:::decision
+  n15 -->|"sí"| n16
+  n17(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"'unitId' in target"}:::decision
+  n15 -->|"no"| n18
+  n19{"!found || found.tenantId !== tenantId"}:::decision
+  n18 -->|"sí"| n19
+  n20(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n19 -->|"sí"| n20
+  n21{"!site || site.tenantId !== tenantId"}:::decision
+  n16 -->|"no"| n21
+  n19 -->|"no"| n21
+  n18 -->|"no"| n21
+  n22(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a InfrastructureAccessService.decide"]:::llamada
+  n21 -->|"no"| n23
+  n24(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n23 --> n24
+  n25["Llama a InfrastructureAccessService.assertSiteLevel"]:::llamada
+  n12 -->|"no"| n25
+  n26["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n25 --> n26
+  n27{"'careSpaceId' in target"}:::decision
+  n26 --> n27
+  n28{"!found || found.tenantId !== tenantId"}:::decision
+  n27 -->|"sí"| n28
+  n29(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n28 -->|"sí"| n29
+  n30{"'unitId' in target"}:::decision
+  n27 -->|"no"| n30
+  n31{"!found || found.tenantId !== tenantId"}:::decision
+  n30 -->|"sí"| n31
+  n32(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n31 -->|"sí"| n32
+  n33{"!site || site.tenantId !== tenantId"}:::decision
+  n28 -->|"no"| n33
+  n31 -->|"no"| n33
+  n30 -->|"no"| n33
+  n34(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n33 -->|"sí"| n34
+  n35["Llama a InfrastructureAccessService.decide"]:::llamada
+  n33 -->|"no"| n35
+  n36(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n35 --> n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n38{"encounter.statusConceptId !== CLIN.ENCOUNTER_IN_PROGRESS"}:::decision
+  n39(["↩ (relanza el error capturado)"]):::error
+  n38 -->|"sí"| n39
+  n40{"!dto.dischargeDispositionCode"}:::decision
+  n38 -->|"no"| n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n40 -->|"sí"| n41
+  n42{"at.getTime() › now.getTime() + 60_000"}:::decision
+  n40 -->|"no"| n42
+  n43(["↩ (relanza el error capturado)"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a AdtSupport.close"]:::llamada
+  n42 -->|"no"| n44
+  n45[("ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounte…")]:::efecto
+  n44 --> n45
+  n46["Llama a AdtSupport.flush"]:::llamada
+  n45 --> n46
+  n47["Intenta"]:::intento
+  n46 --> n47
+  n48(["↩ (relanza el error capturado)"]):::error
+  n47 -->|"si falla"| n48
+  n49["Repite: por cada const p de await tx.find(EncounterParticipants, { encounterI…"]:::bucle
+  n47 --> n49
+  n50[("ACTUALIZA clinical.encounter_participants · ACTUALIZA clinical.encounter_participants")]:::efecto
+  n49 -->|"cada elemento"| n50
+  n51["Repite: por cada const l de await tx.find(EncounterLocations, { encounterId,…"]:::bucle
+  n50 --> n51
+  n49 -->|"al terminar"| n51
+  n52["Llama a AdtSupport.close"]:::llamada
+  n51 -->|"cada elemento"| n52
+  n53[("ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounte…")]:::efecto
+  n52 --> n53
+  n54["Llama a AdtSupport.flush"]:::llamada
+  n53 --> n54
+  n55["Intenta"]:::intento
+  n54 --> n55
+  n56(["↩ (relanza el error capturado)"]):::error
+  n55 -->|"si falla"| n56
+  n57[("ACTUALIZA clinical.encounters · ACTUALIZA clinical.encounters · ACTUALIZA clinical.encounters")]:::efecto
+  n55 --> n57
+  n51 -->|"al terminar"| n57
+  n58["Llama a AdtSupport.flush"]:::llamada
+  n57 --> n58
+  n59["Intenta"]:::intento
+  n58 --> n59
+  n60(["↩ (relanza el error capturado)"]):::error
+  n59 -->|"si falla"| n60
+  n61[("ACTUALIZA clinical.encounters · ACTUALIZA clinical.encounters")]:::efecto
+  n59 --> n61
+  n62{"dto.closeEpisode !== false && encounter.episodeId"}:::decision
+  n61 --> n62
+  n63[("LEE clinical.care_episodes")]:::efecto
+  n62 -->|"sí"| n63
+  n64{"ep && ep.statusConceptId === CLIN.EPISODE_ACTIVE"}:::decision
+  n63 --> n64
+  n65[("ACTUALIZA clinical.care_episodes · ACTUALIZA clinical.care_episodes")]:::efecto
+  n64 -->|"sí"| n65
+  n66["Llama a AdtSupport.flush"]:::llamada
+  n65 --> n66
+  n64 -->|"no"| n66
+  n62 -->|"no"| n66
+  n67["Intenta"]:::intento
+  n66 --> n67
+  n68(["↩ (relanza el error capturado)"]):::error
+  n67 -->|"si falla"| n68
+  n69["Llama a AdtSupport.publish"]:::llamada
+  n67 --> n69
+  n70["Intenta"]:::intento
+  n69 --> n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 22. GET /clinical/encounters/{id}/stay
+
+Ficha de internación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.stay"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientReadUseCases.stay"]:::llamada
+  n3 --> n4
+  n5["Llama a AdtSupport.encounter"]:::llamada
+  n4 --> n5
+  n6[("LEE clinical.encounters")]:::efecto
+  n5 --> n6
+  n7{"!enc || enc.tenantId !== tenantId"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9[("LEE clinical.encounter_locations")]:::efecto
+  n7 -->|"no"| n9
+  n10["Llama a InpatientReadUseCases.authorizeStay"]:::llamada
+  n9 --> n10
+  n11{"movements.length === 0"}:::decision
+  n10 --> n11
+  n12[("LEE practice.practice_sites")]:::efecto
+  n11 -->|"sí"| n12
+  n13{"rows.length === 0"}:::decision
+  n12 --> n13
+  n14(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15["Repite: por cada const siteId de siteIds"]:::bucle
+  n13 -->|"no"| n15
+  n11 -->|"no"| n15
+  n16["Llama a InfrastructureAccessService.decide"]:::llamada
+  n15 -->|"cada elemento"| n16
+  n17(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n16 --> n17
+  n18[("LEE clinical.placement_incidents")]:::efecto
+  n15 -->|"al terminar"| n18
+  n19(("200 Responde con éxito")):::ok
+  n18 --> n19
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 23. POST /clinical/encounters/{id}/transfer
+
+Trasladar de cama
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado; ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | Error: Acción de infraestructura no registrada: {action} |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.transfer"]:::llamada
+  n2 --> n3
+  n4["Llama a TransferPatientUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a AdtSupport.encounter"]:::llamada
+  n5 --> n6
+  n7[("LEE clinical.encounters")]:::efecto
+  n6 --> n7
+  n8{"!enc || enc.tenantId !== tenantId"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n8 -->|"no"| n10
+  n11["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n10 --> n11
+  n12{"'careSpaceId' in target"}:::decision
+  n11 --> n12
+  n13{"!found || found.tenantId !== tenantId"}:::decision
+  n12 -->|"sí"| n13
+  n14(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15{"'unitId' in target"}:::decision
+  n12 -->|"no"| n15
+  n16{"!found || found.tenantId !== tenantId"}:::decision
+  n15 -->|"sí"| n16
+  n17(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n16 -->|"sí"| n17
+  n18{"!site || site.tenantId !== tenantId"}:::decision
+  n13 -->|"no"| n18
+  n16 -->|"no"| n18
+  n15 -->|"no"| n18
+  n19(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a InfrastructureAccessService.decide"]:::llamada
+  n18 -->|"no"| n20
+  n21(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n20 --> n21
+  n22["Llama a AdtSupport.activeBed"]:::llamada
+  n23[("LEE clinical.encounter_locations")]:::efecto
+  n22 --> n23
+  n24{"!from"}:::decision
+  n23 --> n24
+  n25(["↩ (relanza el error capturado)"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n24 -->|"no"| n26
+  n27["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n26 --> n27
+  n28{"'careSpaceId' in target"}:::decision
+  n27 --> n28
+  n29{"!found || found.tenantId !== tenantId"}:::decision
+  n28 -->|"sí"| n29
+  n30(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n29 -->|"sí"| n30
+  n31{"'unitId' in target"}:::decision
+  n28 -->|"no"| n31
+  n32{"!found || found.tenantId !== tenantId"}:::decision
+  n31 -->|"sí"| n32
+  n33(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n32 -->|"sí"| n33
+  n34{"!site || site.tenantId !== tenantId"}:::decision
+  n29 -->|"no"| n34
+  n32 -->|"no"| n34
+  n31 -->|"no"| n34
+  n35(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n34 -->|"sí"| n35
+  n36["Llama a InfrastructureAccessService.decide"]:::llamada
+  n34 -->|"no"| n36
+  n37(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n36 --> n37
+  n38{"from.careSpaceId === dto.toCareSpaceId"}:::decision
+  n39(["↩ (relanza el error capturado)"]):::error
+  n38 -->|"sí"| n39
+  n40{"at.getTime() › now.getTime() + 60_000"}:::decision
+  n38 -->|"no"| n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n40 -->|"sí"| n41
+  n42{"from.periodStart && at ‹ from.periodStart"}:::decision
+  n40 -->|"no"| n42
+  n43(["↩ (relanza el error capturado)"]):::error
+  n42 -->|"sí"| n43
+  n44["Llama a AdtSupport.close"]:::llamada
+  n42 -->|"no"| n44
+  n45[("ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounter_locations · ACTUALIZA clinical.encounte…")]:::efecto
+  n44 --> n45
+  n46["Llama a AdtSupport.flush"]:::llamada
+  n45 --> n46
+  n47["Intenta"]:::intento
+  n46 --> n47
+  n48(["↩ (relanza el error capturado)"]):::error
+  n47 -->|"si falla"| n48
+  n49["Llama a AdtSupport.place"]:::llamada
+  n47 --> n49
+  n50{"!verdict.ok"}:::decision
+  n49 --> n50
+  n51(["↩ (relanza el error capturado)"]):::error
+  n50 -->|"sí"| n51
+  n52{"verdict.forced.length › 0 && !input.canOverride"}:::decision
+  n50 -->|"no"| n52
+  n53(["↩ (relanza el error capturado)"]):::error
+  n52 -->|"sí"| n53
+  n54["Llama a InpatientRepository.bedContext"]:::llamada
+  n52 -->|"no"| n54
+  n55[("LEE practice.space_unit_assignments · LEE practice.care_spaces")]:::efecto
+  n54 --> n55
+  n56[("CREA clinical.encounter_locations")]:::efecto
+  n55 --> n56
+  n57["Llama a AdtSupport.flush"]:::llamada
+  n56 --> n57
+  n58["Intenta"]:::intento
+  n57 --> n58
+  n59(["↩ (relanza el error capturado)"]):::error
+  n58 -->|"si falla"| n59
+  n60{"verdict.forced.length › 0"}:::decision
+  n58 --> n60
+  n61[("CREA clinical.placement_incidents")]:::efecto
+  n60 -->|"sí"| n61
+  n62["Llama a AdtSupport.flush"]:::llamada
+  n61 --> n62
+  n63["Intenta"]:::intento
+  n62 --> n63
+  n64(["↩ (relanza el error capturado)"]):::error
+  n63 -->|"si falla"| n64
+  n65[("ACTUALIZA clinical.encounter_locations")]:::efecto
+  n63 --> n65
+  n66["Llama a AdtSupport.flush"]:::llamada
+  n65 --> n66
+  n67["Intenta"]:::intento
+  n66 --> n67
+  n68(["↩ (relanza el error capturado)"]):::error
+  n67 -->|"si falla"| n68
+  n69["Llama a AdtSupport.publish"]:::llamada
+  n67 --> n69
+  n70["Intenta"]:::intento
+  n69 --> n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 24. POST /clinical/encounters/check-in
 
 Check-in de un encuentro con participantes y ubicación
 
@@ -1852,6 +3441,7 @@ Check-in de un encuentro con participantes y ubicación
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Episodio de cuidado no encontrado |
 | 409 | `CONFLICT` | ConflictException: La cita ya cuenta con un encuentro clínico finalizado. |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Las camas se ocupan por internación (ADT), no por check-in |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1901,73 +3491,82 @@ flowchart TD
   n16 -->|"no"| n21
   n22(["409 CONFLICT La cita ya cuenta con un encuentro clínico finalizado."]):::error
   n21 -->|"sí"| n22
-  n23["Llama a EncountersRepository.create"]:::llamada
+  n23{"dto.location?.careSpaceId"}:::decision
   n21 -->|"no"| n23
   n10 -->|"no"| n23
-  n24[("CREA clinical.encounters")]:::efecto
-  n23 --> n24
-  n25["Repite: por cada const p de dto.participants ?? []"]:::bucle
+  n24[("LEE practice.care_spaces")]:::efecto
+  n23 -->|"sí"| n24
+  n25{"space?.form_concept_id === PRAC.LOC_FORM_BED"}:::decision
   n24 --> n25
-  n26["Llama a EncountersRepository.createParticipant"]:::llamada
-  n25 -->|"cada elemento"| n26
-  n27[("CREA clinical.encounter_participants")]:::efecto
-  n26 --> n27
-  n28{"dto.location"}:::decision
+  n26(["422 PRECONDITION_FAILED Las camas se ocupan por internación (ADT), no por check-in"]):::error
+  n25 -->|"sí"| n26
+  n27["Llama a EncountersRepository.create"]:::llamada
+  n25 -->|"no"| n27
+  n23 -->|"no"| n27
+  n28[("CREA clinical.encounters")]:::efecto
   n27 --> n28
-  n25 -->|"al terminar"| n28
-  n29["Llama a EncountersRepository.createLocation"]:::llamada
-  n28 -->|"sí"| n29
-  n30[("CREA clinical.encounter_locations")]:::efecto
-  n29 --> n30
-  n31{"dto.appointmentId"}:::decision
+  n29["Repite: por cada const p de dto.participants ?? []"]:::bucle
+  n28 --> n29
+  n30["Llama a EncountersRepository.createParticipant"]:::llamada
+  n29 -->|"cada elemento"| n30
+  n31[("CREA clinical.encounter_participants")]:::efecto
   n30 --> n31
-  n28 -->|"no"| n31
-  n32["Llama a SchedulingBookingsRepository.linkPaymentInvoiceToEncounter"]:::llamada
-  n31 -->|"sí"| n32
-  n33[("LEE scheduling.appointment_bookings")]:::efecto
-  n32 --> n33
-  n34["Llama a SchedulingBookingsRepository.findPaymentState"]:::llamada
+  n32{"dto.location"}:::decision
+  n31 --> n32
+  n29 -->|"al terminar"| n32
+  n33["Llama a EncountersRepository.createLocation"]:::llamada
+  n32 -->|"sí"| n33
+  n34[("CREA clinical.encounter_locations")]:::efecto
   n33 --> n34
-  n35[("LEE scheduling.appointment_payment_states")]:::efecto
+  n35{"dto.appointmentId"}:::decision
   n34 --> n35
-  n36[("ACTUALIZA billing.invoices")]:::efecto
-  n35 --> n36
-  n37["Llama a AuthzCareRelationshipsService.recordEncounterCareRelationships"]:::llamada
+  n32 -->|"no"| n35
+  n36["Llama a SchedulingBookingsRepository.linkPaymentInvoiceToEncounter"]:::llamada
+  n35 -->|"sí"| n36
+  n37[("LEE scheduling.appointment_bookings")]:::efecto
   n36 --> n37
-  n31 -->|"no"| n37
-  n38["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
+  n38["Llama a SchedulingBookingsRepository.findPaymentState"]:::llamada
   n37 --> n38
-  n39["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
+  n39[("LEE scheduling.appointment_payment_states")]:::efecto
   n38 --> n39
-  n40[("LEE profiles.patient_profiles")]:::efecto
+  n40[("ACTUALIZA billing.invoices")]:::efecto
   n39 --> n40
-  n41["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
+  n41["Llama a AuthzCareRelationshipsService.recordEncounterCareRelationships"]:::llamada
   n40 --> n41
-  n42[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
+  n35 -->|"no"| n41
+  n42["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
   n41 --> n42
-  n43["Repite: por cada const practitionerProfileId de practitioners"]:::bucle
+  n43["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
   n42 --> n43
-  n44["Llama a CareRelationshipsRepository.findActiveInTenant"]:::llamada
-  n43 -->|"cada elemento"| n44
-  n45[("LEE authz.care_relationships")]:::efecto
+  n44[("LEE profiles.patient_profiles")]:::efecto
+  n43 --> n44
+  n45["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
   n44 --> n45
-  n46["Llama a CareRelationshipsRepository.findPendingInTenant"]:::llamada
+  n46[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
   n45 --> n46
-  n47[("LEE authz.care_relationships")]:::efecto
+  n47["Repite: por cada const practitionerProfileId de practitioners"]:::bucle
   n46 --> n47
-  n48["Llama a CareRelationshipsRepository.create"]:::llamada
-  n47 --> n48
-  n49[("CREA authz.care_relationships")]:::efecto
+  n48["Llama a CareRelationshipsRepository.findActiveInTenant"]:::llamada
+  n47 -->|"cada elemento"| n48
+  n49[("LEE authz.care_relationships")]:::efecto
   n48 --> n49
-  n50["Llama a AuditTrailService.record"]:::llamada
+  n50["Llama a CareRelationshipsRepository.findPendingInTenant"]:::llamada
   n49 --> n50
-  n51["Llama a AuditLogRepository.append"]:::llamada
+  n51[("LEE authz.care_relationships")]:::efecto
   n50 --> n51
-  n52[("CREA audit.audit_log")]:::efecto
+  n52["Llama a CareRelationshipsRepository.create"]:::llamada
   n51 --> n52
-  n53(("201 Responde con éxito")):::ok
+  n53[("CREA authz.care_relationships")]:::efecto
   n52 --> n53
-  n43 -->|"al terminar"| n53
+  n54["Llama a AuditTrailService.record"]:::llamada
+  n53 --> n54
+  n55["Llama a AuditLogRepository.append"]:::llamada
+  n54 --> n55
+  n56[("CREA audit.audit_log")]:::efecto
+  n55 --> n56
+  n57(("201 Responde con éxito")):::ok
+  n56 --> n57
+  n47 -->|"al terminar"| n57
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1976,7 +3575,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /clinical/immunizations
+#### 25. POST /clinical/immunizations
 
 Registrar una inmunización
 
@@ -2038,7 +3637,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. POST /clinical/internal/prescription-expiry-notices
+#### 26. POST /clinical/internal/prescription-expiry-notices
 
 Avisar al paciente de las recetas por vencer (barrido)
 
@@ -2136,7 +3735,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. GET /clinical/me/medical-aspects
+#### 27. GET /clinical/me/medical-aspects
 
 Ver mis aspectos médicos declarados
 
@@ -2182,7 +3781,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. PUT /clinical/me/medical-aspects
+#### 28. PUT /clinical/me/medical-aspects
 
 Guardar mis aspectos médicos declarados
 
@@ -2238,7 +3837,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /clinical/me/procedure-centers
+#### 29. GET /clinical/me/procedure-centers
 
 Dónde hacerme los procedimientos que me pidieron
 
@@ -2300,7 +3899,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /clinical/medication-records
+#### 30. POST /clinical/medication-records
 
 Administrar/registrar medicación
 
@@ -2357,7 +3956,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /clinical/medication-requests
+#### 31. POST /clinical/medication-requests
 
 Prescribir medicación
 
@@ -2453,7 +4052,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /clinical/medication-requests/{id}/attachments
+#### 32. GET /clinical/medication-requests/{id}/attachments
 
 Listar los adjuntos de una receta
 
@@ -2561,7 +4160,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. POST /clinical/medication-requests/{id}/attachments
+#### 33. POST /clinical/medication-requests/{id}/attachments
 
 Adjuntar un archivo ya subido a una receta
 
@@ -2687,7 +4286,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. POST /clinical/medication-requests/{id}/edit
+#### 34. POST /clinical/medication-requests/{id}/edit
 
 Editar ítems de una receta en borrador (DRAFT)
 
@@ -2811,56 +4410,56 @@ flowchart TD
   n46 -->|"no"| n48
   n49[("ACTUALIZA clinical.medication_requests")]:::efecto
   n48 -->|"sí"| n49
-  n50[("ACTUALIZA clinical.medication_requests")]:::efecto
+  n50{"dto.validTo !== undefined"}:::decision
   n49 --> n50
   n48 -->|"no"| n50
-  n51{"dto.validTo !== undefined"}:::decision
-  n50 --> n51
-  n52[("ACTUALIZA clinical.medication_requests")]:::efecto
-  n51 -->|"sí"| n52
-  n53{"dto.patientInstructionsText !== undefined"}:::decision
-  n52 --> n53
-  n51 -->|"no"| n53
-  n54[("ACTUALIZA clinical.medication_requests")]:::efecto
-  n53 -->|"sí"| n54
-  n55{"dto.indicationConditionId !== undefined"}:::decision
-  n54 --> n55
-  n53 -->|"no"| n55
-  n56["Llama a MedicationsService.assertIndicationBelongsToPatient"]:::llamada
-  n55 -->|"sí"| n56
-  n57["Llama a ConditionsRepository.findById"]:::llamada
+  n51[("ACTUALIZA clinical.medication_requests")]:::efecto
+  n50 -->|"sí"| n51
+  n52{"dto.patientInstructionsText !== undefined"}:::decision
+  n51 --> n52
+  n50 -->|"no"| n52
+  n53[("ACTUALIZA clinical.medication_requests")]:::efecto
+  n52 -->|"sí"| n53
+  n54{"dto.indicationConditionId !== undefined"}:::decision
+  n53 --> n54
+  n52 -->|"no"| n54
+  n55["Llama a MedicationsService.assertIndicationBelongsToPatient"]:::llamada
+  n54 -->|"sí"| n55
+  n56["Llama a ConditionsRepository.findById"]:::llamada
+  n55 --> n56
+  n57[("LEE clinical.conditions")]:::efecto
   n56 --> n57
-  n58[("LEE clinical.conditions")]:::efecto
+  n58{"condition?.patientProfileId !== patientProfileId"}:::decision
   n57 --> n58
-  n59{"condition?.patientProfileId !== patientProfileId"}:::decision
-  n58 --> n59
-  n60(["422 PRECONDITION_FAILED La condición indicada no existe o no pertenece a este paciente"]):::error
-  n59 -->|"sí"| n60
-  n61[("ACTUALIZA clinical.medication_requests")]:::efecto
-  n59 -->|"no"| n61
-  n62{"dto.indicationText !== undefined"}:::decision
-  n61 --> n62
-  n55 -->|"no"| n62
+  n59(["422 PRECONDITION_FAILED La condición indicada no existe o no pertenece a este paciente"]):::error
+  n58 -->|"sí"| n59
+  n60[("ACTUALIZA clinical.medication_requests")]:::efecto
+  n58 -->|"no"| n60
+  n61{"dto.indicationText !== undefined"}:::decision
+  n60 --> n61
+  n54 -->|"no"| n61
+  n62[("ACTUALIZA clinical.medication_requests")]:::efecto
+  n61 -->|"sí"| n62
   n63[("ACTUALIZA clinical.medication_requests")]:::efecto
-  n62 -->|"sí"| n63
-  n64[("ACTUALIZA clinical.medication_requests")]:::efecto
+  n62 --> n63
+  n61 -->|"no"| n63
+  n64{"request.indicationConditionId"}:::decision
   n63 --> n64
-  n62 -->|"no"| n64
-  n65{"request.indicationConditionId"}:::decision
-  n64 --> n65
-  n66[("ACTUALIZA clinical.medication_requests")]:::efecto
-  n65 -->|"sí"| n66
-  n67["Llama a MedicationsService.versionRequest"]:::llamada
+  n65[("ACTUALIZA clinical.medication_requests")]:::efecto
+  n64 -->|"sí"| n65
+  n66["Llama a MedicationsService.versionRequest"]:::llamada
+  n65 --> n66
+  n64 -->|"no"| n66
+  n67["Llama a HistoryRepository.append"]:::llamada
   n66 --> n67
-  n65 -->|"no"| n67
-  n68["Llama a HistoryRepository.append"]:::llamada
+  n68{"!binding"}:::decision
   n67 --> n68
-  n69{"!binding"}:::decision
-  n68 --> n69
-  n70(["500 INTERNAL Entidad de historial no registrada: {entity}"]):::error
-  n69 -->|"sí"| n70
-  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
-  n69 -->|"no"| n71
+  n69(["500 INTERNAL Entidad de historial no registrada: {entity}"]):::error
+  n68 -->|"sí"| n69
+  n70[("LEE audit.medication_requests_history · ACTUALIZA audit.medication_requests_history · CREA audit.medication_r…")]:::efecto
+  n68 -->|"no"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2869,7 +4468,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /clinical/medication-requests/{id}/invalidate
+#### 35. POST /clinical/medication-requests/{id}/invalidate
 
 Invalidar una receta emitida
 
@@ -2955,7 +4554,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. POST /clinical/medication-requests/{id}/issue
+#### 36. POST /clinical/medication-requests/{id}/issue
 
 Emitir una receta (la vuelve inmutable)
 
@@ -3081,7 +4680,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /clinical/medication-requests/{id}/renew
+#### 37. POST /clinical/medication-requests/{id}/renew
 
 Renovar una receta (crea una nueva copiando datos)
 
@@ -3169,7 +4768,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. POST /clinical/medication-requests/{id}/replace
+#### 38. POST /clinical/medication-requests/{id}/replace
 
 Reemplazar una receta emitida (crea la corrección)
 
@@ -3269,7 +4868,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. POST /clinical/medication-requests/{id}/sign
+#### 39. POST /clinical/medication-requests/{id}/sign
 
 Firmar una receta en borrador (DRAFT)
 
@@ -3364,7 +4963,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /clinical/observations
+#### 40. POST /clinical/observations
 
 Registrar una observación con componentes y ejecutantes
 
@@ -3467,7 +5066,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. PATCH /clinical/observations/{id}/amend
+#### 41. PATCH /clinical/observations/{id}/amend
 
 Corregir/enmendar una observación (value contract)
 
@@ -3557,7 +5156,210 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. POST /clinical/prescription-signature-policies/{id}/deactivate
+#### 42. GET /clinical/patients/{id}/inpatient-stay
+
+Estancia de internación vigente del paciente
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.currentStayOfPatient"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientReadUseCases.currentStayOfPatient"]:::llamada
+  n3 --> n4
+  n5["Llama a InfrastructureAccessService.canAnywhere"]:::llamada
+  n4 --> n5
+  n6[("LEE practice.practice_sites · LEE practice.practices")]:::efecto
+  n5 --> n6
+  n7{"!(await this.access.canAnywhere(em, actor, req.tenantId, 'f3.adt.read'))"}:::decision
+  n6 --> n7
+  n8(["↩ (relanza el error capturado)"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a AuthzClinicalScopeService.isPatientInTenant"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a AuthzClinicalScopeRepository.patientExists"]:::llamada
+  n9 --> n10
+  n11[("LEE profiles.patient_profiles")]:::efecto
+  n10 --> n11
+  n12["Llama a AuthzClinicalScopeRepository.patientHasFootprintInTenant"]:::llamada
+  n11 --> n12
+  n13[("LEE profiles.person_account_links · LEE scheduling.appointment_bookings · LEE directory.tenant_memberships")]:::efecto
+  n12 --> n13
+  n14{"!(await this.patients.isPatientInTenant( em, patientProfileId, req.tenantId, ))"}:::decision
+  n13 --> n14
+  n15(["↩ (relanza el error capturado)"]):::error
+  n14 -->|"sí"| n15
+  n16["Intenta"]:::intento
+  n14 -->|"no"| n16
+  n17["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
+  n16 --> n17
+  n18{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n17 --> n18
+  n19["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n18 -->|"sí"| n19
+  n20{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n19 --> n20
+  n21(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n20 -->|"no"| n22
+  n18 -->|"no"| n22
+  n23[("LEE profiles.person_account_links")]:::efecto
+  n22 --> n23
+  n24["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n23 --> n24
+  n25[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n24 --> n25
+  n26["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n25 --> n26
+  n27{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n26 --> n27
+  n28(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n27 -->|"sí"| n28
+  n29(["↩ (relanza el error capturado)"]):::error
+  n16 -->|"si falla"| n29
+  n30[("LEE clinical.encounters")]:::efecto
+  n27 -->|"no"| n30
+  n31{"!row"}:::decision
+  n30 --> n31
+  n32(["↩ (relanza el error capturado)"]):::error
+  n31 -->|"sí"| n32
+  n33["Intenta"]:::intento
+  n31 -->|"no"| n33
+  n34["Llama a InpatientReadUseCases.stay"]:::llamada
+  n33 --> n34
+  n35["Llama a AdtSupport.encounter"]:::llamada
+  n34 --> n35
+  n36[("LEE clinical.encounters")]:::efecto
+  n35 --> n36
+  n37{"!enc || enc.tenantId !== tenantId"}:::decision
+  n36 --> n37
+  n38(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n37 -->|"sí"| n38
+  n39[("LEE clinical.encounter_locations")]:::efecto
+  n37 -->|"no"| n39
+  n40["Llama a InpatientReadUseCases.authorizeStay"]:::llamada
+  n39 --> n40
+  n41{"movements.length === 0"}:::decision
+  n40 --> n41
+  n42[("LEE practice.practice_sites")]:::efecto
+  n41 -->|"sí"| n42
+  n43{"rows.length === 0"}:::decision
+  n42 --> n43
+  n44(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n43 -->|"sí"| n44
+  n45[("LEE clinical.placement_incidents")]:::efecto
+  n43 -->|"no"| n45
+  n41 -->|"no"| n45
+  n46{"status === 403 || status === 404"}:::decision
+  n33 -->|"si falla"| n46
+  n47(["↩ (relanza el error capturado)"]):::error
+  n46 -->|"sí"| n47
+  n48(["↩ (relanza el error capturado)"]):::error
+  n46 -->|"no"| n48
+  n49(("200 Responde con éxito")):::ok
+  n45 --> n49
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 43. PATCH /clinical/placement-incidents/{id}
+
+Revisar un incidente de ubicación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Incidente no encontrado; ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.reviewIncident"]:::llamada
+  n2 --> n3
+  n4["Llama a ReviewPlacementIncidentUseCase.execute"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6[("LEE clinical.placement_incidents")]:::efecto
+  n5 --> n6
+  n7{"!inc || inc.tenantId !== req.tenantId"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Incidente no encontrado"]):::error
+  n7 -->|"sí"| n8
+  n9["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n7 -->|"no"| n9
+  n10["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n9 --> n10
+  n11{"'careSpaceId' in target"}:::decision
+  n10 --> n11
+  n12{"!found || found.tenantId !== tenantId"}:::decision
+  n11 -->|"sí"| n12
+  n13(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n12 -->|"sí"| n13
+  n14{"'unitId' in target"}:::decision
+  n11 -->|"no"| n14
+  n15{"!found || found.tenantId !== tenantId"}:::decision
+  n14 -->|"sí"| n15
+  n16(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n15 -->|"sí"| n16
+  n17{"!site || site.tenantId !== tenantId"}:::decision
+  n12 -->|"no"| n17
+  n15 -->|"no"| n17
+  n14 -->|"no"| n17
+  n18(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a InfrastructureAccessService.decide"]:::llamada
+  n17 -->|"no"| n19
+  n20(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n19 --> n20
+  n21[("ACTUALIZA clinical.placement_incidents · ACTUALIZA clinical.placement_incidents · ACTUALIZA clinical.placemen…")]:::efecto
+  n22["Llama a AdtSupport.flush"]:::llamada
+  n21 --> n22
+  n23["Intenta"]:::intento
+  n22 --> n23
+  n24(["↩ (relanza el error capturado)"]):::error
+  n23 -->|"si falla"| n24
+  n25["Llama a AdtSupport.publish"]:::llamada
+  n23 --> n25
+  n26["Intenta"]:::intento
+  n25 --> n26
+  n27>"Evento ~eventType"]:::evento
+  n26 --> n27
+  n28(["↩ (relanza el error capturado)"]):::error
+  n26 -->|"si falla"| n28
+  n29(("200 Responde con éxito")):::ok
+  n27 --> n29
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 44. POST /clinical/prescription-signature-policies/{id}/deactivate
 
 Desactivar una política (cierra vigencia, sin borrado duro)
 
@@ -3602,7 +5404,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /clinical/prescriptions/{id}/pdf
+#### 45. GET /clinical/prescriptions/{id}/pdf
 
 Descargar el PDF oficial de una receta
 
@@ -3727,7 +5529,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /clinical/procedures
+#### 46. POST /clinical/procedures
 
 Registrar un procedimiento
 
@@ -3809,7 +5611,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /clinical/procedures/{id}/attachments
+#### 47. POST /clinical/procedures/{id}/attachments
 
 Adjuntar un archivo ya subido a un procedimiento
 
@@ -3933,7 +5735,182 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /clinical/service-requests
+#### 48. POST /clinical/requisitions
+
+Crear una requisición: varios estudios con su detalle, atómicos
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
+| 409 | `CONFLICT` | ConflictException: La Idempotency-Key ya se usó con un contenido distinto |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El mismo estudio se pide dos veces en la requisición; PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida; PreconditionFailedException: {error.message} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a RequisitionsService.create"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5{"idempotencyKey"}:::decision
+  n4 --> n5
+  n6[("LEE clinical.service_requests")]:::efecto
+  n5 -->|"sí"| n6
+  n7{"existing.length › 0"}:::decision
+  n6 --> n7
+  n8["Llama a RequisitionsService.storedFingerprint"]:::llamada
+  n7 -->|"sí"| n8
+  n9[("LEE clinical.service_request_components")]:::efecto
+  n8 --> n9
+  n10{"stored !== sameContent"}:::decision
+  n9 --> n10
+  n11(["409 CONFLICT La Idempotency-Key ya se usó con un contenido distinto"]):::error
+  n10 -->|"sí"| n11
+  n12["Llama a ServiceRequestReadService.toResponses"]:::llamada
+  n10 -->|"no"| n12
+  n13["Llama a ServiceRequestDetailService.describe"]:::llamada
+  n12 --> n13
+  n14["Llama a ServiceRequestDetailService.loadComponents"]:::llamada
+  n13 --> n14
+  n15[("LEE clinical.service_request_components")]:::efecto
+  n14 --> n15
+  n16["Llama a ServiceRequestDetailService.displays"]:::llamada
+  n15 --> n16
+  n17[("LEE terminology.catalog_concepts")]:::efecto
+  n16 --> n17
+  n18["Llama a ServiceRequestNotesService.noteIdsFor"]:::llamada
+  n17 --> n18
+  n19[("LEE clinical.service_request_notes")]:::efecto
+  n18 --> n19
+  n20["Llama a SuggestedSiteNamesReader.namesFor"]:::llamada
+  n19 --> n20
+  n21[("LEE practice.practice_sites")]:::efecto
+  n20 --> n21
+  n22["Llama a RequisitionsService.assertNoRepeatedItems"]:::llamada
+  n21 --> n22
+  n7 -->|"no"| n22
+  n5 -->|"no"| n22
+  n23["Repite: forEach(…)"]:::bucle
+  n22 --> n23
+  n24["Repite: ciclo for"]:::bucle
+  n23 -->|"cada elemento"| n24
+  n25{"sameSite && overlap"}:::decision
+  n24 -->|"cada elemento"| n25
+  n26(["422 PRECONDITION_FAILED El mismo estudio se pide dos veces en la requisición"]):::error
+  n25 -->|"sí"| n26
+  n27["Repite: por cada const [itemIndex, item] de dto.items.entries()"]:::bucle
+  n25 -->|"no"| n27
+  n24 -->|"al terminar"| n27
+  n23 -->|"al terminar"| n27
+  n28["Intenta"]:::intento
+  n27 -->|"cada elemento"| n28
+  n29["Llama a ServiceRequestsService.create"]:::llamada
+  n28 --> n29
+  n30["Llama a ServiceRequestsService.resolveCategoryConceptId"]:::llamada
+  n29 --> n30
+  n31{"analysisCategoryOf(dto.categoryConceptId) !== dto.category"}:::decision
+  n30 --> n31
+  n32(["422 PRECONDITION_FAILED La categoría indicada no corresponde al concepto de categoría"]):::error
+  n31 -->|"sí"| n32
+  n33["Transacción: inTransaction(…)"]:::transaccion
+  n31 -->|"no"| n33
+  n34["Llama a ServiceRequestsService.assertEncounterBelongsToPatient"]:::llamada
+  n33 --> n34
+  n35["Llama a EncountersRepository.findById"]:::llamada
+  n34 --> n35
+  n36[("LEE clinical.encounters")]:::efecto
+  n35 --> n36
+  n37{"!encounter || encounter.patientProfileId !== dto.patientProfileId || encounter.tenantId !== dto.custodianTena…"}:::decision
+  n36 --> n37
+  n38(["404 NOT_FOUND Encuentro no encontrado"]):::error
+  n37 -->|"sí"| n38
+  n39["Llama a ServiceRequestDetailService.prepare"]:::llamada
+  n37 -->|"no"| n39
+  n40{"enforce && study === null"}:::decision
+  n39 --> n40
+  n41["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n40 -->|"sí"| n41
+  n42(["422 PRECONDITION_FAILED {message}"]):::error
+  n41 --> n42
+  n43{"enforce && study?.family"}:::decision
+  n40 -->|"no"| n43
+  n44{"declared !== undefined && declared !== study.family"}:::decision
+  n43 -->|"sí"| n44
+  n45["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n44 -->|"sí"| n45
+  n46(["422 PRECONDITION_FAILED {message}"]):::error
+  n45 --> n46
+  n47{"input.specimenTypeConceptId !== undefined"}:::decision
+  n44 -->|"no"| n47
+  n43 -->|"no"| n47
+  n48{"!specimenAllowed && category !== 'LAB'"}:::decision
+  n47 -->|"sí"| n48
+  n49["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n48 -->|"sí"| n49
+  n50(["422 PRECONDITION_FAILED {message}"]):::error
+  n49 --> n50
+  n51["Llama a TerminologyStudyCatalogAdapter.isInValueSet"]:::llamada
+  n48 -->|"no"| n51
+  n52[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members")]:::efecto
+  n51 --> n52
+  n53{"!(await this.catalog.isInValueSet( em, 'specimen-type', input.specimenTypeConceptId, ))"}:::decision
+  n52 --> n53
+  n54["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n53 -->|"sí"| n54
+  n55(["422 PRECONDITION_FAILED {message}"]):::error
+  n54 --> n55
+  n56{"components !== undefined || study?.componentsSelectable"}:::decision
+  n53 -->|"no"| n56
+  n47 -->|"no"| n56
+  n57{"!study?.componentsSelectable"}:::decision
+  n56 -->|"sí"| n57
+  n58{"components !== undefined && components.length › 0"}:::decision
+  n57 -->|"sí"| n58
+  n59["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n58 -->|"sí"| n59
+  n60(["422 PRECONDITION_FAILED {message}"]):::error
+  n59 --> n60
+  n61{"components === undefined || components.length === 0"}:::decision
+  n57 -->|"no"| n61
+  n62["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n61 -->|"sí"| n62
+  n63(["422 PRECONDITION_FAILED {message}"]):::error
+  n62 --> n63
+  n64["Llama a TerminologyStudyCatalogAdapter.panelComponentIds"]:::llamada
+  n61 -->|"no"| n64
+  n65["Repite: ciclo for"]:::bucle
+  n64 --> n65
+  n66[("LEE terminology.concept_relationships")]:::efecto
+  n65 -->|"cada elemento"| n66
+  n67{"foreign.length › 0"}:::decision
+  n66 --> n67
+  n65 -->|"al terminar"| n67
+  n68["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n67 -->|"sí"| n68
+  n69(["422 PRECONDITION_FAILED {message}"]):::error
+  n68 --> n69
+  n70{"category !== 'IMAGING'"}:::decision
+  n58 -->|"no"| n70
+  n67 -->|"no"| n70
+  n56 -->|"no"| n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 -->|"sí"| n71
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 49. POST /clinical/service-requests
 
 Crear una orden de servicio
 
@@ -3944,7 +5921,7 @@ Crear una orden de servicio
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Encuentro no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La categoría indicada no corresponde al concepto de categoría; PreconditionFailedException: {message}; PreconditionFailedException: La nota médica citada no está disponible como motivo de esta orden; PreconditionFailedException: La nota médica citada pertenece a otra consulta; PreconditionFailedException: El modo de ejecutor no es válido; PreconditionFailedException: Si elige el paciente, la orden no lleva médico ni sede sugeridos; PreconditionFailedException: La orden necesita la sede sugerida; PreconditionFailedException: Si se recomienda un centro, la orden no lleva médico ejecutor; PreconditionFailedException: Si lo hace el médico, la orden necesita el médico ejecutor; PreconditionFailedException: El médico ejecutor debe ser quien pide la orden; PreconditionFailedException: La sede sugerida no ofrece ese procedimiento con precio; PreconditionFailedException: El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida; PreconditionFailedException: El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el informe o justificar la repetición; PreconditionFailedException: El informe previo indicado no coincide con el duplicado detectado; PreconditionFailedException: El paciente ya tiene una orden activa de este estudio, sin informe; hace falta justificar la repetición; PreconditionFailedException: No se detectó ningún estudio duplicado para justificar; PreconditionFailedException: El punto de toma no es un punto disponible de la sede sugerida |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -3960,7 +5937,7 @@ flowchart TD
   n4 --> n5
   n6(["422 PRECONDITION_FAILED La categoría indicada no corresponde al concepto de categoría"]):::error
   n5 -->|"sí"| n6
-  n7["Transacción: transactional(…)"]:::transaccion
+  n7["Transacción: inTransaction(…)"]:::transaccion
   n5 -->|"no"| n7
   n8["Llama a ServiceRequestsService.assertEncounterBelongsToPatient"]:::llamada
   n7 --> n8
@@ -3972,131 +5949,132 @@ flowchart TD
   n10 --> n11
   n12(["404 NOT_FOUND Encuentro no encontrado"]):::error
   n11 -->|"sí"| n12
-  n13{"basedOnNoteIds.length › 0"}:::decision
+  n13["Llama a ServiceRequestDetailService.prepare"]:::llamada
   n11 -->|"no"| n13
-  n14["Llama a ServiceRequestNotesService.assertUsable"]:::llamada
-  n13 -->|"sí"| n14
-  n15[("LEE chart.clinical_note_headers · LEE clinical.encounters")]:::efecto
+  n14["Llama a TerminologyStudyCatalogAdapter.findStudy"]:::llamada
+  n13 --> n14
+  n15["Llama a TerminologyStudyCatalogAdapter.isInValueSet"]:::llamada
   n14 --> n15
-  n16["Repite: por cada const noteId de noteIds"]:::bucle
+  n16[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members")]:::efecto
   n15 --> n16
-  n17{"!usable"}:::decision
-  n16 -->|"cada elemento"| n17
-  n18(["422 PRECONDITION_FAILED La nota médica citada no está disponible como motivo de esta orden"]):::error
-  n17 -->|"sí"| n18
-  n19{"encounterId && note.encounterId !== encounterId"}:::decision
-  n17 -->|"no"| n19
-  n20(["422 PRECONDITION_FAILED La nota médica citada pertenece a otra consulta"]):::error
-  n19 -->|"sí"| n20
-  n21{"dto.formInstanceId !== undefined"}:::decision
-  n19 -->|"no"| n21
-  n16 -->|"al terminar"| n21
-  n13 -->|"no"| n21
-  n22["Llama a FormInstanceOriginValidator.assertUsableOrigin"]:::llamada
-  n21 -->|"sí"| n22
-  n23[("LEE forms.form_instances")]:::efecto
+  n17["Llama a TerminologyStudyCatalogAdapter.property"]:::llamada
+  n16 --> n17
+  n18[("LEE terminology.concept_properties")]:::efecto
+  n17 --> n18
+  n19["Llama a TerminologyStudyCatalogAdapter.panelComponentIds"]:::llamada
+  n18 --> n19
+  n20["Repite: ciclo for"]:::bucle
+  n19 --> n20
+  n21[("LEE terminology.concept_relationships")]:::efecto
+  n20 -->|"cada elemento"| n21
+  n22["Llama a TerminologyStudyCatalogAdapter.modalityOf"]:::llamada
+  n21 --> n22
+  n20 -->|"al terminar"| n22
+  n23[("LEE terminology.concept_relationships · LEE terminology.catalog_concepts")]:::efecto
   n22 --> n23
-  n24{"!instance"}:::decision
+  n24{"enforce && study === null"}:::decision
   n23 --> n24
-  n25(["↩ (relanza el error capturado)"]):::error
+  n25["Llama a ServiceRequestDetailService.fail"]:::llamada
   n24 -->|"sí"| n25
-  n26{"instance.stateConceptId !== FORMS.INSTANCE_CLOSED"}:::decision
-  n24 -->|"no"| n26
-  n27(["↩ (relanza el error capturado)"]):::error
-  n26 -->|"sí"| n27
-  n28{"encounterId && instance.resourceId !== encounterId"}:::decision
-  n26 -->|"no"| n28
-  n29(["↩ (relanza el error capturado)"]):::error
+  n26(["422 PRECONDITION_FAILED {message}"]):::error
+  n25 --> n26
+  n27{"enforce && study?.family"}:::decision
+  n24 -->|"no"| n27
+  n28{"declared !== undefined && declared !== study.family"}:::decision
+  n27 -->|"sí"| n28
+  n29["Llama a ServiceRequestDetailService.fail"]:::llamada
   n28 -->|"sí"| n29
-  n30["Llama a PerformerSelectionValidator.resolve"]:::llamada
-  n28 -->|"no"| n30
-  n21 -->|"no"| n30
-  n31{"!mode"}:::decision
-  n30 --> n31
-  n32(["422 PRECONDITION_FAILED El modo de ejecutor no es válido"]):::error
+  n30(["422 PRECONDITION_FAILED {message}"]):::error
+  n29 --> n30
+  n31{"input.specimenTypeConceptId !== undefined"}:::decision
+  n28 -->|"no"| n31
+  n27 -->|"no"| n31
+  n32{"!specimenAllowed && category !== 'LAB'"}:::decision
   n31 -->|"sí"| n32
-  n33{"mode === 'PATIENT_CHOICE'"}:::decision
-  n31 -->|"no"| n33
-  n34{"doctor !== undefined || suggestedPracticeSiteId !== undefined"}:::decision
-  n33 -->|"sí"| n34
-  n35(["422 PRECONDITION_FAILED Si elige el paciente, la orden no lleva médico ni sede sugeridos"]):::error
-  n34 -->|"sí"| n35
-  n36{"suggestedPracticeSiteId === undefined"}:::decision
-  n34 -->|"no"| n36
-  n33 -->|"no"| n36
-  n37(["422 PRECONDITION_FAILED La orden necesita la sede sugerida"]):::error
-  n36 -->|"sí"| n37
-  n38{"mode === 'ORGANIZATION'"}:::decision
-  n36 -->|"no"| n38
-  n39{"doctor !== undefined"}:::decision
-  n38 -->|"sí"| n39
-  n40(["422 PRECONDITION_FAILED Si se recomienda un centro, la orden no lleva médico ejecutor"]):::error
-  n39 -->|"sí"| n40
-  n41{"doctor === undefined"}:::decision
-  n38 -->|"no"| n41
-  n42(["422 PRECONDITION_FAILED Si lo hace el médico, la orden necesita el médico ejecutor"]):::error
+  n33["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n32 -->|"sí"| n33
+  n34(["422 PRECONDITION_FAILED {message}"]):::error
+  n33 --> n34
+  n35["Llama a TerminologyStudyCatalogAdapter.isInValueSet"]:::llamada
+  n32 -->|"no"| n35
+  n36[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members")]:::efecto
+  n35 --> n36
+  n37{"!(await this.catalog.isInValueSet( em, 'specimen-type', input.specimenTypeConceptId, ))"}:::decision
+  n36 --> n37
+  n38["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n37 -->|"sí"| n38
+  n39(["422 PRECONDITION_FAILED {message}"]):::error
+  n38 --> n39
+  n40{"components !== undefined || study?.componentsSelectable"}:::decision
+  n37 -->|"no"| n40
+  n31 -->|"no"| n40
+  n41{"!study?.componentsSelectable"}:::decision
+  n40 -->|"sí"| n41
+  n42{"components !== undefined && components.length › 0"}:::decision
   n41 -->|"sí"| n42
-  n43{"input.requesterProfileId === undefined || doctor !== input.requesterProfileId"}:::decision
-  n41 -->|"no"| n43
-  n44(["422 PRECONDITION_FAILED El médico ejecutor debe ser quien pide la orden"]):::error
-  n43 -->|"sí"| n44
-  n45["Llama a PerformerSiteDbReader.offersProcedureWithPrice"]:::llamada
-  n39 -->|"no"| n45
-  n43 -->|"no"| n45
-  n46[("LEE practice.practice_sites · LEE practice.healthcare_services · LEE billing.service_catalog")]:::efecto
-  n45 --> n46
-  n47{"!offered"}:::decision
+  n43["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n42 -->|"sí"| n43
+  n44(["422 PRECONDITION_FAILED {message}"]):::error
+  n43 --> n44
+  n45{"components === undefined || components.length === 0"}:::decision
+  n41 -->|"no"| n45
+  n46["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n45 -->|"sí"| n46
+  n47(["422 PRECONDITION_FAILED {message}"]):::error
   n46 --> n47
-  n48(["422 PRECONDITION_FAILED La sede sugerida no ofrece ese procedimiento con precio"]):::error
-  n47 -->|"sí"| n48
-  n49{"mode === 'SELF'"}:::decision
-  n47 -->|"no"| n49
-  n50["Llama a PerformerSiteDbReader.isActivelyAffiliated"]:::llamada
-  n49 -->|"sí"| n50
-  n51[("LEE practice.practitioner_role_assignments · LEE practice.healthcare_services")]:::efecto
+  n48["Llama a TerminologyStudyCatalogAdapter.panelComponentIds"]:::llamada
+  n45 -->|"no"| n48
+  n49["Repite: ciclo for"]:::bucle
+  n48 --> n49
+  n50[("LEE terminology.concept_relationships")]:::efecto
+  n49 -->|"cada elemento"| n50
+  n51{"foreign.length › 0"}:::decision
   n50 --> n51
-  n52{"!affiliated"}:::decision
-  n51 --> n52
-  n53(["422 PRECONDITION_FAILED El médico no tiene una afiliación activa para ese procedimiento en la sede sugerida"]):::error
-  n52 -->|"sí"| n53
-  n54["Llama a ServiceRequestsService.resolveDuplicateDecision"]:::llamada
-  n52 -->|"no"| n54
-  n49 -->|"no"| n54
-  n55["Llama a DuplicateStudyDetector.findDuplicate"]:::llamada
-  n54 --> n55
-  n56[("LEE clinical.diagnostic_reports · LEE diagnostics.diagnostic_report_versions · LEE clinical.service_requests…")]:::efecto
-  n55 --> n56
-  n57["Llama a DuplicateStudyDetector.releasedVersionOf"]:::llamada
+  n49 -->|"al terminar"| n51
+  n52["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n51 -->|"sí"| n52
+  n53(["422 PRECONDITION_FAILED {message}"]):::error
+  n52 --> n53
+  n54{"category !== 'IMAGING'"}:::decision
+  n42 -->|"no"| n54
+  n51 -->|"no"| n54
+  n40 -->|"no"| n54
+  n55{"hasImagingFields"}:::decision
+  n54 -->|"sí"| n55
+  n56["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n55 -->|"sí"| n56
+  n57(["422 PRECONDITION_FAILED {message}"]):::error
   n56 --> n57
-  n58[("LEE diagnostics.diagnostic_report_versions")]:::efecto
-  n57 --> n58
-  n59{"match"}:::decision
-  n58 --> n59
-  n60{"!dto.previousDiagnosticReportId"}:::decision
-  n59 -->|"sí"| n60
-  n61["Llama a DuplicateStudyDetector.describe"]:::llamada
-  n60 -->|"sí"| n61
-  n62["Llama a DuplicateStudyDetector.designationOrDisplay"]:::llamada
-  n61 --> n62
-  n63[("LEE terminology.catalog_concepts")]:::efecto
+  n58{"catalogImaging && modalityConceptId === undefined"}:::decision
+  n55 -->|"no"| n58
+  n54 -->|"no"| n58
+  n59["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n58 -->|"sí"| n59
+  n60(["422 PRECONDITION_FAILED {message}"]):::error
+  n59 --> n60
+  n61{"modalityConceptId !== undefined"}:::decision
+  n58 -->|"no"| n61
+  n62["Llama a TerminologyStudyCatalogAdapter.isInValueSet"]:::llamada
+  n61 -->|"sí"| n62
+  n63[("LEE terminology.value_sets · LEE terminology.value_set_versions · LEE terminology.value_set_members")]:::efecto
   n62 --> n63
-  n64["Llama a DuplicateStudyDetector.providerName"]:::llamada
+  n64{"!(await this.catalog.isInValueSet( em, 'service-request-imaging-modality', modalityConceptId, ))"}:::decision
   n63 --> n64
-  n65[("LEE directory.tenants")]:::efecto
-  n64 --> n65
-  n66(["422 PRECONDITION_FAILED El paciente ya tiene este estudio dentro de la ventana; hace falta reutilizar el info…"]):::error
+  n65["Llama a ServiceRequestDetailService.fail"]:::llamada
+  n64 -->|"sí"| n65
+  n66(["422 PRECONDITION_FAILED {message}"]):::error
   n65 --> n66
-  n67{"dto.previousDiagnosticReportId !== match.report.id"}:::decision
-  n60 -->|"no"| n67
-  n68(["422 PRECONDITION_FAILED El informe previo indicado no coincide con el duplicado detectado"]):::error
+  n67{"study?.modalityConceptId && study.modalityConceptId !== modalityConceptId"}:::decision
+  n64 -->|"no"| n67
+  n68["Llama a ServiceRequestDetailService.fail"]:::llamada
   n67 -->|"sí"| n68
-  n69{"!dto.previousDiagnosticReportId"}:::decision
-  n67 -->|"no"| n69
-  n59 -->|"no"| n69
-  n70["Llama a DuplicateStudyDetector.findActiveOrderWithoutReport"]:::llamada
-  n69 -->|"sí"| n70
-  n71["… el resto del árbol (6 nodos) está en el JSON del inventario"]:::corte
-  n70 --> n71
+  n69(["422 PRECONDITION_FAILED {message}"]):::error
+  n68 --> n69
+  n70{"bodySiteConceptId === undefined"}:::decision
+  n67 -->|"no"| n70
+  n61 -->|"no"| n70
+  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
+  n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -4105,7 +6083,117 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. POST /clinical/service-requests/duplicate-check
+#### 50. GET /clinical/service-requests/{id}
+
+Leer una orden de servicio con su detalle
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: {WITHOUT_ACCESS_TO_HISTORY} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a ServiceRequestReadService.getById"]:::llamada
+  n2 --> n3
+  n4[("LEE clinical.service_requests")]:::efecto
+  n3 --> n4
+  n5{"!sr || sr.custodianTenantId !== tenantId"}:::decision
+  n4 --> n5
+  n6(["↩ (relanza el error capturado)"]):::error
+  n5 -->|"sí"| n6
+  n7["Intenta"]:::intento
+  n5 -->|"no"| n7
+  n8["Llama a ClinicalReadService.assertCanReadHistory"]:::llamada
+  n7 --> n8
+  n9{"!actor.roles.some((role) =› ROLES_THAT_ATTEND.includes(role))"}:::decision
+  n8 --> n9
+  n10["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n9 -->|"sí"| n10
+  n11["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n10 --> n11
+  n12[("LEE profiles.person_account_links")]:::efecto
+  n11 --> n12
+  n13["Llama a PatientProfilesRepository.findById"]:::llamada
+  n12 --> n13
+  n14[("LEE profiles.patient_profiles")]:::efecto
+  n13 --> n14
+  n15{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n14 --> n15
+  n16(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n15 -->|"no"| n17
+  n9 -->|"no"| n17
+  n18[("LEE profiles.person_account_links")]:::efecto
+  n17 --> n18
+  n19["Llama a HealthPractitionerProfilesRepository.findById"]:::llamada
+  n18 --> n19
+  n20[("LEE profiles.health_practitioner_profiles")]:::efecto
+  n19 --> n20
+  n21["Llama a ClinicalReadService.isAttending"]:::llamada
+  n20 --> n21
+  n22["Llama a SchedulingBookingsRepository.hasConsultationInProgress"]:::llamada
+  n21 --> n22
+  n23[("LEE scheduling.appointment_bookings · LEE scheduling.schedulable_resources")]:::efecto
+  n22 --> n23
+  n24["Llama a ClinicalReadService.assertOwnRecord"]:::llamada
+  n23 --> n24
+  n25["Llama a PersonAccountLinksRepository.findActiveByUser"]:::llamada
+  n24 --> n25
+  n26[("LEE profiles.person_account_links")]:::efecto
+  n25 --> n26
+  n27["Llama a PatientProfilesRepository.findById"]:::llamada
+  n26 --> n27
+  n28[("LEE profiles.patient_profiles")]:::efecto
+  n27 --> n28
+  n29{"!link || !profile || profile.profileId !== link.personId"}:::decision
+  n28 --> n29
+  n30(["403 FORBIDDEN {WITHOUT_ACCESS_TO_HISTORY}"]):::error
+  n29 -->|"sí"| n30
+  n31{"error instanceof HttpException && error.getStatus() === 403"}:::decision
+  n7 -->|"si falla"| n31
+  n32(["↩ (relanza el error capturado)"]):::error
+  n31 -->|"sí"| n32
+  n33(["↩ (relanza el error capturado)"]):::error
+  n31 -->|"no"| n33
+  n34["Llama a ServiceRequestReadService.toResponses"]:::llamada
+  n29 -->|"no"| n34
+  n35["Llama a ServiceRequestDetailService.describe"]:::llamada
+  n34 --> n35
+  n36["Llama a ServiceRequestDetailService.loadComponents"]:::llamada
+  n35 --> n36
+  n37[("LEE clinical.service_request_components")]:::efecto
+  n36 --> n37
+  n38["Llama a ServiceRequestDetailService.displays"]:::llamada
+  n37 --> n38
+  n39[("LEE terminology.catalog_concepts")]:::efecto
+  n38 --> n39
+  n40["Llama a ServiceRequestNotesService.noteIdsFor"]:::llamada
+  n39 --> n40
+  n41[("LEE clinical.service_request_notes")]:::efecto
+  n40 --> n41
+  n42["Llama a SuggestedSiteNamesReader.namesFor"]:::llamada
+  n41 --> n42
+  n43[("LEE practice.practice_sites")]:::efecto
+  n42 --> n43
+  n44(("200 Responde con éxito")):::ok
+  n43 --> n44
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 51. POST /clinical/service-requests/duplicate-check
 
 Pre-validar si el paciente ya se hizo este estudio en la ventana (antiduplicación · T-26)
 
@@ -4243,7 +6331,122 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. GET /public/prescriptions/{id}/verify
+#### 52. POST /internal/clinical/census-close-tick
+
+Cerrar los censos vencidos (worker)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite cerrar el censo de esas unidades; InsufficientRoleException: Su rol no permite cerrar el censo de ninguna unidad de la sede |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientCensusService.tick"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientCensusUseCases.tick"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a InpatientRepository.sitesWithBeds"]:::llamada
+  n5 --> n6
+  n7[("LEE practice.practice_sites · LEE practice.care_spaces")]:::efecto
+  n6 --> n7
+  n8["Repite: por cada const site de sites"]:::bucle
+  n7 --> n8
+  n9["Intenta"]:::intento
+  n8 -->|"cada elemento"| n9
+  n10["Llama a InpatientCensusUseCases.close"]:::llamada
+  n9 --> n10
+  n11["Transacción: transactional(…)"]:::transaccion
+  n10 --> n11
+  n12{"req"}:::decision
+  n11 --> n12
+  n13{"denied.length › 0"}:::decision
+  n12 -->|"sí"| n13
+  n14(["403 FORBIDDEN Su rol no permite cerrar el censo de esas unidades"]):::error
+  n13 -->|"sí"| n14
+  n15[("LEE practice.practice_sites")]:::efecto
+  n12 -->|"no"| n15
+  n16{"!site"}:::decision
+  n15 --> n16
+  n17(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n16 -->|"sí"| n17
+  n18{"Date.now() ‹ window.cutoff.getTime() + GRACE_MINUTES * 60_000"}:::decision
+  n13 -->|"no"| n18
+  n16 -->|"no"| n18
+  n19(["↩ (relanza el error capturado)"]):::error
+  n18 -->|"sí"| n19
+  n20["Llama a InpatientRepository.segments"]:::llamada
+  n18 -->|"no"| n20
+  n21[("LEE clinical.encounter_locations · LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE clini…")]:::efecto
+  n20 --> n21
+  n22[("LEE clinical.inpatient_census_days")]:::efecto
+  n21 --> n22
+  n23{"req && wanted.length === 0 && !unitIds?.length"}:::decision
+  n22 --> n23
+  n24{"any"}:::decision
+  n23 -->|"sí"| n24
+  n25(["403 FORBIDDEN Su rol no permite cerrar el censo de ninguna unidad de la sede"]):::error
+  n24 -->|"sí"| n25
+  n26{"req && wanted.length › 0 && pending.length === 0"}:::decision
+  n24 -->|"no"| n26
+  n23 -->|"no"| n26
+  n27(["↩ (relanza el error capturado)"]):::error
+  n26 -->|"sí"| n27
+  n28["Repite: por cada const unit de pending"]:::bucle
+  n26 -->|"no"| n28
+  n29[("CREA clinical.inpatient_census_days")]:::efecto
+  n28 -->|"cada elemento"| n29
+  n30["Llama a AdtSupport.flush"]:::llamada
+  n29 --> n30
+  n31["Intenta"]:::intento
+  n30 --> n31
+  n32(["↩ (relanza el error capturado)"]):::error
+  n31 -->|"si falla"| n32
+  n33["Repite: por cada const s de segments.filter((r) =› r.unit_id === unit)"]:::bucle
+  n31 --> n33
+  n34[("CREA clinical.inpatient_census_entries")]:::efecto
+  n33 -->|"cada elemento"| n34
+  n35["Llama a AdtSupport.flush"]:::llamada
+  n34 --> n35
+  n33 -->|"al terminar"| n35
+  n36["Intenta"]:::intento
+  n35 --> n36
+  n37(["↩ (relanza el error capturado)"]):::error
+  n36 -->|"si falla"| n37
+  n38["Llama a AdtSupport.publish"]:::llamada
+  n36 --> n38
+  n39["Intenta"]:::intento
+  n38 --> n39
+  n40>"Evento ~eventType"]:::evento
+  n39 --> n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n39 -->|"si falla"| n41
+  n42{"(error as { reason?: string }).reason !== 'CENSUS_DATE_NOT_ENDED'"}:::decision
+  n9 -->|"si falla"| n42
+  n43(["↩ (relanza el error capturado)"]):::error
+  n42 -->|"sí"| n43
+  n44(("200 Responde con éxito")):::ok
+  n40 --> n44
+  n28 -->|"al terminar"| n44
+  n42 -->|"no"| n44
+  n8 -->|"al terminar"| n44
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 53. GET /public/prescriptions/{id}/verify
 
 Verificar la autenticidad de una receta por su sello
 
@@ -4278,6 +6481,461 @@ flowchart TD
   n9 --> n10
   n11(("200 Responde con éxito")):::ok
   n10 --> n11
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 54. GET /sites/{siteId}/attending-practitioners
+
+Profesionales a cargo posibles en la sede
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.attendingPractitioners"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientReadUseCases.attendingPractitioners"]:::llamada
+  n3 --> n4
+  n5["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n4 --> n5
+  n6["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n5 --> n6
+  n7{"'careSpaceId' in target"}:::decision
+  n6 --> n7
+  n8{"!found || found.tenantId !== tenantId"}:::decision
+  n7 -->|"sí"| n8
+  n9(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"'unitId' in target"}:::decision
+  n7 -->|"no"| n10
+  n11{"!found || found.tenantId !== tenantId"}:::decision
+  n10 -->|"sí"| n11
+  n12(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13{"!site || site.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n13
+  n11 -->|"no"| n13
+  n10 -->|"no"| n13
+  n14(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a InfrastructureAccessService.decide"]:::llamada
+  n13 -->|"no"| n15
+  n16(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n15 --> n16
+  n17["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n18["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n17 --> n18
+  n19[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n18 --> n19
+  n20[("LEE practice.practitioner_role_assignments · LEE terminology.catalog_concepts")]:::efecto
+  n19 --> n20
+  n21(("200 Responde con éxito")):::ok
+  n20 --> n21
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 55. GET /sites/{siteId}/census
+
+Censo de un día
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · parámetros de ruta (400) · l…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientCensusService.view"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientCensusUseCases.view"]:::llamada
+  n3 --> n4
+  n5["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n4 --> n5
+  n6["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n5 --> n6
+  n7{"'careSpaceId' in target"}:::decision
+  n6 --> n7
+  n8{"!found || found.tenantId !== tenantId"}:::decision
+  n7 -->|"sí"| n8
+  n9(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"'unitId' in target"}:::decision
+  n7 -->|"no"| n10
+  n11{"!found || found.tenantId !== tenantId"}:::decision
+  n10 -->|"sí"| n11
+  n12(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13{"!site || site.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n13
+  n11 -->|"no"| n13
+  n10 -->|"no"| n13
+  n14(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a InfrastructureAccessService.decide"]:::llamada
+  n13 -->|"no"| n15
+  n16(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n15 --> n16
+  n17["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n18["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n17 --> n18
+  n19[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n18 --> n19
+  n20["Llama a InfrastructureAccessService.assertTargetInScope"]:::llamada
+  n19 --> n20
+  n21{"ref.careSpaceId && !filter.allowsSpace(ref.careSpaceId)"}:::decision
+  n20 --> n21
+  n22(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23{"ref.unitId && !filter.allowsUnit(ref.unitId)"}:::decision
+  n21 -->|"no"| n23
+  n24(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n23 -->|"sí"| n24
+  n25[("LEE clinical.inpatient_census_days")]:::efecto
+  n23 -->|"no"| n25
+  n26["Llama a InpatientCensusUseCases.compute"]:::llamada
+  n25 --> n26
+  n27["Llama a InpatientRepository.segments"]:::llamada
+  n26 --> n27
+  n28[("LEE clinical.encounter_locations · LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE clini…")]:::efecto
+  n27 --> n28
+  n29["Llama a InpatientRepository.bedsByUnit"]:::llamada
+  n28 --> n29
+  n30[("LEE practice.care_spaces · LEE practice.space_unit_assignments")]:::efecto
+  n29 --> n30
+  n31["Repite: por cada const [unit, counts] de preview"]:::bucle
+  n30 --> n31
+  n32{"day"}:::decision
+  n31 -->|"cada elemento"| n32
+  n33[("LEE clinical.inpatient_census_adjustments")]:::efecto
+  n32 -->|"sí"| n33
+  n34(("200 Responde con éxito")):::ok
+  n33 --> n34
+  n32 -->|"no"| n34
+  n31 -->|"al terminar"| n34
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 56. POST /sites/{siteId}/census/{date}/close
+
+Cerrar el censo de un día
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio; InsufficientRoleException: Su rol no permite cerrar el censo de esas unidades; InsufficientRoleException: Su rol no permite cerrar el censo de ninguna unidad de la sede |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientCensusService.close"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientCensusUseCases.close"]:::llamada
+  n3 --> n4
+  n5["Transacción: transactional(…)"]:::transaccion
+  n4 --> n5
+  n6{"req"}:::decision
+  n5 --> n6
+  n7["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n6 -->|"sí"| n7
+  n8["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n7 --> n8
+  n9{"'careSpaceId' in target"}:::decision
+  n8 --> n9
+  n10{"!found || found.tenantId !== tenantId"}:::decision
+  n9 -->|"sí"| n10
+  n11(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n10 -->|"sí"| n11
+  n12{"'unitId' in target"}:::decision
+  n9 -->|"no"| n12
+  n13{"!found || found.tenantId !== tenantId"}:::decision
+  n12 -->|"sí"| n13
+  n14(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n13 -->|"sí"| n14
+  n15{"!site || site.tenantId !== tenantId"}:::decision
+  n10 -->|"no"| n15
+  n13 -->|"no"| n15
+  n12 -->|"no"| n15
+  n16(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a InfrastructureAccessService.decide"]:::llamada
+  n15 -->|"no"| n17
+  n18(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n17 --> n18
+  n19["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n20["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n19 --> n20
+  n21[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n20 --> n21
+  n22{"denied.length › 0"}:::decision
+  n21 --> n22
+  n23(["403 FORBIDDEN Su rol no permite cerrar el censo de esas unidades"]):::error
+  n22 -->|"sí"| n23
+  n24[("LEE practice.practice_sites")]:::efecto
+  n6 -->|"no"| n24
+  n25{"!site"}:::decision
+  n24 --> n25
+  n26(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n25 -->|"sí"| n26
+  n27{"Date.now() ‹ window.cutoff.getTime() + GRACE_MINUTES * 60_000"}:::decision
+  n22 -->|"no"| n27
+  n25 -->|"no"| n27
+  n28(["↩ (relanza el error capturado)"]):::error
+  n27 -->|"sí"| n28
+  n29["Llama a InpatientCensusUseCases.compute"]:::llamada
+  n27 -->|"no"| n29
+  n30["Llama a InpatientRepository.segments"]:::llamada
+  n29 --> n30
+  n31[("LEE clinical.encounter_locations · LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE clini…")]:::efecto
+  n30 --> n31
+  n32["Llama a InpatientRepository.bedsByUnit"]:::llamada
+  n31 --> n32
+  n33[("LEE practice.care_spaces · LEE practice.space_unit_assignments")]:::efecto
+  n32 --> n33
+  n34["Llama a InpatientRepository.segments"]:::llamada
+  n33 --> n34
+  n35[("LEE clinical.encounter_locations · LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE clini…")]:::efecto
+  n34 --> n35
+  n36[("LEE clinical.inpatient_census_days")]:::efecto
+  n35 --> n36
+  n37{"req && wanted.length === 0 && !unitIds?.length"}:::decision
+  n36 --> n37
+  n38{"any"}:::decision
+  n37 -->|"sí"| n38
+  n39(["403 FORBIDDEN Su rol no permite cerrar el censo de ninguna unidad de la sede"]):::error
+  n38 -->|"sí"| n39
+  n40{"req && wanted.length › 0 && pending.length === 0"}:::decision
+  n38 -->|"no"| n40
+  n37 -->|"no"| n40
+  n41(["↩ (relanza el error capturado)"]):::error
+  n40 -->|"sí"| n41
+  n42["Repite: por cada const unit de pending"]:::bucle
+  n40 -->|"no"| n42
+  n43[("CREA clinical.inpatient_census_days")]:::efecto
+  n42 -->|"cada elemento"| n43
+  n44["Llama a AdtSupport.flush"]:::llamada
+  n43 --> n44
+  n45["Intenta"]:::intento
+  n44 --> n45
+  n46(["↩ (relanza el error capturado)"]):::error
+  n45 -->|"si falla"| n46
+  n47["Repite: por cada const s de segments.filter((r) =› r.unit_id === unit)"]:::bucle
+  n45 --> n47
+  n48[("CREA clinical.inpatient_census_entries")]:::efecto
+  n47 -->|"cada elemento"| n48
+  n49["Llama a AdtSupport.flush"]:::llamada
+  n48 --> n49
+  n47 -->|"al terminar"| n49
+  n50["Intenta"]:::intento
+  n49 --> n50
+  n51(["↩ (relanza el error capturado)"]):::error
+  n50 -->|"si falla"| n51
+  n52["Llama a AdtSupport.publish"]:::llamada
+  n50 --> n52
+  n53["Intenta"]:::intento
+  n52 --> n53
+  n54>"Evento ~eventType"]:::evento
+  n53 --> n54
+  n55(["↩ (relanza el error capturado)"]):::error
+  n53 -->|"si falla"| n55
+  n56(("200 Responde con éxito")):::ok
+  n54 --> n56
+  n42 -->|"al terminar"| n56
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 57. GET /sites/{siteId}/inpatient-indicators
+
+Indicadores hospitalarios (OPS)
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios; Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · parámetros de consulta (400)…"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientIndicatorsService.indicators"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientCensusUseCases.indicators"]:::llamada
+  n3 --> n4
+  n5["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n4 --> n5
+  n6["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n5 --> n6
+  n7{"'careSpaceId' in target"}:::decision
+  n6 --> n7
+  n8{"!found || found.tenantId !== tenantId"}:::decision
+  n7 -->|"sí"| n8
+  n9(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"'unitId' in target"}:::decision
+  n7 -->|"no"| n10
+  n11{"!found || found.tenantId !== tenantId"}:::decision
+  n10 -->|"sí"| n11
+  n12(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13{"!site || site.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n13
+  n11 -->|"no"| n13
+  n10 -->|"no"| n13
+  n14(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a InfrastructureAccessService.decide"]:::llamada
+  n13 -->|"no"| n15
+  n16(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n15 --> n16
+  n17["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n18["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n17 --> n18
+  n19[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n18 --> n19
+  n20["Llama a InfrastructureAccessService.assertTargetInScope"]:::llamada
+  n19 --> n20
+  n21{"ref.careSpaceId && !filter.allowsSpace(ref.careSpaceId)"}:::decision
+  n20 --> n21
+  n22(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23{"ref.unitId && !filter.allowsUnit(ref.unitId)"}:::decision
+  n21 -->|"no"| n23
+  n24(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n23 -->|"sí"| n24
+  n25{"dates.length === 0 || dates.length › 366"}:::decision
+  n23 -->|"no"| n25
+  n26(["↩ (relanza el error capturado)"]):::error
+  n25 -->|"sí"| n26
+  n27[("LEE clinical.inpatient_census_days · LEE clinical.inpatient_census_adjustments")]:::efecto
+  n25 -->|"no"| n27
+  n28["Llama a InpatientRepository.turnarounds"]:::llamada
+  n27 --> n28
+  n29[("LEE practice.cleaning_orders")]:::efecto
+  n28 --> n29
+  n30(("200 Responde con éxito")):::ok
+  n29 --> n30
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 58. GET /sites/{siteId}/inpatients
+
+Pacientes internados de una sede
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; InsufficientRoleException: Su rol no permite esta acción sobre este espacio |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Espacio no encontrado; ResourceNotFoundException: Unidad clínica no encontrada; ResourceNotFoundException: Sitio no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a InpatientAdtService.inpatients"]:::llamada
+  n2 --> n3
+  n4["Llama a InpatientReadUseCases.inpatients"]:::llamada
+  n3 --> n4
+  n5["Llama a InfrastructureAccessService.assertCan"]:::llamada
+  n4 --> n5
+  n6["Llama a InfrastructureAccessService.resolve"]:::llamada
+  n5 --> n6
+  n7{"'careSpaceId' in target"}:::decision
+  n6 --> n7
+  n8{"!found || found.tenantId !== tenantId"}:::decision
+  n7 -->|"sí"| n8
+  n9(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n8 -->|"sí"| n9
+  n10{"'unitId' in target"}:::decision
+  n7 -->|"no"| n10
+  n11{"!found || found.tenantId !== tenantId"}:::decision
+  n10 -->|"sí"| n11
+  n12(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n11 -->|"sí"| n12
+  n13{"!site || site.tenantId !== tenantId"}:::decision
+  n8 -->|"no"| n13
+  n11 -->|"no"| n13
+  n10 -->|"no"| n13
+  n14(["404 NOT_FOUND Sitio no encontrado"]):::error
+  n13 -->|"sí"| n14
+  n15["Llama a InfrastructureAccessService.decide"]:::llamada
+  n13 -->|"no"| n15
+  n16(["403 FORBIDDEN Su rol no permite esta acción sobre este espacio"]):::error
+  n15 --> n16
+  n17["Llama a InfrastructureAccessService.scopeFilter"]:::llamada
+  n18["Llama a CareSpaceOpsRepository.siteScopeIndex"]:::llamada
+  n17 --> n18
+  n19[("LEE practice.care_spaces · LEE practice.space_unit_assignments · LEE practice.clinical_units")]:::efecto
+  n18 --> n19
+  n20["Llama a InfrastructureAccessService.assertTargetInScope"]:::llamada
+  n19 --> n20
+  n21{"ref.careSpaceId && !filter.allowsSpace(ref.careSpaceId)"}:::decision
+  n20 --> n21
+  n22(["404 NOT_FOUND Espacio no encontrado"]):::error
+  n21 -->|"sí"| n22
+  n23{"ref.unitId && !filter.allowsUnit(ref.unitId)"}:::decision
+  n21 -->|"no"| n23
+  n24(["404 NOT_FOUND Unidad clínica no encontrada"]):::error
+  n23 -->|"sí"| n24
+  n25[("LEE clinical.encounter_locations · LEE clinical.encounters")]:::efecto
+  n23 -->|"no"| n25
+  n26(("200 Responde con éxito")):::ok
+  n25 --> n26
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

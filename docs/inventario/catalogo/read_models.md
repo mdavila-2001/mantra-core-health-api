@@ -11,14 +11,14 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [frontend_page_views](#frontend_page_views) | Cataloga vistas de página para configurar presentación y consumo de proyecciones en la interfaz. | 20 | 9 | 6 | COINCIDE |
-| [frontend_routes](#frontend_routes) | Registra rutas de aplicaciones cliente para relacionarlas con pantallas, permisos y modelos de lectura. | 20 | 9 | 4 | COINCIDE |
+| [frontend_routes](#frontend_routes) | Registra rutas de aplicaciones cliente para relacionarlas con pantallas, permisos y modelos de lectura. | 20 | 9 | 8 | COINCIDE |
 | [frontend_view_actions](#frontend_view_actions) | Cataloga acciones habilitadas desde una vista para conectar lectura con operaciones autorizadas. | 19 | 10 | 3 | COINCIDE |
 | [frontend_view_fields](#frontend_view_fields) | Define campos disponibles en vistas para controlar qué atributos pueden mostrarse. | 23 | 7 | 3 | COINCIDE |
 | [frontend_view_filters](#frontend_view_filters) | Configura filtros permitidos en vistas para acotar resultados visibles según el contexto de uso. | 19 | 9 | 1 | COINCIDE |
 | [frontend_view_kpis](#frontend_view_kpis) | Define indicadores resumidos que pueden presentarse en vistas de operación o gestión. | 17 | 5 | 1 | COINCIDE |
 | [frontend_view_sort_options](#frontend_view_sort_options) | Define criterios de ordenamiento disponibles en vistas para organizar resultados presentados. | 15 | 7 | 2 | COINCIDE |
 | [frontend_view_states](#frontend_view_states) | Configura estados visuales de vistas para representar carga, vacío, error o resultados. | 15 | 6 | 1 | COINCIDE |
-| [portal_surfaces](#portal_surfaces) | Cataloga superficies del portal para asociar rutas de usuario con sus datos y capacidades de presentación. | 15 | 7 | 4 | COINCIDE |
+| [portal_surfaces](#portal_surfaces) | Cataloga superficies del portal para asociar rutas de usuario con sus datos y capacidades de presentación. | 15 | 7 | 8 | COINCIDE |
 | [read_model_definitions](#read_model_definitions) | Define proyecciones optimizadas para lectura que alimentan portales y experiencias de usuarios. | 23 | 6 | 15 | COINCIDE |
 | [read_model_dependencies](#read_model_dependencies) | Relaciona modelos de lectura con sus fuentes para trazar dependencias de actualización y linaje. | 8 | 2 | 2 | COINCIDE |
 | [read_model_refresh_runs](#read_model_refresh_runs) | Registra ejecuciones de actualización de proyecciones para controlar frescura y fallos de lectura. | 11 | 4 | 6 | COINCIDE |
@@ -266,7 +266,7 @@ Registra rutas de aplicaciones cliente para relacionarlas con pantallas, permiso
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_30_read_models.puml: frontend_routes`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_30_read_models.puml` · **DDL:** `SQL/30_read_models/02_tables.sql`
 - **Entidad del ORM:** `FrontendRoutes` — `src/modules/read_models/entities/frontend_routes.entity.ts`
-- **Resumen:** 20 columnas · 9 índices · 7 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 20 columnas · 9 índices · 7 FK salientes · 1 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -310,15 +310,15 @@ Registra rutas de aplicaciones cliente para relacionarlas con pantallas, permiso
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_frontend_routes_portal_surface_id` | no | portal_surface_id | Soporta la clave foránea fk_frontend_routes_portal_surface_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «portal_surface_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_frontend_routes_portal_surface_id` | no | portal_surface_id | Soporta la clave foránea fk_frontend_routes_portal_surface_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «portal_surface_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_frontend_routes_required_permission_id` | no | required_permission_id | Soporta la clave foránea fk_frontend_routes_required_permission_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_routes_purpose_of_use_concept_id` | no | purpose_of_use_concept_id | Soporta la clave foránea fk_frontend_routes_purpose_of_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_routes_cache_policy_concept_id` | no | cache_policy_concept_id | Soporta la clave foránea fk_frontend_routes_cache_policy_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_routes_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_frontend_routes_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_routes_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_frontend_routes_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_frontend_routes_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_frontend_routes_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `uq_frontend_routes_portal_code` | sí | portal_surface_id, route_code | Garantiza que no se repita la combinación (portal_surface_id, route_code) _(DOCUMENTO)_; Soporta la clave foránea fk_frontend_routes_portal_surface_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «portal_surface_id», la primera columna del índice _(CONSULTA)_ |
-| `uq_frontend_routes_pattern` | sí | portal_surface_id, route_pattern | Garantiza que no se repita la combinación (portal_surface_id, route_pattern) _(DOCUMENTO)_; Soporta la clave foránea fk_frontend_routes_portal_surface_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «portal_surface_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_frontend_routes_portal_code` | sí | portal_surface_id, route_code | Garantiza que no se repita la combinación (portal_surface_id, route_code) _(DOCUMENTO)_; Soporta la clave foránea fk_frontend_routes_portal_surface_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «portal_surface_id», la primera columna del índice _(CONSULTA)_ |
+| `uq_frontend_routes_pattern` | sí | portal_surface_id, route_pattern | Garantiza que no se repita la combinación (portal_surface_id, route_pattern) _(DOCUMENTO)_; Soporta la clave foránea fk_frontend_routes_portal_surface_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «portal_surface_id», la primera columna del índice _(CONSULTA)_ |
 
 #### Restricciones
 
@@ -335,6 +335,10 @@ Registra rutas de aplicaciones cliente para relacionarlas con pantallas, permiso
 | POST /portals/{portalCode}/routes/{routeCode}/views | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
+| GET /admin/analytics/errors | LEE | POR_SQL |
+| GET /admin/analytics/errors/fingerprints | LEE | POR_SQL |
+| GET /admin/analytics/errors/fingerprints/{fingerprint} | LEE | POR_SQL |
+| GET /admin/analytics/errors/routes-not-found | LEE | POR_SQL |
 
 #### Gobierno
 
@@ -855,7 +859,7 @@ Cataloga superficies del portal para asociar rutas de usuario con sus datos y ca
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_30_read_models.puml: portal_surfaces`
 - **Dominio:** Auditoría y Reporting · **Diagrama:** `Mantra Core Health Context/modules/diagram_30_read_models.puml` · **DDL:** `SQL/30_read_models/02_tables.sql`
 - **Entidad del ORM:** `PortalSurfaces` — `src/modules/read_models/entities/portal_surfaces.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 5 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 15 columnas · 7 índices · 5 FK salientes · 1 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -892,7 +896,7 @@ Cataloga superficies del portal para asociar rutas de usuario con sus datos y ca
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_portal_surfaces_portal_code` | sí | portal_code | Garantiza que no se repita la combinación (portal_code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «portal_code», la primera columna del índice _(CONSULTA)_ |
+| `uq_portal_surfaces_portal_code` | sí | portal_code | Garantiza que no se repita la combinación (portal_code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «portal_code», la primera columna del índice _(CONSULTA)_ |
 | `ix_portal_surfaces_portal_type_concept_id` | no | portal_type_concept_id | Soporta la clave foránea fk_portal_surfaces_portal_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_portal_surfaces_audience_role_value_set_id` | no | audience_role_value_set_id | Soporta la clave foránea fk_portal_surfaces_audience_role_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_portal_surfaces_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_portal_surfaces_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -914,6 +918,10 @@ Cataloga superficies del portal para asociar rutas de usuario con sus datos y ca
 | POST /portals/{portalCode}/routes/{routeCode}/views | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
+| GET /admin/analytics/errors | LEE | POR_SQL |
+| GET /admin/analytics/errors/fingerprints | LEE | POR_SQL |
+| GET /admin/analytics/errors/fingerprints/{fingerprint} | LEE | POR_SQL |
+| GET /admin/analytics/errors/routes-not-found | LEE | POR_SQL |
 
 #### Gobierno
 

@@ -3,13 +3,13 @@
 # Flujos del módulo `platform_ops`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 15 (15 con decisiones propias, 0 sin ellas)
+- **Operaciones:** 20 (18 con decisiones propias, 2 sin ellas)
 - Inventario de endpoints del módulo: [platform_ops](../endpoints/platform_ops.md)
 
 ## Proceso: Módulo 46 — Operaciones de Plataforma, Observabilidad y Releases
 
-- **Código:** `platform_ops` · **Agrupación:** CASO_DE_USO_README · **Operaciones:** 15
-- **Actores:** CAPACITY_PLANNER · CHANGE_APPROVER · DEPLOY_PIPELINE · INCIDENT_COMMANDER · PLATFORM_ADMIN · RELEASE_MANAGER · SRE · SYSTEM
+- **Código:** `platform_ops` · **Agrupación:** MIXTO · **Operaciones:** 20
+- **Actores:** CAPACITY_PLANNER · CHANGE_APPROVER · DEPLOY_PIPELINE · GOVERNANCE_ADMIN · INCIDENT_COMMANDER · PLATFORM_ADMIN · RELEASE_MANAGER · SECURITY_ADMIN · SRE · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/platform_ops/README.md`
 
@@ -68,8 +68,13 @@ _Fuente: `src/modules/platform_ops/README.md:80`_
 | `UC-46-13` | Versión y ejecución de runbook | POST /ops/runbook-executions | SRE · PLATFORM_ADMIN | MEDIO | 6 |
 |  |  | POST /ops/runbooks/{id}/versions | SRE · PLATFORM_ADMIN | MEDIO | 3 |
 | `UC-46-14` | Cerrar ejercicio de resiliencia | POST /ops/resilience-exercises/{id}/complete | SRE · PLATFORM_ADMIN | MEDIO | 3 |
+| `ctrl:OpsToolsController` | Operaciones de OpsToolsController que el README no asigna a un caso de uso | GET /admin/ops/tools | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 5 |
+|  |  | GET /admin/ops/tools/{code} | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 5 |
+| `ctrl:RuntimePiecesController` | Operaciones de RuntimePiecesController que el README no asigna a un caso de uso | GET /admin/ops/runtime-pieces | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 1 |
+|  |  | GET /admin/ops/runtime-pieces/{id} | PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · GOVERNANCE_ADMIN | BAJO | 1 |
+|  |  | POST /admin/ops/runtime-pieces/discover | PLATFORM_ADMIN · SRE | MEDIO | 5 |
 
-### Diagrama — etapas `UC-46-01`, `UC-46-02`, `UC-46-03`…
+### Diagrama 1 de 2 — etapas `UC-46-01`, `UC-46-02`, `UC-46-03`…
 
 ```mermaid
 flowchart LR
@@ -83,6 +88,7 @@ flowchart LR
   a32(["SRE · INCIDENT_COMMANDER · PLATFORM_ADMIN"]):::actor
   a44(["CAPACITY_PLANNER · SRE · PLATFORM_ADMIN"]):::actor
   a51(["SRE · PLATFORM_ADMIN"]):::actor
+  a61(["PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · G…"]):::actor
   t3[("platform_ops.change_requests")]:::tabla
   t4[("platform_ops.maintenance_windows")]:::tabla
   t5[("platform_ops.service_components")]:::tabla
@@ -113,6 +119,7 @@ flowchart LR
   t55[("platform_ops.runbooks")]:::tabla
   t58[("platform_ops.recovery_objectives")]:::tabla
   t59[("platform_ops.resilience_exercises")]:::tabla
+  t62[("platform_ops.component_tools")]:::tabla
   subgraph s0["UC-46-01 · Registrar solicitud de cambio"]
     o1["POST /ops/change-requests"]:::op
   end
@@ -159,6 +166,10 @@ flowchart LR
   end
   subgraph s13["UC-46-14 · Cerrar ejercicio de resiliencia"]
     o57["POST /ops/resilience-exercises/{id}/complete"]:::op
+  end
+  subgraph s14["ctrl:OpsToolsController · Operaciones de OpsToolsController que el README no as…"]
+    o60["GET /admin/ops/tools"]:::op
+    o63["GET /admin/ops/tools/{code}"]:::op
   end
   a2 --> o1
   o1 -->|"CREA"| t3
@@ -245,6 +256,48 @@ flowchart LR
   o57 -->|"CREA"| t33
   o57 -->|"LEE"| t58
   o57 -->|"LEE"| t59
+  a61 --> o60
+  o60 -->|"LEE"| t62
+  o60 -->|"LEE"| t22
+  o60 -->|"LEE"| t23
+  o60 -->|"LEE"| t5
+  o60 -->|"LEE"| t12
+  a61 --> o63
+  o63 -->|"LEE"| t62
+  o63 -->|"LEE"| t22
+  o63 -->|"LEE"| t23
+  o63 -->|"LEE"| t5
+  o63 -->|"LEE"| t12
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 2 de 2 — etapas `ctrl:RuntimePiecesController`
+
+```mermaid
+flowchart LR
+  a2(["PLATFORM_ADMIN · SRE · SECURITY_ADMIN · RELEASE_MANAGER · G…"]):::actor
+  a6(["PLATFORM_ADMIN · SRE"]):::actor
+  t3[("platform_ops.tool_registry")]:::tabla
+  t7[("directory.tenants")]:::tabla
+  t8[("terminology.catalog_concepts")]:::tabla
+  subgraph s0["ctrl:RuntimePiecesController · Operaciones de RuntimePiecesController que el RE…"]
+    o1["GET /admin/ops/runtime-pieces"]:::op
+    o4["GET /admin/ops/runtime-pieces/{id}"]:::op
+    o5["POST /admin/ops/runtime-pieces/discover"]:::op
+  end
+  a2 --> o1
+  o1 -->|"LEE"| t3
+  a2 --> o4
+  o4 -->|"LEE"| t3
+  a6 --> o5
+  o5 -->|"LEE"| t7
+  o5 -->|"CREA"| t3
+  o5 -->|"ACTUALIZA"| t3
+  o5 -->|"LEE"| t3
+  o5 -->|"LEE"| t8
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -257,7 +310,173 @@ Cada árbol se deriva del código del handler y de los métodos que invoca (hast
 
 ### Operaciones con decisiones propias
 
-#### 1. POST /ops/artifacts
+#### 1. GET /admin/ops/runtime-pieces/{id}
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Pieza no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a RuntimePiecesService.get"]:::llamada
+  n2 --> n3
+  n4["Llama a RuntimePiecesService.snapshot"]:::llamada
+  n3 --> n4
+  n5["Llama a RuntimePiecesRepository.listRegistered"]:::llamada
+  n4 --> n5
+  n6[("LEE platform_ops.tool_registry")]:::efecto
+  n5 --> n6
+  n7{"!view"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Pieza no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9(("200 Responde con éxito")):::ok
+  n7 -->|"no"| n9
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 2. POST /admin/ops/runtime-pieces/discover
+
+
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 409 | `CONFLICT` | ConflictException: {scan.reason ?? 'No hay código fuente para escanear'} |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Faltan conceptos del catálogo para registrar las piezas: ejecutar el seed de terminología; PreconditionFailedException: No existe el tenant de plataforma que es dueño de las piezas |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a RuntimePiecesService.discover"]:::llamada
+  n2 --> n3
+  n4["Llama a RuntimePiecesSeedService.run"]:::llamada
+  n3 --> n4
+  n5{"!scan.available"}:::decision
+  n4 --> n5
+  n6(["409 CONFLICT {scan.reason ?? 'No hay código fuente para escanear'}"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transaction(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a RuntimePiecesSeedService.assertPreconditions"]:::llamada
+  n7 --> n8
+  n9["Llama a RuntimePiecesRepository.existingConcepts"]:::llamada
+  n8 --> n9
+  n10[("LEE terminology.catalog_concepts")]:::efecto
+  n9 --> n10
+  n11{"missing.length › 0"}:::decision
+  n10 --> n11
+  n12(["422 PRECONDITION_FAILED Faltan conceptos del catálogo para registrar las piezas: ejecutar el seed de terminol…"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a RuntimePiecesRepository.tenantExists"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE directory.tenants")]:::efecto
+  n13 --> n14
+  n15{"!(await this.repo.tenantExists(tx, RUNTIME_PIECES_TENANT_ID))"}:::decision
+  n14 --> n15
+  n16(["422 PRECONDITION_FAILED No existe el tenant de plataforma que es dueño de las piezas"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a RuntimePiecesRepository.listRegistered"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE platform_ops.tool_registry")]:::efecto
+  n17 --> n18
+  n19["Repite: por cada const piece de scan.pieces"]:::bucle
+  n18 --> n19
+  n20{"!row"}:::decision
+  n19 -->|"cada elemento"| n20
+  n21{"!dryRun"}:::decision
+  n20 -->|"sí"| n21
+  n22["Llama a RuntimePiecesRepository.insertIfAbsent"]:::llamada
+  n21 -->|"sí"| n22
+  n23[("CREA platform_ops.tool_registry")]:::efecto
+  n22 --> n23
+  n24{"!dryRun"}:::decision
+  n23 --> n24
+  n21 -->|"no"| n24
+  n20 -->|"no"| n24
+  n25["Llama a RuntimePiecesRepository.updateDerived"]:::llamada
+  n24 -->|"sí"| n25
+  n26[("ACTUALIZA platform_ops.tool_registry")]:::efecto
+  n25 --> n26
+  n27(("200 Responde con éxito")):::ok
+  n26 --> n27
+  n24 -->|"no"| n27
+  n19 -->|"al terminar"| n27
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 3. GET /admin/ops/tools/{code}
+
+Una herramienta con su historial corto de comprobaciones
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Herramienta no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a OpsToolsService.get"]:::llamada
+  n2 --> n3
+  n4["Llama a OpsToolsRepository.findTool"]:::llamada
+  n3 --> n4
+  n5["Llama a OpsToolsRepository.load"]:::llamada
+  n4 --> n5
+  n6[("LEE platform_ops.tool_registry · LEE platform_ops.component_tools · LEE platform_ops.service_components · LEE…")]:::efecto
+  n5 --> n6
+  n7["Llama a OpsToolsRepository.latestRuns"]:::llamada
+  n6 --> n7
+  n8[("LEE platform_ops.health_check_runs")]:::efecto
+  n7 --> n8
+  n9{"!record"}:::decision
+  n8 --> n9
+  n10(["404 NOT_FOUND Herramienta no encontrada"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a OpsToolsRepository.recentRuns"]:::llamada
+  n9 -->|"no"| n11
+  n12[("LEE platform_ops.health_check_runs")]:::efecto
+  n11 --> n12
+  n13(("200 Responde con éxito")):::ok
+  n12 --> n13
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 4. POST /ops/artifacts
 
 Publicar un artefacto inmutable
 
@@ -335,7 +554,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 2. POST /ops/capacity-plans/{id}/measurements
+#### 5. POST /ops/capacity-plans/{id}/measurements
 
 Registrar una medición de capacidad
 
@@ -395,7 +614,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 3. POST /ops/change-requests
+#### 6. POST /ops/change-requests
 
 Registrar una solicitud de cambio
 
@@ -483,7 +702,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 4. POST /ops/change-requests/{id}/approvals
+#### 7. POST /ops/change-requests/{id}/approvals
 
 Registrar la decisión del CAB
 
@@ -544,7 +763,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 5. POST /ops/deployments
+#### 8. POST /ops/deployments
 
 Ejecutar un despliegue
 
@@ -652,7 +871,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 6. POST /ops/deployments/{id}/rollback
+#### 9. POST /ops/deployments/{id}/rollback
 
 Revertir un despliegue
 
@@ -731,7 +950,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 7. POST /ops/error-budget/{policyId}/burn-events
+#### 10. POST /ops/error-budget/{policyId}/burn-events
 
 Registrar la quema del presupuesto de error
 
@@ -802,7 +1021,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 8. POST /ops/health-checks/{id}/runs
+#### 11. POST /ops/health-checks/{id}/runs
 
 Registrar una corrida de health check
 
@@ -886,7 +1105,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 9. PATCH /ops/incidents/{id}
+#### 12. PATCH /ops/incidents/{id}
 
 Mover el incidente, sumar respondientes y publicar comunicaciones
 
@@ -1010,7 +1229,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 10. POST /ops/incidents/{id}/postmortem
+#### 13. POST /ops/incidents/{id}/postmortem
 
 Abrir el postmortem del incidente resuelto
 
@@ -1083,7 +1302,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. POST /ops/readiness-reviews/{id}/complete
+#### 14. POST /ops/readiness-reviews/{id}/complete
 
 Cerrar la revisión de preparación con su decisión
 
@@ -1159,7 +1378,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. POST /ops/resilience-exercises/{id}/complete
+#### 15. POST /ops/resilience-exercises/{id}/complete
 
 Cerrar un ejercicio de resiliencia
 
@@ -1219,7 +1438,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /ops/runbook-executions
+#### 16. POST /ops/runbook-executions
 
 Registrar la ejecución de un runbook
 
@@ -1292,7 +1511,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. POST /ops/runbooks/{id}/versions
+#### 17. POST /ops/runbooks/{id}/versions
 
 Publicar una versión del runbook
 
@@ -1349,7 +1568,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. POST /ops/slo/{id}/measurements
+#### 18. POST /ops/slo/{id}/measurements
 
 Registrar la medición de una ventana del SLO
 
@@ -1425,3 +1644,11 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
+### Operaciones sin decisiones propias
+
+Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su detalle está en la ficha de endpoints.
+
+| Operación | Respuestas posibles | Tablas |
+|---|---|---|
+| GET /admin/ops/runtime-pieces | 200, 401, 403, 429 | 1 |
+| GET /admin/ops/tools | 200, 401, 403, 429 | 5 |
