@@ -19,6 +19,7 @@ import {
   mayDecide,
   scopeCoversPractitioner,
   targetKindOf,
+  type SupportDecider,
   type SupportLinkRow,
   type SupportLinkStatus,
   type SupportTenantScope,
@@ -130,7 +131,20 @@ export class SupportStaffService {
 
   /** Lo que puede ver hoy: hospitales, sedes, servicios, pisos y doctores. */
   async myAccess(actor: AuthenticatedUser): Promise<SupportAccessResponseDto> {
-    return { tenants: await this.scopeOf(this.em.fork(), actor.id) };
+    const em = this.em.fork();
+    const scope = await this.scopeOf(em, actor.id);
+    const open = new Set(
+      await this.links.findActiveMembershipTenantIds(em, actor.id),
+    );
+    // `organizationAccess`: el hospital la aceptó y entra a su token. Sin eso
+    // (un vínculo que sólo aceptó el doctor) ve la agenda de ese doctor y nada
+    // más del hospital.
+    return {
+      tenants: scope.map((tenant) => ({
+        ...tenant,
+        organizationAccess: open.has(tenant.tenantId),
+      })),
+    };
   }
 
   /**
@@ -726,7 +740,7 @@ export class SupportStaffService {
     id: string,
     actor: AuthenticatedUser,
     decision: 'APPROVED' | 'REJECTED',
-    who: (row: SupportLinkRow) => Parameters<typeof mayDecide>[1],
+    who: (row: SupportLinkRow) => SupportDecider,
     guard?: (tx: EntityManager, row: SupportLinkRow) => Promise<boolean>,
   ): Promise<SupportLinkViewDto> {
     const row = await this.em.transactional(async (tx) => {
@@ -750,7 +764,13 @@ export class SupportStaffService {
       const status: SupportLinkStatus =
         decision === 'APPROVED' ? 'ACTIVE' : 'REJECTED';
       await this.links.setStatus(tx, link.kind, link.id, status, actor.id);
-      if (status === 'ACTIVE') {
+      // Sólo el hospital mete a alguien en el hospital. Un vínculo de lugar
+      // siempre lo aprobó el hospital (lo aceptó su administración, o lo
+      // ofreció él y lo aceptó la secretaria); uno con un doctor, sólo si lo
+      // aceptó la administración o lo ofreció el hospital. El que acepta el
+      // doctor solo abre la agenda de ese doctor (`/me/support-agenda`, sin
+      // tenant activo), no la membresía del hospital.
+      if (status === 'ACTIVE' && grantsOrganizationAccess(link, decider)) {
         await this.links.activateMembership(
           tx,
           link.supportUserId,
@@ -909,6 +929,18 @@ function linkNotFound(): ResourceNotFoundException {
     undefined,
     Reason.SUPPORT_LINK_NOT_FOUND,
   );
+}
+
+/**
+ * Si aceptar este vínculo abre el hospital (la membresía del tenant): sólo
+ * cuando del lado del hospital hubo aprobación.
+ */
+export function grantsOrganizationAccess(
+  link: SupportLinkRow,
+  decider: SupportDecider,
+): boolean {
+  if (link.kind === 'LOCATION') return true;
+  return decider.isOrganizationAdmin || initiatorOf(link) === 'ORGANIZATION';
 }
 
 /** Si el vínculo es con una vinculación del propio doctor. */

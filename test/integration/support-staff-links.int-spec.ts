@@ -499,5 +499,51 @@ describeIt(
       );
       expect(membership.status_concept_id).toBe(DIR.MEMBERSHIP_ENDED);
     });
+
+    it('un vínculo que sólo aceptó el doctor abre su agenda, no el hospital', async () => {
+      const created = await service.request(
+        {
+          tenantId: ids.tenantA,
+          items: [
+            {
+              targetKind: 'PRACTITIONER',
+              practitionerRoleAssignmentId: ids.roleA,
+            },
+          ],
+        },
+        secretary,
+      );
+      await service.acceptForPractitioner(created.id, doctor);
+
+      const active = await all<{ n: number }>(
+        'select count(*)::int as n from directory.tenant_memberships where user_id = ? and tenant_id = ? and status_concept_id = ?',
+        [secretary.id, ids.tenantA, DIR.MEMBERSHIP_ACTIVE],
+      );
+      expect(active[0].n).toBe(0);
+      const access = await service.myAccess(secretary);
+      expect(access.tenants).toEqual([
+        expect.objectContaining({
+          tenantId: ids.tenantA,
+          organizationAccess: false,
+          careSpaceIds: [],
+          practitioners: [
+            expect.objectContaining({
+              practitionerRoleAssignmentId: ids.roleA,
+            }),
+          ],
+        }),
+      ]);
+      await expect(
+        service.agenda(
+          {
+            tenantId: ids.tenantA,
+            practitionerRoleAssignmentId: ids.roleA,
+            from: '2026-11-01T00:00:00Z',
+            to: '2026-11-08T00:00:00Z',
+          },
+          secretary,
+        ),
+      ).resolves.toEqual({ items: [], count: 0 });
+    });
   },
 );

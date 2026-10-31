@@ -64,7 +64,7 @@
 
 Aprobar/Denegar solicitud y emitir grant scoped. Caso de uso UC-29-05: Aprobar/Denegar y emitir grant scoped. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:50`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:94`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -176,7 +176,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Evaluar actor efectivo por propósito (step-up). Caso de uso UC-29-09: Evaluar actor efectivo por propósito (step-up). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:54`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:98`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -617,7 +617,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Expirar delegaciones y grants vencidos (barrido). Caso de uso UC-29-08: Expirar delegaciones y grants vencidos. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:53`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:97`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -777,7 +777,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Publicar set de permisos delegados (scoped). Caso de uso UC-29-02: Publicar set de permisos delegados (v1). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:46`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:90`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -899,7 +899,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Versionar set de permisos delegados. Caso de uso UC-29-02: Versionar set (reemplazo all-or-nothing). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:47`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:91`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -1034,19 +1034,19 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.createLocationLink | `src/modules/delegated_access/repositories/support-links.repository.ts:691` |
+| `delegated_access.organization_user_assignments` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.createLocationLink | `src/modules/delegated_access/repositories/support-links.repository.ts:704` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:606` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:594` |
-| `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:311` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:619` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:607` |
+| `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:324` |
 | `iam.authentication_credentials` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:271` |
 | `iam.users` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.clinical_units` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportLinksRepository.findActiveRoleAssignmentsOfPractitioner | `src/modules/delegated_access/repositories/support-links.repository.ts:419` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportLinksRepository.findActiveRoleAssignmentsOfPractitioner | `src/modules/delegated_access/repositories/support-links.repository.ts:419` |
-| `practice.practitioner_support_assignments` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.createPractitionerLink | `src/modules/delegated_access/repositories/support-links.repository.ts:717` |
+| `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportLinksRepository.findActiveRoleAssignmentsOfPractitioner | `src/modules/delegated_access/repositories/support-links.repository.ts:432` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportLinksRepository.findActiveRoleAssignmentsOfPractitioner | `src/modules/delegated_access/repositories/support-links.repository.ts:432` |
+| `practice.practitioner_support_assignments` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.createPractitionerLink | `src/modules/delegated_access/repositories/support-links.repository.ts:730` |
 | `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:271` |
 | `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.invite → SupportStaffService.inviteForPractitioner → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -1255,9 +1255,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:748` |
-| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:672` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:665` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:761` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:685` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:678` |
 | `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `iam.users` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -1265,7 +1265,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:749` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:762` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.end → SupportStaffService.endForPractitioner → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 
@@ -1375,7 +1375,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `directory.tenant_memberships` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
+| `directory.tenant_memberships` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportLinksRepository.findActiveMembershipTenantIds | `src/modules/delegated_access/repositories/support-links.repository.ts:311` |
 | `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.access → SupportStaffService.myAccess → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -1395,14 +1395,15 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `tenants` | `array<SupportTenantScopeDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:334` |
+| `tenants` | `array<SupportTenantScopeDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:339` |
 | `tenants[].tenantId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:319` |
 | `tenants[].organizationName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:321` |
 | `tenants[].wholeOrganization` | `boolean` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:322` |
-| `tenants[].practiceSiteIds` | `array<string>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:323` |
-| `tenants[].clinicalUnitIds` | `array<string>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:324` |
-| `tenants[].careSpaceIds` | `array<string>` | Sí | — | — | Pisos y espacios. | `src/modules/delegated_access/dto/support-staff.dto.ts:326` |
-| `tenants[].practitioners` | `array<SupportScopePractitionerDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:328` |
+| `tenants[].organizationAccess` | `boolean` | Sí | — | — | El hospital aprobó a la secretaria y entra a su token. false = sólo un doctor la aceptó: ve su agenda y nada más del hospital. | `src/modules/delegated_access/dto/support-staff.dto.ts:327` |
+| `tenants[].practiceSiteIds` | `array<string>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:328` |
+| `tenants[].clinicalUnitIds` | `array<string>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:329` |
+| `tenants[].careSpaceIds` | `array<string>` | Sí | — | — | Pisos y espacios. | `src/modules/delegated_access/dto/support-staff.dto.ts:331` |
+| `tenants[].practitioners` | `array<SupportScopePractitionerDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:333` |
 | `tenants[].practitioners[].linkId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:310` |
 | `tenants[].practitioners[].practitionerRoleAssignmentId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:311` |
 | `tenants[].practitioners[].practitionerProfileId` | `string` | No | formato uuid; admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:313` |
@@ -1468,15 +1469,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findActiveRoleAssignmentInTenant | `src/modules/delegated_access/repositories/support-links.repository.ts:397` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findActiveRoleAssignmentInTenant | `src/modules/delegated_access/repositories/support-links.repository.ts:397` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findActiveRoleAssignmentInTenant | `src/modules/delegated_access/repositories/support-links.repository.ts:410` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findActiveRoleAssignmentInTenant | `src/modules/delegated_access/repositories/support-links.repository.ts:410` |
 | `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportStaffService.scopeOf → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:558` |
-| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:558` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:558` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:558` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:558` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:571` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:571` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:571` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:571` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | SupportStaffController.agenda → SupportStaffService.agenda → SupportLinksRepository.findPractitionerAgenda | `src/modules/delegated_access/repositories/support-links.repository.ts:571` |
 
 ### Parámetros
 
@@ -1492,14 +1493,14 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<SupportAgendaItemDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:351` |
-| `items[].bookingId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:339` |
-| `items[].startAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:340` |
-| `items[].endAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:341` |
-| `items[].statusCode` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:343` |
-| `items[].patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:344` |
-| `items[].patientName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:346` |
-| `count` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:352` |
+| `items` | `array<SupportAgendaItemDto>` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:356` |
+| `items[].bookingId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:344` |
+| `items[].startAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:345` |
+| `items[].endAt` | `string` | Sí | formato date-time | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:346` |
+| `items[].statusCode` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:348` |
+| `items[].patientProfileId` | `string` | Sí | formato uuid | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:349` |
+| `items[].patientName` | `string` | No | admite null | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:351` |
+| `count` | `number` | Sí | — | — | — | `src/modules/delegated_access/dto/support-staff.dto.ts:357` |
 
 ### Respuestas posibles
 
@@ -1555,14 +1556,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:311` |
-| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:474` |
-| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:462` |
-| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:447` |
-| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:447` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:488` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:324` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:487` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:475` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:460` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:460` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:501` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.requireSecretaryPerson → SupportLinksRepository.findSecretaryPersonId | `src/modules/delegated_access/repositories/support-links.repository.ts:247` |
-| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:488` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:501` |
 | `profiles.secretary_profiles` | LEE | LEE | POR_SQL | SupportStaffController.catalog → SupportStaffService.catalogForSupport → SupportStaffService.requireSecretaryPerson → SupportLinksRepository.findSecretaryPersonId | `src/modules/delegated_access/repositories/support-links.repository.ts:247` |
 
 ### Parámetros
@@ -1773,10 +1774,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:748` |
-| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:642` |
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:606` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:665` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:761` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:655` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:619` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:678` |
 | `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -1784,7 +1785,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:749` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:762` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.confirm → SupportStaffService.confirmMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 
@@ -1876,10 +1877,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:748` |
-| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:642` |
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:606` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:665` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:761` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:655` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:619` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:678` |
 | `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -1887,7 +1888,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:749` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:762` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.decline → SupportStaffService.declineMine → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 
@@ -1997,9 +1998,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:748` |
-| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:672` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:665` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:761` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:685` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:678` |
 | `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -2007,7 +2008,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:749` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:762` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.leave → SupportStaffService.leaveMine → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 
@@ -2079,7 +2080,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Asignar usuario de organización con alcance y vigencia. Caso de uso UC-29-01: Asignar usuario de organización (scoped, vigente). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:45`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:89`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -2217,13 +2218,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `directory.tenant_memberships` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.assertOrganizationAdmin → SupportLinksRepository.isOrganizationAdmin | `src/modules/delegated_access/repositories/support-links.repository.ts:297` |
-| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:311` |
-| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:474` |
-| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:462` |
-| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:447` |
-| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:447` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:488` |
-| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:488` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:324` |
+| `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:487` |
+| `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:475` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:460` |
+| `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:460` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:501` |
+| `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.orgCatalog → SupportStaffService.catalogForOrganization → SupportStaffService.catalog → SupportLinksRepository.findCatalog | `src/modules/delegated_access/repositories/support-links.repository.ts:501` |
 
 ### Cuerpo
 
@@ -2416,10 +2417,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:748` |
-| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:642` |
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:606` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:665` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:761` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:655` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:619` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:678` |
 | `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -2427,7 +2428,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:749` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:762` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.decide → SupportStaffService.decideForOrganization → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 
@@ -2636,9 +2637,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:748` |
-| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:672` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:665` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:761` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:685` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:678` |
 | `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -2646,7 +2647,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:749` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:762` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.end → SupportStaffService.endForOrganization → SupportStaffService.end → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 
@@ -2754,11 +2755,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | ESCRIBE | CREA | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.createLocationLink | `src/modules/delegated_access/repositories/support-links.repository.ts:691` |
+| `delegated_access.organization_user_assignments` | ESCRIBE | CREA | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.createLocationLink | `src/modules/delegated_access/repositories/support-links.repository.ts:704` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:606` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:594` |
-| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:311` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:619` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:607` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:324` |
 | `iam.authentication_credentials` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:271` |
 | `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -2766,7 +2767,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | ESCRIBE | CREA | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.createPractitionerLink | `src/modules/delegated_access/repositories/support-links.repository.ts:717` |
+| `practice.practitioner_support_assignments` | ESCRIBE | CREA | DIRECTA | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.createPractitionerLink | `src/modules/delegated_access/repositories/support-links.repository.ts:730` |
 | `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.requireSecretaryByNationalId → SupportLinksRepository.findSecretaryByNationalId | `src/modules/delegated_access/repositories/support-links.repository.ts:271` |
 | `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.invite → SupportStaffService.inviteForOrganization → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -2877,7 +2878,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reasignar supervisor / suspender asignación de organización. Caso de uso UC-29-10: Reasignar supervisor / suspender (cascada). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:55`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:99`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -2984,7 +2985,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Crear asignación de delegado de practitioner. Caso de uso UC-29-03: Crear delegación de practitioner. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:48`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:92`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -3123,10 +3124,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:748` |
-| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:642` |
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:606` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:665` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:761` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:655` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:619` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:678` |
 | `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `iam.users` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -3134,7 +3135,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:749` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:762` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.accept → SupportStaffService.acceptForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 
@@ -3206,7 +3207,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Solicitar acceso delegado (aprobación previa). Caso de uso UC-29-04: Solicitar acceso delegado (aprobación previa). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:49`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:93`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -3316,7 +3317,7 @@ El árbol de decisión completo está en [flujos](../flujos/delegated_access.md)
 
 Otorgar grant delegado por-propósito y temporal. Caso de uso UC-29-06: Grant pre-autorizado por-propósito y temporal. Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:51`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:95`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -3452,10 +3453,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:748` |
-| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:642` |
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:606` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:665` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:761` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:655` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.activateMembership → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:619` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.closeMembershipIfUnused | `src/modules/delegated_access/repositories/support-links.repository.ts:678` |
 | `directory.tenants` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `iam.users` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
@@ -3463,7 +3464,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practice_sites` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:749` |
+| `practice.practitioner_support_assignments` | LEE | LEE | DIRECTA | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportLinksRepository.setStatus | `src/modules/delegated_access/repositories/support-links.repository.ts:762` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.persons` | LEE | LEE | POR_SQL | PractitionerSupportController.reject → SupportStaffService.rejectForPractitioner → SupportStaffService.decide → SupportStaffService.loadLink → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 
@@ -3553,7 +3554,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Revocar delegación de forma inmediata (cascada authz). Caso de uso UC-29-07: Revocar delegación inmediata (cascada). Dentro del módulo (descripción del modelo, en inglés): «Lets hospitals, offices, nursing facilities, diagnostic units and pharmacies associate additional users and lets doctors delegate limited work to secretaries, assistants, nurses or billing staff without sharing credentials.» Dominio: Identidad y Seguridad.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:52`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/delegated_access/README.md:96`) · MODELO (`Mantra Core Health Context/modules/diagram_29_delegated_access.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 
 ### Cómo se atiende (sistema)
 
@@ -3757,18 +3758,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `delegated_access.organization_user_assignments` | ESCRIBE | CREA | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.createLocationLink | `src/modules/delegated_access/repositories/support-links.repository.ts:691` |
+| `delegated_access.organization_user_assignments` | ESCRIBE | CREA | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.createLocationLink | `src/modules/delegated_access/repositories/support-links.repository.ts:704` |
 | `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:606` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:594` |
-| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:311` |
+| `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:619` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findOrCreateMembership | `src/modules/delegated_access/repositories/support-links.repository.ts:607` |
+| `directory.tenants` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findOrganizationName | `src/modules/delegated_access/repositories/support-links.repository.ts:324` |
 | `iam.users` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.care_spaces` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.clinical_units` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practice_sites` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practices` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
-| `practice.practitioner_support_assignments` | ESCRIBE | CREA | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.createPractitionerLink | `src/modules/delegated_access/repositories/support-links.repository.ts:717` |
+| `practice.practitioner_support_assignments` | ESCRIBE | CREA | DIRECTA | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.createPractitionerLink | `src/modules/delegated_access/repositories/support-links.repository.ts:730` |
 | `practice.practitioner_support_assignments` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
 | `profiles.person_account_links` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.requireSecretaryPerson → SupportLinksRepository.findSecretaryPersonId | `src/modules/delegated_access/repositories/support-links.repository.ts:247` |
 | `profiles.persons` | LEE | LEE | POR_SQL | SupportStaffController.request → SupportStaffService.request → SupportStaffService.createLinks → SupportLinksRepository.findLinks | `src/modules/delegated_access/repositories/support-links.repository.ts:146` |
