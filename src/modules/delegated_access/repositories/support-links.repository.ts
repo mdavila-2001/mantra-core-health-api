@@ -302,6 +302,19 @@ export class SupportLinksRepository {
     return Number(rows[0]?.n ?? 0) > 0;
   }
 
+  /** Tenants donde la cuenta tiene membresía ACTIVA (los que entran a su token). */
+  async findActiveMembershipTenantIds(
+    em: EntityManager,
+    userId: string,
+  ): Promise<string[]> {
+    const rows = await em.execute<{ tenant_id: string }[]>(
+      `SELECT DISTINCT tenant_id FROM directory.tenant_memberships
+        WHERE user_id = ? AND status_concept_id = ?`,
+      [userId, DIR.MEMBERSHIP_ACTIVE],
+    );
+    return rows.map((row) => row.tenant_id);
+  }
+
   /** Nombre visible de la organización, o `null` si no existe. */
   async findOrganizationName(
     em: EntityManager,

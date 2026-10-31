@@ -320,6 +320,11 @@ export class SupportTenantScopeDto {
   @ApiPropertyOptional({ nullable: true, type: String })
   organizationName!: string | null;
   @ApiProperty() wholeOrganization!: boolean;
+  @ApiProperty({
+    description:
+      'El hospital aprobó a la secretaria y entra a su token. false = sólo un doctor la aceptó: ve su agenda y nada más del hospital.',
+  })
+  organizationAccess!: boolean;
   @ApiProperty({ type: [String] }) practiceSiteIds!: string[];
   @ApiProperty({ type: [String] }) clinicalUnitIds!: string[];
   @ApiProperty({ type: [String], description: 'Pisos y espacios.' })

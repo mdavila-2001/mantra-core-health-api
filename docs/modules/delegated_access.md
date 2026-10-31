@@ -86,9 +86,11 @@ la tabla que ya lo modelaba:
 
 Todo vínculo nace `PENDING` y lo decide **la otra parte** (`domain/support-links.ts`): lo que pide
 la secretaria lo acepta el hospital (OWNER/ADMIN) o, si es con un doctor, el doctor o el hospital;
-lo que ofrecen el hospital o el doctor lo acepta ella. Al aceptar, su membresía del tenant
-(`DIR_ROLE_SUPPORT`, creada `INVITED` con el pedido) pasa a `ACTIVE` y el hospital entra a su
-token; esa membresía no lee la estructura completa del hospital
+lo que ofrecen el hospital o el doctor lo acepta ella. Cuando el hospital la aprobó (un vínculo de
+lugar, o uno con un doctor que aceptó la administración u ofreció el hospital), su membresía del
+tenant (`DIR_ROLE_SUPPORT`, creada `INVITED` con el pedido) pasa a `ACTIVE` y el hospital entra a
+su token. Un vínculo que sólo aceptó el doctor no abre la membresía: da la agenda de ese doctor y
+nada más del hospital (`organizationAccess: false` en `GET /me/support-access`); esa membresía no lee la estructura completa del hospital
 (`TenantAdministrationService.assertCanRead`). Lo que ve —hospitales, sedes, servicios, pisos y
 doctores— es `GET /me/support-access`, armado sólo con vínculos `ACTIVE`; la agenda de un doctor
 (`GET /me/support-agenda`) exige un vínculo activo con ese doctor en ese hospital. Al terminar el

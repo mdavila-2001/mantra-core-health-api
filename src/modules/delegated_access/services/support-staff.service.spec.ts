@@ -99,6 +99,7 @@ function build(links: SupportLinkRow[] = []) {
       practitioners: [],
     }),
     findPractitionerAgenda: fn().mockResolvedValue([]),
+    findActiveMembershipTenantIds: fn().mockResolvedValue([]),
     findOrCreateMembership: fn().mockResolvedValue({ id: 'membership-1' }),
     activateMembership: fn().mockResolvedValue(undefined),
     closeMembershipIfUnused: fn().mockResolvedValue(undefined),
@@ -312,6 +313,38 @@ describe('SupportStaffService', () => {
       );
     });
 
+    it('la aceptación del doctor solo NO mete a la secretaria en el hospital', async () => {
+      const { service, repo } = build([pending]);
+      await service.acceptForPractitioner('link-1', DOCTOR);
+      expect(repo.activateMembership).not.toHaveBeenCalled();
+      expect(repo.findOrCreateMembership).not.toHaveBeenCalled();
+    });
+
+    it('tampoco cuando la invitó el doctor y ella aceptó', async () => {
+      const { service, repo } = build([
+        { ...pending, createdByUserId: DOCTOR.id },
+      ]);
+      const view = await service.confirmMine('link-1', SECRETARY);
+      expect(view.status).toBe('ACTIVE');
+      expect(repo.activateMembership).not.toHaveBeenCalled();
+    });
+
+    it('si la acepta la administración del hospital, sí abre la membresía', async () => {
+      const { service, repo } = build([pending]);
+      await service.decideForOrganization(
+        'tenant-a',
+        'link-1',
+        { decision: 'APPROVED' },
+        ADMIN,
+      );
+      expect(repo.activateMembership).toHaveBeenCalledWith(
+        expect.anything(),
+        SECRETARY.id,
+        'tenant-a',
+        ADMIN.id,
+      );
+    });
+
     it('otro doctor no la ve: 404', async () => {
       const { service } = build([pending]);
       await expect(
@@ -398,6 +431,7 @@ describe('SupportStaffService', () => {
       const access = await service.myAccess(SECRETARY);
       expect(access.tenants).toHaveLength(1);
       expect(access.tenants[0].careSpaceIds).toEqual(['floor-1']);
+      expect(access.tenants[0].organizationAccess).toBe(false);
     });
 
     it('terminar un vínculo cierra la membresía si fue el último', async () => {
