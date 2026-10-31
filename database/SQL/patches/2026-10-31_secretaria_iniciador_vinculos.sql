@@ -22,19 +22,27 @@ ALTER TABLE "delegated_access"."organization_user_assignments"
 ALTER TABLE "practice"."practitioner_support_assignments"
     ADD COLUMN IF NOT EXISTS "initiated_by_party_concept_id" uuid;
 
-DO $$ BEGIN
-    ALTER TABLE "delegated_access"."organization_user_assignments"
-        ADD CONSTRAINT "fk_org_user_assignments_initiated_by_party"
-        FOREIGN KEY ("initiated_by_party_concept_id")
-        REFERENCES "terminology"."catalog_concepts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
-
-DO $$ BEGIN
-    ALTER TABLE "practice"."practitioner_support_assignments"
-        ADD CONSTRAINT "fk_prac_support_assignments_initiated_by_party"
-        FOREIGN KEY ("initiated_by_party_concept_id")
-        REFERENCES "terminology"."catalog_concepts" ("id");
-EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+-- Una sola FK por columna, con los nombres que emite gen_ddl.py en el modelo (v4.2.80,
+-- SQL/patches/2026-10-31_v4280_iniciador_vinculos.sql): si la columna ya tiene alguna FK a
+-- terminology.catalog_concepts (la del modelo o una anterior), no se agrega otra.
+DO $$
+DECLARE
+    t record;
+BEGIN
+    FOR t IN SELECT * FROM (VALUES
+        ('delegated_access.organization_user_assignments'::regclass, 'fk_organization_user_assignments_initiated_by_party_concept_id'),
+        ('practice.practitioner_support_assignments'::regclass, 'fk_practitioner_support_assignments_initiated_by_party_7e268d24')
+    ) v(rel, conname) LOOP
+        IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint c
+              JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY (c.conkey)
+             WHERE c.conrelid = t.rel AND c.contype = 'f' AND a.attname = 'initiated_by_party_concept_id'
+               AND c.confrelid = 'terminology.catalog_concepts'::regclass) THEN
+            EXECUTE format('ALTER TABLE %s ADD CONSTRAINT %I FOREIGN KEY ("initiated_by_party_concept_id") '
+                           'REFERENCES "terminology"."catalog_concepts" ("id")', t.rel, t.conname);
+        END IF;
+    END LOOP;
+END $$;
 
 CREATE INDEX IF NOT EXISTS "ix_org_user_assignments_initiated_by_party"
     ON "delegated_access"."organization_user_assignments" ("initiated_by_party_concept_id");
