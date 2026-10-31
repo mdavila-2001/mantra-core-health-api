@@ -11,6 +11,8 @@ import { TelemetryOnboardingAnalyticsController } from './presentation/controlle
 import { TelemetryClientErrorsController } from './presentation/controllers/telemetry-client-errors.controller';
 import { TelemetryErrorsAnalyticsController } from './presentation/controllers/telemetry-errors-analytics.controller';
 import { TelemetryPartsAnalyticsController } from './presentation/controllers/telemetry-parts-analytics.controller';
+import { TelemetryRetentionController } from './presentation/controllers/telemetry-retention.controller';
+import { TelemetryRetentionService } from './application/services/telemetry-retention.service';
 import { TelemetryClientErrorsService } from './application/services/telemetry-client-errors.service';
 import { TelemetryErrorsAnalyticsService } from './application/services/telemetry-errors-analytics.service';
 import { TelemetryPartsAnalyticsService } from './application/services/telemetry-parts-analytics.service';
@@ -73,6 +75,7 @@ import {
     TelemetryOnboardingAnalyticsController,
     TelemetryClickHeatmapController,
     TelemetryClientErrorsController,
+    TelemetryRetentionController,
     TelemetryErrorsAnalyticsController,
     TelemetryPartsAnalyticsController,
   ],
@@ -118,6 +121,7 @@ import {
     TelemetryAnalyticsService,
     TelemetryClickHeatmapService,
     TelemetryClientErrorsService,
+    TelemetryRetentionService,
     TelemetryErrorsAnalyticsService,
     TelemetryPartsAnalyticsService,
     TelemetryOnboardingAnalyticsService,
