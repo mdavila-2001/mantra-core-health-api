@@ -28,6 +28,7 @@ function row(over: Partial<SupportLinkRow> = {}): SupportLinkRow {
     supportName: 'Ana',
     status: 'PENDING',
     createdByUserId: SECRETARY.id,
+    initiatedBy: 'SUPPORT_STAFF',
     createdAt: new Date('2026-10-31T10:00:00Z'),
     practiceSiteId: null,
     clinicalUnitId: null,
@@ -103,8 +104,8 @@ function build(links: SupportLinkRow[] = []) {
     findOrCreateMembership: fn().mockResolvedValue({ id: 'membership-1' }),
     activateMembership: fn().mockResolvedValue(undefined),
     closeMembershipIfUnused: fn().mockResolvedValue(undefined),
-    createLocationLink: fn(() => ({ id: 'new-location' })),
-    createPractitionerLink: fn(() => ({ id: 'new-practitioner' })),
+    createLocationLink: fn(async () => ({ id: 'new-location' })),
+    createPractitionerLink: fn(async () => ({ id: 'new-practitioner' })),
     setStatus: fn().mockResolvedValue(undefined),
   };
   const logger = { setContext: fn(), info: fn(), warn: fn() };
@@ -171,9 +172,11 @@ describe('SupportStaffService', () => {
       expect(repo.createLocationLink).toHaveBeenCalledWith(
         expect.anything(),
         expect.objectContaining({
+          tenantId: 'tenant-a',
           tenantMembershipId: 'membership-1',
           careSpaceId: 'floor-2',
           practiceSiteId: undefined,
+          initiatedBy: 'SUPPORT_STAFF',
           actorUserId: SECRETARY.id,
         }),
       );
@@ -247,6 +250,39 @@ describe('SupportStaffService', () => {
       expect(repo.closeMembershipIfUnused).toHaveBeenCalled();
     });
 
+    it('un miembro que no administra no puede invitar: no queda vínculo «del hospital»', async () => {
+      const { service, repo } = build();
+      await expect(
+        service.inviteForOrganization(
+          'tenant-a',
+          {
+            nationalId: '7654321',
+            items: [{ targetKind: 'SPACE', careSpaceId: 'floor-2' }],
+          },
+          DOCTOR,
+        ),
+      ).rejects.toMatchObject({
+        reason: 'SUPPORT_ORGANIZATION_ADMIN_REQUIRED',
+      });
+      expect(repo.createLocationLink).not.toHaveBeenCalled();
+    });
+
+    it('la invitación del administrador queda guardada como ORGANIZATION', async () => {
+      const { service, repo } = build();
+      await service.inviteForOrganization(
+        'tenant-a',
+        {
+          nationalId: '7654321',
+          items: [{ targetKind: 'SPACE', careSpaceId: 'floor-2' }],
+        },
+        ADMIN,
+      );
+      expect(repo.createLocationLink).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ initiatedBy: 'ORGANIZATION' }),
+      );
+    });
+
     it('quien no administra el hospital recibe 403', async () => {
       const { service, repo } = build([row()]);
       await expect(
@@ -275,7 +311,10 @@ describe('SupportStaffService', () => {
     });
 
     it('lo que invitó el hospital lo acepta la secretaria, no el hospital', async () => {
-      const invited = row({ createdByUserId: ADMIN.id });
+      const invited = row({
+        createdByUserId: ADMIN.id,
+        initiatedBy: 'ORGANIZATION',
+      });
       const { service, repo } = build([invited]);
       await expect(
         service.decideForOrganization(
@@ -322,7 +361,7 @@ describe('SupportStaffService', () => {
 
     it('tampoco cuando la invitó el doctor y ella aceptó', async () => {
       const { service, repo } = build([
-        { ...pending, createdByUserId: DOCTOR.id },
+        { ...pending, createdByUserId: DOCTOR.id, initiatedBy: 'PRACTITIONER' },
       ]);
       const view = await service.confirmMine('link-1', SECRETARY);
       expect(view.status).toBe('ACTIVE');

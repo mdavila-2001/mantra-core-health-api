@@ -5,6 +5,7 @@ import { CONCEPTS, SEED } from '../../src/common/constants/concepts';
 import { TerminologySeedService } from '../../src/common/seed/terminology-seed.service';
 import { buildOrmConfig } from '../../src/orm/config/orm.config';
 import { DIR } from '../../src/modules/directory/directory.concepts';
+import { DELEG } from '../../src/modules/delegated_access/delegated_access.concepts';
 import { TenantMembershipsRepository } from '../../src/modules/directory/repositories';
 import { TenantAdministrationService } from '../../src/modules/directory/services/tenant-administration.service';
 import { PRAC } from '../../src/modules/practice/practice.concepts';
@@ -118,6 +119,9 @@ describeIt(
         DIR.ROLE_SUPPORT,
         PROF.PROFILE_TYPE_SECRETARY,
         PRAC.SUPPORT_PENDING,
+        DELEG.INITIATOR_SUPPORT_STAFF,
+        DELEG.INITIATOR_ORGANIZATION,
+        DELEG.INITIATOR_PRACTITIONER,
       ];
       const [{ n }] = await all<{ n: number }>(
         `select count(*)::int as n from terminology.catalog_concepts where id in (${needed.map(() => '?').join(', ')})`,
@@ -480,6 +484,13 @@ describeIt(
         initiatedBy: 'ORGANIZATION',
         awaiting: 'SUPPORT_STAFF',
       });
+      const [stored] = await all<{ initiated_by_party_concept_id: string }>(
+        'select initiated_by_party_concept_id from delegated_access.organization_user_assignments where id = ?',
+        [invited.id],
+      );
+      expect(stored.initiated_by_party_concept_id).toBe(
+        DELEG.INITIATOR_ORGANIZATION,
+      );
       await service.confirmMine(invited.id, secretary);
       expect(
         (await service.myAccess(secretary)).tenants[0].careSpaceIds.sort(),

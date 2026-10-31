@@ -222,8 +222,13 @@ export class SupportLinkViewDto {
   personName!: string | null;
   @ApiProperty({ enum: ['PENDING', 'ACTIVE', 'REJECTED', 'ENDED'] })
   status!: SupportLinkStatus;
-  @ApiProperty({ enum: ['SUPPORT_STAFF', 'ORGANIZATION', 'PRACTITIONER'] })
-  initiatedBy!: SupportParty;
+  @ApiPropertyOptional({
+    nullable: true,
+    enum: ['SUPPORT_STAFF', 'ORGANIZATION', 'PRACTITIONER'],
+    description:
+      'Quién inició el vínculo, guardado al crearlo. null = sin iniciador: nadie lo decide.',
+  })
+  initiatedBy!: SupportParty | null;
   @ApiPropertyOptional({
     nullable: true,
     enum: ['SUPPORT_STAFF', 'ORGANIZATION', 'PRACTITIONER'],

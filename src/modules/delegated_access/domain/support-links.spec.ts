@@ -1,6 +1,7 @@
 import {
   awaitingPartyOf,
   buildSupportScope,
+  grantsOrganizationAccess,
   initiatorOf,
   mayDecide,
   scopeCoversPractitioner,
@@ -23,6 +24,7 @@ function link(over: Partial<SupportLinkRow> = {}): SupportLinkRow {
     supportName: 'Ana',
     status: 'PENDING',
     createdByUserId: SECRETARY,
+    initiatedBy: 'SUPPORT_STAFF',
     createdAt: new Date('2026-10-31T10:00:00Z'),
     practiceSiteId: null,
     clinicalUnitId: null,
@@ -74,7 +76,7 @@ describe('vínculos de la secretaria', () => {
   });
 
   it('lo ofrecido por el hospital o el doctor lo decide sólo la secretaria', () => {
-    const byOrg = link({ createdByUserId: ADMIN });
+    const byOrg = link({ createdByUserId: ADMIN, initiatedBy: 'ORGANIZATION' });
     expect(initiatorOf(byOrg)).toBe('ORGANIZATION');
     expect(awaitingPartyOf(byOrg)).toBe('SUPPORT_STAFF');
     expect(mayDecide(byOrg, { ...NOBODY, isOrganizationAdmin: true })).toBe(
@@ -87,12 +89,67 @@ describe('vínculos de la secretaria', () => {
       practitionerRoleAssignmentId: 'pra-1',
       practitionerUserId: DOCTOR,
       createdByUserId: DOCTOR,
+      initiatedBy: 'PRACTITIONER',
     });
     expect(initiatorOf(byDoctor)).toBe('PRACTITIONER');
     expect(mayDecide(byDoctor, { ...NOBODY, isPractitioner: true })).toBe(
       false,
     );
     expect(mayDecide(byDoctor, { ...NOBODY, isSupportStaff: true })).toBe(true);
+  });
+
+  it('el iniciador sale de la columna guardada, no de quién escribió la fila', () => {
+    // Escrito por alguien que no es la secretaria ni el doctor, pero sin
+    // iniciador guardado: no es «del hospital», nadie lo decide y no abre nada.
+    const unknown = link({
+      createdByUserId: 'user-miembro',
+      initiatedBy: null,
+    });
+    expect(initiatorOf(unknown)).toBeNull();
+    expect(awaitingPartyOf(unknown)).toBeNull();
+    const everyone = {
+      isSupportStaff: true,
+      isOrganizationAdmin: true,
+      isPractitioner: true,
+    };
+    expect(mayDecide(unknown, everyone)).toBe(false);
+    expect(grantsOrganizationAccess(unknown, everyone)).toBe(false);
+  });
+
+  it('sólo la aprobación del hospital abre la membresía, también en un piso', () => {
+    const floor = link({ careSpaceId: 'floor-1' });
+    // Un doctor no abre el hospital, ni siquiera para un vínculo de lugar.
+    expect(
+      grantsOrganizationAccess(floor, { ...NOBODY, isPractitioner: true }),
+    ).toBe(false);
+    expect(
+      grantsOrganizationAccess(floor, { ...NOBODY, isSupportStaff: true }),
+    ).toBe(false);
+    expect(
+      grantsOrganizationAccess(floor, { ...NOBODY, isOrganizationAdmin: true }),
+    ).toBe(true);
+
+    const offeredByOrg = link({ initiatedBy: 'ORGANIZATION' });
+    expect(
+      grantsOrganizationAccess(offeredByOrg, {
+        ...NOBODY,
+        isSupportStaff: true,
+      }),
+    ).toBe(true);
+
+    const offeredByDoctor = link({
+      kind: 'PRACTITIONER',
+      practitionerRoleAssignmentId: 'pra-1',
+      initiatedBy: 'PRACTITIONER',
+    });
+    expect(
+      grantsOrganizationAccess(offeredByDoctor, {
+        ...NOBODY,
+        isSupportStaff: true,
+      }),
+    ).toBe(false);
+    // Un «doctor» no puede iniciar un vínculo de lugar: queda sin decisor.
+    expect(awaitingPartyOf(link({ initiatedBy: 'PRACTITIONER' }))).toBeNull();
   });
 
   it('un vínculo ya decidido no espera a nadie', () => {

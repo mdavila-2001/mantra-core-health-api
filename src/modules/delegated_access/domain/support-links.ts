@@ -46,6 +46,12 @@ export interface SupportLinkRow {
   readonly supportName: string | null;
   readonly status: SupportLinkStatus;
   readonly createdByUserId: string | null;
+  /**
+   * Quién inició el vínculo, tal como se guardó al crearlo
+   * (`initiated_by_party_concept_id`). `null` si la fila no lo trae: un
+   * vínculo así no lo decide nadie ni abre nada (falla cerrado).
+   */
+  readonly initiatedBy: SupportParty | null;
   readonly createdAt: Date;
   readonly practiceSiteId: string | null;
   readonly clinicalUnitId: string | null;
@@ -75,21 +81,13 @@ export function targetKindOf(row: SupportLinkRow): SupportTargetKind {
 }
 
 /**
- * Quién inició el vínculo, por quién escribió la fila.
- *
- * La secretaria sólo escribe filas a su nombre; el doctor sólo las de su
- * vinculación; cualquier otro autor es la administración del hospital.
+ * Quién inició el vínculo. Sale de la columna escrita al crearlo, nunca de
+ * comparar quién escribió la fila con una cuenta: `ORGANIZATION` sólo lo
+ * escribe la invitación del hospital tras comprobar que quien invita lo
+ * administra; `PRACTITIONER`, la del doctor sobre su propia vinculación.
  */
-export function initiatorOf(row: SupportLinkRow): SupportParty {
-  if (row.createdByUserId === row.supportUserId) return 'SUPPORT_STAFF';
-  if (
-    row.kind === 'PRACTITIONER' &&
-    row.practitionerUserId !== null &&
-    row.createdByUserId === row.practitionerUserId
-  ) {
-    return 'PRACTITIONER';
-  }
-  return 'ORGANIZATION';
+export function initiatorOf(row: SupportLinkRow): SupportParty | null {
+  return row.initiatedBy;
 }
 
 /**
@@ -100,8 +98,14 @@ export function initiatorOf(row: SupportLinkRow): SupportParty {
  */
 export function awaitingPartyOf(row: SupportLinkRow): SupportParty | null {
   if (row.status !== 'PENDING') return null;
-  if (initiatorOf(row) !== 'SUPPORT_STAFF') return 'SUPPORT_STAFF';
-  return row.kind === 'PRACTITIONER' ? 'PRACTITIONER' : 'ORGANIZATION';
+  const initiator = initiatorOf(row);
+  if (initiator === null) return null;
+  if (initiator === 'SUPPORT_STAFF') {
+    return row.kind === 'PRACTITIONER' ? 'PRACTITIONER' : 'ORGANIZATION';
+  }
+  // Un doctor sólo inicia vínculos con su propia vinculación.
+  if (initiator === 'PRACTITIONER' && row.kind !== 'PRACTITIONER') return null;
+  return 'SUPPORT_STAFF';
 }
 
 /** Quién está decidiendo, ya resuelto contra el vínculo. */
@@ -128,6 +132,27 @@ export function mayDecide(row: SupportLinkRow, who: SupportDecider): boolean {
   if (awaiting === 'SUPPORT_STAFF') return who.isSupportStaff;
   if (awaiting === 'ORGANIZATION') return who.isOrganizationAdmin;
   return who.isPractitioner || who.isOrganizationAdmin;
+}
+
+/**
+ * Si aceptar este vínculo abre el hospital (la membresía del tenant).
+ *
+ * Deniega por defecto. Sólo hay aprobación del hospital en dos casos:
+ * - decide la administración del hospital (OWNER/ADMIN comprobado al decidir)
+ *   un vínculo que pidió la secretaria;
+ * - la secretaria acepta lo que ofreció el hospital (`ORGANIZATION`, que sólo
+ *   se escribe tras comprobar que quien invitó lo administraba).
+ * Que acepte el doctor —o que ella acepte lo que ofreció el doctor— nunca abre
+ * el hospital, sea el vínculo con un doctor, una sede o un piso.
+ */
+export function grantsOrganizationAccess(
+  row: SupportLinkRow,
+  decider: SupportDecider,
+): boolean {
+  const initiator = initiatorOf(row);
+  if (initiator === 'SUPPORT_STAFF') return decider.isOrganizationAdmin;
+  if (initiator === 'ORGANIZATION') return decider.isSupportStaff;
+  return false;
 }
 
 /** Lo que la secretaria puede ver en un hospital donde trabaja. */
