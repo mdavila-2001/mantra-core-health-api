@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsUUID } from 'class-validator';
 
-const SCOPES = ['TENANT', 'PRACTICE', 'SITE', 'UNIT'] as const;
+const SCOPES = ['TENANT', 'PRACTICE', 'SITE', 'UNIT', 'SPACE'] as const;
 
 /**
  * Cuerpo de `PATCH /org/user-assignments/{id}` (UC-29-10). Al menos uno de
