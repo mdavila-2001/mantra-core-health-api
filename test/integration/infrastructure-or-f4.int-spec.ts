@@ -490,4 +490,57 @@ describe('Infraestructura F4 · quirófanos', () => {
       util.body.rooms.reduce((a: number, r: any) => a + r.sessionMinutes, 0),
     );
   });
+
+  it('PERIOP_NURSE con ámbito del tenant: ve sus sedes en /me y la agenda de quirófanos; en otro tenant no', async () => {
+    const enf = await crearPersonal(
+      ctx,
+      orgA,
+      `F4ENF-${tag}`,
+      DELEG.ASSIGN_ROLE_STAFF,
+      { site: orgA.siteId },
+    );
+    const [role] = await q<{ id: string }>(
+      "select id from authz.roles where code = 'PERIOP_NURSE'",
+    );
+    await q(
+      `insert into authz.user_role_assignments
+         (id, user_id, role_id, tenant_id, status_concept_id, created_at, updated_at)
+       values (gen_random_uuid(), ?, ?, ?, ?, now(), now())`,
+      [enf.userId, role.id, orgA.tenantId, CONCEPTS.STATE_ACTIVE],
+    );
+    const login = await http()
+      .post('/iam/auth/login')
+      .send({ email: `f4enf-${tag}@example.test`, password: PASSWORD })
+      .expect(200);
+    const who = { token: login.body.accessToken, tenantId: orgA.tenantId };
+    const me = await http()
+      .get('/practice/infrastructure-access/me')
+      .set(como(who))
+      .expect(200);
+    const sede = me.body.sites.find((x: any) => x.siteId === orgA.siteId);
+    expect(sede).toMatchObject({ globalRoles: ['PERIOP_STAFF'] });
+    expect(sede.actions).toContain('f4.or.read');
+    const rooms = await http()
+      .get(`/sites/${orgA.siteId}/operating-rooms`)
+      .set(como(who))
+      .expect(200);
+    expect(rooms.body.map((r: any) => r.careSpace.id)).toContain(orId);
+    // Sin el rol (otra cuenta del mismo tenant, sólo STAFF): no ve la agenda.
+    const otra = await crearPersonal(
+      ctx,
+      orgA,
+      `F4SINROL-${tag}`,
+      DELEG.ASSIGN_ROLE_STAFF,
+      { site: orgA.siteId },
+    );
+    const sin = await http()
+      .get(`/sites/${orgA.siteId}/operating-rooms`)
+      .set(como(otra));
+    expect([403, 404]).toContain(sin.status);
+    // En otro tenant el rol no cuenta.
+    await http()
+      .get(`/sites/${orgB.siteId}/operating-rooms`)
+      .set(como(who))
+      .expect((r) => expect([403, 404]).toContain(r.status));
+  });
 });
