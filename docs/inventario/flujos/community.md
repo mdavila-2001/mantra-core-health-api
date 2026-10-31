@@ -49,10 +49,10 @@ _Fuente: `src/modules/community/README.md:3`_
 |  |  | PATCH /community/groups/{groupId}/members/{member} | Cualquier sesión válida | ALTO | 13 |
 |  |  | GET /community/groups/{groupId}/posts | Cualquier sesión válida | BAJO | 8 |
 |  |  | POST /community/groups/{groupId}/posts | Cualquier sesión válida | ALTO | 15 |
-| `ctrl:CommunityMessagingController` | Operaciones de CommunityMessagingController que el README no asigna a un caso de uso | GET /community/conversations | Cualquier sesión válida | BAJO | 6 |
+| `ctrl:CommunityMessagingController` | Operaciones de CommunityMessagingController que el README no asigna a un caso de uso | GET /community/conversations | Cualquier sesión válida | BAJO | 7 |
 |  |  | POST /community/conversations | Cualquier sesión válida | ALTO | 8 |
 |  |  | GET /community/conversations/{conversationId}/attachments/{fileId}/content | Cualquier sesión válida | BAJO | 8 |
-|  |  | GET /community/conversations/{conversationId}/messages | Cualquier sesión válida | BAJO | 7 |
+|  |  | GET /community/conversations/{conversationId}/messages | Cualquier sesión válida | BAJO | 8 |
 |  |  | DELETE /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 8 |
 |  |  | PATCH /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 6 |
 |  |  | PATCH /community/conversations/{conversationId}/participant | Cualquier sesión válida | BAJO | 4 |
@@ -71,30 +71,30 @@ _Fuente: `src/modules/community/README.md:3`_
 |  |  | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
 |  |  | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
 |  |  | DESCONOCIDO / | Cualquier sesión válida | BAJO | 0 |
-|  |  | GET /f/{slug} | Público (sin sesión) | BAJO | 18 |
-|  |  | GET /l/{slug} | Público (sin sesión) | BAJO | 18 |
-|  |  | GET /o/{slug} | Público (sin sesión) | BAJO | 18 |
-|  |  | GET /p/{slug} | Público (sin sesión) | BAJO | 18 |
+|  |  | GET /f/{slug} | Público (sin sesión) | BAJO | 19 |
+|  |  | GET /l/{slug} | Público (sin sesión) | BAJO | 19 |
+|  |  | GET /o/{slug} | Público (sin sesión) | BAJO | 19 |
+|  |  | GET /p/{slug} | Público (sin sesión) | BAJO | 19 |
 |  |  | GET /public/comments/{commentId}/replies | Público (sin sesión) | BAJO | 4 |
 |  |  | GET /public/media/{id} | Público (sin sesión) | BAJO | 7 |
-|  |  | GET /public/nearby | Público (sin sesión) | BAJO | 7 |
+|  |  | GET /public/nearby | Público (sin sesión) | BAJO | 8 |
 |  |  | GET /public/posts | Público (sin sesión) | BAJO | 5 |
 |  |  | GET /public/posts/{postId}/comments | Público (sin sesión) | BAJO | 4 |
 |  |  | GET /public/posts/{postId}/reactions | Público (sin sesión) | BAJO | 3 |
-|  |  | GET /public/profiles/{prefijo}/{slug} | Público (sin sesión) | BAJO | 18 |
+|  |  | GET /public/profiles/{prefijo}/{slug} | Público (sin sesión) | BAJO | 19 |
 |  |  | GET /public/profiles/{prefijo}/{slug}/reviews | Público (sin sesión) | BAJO | 5 |
-|  |  | GET /public/search | Público (sin sesión) | BAJO | 12 |
-|  |  | GET /public/search/diagnostic-units | Público (sin sesión) | BAJO | 12 |
-|  |  | GET /public/search/insurers | Público (sin sesión) | BAJO | 12 |
-|  |  | GET /public/search/medications | Público (sin sesión) | BAJO | 12 |
-|  |  | GET /public/search/organizations | Público (sin sesión) | BAJO | 12 |
-|  |  | GET /public/search/pharmacies | Público (sin sesión) | BAJO | 12 |
-|  |  | GET /public/search/practitioners | Público (sin sesión) | BAJO | 12 |
-|  |  | GET /s/{slug} | Público (sin sesión) | BAJO | 18 |
+|  |  | GET /public/search | Público (sin sesión) | BAJO | 13 |
+|  |  | GET /public/search/diagnostic-units | Público (sin sesión) | BAJO | 13 |
+|  |  | GET /public/search/insurers | Público (sin sesión) | BAJO | 13 |
+|  |  | GET /public/search/medications | Público (sin sesión) | BAJO | 13 |
+|  |  | GET /public/search/organizations | Público (sin sesión) | BAJO | 13 |
+|  |  | GET /public/search/pharmacies | Público (sin sesión) | BAJO | 13 |
+|  |  | GET /public/search/practitioners | Público (sin sesión) | BAJO | 13 |
+|  |  | GET /s/{slug} | Público (sin sesión) | BAJO | 19 |
 | `ctrl:CommunityReviewsController` | Operaciones de CommunityReviewsController que el README no asigna a un caso de uso | GET /community/profiles/{profileId}/reviews | Cualquier sesión válida | BAJO | 5 |
 |  |  | POST /community/profiles/{profileId}/reviews/{reviewId}/responses | Cualquier sesión válida | ALTO | 6 |
 | `ctrl:CommunitySearchIndexController` | Operaciones de CommunitySearchIndexController que el README no asigna a un caso de uso | GET /internal/community/search/health | SYSTEM · SECURITY_ADMIN · SEARCH_ADMIN | BAJO | 1 |
-|  |  | POST /internal/community/search/reindex | SYSTEM · SECURITY_ADMIN · SEARCH_ADMIN | BAJO | 9 |
+|  |  | POST /internal/community/search/reindex | SYSTEM · SECURITY_ADMIN · SEARCH_ADMIN | BAJO | 10 |
 | `ctrl:CommunitySocialController` | Operaciones de CommunitySocialController que el README no asigna a un caso de uso | DELETE /community/blocks | Cualquier sesión válida | ALTO | 5 |
 |  |  | GET /community/blocks | Cualquier sesión válida | BAJO | 4 |
 |  |  | DELETE /community/bookmarks | Cualquier sesión válida | ALTO | 5 |
@@ -354,7 +354,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a49(["SECURITY_ADMIN"]):::actor
+  a50(["SECURITY_ADMIN"]):::actor
   t3[("clinical.encounters")]:::tabla
   t4[("community.groups")]:::tabla
   t5[("community.public_profiles")]:::tabla
@@ -367,19 +367,19 @@ flowchart LR
   t27[("community.conversations")]:::tabla
   t28[("community.direct_messages")]:::tabla
   t29[("directory.tenants")]:::tabla
-  t31[("community.user_blocks")]:::tabla
-  t34[("common.file_versions")]:::tabla
-  t35[("common.files")]:::tabla
-  t50[("community.moderation_appeals")]:::tabla
-  t51[("community.moderation_decisions")]:::tabla
-  t53[("community.moderation_queue")]:::tabla
-  t56[("community.moderation_strikes")]:::tabla
-  t58[("community.content_reports")]:::tabla
-  t60[("community.poll_options")]:::tabla
-  t61[("community.poll_votes")]:::tabla
-  t62[("community.polls")]:::tabla
-  t63[("community.social_follows")]:::tabla
-  t64[("community.social_posts")]:::tabla
+  t32[("community.user_blocks")]:::tabla
+  t35[("common.file_versions")]:::tabla
+  t36[("common.files")]:::tabla
+  t51[("community.moderation_appeals")]:::tabla
+  t52[("community.moderation_decisions")]:::tabla
+  t54[("community.moderation_queue")]:::tabla
+  t57[("community.moderation_strikes")]:::tabla
+  t59[("community.content_reports")]:::tabla
+  t61[("community.poll_options")]:::tabla
+  t62[("community.poll_votes")]:::tabla
+  t63[("community.polls")]:::tabla
+  t64[("community.social_follows")]:::tabla
+  t65[("community.social_posts")]:::tabla
   t11[("+3 tablas más")]
   t13[("+1 tablas más")]
   t15[("+1 tablas más")]
@@ -397,35 +397,36 @@ flowchart LR
     o20["GET /community/groups/{groupId}/posts"]:::op
     o23["POST /community/groups/{groupId}/posts"]:::op
   end
-  t32[("+2 tablas más")]
-  t36[("+2 tablas más")]
-  t38[("+1 tablas más")]
-  t40[("+2 tablas más")]
-  t45[("+1 tablas más")]
+  t30[("+1 tablas más")]
+  t33[("+2 tablas más")]
+  t37[("+2 tablas más")]
+  t39[("+2 tablas más")]
+  t41[("+2 tablas más")]
+  t46[("+1 tablas más")]
   subgraph s1["ctrl:CommunityMessagingController · Operaciones de CommunityMessagingController…"]
     o25["GET /community/conversations"]:::op
-    o30["POST /community/conversations"]:::op
-    o33["GET /community/conversations/{conversationId}/attachments/{fileId}/co…"]:::op
-    o37["GET /community/conversations/{conversationId}/messages"]:::op
-    o39["DELETE /community/conversations/{conversationId}/messages/{messageId}"]:::op
-    o41["PATCH /community/conversations/{conversationId}/messages/{messageId}"]:::op
-    o42["PATCH /community/conversations/{conversationId}/participant"]:::op
-    o43["DELETE /community/conversations/{conversationId}/pin"]:::op
-    o44["POST /community/conversations/{conversationId}/pin"]:::op
-    o46["GET /community/conversations/{conversationId}/presence"]:::op
-    o47["POST /community/conversations/contacts/search"]:::op
+    o31["POST /community/conversations"]:::op
+    o34["GET /community/conversations/{conversationId}/attachments/{fileId}/co…"]:::op
+    o38["GET /community/conversations/{conversationId}/messages"]:::op
+    o40["DELETE /community/conversations/{conversationId}/messages/{messageId}"]:::op
+    o42["PATCH /community/conversations/{conversationId}/messages/{messageId}"]:::op
+    o43["PATCH /community/conversations/{conversationId}/participant"]:::op
+    o44["DELETE /community/conversations/{conversationId}/pin"]:::op
+    o45["POST /community/conversations/{conversationId}/pin"]:::op
+    o47["GET /community/conversations/{conversationId}/presence"]:::op
+    o48["POST /community/conversations/contacts/search"]:::op
   end
   subgraph s2["ctrl:CommunityModerationController · Operaciones de CommunityModerationControll…"]
-    o48["GET /community/moderation/appeals"]:::op
-    o52["POST /community/moderation/appeals/{appealId}/resolve"]:::op
-    o54["GET /community/moderation/decisions"]:::op
-    o55["GET /community/moderation/decisions/mine"]:::op
-    o57["GET /community/moderation/queue"]:::op
+    o49["GET /community/moderation/appeals"]:::op
+    o53["POST /community/moderation/appeals/{appealId}/resolve"]:::op
+    o55["GET /community/moderation/decisions"]:::op
+    o56["GET /community/moderation/decisions/mine"]:::op
+    o58["GET /community/moderation/queue"]:::op
   end
-  t65[("+3 tablas más")]
+  t66[("+3 tablas más")]
   subgraph s3["ctrl:CommunityPollsController · Operaciones de CommunityPollsController que el…"]
-    o59["GET /community/polls/{pollId}"]:::op
-    o66["POST /community/posts/{postId}/polls"]:::op
+    o60["GET /community/polls/{pollId}"]:::op
+    o67["POST /community/posts/{postId}/polls"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -496,54 +497,48 @@ flowchart LR
   o25 -->|"LEE"| t5
   o25 -->|"LEE"| t7
   o25 -->|"LEE"| t29
-  a2 --> o30
-  o30 -->|"CREA"| t26
-  o30 -->|"LEE"| t26
-  o30 -->|"CREA"| t27
-  o30 -->|"LEE"| t27
-  o30 -->|"LEE"| t5
-  o30 -->|"LEE"| t31
-  o30 -.-> t32
-  a2 --> o33
-  o33 -->|"LEE"| t34
-  o33 -->|"LEE"| t35
-  o33 -->|"LEE"| t26
-  o33 -->|"LEE"| t28
-  o33 -->|"LEE"| t5
-  o33 -->|"LEE"| t31
-  o33 -.-> t36
-  a2 --> o37
-  o37 -->|"LEE"| t26
-  o37 -->|"LEE"| t27
-  o37 -->|"LEE"| t28
-  o37 -->|"LEE"| t5
-  o37 -->|"LEE"| t31
-  o37 -->|"LEE"| t7
-  o37 -.-> t38
-  a2 --> o39
-  o39 -->|"LEE"| t26
-  o39 -->|"ACTUALIZA"| t27
-  o39 -->|"LEE"| t27
-  o39 -->|"ACTUALIZA"| t28
-  o39 -->|"LEE"| t28
-  o39 -->|"LEE"| t5
-  o39 -.-> t40
-  a2 --> o41
-  o41 -->|"LEE"| t26
-  o41 -->|"ACTUALIZA"| t28
-  o41 -->|"LEE"| t28
-  o41 -->|"LEE"| t5
-  o41 -->|"LEE"| t7
-  o41 -->|"LEE"| t29
+  o25 -.-> t30
+  a2 --> o31
+  o31 -->|"CREA"| t26
+  o31 -->|"LEE"| t26
+  o31 -->|"CREA"| t27
+  o31 -->|"LEE"| t27
+  o31 -->|"LEE"| t5
+  o31 -->|"LEE"| t32
+  o31 -.-> t33
+  a2 --> o34
+  o34 -->|"LEE"| t35
+  o34 -->|"LEE"| t36
+  o34 -->|"LEE"| t26
+  o34 -->|"LEE"| t28
+  o34 -->|"LEE"| t5
+  o34 -->|"LEE"| t32
+  o34 -.-> t37
+  a2 --> o38
+  o38 -->|"LEE"| t26
+  o38 -->|"LEE"| t27
+  o38 -->|"LEE"| t28
+  o38 -->|"LEE"| t5
+  o38 -->|"LEE"| t32
+  o38 -->|"LEE"| t7
+  o38 -.-> t39
+  a2 --> o40
+  o40 -->|"LEE"| t26
+  o40 -->|"ACTUALIZA"| t27
+  o40 -->|"LEE"| t27
+  o40 -->|"ACTUALIZA"| t28
+  o40 -->|"LEE"| t28
+  o40 -->|"LEE"| t5
+  o40 -.-> t41
   a2 --> o42
   o42 -->|"LEE"| t26
+  o42 -->|"ACTUALIZA"| t28
+  o42 -->|"LEE"| t28
   o42 -->|"LEE"| t5
   o42 -->|"LEE"| t7
   o42 -->|"LEE"| t29
   a2 --> o43
   o43 -->|"LEE"| t26
-  o43 -->|"ACTUALIZA"| t27
-  o43 -->|"LEE"| t27
   o43 -->|"LEE"| t5
   o43 -->|"LEE"| t7
   o43 -->|"LEE"| t29
@@ -551,56 +546,63 @@ flowchart LR
   o44 -->|"LEE"| t26
   o44 -->|"ACTUALIZA"| t27
   o44 -->|"LEE"| t27
-  o44 -->|"LEE"| t28
   o44 -->|"LEE"| t5
   o44 -->|"LEE"| t7
-  o44 -.-> t45
-  a2 --> o46
-  o46 -->|"LEE"| t26
-  o46 -->|"LEE"| t5
-  o46 -->|"LEE"| t7
-  o46 -->|"LEE"| t29
+  o44 -->|"LEE"| t29
+  a2 --> o45
+  o45 -->|"LEE"| t26
+  o45 -->|"ACTUALIZA"| t27
+  o45 -->|"LEE"| t27
+  o45 -->|"LEE"| t28
+  o45 -->|"LEE"| t5
+  o45 -->|"LEE"| t7
+  o45 -.-> t46
   a2 --> o47
+  o47 -->|"LEE"| t26
   o47 -->|"LEE"| t5
-  o47 -->|"LEE"| t31
   o47 -->|"LEE"| t7
   o47 -->|"LEE"| t29
-  a49 --> o48
-  o48 -->|"LEE"| t50
-  o48 -->|"LEE"| t51
-  a49 --> o52
-  o52 -->|"ACTUALIZA"| t50
-  o52 -->|"LEE"| t50
-  o52 -->|"LEE"| t51
-  o52 -->|"ACTUALIZA"| t53
-  o52 -->|"LEE"| t53
-  a49 --> o54
-  o54 -->|"LEE"| t51
-  a2 --> o55
-  o55 -->|"LEE"| t50
-  o55 -->|"LEE"| t51
-  o55 -->|"LEE"| t56
-  o55 -->|"LEE"| t5
-  o55 -->|"LEE"| t7
-  o55 -->|"LEE"| t29
-  a49 --> o57
-  o57 -->|"LEE"| t58
-  o57 -->|"LEE"| t53
-  a2 --> o59
-  o59 -->|"LEE"| t60
-  o59 -->|"LEE"| t61
-  o59 -->|"LEE"| t62
-  o59 -->|"LEE"| t5
-  o59 -->|"LEE"| t63
-  o59 -->|"LEE"| t64
-  o59 -.-> t65
-  a2 --> o66
-  o66 -->|"CREA"| t60
-  o66 -->|"CREA"| t62
-  o66 -->|"LEE"| t5
-  o66 -->|"LEE"| t64
-  o66 -->|"LEE"| t7
-  o66 -->|"LEE"| t29
+  a2 --> o48
+  o48 -->|"LEE"| t5
+  o48 -->|"LEE"| t32
+  o48 -->|"LEE"| t7
+  o48 -->|"LEE"| t29
+  a50 --> o49
+  o49 -->|"LEE"| t51
+  o49 -->|"LEE"| t52
+  a50 --> o53
+  o53 -->|"ACTUALIZA"| t51
+  o53 -->|"LEE"| t51
+  o53 -->|"LEE"| t52
+  o53 -->|"ACTUALIZA"| t54
+  o53 -->|"LEE"| t54
+  a50 --> o55
+  o55 -->|"LEE"| t52
+  a2 --> o56
+  o56 -->|"LEE"| t51
+  o56 -->|"LEE"| t52
+  o56 -->|"LEE"| t57
+  o56 -->|"LEE"| t5
+  o56 -->|"LEE"| t7
+  o56 -->|"LEE"| t29
+  a50 --> o58
+  o58 -->|"LEE"| t59
+  o58 -->|"LEE"| t54
+  a2 --> o60
+  o60 -->|"LEE"| t61
+  o60 -->|"LEE"| t62
+  o60 -->|"LEE"| t63
+  o60 -->|"LEE"| t5
+  o60 -->|"LEE"| t64
+  o60 -->|"LEE"| t65
+  o60 -.-> t66
+  a2 --> o67
+  o67 -->|"CREA"| t61
+  o67 -->|"CREA"| t63
+  o67 -->|"LEE"| t5
+  o67 -->|"LEE"| t65
+  o67 -->|"LEE"| t7
+  o67 -->|"LEE"| t29
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -625,29 +627,29 @@ flowchart LR
   t25[("common.file_versions")]:::tabla
   t26[("common.files")]:::tabla
   t29[("community.verified_badges")]:::tabla
-  t30[("scheduling.bookable_slots")]:::tabla
-  t31[("scheduling.practitioner_schedules")]:::tabla
+  t30[("profiles.practitioner_admissions")]:::tabla
+  t31[("scheduling.bookable_slots")]:::tabla
   t39[("community.review_dimension_scores")]:::tabla
   t40[("community.review_responses")]:::tabla
   t41[("profiles.persons")]:::tabla
   t43[("profiles.practitioner_specialties")]:::tabla
   t61[("directory.tenant_memberships")]:::tabla
   t62[("directory.tenants")]:::tabla
-  t14[("+12 tablas más")]
-  t16[("+12 tablas más")]
-  t18[("+12 tablas más")]
-  t20[("+12 tablas más")]
+  t14[("+13 tablas más")]
+  t16[("+13 tablas más")]
+  t18[("+13 tablas más")]
+  t20[("+13 tablas más")]
   t27[("+1 tablas más")]
-  t32[("+1 tablas más")]
-  t37[("+12 tablas más")]
-  t44[("+6 tablas más")]
-  t46[("+6 tablas más")]
-  t48[("+6 tablas más")]
-  t50[("+6 tablas más")]
-  t52[("+6 tablas más")]
-  t54[("+6 tablas más")]
-  t56[("+6 tablas más")]
-  t58[("+12 tablas más")]
+  t32[("+2 tablas más")]
+  t37[("+13 tablas más")]
+  t44[("+7 tablas más")]
+  t46[("+7 tablas más")]
+  t48[("+7 tablas más")]
+  t50[("+7 tablas más")]
+  t52[("+7 tablas más")]
+  t54[("+7 tablas más")]
+  t56[("+7 tablas más")]
+  t58[("+13 tablas más")]
   subgraph s0["ctrl:CommunityPublicController · Operaciones de CommunityPublicController que e…"]
     o1["DESCONOCIDO /"]:::op
     o3["DESCONOCIDO /"]:::op
@@ -678,7 +680,7 @@ flowchart LR
     o59["GET /community/profiles/{profileId}/reviews"]:::op
     o60["POST /community/profiles/{profileId}/reviews/{reviewId}/responses"]:::op
   end
-  t66[("+3 tablas más")]
+  t66[("+4 tablas más")]
   subgraph s2["ctrl:CommunitySearchIndexController · Operaciones de CommunitySearchIndexContro…"]
     o63["GET /internal/community/search/health"]:::op
     o65["POST /internal/community/search/reindex"]:::op
@@ -774,56 +776,56 @@ flowchart LR
   o42 -->|"LEE"| t11
   o42 -->|"LEE"| t13
   o42 -->|"LEE"| t29
-  o42 -->|"LEE"| t43
   o42 -->|"LEE"| t30
+  o42 -->|"LEE"| t43
   o42 -.-> t44
   a7 --> o45
   o45 -->|"LEE"| t8
   o45 -->|"LEE"| t11
   o45 -->|"LEE"| t13
   o45 -->|"LEE"| t29
-  o45 -->|"LEE"| t43
   o45 -->|"LEE"| t30
+  o45 -->|"LEE"| t43
   o45 -.-> t46
   a7 --> o47
   o47 -->|"LEE"| t8
   o47 -->|"LEE"| t11
   o47 -->|"LEE"| t13
   o47 -->|"LEE"| t29
-  o47 -->|"LEE"| t43
   o47 -->|"LEE"| t30
+  o47 -->|"LEE"| t43
   o47 -.-> t48
   a7 --> o49
   o49 -->|"LEE"| t8
   o49 -->|"LEE"| t11
   o49 -->|"LEE"| t13
   o49 -->|"LEE"| t29
-  o49 -->|"LEE"| t43
   o49 -->|"LEE"| t30
+  o49 -->|"LEE"| t43
   o49 -.-> t50
   a7 --> o51
   o51 -->|"LEE"| t8
   o51 -->|"LEE"| t11
   o51 -->|"LEE"| t13
   o51 -->|"LEE"| t29
-  o51 -->|"LEE"| t43
   o51 -->|"LEE"| t30
+  o51 -->|"LEE"| t43
   o51 -.-> t52
   a7 --> o53
   o53 -->|"LEE"| t8
   o53 -->|"LEE"| t11
   o53 -->|"LEE"| t13
   o53 -->|"LEE"| t29
-  o53 -->|"LEE"| t43
   o53 -->|"LEE"| t30
+  o53 -->|"LEE"| t43
   o53 -.-> t54
   a7 --> o55
   o55 -->|"LEE"| t8
   o55 -->|"LEE"| t11
   o55 -->|"LEE"| t13
   o55 -->|"LEE"| t29
-  o55 -->|"LEE"| t43
   o55 -->|"LEE"| t30
+  o55 -->|"LEE"| t43
   o55 -.-> t56
   a7 --> o57
   o57 -->|"LEE"| t8
@@ -853,8 +855,8 @@ flowchart LR
   o65 -->|"LEE"| t11
   o65 -->|"LEE"| t13
   o65 -->|"LEE"| t29
-  o65 -->|"LEE"| t43
   o65 -->|"LEE"| t30
+  o65 -->|"LEE"| t43
   o65 -.-> t66
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
@@ -1881,33 +1883,41 @@ flowchart TD
   n15 -->|"al terminar"| n18
   n19[("LEE community.public_profiles")]:::efecto
   n18 --> n19
-  n20["Repite: map(…)"]:::bucle
+  n20["Llama a CommunityMessagingReadService.peerCards"]:::llamada
   n19 --> n20
-  n21["Llama a ConversationsRepository.findLastMessage"]:::llamada
-  n20 -->|"cada elemento"| n21
-  n22[("LEE community.direct_messages")]:::efecto
+  n21["Llama a PractitionerVerificationReader.verificationOf"]:::llamada
+  n20 --> n21
+  n22["Llama a PractitionerAdmissionsRepository.findCurrentByPractitioners"]:::llamada
   n21 --> n22
-  n23["Llama a ConversationsRepository.countUnread"]:::llamada
+  n23[("LEE profiles.practitioner_admissions")]:::efecto
   n22 --> n23
-  n24[("LEE community.direct_messages")]:::efecto
+  n24["Repite: map(…)"]:::bucle
   n23 --> n24
-  n25{"!lastReadMessageId"}:::decision
-  n24 --> n25
+  n25["Llama a ConversationsRepository.findLastMessage"]:::llamada
+  n24 -->|"cada elemento"| n25
   n26[("LEE community.direct_messages")]:::efecto
-  n25 -->|"sí"| n26
-  n27[("LEE community.direct_messages · LEE community.direct_messages")]:::efecto
+  n25 --> n26
+  n27["Llama a ConversationsRepository.countUnread"]:::llamada
   n26 --> n27
-  n25 -->|"no"| n27
-  n28{"!lastRead?.sentAt"}:::decision
+  n28[("LEE community.direct_messages")]:::efecto
   n27 --> n28
-  n29[("LEE community.direct_messages")]:::efecto
-  n28 -->|"sí"| n29
+  n29{"!lastReadMessageId"}:::decision
+  n28 --> n29
   n30[("LEE community.direct_messages")]:::efecto
-  n29 --> n30
-  n28 -->|"no"| n30
-  n31(("200 Responde con éxito")):::ok
+  n29 -->|"sí"| n30
+  n31[("LEE community.direct_messages · LEE community.direct_messages")]:::efecto
   n30 --> n31
-  n20 -->|"al terminar"| n31
+  n29 -->|"no"| n31
+  n32{"!lastRead?.sentAt"}:::decision
+  n31 --> n32
+  n33[("LEE community.direct_messages")]:::efecto
+  n32 -->|"sí"| n33
+  n34[("LEE community.direct_messages")]:::efecto
+  n33 --> n34
+  n32 -->|"no"| n34
+  n35(("200 Responde con éxito")):::ok
+  n34 --> n35
+  n24 -->|"al terminar"| n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2258,8 +2268,18 @@ flowchart TD
   n32 --> n33
   n34[("LEE community.direct_messages")]:::efecto
   n33 --> n34
-  n35(("200 Responde con éxito")):::ok
+  n35["Llama a CommunityMessagingReadService.threadPeers"]:::llamada
   n34 --> n35
+  n36["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n35 --> n36
+  n37[("LEE community.conversation_participants")]:::efecto
+  n36 --> n37
+  n38["Llama a PublicProfilesRepository.listByIds"]:::llamada
+  n37 --> n38
+  n39[("LEE community.public_profiles")]:::efecto
+  n38 --> n39
+  n40(("200 Responde con éxito")):::ok
+  n39 --> n40
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -6632,28 +6652,32 @@ flowchart TD
   n14 --> n15
   n16[("LEE common.addresses")]:::efecto
   n15 --> n16
-  n17["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
+  n17["Llama a PublicSearchRepository.practitionersInReview"]:::llamada
   n16 --> n17
-  n18[("LEE community.social_posts")]:::efecto
+  n18[("LEE profiles.practitioner_admissions")]:::efecto
   n17 --> n18
-  n19["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
+  n19["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
   n18 --> n19
-  n20[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
+  n20[("LEE community.social_posts")]:::efecto
   n19 --> n20
-  n21["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
+  n21["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
   n20 --> n21
-  n22[("LEE profiles.practitioner_affiliations")]:::efecto
+  n22[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
   n21 --> n22
-  n23["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
+  n23["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
   n22 --> n23
-  n24[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n24[("LEE profiles.practitioner_affiliations")]:::efecto
   n23 --> n24
-  n25["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n25["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
   n24 --> n25
-  n26[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27(("200 Responde con éxito")):::ok
+  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n26 --> n27
+  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -6877,54 +6901,58 @@ flowchart TD
   n30 --> n31
   n32[("LEE scheduling.bookable_slots · LEE scheduling.schedulable_resources · LEE scheduling.practitioner_schedules")]:::efecto
   n31 --> n32
-  n33["Llama a SearchIndexService.bulkIndex"]:::llamada
+  n33["Llama a PublicSearchRepository.practitionersInReview"]:::llamada
   n32 --> n33
-  n34["Llama a SearchIndexService.assertTenant"]:::llamada
+  n34[("LEE profiles.practitioner_admissions")]:::efecto
   n33 --> n34
-  n35{"!tenantId"}:::decision
+  n35["Llama a SearchIndexService.bulkIndex"]:::llamada
   n34 --> n35
-  n36(["422 PRECONDITION_FAILED Falta el tenant de contexto para la operación de búsqueda"]):::error
-  n35 -->|"sí"| n36
-  n37["Llama a SearchIndexService.resolveIndex"]:::llamada
-  n35 -->|"no"| n37
-  n38{"!def"}:::decision
-  n37 --> n38
-  n39(["404 NOT_FOUND Índice de búsqueda no reconocido"]):::error
-  n38 -->|"sí"| n39
-  n40["Llama a SearchIndexService.ensureIndex"]:::llamada
-  n38 -->|"no"| n40
-  n41["Llama a SearchIndexService.resolveIndex"]:::llamada
-  n40 --> n41
-  n42{"!def"}:::decision
-  n41 --> n42
-  n43(["404 NOT_FOUND Índice de búsqueda no reconocido"]):::error
-  n42 -->|"sí"| n43
-  n44["Repite: por cada const entry de documents"]:::bucle
-  n42 -->|"no"| n44
-  n45["Llama a SearchIndexService.assertIndexableDocument"]:::llamada
-  n44 -->|"cada elemento"| n45
-  n46{"extra.length › 0"}:::decision
-  n45 --> n46
-  n47(["422 PRECONDITION_FAILED El documento trae campos no declarados para este índice"]):::error
-  n46 -->|"sí"| n47
-  n48["Llama a SearchIndexService.countDocuments"]:::llamada
-  n46 -->|"no"| n48
-  n44 -->|"al terminar"| n48
-  n19 -->|"al terminar"| n48
-  n49["Llama a SearchIndexService.assertTenant"]:::llamada
-  n48 --> n49
-  n50{"!tenantId"}:::decision
-  n49 --> n50
-  n51(["422 PRECONDITION_FAILED Falta el tenant de contexto para la operación de búsqueda"]):::error
-  n50 -->|"sí"| n51
-  n52["Llama a SearchIndexService.resolveIndex"]:::llamada
-  n50 -->|"no"| n52
-  n53{"!def"}:::decision
-  n52 --> n53
-  n54(["404 NOT_FOUND Índice de búsqueda no reconocido"]):::error
-  n53 -->|"sí"| n54
-  n55(("200 Responde con éxito")):::ok
-  n53 -->|"no"| n55
+  n36["Llama a SearchIndexService.assertTenant"]:::llamada
+  n35 --> n36
+  n37{"!tenantId"}:::decision
+  n36 --> n37
+  n38(["422 PRECONDITION_FAILED Falta el tenant de contexto para la operación de búsqueda"]):::error
+  n37 -->|"sí"| n38
+  n39["Llama a SearchIndexService.resolveIndex"]:::llamada
+  n37 -->|"no"| n39
+  n40{"!def"}:::decision
+  n39 --> n40
+  n41(["404 NOT_FOUND Índice de búsqueda no reconocido"]):::error
+  n40 -->|"sí"| n41
+  n42["Llama a SearchIndexService.ensureIndex"]:::llamada
+  n40 -->|"no"| n42
+  n43["Llama a SearchIndexService.resolveIndex"]:::llamada
+  n42 --> n43
+  n44{"!def"}:::decision
+  n43 --> n44
+  n45(["404 NOT_FOUND Índice de búsqueda no reconocido"]):::error
+  n44 -->|"sí"| n45
+  n46["Repite: por cada const entry de documents"]:::bucle
+  n44 -->|"no"| n46
+  n47["Llama a SearchIndexService.assertIndexableDocument"]:::llamada
+  n46 -->|"cada elemento"| n47
+  n48{"extra.length › 0"}:::decision
+  n47 --> n48
+  n49(["422 PRECONDITION_FAILED El documento trae campos no declarados para este índice"]):::error
+  n48 -->|"sí"| n49
+  n50["Llama a SearchIndexService.countDocuments"]:::llamada
+  n48 -->|"no"| n50
+  n46 -->|"al terminar"| n50
+  n19 -->|"al terminar"| n50
+  n51["Llama a SearchIndexService.assertTenant"]:::llamada
+  n50 --> n51
+  n52{"!tenantId"}:::decision
+  n51 --> n52
+  n53(["422 PRECONDITION_FAILED Falta el tenant de contexto para la operación de búsqueda"]):::error
+  n52 -->|"sí"| n53
+  n54["Llama a SearchIndexService.resolveIndex"]:::llamada
+  n52 -->|"no"| n54
+  n55{"!def"}:::decision
+  n54 --> n55
+  n56(["404 NOT_FOUND Índice de búsqueda no reconocido"]):::error
+  n55 -->|"sí"| n56
+  n57(("200 Responde con éxito")):::ok
+  n55 -->|"no"| n57
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7153,28 +7181,32 @@ flowchart TD
   n14 --> n15
   n16[("LEE common.addresses")]:::efecto
   n15 --> n16
-  n17["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
+  n17["Llama a PublicSearchRepository.practitionersInReview"]:::llamada
   n16 --> n17
-  n18[("LEE community.social_posts")]:::efecto
+  n18[("LEE profiles.practitioner_admissions")]:::efecto
   n17 --> n18
-  n19["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
+  n19["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
   n18 --> n19
-  n20[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
+  n20[("LEE community.social_posts")]:::efecto
   n19 --> n20
-  n21["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
+  n21["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
   n20 --> n21
-  n22[("LEE profiles.practitioner_affiliations")]:::efecto
+  n22[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
   n21 --> n22
-  n23["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
+  n23["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
   n22 --> n23
-  n24[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n24[("LEE profiles.practitioner_affiliations")]:::efecto
   n23 --> n24
-  n25["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n25["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
   n24 --> n25
-  n26[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27(("200 Responde con éxito")):::ok
+  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n26 --> n27
+  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7227,28 +7259,32 @@ flowchart TD
   n14 --> n15
   n16[("LEE common.addresses")]:::efecto
   n15 --> n16
-  n17["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
+  n17["Llama a PublicSearchRepository.practitionersInReview"]:::llamada
   n16 --> n17
-  n18[("LEE community.social_posts")]:::efecto
+  n18[("LEE profiles.practitioner_admissions")]:::efecto
   n17 --> n18
-  n19["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
+  n19["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
   n18 --> n19
-  n20[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
+  n20[("LEE community.social_posts")]:::efecto
   n19 --> n20
-  n21["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
+  n21["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
   n20 --> n21
-  n22[("LEE profiles.practitioner_affiliations")]:::efecto
+  n22[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
   n21 --> n22
-  n23["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
+  n23["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
   n22 --> n23
-  n24[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n24[("LEE profiles.practitioner_affiliations")]:::efecto
   n23 --> n24
-  n25["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n25["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
   n24 --> n25
-  n26[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27(("200 Responde con éxito")):::ok
+  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n26 --> n27
+  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7301,28 +7337,32 @@ flowchart TD
   n14 --> n15
   n16[("LEE common.addresses")]:::efecto
   n15 --> n16
-  n17["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
+  n17["Llama a PublicSearchRepository.practitionersInReview"]:::llamada
   n16 --> n17
-  n18[("LEE community.social_posts")]:::efecto
+  n18[("LEE profiles.practitioner_admissions")]:::efecto
   n17 --> n18
-  n19["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
+  n19["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
   n18 --> n19
-  n20[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
+  n20[("LEE community.social_posts")]:::efecto
   n19 --> n20
-  n21["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
+  n21["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
   n20 --> n21
-  n22[("LEE profiles.practitioner_affiliations")]:::efecto
+  n22[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
   n21 --> n22
-  n23["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
+  n23["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
   n22 --> n23
-  n24[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n24[("LEE profiles.practitioner_affiliations")]:::efecto
   n23 --> n24
-  n25["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n25["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
   n24 --> n25
-  n26[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27(("200 Responde con éxito")):::ok
+  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n26 --> n27
+  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7781,10 +7821,14 @@ flowchart TD
   n40 --> n41
   n42[("LEE common.addresses")]:::efecto
   n41 --> n42
-  n43(("200 Responde con éxito")):::ok
-  n29 -->|"no"| n43
-  n27 -->|"al terminar"| n43
+  n43["Llama a PublicSearchRepository.practitionersInReview"]:::llamada
   n42 --> n43
+  n44[("LEE profiles.practitioner_admissions")]:::efecto
+  n43 --> n44
+  n45(("200 Responde con éxito")):::ok
+  n29 -->|"no"| n45
+  n27 -->|"al terminar"| n45
+  n44 --> n45
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -7933,28 +7977,32 @@ flowchart TD
   n16 --> n17
   n18[("LEE common.addresses")]:::efecto
   n17 --> n18
-  n19["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
+  n19["Llama a PublicSearchRepository.practitionersInReview"]:::llamada
   n18 --> n19
-  n20[("LEE community.social_posts")]:::efecto
+  n20[("LEE profiles.practitioner_admissions")]:::efecto
   n19 --> n20
-  n21["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
+  n21["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
   n20 --> n21
-  n22[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
+  n22[("LEE community.social_posts")]:::efecto
   n21 --> n22
-  n23["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
+  n23["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
   n22 --> n23
-  n24[("LEE profiles.practitioner_affiliations")]:::efecto
+  n24[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
   n23 --> n24
-  n25["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
+  n25["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
   n24 --> n25
-  n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n26[("LEE profiles.practitioner_affiliations")]:::efecto
   n25 --> n26
-  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n27["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
   n26 --> n27
-  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n28[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n27 --> n28
-  n29(("200 Responde con éxito")):::ok
+  n29["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n28 --> n29
+  n30[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n29 --> n30
+  n31(("200 Responde con éxito")):::ok
+  n30 --> n31
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -9284,28 +9332,32 @@ flowchart TD
   n14 --> n15
   n16[("LEE common.addresses")]:::efecto
   n15 --> n16
-  n17["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
+  n17["Llama a PublicSearchRepository.practitionersInReview"]:::llamada
   n16 --> n17
-  n18[("LEE community.social_posts")]:::efecto
+  n18[("LEE profiles.practitioner_admissions")]:::efecto
   n17 --> n18
-  n19["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
+  n19["Llama a PublicSearchRepository.listPublicPosts"]:::llamada
   n18 --> n19
-  n20[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
+  n20[("LEE community.social_posts")]:::efecto
   n19 --> n20
-  n21["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
+  n21["Llama a PublicSearchRepository.specialtiesByPractitioner"]:::llamada
   n20 --> n21
-  n22[("LEE profiles.practitioner_affiliations")]:::efecto
+  n22[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts")]:::efecto
   n21 --> n22
-  n23["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
+  n23["Llama a PublicSearchRepository.affiliationsByPractitioner"]:::llamada
   n22 --> n23
-  n24[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
+  n24[("LEE profiles.practitioner_affiliations")]:::efecto
   n23 --> n24
-  n25["Llama a PublicSearchRepository.engagementByPost"]:::llamada
+  n25["Llama a PublicSearchRepository.practiceSitesByPractitioner"]:::llamada
   n24 --> n25
-  n26[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n26[("LEE practice.practitioner_role_assignments · LEE practice.practice_sites · LEE practice.practices · LEE commo…")]:::efecto
   n25 --> n26
-  n27(("200 Responde con éxito")):::ok
+  n27["Llama a PublicSearchRepository.engagementByPost"]:::llamada
   n26 --> n27
+  n28[("LEE community.post_media · LEE community.reactions · LEE community.comments")]:::efecto
+  n27 --> n28
+  n29(("200 Responde con éxito")):::ok
+  n28 --> n29
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

@@ -2,7 +2,7 @@
 
 # Catálogo del schema `practice`
 
-- **Tablas:** 11 · **Columnas:** 160 (42 con descripción: 26.3 %) · **Índices:** 85
+- **Tablas:** 16 · **Columnas:** 249 (52 con descripción: 20.9 %) · **Índices:** 138
 - **Dominio:** Práctica y Agenda
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,23 +10,28 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [care_spaces](#care_spaces) | Cataloga consultorios, salas u otros espacios de cuidado disponibles para prestar atención. | 15 | 8 | 7 | COINCIDE |
-| [clinical_units](#clinical_units) | Representa unidades clínicas que organizan áreas o equipos asistenciales dentro de una práctica o institución. | 14 | 8 | 9 | COINCIDE |
-| [healthcare_services](#healthcare_services) | Define servicios de salud ofrecidos por una práctica para relacionar prestaciones con profesionales, sedes y procesos de atención. | 15 | 8 | 18 | DIVERGE |
+| [care_spaces](#care_spaces) | Cataloga consultorios, salas u otros espacios de cuidado disponibles para prestar atención. | 34 | 18 | 7 | DIVERGE |
+| [clinical_units](#clinical_units) | Representa unidades clínicas que organizan áreas o equipos asistenciales dentro de una práctica o institución. | 19 | 11 | 9 | DIVERGE |
+| [facility_typology_rules](#facility_typology_rules) | Declara qué funciones de espacio admite o exige cada tipología de establecimiento de salud, para validar la infraestructura contra la norma sin reglas escritas en código. | 8 | 4 | 0 | SIN_ENTIDAD |
+| [healthcare_services](#healthcare_services) | Define servicios de salud ofrecidos por una práctica para relacionar prestaciones con profesionales, sedes y procesos de atención. | 16 | 10 | 18 | COINCIDE |
 | [inventory_items](#inventory_items) | Cataloga insumos y bienes administrados por una práctica sanitaria para sostener su operación cotidiana. | 15 | 6 | 3 | COINCIDE |
 | [inventory_movements](#inventory_movements) | Registra entradas, salidas y ajustes de inventario de una práctica para preservar trazabilidad de existencias. | 9 | 4 | 1 | COINCIDE |
 | [practice_accreditations](#practice_accreditations) | Conserva acreditaciones de una práctica sanitaria para documentar reconocimientos o certificaciones institucionales. | 16 | 8 | 3 | COINCIDE |
 | [practice_settings](#practice_settings) | Almacena opciones operativas de una práctica para adaptar su funcionamiento dentro del sistema médico. | 10 | 4 | 3 | COINCIDE |
-| [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 18 | 11 | 85 | DIVERGE |
-| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 8 | 176 | COINCIDE |
-| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 96 | COINCIDE |
+| [practice_sites](#practice_sites) | Identifica ubicaciones donde una práctica presta servicios para vincular agenda, atención y recursos con una sede. | 30 | 21 | 103 | DIVERGE |
+| [practices](#practices) | Representa organizaciones o prácticas prestadoras de servicios de salud y su configuración de operación. | 15 | 9 | 186 | COINCIDE |
+| [practitioner_location_assignments](#practitioner_location_assignments) | Registra en qué espacios atiende cada profesional de una organización, lo que lo ubica para los permisos por ubicación y para la agenda combinada. | 12 | 7 | 0 | SIN_ENTIDAD |
+| [practitioner_role_assignments](#practitioner_role_assignments) | Asigna roles asistenciales a profesionales dentro de una organización o sede para precisar sus responsabilidades operativas. | 20 | 12 | 119 | COINCIDE |
 | [practitioner_support_assignments](#practitioner_support_assignments) | Vincula personal de apoyo con profesionales o ámbitos de práctica para coordinar tareas de atención y gestión. | 13 | 8 | 1 | COINCIDE |
+| [site_declared_capacities](#site_declared_capacities) | Registra la capacidad declarada ante la autoridad sanitaria (camas, consultorios, quirófanos…) para compararla con la capacidad real derivada de los espacios. | 13 | 6 | 0 | SIN_ENTIDAD |
+| [space_form_parent_rules](#space_form_parent_rules) | Define qué forma de espacio físico puede contener a otra (edificio, piso, sala, local, cama…) para mantener coherente el árbol de ubicaciones. | 7 | 3 | 0 | SIN_ENTIDAD |
+| [space_unit_assignments](#space_unit_assignments) | Vincula espacios físicos con unidades organizativas, con vigencia y rol (propietaria, compartida o préstamo), para separar el árbol físico del organizativo. | 12 | 7 | 0 | SIN_ENTIDAD |
 
 ## Diagrama entidad-relación
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 1 — 11 tablas
+### Familia 1 de 1 — 14 tablas
 
 ```mermaid
 erDiagram
@@ -60,6 +65,24 @@ erDiagram
     uuid address_id FK
     uuid managing_tenant_id FK
   }
+  practice_practitioner_location_assignments["practice.practitioner_location_assignments"] {
+    uuid id PK
+    uuid tenant_id FK
+    uuid practitioner_role_assignment_id FK
+    uuid care_space_id FK
+    uuid status_concept_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  practice_space_unit_assignments["practice.space_unit_assignments"] {
+    uuid id PK
+    uuid tenant_id FK
+    uuid care_space_id FK
+    uuid clinical_unit_id FK
+    uuid role_concept_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
   practice_healthcare_services["practice.healthcare_services"] {
     uuid id PK
     uuid practice_id FK
@@ -67,8 +90,8 @@ erDiagram
     uuid clinical_unit_id FK
     uuid service_concept_id FK
     uuid specialty_concept_id FK
+    uuid service_catalog_id FK
     uuid status_concept_id FK
-    uuid created_by_user_id FK
   }
   practice_practitioner_role_assignments["practice.practitioner_role_assignments"] {
     uuid id PK
@@ -97,6 +120,14 @@ erDiagram
     uuid admin_user_id FK
     uuid currency_concept_id FK
     uuid status_concept_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  practice_site_declared_capacities["practice.site_declared_capacities"] {
+    uuid id PK
+    uuid tenant_id FK
+    uuid practice_site_id FK
+    uuid capacity_kind_concept_id FK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
   }
@@ -136,6 +167,10 @@ erDiagram
   practice_care_spaces }o--o| practice_clinical_units : "clinical_unit_id"
   practice_clinical_units }o--|| practice_practice_sites : "practice_site_id"
   practice_practice_sites }o--|| practice_practices : "practice_id"
+  practice_practitioner_location_assignments }o--|| practice_practitioner_role_assignments : "practitioner_role_assignment_…"
+  practice_practitioner_location_assignments }o--|| practice_care_spaces : "care_space_id"
+  practice_space_unit_assignments }o--|| practice_care_spaces : "care_space_id"
+  practice_space_unit_assignments }o--|| practice_clinical_units : "clinical_unit_id"
   practice_healthcare_services }o--|| practice_practices : "practice_id"
   practice_healthcare_services }o--o| practice_practice_sites : "practice_site_id"
   practice_healthcare_services }o--o| practice_clinical_units : "clinical_unit_id"
@@ -145,11 +180,16 @@ erDiagram
   practice_practitioner_role_assignments }o--o| practice_healthcare_services : "healthcare_service_id"
   practice_practice_accreditations }o--|| practice_practices : "practice_id"
   practice_practice_accreditations }o--o| practice_practice_sites : "practice_site_id"
+  practice_site_declared_capacities }o--|| practice_practice_sites : "practice_site_id"
   practice_practitioner_support_assignments }o--|| practice_practitioner_role_assignments : "practitioner_role_assignment_…"
   practice_inventory_items }o--|| practice_practices : "practice_id"
   practice_practice_settings }o--|| practice_practices : "practice_id"
   practice_inventory_movements }o--|| practice_inventory_items : "inventory_item_id"
 ```
+
+### Tablas sin relaciones dentro del schema
+
+`practice.facility_typology_rules` · `practice.space_form_parent_rules`
 
 ## Fichas
 
@@ -162,7 +202,7 @@ Cataloga consultorios, salas u otros espacios de cuidado disponibles para presta
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: care_spaces`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `CareSpaces` — `src/modules/practice/entities/care_spaces.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 8 FK salientes · 12 entrantes · 7 operaciones
+- **Resumen:** 34 columnas · 18 índices · 15 FK salientes · 21 entrantes · 7 operaciones
 
 #### Columnas
 
@@ -183,6 +223,25 @@ Cataloga consultorios, salas u otros espacios de cuidado disponibles para presta
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/care_spaces.entity.ts:100`)_ | coincide |
+| 16 | `prep_minutes` | `integer` | Opcional | + v4.2.49 (ORG-QUI-002, issue #58): minutos de preparacion y de limpieza del espacio (quirofano incluido); misma semantica que scheduling.practitioner_service_offerings. El caso (procedure_cases) puede traer los suyos y gana sobre estos. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:159`)_ | **AUSENTE_EN_ORM** |
+| 17 | `cleanup_minutes` | `integer` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 18 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.67 (infraestructura F1): árbol FÍSICO = FHIR Location. `form_concept_id` es la FORMA (LOC_FORM_*: si/bu/wi/lvl/wa/area/co/ro/bd/vi) y `space_type_concept_id` pasa a significar la FUNCIÓN (SPACE_FN_*). La forma queda NULL en las filas viejas: la API las completa con LOC_FORM_ROOM, porque el id del concepto lo deriva la API. Atributos técnicos (asepsia, presión, renovaciones/h, validación HVAC), restricciones de sexo y edad, categoría de cama, si es censable y el GLN (GS1, 13 dígitos). `tenant_id` NOT NULL desde v4.2.67b; sede, unidad y espacio padre se referencian con FK compuesta (tenant_id, x_id): el padre tiene que ser del mismo tenant. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:164`)_ | **AUSENTE_EN_ORM** |
+| 19 | `form_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 20 | `description` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 21 | `floor_number` | `integer` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 22 | `area_m2` | `numeric(10,2)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 23 | `asepsis_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 24 | `pressure_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 25 | `air_changes_per_hour` | `numeric(6,2)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 26 | `hvac_validated_on` | `date` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 27 | `sex_restriction_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 28 | `age_group_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 29 | `bed_category_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 30 | `censable` | `boolean` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 31 | `gln` | `varchar(13)` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 32 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 33 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 34 | `location_path` | `varchar` | Opcional | + v4.2.75 (jerarquia de ubicaciones): Sede (practice_sites) -> Edificio -> Piso -> Sala/Cama, todo como care_spaces anidados por parent_space_id. La FORMA (edificio, piso, ala, sala, cama) es la de v4.2.67: form_concept_id (LOC_FORM_bu¦lvl¦wi¦ro¦bd); no se agrega una segunda columna de tipo. location_path: ruta MATERIALIZADA de ids desde la sede, '/siteId/buildingId/levelId/roomId/' (termina en '/'); permite 'esta dentro de' con LIKE 'prefijo%' sin recursion. La mantiene la API al crear/mover un espacio. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:188`)_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -196,14 +255,30 @@ Cataloga consultorios, salas u otros espacios de cuidado disponibles para presta
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_care_spaces_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_care_spaces_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_care_spaces_updated_by_user_id |
+| hacia | tenant_id | directory.tenants (id) | fk_care_spaces_tenant_id |
+| hacia | form_concept_id | terminology.catalog_concepts (id) | fk_care_spaces_form_concept_id |
+| hacia | asepsis_concept_id | terminology.catalog_concepts (id) | fk_care_spaces_asepsis_concept_id |
+| hacia | pressure_concept_id | terminology.catalog_concepts (id) | fk_care_spaces_pressure_concept_id |
+| hacia | sex_restriction_concept_id | terminology.catalog_concepts (id) | fk_care_spaces_sex_restriction_concept_id |
+| hacia | age_group_concept_id | terminology.catalog_concepts (id) | fk_care_spaces_age_group_concept_id |
+| hacia | bed_category_concept_id | terminology.catalog_concepts (id) | fk_care_spaces_bed_category_concept_id |
 | desde | id | practice.care_spaces (parent_space_id) | fk_care_spaces_parent_space_id |
+| desde | id | practice.space_unit_assignments (care_space_id) | fk_space_unit_assignments_care_space_id |
+| desde | id | practice.practitioner_location_assignments (care_space_id) | fk_practitioner_location_assignments_care_space_id |
 | desde | id | clinical.procedures (care_space_id) | fk_procedures_care_space_id |
 | desde | id | clinical.encounter_locations (care_space_id) | fk_encounter_locations_care_space_id |
 | desde | id | audit.care_spaces_history (care_space_id) | fk_care_spaces_history_care_space_id |
 | desde | id | diagnostics.specimen_container_events (destination_location_id) | fk_specimen_container_events_destination_location_id |
+| desde | id | diagnostic_units.diagnostic_equipment (care_space_id) | fk_diagnostic_equipment_care_space_id |
+| desde | id | pharmacy_inventory.inventory_locations (care_space_id) | fk_inventory_locations_care_space_id |
 | desde | id | delegated_access.organization_user_assignments (care_space_id) | fk_organization_user_assignments_care_space_id |
+| desde | id | delegated_access.support_scope_grants (care_space_id) | fk_support_scope_grants_care_space_id |
+| desde | id | delegated_access.engagement_request_items (care_space_id) | fk_engagement_request_items_care_space_id |
+| desde | id | delegated_access.effective_support_access (care_space_id) | fk_effective_support_access_care_space_id |
 | desde | id | scheduling.practitioner_schedules (care_space_id) | fk_practitioner_schedules_care_space_id |
 | desde | id | scheduling.availability_slots (care_space_id) | fk_availability_slots_care_space_id |
+| desde | id | scheduling.bookable_slots (care_space_id) | fk_bookable_slots_care_space_id |
+| desde | id | scheduling.appointment_bookings (care_space_id) | fk_appointment_bookings_care_space_id |
 | desde | id | procedures_perioperative.procedure_cases (operating_room_id) | fk_procedure_cases_operating_room_id |
 | desde | id | procedures_perioperative.procedure_case_locations (care_space_id) | fk_procedure_case_locations_care_space_id |
 | desde | id | procedures_perioperative.pacu_stays (care_space_id) | fk_pacu_stays_care_space_id |
@@ -221,6 +296,25 @@ Cataloga consultorios, salas u otros espacios de cuidado disponibles para presta
 | `ix_care_spaces_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_care_spaces_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_spaces_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_care_spaces_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_care_spaces_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_care_spaces_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_spaces_tenant_id` | no | tenant_id | Soporta la clave foránea fk_care_spaces_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_spaces_form_concept_id` | no | form_concept_id | Soporta la clave foránea fk_care_spaces_form_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_spaces_asepsis_concept_id` | no | asepsis_concept_id | Soporta la clave foránea fk_care_spaces_asepsis_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_spaces_pressure_concept_id` | no | pressure_concept_id | Soporta la clave foránea fk_care_spaces_pressure_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_spaces_sex_restriction_concept_id` | no | sex_restriction_concept_id | Soporta la clave foránea fk_care_spaces_sex_restriction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_spaces_age_group_concept_id` | no | age_group_concept_id | Soporta la clave foránea fk_care_spaces_age_group_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_spaces_bed_category_concept_id` | no | bed_category_concept_id | Soporta la clave foránea fk_care_spaces_bed_category_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_care_spaces_site_code` | sí | practice_site_id, code | Garantiza que no se repita la combinación (practice_site_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_care_spaces_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «practice_site_id», la primera columna del índice _(CONSULTA)_ |
+| `ux_care_spaces_tenant_id_id` | sí | tenant_id, id | Garantiza que no se repita la combinación (tenant_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_care_spaces_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_care_spaces_location_path` | no | (location_path varchar_pattern_ops) | _sin uso detectado estáticamente_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_care_spaces_site_code` | UNIQUE INDEX | UNIQUE INDEX ("practice_site_id", "code") |
+| `ux_care_spaces_tenant_id_id` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "id") |
+| `ck_care_spaces_buffers` | CHECK | CHECK ((COALESCE("prep_minutes", 0) >= 0 AND COALESCE("cleanup_minutes", 0) >= 0)) |
+| `ck_care_spaces_location_path` | CHECK | CHECK (("location_path" IS NULL OR "location_path" ~ '^/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/)+$')) |
 
 #### Operaciones que la tocan
 
@@ -257,7 +351,7 @@ Representa unidades clínicas que organizan áreas o equipos asistenciales dentr
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: clinical_units`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `ClinicalUnits` — `src/modules/practice/entities/clinical_units.entity.ts`
-- **Resumen:** 14 columnas · 8 índices · 8 FK salientes · 8 entrantes · 9 operaciones
+- **Resumen:** 19 columnas · 11 índices · 10 FK salientes · 11 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -277,6 +371,11 @@ Representa unidades clínicas que organizan áreas o equipos asistenciales dentr
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/clinical_units.entity.ts:94`)_ | coincide |
+| 15 | `responsible_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | + v4.2.49 (ORG-ARE-002, issue #58): responsable del area. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:131`)_ | **AUSENTE_EN_ORM** |
+| 16 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.67 (infraestructura F1): árbol ORGANIZATIVO (servicio/departamento). `tenant_id` se copia de la sede para el RLS; vigencia de la unidad. NOT NULL desde v4.2.67b, y (tenant_id, practice_site_id) / (tenant_id, parent_unit_id) son FK compuestas al padre del MISMO tenant (patch 2026-10-29_infraestructura_f1b_seguridad.sql). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:133`)_ | **AUSENTE_EN_ORM** |
+| 17 | `description` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 18 | `valid_from` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 19 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -290,13 +389,18 @@ Representa unidades clínicas que organizan áreas o equipos asistenciales dentr
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_clinical_units_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_clinical_units_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_clinical_units_updated_by_user_id |
+| hacia | responsible_user_id | iam.users (id) | fk_clinical_units_responsible_user_id |
+| hacia | tenant_id | directory.tenants (id) | fk_clinical_units_tenant_id |
 | desde | id | practice.clinical_units (parent_unit_id) | fk_clinical_units_parent_unit_id |
 | desde | id | practice.care_spaces (clinical_unit_id) | fk_care_spaces_clinical_unit_id |
+| desde | id | practice.space_unit_assignments (clinical_unit_id) | fk_space_unit_assignments_clinical_unit_id |
 | desde | id | practice.healthcare_services (clinical_unit_id) | fk_healthcare_services_clinical_unit_id |
 | desde | id | practice.practitioner_role_assignments (clinical_unit_id) | fk_practitioner_role_assignments_clinical_unit_id |
 | desde | id | clinical.encounter_locations (clinical_unit_id) | fk_encounter_locations_clinical_unit_id |
 | desde | id | audit.clinical_units_history (clinical_unit_id) | fk_clinical_units_history_clinical_unit_id |
 | desde | id | organization_extensions.hospital_service_lines (clinical_unit_id) | fk_hospital_service_lines_clinical_unit_id |
+| desde | id | organization_extensions.facility_licenses (clinical_unit_id) | fk_facility_licenses_clinical_unit_id |
+| desde | id | pharmacy_inventory.inventory_locations (clinical_unit_id) | fk_inventory_locations_clinical_unit_id |
 | desde | id | delegated_access.organization_user_assignments (clinical_unit_id) | fk_organization_user_assignments_clinical_unit_id |
 
 #### Índices
@@ -311,6 +415,15 @@ Representa unidades clínicas que organizan áreas o equipos asistenciales dentr
 | `ix_clinical_units_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_clinical_units_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_units_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_clinical_units_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_clinical_units_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_clinical_units_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_clinical_units_responsible_user_id` | no | responsible_user_id | Soporta la clave foránea fk_clinical_units_responsible_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_clinical_units_tenant_id` | no | tenant_id | Soporta la clave foránea fk_clinical_units_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_clinical_units_tenant_id_id` | sí | tenant_id, id | Garantiza que no se repita la combinación (tenant_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_clinical_units_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_clinical_units_tenant_id_id` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "id") |
 
 #### Operaciones que la tocan
 
@@ -340,6 +453,67 @@ Representa unidades clínicas que organizan áreas o equipos asistenciales dentr
 
 ---
 
+### facility_typology_rules
+
+#### Vista general
+
+Declara qué funciones de espacio admite o exige cada tipología de establecimiento de salud, para validar la infraestructura contra la norma sin reglas escritas en código.
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: facility_typology_rules`
+- **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 8 columnas · 4 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `typology_concept_id` | `uuid` | Clave primaria; Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `space_function_concept_id` | `uuid` | Clave primaria; Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 3 | `rule_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 8 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | typology_concept_id | terminology.catalog_concepts (id) | fk_facility_typology_rules_typology_concept_id |
+| hacia | space_function_concept_id | terminology.catalog_concepts (id) | fk_facility_typology_rules_space_function_concept_id |
+| hacia | rule_concept_id | terminology.catalog_concepts (id) | fk_facility_typology_rules_rule_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_facility_typology_rules_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_facility_typology_rules_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_facility_typology_rules_space_function_concept_id` | no | space_function_concept_id | Soporta la clave foránea fk_facility_typology_rules_space_function_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_facility_typology_rules_rule_concept_id` | no | rule_concept_id | Soporta la clave foránea fk_facility_typology_rules_rule_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_facility_typology_rules_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_facility_typology_rules_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_facility_typology_rules_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_facility_typology_rules_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### healthcare_services
 
 #### Vista general
@@ -349,7 +523,7 @@ Define servicios de salud ofrecidos por una práctica para relacionar prestacion
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: healthcare_services`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `HealthcareServices` — `src/modules/practice/entities/healthcare_services.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 8 FK salientes · 3 entrantes · 18 operaciones
+- **Resumen:** 16 columnas · 10 índices · 9 FK salientes · 9 entrantes · 18 operaciones
 
 #### Columnas
 
@@ -364,12 +538,13 @@ Define servicios de salud ofrecidos por una práctica para relacionar prestacion
 | 7 | `referral_required` | `boolean` | Opcional | _sin dato_ | coincide |
 | 8 | `appointment_required` | `boolean` | Opcional | _sin dato_ | coincide |
 | 9 | `telehealth_available` | `boolean` | Opcional | _sin dato_ | coincide |
-| 10 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 11 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/healthcare_services.entity.ts:83`)_ | coincide |
-| 12 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/healthcare_services.entity.ts:89`)_ | coincide |
-| 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/healthcare_services.entity.ts:107`)_ | coincide |
+| 10 | `service_catalog_id` | `uuid` | Clave foránea → billing.service_catalog.id; Opcional | + centros medicos (M-04): item de billing.service_catalog que fija el precio de este procedimiento en esta sede. NULL = la sede aun no publico precio (no aparece en la busqueda). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:275`)_ | coincide |
+| 11 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 12 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/healthcare_services.entity.ts:83`)_ | coincide |
+| 13 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/healthcare_services.entity.ts:89`)_ | coincide |
+| 14 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 15 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 16 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/healthcare_services.entity.ts:107`)_ | coincide |
 
 #### Relaciones
 
@@ -380,12 +555,19 @@ Define servicios de salud ofrecidos por una práctica para relacionar prestacion
 | hacia | clinical_unit_id | practice.clinical_units (id) | fk_healthcare_services_clinical_unit_id |
 | hacia | service_concept_id | terminology.catalog_concepts (id) | fk_healthcare_services_service_concept_id |
 | hacia | specialty_concept_id | terminology.catalog_concepts (id) | fk_healthcare_services_specialty_concept_id |
+| hacia | service_catalog_id | billing.service_catalog (id) | fk_healthcare_services_service_catalog_id |
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_healthcare_services_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_healthcare_services_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_healthcare_services_updated_by_user_id |
 | desde | id | practice.practitioner_role_assignments (healthcare_service_id) | fk_practitioner_role_assignments_healthcare_service_id |
 | desde | id | organization_extensions.hospital_service_lines (healthcare_service_id) | fk_hospital_service_lines_healthcare_service_id |
+| desde | id | organization_extensions.facility_licenses (healthcare_service_id) | fk_facility_licenses_healthcare_service_id |
 | desde | id | organization_extensions.organization_affiliations (healthcare_service_id) | fk_organization_affiliations_healthcare_service_id |
+| desde | id | delegated_access.support_scope_grants (healthcare_service_id) | fk_support_scope_grants_healthcare_service_id |
+| desde | id | delegated_access.engagement_request_items (healthcare_service_id) | fk_engagement_request_items_healthcare_service_id |
+| desde | id | delegated_access.effective_support_access (healthcare_service_id) | fk_effective_support_access_healthcare_service_id |
+| desde | id | scheduling.bookable_slots (healthcare_service_id) | fk_bookable_slots_healthcare_service_id |
+| desde | id | scheduling.appointment_bookings (healthcare_service_id) | fk_appointment_bookings_healthcare_service_id |
 
 #### Índices
 
@@ -397,8 +579,16 @@ Define servicios de salud ofrecidos por una práctica para relacionar prestacion
 | `ix_healthcare_services_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_healthcare_services_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «service_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_healthcare_services_specialty_concept_id` | no | specialty_concept_id | Soporta la clave foránea fk_healthcare_services_specialty_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_healthcare_services_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_healthcare_services_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_healthcare_services_service_catalog_id` | no | service_catalog_id | Soporta la clave foránea fk_healthcare_services_service_catalog_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «service_catalog_id», la primera columna del índice _(CONSULTA)_ |
+| `ux_healthcare_services_site_service` | sí | practice_site_id, service_concept_id | Garantiza que no se repita la combinación (practice_site_id, service_concept_id) _(DOCUMENTO)_; Soporta la clave foránea fk_healthcare_services_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «practice_site_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_healthcare_services_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_healthcare_services_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_healthcare_services_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_healthcare_services_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_healthcare_services_site_service` | UNIQUE INDEX | UNIQUE INDEX ("practice_site_id", "service_concept_id") |
 
 #### Operaciones que la tocan
 
@@ -730,7 +920,7 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practice_sites`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PracticeSites` — `src/modules/practice/entities/practice_sites.entity.ts`
-- **Resumen:** 18 columnas · 11 índices · 11 FK salientes · 19 entrantes · 85 operaciones
+- **Resumen:** 30 columnas · 21 índices · 18 FK salientes · 25 entrantes · 103 operaciones
 
 #### Columnas
 
@@ -748,12 +938,24 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | 10 | `address_id` | `uuid` | Clave foránea → common.addresses.id; Opcional | _sin dato_ | coincide |
 | 11 | `managing_tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Opcional | _sin dato_ | coincide |
 | 12 | `bank_qr_file_id` | `uuid` | Clave foránea → common.files.id; Opcional | Archivo del QR de cobro bancario de la sede, en `common.files`. Nulo si la sede no cobra por QR. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practice_sites.entity.ts:87`)_ | coincide |
-| 13 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
-| 14 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:105`)_ | coincide |
-| 15 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:111`)_ | coincide |
-| 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practice_sites.entity.ts:129`)_ | coincide |
+| 13 | `logo_file_id` | `uuid` | Clave foránea → common.files.id; Opcional | + v4.2.64 — logo del consultorio que sale en el membrete de sus PDF. Mismo camino que `bank_qr_file_id`: el binario vive en `common.files` y acá queda solo su id. Nullable: no toda sede tiene logo, y no hay uno por defecto que inventar. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:86`)_ | coincide |
+| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | coincide |
+| 15 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:105`)_ | coincide |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/practice/entities/practice_sites.entity.ts:111`)_ | coincide |
+| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 19 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/practice/entities/practice_sites.entity.ts:129`)_ | coincide |
+| 20 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | + v4.2.67 (infraestructura hospitalaria F1): la sede es el ESTABLECIMIENTO regulado (Organization + Location "facility" de IHE mCSD). `tenant_id` se copia de practices.tenant_id para que el RLS la cubra. Datos regulatorios de Bolivia: código SNIS/SUIS, subsector, nivel de atención, tipología, ente gestor, red y SEDES. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:96`)_ | **AUSENTE_EN_ORM** |
+| 21 | `snis_code` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 22 | `subsector_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 23 | `care_level_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 24 | `facility_typology_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 25 | `managing_entity_name` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 26 | `health_network_name` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 27 | `sedes_department_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 28 | `municipality_name` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 29 | `snis_verified_at` | `timestamptz` | Opcional | + v4.2.67b (seguridad): el código SNIS sólo reserva unicidad GLOBAL una vez que la plataforma lo verificó (SECURITY_ADMIN/SUPERADMIN). Sin verificar, dos tenants pueden declarar el mismo código: así nadie lo «ocupa» ni lo usa de oráculo entre tenants. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:109`)_ | **AUSENTE_EN_ORM** |
+| 30 | `snis_verified_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -767,16 +969,26 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | hacia | address_id | common.addresses (id) | fk_practice_sites_address_id |
 | hacia | managing_tenant_id | directory.tenants (id) | fk_practice_sites_managing_tenant_id |
 | hacia | bank_qr_file_id | common.files (id) | fk_practice_sites_bank_qr_file_id |
+| hacia | logo_file_id | common.files (id) | fk_practice_sites_logo_file_id |
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_practice_sites_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_practice_sites_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_practice_sites_updated_by_user_id |
+| hacia | tenant_id | directory.tenants (id) | fk_practice_sites_tenant_id |
+| hacia | subsector_concept_id | terminology.catalog_concepts (id) | fk_practice_sites_subsector_concept_id |
+| hacia | care_level_concept_id | terminology.catalog_concepts (id) | fk_practice_sites_care_level_concept_id |
+| hacia | facility_typology_concept_id | terminology.catalog_concepts (id) | fk_practice_sites_facility_typology_concept_id |
+| hacia | sedes_department_concept_id | terminology.catalog_concepts (id) | fk_practice_sites_sedes_department_concept_id |
+| hacia | snis_verified_by_user_id | iam.users (id) | fk_practice_sites_snis_verified_by_user_id |
 | desde | id | practice.clinical_units (practice_site_id) | fk_clinical_units_practice_site_id |
 | desde | id | practice.care_spaces (practice_site_id) | fk_care_spaces_practice_site_id |
+| desde | id | practice.site_declared_capacities (practice_site_id) | fk_site_declared_capacities_practice_site_id |
 | desde | id | practice.healthcare_services (practice_site_id) | fk_healthcare_services_practice_site_id |
 | desde | id | practice.practitioner_role_assignments (practice_site_id) | fk_practitioner_role_assignments_practice_site_id |
 | desde | id | practice.practice_accreditations (practice_site_id) | fk_practice_accreditations_practice_site_id |
 | desde | id | profiles.practitioner_affiliations (practice_site_id) | fk_practitioner_affiliations_practice_site_id |
+| desde | id | clinical.service_requests (suggested_practice_site_id) | fk_service_requests_suggested_practice_site_id |
 | desde | id | clinical.procedures (practice_site_id) | fk_procedures_practice_site_id |
+| desde | id | clinical.received_services (practice_site_id) | fk_received_services_practice_site_id |
 | desde | id | clinical.encounter_locations (practice_site_id) | fk_encounter_locations_practice_site_id |
 | desde | id | audit.practice_sites_history (practice_site_id) | fk_practice_sites_history_practice_site_id |
 | desde | id | diagnostics.specimen_collection_events (collection_site_id) | fk_specimen_collection_events_collection_site_id |
@@ -785,8 +997,11 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | desde | id | organization_extensions.organization_affiliations (host_practice_site_id) | fk_organization_affiliations_host_practice_site_id |
 | desde | id | diagnostic_units.diagnostic_units (primary_practice_site_id) | fk_diagnostic_units_primary_practice_site_id |
 | desde | id | diagnostic_units.diagnostic_unit_sites (practice_site_id) | fk_diagnostic_unit_sites_practice_site_id |
+| desde | id | pharmacy.pharmacies (primary_practice_site_id) | fk_pharmacies_primary_practice_site_id |
 | desde | id | pharmacy.pharmacy_sites (practice_site_id) | fk_pharmacy_sites_practice_site_id |
 | desde | id | delegated_access.organization_user_assignments (practice_site_id) | fk_organization_user_assignments_practice_site_id |
+| desde | id | delegated_access.support_scope_grants (practice_site_id) | fk_support_scope_grants_practice_site_id |
+| desde | id | delegated_access.engagement_request_items (practice_site_id) | fk_engagement_request_items_practice_site_id |
 | desde | id | payments.cashier_payment_contexts (site_id) | fk_cashier_payment_contexts_site_id |
 | desde | id | procedures_perioperative.procedure_cases (practice_site_id) | fk_procedure_cases_practice_site_id |
 
@@ -805,6 +1020,23 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | `ix_practice_sites_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practice_sites_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practice_sites_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practice_sites_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practice_sites_bank_qr_file_id` | no | bank_qr_file_id | Soporta la clave foránea fk_practice_sites_bank_qr_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practice_sites_logo_file_id` | no | logo_file_id | Soporta la clave foránea fk_practice_sites_logo_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practice_sites_tenant_id` | no | tenant_id | Soporta la clave foránea fk_practice_sites_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practice_sites_subsector_concept_id` | no | subsector_concept_id | Soporta la clave foránea fk_practice_sites_subsector_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practice_sites_care_level_concept_id` | no | care_level_concept_id | Soporta la clave foránea fk_practice_sites_care_level_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practice_sites_facility_typology_concept_id` | no | facility_typology_concept_id | Soporta la clave foránea fk_practice_sites_facility_typology_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practice_sites_sedes_department_concept_id` | no | sedes_department_concept_id | Soporta la clave foránea fk_practice_sites_sedes_department_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_practice_sites_snis_code` | sí | snis_code donde WHERE snis_code IS NOT NULL AND snis_verified_at IS NOT NULL | Garantiza que no se repita la combinación (snis_code) _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE snis_code IS NOT NULL AND snis_verified_at IS NOT NULL _(ESTRUCTURAL)_ |
+| `ix_practice_sites_tenant_id_snis_code` | no | tenant_id, snis_code | Soporta la clave foránea fk_practice_sites_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practice_sites_snis_verified_by_user_id` | no | snis_verified_by_user_id | Soporta la clave foránea fk_practice_sites_snis_verified_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_practice_sites_tenant_id_id` | sí | tenant_id, id | Garantiza que no se repita la combinación (tenant_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_practice_sites_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_practice_sites_snis_code` | UNIQUE INDEX | UNIQUE INDEX ("snis_code") WHERE snis_code IS NOT NULL AND snis_verified_at IS NOT NULL |
+| `ux_practice_sites_tenant_id_id` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "id") |
 
 #### Operaciones que la tocan
 
@@ -880,7 +1112,25 @@ Identifica ubicaciones donde una práctica presta servicios para vincular agenda
 | POST /tenants/{tenantId}/practices | CREA | DIRECTA |
 | POST /tenants/{tenantId}/practices | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| GET /admissions | LEE | DIRECTA |
+| GET /admissions/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/claim | LEE | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| GET /admissions/{id}/documents/{fileId}/content | LEE | DIRECTA |
+| POST /admissions/{id}/documents/{fileId}/download-url | LEE | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | LEE | DIRECTA |
+| POST /admissions/{id}/reassign | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/release | LEE | DIRECTA |
+| POST /admissions/{id}/request-info | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/search | LEE | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| POST /profiles/practitioners | LEE | DIRECTA |
 | POST /profiles/practitioners/{profileId}/affiliations | LEE | DIRECTA |
+| GET /profiles/practitioners/me/admission | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | POST /profiles/practitioners/me/affiliations | LEE | DIRECTA |
 | GET /tenants/{tenantId}/practitioner-requests | LEE | DIRECTA |
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | LEE | DIRECTA |
@@ -919,7 +1169,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practices`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `Practices` — `src/modules/practice/entities/practices.entity.ts`
-- **Resumen:** 15 columnas · 8 índices · 7 FK salientes · 50 entrantes · 176 operaciones
+- **Resumen:** 15 columnas · 9 índices · 7 FK salientes · 54 entrantes · 186 operaciones
 
 #### Columnas
 
@@ -972,6 +1222,9 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | desde | id | accounting.assets (practice_id) | fk_assets_practice_id |
 | desde | id | accounting.liabilities (practice_id) | fk_liabilities_practice_id |
 | desde | id | accounting.infrastructure_items (practice_id) | fk_infrastructure_items_practice_id |
+| desde | id | accounting.practitioner_simple_accounts (practice_id) | fk_practitioner_simple_accounts_practice_id |
+| desde | id | accounting.practitioner_simple_records (practice_id) | fk_practitioner_simple_records_practice_id |
+| desde | id | accounting.practitioner_simple_transactions (practice_id) | fk_practitioner_simple_transactions_practice_id |
 | desde | id | billing.service_catalog (practice_id) | fk_service_catalog_practice_id |
 | desde | id | billing.invoices (practice_id) | fk_invoices_practice_id |
 | desde | id | billing.payments_received (practice_id) | fk_payments_received_practice_id |
@@ -979,6 +1232,7 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | desde | id | billing.vendors (practice_id) | fk_vendors_practice_id |
 | desde | id | billing.bills (practice_id) | fk_bills_practice_id |
 | desde | id | billing.payments_made (practice_id) | fk_payments_made_practice_id |
+| desde | id | billing.siat_simulated_invoices (practice_id) | fk_siat_simulated_invoices_practice_id |
 | desde | id | billing.tax_codes (practice_id) | fk_tax_codes_practice_id |
 | desde | id | billing.tax_periods (practice_id) | fk_tax_periods_practice_id |
 | desde | id | billing.budgets (practice_id) | fk_budgets_practice_id |
@@ -1007,14 +1261,21 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_practices_tenant_id` | no | tenant_id | Soporta la clave foránea fk_practices_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practices_tenant_id` | no | tenant_id | Soporta la clave foránea fk_practices_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practices_type_concept_id` | no | type_concept_id | Soporta la clave foránea fk_practices_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practices_admin_user_id` | no | admin_user_id | Soporta la clave foránea fk_practices_admin_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «admin_user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practices_currency_concept_id` | no | currency_concept_id | Soporta la clave foránea fk_practices_currency_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_practices_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practices_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practices_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practices_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practices_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practices_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practices_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practices_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_practices_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
+| `ux_practices_tenant_id_id` | sí | tenant_id, id | Garantiza que no se repita la combinación (tenant_id, id) _(DOCUMENTO)_; Soporta la clave foránea fk_practices_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_practices_tenant_id_id` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "id") |
 
 #### Operaciones que la tocan
 
@@ -1060,17 +1321,27 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 | PATCH /accounting/practitioner/liabilities/{id}/automation | LEE | DIRECTA |
 | POST /accounting/practitioner/liabilities/{id}/progress | LEE | DIRECTA |
 | GET /accounting/practitioner/liabilities/{id}/schedule | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/accounts | LEE | DIRECTA |
 | POST /accounting/practitioner/simple/accounts | LEE | DIRECTA |
 | DELETE /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
 | PUT /accounting/practitioner/simple/accounts/{id} | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/records | LEE | DIRECTA |
 | POST /accounting/practitioner/simple/records | LEE | DIRECTA |
 | DELETE /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
 | PUT /accounting/practitioner/simple/records/{id} | LEE | DIRECTA |
 | GET /accounting/practitioner/simple/summary | LEE | DIRECTA |
+| GET /accounting/practitioner/simple/transactions | LEE | DIRECTA |
 | POST /accounting/practitioner/simple/transactions | LEE | DIRECTA |
 | DELETE /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
 | PUT /accounting/practitioner/simple/transactions/{id} | LEE | DIRECTA |
 | GET /accounting/trial-balance | LEE | DIRECTA |
+| GET /admin/catalogs/services | LEE | DIRECTA |
+| POST /admin/catalogs/services | LEE | DIRECTA |
+| GET /admin/catalogs/services/{id} | LEE | DIRECTA |
+| PATCH /admin/catalogs/services/{id} | LEE | DIRECTA |
+| POST /admin/catalogs/services/{id}/deactivate | LEE | DIRECTA |
+| POST /admin/catalogs/services/{id}/reactivate | LEE | DIRECTA |
+| GET /admin/catalogs/services/scopes | LEE | DIRECTA |
 | POST /billing/internal/dunning-runs/run-due | LEE | DIRECTA |
 | GET /billing/invoices | LEE | DIRECTA |
 | GET /billing/invoices/{id} | LEE | DIRECTA |
@@ -1211,6 +1482,82 @@ Representa organizaciones o prácticas prestadoras de servicios de salud y su co
 
 ---
 
+### practitioner_location_assignments
+
+#### Vista general
+
+Registra en qué espacios atiende cada profesional de una organización, lo que lo ubica para los permisos por ubicación y para la agenda combinada.
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practitioner_location_assignments`
+- **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 12 columnas · 7 índices · 6 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | v4.2.76 (hardening): tenant_id = tenant del profesional y del espacio (trigger integrity.trg_support_tenant_consistency). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_14_practice.puml:635`)_ | **SIN_ENTIDAD** |
+| 3 | `practitioner_role_assignment_id` | `uuid` | Clave foránea → practice.practitioner_role_assignments.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `valid_from` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `valid_to` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 12 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | practitioner_role_assignment_id | practice.practitioner_role_assignments (id) | fk_practitioner_location_assignments_practitioner_role_7cd3d7ce |
+| hacia | care_space_id | practice.care_spaces (id) | fk_practitioner_location_assignments_care_space_id |
+| hacia | tenant_id | directory.tenants (id) | fk_practitioner_location_assignments_tenant_id |
+| hacia | status_concept_id | terminology.catalog_concepts (id) | fk_practitioner_location_assignments_status_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_practitioner_location_assignments_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_practitioner_location_assignments_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_practitioner_location_assignments_tenant_id` | no | tenant_id, status_concept_id | Soporta la clave foránea fk_practitioner_location_assignments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_location_assignments_practitioner_role_a_id` | no | practitioner_role_assignment_id | Soporta la clave foránea fk_practitioner_location_assignments_practitioner_role_7cd3d7ce: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_location_assignments_care_space_id` | no | care_space_id | Soporta la clave foránea fk_practitioner_location_assignments_care_space_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_location_assignments_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_practitioner_location_assignments_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_practitioner_location_assignments_current` | sí | practitioner_role_assignment_id, care_space_id donde WHERE valid_to IS NULL | Garantiza que no se repita la combinación (practitioner_role_assignment_id, care_space_id) _(DOCUMENTO)_; Soporta la clave foránea fk_practitioner_location_assignments_practitioner_role_7cd3d7ce: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE valid_to IS NULL _(ESTRUCTURAL)_ |
+| `ix_practitioner_location_assignments_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_practitioner_location_assignments_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_practitioner_location_assignments_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_practitioner_location_assignments_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_practitioner_location_assignments_current` | UNIQUE INDEX | UNIQUE INDEX ("practitioner_role_assignment_id", "care_space_id") WHERE valid_to IS NULL |
+| `ck_practitioner_location_assignments_period` | CHECK | CHECK (("valid_from" IS NULL OR "valid_to" IS NULL OR "valid_from" <= "valid_to")) |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### practitioner_role_assignments
 
 #### Vista general
@@ -1220,7 +1567,7 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: practitioner_role_assignments`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
 - **Entidad del ORM:** `PractitionerRoleAssignments` — `src/modules/practice/entities/practitioner_role_assignments.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 7 entrantes · 96 operaciones
+- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 11 entrantes · 119 operaciones
 
 #### Columnas
 
@@ -1263,18 +1610,22 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | hacia | created_by_user_id | iam.users (id) | fk_practitioner_role_assignments_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_practitioner_role_assignments_updated_by_user_id |
 | desde | id | practice.practitioner_support_assignments (practitioner_role_assignment_id) | fk_practitioner_support_assignments_practitioner_role__75362a27 |
+| desde | id | practice.practitioner_location_assignments (practitioner_role_assignment_id) | fk_practitioner_location_assignments_practitioner_role_7cd3d7ce |
 | desde | id | clinical.encounter_participants (practitioner_role_assignment_id) | fk_encounter_participants_practitioner_role_assignment_id |
 | desde | id | audit.practitioner_role_assignments_history (practitioner_role_assignment_id) | fk_practitioner_role_assignments_history_practitioner__baff3e62 |
 | desde | id | community.party_ratings (verified_role_assignment_id) | fk_party_ratings_verified_role_assignment_id |
 | desde | id | diagnostic_units.diagnostic_unit_practitioner_assignments (practitioner_role_assignment_id) | fk_diagnostic_unit_practitioner_assignments_practition_d05600aa |
 | desde | id | insurance.network_provider_memberships (practitioner_role_assignment_id) | fk_network_provider_memberships_practitioner_role_assignment_id |
 | desde | id | delegated_access.practitioner_delegate_assignments (practitioner_role_assignment_id) | fk_practitioner_delegate_assignments_practitioner_role_7e0ebecf |
+| desde | id | delegated_access.support_scope_grants (practitioner_role_assignment_id) | fk_support_scope_grants_practitioner_role_assignment_id |
+| desde | id | delegated_access.engagement_request_items (practitioner_role_assignment_id) | fk_engagement_request_items_practitioner_role_assignment_id |
+| desde | id | delegated_access.effective_support_access (practitioner_role_assignment_id) | fk_effective_support_access_practitioner_role_assignment_id |
 
 #### Índices
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_practitioner_role_assignments_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_practitioner_role_assignments_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_practitioner_role_assignments_practitioner_profile_id` | no | practitioner_profile_id | Soporta la clave foránea fk_practitioner_role_assignments_practitioner_profile_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 9 consulta(s) de repositorio filtran u ordenan por «practitioner_profile_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practitioner_role_assignments_practice_id` | no | practice_id | Soporta la clave foránea fk_practitioner_role_assignments_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practitioner_role_assignments_practice_site_id` | no | practice_site_id | Soporta la clave foránea fk_practitioner_role_assignments_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «practice_site_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_practitioner_role_assignments_clinical_unit_id` | no | clinical_unit_id | Soporta la clave foránea fk_practitioner_role_assignments_clinical_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1347,7 +1698,12 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | POST /practitioner-delegates | LEE | DIRECTA |
 | GET /diagnostic-units/{id}/administration | LEE | DIRECTA |
 | POST /iam/auth/register-practitioner | CREA | DIRECTA |
+| POST /iam/auth/register-practitioner | LEE | DIRECTA |
 | POST /iam/users/assisted-practitioner-registration | CREA | DIRECTA |
+| POST /iam/users/assisted-practitioner-registration | LEE | DIRECTA |
+| POST /identity/checks/{id}/results | LEE | DIRECTA |
+| POST /identity/manual-review/{id}/decision | LEE | DIRECTA |
+| POST /internal/identity/checks/{id}/results | LEE | DIRECTA |
 | GET /practitioners/{profileId}/insurance-networks | LEE | POR_SQL |
 | GET /medical-centers/search/for-my-orders | LEE | DIRECTA |
 | POST /medical-groups | LEE | DIRECTA |
@@ -1382,6 +1738,24 @@ Asigna roles asistenciales a profesionales dentro de una organización o sede pa
 | POST /role-assignments/{roleId}/support-assignments | LEE | DIRECTA |
 | POST /role-assignments/{roleId}/suspend | LEE | DIRECTA |
 | POST /procedure-cases/{id}/preoperative-orders | LEE | DIRECTA |
+| GET /admissions | LEE | DIRECTA |
+| GET /admissions/{id} | LEE | DIRECTA |
+| POST /admissions/{id}/claim | LEE | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| GET /admissions/{id}/documents/{fileId}/content | LEE | DIRECTA |
+| POST /admissions/{id}/documents/{fileId}/download-url | LEE | DIRECTA |
+| POST /admissions/{id}/items/{itemId}/review | LEE | DIRECTA |
+| POST /admissions/{id}/reassign | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
+| POST /admissions/{id}/release | LEE | DIRECTA |
+| POST /admissions/{id}/request-info | LEE | DIRECTA |
+| POST /admissions/{id}/suspend | LEE | DIRECTA |
+| POST /admissions/search | LEE | DIRECTA |
+| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| POST /profiles/practitioners | LEE | DIRECTA |
+| GET /profiles/practitioners/me/admission | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/resubmit | LEE | DIRECTA |
+| POST /profiles/practitioners/me/admission/withdraw | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
 | GET /quotations/{id} | LEE | DIRECTA |
@@ -1461,6 +1835,207 @@ Vincula personal de apoyo con profesionales o ámbitos de práctica para coordin
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /role-assignments/{roleId}/support-assignments | CREA | DIRECTA |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### site_declared_capacities
+
+#### Vista general
+
+Registra la capacidad declarada ante la autoridad sanitaria (camas, consultorios, quirófanos…) para compararla con la capacidad real derivada de los espacios.
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: site_declared_capacities`
+- **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 13 columnas · 6 índices · 5 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 3 | `practice_site_id` | `uuid` | Clave foránea → practice.practice_sites.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `capacity_kind_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `quantity` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `as_of` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `resolution_number` | `varchar` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 8 | `valid_to` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 9 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 10 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 13 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | practice_site_id | practice.practice_sites (id) | fk_site_declared_capacities_practice_site_id |
+| hacia | tenant_id | directory.tenants (id) | fk_site_declared_capacities_tenant_id |
+| hacia | capacity_kind_concept_id | terminology.catalog_concepts (id) | fk_site_declared_capacities_capacity_kind_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_site_declared_capacities_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_site_declared_capacities_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_site_declared_capacities_tenant_id` | no | tenant_id | Soporta la clave foránea fk_site_declared_capacities_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_site_declared_capacities_practice_site_id` | no | practice_site_id | Soporta la clave foránea fk_site_declared_capacities_practice_site_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_site_declared_capacities_capacity_kind_concept_id` | no | capacity_kind_concept_id | Soporta la clave foránea fk_site_declared_capacities_capacity_kind_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_site_declared_capacities_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_site_declared_capacities_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_site_declared_capacities_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_site_declared_capacities_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_site_declared_capacities_site_kind_as_of` | no | practice_site_id, capacity_kind_concept_id, ("as_of" DESC) | _sin uso detectado estáticamente_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### space_form_parent_rules
+
+#### Vista general
+
+Define qué forma de espacio físico puede contener a otra (edificio, piso, sala, local, cama…) para mantener coherente el árbol de ubicaciones.
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: space_form_parent_rules`
+- **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 7 columnas · 3 índices · 4 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `parent_form_concept_id` | `uuid` | Clave primaria; Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `child_form_concept_id` | `uuid` | Clave primaria; Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 3 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | parent_form_concept_id | terminology.catalog_concepts (id) | fk_space_form_parent_rules_parent_form_concept_id |
+| hacia | child_form_concept_id | terminology.catalog_concepts (id) | fk_space_form_parent_rules_child_form_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_space_form_parent_rules_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_space_form_parent_rules_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_space_form_parent_rules_child_form_concept_id` | no | child_form_concept_id | Soporta la clave foránea fk_space_form_parent_rules_child_form_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_form_parent_rules_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_space_form_parent_rules_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_form_parent_rules_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_space_form_parent_rules_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### space_unit_assignments
+
+#### Vista general
+
+Vincula espacios físicos con unidades organizativas, con vigencia y rol (propietaria, compartida o préstamo), para separar el árbol físico del organizativo.
+
+- **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_14_practice.puml: space_unit_assignments`
+- **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_14_practice.puml` · **DDL:** `SQL/14_practice/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 12 columnas · 7 índices · 6 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `tenant_id` | `uuid` | Clave foránea → directory.tenants.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 3 | `care_space_id` | `uuid` | Clave foránea → practice.care_spaces.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `clinical_unit_id` | `uuid` | Clave foránea → practice.clinical_units.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `role_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `valid_from` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `valid_to` | `timestamptz` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 12 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | care_space_id | practice.care_spaces (id) | fk_space_unit_assignments_care_space_id |
+| hacia | clinical_unit_id | practice.clinical_units (id) | fk_space_unit_assignments_clinical_unit_id |
+| hacia | tenant_id | directory.tenants (id) | fk_space_unit_assignments_tenant_id |
+| hacia | role_concept_id | terminology.catalog_concepts (id) | fk_space_unit_assignments_role_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_space_unit_assignments_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_space_unit_assignments_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_space_unit_assignments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_space_unit_assignments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_unit_assignments_care_space_id` | no | care_space_id | Soporta la clave foránea fk_space_unit_assignments_care_space_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_unit_assignments_clinical_unit_id` | no | clinical_unit_id | Soporta la clave foránea fk_space_unit_assignments_clinical_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_unit_assignments_role_concept_id` | no | role_concept_id | Soporta la clave foránea fk_space_unit_assignments_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_unit_assignments_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_space_unit_assignments_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_space_unit_assignments_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_space_unit_assignments_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ux_space_unit_assignments_current` | sí | care_space_id, clinical_unit_id donde WHERE valid_to IS NULL | Garantiza que no se repita la combinación (care_space_id, clinical_unit_id) _(DOCUMENTO)_; Soporta la clave foránea fk_space_unit_assignments_care_space_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE valid_to IS NULL _(ESTRUCTURAL)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_space_unit_assignments_current` | UNIQUE INDEX | UNIQUE INDEX ("care_space_id", "clinical_unit_id") WHERE valid_to IS NULL |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
 
 #### Gobierno
 

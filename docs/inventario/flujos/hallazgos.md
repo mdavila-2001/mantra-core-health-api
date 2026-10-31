@@ -7,15 +7,15 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | ID | Severidad | Hallazgo | Cuenta |
 |---|---|---|---|
 | [FLU-01](#flu-01) | ALTA | Operaciones sin proceso asignado | 0 |
-| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 153 |
+| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 155 |
 | [FLU-03](#flu-03) | ALTA | Ruta pública que escribe en la base | 18 |
-| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 134 |
+| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 142 |
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
 | [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 4 |
-| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1131 |
-| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 9 |
+| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1213 |
+| [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 91 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 0 |
-| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 113 |
+| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 129 |
 
 ## FLU-01
 
@@ -27,14 +27,14 @@ _Ninguno._
 
 ## FLU-02
 
-**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 153 caso(s).
+**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 155 caso(s).
 
 **Qué hacer:** Confirmar que la regla de acceso vive en el servicio o declarar los roles en el controlador. Hoy la API no las distingue de una sesión cualquiera.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
-| GET /audio-assets/{assetId}/content | audio_assets | escribe y el controlador no declara roles | `src/modules/audio_assets/controllers/audio-assets.controller.ts:44` |
-| POST /audio-assets/resolve | audio_assets | escribe y el controlador no declara roles | `src/modules/audio_assets/controllers/audio-assets.controller.ts:28` |
+| GET /audio-assets/{assetId}/content | audio_assets | escribe y el controlador no declara roles | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48` |
+| POST /audio-assets/resolve | audio_assets | escribe y el controlador no declara roles | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32` |
 | POST /billing/simulated/charges/{chargeId}/invoices | billing | escribe y el controlador no declara roles | `src/modules/billing/controllers/billing-simulated.controller.ts:101` |
 | POST /billing/simulated/charges/{chargeId}/payment | billing | escribe y el controlador no declara roles | `src/modules/billing/controllers/billing-simulated.controller.ts:61` |
 | POST /billing/simulated/invoices/{invoiceId}/annulment | billing | escribe y el controlador no declara roles | `src/modules/billing/controllers/billing-simulated.controller.ts:130` |
@@ -161,6 +161,8 @@ _Ninguno._
 | PUT /profiles/practitioners/{profileId}/photo | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308` |
 | POST /profiles/practitioners/{profileId}/specialties | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646` |
 | PATCH /profiles/practitioners/me | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:237` |
+| POST /profiles/practitioners/me/admission/resubmit | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:56` |
+| POST /profiles/practitioners/me/admission/withdraw | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:78` |
 | POST /profiles/practitioners/me/affiliations | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:457` |
 | DELETE /profiles/practitioners/me/affiliations/{affiliationId} | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508` |
 | PATCH /profiles/practitioners/me/affiliations/{affiliationId} | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482` |
@@ -177,14 +179,14 @@ _Ninguno._
 | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/tenant-practitioner-requests.controller.ts:118` |
 | PUT /views/{frontendPageViewId}/preferences | read_models | escribe y el controlador no declara roles | `src/modules/read_models/controllers/frontend-views.controller.ts:139` |
 | POST /surveys/me/invitations/{id}/responses | surveys | escribe y el controlador no declara roles | `src/modules/surveys/controllers/surveys-patient.controller.ts:61` |
-| POST /telemetry/activity-events | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/controllers/telemetry-events.controller.ts:45` |
-| POST /telemetry/client-contexts | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/controllers/telemetry-events.controller.ts:62` |
-| POST /telemetry/conversion-events | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/controllers/telemetry-events.controller.ts:97` |
-| POST /telemetry/disclosure-acceptances | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:46` |
-| POST /telemetry/session-journeys/{id}/close | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/controllers/telemetry-events.controller.ts:113` |
-| POST /telemetry/tracking-consents | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:64` |
-| POST /telemetry/tracking-consents/{id}/withdraw | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:106` |
-| POST /telemetry/web-vitals | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/controllers/telemetry-events.controller.ts:80` |
+| POST /telemetry/activity-events | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45` |
+| POST /telemetry/client-contexts | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:62` |
+| POST /telemetry/conversion-events | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:97` |
+| POST /telemetry/disclosure-acceptances | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:46` |
+| POST /telemetry/session-journeys/{id}/close | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:113` |
+| POST /telemetry/tracking-consents | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:64` |
+| POST /telemetry/tracking-consents/{id}/withdraw | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:106` |
+| POST /telemetry/web-vitals | telemetry | escribe y el controlador no declara roles | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:80` |
 | POST /terminology/ConceptMap/$translate | terminology | escribe y el controlador no declara roles | `src/modules/terminology/controllers/terminology-fhir.controller.ts:97` |
 
 ## FLU-03
@@ -200,7 +202,7 @@ _Ninguno._
 | POST /iam/auth/login | iam | ACTUALIZA iam.account_lockouts, CREA iam.account_lockouts, ACTUALIZA iam.refresh_tokens, CREA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions, CREA iam.sessions, ACTUALIZA iam.users | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:351` |
 | POST /iam/auth/register-organization | iam | CREA common.addresses, ACTUALIZA common.files, CREA diagnostic_units.diagnostic_study_offerings, CREA diagnostic_units.diagnostic_unit_sites, CREA diagnostic_units.diagnostic_units, CREA directory.branches, CREA directory.tenant_affiliation_documents, CREA directory.tenant_legal_representatives, CREA directory.tenant_medical_facilities, CREA directory.tenant_medical_facility_sites, CREA directory.tenant_memberships, CREA directory.tenants, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA insurance.insurance_brokers, CREA insurance.insurance_carriers, CREA messaging.notification_requests, CREA pharmacy.pharmacies, CREA pharmacy.pharmacy_product_categories, CREA pharmacy.pharmacy_sites, CREA practice.practice_sites, CREA practice.practices | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:134` |
 | POST /iam/auth/register-patient | iam | CREA common.contact_points, CREA common.identifiers, CREA directory.tenant_memberships, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA messaging.notification_requests, CREA profiles.patient_profiles, CREA profiles.person_account_links, CREA profiles.person_profiles, CREA profiles.persons | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:110` |
-| POST /iam/auth/register-practitioner | iam | CREA authz.user_role_assignments, CREA common.addresses, CREA common.contact_points, CREA common.file_versions, CREA common.files, ACTUALIZA common.files, CREA common.identifiers, CREA directory.tenant_memberships, CREA iam.account_activations, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA messaging.notification_requests, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs, CREA practice.practice_sites, CREA practice.practices, CREA practice.practitioner_role_assignments, CREA profiles.health_practitioner_profiles, CREA profiles.jurisdiction_authorizations, CREA profiles.person_account_links, CREA profiles.person_profiles, CREA profiles.persons, CREA profiles.practitioner_languages, CREA profiles.practitioner_specialties, CREA profiles.professional_credentials | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:266` |
+| POST /iam/auth/register-practitioner | iam | CREA authz.user_role_assignments, CREA common.addresses, CREA common.contact_points, CREA common.file_versions, CREA common.files, ACTUALIZA common.files, CREA common.identifiers, CREA directory.tenant_memberships, CREA iam.account_activations, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA messaging.notification_requests, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs, CREA practice.practice_sites, CREA practice.practices, CREA practice.practitioner_role_assignments, CREA profiles.health_practitioner_profiles, CREA profiles.jurisdiction_authorizations, ACTUALIZA profiles.jurisdiction_authorizations, CREA profiles.person_account_links, CREA profiles.person_profiles, CREA profiles.persons, CREA profiles.practitioner_admission_events, BORRA profiles.practitioner_admission_reviews, CREA profiles.practitioner_admission_reviews, ACTUALIZA profiles.practitioner_admission_reviews, CREA profiles.practitioner_admissions, CREA profiles.practitioner_languages, CREA profiles.practitioner_specialties, ACTUALIZA profiles.practitioner_specialties, CREA profiles.professional_credentials, ACTUALIZA profiles.professional_credentials | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:266` |
 | POST /iam/auth/resend-verification | iam | CREA iam.email_verifications, CREA messaging.notification_requests | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:299` |
 | POST /iam/auth/reset-password | iam | ACTUALIZA iam.authentication_credentials, ACTUALIZA iam.password_resets, ACTUALIZA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:405` |
 | POST /iam/auth/token/refresh | iam | ACTUALIZA iam.refresh_tokens, CREA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:421` |
@@ -216,7 +218,7 @@ _Ninguno._
 
 ## FLU-04
 
-**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 134 caso(s).
+**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 142 caso(s).
 
 **Qué hacer:** Escribir la prueba de integración contra PostgreSQL real (regla 80.2.4). Las sin prueba alguna van primero.
 
@@ -225,8 +227,8 @@ _Ninguno._
 | DELETE /accounting/practitioner/simple/accounts/{id} | accounting | sólo prueba de controlador | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:132` |
 | DELETE /accounting/practitioner/simple/records/{id} | accounting | sólo prueba de controlador | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:204` |
 | DELETE /accounting/practitioner/simple/transactions/{id} | accounting | sólo prueba de controlador | `src/modules/accounting/controllers/accounting-practitioner-simple.controller.ts:271` |
-| GET /audio-assets/{assetId}/content | audio_assets | ninguna prueba la menciona | `src/modules/audio_assets/controllers/audio-assets.controller.ts:44` |
-| POST /audio-assets/resolve | audio_assets | ninguna prueba la menciona | `src/modules/audio_assets/controllers/audio-assets.controller.ts:28` |
+| GET /audio-assets/{assetId}/content | audio_assets | ninguna prueba la menciona | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48` |
+| POST /audio-assets/resolve | audio_assets | ninguna prueba la menciona | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32` |
 | POST /audit/retention/apply | audit | sólo prueba de controlador | `src/modules/audit/controllers/audit.controller.ts:136` |
 | PUT /auth-providers/identity-providers/{id}/attribute-mappings | auth_providers | sólo prueba de controlador | `src/modules/auth_providers/controllers/auth-providers.controller.ts:153` |
 | POST /billing/simulated/charges/{chargeId}/invoices | billing | ninguna prueba la menciona | `src/modules/billing/controllers/billing-simulated.controller.ts:101` |
@@ -288,6 +290,7 @@ _Ninguno._
 | POST /iam/auth/upload-registration-logo | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:184` |
 | POST /iam/auth/verify-email | iam | sólo prueba de controlador | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:316` |
 | POST /iam/me/sessions/{id}/revoke | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:71` |
+| POST /identity/checks/{id}/results | identity_assurance | sólo prueba de controlador | `src/modules/identity_assurance/controllers/identity-checks.controller.ts:58` |
 | POST /identity/me/practitioner/license-verification | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
 | POST /identity/me/tenants/{tenantId}/verification | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94` |
 | POST /internal/identity/evidence/lifecycle-scan | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79` |
@@ -320,6 +323,11 @@ _Ninguno._
 | POST /pharmacies/{pharmacyId}/products | pharmacy | sólo prueba de controlador | `src/modules/pharmacy/controllers/pharmacy.controller.ts:342` |
 | PATCH /pharmacies/{pharmacyId}/products/{productId} | pharmacy | sólo prueba de controlador | `src/modules/pharmacy/controllers/pharmacy.controller.ts:361` |
 | POST /pharmacy/orders/{id}/conversation | pharmacy_inventory | ninguna prueba la menciona | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156` |
+| POST /admissions/{id}/claim | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
+| POST /admissions/{id}/decision | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
+| POST /admissions/{id}/reassign | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
+| POST /admissions/{id}/request-info | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
+| POST /profiles/credentials/{credentialId}/verify | profiles | sólo prueba de controlador | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:813` |
 | DELETE /profiles/patients/me/addresses/{id} | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
 | PATCH /profiles/patients/me/addresses/{id} | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
 | DELETE /profiles/patients/me/primary-practitioner | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67` |
@@ -328,6 +336,8 @@ _Ninguno._
 | DELETE /profiles/practitioners/{profileId}/photo | profiles | sólo prueba de controlador | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:338` |
 | PUT /profiles/practitioners/{profileId}/photo | profiles | sólo prueba de controlador | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:308` |
 | POST /profiles/practitioners/{profileId}/specialties | profiles | sólo prueba de controlador | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:646` |
+| POST /profiles/practitioners/me/admission/resubmit | profiles | sólo prueba de controlador | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:56` |
+| POST /profiles/practitioners/me/admission/withdraw | profiles | sólo prueba de controlador | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:78` |
 | DELETE /profiles/practitioners/me/affiliations/{affiliationId} | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:508` |
 | PATCH /profiles/practitioners/me/affiliations/{affiliationId} | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:482` |
 | DELETE /profiles/practitioners/me/credentials/{credentialId} | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/profiles-practitioners.controller.ts:595` |
@@ -344,14 +354,14 @@ _Ninguno._
 | POST /surveys/me/invitations/{id}/responses | surveys | ninguna prueba la menciona | `src/modules/surveys/controllers/surveys-patient.controller.ts:61` |
 | DELETE /surveys/templates/{id}/questions/{questionId} | surveys | ninguna prueba la menciona | `src/modules/surveys/controllers/surveys-templates.controller.ts:169` |
 | POST /internal/governance/retention-executions/run | system_ops | ninguna prueba la menciona | `src/modules/system_ops/controllers/retention-execution.controller.ts:28` |
-| POST /telemetry/activity-events | telemetry | ninguna prueba la menciona | `src/modules/telemetry/controllers/telemetry-events.controller.ts:45` |
-| POST /telemetry/client-contexts | telemetry | ninguna prueba la menciona | `src/modules/telemetry/controllers/telemetry-events.controller.ts:62` |
-| POST /telemetry/conversion-events | telemetry | ninguna prueba la menciona | `src/modules/telemetry/controllers/telemetry-events.controller.ts:97` |
-| POST /telemetry/disclosure-acceptances | telemetry | sólo prueba de controlador | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:46` |
-| POST /telemetry/session-journeys/{id}/close | telemetry | ninguna prueba la menciona | `src/modules/telemetry/controllers/telemetry-events.controller.ts:113` |
-| POST /telemetry/tracking-consents | telemetry | sólo prueba de controlador | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:64` |
-| POST /telemetry/tracking-consents/{id}/withdraw | telemetry | sólo prueba de controlador | `src/modules/telemetry/controllers/telemetry-consent.controller.ts:106` |
-| POST /telemetry/web-vitals | telemetry | ninguna prueba la menciona | `src/modules/telemetry/controllers/telemetry-events.controller.ts:80` |
+| POST /telemetry/activity-events | telemetry | ninguna prueba la menciona | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45` |
+| POST /telemetry/client-contexts | telemetry | ninguna prueba la menciona | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:62` |
+| POST /telemetry/conversion-events | telemetry | ninguna prueba la menciona | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:97` |
+| POST /telemetry/disclosure-acceptances | telemetry | sólo prueba de controlador | `src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:46` |
+| POST /telemetry/session-journeys/{id}/close | telemetry | ninguna prueba la menciona | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:113` |
+| POST /telemetry/tracking-consents | telemetry | sólo prueba de controlador | `src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:64` |
+| POST /telemetry/tracking-consents/{id}/withdraw | telemetry | sólo prueba de controlador | `src/modules/telemetry/presentation/controllers/telemetry-consent.controller.ts:106` |
+| POST /telemetry/web-vitals | telemetry | ninguna prueba la menciona | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:80` |
 | POST /terminology/ConceptMap/$translate | terminology | sólo prueba de controlador | `src/modules/terminology/controllers/terminology-fhir.controller.ts:97` |
 | POST /terminology/ValueSet/{id}/$expand | terminology | sólo prueba de controlador | `src/modules/terminology/controllers/terminology-fhir.controller.ts:71` |
 | POST /tracking/webhooks/carriers/{carrierCode} | tracking | sólo prueba de controlador | `src/modules/tracking/controllers/tracking.controller.ts:150` |
@@ -394,7 +404,7 @@ _Ninguno._
 
 ## FLU-07
 
-**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1131 caso(s).
+**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1213 caso(s).
 
 **Qué hacer:** Informativo: pueden ser internas (workers), de otros consumidores (móvil, integraciones) o deuda. Confirmar con el responsable antes de retirar nada.
 
@@ -429,6 +439,13 @@ _Ninguno._
 | POST /accounting/practitioner/simple/transactions | accounting | ningún cliente del frontend la declara | — |
 | DELETE /accounting/practitioner/simple/transactions/{id} | accounting | ningún cliente del frontend la declara | — |
 | PUT /accounting/practitioner/simple/transactions/{id} | accounting | ningún cliente del frontend la declara | — |
+| GET /admin/catalogs/services | admin_catalogs | ningún cliente del frontend la declara | — |
+| POST /admin/catalogs/services | admin_catalogs | ningún cliente del frontend la declara | — |
+| GET /admin/catalogs/services/{id} | admin_catalogs | ningún cliente del frontend la declara | — |
+| PATCH /admin/catalogs/services/{id} | admin_catalogs | ningún cliente del frontend la declara | — |
+| POST /admin/catalogs/services/{id}/deactivate | admin_catalogs | ningún cliente del frontend la declara | — |
+| POST /admin/catalogs/services/{id}/reactivate | admin_catalogs | ningún cliente del frontend la declara | — |
+| GET /admin/catalogs/services/scopes | admin_catalogs | ningún cliente del frontend la declara | — |
 | POST /ads/ad-accounts/{id}/campaigns/launch | ads | ningún cliente del frontend la declara | — |
 | POST /ads/ad-accounts/{id}/experiments | ads | ningún cliente del frontend la declara | — |
 | POST /ads/ad-accounts/{id}/invoices/issue | ads | ningún cliente del frontend la declara | — |
@@ -477,8 +494,10 @@ _Ninguno._
 | POST /moderation/decisions | audit | ningún cliente del frontend la declara | — |
 | POST /privacy/dsar | audit | ningún cliente del frontend la declara | — |
 | PATCH /privacy/dsar/{id} | audit | ningún cliente del frontend la declara | — |
+| GET /authz/access-reviews/due | authz | ningún cliente del frontend la declara | — |
 | POST /authz/care-relationships | authz | ningún cliente del frontend la declara | — |
 | POST /authz/care-relationships/{id}/revoke | authz | ningún cliente del frontend la declara | — |
+| GET /authz/catalog/modules | authz | ningún cliente del frontend la declara | — |
 | DELETE /authz/clinical-access-grants/{grantId} | authz | ningún cliente del frontend la declara | — |
 | POST /authz/decisions/evaluate | authz | ningún cliente del frontend la declara | — |
 | GET /authz/internal-users | authz | ningún cliente del frontend la declara | — |
@@ -493,13 +512,22 @@ _Ninguno._
 | POST /authz/permission-categories | authz | ningún cliente del frontend la declara | — |
 | GET /authz/permissions | authz | ningún cliente del frontend la declara | — |
 | POST /authz/permissions | authz | ningún cliente del frontend la declara | — |
+| GET /authz/resource-scope-grants | authz | ningún cliente del frontend la declara | — |
 | POST /authz/resource-scope-grants | authz | ningún cliente del frontend la declara | — |
+| DELETE /authz/resource-scope-grants/{grantId} | authz | ningún cliente del frontend la declara | — |
 | GET /authz/roles | authz | ningún cliente del frontend la declara | — |
 | POST /authz/roles | authz | ningún cliente del frontend la declara | — |
+| GET /authz/roles/{roleId}/field-permissions | authz | ningún cliente del frontend la declara | — |
 | PUT /authz/roles/{roleId}/field-permissions | authz | ningún cliente del frontend la declara | — |
 | GET /authz/roles/{roleId}/permissions | authz | ningún cliente del frontend la declara | — |
 | PUT /authz/roles/{roleId}/permissions | authz | ningún cliente del frontend la declara | — |
 | POST /authz/tenants/{tenantId}/access-policies | authz | ningún cliente del frontend la declara | — |
+| GET /authz/users/{userId}/access-reviews | authz | ningún cliente del frontend la declara | — |
+| POST /authz/users/{userId}/access-reviews | authz | ningún cliente del frontend la declara | — |
+| GET /authz/users/{userId}/lifecycle | authz | ningún cliente del frontend la declara | — |
+| POST /authz/users/{userId}/lifecycle/offboard | authz | ningún cliente del frontend la declara | — |
+| POST /authz/users/{userId}/lifecycle/reactivate | authz | ningún cliente del frontend la declara | — |
+| POST /authz/users/{userId}/lifecycle/suspend | authz | ningún cliente del frontend la declara | — |
 | POST /authz/users/{userId}/permission-grants | authz | ningún cliente del frontend la declara | — |
 | GET /authz/users/{userId}/role-assignments | authz | ningún cliente del frontend la declara | — |
 | POST /authz/users/{userId}/role-assignments | authz | ningún cliente del frontend la declara | — |
@@ -582,44 +610,108 @@ _Ninguno._
 | POST /clinical/medication-requests/{id}/replace | clinical | ningún cliente del frontend la declara | — |
 | PATCH /clinical/observations/{id}/amend | clinical | ningún cliente del frontend la declara | — |
 | GET /clinical/patients/{patientProfileId}/received-services | clinical | ningún cliente del frontend la declara | — |
-| GET /clinical/prescription-signature-policies | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/prescription-signature-policies | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/prescription-signature-policies/{id}/deactivate | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/procedures | clinical | ningún cliente del frontend la declara | — |
-| GET /public/prescriptions/{id}/verify | clinical | ningún cliente del frontend la declara | — |
-| PATCH /care-gaps/{id}/close | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /care-gaps/recompute | clinical_ext | ningún cliente del frontend la declara | — |
-| GET /care-teams | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /care-teams | clinical_ext | ningún cliente del frontend la declara | — |
-| PATCH /care-teams/{id}/members/{memberId}/set-responsible | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /cds-rules | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /cds-rules/{id}/versions/publish | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /cds-rules/{id}/versions/rollback | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /cds/evaluate | clinical_ext | ningún cliente del frontend la declara | — |
-| PATCH /clinical-alerts/{id}/acknowledge | clinical_ext | ningún cliente del frontend la declara | — |
-| PATCH /clinical-alerts/{id}/override | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /drug-interactions | clinical_ext | ningún cliente del frontend la declara | — |
-| POST /immunization-schedules | clinical_ext | ningún cliente del frontend la declara | — |
 
-_Se muestran 200 de 1131; la lista completa está en `inventario/flujos/hallazgos.json`._
+_Se muestran 200 de 1213; la lista completa está en `inventario/flujos/hallazgos.json`._
 
 ## FLU-08
 
-**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 9 caso(s).
+**Operaciones que existen en el código y el contrato OpenAPI no publica** — severidad MEDIA — 91 caso(s).
 
 **Qué hacer:** Regenerar el contrato o decidir si deben dejar de existir. Los clientes generados no las ven.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
+| GET /admin/catalogs/services | admin_catalogs | handler sin operación en openapi.json | `src/modules/admin_catalogs/controllers/admin-service-catalog.controller.ts:55` |
+| POST /admin/catalogs/services | admin_catalogs | handler sin operación en openapi.json | `src/modules/admin_catalogs/controllers/admin-service-catalog.controller.ts:72` |
+| GET /admin/catalogs/services/{id} | admin_catalogs | handler sin operación en openapi.json | `src/modules/admin_catalogs/controllers/admin-service-catalog.controller.ts:64` |
+| PATCH /admin/catalogs/services/{id} | admin_catalogs | handler sin operación en openapi.json | `src/modules/admin_catalogs/controllers/admin-service-catalog.controller.ts:93` |
+| POST /admin/catalogs/services/{id}/deactivate | admin_catalogs | handler sin operación en openapi.json | `src/modules/admin_catalogs/controllers/admin-service-catalog.controller.ts:112` |
+| POST /admin/catalogs/services/{id}/reactivate | admin_catalogs | handler sin operación en openapi.json | `src/modules/admin_catalogs/controllers/admin-service-catalog.controller.ts:128` |
+| GET /admin/catalogs/services/scopes | admin_catalogs | handler sin operación en openapi.json | `src/modules/admin_catalogs/controllers/admin-service-catalog.controller.ts:46` |
+| GET /authz/access-reviews/due | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:150` |
+| GET /authz/catalog/modules | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-modules-catalog.controller.ts:28` |
+| GET /authz/resource-scope-grants | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:207` |
+| DELETE /authz/resource-scope-grants/{grantId} | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:218` |
+| GET /authz/roles/{roleId}/field-permissions | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:199` |
+| GET /authz/users/{userId}/access-reviews | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:165` |
+| POST /authz/users/{userId}/access-reviews | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:176` |
+| GET /authz/users/{userId}/lifecycle | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:67` |
+| POST /authz/users/{userId}/lifecycle/offboard | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:125` |
+| POST /authz/users/{userId}/lifecycle/reactivate | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:101` |
+| POST /authz/users/{userId}/lifecycle/suspend | authz | handler sin operación en openapi.json | `src/modules/authz/controllers/authz-governance.controller.ts:79` |
+| GET /admin/clinical-imports | clinical_import | handler sin operación en openapi.json | `src/modules/clinical_import/clinical-import.controller.ts:145` |
+| POST /admin/clinical-imports | clinical_import | handler sin operación en openapi.json | `src/modules/clinical_import/clinical-import.controller.ts:163` |
+| GET /admin/clinical-imports/{id} | clinical_import | handler sin operación en openapi.json | `src/modules/clinical_import/clinical-import.controller.ts:241` |
+| POST /admin/clinical-imports/{id}/confirm | clinical_import | handler sin operación en openapi.json | `src/modules/clinical_import/clinical-import.controller.ts:220` |
+| GET /admin/clinical-imports/{id}/loaded | clinical_import | handler sin operación en openapi.json | `src/modules/clinical_import/clinical-import.controller.ts:274` |
+| GET /admin/clinical-imports/{id}/report | clinical_import | handler sin operación en openapi.json | `src/modules/clinical_import/clinical-import.controller.ts:248` |
+| GET /admin/clinical-imports/catalog | clinical_import | handler sin operación en openapi.json | `src/modules/clinical_import/clinical-import.controller.ts:117` |
+| GET /admin/clinical-imports/import-template | clinical_import | handler sin operación en openapi.json | `src/modules/clinical_import/clinical-import.controller.ts:126` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:582` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:589` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:602` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:607` |
+| GET /admin/catalog/fit | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:48` |
+| POST /admin/catalog/fit/run | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:60` |
+| POST /internal/catalog/fit/run | data_catalog | handler sin operación en openapi.json | `src/modules/data_catalog/presentation/controllers/catalog-fit.controller.ts:109` |
+| GET /admin/governance/data-quality/issues | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:38` |
+| GET /admin/governance/data-quality/issues/{id} | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:45` |
+| POST /admin/governance/data-quality/issues/{id}/resolution | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:53` |
+| GET /admin/governance/data-quality/rules | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:71` |
+| GET /admin/governance/data-quality/rules/{id} | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-data-quality.controller.ts:78` |
+| GET /admin/governance/privacy-requests | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-privacy-requests.controller.ts:20` |
+| GET /admin/governance/privacy-requests/{id} | governance_admin | handler sin operación en openapi.json | `src/modules/governance_admin/controllers/admin-privacy-requests.controller.ts:27` |
 | DESCONOCIDO /iam/auth | iam | handler sin operación en openapi.json | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:460` |
 | DESCONOCIDO /notifications/web-push | messaging | handler sin operación en openapi.json | `src/modules/messaging/controllers/web-push.controller.ts:78` |
+| POST /pharmacies/{pharmacyId}/categories/bulk | pharmacy | handler sin operación en openapi.json | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:52` |
+| POST /pharmacies/{pharmacyId}/prices/bulk | pharmacy | handler sin operación en openapi.json | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:86` |
+| POST /pharmacies/{pharmacyId}/products/bulk | pharmacy | handler sin operación en openapi.json | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:69` |
+| POST /pharmacies/{pharmacyId}/sites/bulk | pharmacy | handler sin operación en openapi.json | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:105` |
+| GET /pharmacies/{pharmacyId}/integration-connections | pharmacy_inventory | handler sin operación en openapi.json | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:71` |
+| GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products | pharmacy_inventory | handler sin operación en openapi.json | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:92` |
+| GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings | pharmacy_inventory | handler sin operación en openapi.json | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:81` |
+| POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync | pharmacy_inventory | handler sin operación en openapi.json | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52` |
+| GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches | pharmacy_inventory | handler sin operación en openapi.json | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:106` |
+| PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability | pharmacy_inventory | handler sin operación en openapi.json | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40` |
+| GET /admin/ops/runtime-pieces | platform_ops | handler sin operación en openapi.json | `src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:49` |
+| GET /admin/ops/runtime-pieces/{id} | platform_ops | handler sin operación en openapi.json | `src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:62` |
+| POST /admin/ops/runtime-pieces/discover | platform_ops | handler sin operación en openapi.json | `src/modules/platform_ops/runtime_pieces/runtime-pieces.controller.ts:73` |
+| DESCONOCIDO /admissions | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:86` |
+| GET /admissions | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:90` |
+| GET /admissions/{id} | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:146` |
+| POST /admissions/{id}/claim | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:167` |
+| POST /admissions/{id}/decision | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:286` |
+| GET /admissions/{id}/documents/{fileId}/content | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:373` |
+| POST /admissions/{id}/documents/{fileId}/download-url | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:350` |
+| POST /admissions/{id}/items/{itemId}/review | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:256` |
+| POST /admissions/{id}/reassign | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:213` |
+| POST /admissions/{id}/reinstate | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:329` |
+| POST /admissions/{id}/release | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:190` |
+| POST /admissions/{id}/request-info | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:237` |
+| POST /admissions/{id}/suspend | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:310` |
+| POST /admissions/expire-sweep | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:125` |
+| POST /admissions/search | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/admissions.controller.ts:107` |
+| GET /profiles/practitioners/me/admission | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:45` |
+| POST /profiles/practitioners/me/admission/resubmit | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:56` |
+| POST /profiles/practitioners/me/admission/withdraw | profiles | handler sin operación en openapi.json | `src/modules/profiles/presentation/controllers/own-admission.controller.ts:78` |
 | DESCONOCIDO / | promotions | handler sin operación en openapi.json | `src/modules/promotions/controllers/loyalty.controller.ts:185` |
 | DESCONOCIDO /redis-runtime | redis_runtime | handler sin operación en openapi.json | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:44` |
 | DESCONOCIDO /search | search_platform | handler sin operación en openapi.json | `src/modules/search_platform/controllers/search-platform.controller.ts:114` |
+| GET /admin/governance/mutability | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:34` |
+| GET /admin/governance/mutability/{schema}/{table} | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:57` |
+| GET /admin/governance/mutability/summary | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/mutability/controllers/mutability.controller.ts:46` |
+| GET /admin/governance/pii-fields | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/controllers/governance-read.controller.ts:59` |
+| GET /admin/governance/policies | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/controllers/governance-read.controller.ts:32` |
+| GET /admin/governance/policies/{id} | system_ops | handler sin operación en openapi.json | `src/modules/system_ops/controllers/governance-read.controller.ts:45` |
+| GET /admin/ui-visibility/elements | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:53` |
+| POST /admin/ui-visibility/elements | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:61` |
+| POST /admin/ui-visibility/elements/sync | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:75` |
+| GET /admin/ui-visibility/preview | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:153` |
+| GET /admin/ui-visibility/rules | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:90` |
+| POST /admin/ui-visibility/rules | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:96` |
+| PATCH /admin/ui-visibility/rules/{id} | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:110` |
+| POST /admin/ui-visibility/rules/{id}/end | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/admin-ui-visibility.controller.ts:139` |
+| GET /me/ui-visibility | ui_visibility | handler sin operación en openapi.json | `src/modules/ui_visibility/controllers/me-ui-visibility.controller.ts:23` |
 
 ## FLU-09
 
@@ -631,7 +723,7 @@ _Ninguno._
 
 ## FLU-10
 
-**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 113 caso(s).
+**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 129 caso(s).
 
 **Qué hacer:** Cambiar el `new Error(...)` por una excepción del proyecto con estado y código estables (regla 96.4.4). El cliente hoy recibe INTERNAL sin poder distinguir la causa.
 
@@ -639,13 +731,13 @@ _Ninguno._
 |---|---|---|---|
 | GET /health/data-sources | app | DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59) \| DataSourceConfigurationError: No hay ninguna conexión registrada como «{name}». Registradas: {known}. (src/persistence/registry/connection.registry.ts:59) | `src/persistence/health/data-sources.controller.ts:30` |
 | GET /readiness | app | SchemaIntegrityIncompleteError: Integridad del esquema incompleta: {report?.blockingCount ?? 0} restricciones sin aplicar (src/app-readiness.service.ts:178) \| SeedCoreIncompleteError: Seeds núcleo fallidos: {failed.join(', ')} (src/app-readiness.service.ts:202) \| SeedCoreIncompleteError: Catálogo de conceptos sin materializar: faltan {ids.length - present} de {ids.length} (src/app-readiness.service.ts:219) | `src/app.controller.ts:63` |
-| GET /audio-assets/{assetId}/content | audio_assets | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/audio_assets/controllers/audio-assets.controller.ts:44` |
-| POST /audio-assets/resolve | audio_assets | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/repositories/audio-assets.repository.ts:127) \| Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118) | `src/modules/audio_assets/controllers/audio-assets.controller.ts:28` |
-| POST /internal/audio-assets/{assetId}/generated | audio_assets | StorageLifecycleDenied: PUBLICATION_PROOF_REQUIRED (src/modules/audio_assets/application/audio-generation.use-case.ts:122) \| StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/repositories/audio-assets.repository.ts:235) \| StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/repositories/audio-assets.repository.ts:235) | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:108` |
-| POST /internal/audio-assets/{assetId}/prepare-generation | audio_assets | Error: Payload cifrado de audio inválido (src/modules/audio_assets/infrastructure/audio-value-cipher.service.ts:38) | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:97` |
-| POST /internal/audio-assets/garbage-collect | audio_assets | StorageLifecycleDenied: DELETE_PERMIT_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:212) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/local-disk-file-storage.adapter.ts:215) \| DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:71` |
-| POST /internal/audio-assets/pregenerate | audio_assets | Error: La plantilla enumerada excede {MAX_ENUMERATED_COMBINATIONS} combinaciones (src/modules/audio_assets/application/pregenerate-audio-assets.use-case.ts:89) \| Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/repositories/audio-assets.repository.ts:118) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/repositories/audio-assets.repository.ts:127) | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:46` |
-| POST /internal/audio-assets/verify | audio_assets | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/audio_assets/controllers/audio-assets-internal.controller.ts:61` |
+| GET /audio-assets/{assetId}/content | audio_assets | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:48` |
+| POST /audio-assets/resolve | audio_assets | Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:118) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:127) \| Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:118) | `src/modules/audio_assets/presentation/controllers/audio-assets.controller.ts:32` |
+| POST /internal/audio-assets/{assetId}/generated | audio_assets | StorageLifecycleDenied: PUBLICATION_PROOF_REQUIRED (src/modules/audio_assets/application/audio-generation.use-case.ts:126) \| StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:235) \| StorageLifecycleDenied: PUBLICATION_TRANSACTION_REQUIRED (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:235) | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:108` |
+| POST /internal/audio-assets/{assetId}/prepare-generation | audio_assets | Error: Payload cifrado de audio inválido (src/modules/audio_assets/infrastructure/adapters/audio-value-cipher.service.ts:39) | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:97` |
+| POST /internal/audio-assets/garbage-collect | audio_assets | StorageLifecycleDenied: DELETE_PERMIT_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:212) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/local-disk-file-storage.adapter.ts:215) \| DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:71` |
+| POST /internal/audio-assets/pregenerate | audio_assets | Error: La plantilla enumerada excede {MAX_ENUMERATED_COMBINATIONS} combinaciones (src/modules/audio_assets/application/pregenerate-audio-assets.use-case.ts:89) \| Error: No se pudo materializar el asset de audio idempotente (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:118) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/audio_assets/infrastructure/repositories/audio-assets.repository.ts:127) | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:46` |
+| POST /internal/audio-assets/verify | audio_assets | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/audio_assets/presentation/controllers/audio-assets-internal.controller.ts:61` |
 | POST /audit/integrity/verify | audit | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/audit/services/audit-events.service.ts:205) | `src/modules/audit/controllers/audit.controller.ts:118` |
 | POST /authz/care-relationships | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-care-relationships.controller.ts:60` |
 | POST /authz/care-relationships/request | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-care-relationships.controller.ts:146` |
@@ -674,6 +766,13 @@ _Ninguno._
 | POST /cds-rules | clinical_ext | UnparseableCdsRuleError: logic_json no es un objeto (src/modules/clinical_ext/services/cds.service.ts:407) \| UnparseableCdsRuleError: op 'in' exige un array en value (src/modules/clinical_ext/services/cds.service.ts:482) \| UnparseableCdsRuleError: op '{op}' exige un número en value (src/modules/clinical_ext/services/cds.service.ts:494) | `src/modules/clinical_ext/controllers/cds.controller.ts:53` |
 | POST /cds-rules/{id}/versions/publish | clinical_ext | UnparseableCdsRuleError: logic_json no es un objeto (src/modules/clinical_ext/services/cds.service.ts:407) \| UnparseableCdsRuleError: op 'in' exige un array en value (src/modules/clinical_ext/services/cds.service.ts:482) \| UnparseableCdsRuleError: op '{op}' exige un número en value (src/modules/clinical_ext/services/cds.service.ts:494) | `src/modules/clinical_ext/controllers/cds.controller.ts:70` |
 | POST /cds/evaluate | clinical_ext | UnparseableCdsRuleError: logic_json no es un objeto (src/modules/clinical_ext/services/cds.service.ts:433) \| UnparseableCdsRuleError: op 'in' exige un array en value (src/modules/clinical_ext/services/cds.service.ts:482) \| UnparseableCdsRuleError: op '{op}' exige un número en value (src/modules/clinical_ext/services/cds.service.ts:494) | `src/modules/clinical_ext/controllers/cds.controller.ts:113` |
+| GET /admin/clinical-imports | clinical_import | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/clinical_import/clinical-import.controller.ts:153) | `src/modules/clinical_import/clinical-import.controller.ts:145` |
+| POST /admin/clinical-imports | clinical_import | ImportError: BAD_REQUEST (src/modules/clinical_import/clinical-import.controller.ts:206) \| ImportError: NOT_FOUND (src/modules/clinical_import/clinical-import.service.ts:155) \| ImportError: BAD_REQUEST (src/modules/clinical_import/clinical-import.service.ts:159) | `src/modules/clinical_import/clinical-import.controller.ts:163` |
+| GET /admin/clinical-imports/{id} | clinical_import | ImportError: NOT_FOUND (src/modules/clinical_import/clinical-import.service.ts:442) | `src/modules/clinical_import/clinical-import.controller.ts:241` |
+| POST /admin/clinical-imports/{id}/confirm | clinical_import | ImportError: BAD_REQUEST (src/modules/clinical_import/clinical-import.service.ts:326) \| ImportError: NOT_FOUND (src/modules/clinical_import/clinical-import.service.ts:442) \| ImportError: CONFLICT (src/modules/clinical_import/clinical-import.service.ts:331) | `src/modules/clinical_import/clinical-import.controller.ts:220` |
+| GET /admin/clinical-imports/{id}/loaded | clinical_import | ImportError: NOT_FOUND (src/modules/clinical_import/clinical-import.service.ts:442) \| ImportError: CONFLICT (src/modules/clinical_import/clinical-import.service.ts:434) | `src/modules/clinical_import/clinical-import.controller.ts:274` |
+| GET /admin/clinical-imports/{id}/report | clinical_import | ImportError: NOT_FOUND (src/modules/clinical_import/clinical-import.service.ts:442) \| ImportError: CONFLICT (src/modules/clinical_import/clinical-import.service.ts:402) | `src/modules/clinical_import/clinical-import.controller.ts:248` |
+| GET /admin/clinical-imports/import-template | clinical_import | ImportError: BAD_REQUEST (src/modules/clinical_import/clinical-import.service.ts:141) \| ImportError: NOT_FOUND (src/modules/clinical_import/clinical-import.service.ts:143) | `src/modules/clinical_import/clinical-import.controller.ts:126` |
 | POST /common/files | common | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/files.service.ts:609) \| StorageLifecycleDenied: {identity.reasonCode} (src/common/storage/storage-publication.service.ts:142) \| StorageLifecycleDenied: TRANSACTION_REQUIRED (src/common/storage/storage-lifecycle-coordinator.service.ts:60) | `src/modules/common/controllers/common-files.controller.ts:151` |
 | DELETE /common/files/{id} | common | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/files.service.ts:609) \| StorageLifecycleDenied: {identity.reasonCode} (src/common/storage/storage-publication.service.ts:142) \| StorageLifecycleDenied: TRANSACTION_REQUIRED (src/common/storage/storage-lifecycle-coordinator.service.ts:60) | `src/modules/common/controllers/common-files.controller.ts:228` |
 | GET /common/files/{id}/content | common | DomainException: {HttpStatus.SERVICE_UNAVAILABLE} (src/common/storage/s3-file-storage.adapter.ts:317) \| Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/common/controllers/common-files.controller.ts:126` |
@@ -693,11 +792,11 @@ _Ninguno._
 | POST /consent/hipaa-authorizations | consent | DomainException: {HttpStatus.FORBIDDEN} (src/modules/consent/services/consent-scope.service.ts:56) | `src/modules/consent/controllers/hipaa-authorizations.controller.ts:37` |
 | POST /consent/privacy-restrictions | consent | DomainException: {HttpStatus.FORBIDDEN} (src/modules/consent/services/consent-scope.service.ts:56) | `src/modules/consent/controllers/privacy-restrictions.controller.ts:30` |
 | POST /admin/content-packs/{code}/apply | content_packs | Error: El catálogo del glosario declara el slug "{term.slug}" más de una vez (src/common/seed/glossary-seed.service.ts:372) \| Error: El directorio declara el código "{facility.code}" más de una vez (src/common/seed/bolivia-facilities-seed.service.ts:187) \| Error: El catálogo geográfico declara la sigla "{department.code}" más de una vez (src/common/seed/bo-geography-seed.service.ts:247) | `src/modules/content_packs/content-packs.controller.ts:69` |
-| POST /admin/catalog/annotations/{id}/review | data_catalog | DomainException: {403} (src/modules/data_catalog/services/catalog-governance.service.ts:264) \| DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:270) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:282` |
-| PUT /admin/catalog/columns/{id}/annotation | data_catalog | DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:120) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:252` |
-| PUT /admin/catalog/objects/{id}/annotation | data_catalog | DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:120) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:224` |
-| POST /admin/catalog/scans | data_catalog | ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) \| ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:375` |
-| POST /internal/catalog/scans/run-next | data_catalog | ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) \| ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) | `src/modules/data_catalog/controllers/internal-catalog.controller.ts:30` |
+| POST /admin/catalog/annotations/{id}/review | data_catalog | DomainException: {403} (src/modules/data_catalog/application/catalog-governance.service.ts:264) \| DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:270) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:282` |
+| PUT /admin/catalog/columns/{id}/annotation | data_catalog | DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:120) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:252` |
+| PUT /admin/catalog/objects/{id}/annotation | data_catalog | DomainException: {422} (src/modules/data_catalog/application/catalog-governance.service.ts:120) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:224` |
+| POST /admin/catalog/scans | data_catalog | ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) \| ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) | `src/modules/data_catalog/presentation/controllers/admin-catalog.controller.ts:375` |
+| POST /internal/catalog/scans/run-next | data_catalog | ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) \| ScanFenced (src/modules/data_catalog/application/catalog-scan.service.ts:234) | `src/modules/data_catalog/presentation/controllers/internal-catalog.controller.ts:30` |
 | POST /authz/effective-actor/evaluate | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:48` |
 | POST /delegated-permission-sets | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:64` |
 | POST /delegated-permission-sets/{id}/versions | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
@@ -728,24 +827,33 @@ _Ninguno._
 | GET /object-storage/versions/{versionId}/content/{token} | object_storage | ObjectContentUnavailableError: BODY_UNREADABLE (src/modules/object_storage/ports/s3-object-content.reader.ts:98) \| ObjectContentUnavailableError: NOT_FOUND / PROVIDER_ERROR (src/modules/object_storage/ports/s3-object-content.reader.ts:103) | `src/modules/object_storage/controllers/object-storage.controller.ts:273` |
 | GET /admin/ops/traffic | ops_console | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/application/ops-traffic.service.ts:93) | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:90` |
 | GET /admin/ops/traffic/endpoints | ops_console | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/ops_console/application/ops-traffic.service.ts:93) | `src/modules/ops_console/presentation/controllers/ops-console.controller.ts:102` |
+| POST /pharmacies/{pharmacyId}/categories/bulk | pharmacy | DryRunRollback: {{ outcome: 'UNCHANGED', id }} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:173) \| DryRunRollback: {outcome} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:177) | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:52` |
+| POST /pharmacies/{pharmacyId}/prices/bulk | pharmacy | DryRunRollback: {{ outcome: 'UNCHANGED', id }} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:173) \| DryRunRollback: {outcome} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:177) | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:86` |
+| POST /pharmacies/{pharmacyId}/products/bulk | pharmacy | DryRunRollback: {{ outcome: 'UNCHANGED', id }} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:173) \| DryRunRollback: {outcome} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:177) | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:69` |
+| POST /pharmacies/{pharmacyId}/sites/bulk | pharmacy | DryRunRollback: {{ outcome: 'UNCHANGED', id }} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:173) \| DryRunRollback: {outcome} (src/modules/pharmacy/services/pharmacy-bulk.service.ts:177) | `src/modules/pharmacy/controllers/pharmacy-bulk.controller.ts:105` |
+| GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products | pharmacy_inventory | ExternalCatalogUnavailableError: not configured (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:78) \| ExternalCatalogUnavailableError: GET {path} → {status} (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:87) \| ExternalCatalogUnavailableError: invalid product (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:45) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:92` |
+| POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync | pharmacy_inventory | ExternalCatalogUnavailableError: not configured (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:78) \| ExternalCatalogUnavailableError: GET {path} → {status} (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:87) \| ExternalCatalogUnavailableError: invalid product (src/modules/pharmacy_inventory/infrastructure/adapters/http-external-pharmacy-catalog.adapter.ts:45) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52` |
+| PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability | pharmacy_inventory | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/pharmacy_inventory/application/site-availability/set-site-product-availability.use-case.ts:76) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40` |
 | POST /procedure-cases/{id}/diagnoses | procedures_perioperative | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/procedures_perioperative/controllers/periop.controller.ts:211` |
 | POST /profiles/patients/me/addresses | profiles | Error: createSavedAddress no creó fila con municipio declarado (src/modules/profiles/infrastructure/adapters/patient-address-book.adapter.ts:54) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57` |
 | PATCH /profiles/patients/me/addresses/{id} | profiles | Error: createSavedAddress no creó fila con municipio declarado (src/modules/profiles/infrastructure/adapters/patient-address-book.adapter.ts:54) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
 | POST /admin/qa/plans/{planId}/approvals | qa_execution | DomainException: {HttpStatus.FORBIDDEN} (src/modules/qa_execution/services/qa-execution.service.ts:432) | `src/modules/qa_execution/controllers/qa-execution.controller.ts:148` |
-| POST /scheduling/bookings/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:545` |
-| POST /scheduling/bookings/{id}/reschedule | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:479` |
+| POST /scheduling/bookings/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:546` |
+| POST /scheduling/bookings/{id}/payment-receipts/{receiptId}/confirm | scheduling | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) \| Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:385` |
+| PUT /scheduling/bookings/{id}/payment-state | scheduling | Error: La factura {data.invoiceId} de la cita {data.bookingId} no existe (src/modules/scheduling/infrastructure/adapters/billing-booking.adapter.ts:133) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:267` |
+| POST /scheduling/bookings/{id}/reschedule | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:480` |
 | POST /scheduling/resources/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841` |
 | POST /surveys/invitations | surveys | Error: La encuesta base {kind} del tenant no quedó materializada (plantilla {ids.templateId}) (src/modules/surveys/services/surveys-system-templates.service.ts:142) | `src/modules/surveys/controllers/surveys-assignments.controller.ts:55` |
 | POST /system-context/contexts | system_context | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/system_context/services/system-contexts.service.ts:633) | `src/modules/system_context/controllers/system-context.controller.ts:289` |
 | POST /system-context/contexts/{id}/refresh | system_context | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/system_context/services/system-contexts.service.ts:633) \| DomainException: {HttpStatus.BAD_REQUEST} (src/modules/system_context/services/system-contexts.service.ts:668) | `src/modules/system_context/controllers/system-context.controller.ts:310` |
 | POST /internal/governance/retention-executions/run | system_ops | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/system_ops/services/retention-execution.service.ts:186) \| StorageLifecycleDenied: EXTERNAL_REFERENCE_UNKNOWN (src/modules/identity_assurance/services/identity-evidence-lifecycle.service.ts:80) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/modules/identity_assurance/services/identity-evidence-lifecycle.service.ts:89) | `src/modules/system_ops/controllers/retention-execution.controller.ts:28` |
-| GET /admin/analytics/funnels/{funnelId}/report | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:156` |
-| GET /admin/analytics/overview | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:121` |
-| GET /admin/analytics/pipeline-health | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:169` |
-| GET /admin/analytics/sessions | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:179` |
-| GET /admin/analytics/timeseries | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:130` |
-| GET /admin/analytics/web-vitals | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/controllers/telemetry-analytics.controller.ts:139` |
-| POST /telemetry/activity-events | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/services/telemetry-events.service.ts:682) | `src/modules/telemetry/controllers/telemetry-events.controller.ts:45` |
+| GET /admin/analytics/funnels/{funnelId}/report | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:156` |
+| GET /admin/analytics/overview | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:121` |
+| GET /admin/analytics/pipeline-health | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:169` |
+| GET /admin/analytics/sessions | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:179` |
+| GET /admin/analytics/timeseries | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:130` |
+| GET /admin/analytics/web-vitals | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-analytics.service.ts:105) | `src/modules/telemetry/presentation/controllers/telemetry-analytics.controller.ts:139` |
+| POST /telemetry/activity-events | telemetry | DomainException: {HttpStatus.UNPROCESSABLE_ENTITY} (src/modules/telemetry/application/services/telemetry-events.service.ts:682) | `src/modules/telemetry/presentation/controllers/telemetry-events.controller.ts:45` |
 | GET /terminology/import-template | terminology | ImportFileRejectedException: {ErrorCode.IMPORT_PROFILE_UNKNOWN} (src/modules/terminology/services/import-template.service.ts:82) \| ImportFileRejectedException: {ErrorCode.IMPORT_FORMAT_UNSUPPORTED} (src/modules/terminology/services/import-template.service.ts:91) | `src/modules/terminology/controllers/terminology-import-template.controller.ts:34` |
 | POST /terminology/versions/{versionId}/import-file | terminology | ImportFileRejectedException: {ErrorCode.IMPORT_PROFILE_UNKNOWN} (src/modules/terminology/services/concept-file-import.service.ts:284) \| ImportFileRejectedException: {ErrorCode.IMPORT_EMPTY_FILE} (src/modules/terminology/services/concept-file-import.service.ts:184) \| ImportFileRejectedException: {ErrorCode.IMPORT_FORMAT_UNSUPPORTED} (src/modules/terminology/services/concept-file-import.service.ts:309) | `src/modules/terminology/controllers/terminology-versions.controller.ts:118` |
 | POST /ts/location/pings/batch-ingest | time_series | DomainException: {HttpStatus.FORBIDDEN} (src/modules/time_series/services/location-consent.policy.ts:152) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/time_series/services/location-consent.policy.ts:152) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/time_series/services/location-consent.policy.ts:152) | `src/modules/time_series/controllers/series.controller.ts:206` |

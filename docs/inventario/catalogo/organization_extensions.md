@@ -2,7 +2,7 @@
 
 # Catálogo del schema `organization_extensions`
 
-- **Tablas:** 5 · **Columnas:** 84 (20 con descripción: 23.8 %) · **Índices:** 55
+- **Tablas:** 5 · **Columnas:** 86 (21 con descripción: 24.4 %) · **Índices:** 57
 - **Dominio:** Práctica y Agenda
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,7 +10,7 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [facility_licenses](#facility_licenses) | Conserva licencias y habilitaciones de instalaciones sanitarias para documentar autorización operativa. | 18 | 11 | 4 | COINCIDE |
+| [facility_licenses](#facility_licenses) | Conserva licencias y habilitaciones de instalaciones sanitarias para documentar autorización operativa. | 20 | 13 | 4 | DIVERGE |
 | [hospital_service_lines](#hospital_service_lines) | Cataloga líneas de servicio hospitalarias para describir áreas de atención ofrecidas por cada hospital. | 14 | 9 | 3 | COINCIDE |
 | [hospitals](#hospitals) | Representa hospitales como una especialización de organización sanitaria con atributos propios de ese tipo de institución. | 18 | 15 | 5 | COINCIDE |
 | [organization_affiliations](#organization_affiliations) | Vincula organizaciones sanitarias para representar afiliaciones y relaciones institucionales relevantes a la prestación. | 16 | 9 | 3 | COINCIDE |
@@ -62,7 +62,7 @@ Conserva licencias y habilitaciones de instalaciones sanitarias para documentar 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_22_organization_extensions.puml: facility_licenses`
 - **Dominio:** Práctica y Agenda · **Diagrama:** `Mantra Core Health Context/modules/diagram_22_organization_extensions.puml` · **DDL:** `SQL/22_organization_extensions/02_tables.sql`
 - **Entidad del ORM:** `FacilityLicenses` — `src/modules/organization_extensions/entities/facility_licenses.entity.ts`
-- **Resumen:** 18 columnas · 11 índices · 10 FK salientes · 0 entrantes · 4 operaciones
+- **Resumen:** 20 columnas · 13 índices · 12 FK salientes · 0 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -86,6 +86,8 @@ Conserva licencias y habilitaciones de instalaciones sanitarias para documentar 
 | 16 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 17 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 18 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/organization_extensions/entities/facility_licenses.entity.ts:126`)_ | coincide |
+| 19 | `clinical_unit_id` | `uuid` | Clave foránea → practice.clinical_units.id; Opcional | + v4.2.67b (infraestructura F1): alcance opcional de la habilitación a una unidad organizativa o a un servicio de la sede. NULL = habilita el establecimiento entero. Sede y unidad se referencian además con FK compuesta (tenant_id, x_id) y el servicio con un trigger: el padre tiene que ser del mismo tenant (patch 2026-10-29_infraestructura_f1b). _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_22_organization_extensions.puml:79`)_ | **AUSENTE_EN_ORM** |
+| 20 | `healthcare_service_id` | `uuid` | Clave foránea → practice.healthcare_services.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -101,6 +103,8 @@ Conserva licencias y habilitaciones de instalaciones sanitarias para documentar 
 | hacia | verification_status_concept_id | terminology.catalog_concepts (id) | fk_facility_licenses_verification_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_facility_licenses_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_facility_licenses_updated_by_user_id |
+| hacia | clinical_unit_id | practice.clinical_units (id) | fk_facility_licenses_clinical_unit_id |
+| hacia | healthcare_service_id | practice.healthcare_services (id) | fk_facility_licenses_healthcare_service_id |
 
 #### Índices
 
@@ -117,6 +121,8 @@ Conserva licencias y habilitaciones de instalaciones sanitarias para documentar 
 | `ix_facility_licenses_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_facility_licenses_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_facility_licenses_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_facility_licenses_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_facility_licenses_tenant_id_updated_at` | no | tenant_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
+| `ix_facility_licenses_clinical_unit_id` | no | clinical_unit_id | Soporta la clave foránea fk_facility_licenses_clinical_unit_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_facility_licenses_healthcare_service_id` | no | healthcare_service_id | Soporta la clave foránea fk_facility_licenses_healthcare_service_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
 

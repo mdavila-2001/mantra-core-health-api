@@ -5,7 +5,7 @@
 - **Bloque:** Marketing y Crecimiento (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 - **Operaciones:** 104 (100 en el contrato, 4 sólo en el código)
 - **Riesgo:** ALTO 29 · MEDIO 9 · BAJO 66
-- **Tablas distintas que tocan:** 68
+- **Tablas distintas que tocan:** 69
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/community.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -24,10 +24,10 @@
 | 10 | POST | `/community/bookmarks` | Guardar un bookmark en una colección | ALTO | 5 | sesión (sin roles) |
 | 11 | POST | `/community/comments` | Comentar (hilo anidado) con contadores | ALTO | 10 | sesión (sin roles) |
 | 12 | GET | `/community/comments/media/{fileId}/content` | Descargar el adjunto de un comentario (imagen, sticker o GIF) | BAJO | 10 | sesión (sin roles) |
-| 13 | GET | `/community/conversations` | Conversaciones activas de un perfil | BAJO | 6 | sesión (sin roles) |
+| 13 | GET | `/community/conversations` | Conversaciones activas de un perfil | BAJO | 7 | sesión (sin roles) |
 | 14 | POST | `/community/conversations` | Crear una conversación con participantes | ALTO | 8 | sesión (sin roles) |
 | 15 | GET | `/community/conversations/{conversationId}/attachments/{fileId}/content` | Descargar el adjunto de una conversación (participante activo) | BAJO | 8 | sesión (sin roles) |
-| 16 | GET | `/community/conversations/{conversationId}/messages` | Mensajes de una conversación | BAJO | 7 | sesión (sin roles) |
+| 16 | GET | `/community/conversations/{conversationId}/messages` | Mensajes de una conversación | BAJO | 8 | sesión (sin roles) |
 | 17 | POST | `/community/conversations/{conversationId}/messages` | Enviar un mensaje directo en la conversación | ALTO | 25 | sesión (sin roles) |
 | 18 | DELETE | `/community/conversations/{conversationId}/messages/{messageId}` | Eliminar un mensaje propio | ALTO | 8 | sesión (sin roles) |
 | 19 | PATCH | `/community/conversations/{conversationId}/messages/{messageId}` | Editar el texto de un mensaje propio | ALTO | 6 | sesión (sin roles) |
@@ -85,37 +85,37 @@
 | 71 | PUT | `/community/reactions` | Reaccionar a contenido (upsert una reacción por actor/objeto) | ALTO | 6 | sesión (sin roles) |
 | 72 | POST | `/community/reports` | Reportar contenido y encolar moderación | ALTO | 3 | sesión (sin roles) |
 | 73 | GET | `/community/topics` | Temas de la comunidad | BAJO | 1 | sesión (sin roles) |
-| 74 | GET | `/f/{slug}` | Ficha pública de una farmacia | BAJO | 18 | pública |
+| 74 | GET | `/f/{slug}` | Ficha pública de una farmacia | BAJO | 19 | pública |
 | 75 | GET | `/internal/community/feed/pending` | Publicaciones publicadas sin fan-out | BAJO | 3 | SYSTEM, SECURITY_ADMIN |
 | 76 | POST | `/internal/community/feed/ranking/apply` | Aplicar rank_score recalculado | MEDIO | 1 | SYSTEM, SECURITY_ADMIN |
 | 77 | GET | `/internal/community/feed/ranking/pending` | Items de feed pendientes de puntuar | BAJO | 4 | SYSTEM, SECURITY_ADMIN |
 | 78 | POST | `/internal/community/feed/rebuild` | Generar feed (fan-out y ranking) | MEDIO | 2 | SYSTEM, SECURITY_ADMIN |
 | 79 | GET | `/internal/community/search/health` | Estado del índice del directorio público | BAJO | 1 | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN |
-| 80 | POST | `/internal/community/search/reindex` | Reindexar el directorio público | BAJO | 9 | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN |
+| 80 | POST | `/internal/community/search/reindex` | Reindexar el directorio público | BAJO | 10 | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN |
 | 81 | POST | `/internal/community/verification/badges` | Emitir un sello a mano (auditado) | MEDIO | 6 | SECURITY_ADMIN |
 | 82 | POST | `/internal/community/verification/badges/{targetId}/revoke` | Bajar los sellos de un sujeto (auditado) | MEDIO | 5 | SECURITY_ADMIN |
 | 83 | POST | `/internal/community/verification/badges/expire-sweep` | Bajar los sellos cuya vigencia ya venció | MEDIO | 5 | SYSTEM, SECURITY_ADMIN |
-| 84 | GET | `/l/{slug}` | Ficha pública de un laboratorio | BAJO | 18 | pública |
-| 85 | GET | `/o/{slug}` | Ficha pública de una organización | BAJO | 18 | pública |
-| 86 | GET | `/p/{slug}` | Ficha pública de un profesional | BAJO | 18 | pública |
+| 84 | GET | `/l/{slug}` | Ficha pública de un laboratorio | BAJO | 19 | pública |
+| 85 | GET | `/o/{slug}` | Ficha pública de una organización | BAJO | 19 | pública |
+| 86 | GET | `/p/{slug}` | Ficha pública de un profesional | BAJO | 19 | pública |
 | 87 | GET | `/patients/me/reviewable-care` | Consultar si una atención recibida se puede calificar | BAJO | 4 | PATIENT |
 | 88 | POST | `/patients/me/reviews` | Calificar una atención recibida | MEDIO | 6 | PATIENT |
 | 89 | GET | `/public/comments/{commentId}/replies` | Respuestas de un comentario público | BAJO | 4 | pública |
 | 90 | GET | `/public/media/{id}` | Servir una imagen pública (avatar, portada o post) | BAJO | 7 | pública |
-| 91 | GET | `/public/nearby` | Prestadores cercanos, en línea recta | BAJO | 7 | pública |
+| 91 | GET | `/public/nearby` | Prestadores cercanos, en línea recta | BAJO | 8 | pública |
 | 92 | GET | `/public/posts` | Últimas publicaciones de todos los profesionales | BAJO | 5 | pública |
 | 93 | GET | `/public/posts/{postId}/comments` | Comentarios raíz de una publicación pública | BAJO | 4 | pública |
 | 94 | GET | `/public/posts/{postId}/reactions` | Quiénes reaccionaron a una publicación pública | BAJO | 3 | pública |
-| 95 | GET | `/public/profiles/{prefijo}/{slug}` | Ficha pública por prefijo de vertical | BAJO | 18 | pública |
+| 95 | GET | `/public/profiles/{prefijo}/{slug}` | Ficha pública por prefijo de vertical | BAJO | 19 | pública |
 | 96 | GET | `/public/profiles/{prefijo}/{slug}/reviews` | Opiniones publicadas de una ficha pública | BAJO | 5 | pública |
-| 97 | GET | `/public/search` | Buscador público unificado | BAJO | 12 | pública |
-| 98 | GET | `/public/search/diagnostic-units` | Laboratorios y centros de diagnóstico | BAJO | 12 | pública |
-| 99 | GET | `/public/search/insurers` | Aseguradoras en el directorio público | BAJO | 12 | pública |
-| 100 | GET | `/public/search/medications` | Medicamentos ofertados públicamente | BAJO | 12 | pública |
-| 101 | GET | `/public/search/organizations` | Organizaciones en el directorio público | BAJO | 12 | pública |
-| 102 | GET | `/public/search/pharmacies` | Farmacias en el directorio público | BAJO | 12 | pública |
-| 103 | GET | `/public/search/practitioners` | Profesionales en el directorio público | BAJO | 12 | pública |
-| 104 | GET | `/s/{slug}` | Ficha pública de una aseguradora | BAJO | 18 | pública |
+| 97 | GET | `/public/search` | Buscador público unificado | BAJO | 13 | pública |
+| 98 | GET | `/public/search/diagnostic-units` | Laboratorios y centros de diagnóstico | BAJO | 13 | pública |
+| 99 | GET | `/public/search/insurers` | Aseguradoras en el directorio público | BAJO | 13 | pública |
+| 100 | GET | `/public/search/medications` | Medicamentos ofertados públicamente | BAJO | 13 | pública |
+| 101 | GET | `/public/search/organizations` | Organizaciones en el directorio público | BAJO | 13 | pública |
+| 102 | GET | `/public/search/pharmacies` | Farmacias en el directorio público | BAJO | 13 | pública |
+| 103 | GET | `/public/search/practitioners` | Profesionales en el directorio público | BAJO | 13 | pública |
+| 104 | GET | `/s/{slug}` | Ficha pública de una aseguradora | BAJO | 19 | pública |
 
 ---
 
@@ -132,7 +132,7 @@
 
 Entero de un parámetro de consulta, o `undefined`. Un valor no numérico se ignora en vez de dar 400: el contrato promete que `limit` fuera de rango se **recorta**, y «abc» es tan fuera de rango como 9999. La única excepción son las coordenadas de `nearby`, que sí fallan. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -144,7 +144,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-public.controller.ts:582` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | RATE_LIMIT | Límite propio: Throttle(PUBLIC_RATE_LIMIT) | `src/modules/community/controllers/community-public.controller.ts:582` |
 
 ### Tablas que afecta
@@ -193,7 +193,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Decimal de un parámetro de consulta, o `undefined`. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -205,7 +205,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-public.controller.ts:589` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | RATE_LIMIT | Límite propio: Throttle(PUBLIC_RATE_LIMIT) | `src/modules/community/controllers/community-public.controller.ts:589` |
 
 ### Tablas que afecta
@@ -254,7 +254,7 @@ _Ninguna prueba existente menciona esta operación._
 
 El vertical de `nearby`, o `undefined` si no es uno de los cuatro que acepta ese endpoint (ver ). Mismo criterio que `toInt`/`toBool`: un vertical inventado se ignora —el buscador cae a «todos»— en vez de romper la consulta con 400. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -266,7 +266,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-public.controller.ts:602` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | RATE_LIMIT | Límite propio: Throttle(PUBLIC_RATE_LIMIT) | `src/modules/community/controllers/community-public.controller.ts:602` |
 
 ### Tablas que afecta
@@ -315,7 +315,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Booleano de un parámetro; sólo `'true'` afirma. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -327,7 +327,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-public.controller.ts:607` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | RATE_LIMIT | Límite propio: Throttle(PUBLIC_RATE_LIMIT) | `src/modules/community/controllers/community-public.controller.ts:607` |
 
 ### Tablas que afecta
@@ -376,7 +376,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Levantar un bloqueo. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -388,10 +388,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:325` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | blockerProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | blockedProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -455,7 +455,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Bloqueos emitidos por un perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -467,11 +467,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:534` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -542,7 +542,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Bloquear a un usuario. Caso de uso UC-19-14: Bloquea a un usuario. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:138`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:138`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -554,10 +554,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:272` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -647,7 +647,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Quitar un marcador. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -659,11 +659,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:310` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | bookmarkableType (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | bookmarkableRefId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -729,7 +729,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Marcadores guardados por un perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -741,12 +741,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:517` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | collectionName (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -819,7 +819,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Guardar un bookmark en una colección. Caso de uso UC-19-04: Guarda bookmark en colección. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:128`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:128`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -831,10 +831,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:240` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -922,7 +922,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Comentar (hilo anidado) con contadores. Caso de uso UC-19-02: Comenta (hilo anidado) con contadores. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:126`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:126`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -934,10 +934,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:207` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1061,7 +1061,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Descargar el adjunto de un comentario (imagen, sticker o GIF). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1073,10 +1073,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:468` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: fileId | `src/modules/community/controllers/community-social.controller.ts:468` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1146,11 +1146,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Conversaciones activas de un perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /community/conversations` la atiende `CommunityMessagingController.listConversations` (src/modules/community/controllers/community-messaging.controller.ts:283). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listConversations`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants.
+`GET /community/conversations` la atiende `CommunityMessagingController.listConversations` (src/modules/community/controllers/community-messaging.controller.ts:283). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listConversations`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, directory.tenant_memberships, directory.tenants, profiles.practitioner_admissions.
 
 ### Requerimientos
 
@@ -1158,12 +1158,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:283` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | q (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1175,6 +1175,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → PublicProfilesRepository.listByIds | `src/modules/community/repositories/public-profiles.repository.ts:135` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → CommunityVisibilityService.assertOwnMessagingProfile → CommunityVisibilityService.messagingAccess → CommunityOrganizationStaffService.canAttend → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `directory.tenants` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → CommunityVisibilityService.assertOwnMessagingProfile → CommunityVisibilityService.messagingAccess → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → CommunityMessagingReadService.peerCards → PractitionerVerificationReader.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 
 ### Parámetros
 
@@ -1193,33 +1194,37 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ConversationListItemDto>` | Sí | — | — | Conversaciones de la página. | `src/modules/community/dto/read-messaging.dto.ts:250` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador de la conversación. | `src/modules/community/dto/read-messaging.dto.ts:185` |
-| `items[].conversationTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de conversación (directa, grupal). | `src/modules/community/dto/read-messaging.dto.ts:189` |
-| `items[].groupId` | `string` | No | formato uuid; admite null | — | Grupo al que pertenece, si es de grupo. | `src/modules/community/dto/read-messaging.dto.ts:193` |
-| `items[].lastMessageAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió el último mensaje. | `src/modules/community/dto/read-messaging.dto.ts:197` |
-| `items[].messageCount` | `number` | No | admite null | — | Cuántos mensajes acumula. | `src/modules/community/dto/read-messaging.dto.ts:201` |
-| `items[].lastMessage` | `ConversationPreviewMessageDto` | No | — | — | Vista previa del último mensaje. | `src/modules/community/dto/read-messaging.dto.ts:205` |
-| `items[].lastMessage.id` | `string` | No | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:18` |
-| `items[].lastMessage.senderProfileId` | `string` | No | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:22` |
-| `items[].lastMessage.bodyText` | `string` | No | admite null | — | Cuerpo del mensaje; `null` si era sólo un adjunto o si se eliminó. | `src/modules/community/dto/read-messaging.dto.ts:26` |
-| `items[].lastMessage.contentTypeConceptId` | `string` | No | formato uuid; admite null | — | Concept id del tipo de contenido (texto o media). F4.3: con esto la fila de la bandeja dice «Foto» o «Documento» sin adivinarlo por el cuerpo vacío. | `src/modules/community/dto/read-messaging.dto.ts:33` |
-| `items[].lastMessage.attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`, si el último mensaje era uno. | `src/modules/community/dto/read-messaging.dto.ts:37` |
-| `items[].lastMessage.deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó, si el último mensaje está eliminado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:41` |
-| `items[].lastMessage.sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:45` |
-| `items[].unreadCount` | `number` | Sí | — | — | Cuántos mensajes le quedan sin leer al actor. | `src/modules/community/dto/read-messaging.dto.ts:209` |
-| `items[].lastMessageReadByPeer` | `boolean` | No | admite null | — | Si el otro lado ya leyó el último mensaje, cuando ese mensaje es del actor y la conversación es directa. `null` si no se sabe (grupo, o el último no es propio). Con esto la bandeja pinta el doble tilde sin mentir (F4.3). | `src/modules/community/dto/read-messaging.dto.ts:217` |
-| `items[].isFavorite` | `boolean` | Sí | — | — | Favorita para el actor (F4.4). | `src/modules/community/dto/read-messaging.dto.ts:221` |
-| `items[].isPinned` | `boolean` | Sí | — | — | Fijada arriba de la bandeja del actor (F4.4). Las fijadas van primero. | `src/modules/community/dto/read-messaging.dto.ts:225` |
-| `items[].archivedAt` | `string` | No | formato date-time; admite null | — | Desde cuándo la archivó el actor; `null` si no está archivada (F4.4). | `src/modules/community/dto/read-messaging.dto.ts:229` |
-| `items[].pinnedMessageId` | `string` | No | formato uuid; admite null | — | El mensaje fijado en la barra superior, si hay uno (F4.6). | `src/modules/community/dto/read-messaging.dto.ts:233` |
-| `items[].peers` | `array<ConversationPeerDto>` | Sí | — | — | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `src/modules/community/dto/read-messaging.dto.ts:243` |
-| `items[].peers[].profileId` | `string` | Sí | formato uuid | — | Perfil público del participante. | `src/modules/community/dto/read-messaging.dto.ts:118` |
-| `items[].peers[].displayName` | `string` | No | admite null | — | Cómo se llama, para poder pintar la fila. | `src/modules/community/dto/read-messaging.dto.ts:122` |
-| `items[].peers[].avatarUrl` | `string` | No | admite null | — | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `src/modules/community/dto/read-messaging.dto.ts:126` |
-| `count` | `number` | Sí | — | — | Cuántas trae esta página. | `src/modules/community/dto/read-messaging.dto.ts:254` |
-| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-messaging.dto.ts:258` |
-| `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null` si no hay más (F4.3). Se pagina sobre el orden de la bandeja —fijadas primero, después por último mensaje— y dentro del mismo recorte que aplique `q`. | `src/modules/community/dto/read-messaging.dto.ts:267` |
+| `items` | `array<ConversationListItemDto>` | Sí | — | — | Conversaciones de la página. | `src/modules/community/dto/read-messaging.dto.ts:262` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador de la conversación. | `src/modules/community/dto/read-messaging.dto.ts:197` |
+| `items[].conversationTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de conversación (directa, grupal). | `src/modules/community/dto/read-messaging.dto.ts:201` |
+| `items[].groupId` | `string` | No | formato uuid; admite null | — | Grupo al que pertenece, si es de grupo. | `src/modules/community/dto/read-messaging.dto.ts:205` |
+| `items[].lastMessageAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió el último mensaje. | `src/modules/community/dto/read-messaging.dto.ts:209` |
+| `items[].messageCount` | `number` | No | admite null | — | Cuántos mensajes acumula. | `src/modules/community/dto/read-messaging.dto.ts:213` |
+| `items[].lastMessage` | `ConversationPreviewMessageDto` | No | — | — | Vista previa del último mensaje. | `src/modules/community/dto/read-messaging.dto.ts:217` |
+| `items[].lastMessage.id` | `string` | No | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:19` |
+| `items[].lastMessage.senderProfileId` | `string` | No | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:23` |
+| `items[].lastMessage.bodyText` | `string` | No | admite null | — | Cuerpo del mensaje; `null` si era sólo un adjunto o si se eliminó. | `src/modules/community/dto/read-messaging.dto.ts:27` |
+| `items[].lastMessage.contentTypeConceptId` | `string` | No | formato uuid; admite null | — | Concept id del tipo de contenido (texto o media). F4.3: con esto la fila de la bandeja dice «Foto» o «Documento» sin adivinarlo por el cuerpo vacío. | `src/modules/community/dto/read-messaging.dto.ts:34` |
+| `items[].lastMessage.attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`, si el último mensaje era uno. | `src/modules/community/dto/read-messaging.dto.ts:38` |
+| `items[].lastMessage.deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó, si el último mensaje está eliminado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:42` |
+| `items[].lastMessage.sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:46` |
+| `items[].unreadCount` | `number` | Sí | — | — | Cuántos mensajes le quedan sin leer al actor. | `src/modules/community/dto/read-messaging.dto.ts:221` |
+| `items[].lastMessageReadByPeer` | `boolean` | No | admite null | — | Si el otro lado ya leyó el último mensaje, cuando ese mensaje es del actor y la conversación es directa. `null` si no se sabe (grupo, o el último no es propio). Con esto la bandeja pinta el doble tilde sin mentir (F4.3). | `src/modules/community/dto/read-messaging.dto.ts:229` |
+| `items[].isFavorite` | `boolean` | Sí | — | — | Favorita para el actor (F4.4). | `src/modules/community/dto/read-messaging.dto.ts:233` |
+| `items[].isPinned` | `boolean` | Sí | — | — | Fijada arriba de la bandeja del actor (F4.4). Las fijadas van primero. | `src/modules/community/dto/read-messaging.dto.ts:237` |
+| `items[].archivedAt` | `string` | No | formato date-time; admite null | — | Desde cuándo la archivó el actor; `null` si no está archivada (F4.4). | `src/modules/community/dto/read-messaging.dto.ts:241` |
+| `items[].pinnedMessageId` | `string` | No | formato uuid; admite null | — | El mensaje fijado en la barra superior, si hay uno (F4.6). | `src/modules/community/dto/read-messaging.dto.ts:245` |
+| `items[].peers` | `array<ConversationPeerDto>` | Sí | — | — | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `src/modules/community/dto/read-messaging.dto.ts:255` |
+| `items[].peers[].profileId` | `string` | Sí | formato uuid | — | Perfil público del participante. | `src/modules/community/dto/read-messaging.dto.ts:119` |
+| `items[].peers[].displayName` | `string` | No | admite null | — | Cómo se llama, para poder pintar la fila. | `src/modules/community/dto/read-messaging.dto.ts:123` |
+| `items[].peers[].avatarUrl` | `string` | No | admite null | — | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `src/modules/community/dto/read-messaging.dto.ts:127` |
+| `items[].peers[].verification` | `PractitionerVerificationDto` | No | — | — | El sello de verificación del participante cuando es un profesional; `null` para pacientes, organizaciones y cualquier otro perfil. Es la misma forma y la misma proyección de la admisión que muestran la Guía y el buscador (`VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED`): el chat no interpreta el estado por su cuenta. Aditivo. | `src/modules/community/dto/read-messaging.dto.ts:138` |
+| `items[].peers[].verification.status` | `string` | No | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | Estado visible. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `items[].peers[].verification.verifiedAt` | `string` | No | formato date-time; admite null | — | Cuándo se verificó (ISO), si alguna vez se verificó. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `items[].peers[].verification.validUntil` | `string` | No | admite null | — | Hasta cuándo vale (YYYY-MM-DD, fin de día en America/La_Paz). | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `count` | `number` | Sí | — | — | Cuántas trae esta página. | `src/modules/community/dto/read-messaging.dto.ts:266` |
+| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-messaging.dto.ts:270` |
+| `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null` si no hay más (F4.3). Se pagina sobre el orden de la bandeja —fijadas primero, después por último mensaje— y dentro del mismo recorte que aplique `q`. | `src/modules/community/dto/read-messaging.dto.ts:279` |
 
 ### Respuestas posibles
 
@@ -1259,7 +1264,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Crear una conversación con participantes. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1271,10 +1276,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:70` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1367,7 +1372,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Descargar el adjunto de una conversación (participante activo). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1379,10 +1384,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:246` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId, fileId | `src/modules/community/controllers/community-messaging.controller.ts:246` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1452,11 +1457,11 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Mensajes de una conversación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.listMessages` (src/modules/community/controllers/community-messaging.controller.ts:300). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listMessages`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants.
+`GET /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.listMessages` (src/modules/community/controllers/community-messaging.controller.ts:300). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listMessages`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, community.user_blocks, directory.tenant_memberships, directory.tenants, profiles.practitioner_admissions.
 
 ### Requerimientos
 
@@ -1464,12 +1469,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:300` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:300` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1482,6 +1487,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `community.user_blocks` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → CommunityMessagingReadService.assertNoBlockWithPeers → CommunityVisibilityService.isBlockedBetween → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
 | `directory.tenant_memberships` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → CommunityVisibilityService.assertOwnMessagingProfile → CommunityVisibilityService.messagingAccess → CommunityOrganizationStaffService.canAttend → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:75` |
 | `directory.tenants` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → CommunityVisibilityService.assertOwnMessagingProfile → CommunityVisibilityService.messagingAccess → CommunityOrganizationStaffService.isTenantBacked | `src/modules/community/services/community-organization-staff.service.ts:111` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → CommunityMessagingReadService.threadPeers → CommunityMessagingReadService.peerCards → PractitionerVerificationReader.verificationOf → PractitionerAdmissionsRepository.findCurrentByPractitioners | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:166` |
 
 ### Parámetros
 
@@ -1500,32 +1506,40 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<DirectMessageDto>` | Sí | — | — | Mensajes de la página, del más reciente al más antiguo. | `src/modules/community/dto/read-messaging.dto.ts:321` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:274` |
-| `items[].conversationId` | `string` | Sí | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:278` |
-| `items[].senderProfileId` | `string` | Sí | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:282` |
-| `items[].replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:286` |
-| `items[].contentTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:290` |
-| `items[].bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:294` |
-| `items[].attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:298` |
-| `items[].isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:302` |
-| `items[].deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:310` |
-| `items[].sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:314` |
-| `count` | `number` | Sí | — | — | Cuántos trae esta página. | `src/modules/community/dto/read-messaging.dto.ts:325` |
-| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-messaging.dto.ts:329` |
-| `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-messaging.dto.ts:333` |
-| `peerReadUpTo` | `string` | No | formato date-time; admite null | — | Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT. `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios cuyo `sentAt` sea anterior o igual a esta marca. | `src/modules/community/dto/read-messaging.dto.ts:343` |
-| `pinnedMessage` | `DirectMessageDto` | No | — | — | El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja con la primera página para que la barra superior se pinte sin otra llamada, aunque el mensaje sea de hace meses y no esté en la página. | `src/modules/community/dto/read-messaging.dto.ts:351` |
-| `pinnedMessage.id` | `string` | No | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:274` |
-| `pinnedMessage.conversationId` | `string` | No | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:278` |
-| `pinnedMessage.senderProfileId` | `string` | No | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:282` |
-| `pinnedMessage.replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:286` |
-| `pinnedMessage.contentTypeConceptId` | `string` | No | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:290` |
-| `pinnedMessage.bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:294` |
-| `pinnedMessage.attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:298` |
-| `pinnedMessage.isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:302` |
-| `pinnedMessage.deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:310` |
-| `pinnedMessage.sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:314` |
+| `items` | `array<DirectMessageDto>` | Sí | — | — | Mensajes de la página, del más reciente al más antiguo. | `src/modules/community/dto/read-messaging.dto.ts:333` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:286` |
+| `items[].conversationId` | `string` | Sí | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:290` |
+| `items[].senderProfileId` | `string` | Sí | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:294` |
+| `items[].replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:298` |
+| `items[].contentTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:302` |
+| `items[].bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:306` |
+| `items[].attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:310` |
+| `items[].isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:314` |
+| `items[].deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:322` |
+| `items[].sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:326` |
+| `count` | `number` | Sí | — | — | Cuántos trae esta página. | `src/modules/community/dto/read-messaging.dto.ts:337` |
+| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-messaging.dto.ts:341` |
+| `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-messaging.dto.ts:345` |
+| `peerReadUpTo` | `string` | No | formato date-time; admite null | — | Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT. `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios cuyo `sentAt` sea anterior o igual a esta marca. | `src/modules/community/dto/read-messaging.dto.ts:355` |
+| `pinnedMessage` | `DirectMessageDto` | No | — | — | El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja con la primera página para que la barra superior se pinte sin otra llamada, aunque el mensaje sea de hace meses y no esté en la página. | `src/modules/community/dto/read-messaging.dto.ts:363` |
+| `pinnedMessage.id` | `string` | No | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:286` |
+| `pinnedMessage.conversationId` | `string` | No | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:290` |
+| `pinnedMessage.senderProfileId` | `string` | No | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:294` |
+| `pinnedMessage.replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:298` |
+| `pinnedMessage.contentTypeConceptId` | `string` | No | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:302` |
+| `pinnedMessage.bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:306` |
+| `pinnedMessage.attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:310` |
+| `pinnedMessage.isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:314` |
+| `pinnedMessage.deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:322` |
+| `pinnedMessage.sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:326` |
+| `peers` | `array<ConversationPeerDto>` | No | — | — | Los demás participantes con su sello, como en la bandeja. Viaja sólo con la primera página (la cabecera del hilo se pinta al abrir y no en cada página de historia). Es el «detalle» de la conversación: no hay `GET :id`. | `src/modules/community/dto/read-messaging.dto.ts:371` |
+| `peers[].profileId` | `string` | No | formato uuid | — | Perfil público del participante. | `src/modules/community/dto/read-messaging.dto.ts:119` |
+| `peers[].displayName` | `string` | No | admite null | — | Cómo se llama, para poder pintar la fila. | `src/modules/community/dto/read-messaging.dto.ts:123` |
+| `peers[].avatarUrl` | `string` | No | admite null | — | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `src/modules/community/dto/read-messaging.dto.ts:127` |
+| `peers[].verification` | `PractitionerVerificationDto` | No | — | — | El sello de verificación del participante cuando es un profesional; `null` para pacientes, organizaciones y cualquier otro perfil. Es la misma forma y la misma proyección de la admisión que muestran la Guía y el buscador (`VERIFIED`, `IN_REVIEW`, `UNVERIFIED`, `SUSPENDED`, `EXPIRED`): el chat no interpreta el estado por su cuenta. Aditivo. | `src/modules/community/dto/read-messaging.dto.ts:138` |
+| `peers[].verification.status` | `string` | No | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | Estado visible. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `peers[].verification.verifiedAt` | `string` | No | formato date-time; admite null | — | Cuándo se verificó (ISO), si alguna vez se verificó. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `peers[].verification.validUntil` | `string` | No | admite null | — | Hasta cuándo vale (YYYY-MM-DD, fin de día en America/La_Paz). | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
 
 ### Respuestas posibles
 
@@ -1565,7 +1579,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Enviar un mensaje directo en la conversación. Caso de uso UC-19-06: Envía mensaje directo. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:130`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:130`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1577,11 +1591,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:86` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:86` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1700,7 +1714,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Eliminar un mensaje propio. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1712,10 +1726,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:121` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId, messageId | `src/modules/community/controllers/community-messaging.controller.ts:121` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1746,9 +1760,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:358` |
-| `messageId` | `string` | Sí | formato uuid | — | El mensaje eliminado. | `src/modules/community/dto/read-messaging.dto.ts:362` |
-| `deletedAt` | `string` | Sí | formato date-time | — | Cuándo. | `src/modules/community/dto/read-messaging.dto.ts:366` |
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:378` |
+| `messageId` | `string` | Sí | formato uuid | — | El mensaje eliminado. | `src/modules/community/dto/read-messaging.dto.ts:382` |
+| `deletedAt` | `string` | Sí | formato date-time | — | Cuándo. | `src/modules/community/dto/read-messaging.dto.ts:386` |
 
 ### Respuestas posibles
 
@@ -1789,7 +1803,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Editar el texto de un mensaje propio. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1801,11 +1815,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:103` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId, messageId | `src/modules/community/controllers/community-messaging.controller.ts:103` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1856,16 +1870,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:274` |
-| `conversationId` | `string` | Sí | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:278` |
-| `senderProfileId` | `string` | Sí | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:282` |
-| `replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:286` |
-| `contentTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:290` |
-| `bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:294` |
-| `attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:298` |
-| `isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:302` |
-| `deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:310` |
-| `sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:314` |
+| `id` | `string` | Sí | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:286` |
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:290` |
+| `senderProfileId` | `string` | Sí | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:294` |
+| `replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:298` |
+| `contentTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:302` |
+| `bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:306` |
+| `attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:310` |
+| `isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:314` |
+| `deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:322` |
+| `sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:326` |
 
 ### Respuestas posibles
 
@@ -1906,7 +1920,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Marcar la conversación como favorita, fijada o archivada. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -1918,11 +1932,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:161` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:161` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1973,10 +1987,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:81` |
-| `isFavorite` | `boolean` | Sí | — | — | Favorita para este participante. | `src/modules/community/dto/read-messaging.dto.ts:85` |
-| `isPinned` | `boolean` | Sí | — | — | Fijada arriba de la bandeja de este participante. | `src/modules/community/dto/read-messaging.dto.ts:89` |
-| `archivedAt` | `string` | No | formato date-time; admite null | — | Desde cuándo está archivada; `null` si no lo está. | `src/modules/community/dto/read-messaging.dto.ts:93` |
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:82` |
+| `isFavorite` | `boolean` | Sí | — | — | Favorita para este participante. | `src/modules/community/dto/read-messaging.dto.ts:86` |
+| `isPinned` | `boolean` | Sí | — | — | Fijada arriba de la bandeja de este participante. | `src/modules/community/dto/read-messaging.dto.ts:90` |
+| `archivedAt` | `string` | No | formato date-time; admite null | — | Desde cuándo está archivada; `null` si no lo está. | `src/modules/community/dto/read-messaging.dto.ts:94` |
 
 ### Respuestas posibles
 
@@ -2016,7 +2030,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Soltar el mensaje fijado de la conversación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2028,10 +2042,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:197` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:197` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2059,8 +2073,8 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:100` |
-| `pinnedMessageId` | `string` | No | formato uuid; admite null | — | El mensaje fijado, o `null` si se soltó. | `src/modules/community/dto/read-messaging.dto.ts:104` |
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:101` |
+| `pinnedMessageId` | `string` | No | formato uuid; admite null | — | El mensaje fijado, o `null` si se soltó. | `src/modules/community/dto/read-messaging.dto.ts:105` |
 
 ### Respuestas posibles
 
@@ -2100,7 +2114,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Fijar un mensaje de la conversación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2112,11 +2126,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:180` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:180` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2167,8 +2181,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:100` |
-| `pinnedMessageId` | `string` | No | formato uuid; admite null | — | El mensaje fijado, o `null` si se soltó. | `src/modules/community/dto/read-messaging.dto.ts:104` |
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:101` |
+| `pinnedMessageId` | `string` | No | formato uuid; admite null | — | El mensaje fijado, o `null` si se soltó. | `src/modules/community/dto/read-messaging.dto.ts:105` |
 
 ### Respuestas posibles
 
@@ -2208,7 +2222,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Presencia de los demás participantes. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2220,10 +2234,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:316` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:316` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2249,11 +2263,11 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `conversationId` | `string` | Sí | formato uuid | — | Conversación consultada. | `src/modules/community/dto/read-messaging.dto.ts:70` |
-| `peers` | `array<ProfilePresenceDto>` | Sí | — | — | Los otros participantes, sin el propio. | `src/modules/community/dto/read-messaging.dto.ts:74` |
-| `peers[].profileId` | `string` | Sí | formato uuid | — | Perfil público. | `src/modules/community/dto/read-messaging.dto.ts:52` |
-| `peers[].online` | `boolean` | Sí | — | — | `true` si tiene la mensajería abierta ahora mismo. | `src/modules/community/dto/read-messaging.dto.ts:56` |
-| `peers[].lastSeenAt` | `string` | No | formato date-time; admite null | — | Última vez que se lo vio conectado; `null` si nunca, o si la presencia no está disponible (Redis caído: se responde «no se sabe», no un 500). | `src/modules/community/dto/read-messaging.dto.ts:63` |
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación consultada. | `src/modules/community/dto/read-messaging.dto.ts:71` |
+| `peers` | `array<ProfilePresenceDto>` | Sí | — | — | Los otros participantes, sin el propio. | `src/modules/community/dto/read-messaging.dto.ts:75` |
+| `peers[].profileId` | `string` | Sí | formato uuid | — | Perfil público. | `src/modules/community/dto/read-messaging.dto.ts:53` |
+| `peers[].online` | `boolean` | Sí | — | — | `true` si tiene la mensajería abierta ahora mismo. | `src/modules/community/dto/read-messaging.dto.ts:57` |
+| `peers[].lastSeenAt` | `string` | No | formato date-time; admite null | — | Última vez que se lo vio conectado; `null` si nunca, o si la presencia no está disponible (Redis caído: se responde «no se sabe», no un 500). | `src/modules/community/dto/read-messaging.dto.ts:64` |
 
 ### Respuestas posibles
 
@@ -2293,7 +2307,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Marcar mensajes como leídos (recibos). Caso de uso UC-19-07: Marca mensajes como leídos (recibos). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:131`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:131`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2305,11 +2319,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:144` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-messaging.controller.ts:144` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2403,7 +2417,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Buscar personas para iniciar una conversación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2415,10 +2429,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-messaging.controller.ts:216` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2433,9 +2447,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `profileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/community/dto/read-messaging.dto.ts:134` |
-| `q` | `string` | Sí | longitud mínima 2; longitud máxima 80 | `@Transform(({ value }: TransformFnParams): unknown => typeof value === 'string' ? value.trim() : (value as unknown), )` `@IsString()` `@MinLength(2)` `@MaxLength(80)` | — | `src/modules/community/dto/read-messaging.dto.ts:144` |
-| `limit` | `object` | No | mínimo 1; máximo 20 | `@Type(() => Number)` `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(20)` | — | `src/modules/community/dto/read-messaging.dto.ts:153` |
+| `profileId` | `string` | Sí | formato uuid | `@IsUUID()` | — | `src/modules/community/dto/read-messaging.dto.ts:146` |
+| `q` | `string` | Sí | longitud mínima 2; longitud máxima 80 | `@Transform(({ value }: TransformFnParams): unknown => typeof value === 'string' ? value.trim() : (value as unknown), )` `@IsString()` `@MinLength(2)` `@MaxLength(80)` | — | `src/modules/community/dto/read-messaging.dto.ts:156` |
+| `limit` | `object` | No | mínimo 1; máximo 20 | `@Type(() => Number)` `@IsOptional()` `@IsInt()` `@Min(1)` `@Max(20)` | — | `src/modules/community/dto/read-messaging.dto.ts:165` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2462,11 +2476,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ChatContactDto>` | Sí | — | — | — | `src/modules/community/dto/read-messaging.dto.ts:178` |
-| `items[].profileId` | `string` | Sí | formato uuid | — | Perfil interno necesario para crear la conversación. | `src/modules/community/dto/read-messaging.dto.ts:160` |
-| `items[].displayName` | `string` | Sí | — | — | Nombre visible en el resultado. | `src/modules/community/dto/read-messaging.dto.ts:164` |
-| `items[].headline` | `string` | No | admite null | — | Descripción breve, si la persona la configuró. | `src/modules/community/dto/read-messaging.dto.ts:168` |
-| `items[].avatarUrl` | `string` | No | admite null | — | Avatar servido por la ruta pública de archivos, o `null`. | `src/modules/community/dto/read-messaging.dto.ts:172` |
+| `items` | `array<ChatContactDto>` | Sí | — | — | — | `src/modules/community/dto/read-messaging.dto.ts:190` |
+| `items[].profileId` | `string` | Sí | formato uuid | — | Perfil interno necesario para crear la conversación. | `src/modules/community/dto/read-messaging.dto.ts:172` |
+| `items[].displayName` | `string` | Sí | — | — | Nombre visible en el resultado. | `src/modules/community/dto/read-messaging.dto.ts:176` |
+| `items[].headline` | `string` | No | admite null | — | Descripción breve, si la persona la configuró. | `src/modules/community/dto/read-messaging.dto.ts:180` |
+| `items[].avatarUrl` | `string` | No | admite null | — | Avatar servido por la ruta pública de archivos, o `null`. | `src/modules/community/dto/read-messaging.dto.ts:184` |
 
 ### Respuestas posibles
 
@@ -2505,7 +2519,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Timeline de un perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2517,11 +2531,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-timeline.controller.ts:34` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2621,7 +2635,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Dejar de seguir un objeto social. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2633,11 +2647,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:295` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | followerProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | followableType (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | followableRefId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2702,7 +2716,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Seguimientos activos de un perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2714,11 +2728,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:502` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | followerProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2791,7 +2805,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Seguir un objeto social. Caso de uso UC-19-05: Sigue objeto social (perfil/tópico/hashtag/grupo). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:129`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:129`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2803,10 +2817,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:256` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2897,7 +2911,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Grupos de una organización. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -2909,13 +2923,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:188` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | topicId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | q (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2999,7 +3013,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Crear un grupo/comunidad. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3011,10 +3025,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3113,7 +3127,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Ficha de un grupo. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3125,10 +3139,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:211` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:211` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3217,7 +3231,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Integrantes de un grupo. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3229,13 +3243,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:222` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | joinStatus (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:222` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3316,7 +3330,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Unirse a un grupo / comunidad. Caso de uso UC-19-13: Se une a grupo/comunidad. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:137`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:137`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3328,11 +3342,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:94` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3427,7 +3441,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Salir del grupo o dar de baja a un integrante. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3439,9 +3453,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:143` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: groupId, member | `src/modules/community/controllers/community-groups.controller.ts:143` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3515,7 +3529,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Aprobar/rechazar un alta o cambiar el rol. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3527,11 +3541,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: groupId, member | `src/modules/community/controllers/community-groups.controller.ts:111` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3631,7 +3645,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Muro de un grupo. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3643,12 +3657,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:242` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:242` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3731,7 +3745,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Publicar en el muro del grupo. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3743,11 +3757,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-groups.controller.ts:164` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: groupId | `src/modules/community/controllers/community-groups.controller.ts:164` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3856,7 +3870,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Apelaciones presentadas, con su decisión. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3868,8 +3882,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:182` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3954,7 +3968,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Resolver una apelación de moderación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -3966,11 +3980,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:112` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: appealId | `src/modules/community/controllers/community-moderation.controller.ts:112` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4057,7 +4071,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Decisiones de moderación tomadas. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4069,8 +4083,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:169` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4144,7 +4158,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Apelar una decisión de moderación. Caso de uso UC-19-10: Apela una decisión. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:134`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:134`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4156,11 +4170,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-moderation.controller.ts:95` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: decisionId | `src/modules/community/controllers/community-moderation.controller.ts:95` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4254,7 +4268,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Mis propias decisiones de moderación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4266,9 +4280,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-moderation.controller.ts:154` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4345,7 +4359,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Cola de moderación con filtros y cursor. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4357,8 +4371,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4441,7 +4455,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Resolver moderación (decisión + strike). Caso de uso UC-19-09: Resuelve moderación (decisión + strike). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:133`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:133`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4453,11 +4467,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-moderation.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: queueId | `src/modules/community/controllers/community-moderation.controller.ts:77` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4554,7 +4568,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Notificaciones sociales de un perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4566,11 +4580,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-timeline.controller.ts:49` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | profileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4649,7 +4663,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Encuesta con opciones, recuentos y voto propio. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4661,10 +4675,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-polls.controller.ts:74` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pollId | `src/modules/community/controllers/community-polls.controller.ts:74` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4745,7 +4759,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Votar en una encuesta. Caso de uso UC-19-12: Vota en encuesta. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:136`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:136`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4757,11 +4771,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-polls.controller.ts:57` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pollId | `src/modules/community/controllers/community-polls.controller.ts:57` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4859,7 +4873,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Publicación con media, hashtags y menciones. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4871,10 +4885,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:432` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-social.controller.ts:432` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4961,7 +4975,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Comentarios de una publicación (hilo anidado). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -4973,12 +4987,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:443` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-social.controller.ts:443` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -5067,7 +5081,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Crear una encuesta con opciones sobre un post. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -5079,11 +5093,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-polls.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-polls.controller.ts:40` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -5184,7 +5198,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Reacciones de una publicación, agrupadas por tipo. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -5196,10 +5210,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:489` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: postId | `src/modules/community/controllers/community-social.controller.ts:489` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -5274,7 +5288,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Ficha de un perfil público. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -5286,9 +5300,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:405` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:405` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -5378,7 +5392,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Respuesta automática por inactividad del perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -5390,9 +5404,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:372` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:372` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -5463,7 +5477,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Configurar la respuesta automática del perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -5475,11 +5489,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:388` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:388` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -5586,7 +5600,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Publicaciones de un perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -5598,12 +5612,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:415` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | actorProfileId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:415` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -5694,7 +5708,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Publicar un post con hashtags, media y menciones. Caso de uso UC-19-01: Publica post con hashtags, media y menciones. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:125`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:125`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -5706,11 +5720,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:190` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-social.controller.ts:190` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -5845,7 +5859,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Reviews publicadas de un perfil. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -5857,11 +5871,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-reviews.controller.ts:73` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | cursor (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-reviews.controller.ts:73` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -5949,7 +5963,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Publicar una review verificada de servicio. Caso de uso UC-19-11: Publica review verificada de servicio. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:135`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:135`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -5961,11 +5975,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-reviews.controller.ts:51` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId | `src/modules/community/controllers/community-reviews.controller.ts:51` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6074,7 +6088,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Responder una reseña de la propia vitrina. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6086,11 +6100,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-reviews.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: profileId, reviewId | `src/modules/community/controllers/community-reviews.controller.ts:93` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6179,7 +6193,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Ficha de un perfil público por su slug. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6191,8 +6205,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:354` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6279,7 +6293,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Consultar la vitrina pública propia. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6291,8 +6305,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:115` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6356,7 +6370,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Crear o actualizar la vitrina pública propia. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6368,10 +6382,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:127` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6483,7 +6497,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Estadísticas de la vitrina pública propia. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6495,8 +6509,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:153` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6555,7 +6569,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Vitrinas de organización que la sesión puede atender en el chat. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6567,8 +6581,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:179` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6629,7 +6643,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Crear un perfil público (bootstrap del grafo social). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6641,10 +6655,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-social.controller.ts:88` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6743,7 +6757,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Calificaciones de un médico, paciente u organización. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6755,10 +6769,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/party-ratings.controller.ts:92` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | targetType (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | targetId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6817,7 +6831,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Calificar con estrellas a un médico, paciente u organización. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6829,10 +6843,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/party-ratings.controller.ts:45` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -6930,7 +6944,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Mis calificaciones. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -6942,9 +6956,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/party-ratings.controller.ts:77` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | reviewerType (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -7003,7 +7017,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Nota media de un médico, paciente u organización. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -7015,10 +7029,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/party-ratings.controller.ts:64` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | targetType (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | targetId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -7077,7 +7091,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reaccionar a contenido (upsert una reacción por actor/objeto). Caso de uso UC-19-03: Reacciona (upsert una reacción por actor/objeto). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:127`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:127`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -7089,10 +7103,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-social.controller.ts:223` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -7184,7 +7198,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Reportar contenido y encolar moderación. Caso de uso UC-19-08: Reporta contenido y encola moderación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:132`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:132`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -7196,10 +7210,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-moderation.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -7285,7 +7299,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Temas de la comunidad. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -7297,8 +7311,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-topics.controller.ts:27` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -7357,11 +7371,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Ficha pública de una farmacia. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /f/{slug}` la atiende `CommunityPublicController.getPharmacy` (src/modules/community/controllers/community-public.controller.ts:550). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 10 más.
+`GET /f/{slug}` la atiende `CommunityPublicController.getPharmacy` (src/modules/community/controllers/community-public.controller.ts:550). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 11 más.
 
 ### Requerimientos
 
@@ -7374,24 +7388,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1347` |
-| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1319` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1112` |
-| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1332` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1173` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:913` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1381` |
+| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1353` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1146` |
+| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1366` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1207` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:914` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getPharmacy → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
 
 ### Parámetros
 
@@ -7407,53 +7422,57 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:398` |
-| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:401` |
-| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:404` |
-| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:407` |
-| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:410` |
-| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:413` |
-| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:416` |
-| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:419` |
-| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:422` |
-| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:425` |
-| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:428` |
-| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:431` |
-| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:438` |
-| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:332` |
-| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:335` |
-| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:341` |
-| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:348` |
-| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:356` |
-| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:445` |
-| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:371` |
-| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:374` |
-| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:380` |
-| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:387` |
-| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:393` |
-| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:448` |
-| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:451` |
-| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:454` |
-| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:460` |
-| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `src/modules/community/dto/public-search.dto.ts:65` |
-| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:68` |
-| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:74` |
-| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:77` |
-| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:80` |
-| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:463` |
-| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:469` |
-| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:472` |
-| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:274` |
-| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:277` |
-| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:280` |
-| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:283` |
-| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:286` |
-| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
-| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:475` |
+| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:408` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:411` |
+| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:414` |
+| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:417` |
+| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:420` |
+| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:423` |
+| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:426` |
+| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:429` |
+| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:432` |
+| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:435` |
+| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:438` |
+| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:441` |
+| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:448` |
+| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:342` |
+| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:345` |
+| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:351` |
+| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:358` |
+| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:366` |
+| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:455` |
+| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:381` |
+| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:384` |
+| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:390` |
+| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:397` |
+| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:403` |
+| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:458` |
+| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:461` |
+| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:464` |
+| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:470` |
+| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `src/modules/community/dto/public-search.dto.ts:67` |
+| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:70` |
+| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:76` |
+| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:79` |
+| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:82` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `src/modules/community/dto/public-search.dto.ts:477` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | Estado visible. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | Cuándo se verificó (ISO), si alguna vez se verificó. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale (YYYY-MM-DD, fin de día en America/La_Paz). | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:480` |
+| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:486` |
+| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:489` |
+| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:284` |
+| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:287` |
+| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:290` |
+| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:293` |
+| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:296` |
+| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:299` |
+| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:492` |
 
 ### Respuestas posibles
 
@@ -7489,7 +7508,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Publicaciones publicadas sin fan-out. Caso de uso UC-19-15: Lote de posts publicados sin repartir, con sus seguidores. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:140`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:140`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -7501,9 +7520,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/community/controllers/community-feed.controller.ts:79` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -7569,7 +7588,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Aplicar rank_score recalculado. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -7581,10 +7600,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/community/controllers/community-feed.controller.ts:111` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -7669,7 +7688,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Items de feed pendientes de puntuar. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -7681,9 +7700,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/community/controllers/community-feed.controller.ts:99` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -7753,7 +7772,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Generar feed (fan-out y ranking). Caso de uso UC-19-15: Fan-out del feed (lo dispara worker-community). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:139`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/community/README.md:139`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -7765,10 +7784,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/community/controllers/community-feed.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -7854,7 +7873,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Estado del índice del directorio público. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -7866,14 +7885,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN | `src/modules/community/controllers/community-search-index.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunitySearchIndexController.health → CommunitySearchIndexService.health → PublicSearchRepository.countIndexable | `src/modules/community/repositories/public-search.repository.ts:755` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunitySearchIndexController.health → CommunitySearchIndexService.health → PublicSearchRepository.countIndexable | `src/modules/community/repositories/public-search.repository.ts:756` |
 
 ### Cuerpo
 
@@ -7925,11 +7944,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Reindexar el directorio público. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`POST /internal/community/search/reindex` la atiende `CommunitySearchIndexController.reindex` (src/modules/community/controllers/community-search-index.controller.ts:47). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN. Valida el cuerpo como `ReindexRequestDto` (1 campo, 0 obligatorios). Delega en `CommunitySearchIndexService.reindexAll`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources y 1 más.
+`POST /internal/community/search/reindex` la atiende `CommunitySearchIndexController.reindex` (src/modules/community/controllers/community-search-index.controller.ts:47). Exige sesión con alguno de los roles SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN. Valida el cuerpo como `ReindexRequestDto` (1 campo, 0 obligatorios). Delega en `CommunitySearchIndexService.reindexAll`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_admissions, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules y 2 más.
 
 ### Requerimientos
 
@@ -7937,24 +7956,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN | `src/modules/community/controllers/community-search-index.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.locationsByOwner | `src/modules/community/repositories/public-search.repository.ts:797` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → PublicSearchRepository.countIndexable | `src/modules/community/repositories/public-search.repository.ts:755` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.locationsByOwner | `src/modules/community/repositories/public-search.repository.ts:798` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → PublicSearchRepository.countIndexable | `src/modules/community/repositories/public-search.repository.ts:756` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunitySearchIndexController.reindex → CommunitySearchIndexService.reindexAll → CommunitySearchIndexService.buildDocuments → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
 
 ### Cuerpo — DTO `ReindexRequestDto` · `application/json`
 
@@ -8025,7 +8045,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Emitir un sello a mano (auditado). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -8037,17 +8057,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-verification.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | CommunityVerificationController.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
-| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityVerificationController.grant → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:175` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityVerificationController.grant → CommunityVerificationService.applyVerified | `src/modules/community/services/community-verification.service.ts:201` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityVerificationController.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityVerificationController.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:94` |
 | `community.verified_badges` | ESCRIBE | CREA | DIRECTA | CommunityVerificationController.grant → CommunityVerificationService.applyVerified → VerifiedBadgesRepository.grant | `src/modules/community/repositories/verified-badges.repository.ts:103` |
@@ -8124,7 +8144,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Bajar los sellos de un sujeto (auditado). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -8136,17 +8156,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-verification.controller.ts:104` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | CommunityVerificationController.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
-| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityVerificationController.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges | `src/modules/community/services/community-verification.service.ts:249` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityVerificationController.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges | `src/modules/community/services/community-verification.service.ts:275` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityVerificationController.revoke → CommunityVerificationService.applyRevoked → VerifiedBadgesRepository.findProfileByTarget | `src/modules/community/repositories/verified-badges.repository.ts:205` |
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityVerificationController.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.revoke | `src/modules/community/repositories/verified-badges.repository.ts:140` |
 | `community.verified_badges` | LEE | LEE | DIRECTA | CommunityVerificationController.revoke → CommunityVerificationService.applyRevoked → CommunityVerificationService.revokeProfileBadges → VerifiedBadgesRepository.findAllBySubject | `src/modules/community/repositories/verified-badges.repository.ts:73` |
@@ -8220,7 +8240,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Bajar los sellos cuya vigencia ya venció. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -8232,16 +8252,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/community/controllers/community-verification.controller.ts:133` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.verified_badges_history` | ESCRIBE | CREA | DIRECTA | CommunityVerificationController.expireSweep → CommunityVerificationService.expireSweep → VerifiedBadgesRepository.recordHistory | `src/modules/community/repositories/verified-badges.repository.ts:172` |
-| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityVerificationController.expireSweep → CommunityVerificationService.expireSweep | `src/modules/community/services/community-verification.service.ts:301` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityVerificationController.expireSweep → CommunityVerificationService.expireSweep | `src/modules/community/services/community-verification.service.ts:299` |
+| `community.public_profiles` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityVerificationController.expireSweep → CommunityVerificationService.expireSweep | `src/modules/community/services/community-verification.service.ts:327` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityVerificationController.expireSweep → CommunityVerificationService.expireSweep | `src/modules/community/services/community-verification.service.ts:325` |
 | `community.verified_badges` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityVerificationController.expireSweep → CommunityVerificationService.expireSweep → VerifiedBadgesRepository.revoke | `src/modules/community/repositories/verified-badges.repository.ts:140` |
 | `community.verified_badges` | LEE | LEE | DIRECTA | CommunityVerificationController.expireSweep → CommunityVerificationService.expireSweep → VerifiedBadgesRepository.findExpired | `src/modules/community/repositories/verified-badges.repository.ts:226` |
 
@@ -8290,11 +8310,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Ficha pública de un laboratorio. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /l/{slug}` la atiende `CommunityPublicController.getDiagnosticUnit` (src/modules/community/controllers/community-public.controller.ts:558). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 10 más.
+`GET /l/{slug}` la atiende `CommunityPublicController.getDiagnosticUnit` (src/modules/community/controllers/community-public.controller.ts:558). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 11 más.
 
 ### Requerimientos
 
@@ -8307,24 +8327,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1347` |
-| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1319` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1112` |
-| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1332` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1173` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:913` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1381` |
+| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1353` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1146` |
+| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1366` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1207` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:914` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getDiagnosticUnit → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
 
 ### Parámetros
 
@@ -8340,53 +8361,57 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:398` |
-| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:401` |
-| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:404` |
-| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:407` |
-| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:410` |
-| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:413` |
-| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:416` |
-| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:419` |
-| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:422` |
-| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:425` |
-| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:428` |
-| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:431` |
-| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:438` |
-| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:332` |
-| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:335` |
-| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:341` |
-| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:348` |
-| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:356` |
-| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:445` |
-| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:371` |
-| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:374` |
-| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:380` |
-| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:387` |
-| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:393` |
-| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:448` |
-| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:451` |
-| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:454` |
-| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:460` |
-| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `src/modules/community/dto/public-search.dto.ts:65` |
-| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:68` |
-| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:74` |
-| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:77` |
-| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:80` |
-| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:463` |
-| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:469` |
-| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:472` |
-| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:274` |
-| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:277` |
-| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:280` |
-| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:283` |
-| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:286` |
-| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
-| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:475` |
+| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:408` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:411` |
+| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:414` |
+| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:417` |
+| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:420` |
+| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:423` |
+| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:426` |
+| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:429` |
+| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:432` |
+| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:435` |
+| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:438` |
+| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:441` |
+| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:448` |
+| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:342` |
+| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:345` |
+| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:351` |
+| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:358` |
+| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:366` |
+| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:455` |
+| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:381` |
+| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:384` |
+| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:390` |
+| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:397` |
+| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:403` |
+| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:458` |
+| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:461` |
+| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:464` |
+| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:470` |
+| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `src/modules/community/dto/public-search.dto.ts:67` |
+| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:70` |
+| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:76` |
+| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:79` |
+| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:82` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `src/modules/community/dto/public-search.dto.ts:477` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | Estado visible. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | Cuándo se verificó (ISO), si alguna vez se verificó. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale (YYYY-MM-DD, fin de día en America/La_Paz). | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:480` |
+| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:486` |
+| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:489` |
+| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:284` |
+| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:287` |
+| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:290` |
+| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:293` |
+| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:296` |
+| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:299` |
+| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:492` |
 
 ### Respuestas posibles
 
@@ -8422,11 +8447,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Ficha pública de una organización. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /o/{slug}` la atiende `CommunityPublicController.getOrganization` (src/modules/community/controllers/community-public.controller.ts:540). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 10 más.
+`GET /o/{slug}` la atiende `CommunityPublicController.getOrganization` (src/modules/community/controllers/community-public.controller.ts:540). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 11 más.
 
 ### Requerimientos
 
@@ -8439,24 +8464,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1347` |
-| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1319` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1112` |
-| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1332` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1173` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:913` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1381` |
+| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1353` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1146` |
+| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1366` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1207` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:914` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getOrganization → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
 
 ### Parámetros
 
@@ -8472,53 +8498,57 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:398` |
-| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:401` |
-| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:404` |
-| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:407` |
-| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:410` |
-| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:413` |
-| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:416` |
-| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:419` |
-| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:422` |
-| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:425` |
-| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:428` |
-| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:431` |
-| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:438` |
-| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:332` |
-| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:335` |
-| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:341` |
-| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:348` |
-| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:356` |
-| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:445` |
-| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:371` |
-| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:374` |
-| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:380` |
-| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:387` |
-| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:393` |
-| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:448` |
-| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:451` |
-| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:454` |
-| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:460` |
-| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `src/modules/community/dto/public-search.dto.ts:65` |
-| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:68` |
-| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:74` |
-| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:77` |
-| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:80` |
-| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:463` |
-| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:469` |
-| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:472` |
-| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:274` |
-| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:277` |
-| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:280` |
-| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:283` |
-| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:286` |
-| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
-| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:475` |
+| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:408` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:411` |
+| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:414` |
+| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:417` |
+| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:420` |
+| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:423` |
+| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:426` |
+| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:429` |
+| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:432` |
+| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:435` |
+| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:438` |
+| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:441` |
+| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:448` |
+| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:342` |
+| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:345` |
+| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:351` |
+| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:358` |
+| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:366` |
+| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:455` |
+| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:381` |
+| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:384` |
+| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:390` |
+| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:397` |
+| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:403` |
+| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:458` |
+| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:461` |
+| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:464` |
+| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:470` |
+| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `src/modules/community/dto/public-search.dto.ts:67` |
+| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:70` |
+| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:76` |
+| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:79` |
+| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:82` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `src/modules/community/dto/public-search.dto.ts:477` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | Estado visible. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | Cuándo se verificó (ISO), si alguna vez se verificó. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale (YYYY-MM-DD, fin de día en America/La_Paz). | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:480` |
+| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:486` |
+| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:489` |
+| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:284` |
+| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:287` |
+| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:290` |
+| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:293` |
+| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:296` |
+| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:299` |
+| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:492` |
 
 ### Respuestas posibles
 
@@ -8554,11 +8584,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Ficha pública de un profesional. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /p/{slug}` la atiende `CommunityPublicController.getPractitioner` (src/modules/community/controllers/community-public.controller.ts:530). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 10 más.
+`GET /p/{slug}` la atiende `CommunityPublicController.getPractitioner` (src/modules/community/controllers/community-public.controller.ts:530). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 11 más.
 
 ### Requerimientos
 
@@ -8571,24 +8601,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1347` |
-| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1319` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1112` |
-| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1332` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1173` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:913` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1381` |
+| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1353` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1146` |
+| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1366` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1207` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:914` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getPractitioner → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
 
 ### Parámetros
 
@@ -8604,53 +8635,57 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:398` |
-| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:401` |
-| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:404` |
-| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:407` |
-| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:410` |
-| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:413` |
-| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:416` |
-| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:419` |
-| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:422` |
-| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:425` |
-| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:428` |
-| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:431` |
-| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:438` |
-| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:332` |
-| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:335` |
-| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:341` |
-| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:348` |
-| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:356` |
-| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:445` |
-| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:371` |
-| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:374` |
-| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:380` |
-| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:387` |
-| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:393` |
-| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:448` |
-| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:451` |
-| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:454` |
-| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:460` |
-| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `src/modules/community/dto/public-search.dto.ts:65` |
-| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:68` |
-| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:74` |
-| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:77` |
-| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:80` |
-| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:463` |
-| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:469` |
-| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:472` |
-| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:274` |
-| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:277` |
-| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:280` |
-| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:283` |
-| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:286` |
-| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
-| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:475` |
+| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:408` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:411` |
+| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:414` |
+| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:417` |
+| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:420` |
+| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:423` |
+| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:426` |
+| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:429` |
+| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:432` |
+| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:435` |
+| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:438` |
+| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:441` |
+| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:448` |
+| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:342` |
+| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:345` |
+| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:351` |
+| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:358` |
+| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:366` |
+| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:455` |
+| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:381` |
+| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:384` |
+| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:390` |
+| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:397` |
+| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:403` |
+| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:458` |
+| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:461` |
+| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:464` |
+| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:470` |
+| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `src/modules/community/dto/public-search.dto.ts:67` |
+| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:70` |
+| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:76` |
+| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:79` |
+| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:82` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `src/modules/community/dto/public-search.dto.ts:477` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | Estado visible. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | Cuándo se verificó (ISO), si alguna vez se verificó. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale (YYYY-MM-DD, fin de día en America/La_Paz). | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:480` |
+| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:486` |
+| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:489` |
+| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:284` |
+| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:287` |
+| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:290` |
+| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:293` |
+| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:296` |
+| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:299` |
+| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:492` |
 
 ### Respuestas posibles
 
@@ -8686,7 +8721,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Consultar si una atención recibida se puede calificar. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -8698,9 +8733,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/community/controllers/patient-reviews.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | appointmentBookingId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -8770,7 +8805,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Calificar una atención recibida. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -8782,10 +8817,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/community/controllers/patient-reviews.controller.ts:87` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -8885,7 +8920,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Respuestas de un comentario público. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -8905,10 +8940,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.comment_media` | LEE | LEE | POR_SQL | CommunityPublicController.commentReplies → CommunityPublicService.commentReplies → PublicSearchRepository.listPublicCommentReplies → PublicSearchRepository.listPublicComments → PublicSearchRepository.listPublicCommentMedia | `src/modules/community/repositories/public-search.repository.ts:1816` |
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.commentReplies → CommunityPublicService.commentReplies → PublicSearchRepository.findPostOfPublicComment | `src/modules/community/repositories/public-search.repository.ts:1662` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | CommunityPublicController.commentReplies → CommunityPublicService.commentReplies → PublicSearchRepository.findPostOfPublicComment | `src/modules/community/repositories/public-search.repository.ts:1662` |
-| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.commentReplies → CommunityPublicService.commentReplies → CommunityPublicService.assertPostPublic → PublicSearchRepository.isPostPublic | `src/modules/community/repositories/public-search.repository.ts:1483` |
+| `community.comment_media` | LEE | LEE | POR_SQL | CommunityPublicController.commentReplies → CommunityPublicService.commentReplies → PublicSearchRepository.listPublicCommentReplies → PublicSearchRepository.listPublicComments → PublicSearchRepository.listPublicCommentMedia | `src/modules/community/repositories/public-search.repository.ts:1850` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.commentReplies → CommunityPublicService.commentReplies → PublicSearchRepository.findPostOfPublicComment | `src/modules/community/repositories/public-search.repository.ts:1696` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | CommunityPublicController.commentReplies → CommunityPublicService.commentReplies → PublicSearchRepository.findPostOfPublicComment | `src/modules/community/repositories/public-search.repository.ts:1696` |
+| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.commentReplies → CommunityPublicService.commentReplies → CommunityPublicService.assertPostPublic → PublicSearchRepository.isPostPublic | `src/modules/community/repositories/public-search.repository.ts:1517` |
 
 ### Parámetros
 
@@ -8963,7 +8998,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Servir una imagen pública (avatar, portada o post). Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -8983,11 +9018,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.file_versions` | LEE | LEE | DIRECTA | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → FileUploadService.downloadPublicMedia → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → FileUploadService.downloadPublicMedia → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `community.comment_media` | LEE | LEE | POR_SQL | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → PublicSearchRepository.isPublicCommentMedia | `src/modules/community/repositories/public-search.repository.ts:1423` |
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → PublicSearchRepository.isPublicCommentMedia | `src/modules/community/repositories/public-search.repository.ts:1423` |
-| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → PublicSearchRepository.isPublicPostMedia | `src/modules/community/repositories/public-search.repository.ts:1374` |
+| `community.comment_media` | LEE | LEE | POR_SQL | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → PublicSearchRepository.isPublicCommentMedia | `src/modules/community/repositories/public-search.repository.ts:1457` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → PublicSearchRepository.isPublicCommentMedia | `src/modules/community/repositories/public-search.repository.ts:1457` |
+| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → PublicSearchRepository.isPublicPostMedia | `src/modules/community/repositories/public-search.repository.ts:1408` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → PublicProfilesRepository.isPublicMedia | `src/modules/community/repositories/public-profiles.repository.ts:381` |
-| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → PublicSearchRepository.isPublicPostMedia | `src/modules/community/repositories/public-search.repository.ts:1374` |
+| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.getPublicMedia → CommunityPublicService.getPublicMedia → PublicSearchRepository.isPublicPostMedia | `src/modules/community/repositories/public-search.repository.ts:1408` |
 
 ### Parámetros
 
@@ -9042,11 +9077,11 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Prestadores cercanos, en línea recta. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/nearby` la atiende `CommunityPublicController.nearby` (src/modules/community/controllers/community-public.controller.ts:382). Es una ruta pública: no exige token. Delega en `CommunityPublicService.nearby`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources.
+`GET /public/nearby` la atiende `CommunityPublicController.nearby` (src/modules/community/controllers/community-public.controller.ts:382). Es una ruta pública: no exige token. Delega en `CommunityPublicService.nearby`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_admissions, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources.
 
 ### Requerimientos
 
@@ -9064,13 +9099,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → PublicSearchRepository.nearbyProfiles | `src/modules/community/repositories/public-search.repository.ts:679` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → PublicSearchRepository.nearbyProfiles | `src/modules/community/repositories/public-search.repository.ts:708` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → PublicSearchRepository.nearbyProfiles | `src/modules/community/repositories/public-search.repository.ts:680` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → PublicSearchRepository.nearbyProfiles | `src/modules/community/repositories/public-search.repository.ts:709` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.nearby → CommunityPublicService.nearby → CommunityPublicService.nearbyFromSql → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
 
 ### Parámetros
 
@@ -9128,7 +9164,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Últimas publicaciones de todos los profesionales. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -9147,11 +9183,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1347` |
-| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1319` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.listFeedPublic | `src/modules/community/repositories/public-search.repository.ts:1248` |
-| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1332` |
-| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.listFeedPublic | `src/modules/community/repositories/public-search.repository.ts:1248` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1381` |
+| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1353` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.listFeedPublic | `src/modules/community/repositories/public-search.repository.ts:1282` |
+| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1366` |
+| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.feedPublico → CommunityPublicService.feedPublic → PublicSearchRepository.listFeedPublic | `src/modules/community/repositories/public-search.repository.ts:1282` |
 
 ### Parámetros
 
@@ -9204,7 +9240,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Comentarios raíz de una publicación pública. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -9224,10 +9260,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.comment_media` | LEE | LEE | POR_SQL | CommunityPublicController.postComments → CommunityPublicService.postComments → PublicSearchRepository.listPublicRootComments → PublicSearchRepository.listPublicComments → PublicSearchRepository.listPublicCommentMedia | `src/modules/community/repositories/public-search.repository.ts:1816` |
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.postComments → CommunityPublicService.postComments → PublicSearchRepository.listPublicRootComments → PublicSearchRepository.listPublicComments | `src/modules/community/repositories/public-search.repository.ts:1756` |
-| `community.public_profiles` | LEE | LEE | POR_SQL | CommunityPublicController.postComments → CommunityPublicService.postComments → CommunityPublicService.assertPostPublic → PublicSearchRepository.isPostPublic | `src/modules/community/repositories/public-search.repository.ts:1483` |
-| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.postComments → CommunityPublicService.postComments → CommunityPublicService.assertPostPublic → PublicSearchRepository.isPostPublic | `src/modules/community/repositories/public-search.repository.ts:1483` |
+| `community.comment_media` | LEE | LEE | POR_SQL | CommunityPublicController.postComments → CommunityPublicService.postComments → PublicSearchRepository.listPublicRootComments → PublicSearchRepository.listPublicComments → PublicSearchRepository.listPublicCommentMedia | `src/modules/community/repositories/public-search.repository.ts:1850` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.postComments → CommunityPublicService.postComments → PublicSearchRepository.listPublicRootComments → PublicSearchRepository.listPublicComments | `src/modules/community/repositories/public-search.repository.ts:1790` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | CommunityPublicController.postComments → CommunityPublicService.postComments → CommunityPublicService.assertPostPublic → PublicSearchRepository.isPostPublic | `src/modules/community/repositories/public-search.repository.ts:1517` |
+| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.postComments → CommunityPublicService.postComments → CommunityPublicService.assertPostPublic → PublicSearchRepository.isPostPublic | `src/modules/community/repositories/public-search.repository.ts:1517` |
 
 ### Parámetros
 
@@ -9282,7 +9318,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Quiénes reaccionaron a una publicación pública. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -9302,9 +9338,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | LEE | LEE | POR_SQL | CommunityPublicController.postReactions → CommunityPublicService.postReactions → PublicSearchRepository.listPostReactors | `src/modules/community/repositories/public-search.repository.ts:1544` |
-| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.postReactions → CommunityPublicService.postReactions → PublicSearchRepository.listPostReactors | `src/modules/community/repositories/public-search.repository.ts:1544` |
-| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.postReactions → CommunityPublicService.postReactions → CommunityPublicService.assertPostPublic → PublicSearchRepository.isPostPublic | `src/modules/community/repositories/public-search.repository.ts:1483` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | CommunityPublicController.postReactions → CommunityPublicService.postReactions → PublicSearchRepository.listPostReactors | `src/modules/community/repositories/public-search.repository.ts:1578` |
+| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.postReactions → CommunityPublicService.postReactions → PublicSearchRepository.listPostReactors | `src/modules/community/repositories/public-search.repository.ts:1578` |
+| `community.social_posts` | LEE | LEE | POR_SQL | CommunityPublicController.postReactions → CommunityPublicService.postReactions → CommunityPublicService.assertPostPublic → PublicSearchRepository.isPostPublic | `src/modules/community/repositories/public-search.repository.ts:1517` |
 
 ### Parámetros
 
@@ -9359,11 +9395,11 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Ficha pública por prefijo de vertical. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/profiles/{prefijo}/{slug}` la atiende `CommunityPublicController.getProfileByPrefix` (src/modules/community/controllers/community-public.controller.ts:427). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 10 más.
+`GET /public/profiles/{prefijo}/{slug}` la atiende `CommunityPublicController.getProfileByPrefix` (src/modules/community/controllers/community-public.controller.ts:427). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 11 más.
 
 ### Requerimientos
 
@@ -9376,24 +9412,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1347` |
-| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1319` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1112` |
-| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1332` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1173` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:913` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1381` |
+| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1353` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1146` |
+| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1366` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1207` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:914` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getProfileByPrefix → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
 
 ### Parámetros
 
@@ -9410,53 +9447,57 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:398` |
-| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:401` |
-| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:404` |
-| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:407` |
-| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:410` |
-| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:413` |
-| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:416` |
-| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:419` |
-| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:422` |
-| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:425` |
-| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:428` |
-| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:431` |
-| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:438` |
-| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:332` |
-| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:335` |
-| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:341` |
-| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:348` |
-| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:356` |
-| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:445` |
-| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:371` |
-| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:374` |
-| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:380` |
-| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:387` |
-| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:393` |
-| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:448` |
-| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:451` |
-| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:454` |
-| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:460` |
-| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `src/modules/community/dto/public-search.dto.ts:65` |
-| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:68` |
-| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:74` |
-| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:77` |
-| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:80` |
-| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:463` |
-| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:469` |
-| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:472` |
-| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:274` |
-| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:277` |
-| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:280` |
-| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:283` |
-| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:286` |
-| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
-| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:475` |
+| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:408` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:411` |
+| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:414` |
+| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:417` |
+| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:420` |
+| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:423` |
+| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:426` |
+| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:429` |
+| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:432` |
+| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:435` |
+| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:438` |
+| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:441` |
+| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:448` |
+| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:342` |
+| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:345` |
+| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:351` |
+| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:358` |
+| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:366` |
+| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:455` |
+| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:381` |
+| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:384` |
+| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:390` |
+| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:397` |
+| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:403` |
+| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:458` |
+| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:461` |
+| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:464` |
+| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:470` |
+| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `src/modules/community/dto/public-search.dto.ts:67` |
+| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:70` |
+| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:76` |
+| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:79` |
+| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:82` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `src/modules/community/dto/public-search.dto.ts:477` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | Estado visible. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | Cuándo se verificó (ISO), si alguna vez se verificó. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale (YYYY-MM-DD, fin de día en America/La_Paz). | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:480` |
+| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:486` |
+| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:489` |
+| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:284` |
+| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:287` |
+| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:290` |
+| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:293` |
+| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:296` |
+| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:299` |
+| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:492` |
 
 ### Respuestas posibles
 
@@ -9492,7 +9533,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Opiniones publicadas de una ficha pública. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
@@ -9511,7 +9552,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.listPublicProfileReviews → CommunityReviewsReadService.listPublicReviewsBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1112` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.listPublicProfileReviews → CommunityReviewsReadService.listPublicReviewsBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1146` |
 | `community.review_dimension_scores` | LEE | LEE | DIRECTA | CommunityPublicController.listPublicProfileReviews → CommunityReviewsReadService.listPublicReviewsBySlug → CommunityReviewsReadService.projectPage → ReviewsRepository.listDimensionScores | `src/modules/community/repositories/reviews.repository.ts:217` |
 | `community.review_responses` | LEE | LEE | DIRECTA | CommunityPublicController.listPublicProfileReviews → CommunityReviewsReadService.listPublicReviewsBySlug → CommunityReviewsReadService.projectPage → ReviewsRepository.listResponses | `src/modules/community/repositories/reviews.repository.ts:226` |
 | `community.service_reviews` | LEE | LEE | DIRECTA | CommunityPublicController.listPublicProfileReviews → CommunityReviewsReadService.listPublicReviewsBySlug → CommunityReviewsReadService.projectPage → ReviewsRepository.listByTargetPage | `src/modules/community/repositories/reviews.repository.ts:158` |
@@ -9574,11 +9615,11 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Buscador público unificado. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/search` la atiende `CommunityPublicController.search` (src/modules/community/controllers/community-public.controller.ts:192). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources y 4 más.
+`GET /public/search` la atiende `CommunityPublicController.search` (src/modules/community/controllers/community-public.controller.ts:192). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_admissions, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules y 5 más.
 
 ### Requerimientos
 
@@ -9594,14 +9635,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:521` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.search → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:486` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1704` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:522` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.search → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:487` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1738` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.search → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | CommunityPublicController.search → CommunityPublicService.search → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | CommunityPublicController.search → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | CommunityPublicController.search → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
@@ -9659,11 +9701,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Laboratorios y centros de diagnóstico. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/search/diagnostic-units` la atiende `CommunityPublicController.searchDiagnosticUnits` (src/modules/community/controllers/community-public.controller.ts:306). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources y 4 más.
+`GET /public/search/diagnostic-units` la atiende `CommunityPublicController.searchDiagnosticUnits` (src/modules/community/controllers/community-public.controller.ts:306). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_admissions, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules y 5 más.
 
 ### Requerimientos
 
@@ -9679,14 +9721,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:521` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:486` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1704` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:522` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:487` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1738` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | CommunityPublicController.searchDiagnosticUnits → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
@@ -9744,11 +9787,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Aseguradoras en el directorio público. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/search/insurers` la atiende `CommunityPublicController.searchInsurers` (src/modules/community/controllers/community-public.controller.ts:323). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources y 4 más.
+`GET /public/search/insurers` la atiende `CommunityPublicController.searchInsurers` (src/modules/community/controllers/community-public.controller.ts:323). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_admissions, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules y 5 más.
 
 ### Requerimientos
 
@@ -9764,14 +9807,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:521` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchInsurers → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:486` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1704` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:522` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchInsurers → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:487` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1738` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchInsurers → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | CommunityPublicController.searchInsurers → CommunityPublicService.search → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | CommunityPublicController.searchInsurers → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | CommunityPublicController.searchInsurers → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
@@ -9829,11 +9873,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Medicamentos ofertados públicamente. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/search/medications` la atiende `CommunityPublicController.searchMedications` (src/modules/community/controllers/community-public.controller.ts:357). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources y 4 más.
+`GET /public/search/medications` la atiende `CommunityPublicController.searchMedications` (src/modules/community/controllers/community-public.controller.ts:357). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_admissions, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules y 5 más.
 
 ### Requerimientos
 
@@ -9849,14 +9893,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:521` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchMedications → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:486` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1704` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:522` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchMedications → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:487` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1738` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchMedications → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | CommunityPublicController.searchMedications → CommunityPublicService.search → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | CommunityPublicController.searchMedications → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | CommunityPublicController.searchMedications → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
@@ -9914,11 +9959,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Organizaciones en el directorio público. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/search/organizations` la atiende `CommunityPublicController.searchOrganizations` (src/modules/community/controllers/community-public.controller.ts:268). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources y 4 más.
+`GET /public/search/organizations` la atiende `CommunityPublicController.searchOrganizations` (src/modules/community/controllers/community-public.controller.ts:268). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_admissions, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules y 5 más.
 
 ### Requerimientos
 
@@ -9934,14 +9979,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:521` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchOrganizations → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:486` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1704` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:522` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchOrganizations → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:487` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1738` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | CommunityPublicController.searchOrganizations → CommunityPublicService.search → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | CommunityPublicController.searchOrganizations → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | CommunityPublicController.searchOrganizations → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
@@ -10004,11 +10050,11 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Farmacias en el directorio público. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/search/pharmacies` la atiende `CommunityPublicController.searchPharmacies` (src/modules/community/controllers/community-public.controller.ts:340). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources y 4 más.
+`GET /public/search/pharmacies` la atiende `CommunityPublicController.searchPharmacies` (src/modules/community/controllers/community-public.controller.ts:340). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_admissions, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules y 5 más.
 
 ### Requerimientos
 
@@ -10024,14 +10070,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:521` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchPharmacies → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:486` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1704` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:522` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchPharmacies → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:487` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1738` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | CommunityPublicController.searchPharmacies → CommunityPublicService.search → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | CommunityPublicController.searchPharmacies → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | CommunityPublicController.searchPharmacies → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
@@ -10089,11 +10136,11 @@ _Ninguna prueba existente menciona esta operación._
 
 Profesionales en el directorio público. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /public/search/practitioners` la atiende `CommunityPublicController.searchPractitioners` (src/modules/community/controllers/community-public.controller.ts:217). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules, scheduling.schedulable_resources y 4 más.
+`GET /public/search/practitioners` la atiende `CommunityPublicController.searchPractitioners` (src/modules/community/controllers/community-public.controller.ts:217). Es una ruta pública: no exige token. Delega en `CommunityPublicService.search`. Lee common.addresses, community.public_profiles, community.service_reviews, community.verified_badges, profiles.practitioner_admissions, profiles.practitioner_specialties, scheduling.bookable_slots, scheduling.practitioner_schedules y 5 más.
 
 ### Requerimientos
 
@@ -10110,14 +10157,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:521` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchPractitioners → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:486` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1704` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.targetIdsByCity | `src/modules/community/repositories/public-search.repository.ts:522` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.searchPractitioners → CommunityPublicService.search → PublicSearchRepository.searchProfiles | `src/modules/community/repositories/public-search.repository.ts:487` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → PublicSearchRepository.searchProfiles → PublicSearchRepository.practitionerIdsBySpecialty | `src/modules/community/repositories/public-search.repository.ts:1738` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | CommunityPublicController.searchPractitioners → CommunityPublicService.search → CatalogConceptsRepository.findById | `src/modules/terminology/repositories/catalog-concepts.repository.ts:75` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | CommunityPublicController.searchPractitioners → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | CommunityPublicController.searchPractitioners → CommunityPublicService.search → PublicTerritoryFilterService.resolve → PublicTerritoryFilterService.assertMember → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
@@ -10181,11 +10229,11 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 Ficha pública de una aseguradora. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:35`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
 
 ### Cómo se atiende (sistema)
 
-`GET /s/{slug}` la atiende `CommunityPublicController.getInsurer` (src/modules/community/controllers/community-public.controller.ts:568). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 10 más.
+`GET /s/{slug}` la atiende `CommunityPublicController.getInsurer` (src/modules/community/controllers/community-public.controller.ts:568). Es una ruta pública: no exige token. Delega en `CommunityPublicService.getBySlug`. Lee common.addresses, community.comments, community.post_media, community.public_profiles, community.reactions, community.service_reviews, community.social_posts, community.verified_badges y 11 más.
 
 ### Requerimientos
 
@@ -10198,24 +10246,25 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1347` |
-| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1319` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1112` |
-| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1332` |
-| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1140` |
-| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1173` |
-| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1093` |
-| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:960` |
-| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:913` |
-| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
-| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1024` |
-| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:868` |
+| `common.addresses` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `community.comments` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1381` |
+| `community.post_media` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1353` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.findPublicBySlug | `src/modules/community/repositories/public-search.repository.ts:1146` |
+| `community.reactions` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.engagementByPost | `src/modules/community/repositories/public-search.repository.ts:1366` |
+| `community.service_reviews` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.ratingsByProfile | `src/modules/community/repositories/public-search.repository.ts:1174` |
+| `community.social_posts` | LEE | LEE | DIRECTA | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.listPublicPosts | `src/modules/community/repositories/public-search.repository.ts:1207` |
+| `community.verified_badges` | LEE | LEE | DIRECTA | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.badgesByProfiles | `src/modules/community/repositories/public-search.repository.ts:1094` |
+| `practice.practice_sites` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practices` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `practice.practitioner_role_assignments` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.practiceSitesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:961` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.practitionersInReview | `src/modules/community/repositories/public-search.repository.ts:1123` |
+| `profiles.practitioner_affiliations` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.affiliationsByPractitioner | `src/modules/community/repositories/public-search.repository.ts:914` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
+| `scheduling.bookable_slots` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.practitioner_schedules` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → CommunityPublicService.signals → PublicSearchRepository.agendaByPractitioner | `src/modules/community/repositories/public-search.repository.ts:1025` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunityPublicController.getInsurer → CommunityPublicService.getBySlug → PublicSearchRepository.specialtiesByPractitioner | `src/modules/community/repositories/public-search.repository.ts:869` |
 
 ### Parámetros
 
@@ -10231,53 +10280,57 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:398` |
-| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:401` |
-| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:404` |
-| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:407` |
-| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:410` |
-| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:413` |
-| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:416` |
-| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:419` |
-| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:422` |
-| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:425` |
-| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:428` |
-| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:431` |
-| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:438` |
-| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:332` |
-| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:335` |
-| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:341` |
-| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:348` |
-| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:356` |
-| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:445` |
-| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:371` |
-| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:374` |
-| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:380` |
-| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:387` |
-| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:37` |
-| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:40` |
-| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:393` |
-| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:448` |
-| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:451` |
-| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:454` |
-| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:460` |
-| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `EXPIRED` si lo hubo y venció | `src/modules/community/dto/public-search.dto.ts:65` |
-| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:68` |
-| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:74` |
-| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:77` |
-| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:80` |
-| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:463` |
-| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:469` |
-| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:472` |
-| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:274` |
-| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:277` |
-| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:280` |
-| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:283` |
-| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:286` |
-| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:289` |
-| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:475` |
+| `kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: Exclude<PublicResultKind, 'MEDICATION'> | `src/modules/community/dto/public-search.dto.ts:408` |
+| `slug` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:411` |
+| `displayName` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:414` |
+| `headline` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:417` |
+| `biography` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:420` |
+| `avatarUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:423` |
+| `coverUrl` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:426` |
+| `verified` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:429` |
+| `city` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:432` |
+| `address` | `string` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:435` |
+| `location` | `PublicLocationDto` | No | — | — | — | `src/modules/community/dto/public-search.dto.ts:438` |
+| `location.lat` | `number` | No | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `location.lng` | `number` | No | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `specialties` | `array<string>` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:441` |
+| `trajectory` | `array<PublicAffiliationDto>` | Sí | — | — | Trayectoria laboral, de la más reciente a la más antigua. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:448` |
+| `trajectory[].organizationName` | `string` | Sí | — | — | Institución, tal como la declaró el profesional | `src/modules/community/dto/public-search.dto.ts:342` |
+| `trajectory[].roleTitle` | `string` | Sí | — | — | Cargo ejercido | `src/modules/community/dto/public-search.dto.ts:345` |
+| `trajectory[].departmentText` | `string` | Sí | admite null | — | Servicio o departamento, si lo declaró | `src/modules/community/dto/public-search.dto.ts:351` |
+| `trajectory[].startDate` | `string` | Sí | formato date | — | Inicio del vínculo | `src/modules/community/dto/public-search.dto.ts:358` |
+| `trajectory[].endDate` | `string` | Sí | formato date; admite null | — | Fin del vínculo, o null si sigue vigente | `src/modules/community/dto/public-search.dto.ts:366` |
+| `practiceSites` | `array<PublicPracticeSiteDto>` | Sí | — | — | Dónde atiende: sus sedes vigentes, los consultorios propios primero. Vacía fuera de un profesional | `src/modules/community/dto/public-search.dto.ts:455` |
+| `practiceSites[].id` | `string` | Sí | formato uuid | — | Identificador de la sede | `src/modules/community/dto/public-search.dto.ts:381` |
+| `practiceSites[].name` | `string` | Sí | — | — | Nombre de la sede | `src/modules/community/dto/public-search.dto.ts:384` |
+| `practiceSites[].addressText` | `string` | Sí | admite null | — | Dirección en una línea, o null si la sede no cargó ninguna | `src/modules/community/dto/public-search.dto.ts:390` |
+| `practiceSites[].location` | `PublicLocationDto` | Sí | — | — | Punto de la sede; null si su dirección no tiene coordenadas | `src/modules/community/dto/public-search.dto.ts:397` |
+| `practiceSites[].location.lat` | `number` | Sí | — | — | Latitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:38` |
+| `practiceSites[].location.lng` | `number` | Sí | — | — | Longitud en grados decimales | `src/modules/community/dto/public-search.dto.ts:41` |
+| `practiceSites[].isOwn` | `boolean` | Sí | — | — | Si es un consultorio propio del profesional y no la sede de una organización | `src/modules/community/dto/public-search.dto.ts:403` |
+| `ratingAverage` | `number` | Sí | admite null | — | — | `src/modules/community/dto/public-search.dto.ts:458` |
+| `ratingCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:461` |
+| `acceptsReviews` | `boolean` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:464` |
+| `verifiedBadge` | `PublicVerifiedBadgeDto` | Sí | — | — | El mismo sello y la misma semántica que en el buscador | `src/modules/community/dto/public-search.dto.ts:470` |
+| `verifiedBadge.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, EXPIRED, NONE | — | `VERIFIED` sólo con respaldo vigente; `IN_REVIEW` si pidió la verificación y | `src/modules/community/dto/public-search.dto.ts:67` |
+| `verifiedBadge.badgeTypeConceptId` | `string` | Sí | admite null | — | Qué se verificó | `src/modules/community/dto/public-search.dto.ts:70` |
+| `verifiedBadge.verificationMethodConceptId` | `string` | Sí | admite null | — | Cómo se verificó (autoridad externa, alta manual auditada) | `src/modules/community/dto/public-search.dto.ts:76` |
+| `verifiedBadge.verifiedAt` | `string` | Sí | admite null | — | Desde cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:79` |
+| `verifiedBadge.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale, ISO | `src/modules/community/dto/public-search.dto.ts:82` |
+| `verification` | `PractitionerVerificationDto` | Sí | — | — | El mismo sello en la forma `verification`, derivado de `verifiedBadge`. | `src/modules/community/dto/public-search.dto.ts:477` |
+| `verification.status` | `string` | Sí | valores: VERIFIED, IN_REVIEW, UNVERIFIED, SUSPENDED, EXPIRED | — | Estado visible. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:25` |
+| `verification.verifiedAt` | `string` | Sí | formato date-time; admite null | — | Cuándo se verificó (ISO), si alguna vez se verificó. | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:29` |
+| `verification.validUntil` | `string` | Sí | admite null | — | Hasta cuándo vale (YYYY-MM-DD, fin de día en America/La_Paz). | `src/modules/profiles/presentation/dto/practitioner-verification.dto.ts:33` |
+| `hasPublishedAgenda` | `boolean` | Sí | — | — | Si tiene agenda publicada | `src/modules/community/dto/public-search.dto.ts:480` |
+| `nextAvailableDate` | `string` | Sí | admite null | — | Primer día con hueco (YYYY-MM-DD) | `src/modules/community/dto/public-search.dto.ts:486` |
+| `posts` | `array<PublicPostSummaryDto>` | Sí | — | — | Máx. 20 | `src/modules/community/dto/public-search.dto.ts:489` |
+| `posts[].id` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:284` |
+| `posts[].bodyText` | `string` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:287` |
+| `posts[].publishedAt` | `string` | Sí | — | — | Instante ISO-8601 en UTC | `src/modules/community/dto/public-search.dto.ts:290` |
+| `posts[].mediaUrls` | `array<string>` | Sí | — | — | Vacío, nunca null | `src/modules/community/dto/public-search.dto.ts:293` |
+| `posts[].reactionCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:296` |
+| `posts[].commentCount` | `number` | Sí | — | — | — | `src/modules/community/dto/public-search.dto.ts:299` |
+| `updatedAt` | `string` | Sí | — | — | Alimenta el ETag y el <lastmod> del sitemap | `src/modules/community/dto/public-search.dto.ts:492` |
 
 ### Respuestas posibles
 

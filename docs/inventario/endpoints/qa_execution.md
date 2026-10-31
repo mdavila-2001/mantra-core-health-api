@@ -49,11 +49,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, SECURITY_ADMIN | `src/modules/qa_execution/controllers/qa-execution.controller.ts:72` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: environmentId | `src/modules/qa_execution/controllers/qa-execution.controller.ts:72` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -177,8 +177,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_execution/controllers/qa-execution.controller.ts:132` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -248,11 +248,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_execution/controllers/qa-execution.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CABECERA | Idempotency-Key (opcional) | `contrato (parameters)` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -266,8 +266,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `qa_execution.plan_events` | LEE | LEE | DIRECTA | QaExecutionController.createPlan → QaExecutionService.createPlan → QaExecutionService.getPlan | `src/modules/qa_execution/services/qa-execution.service.ts:556` |
 | `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaExecutionController.createPlan → QaExecutionService.createPlan → QaExecutionService.loadContext | `src/modules/qa_execution/services/qa-execution.service.ts:277` |
 | `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaExecutionController.createPlan → QaExecutionService.createPlan → QaExecutionService.loadContext | `src/modules/qa_execution/services/qa-execution.service.ts:257` |
-| `qa_lab.test_runs` | ESCRIBE | CREA | DIRECTA | QaExecutionController.createPlan → QaExecutionService.createPlan → QaRunsService.createRun → QaRunsRepository.createRun | `src/modules/qa_lab/repositories/qa-runs.repository.ts:131` |
-| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaExecutionController.createPlan → QaExecutionService.createPlan → QaRunsService.createRun → QaRunsRepository.findRunsInProgress | `src/modules/qa_lab/repositories/qa-runs.repository.ts:217` |
+| `qa_lab.test_runs` | ESCRIBE | CREA | DIRECTA | QaExecutionController.createPlan → QaExecutionService.createPlan → QaRunsService.createRun → QaRunsRepository.createRun | `src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts:131` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaExecutionController.createPlan → QaExecutionService.createPlan → QaRunsService.createRun → QaRunsRepository.findRunsInProgress | `src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts:217` |
 | `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaExecutionController.createPlan → QaExecutionService.createPlan → QaExecutionService.loadContext | `src/modules/qa_execution/services/qa-execution.service.ts:251` |
 
 ### Parámetros
@@ -368,9 +368,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_execution/controllers/qa-execution.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId | `src/modules/qa_execution/controllers/qa-execution.controller.ts:139` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -442,11 +442,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, RELEASE_MANAGER, SECURITY_ADMIN | `src/modules/qa_execution/controllers/qa-execution.controller.ts:148` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId | `src/modules/qa_execution/controllers/qa-execution.controller.ts:148` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -551,9 +551,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_execution/controllers/qa-execution.controller.ts:167` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: planId | `src/modules/qa_execution/controllers/qa-execution.controller.ts:167` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -628,10 +628,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER | `src/modules/qa_execution/controllers/qa-execution.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -732,8 +732,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: QA_ADMIN, QA_ENGINEER, RELEASE_MANAGER, PLATFORM_ADMIN | `src/modules/qa_execution/controllers/qa-execution.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -795,8 +795,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM | `src/modules/qa_execution/controllers/qa-execution.controller.ts:193` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -808,17 +808,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | `qa_execution.plan_approvals` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext | `src/modules/qa_execution/services/qa-execution.service.ts:690` |
 | `qa_execution.plan_events` | ESCRIBE | CREA | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaExecutionService.appendEvent | `src/modules/qa_execution/services/qa-execution.service.ts:599` |
 | `qa_execution.plan_events` | LEE | LEE | POR_SQL | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaExecutionService.appendEvent | `src/modules/qa_execution/services/qa-execution.service.ts:594` |
-| `qa_lab.assertion_results` | ESCRIBE | CREA | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.evaluateResult → QaRunsRepository.createAssertionResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:370` |
-| `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.evaluateResult → QaRunsRepository.countAssertionResults | `src/modules/qa_lab/repositories/qa-runs.repository.ts:396` |
-| `qa_lab.request_payloads` | ESCRIBE | CREA | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.createRequestPayload | `src/modules/qa_lab/repositories/qa-runs.repository.ts:447` |
-| `qa_lab.response_payloads` | ESCRIBE | CREA | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.createResponsePayload | `src/modules/qa_lab/repositories/qa-runs.repository.ts:515` |
-| `qa_lab.test_assertions` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.evaluateResult → QaCatalogRepository.findAssertionsByCase | `src/modules/qa_lab/repositories/qa-catalog.repository.ts:426` |
-| `qa_lab.test_case_results` | ESCRIBE | CREA | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.createCaseResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:273` |
-| `qa_lab.test_case_results` | ESCRIBE | ACTUALIZA | POR_TIPO | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.evaluateResult | `src/modules/qa_lab/services/qa-runs.service.ts:468` |
-| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.findCaseResult | `src/modules/qa_lab/repositories/qa-runs.repository.ts:329` |
+| `qa_lab.assertion_results` | ESCRIBE | CREA | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.evaluateResult → QaRunsRepository.createAssertionResult | `src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts:370` |
+| `qa_lab.assertion_results` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.evaluateResult → QaRunsRepository.countAssertionResults | `src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts:396` |
+| `qa_lab.request_payloads` | ESCRIBE | CREA | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.createRequestPayload | `src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts:447` |
+| `qa_lab.response_payloads` | ESCRIBE | CREA | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.createResponsePayload | `src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts:515` |
+| `qa_lab.test_assertions` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.evaluateResult → QaCatalogRepository.findAssertionsByCase | `src/modules/qa_lab/infrastructure/repositories/qa-catalog.repository.ts:426` |
+| `qa_lab.test_case_results` | ESCRIBE | CREA | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.createCaseResult | `src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts:273` |
+| `qa_lab.test_case_results` | ESCRIBE | ACTUALIZA | POR_TIPO | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.evaluateResult | `src/modules/qa_lab/application/services/qa-runs.service.ts:471` |
+| `qa_lab.test_case_results` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.findCaseResult | `src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts:329` |
 | `qa_lab.test_cases` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaExecutionService.loadContext | `src/modules/qa_execution/services/qa-execution.service.ts:277` |
 | `qa_lab.test_environments` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaExecutionService.loadContext | `src/modules/qa_execution/services/qa-execution.service.ts:257` |
-| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/repositories/qa-runs.repository.ts:178` |
+| `qa_lab.test_runs` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaRunsService.executeCase → QaRunsRepository.findRunForUpdate | `src/modules/qa_lab/infrastructure/repositories/qa-runs.repository.ts:178` |
 | `qa_lab.test_suites` | LEE | LEE | DIRECTA | QaExecutionInternalController.runNext → QaExecutionService.runNext → QaExecutionService.loadContext | `src/modules/qa_execution/services/qa-execution.service.ts:251` |
 
 ### Cuerpo

@@ -47,7 +47,7 @@
 | [service_level_objectives](#service_level_objectives) | Establece objetivos cuantitativos de servicio para evaluar confiabilidad y calidad operativa. | 14 | 5 | 4 | COINCIDE |
 | [service_ownerships](#service_ownerships) | Asigna ownership de servicios a equipos para definir responsabilidad operativa. | 13 | 8 | 0 | COINCIDE |
 | [slo_measurements](#slo_measurements) | Registra mediciones de objetivos de servicio para comparar resultados con metas acordadas. | 11 | 4 | 5 | COINCIDE |
-| [tool_registry](#tool_registry) | Registra herramientas y tecnologías operativas disponibles para construir, desplegar y mantener servicios. | 17 | 8 | 1 | COINCIDE |
+| [tool_registry](#tool_registry) | Registra herramientas y tecnologías operativas disponibles para construir, desplegar y mantener servicios. | 17 | 8 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -3361,7 +3361,7 @@ Registra herramientas y tecnologías operativas disponibles para construir, desp
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_46_platform_ops.puml: tool_registry`
 - **Dominio:** Operaciones de Plataforma · **Diagrama:** `Mantra Core Health Context/modules/diagram_46_platform_ops.puml` · **DDL:** `SQL/46_platform_ops/02_tables.sql`
 - **Entidad del ORM:** `ToolRegistry` — `src/modules/platform_ops/entities/tool_registry.entity.ts`
-- **Resumen:** 17 columnas · 8 índices · 6 FK salientes · 2 entrantes · 1 operaciones
+- **Resumen:** 17 columnas · 8 índices · 6 FK salientes · 2 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -3421,6 +3421,11 @@ Registra herramientas y tecnologías operativas disponibles para construir, desp
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /admin/ops/runtime-pieces | LEE | POR_SQL |
+| GET /admin/ops/runtime-pieces/{id} | LEE | POR_SQL |
+| POST /admin/ops/runtime-pieces/discover | CREA | POR_SQL |
+| POST /admin/ops/runtime-pieces/discover | ACTUALIZA | POR_SQL |
+| POST /admin/ops/runtime-pieces/discover | LEE | POR_SQL |
 | POST /ops/artifacts | LEE | DIRECTA |
 
 #### Gobierno

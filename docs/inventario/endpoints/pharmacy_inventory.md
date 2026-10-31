@@ -3,9 +3,9 @@
 # Endpoints del módulo `pharmacy_inventory`
 
 - **Bloque:** Farmacia (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
-- **Operaciones:** 30 (30 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 2 · MEDIO 26 · BAJO 2
-- **Tablas distintas que tocan:** 63
+- **Operaciones:** 36 (30 en el contrato, 6 sólo en el código)
+- **Riesgo:** ALTO 2 · MEDIO 28 · BAJO 6
+- **Tablas distintas que tocan:** 64
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/pharmacy-inventory.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -15,33 +15,39 @@
 | 1 | POST | `/internal/inventory-sync-batches` | Ingerir un lote de sincronización ERP | MEDIO | 7 | SECURITY_ADMIN |
 | 2 | POST | `/internal/inventory-sync/{batchId}/reconcile` | Conciliar lote de sincronización externa (UC-25-12) | MEDIO | 6 | SECURITY_ADMIN |
 | 3 | POST | `/internal/reservations/expire` | Liberar reservas y pedidos vencidos (UC-25-05) | MEDIO | 24 | SYSTEM, SECURITY_ADMIN |
-| 4 | GET | `/pharmacy-inventory/availability` | Consultar qué sedes pueden surtir un conjunto de productos | BAJO | 10 | sesión (sin roles) |
-| 5 | GET | `/pharmacy-inventory/sites/{siteId}/stock` | Consultar el stock disponible de una sede | BAJO | 6 | sesión (sin roles) |
-| 6 | POST | `/pharmacy/{pharmacyId}/dispensations` | Dispensar una prescripción a un paciente (UC-25-03) | MEDIO | 19 | SECURITY_ADMIN |
-| 7 | POST | `/pharmacy/{pharmacyId}/goods-receipts` | Recepcionar mercancía por lote (UC-25-02) | MEDIO | 19 | SECURITY_ADMIN |
-| 8 | POST | `/pharmacy/{pharmacyId}/purchase-orders` | Emitir una orden de compra a proveedor (UC-25-01) | MEDIO | 8 | SECURITY_ADMIN |
-| 9 | POST | `/pharmacy/{pharmacyId}/reservations` | Reservar stock para una prescripción (UC-25-04) | MEDIO | 13 | SECURITY_ADMIN |
-| 10 | POST | `/pharmacy/{pharmacyId}/suppliers` | Registrar un proveedor de farmacia | MEDIO | 2 | SECURITY_ADMIN |
-| 11 | POST | `/pharmacy/{pharmacyId}/transfers` | Transferir stock entre ubicaciones (UC-25-10) | MEDIO | 10 | SECURITY_ADMIN |
-| 12 | POST | `/pharmacy/{siteId}/count-sessions` | Iniciar y congelar una sesión de conteo (UC-25-06) | MEDIO | 9 | SECURITY_ADMIN |
-| 13 | POST | `/pharmacy/{siteId}/inventory-locations` | Crear una ubicación de inventario | MEDIO | 4 | SECURITY_ADMIN |
-| 14 | POST | `/pharmacy/count-sessions/{id}/approve` | Aprobar conteo y ajustar ledger por varianza (UC-25-07) | MEDIO | 13 | SECURITY_ADMIN |
-| 15 | POST | `/pharmacy/dispensations/{id}/reverse` | Reversar una dispensación (UC-25-11) | MEDIO | 10 | SECURITY_ADMIN |
-| 16 | GET | `/pharmacy/orders` | Bandeja de pedidos de las farmacias del tenant (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 17 | POST | `/pharmacy/orders` | Crear un pedido de farmacia (FAR-E1) | MEDIO | 27 | PATIENT |
-| 18 | GET | `/pharmacy/orders/{id}` | Consultar un pedido de farmacia (FAR-E1) | ALTO | 49 | sesión (sin roles) |
-| 19 | POST | `/pharmacy/orders/{id}/accept-substitutions` | Aceptar los genéricos propuestos (paciente) | MEDIO | 26 | PATIENT |
-| 20 | POST | `/pharmacy/orders/{id}/cancel` | Cancelar un pedido de farmacia (FAR-E1) | MEDIO | 23 | PATIENT |
-| 21 | POST | `/pharmacy/orders/{id}/confirm` | Confirmar el pedido (FAR-E2) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 22 | POST | `/pharmacy/orders/{id}/conversation` | Abrir el chat del pedido con la farmacia | ALTO | 11 | sesión (sin roles) |
-| 23 | POST | `/pharmacy/orders/{id}/dispense` | Dispensar el pedido en el mostrador (FAR-E3) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 24 | POST | `/pharmacy/orders/{id}/prefer-original` | Preferir los productos originales (paciente) | MEDIO | 19 | PATIENT |
-| 25 | POST | `/pharmacy/orders/{id}/ready` | Marcar el pedido listo para retiro (FAR-E2/E3) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 26 | POST | `/pharmacy/orders/{id}/reject` | Rechazar el pedido (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 27 | POST | `/pharmacy/orders/{id}/review` | Abrir revisión del pedido (FAR-E2) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
-| 28 | GET | `/pharmacy/orders/me` | Mis pedidos de farmacia, más nuevos primero (FAR-E1) | MEDIO | 48 | PATIENT |
-| 29 | POST | `/pharmacy/recall-holds` | Aplicar retiro/recall de lote (UC-25-08) | MEDIO | 11 | SECURITY_ADMIN |
-| 30 | POST | `/pharmacy/recall-holds/{id}/release` | Liberar recall y reactivar lote (UC-25-09) | MEDIO | 11 | SECURITY_ADMIN |
+| 4 | GET | `/pharmacies/{pharmacyId}/integration-connections` | — | BAJO | 3 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 5 | GET | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products` | — | BAJO | 3 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 6 | GET | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings` | — | BAJO | 4 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 7 | POST | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync` | — | MEDIO | 16 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 8 | GET | `/pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches` | — | BAJO | 4 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 9 | PUT | `/pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability` | «Lo tengo / No lo tengo» de un producto en una sede. | MEDIO | 8 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 10 | GET | `/pharmacy-inventory/availability` | Consultar qué sedes pueden surtir un conjunto de productos | BAJO | 10 | sesión (sin roles) |
+| 11 | GET | `/pharmacy-inventory/sites/{siteId}/stock` | Consultar el stock disponible de una sede | BAJO | 6 | sesión (sin roles) |
+| 12 | POST | `/pharmacy/{pharmacyId}/dispensations` | Dispensar una prescripción a un paciente (UC-25-03) | MEDIO | 19 | SECURITY_ADMIN |
+| 13 | POST | `/pharmacy/{pharmacyId}/goods-receipts` | Recepcionar mercancía por lote (UC-25-02) | MEDIO | 19 | SECURITY_ADMIN |
+| 14 | POST | `/pharmacy/{pharmacyId}/purchase-orders` | Emitir una orden de compra a proveedor (UC-25-01) | MEDIO | 8 | SECURITY_ADMIN |
+| 15 | POST | `/pharmacy/{pharmacyId}/reservations` | Reservar stock para una prescripción (UC-25-04) | MEDIO | 13 | SECURITY_ADMIN |
+| 16 | POST | `/pharmacy/{pharmacyId}/suppliers` | Registrar un proveedor de farmacia | MEDIO | 2 | SECURITY_ADMIN |
+| 17 | POST | `/pharmacy/{pharmacyId}/transfers` | Transferir stock entre ubicaciones (UC-25-10) | MEDIO | 10 | SECURITY_ADMIN |
+| 18 | POST | `/pharmacy/{siteId}/count-sessions` | Iniciar y congelar una sesión de conteo (UC-25-06) | MEDIO | 9 | SECURITY_ADMIN |
+| 19 | POST | `/pharmacy/{siteId}/inventory-locations` | Crear una ubicación de inventario | MEDIO | 4 | SECURITY_ADMIN |
+| 20 | POST | `/pharmacy/count-sessions/{id}/approve` | Aprobar conteo y ajustar ledger por varianza (UC-25-07) | MEDIO | 13 | SECURITY_ADMIN |
+| 21 | POST | `/pharmacy/dispensations/{id}/reverse` | Reversar una dispensación (UC-25-11) | MEDIO | 10 | SECURITY_ADMIN |
+| 22 | GET | `/pharmacy/orders` | Bandeja de pedidos de las farmacias del tenant (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 23 | POST | `/pharmacy/orders` | Crear un pedido de farmacia (FAR-E1) | MEDIO | 27 | PATIENT |
+| 24 | GET | `/pharmacy/orders/{id}` | Consultar un pedido de farmacia (FAR-E1) | ALTO | 49 | sesión (sin roles) |
+| 25 | POST | `/pharmacy/orders/{id}/accept-substitutions` | Aceptar los genéricos propuestos (paciente) | MEDIO | 26 | PATIENT |
+| 26 | POST | `/pharmacy/orders/{id}/cancel` | Cancelar un pedido de farmacia (FAR-E1) | MEDIO | 23 | PATIENT |
+| 27 | POST | `/pharmacy/orders/{id}/confirm` | Confirmar el pedido (FAR-E2) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 28 | POST | `/pharmacy/orders/{id}/conversation` | Abrir el chat del pedido con la farmacia | ALTO | 11 | sesión (sin roles) |
+| 29 | POST | `/pharmacy/orders/{id}/dispense` | Dispensar el pedido en el mostrador (FAR-E3) | MEDIO | 37 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 30 | POST | `/pharmacy/orders/{id}/prefer-original` | Preferir los productos originales (paciente) | MEDIO | 19 | PATIENT |
+| 31 | POST | `/pharmacy/orders/{id}/ready` | Marcar el pedido listo para retiro (FAR-E2/E3) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 32 | POST | `/pharmacy/orders/{id}/reject` | Rechazar el pedido (FAR-E2) | MEDIO | 34 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 33 | POST | `/pharmacy/orders/{id}/review` | Abrir revisión del pedido (FAR-E2) | MEDIO | 29 | SECURITY_ADMIN, PHARMACY_STAFF |
+| 34 | GET | `/pharmacy/orders/me` | Mis pedidos de farmacia, más nuevos primero (FAR-E1) | MEDIO | 48 | PATIENT |
+| 35 | POST | `/pharmacy/recall-holds` | Aplicar retiro/recall de lote (UC-25-08) | MEDIO | 11 | SECURITY_ADMIN |
+| 36 | POST | `/pharmacy/recall-holds/{id}/release` | Liberar recall y reactivar lote (UC-25-09) | MEDIO | 11 | SECURITY_ADMIN |
 
 ---
 
@@ -58,7 +64,7 @@
 
 Ingerir un lote de sincronización ERP. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -70,10 +76,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -176,7 +182,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Conciliar lote de sincronización externa (UC-25-12). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -188,9 +194,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: batchId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts:93` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -257,7 +263,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Liberar reservas y pedidos vencidos (UC-25-05). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -269,8 +275,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-internal.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -297,7 +303,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/expire-inventory-reservations.use-case.ts:33` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReservationsRepository.findExpired | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:125` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → InventoryReservationsService.expire → ExpireInventoryReservationsUseCase.execute → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → PharmacyOrdersService.expireDue → PharmacyOrdersUseCases.expireDue → PharmacyOrdersRepository.findPharmaciesByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:265` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | PharmacyInventoryInternalController.expireReservations → PharmacyOrdersService.expireDue → PharmacyOrdersUseCases.expireDue → PharmacyOrderNotificationsService.expiredToPrescriber → NotifyPharmacyOrderUseCase.expiredToPrescriber → NotifyPharmacyOrderUseCase.emitToPerson → ProfilesPersonAccountLinksAdapter.findActiveByPerson → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 
@@ -339,7 +345,558 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 4. GET /pharmacy-inventory/availability
+## 4. GET /pharmacies/{pharmacyId}/integration-connections
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Farmacia
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacyIntegrationSyncController.listConnections` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:71`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`GET /pharmacies/{pharmacyId}/integration-connections` la atiende `PharmacyIntegrationSyncController.listConnections` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:71). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Delega en `IntegrationReadService.connections`. Lee pharmacy.pharmacies, pharmacy.pharmacy_integration_connections, pharmacy.pharmacy_sites.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:71` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:71` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listConnections → IntegrationReadService.connections → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listConnections → IntegrationReadService.connections → IntegrationReadRepository.findConnections | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:36` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listConnections → IntegrationReadService.connections → IntegrationReadRepository.findSites | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:87` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<IntegrationConnectionListDto>` · DTO `IntegrationConnectionListDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<IntegrationConnectionDto>` | Sí | — | — | Conexiones, de la más nueva a la más vieja. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:108` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador de la conexión. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:57` |
+| `items[].pharmacySiteId` | `string` | No | formato uuid; admite null | — | Sede a la que se acota; `null` = todas las sedes activas. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:63` |
+| `items[].siteName` | `string` | No | admite null | — | Nombre de esa sede. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:69` |
+| `items[].integrationMode` | `string` | Sí | valores: BATCH, REALTIME | — | `BATCH` o `REALTIME`. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:75` |
+| `items[].supportsStockQuery` | `boolean` | Sí | — | — | Si la conexión admite consultar stock. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:81` |
+| `items[].status` | `string` | Sí | valores: ACTIVE, INACTIVE | — | `ACTIVE` o `INACTIVE`. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:87` |
+| `items[].providerConfigured` | `boolean` | Sí | — | — | Si la API sabe dónde está el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:93` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | Alta de la conexión. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:99` |
+| `providerConfigured` | `boolean` | Sí | — | — | Si la API sabe dónde está el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:114` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.spec.ts:87` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyIntegrationSyncController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 5. GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Farmacia
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacyIntegrationSyncController.listExternalProducts` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:92`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/external-products` la atiende `PharmacyIntegrationSyncController.listExternalProducts` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:92). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Delega en `IntegrationReadService.externalProducts`. Lee pharmacy.pharmacies, pharmacy.pharmacy_external_product_mappings, pharmacy.pharmacy_integration_connections.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:92` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:92` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listExternalProducts → IntegrationReadService.externalProducts → IntegrationReadService.requireConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
+| `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listExternalProducts → IntegrationReadService.externalProducts → IntegrationReadRepository.findMappings | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:60` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listExternalProducts → IntegrationReadService.externalProducts → IntegrationReadService.requireConnection → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:49` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | — |
+| `connectionId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<ExternalCatalogListDto>` · DTO `ExternalCatalogListDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<ExternalCatalogProductDto>` | Sí | — | — | Productos del sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:204` |
+| `items[].code` | `string` | Sí | — | — | Código del producto en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:171` |
+| `items[].name` | `string` | Sí | — | — | Nombre en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:177` |
+| `items[].presentation` | `string` | No | admite null | — | Presentación en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:183` |
+| `items[].unitCode` | `string` | No | admite null | — | Unidad en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:189` |
+| `items[].mappedProductId` | `string` | No | formato uuid; admite null | — | Producto de la farmacia vinculado; `null` si no tiene o es ambiguo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:195` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | ExternalCatalogUnavailableError: not configured; ExternalCatalogUnavailableError: GET {path} → {status}; ExternalCatalogUnavailableError: invalid product |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.spec.ts:89` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyIntegrationSyncController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 6. GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Farmacia
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacyIntegrationSyncController.listMappings` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:81`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/product-mappings` la atiende `PharmacyIntegrationSyncController.listMappings` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:81). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Delega en `IntegrationReadService.mappings`. Lee pharmacy.pharmacies, pharmacy.pharmacy_external_product_mappings, pharmacy.pharmacy_integration_connections, pharmacy.pharmacy_products.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:81` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:81` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadService.requireConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
+| `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadRepository.findMappings | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:60` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadService.requireConnection → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:49` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listMappings → IntegrationReadService.mappings → IntegrationReadRepository.findProducts | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:74` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | — |
+| `connectionId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<IntegrationMappingListDto>` · DTO `IntegrationMappingListDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<IntegrationMappingDto>` | Sí | — | — | Vínculos, por código externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:162` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador del vínculo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:123` |
+| `items[].externalProductCode` | `string` | Sí | — | — | Código del producto en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:129` |
+| `items[].pharmacyProductId` | `string` | Sí | formato uuid | — | Producto de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:135` |
+| `items[].productCode` | `string` | No | admite null | — | Código del producto en la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:141` |
+| `items[].productName` | `string` | No | admite null | — | Nombre del producto en la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:147` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | Alta del vínculo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:153` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.spec.ts:88` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyIntegrationSyncController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 7. POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Farmacia
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacyIntegrationSyncController.syncNow` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`POST /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync` la atiende `PharmacyIntegrationSyncController.syncNow` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Delega en `SyncExternalPharmacyCatalogUseCase.execute`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items. Actualiza pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items. Lee pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items, pharmacy.pharmacies, pharmacy.pharmacy_external_product_mappings, pharmacy.pharmacy_integration_connections, pharmacy.pharmacy_products y 1 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:52` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → SiteStockWriter.append → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:84` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.findFirstActiveInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:69` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.apply → SiteStockWriter.write → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy_inventory.pharmacy_inventory_sync_batches` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → SyncRepository.createBatch | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:129` |
+| `pharmacy_inventory.pharmacy_inventory_sync_batches` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → ReconcileInventorySyncBatchUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-sync/reconcile-inventory-sync-batch.use-case.ts:67` |
+| `pharmacy_inventory.pharmacy_inventory_sync_batches` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → SyncRepository.findBatchById | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:91` |
+| `pharmacy_inventory.pharmacy_inventory_sync_items` | ESCRIBE | CREA | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → SyncRepository.createItem | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:155` |
+| `pharmacy_inventory.pharmacy_inventory_sync_items` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → ReconcileInventorySyncBatchUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-sync/reconcile-inventory-sync-batch.use-case.ts:56` |
+| `pharmacy_inventory.pharmacy_inventory_sync_items` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → SyncRepository.findItemByIdempotencyKey | `src/modules/pharmacy_inventory/infrastructure/repositories/sync.repository.ts:115` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
+| `pharmacy.pharmacy_external_product_mappings` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findMappings | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:60` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:49` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → CreateInventorySyncBatchUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.syncNow → SyncExternalPharmacyCatalogUseCase.execute → SyncExternalPharmacyCatalogUseCase.plan → IntegrationReadRepository.findActiveSites | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:96` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | — |
+| `connectionId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<IntegrationSyncResponseDto>` · DTO `IntegrationSyncResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `batchId` | `string` | Sí | formato uuid | — | Lote de sincronización que dejó la corrida. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:24` |
+| `received` | `number` | Sí | — | — | Líneas de stock recibidas del sistema externo (todas las sedes). | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:30` |
+| `mapped` | `number` | Sí | — | — | Líneas traducidas a un producto de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:36` |
+| `unmapped` | `array<UnmappedExternalProductDto>` | Sí | — | — | Códigos externos sin un vínculo único, una vez cada uno. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:42` |
+| `unmapped[].externalCode` | `string` | Sí | — | — | Código del producto en el sistema externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:9` |
+| `unmapped[].name` | `string` | Sí | — | — | Nombre que le da el catálogo externo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:15` |
+| `applied` | `number` | Sí | — | — | Posiciones de stock que cambiaron (las iguales no cuentan). | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:48` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El lote no está en estado reconciliable |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | ExternalCatalogUnavailableError: not configured; ExternalCatalogUnavailableError: GET {path} → {status}; ExternalCatalogUnavailableError: invalid product; ExternalCatalogUnavailableError: invalid stock line |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.spec.ts:61` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyIntegrationSyncController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 8. GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Farmacia
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacyIntegrationSyncController.listSyncBatches` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:106`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`GET /pharmacies/{pharmacyId}/integration-connections/{connectionId}/sync-batches` la atiende `PharmacyIntegrationSyncController.listSyncBatches` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:106). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Delega en `IntegrationReadService.syncBatches`. Lee pharmacy_inventory.pharmacy_inventory_sync_batches, pharmacy_inventory.pharmacy_inventory_sync_items, pharmacy.pharmacies, pharmacy.pharmacy_integration_connections.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:106` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, connectionId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.ts:106` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `pharmacy_inventory.pharmacy_inventory_sync_batches` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadRepository.findBatches | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:118` |
+| `pharmacy_inventory.pharmacy_inventory_sync_items` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadRepository.countDiscrepancies | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:132` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadService.requireConnection → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
+| `pharmacy.pharmacy_integration_connections` | LEE | LEE | DIRECTA | PharmacyIntegrationSyncController.listSyncBatches → IntegrationReadService.syncBatches → IntegrationReadService.requireConnection → IntegrationReadRepository.findConnection | `src/modules/pharmacy_inventory/infrastructure/repositories/integration-read.repository.ts:49` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | — |
+| `connectionId` | path | Sí | `string` | — |
+| `limit` | query | sin dato | `number \| undefined` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<IntegrationSyncBatchListDto>` · DTO `IntegrationSyncBatchListDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<IntegrationSyncBatchDto>` | Sí | — | — | Lotes, del más nuevo al más viejo. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:252` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador del lote. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:213` |
+| `items[].status` | `string` | Sí | valores: RECEIVED, COMPLETED | — | `RECEIVED` o `COMPLETED`. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:219` |
+| `items[].receivedAt` | `string` | No | formato date-time; admite null | — | Cuándo se recibió. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:225` |
+| `items[].completedAt` | `string` | No | formato date-time; admite null | — | Cuándo se concilió. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:231` |
+| `items[].itemCount` | `number` | Sí | — | — | Ítems del lote. | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:237` |
+| `items[].discrepancies` | `number` | Sí | — | — | Ítems sin producto (códigos sin vínculo). | `src/modules/pharmacy_inventory/presentation/dto/integration-sync.dto.ts:243` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-integration-sync.controller.spec.ts:90` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacyIntegrationSyncController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 9. PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** «Lo tengo / No lo tengo» de un producto en una sede.
+- **Bloque:** Farmacia
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `PharmacySiteAvailabilityController.setSiteAvailability` — `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40`
+
+### Qué es y para qué sirve (negocio)
+
+«Lo tengo / No lo tengo» de un producto en una sede. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+
+### Cómo se atiende (sistema)
+
+`PUT /pharmacies/{pharmacyId}/sites/{siteId}/products/{productId}/availability` la atiende `PharmacySiteAvailabilityController.setSiteAvailability` (src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40). Exige sesión con alguno de los roles SECURITY_ADMIN, PHARMACY_STAFF. Valida el cuerpo como `SetSiteAvailabilityDto` (2 campos, 1 obligatorio). Delega en `SetSiteProductAvailabilityUseCase.execute`. Crea filas en pharmacy_inventory.inventory_ledger_entries, pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions. Lee pharmacy_inventory.inventory_locations, pharmacy_inventory.inventory_stock_positions, pharmacy.pharmacies, pharmacy.pharmacy_products, pharmacy.pharmacy_sites.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId, siteId, productId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.ts:40` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `pharmacy_inventory.inventory_ledger_entries` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → SiteStockWriter.append → LedgerRepository.append | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:142` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:84` |
+| `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → SiteStockWriter.defaultLocationId → LocationsRepository.findFirstActiveInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:69` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → SiteStockWriter.write → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
+| `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
+| `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
+| `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacySiteAvailabilityController.setSiteAvailability → SetSiteProductAvailabilityUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `pharmacyId` | path | Sí | `string` | — |
+| `siteId` | path | Sí | `string` | — |
+| `productId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `SetSiteAvailabilityDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `available` | `boolean` | Sí | — | `@IsBoolean()` | «Lo tengo» en esta sucursal | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:14` |
+| `quantity` | `number` | No | mínimo 0; máximo 1_000_000 | `@IsOptional()` `@IsInt()` `@Min(0)` `@Max(1_000_000)` | Unidades para vender en la sede. Sin ella, «Lo tengo» toma el conteo del catálogo, o 1 si el producto no tiene conteo o está en 0. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:25` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "available": true
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "available": true,
+  "quantity": 1
+}
+```
+
+</details>
+
+### Respuesta — `Promise<SiteAvailabilityResponseDto>` · DTO `SiteAvailabilityResponseDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `siteId` | `string` | Sí | formato uuid | — | Sede de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:34` |
+| `productId` | `string` | Sí | formato uuid | — | Producto de la farmacia. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:40` |
+| `available` | `boolean` | Sí | — | — | Si hay unidades para vender en la sede. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:46` |
+| `quantity` | `number` | Sí | — | — | Unidades para vender en la sede (sin lo reservado ni lo retenido). | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:52` |
+| `stockUpdatedAt` | `string` | Sí | formato date-time | — | Última actualización de la existencia de la sede, en ISO 8601. | `src/modules/pharmacy_inventory/presentation/dto/site-availability.dto.ts:58` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+| 500 | `INTERNAL` | DomainException: {HttpStatus.BAD_REQUEST} |
+
+El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.md).
+
+### Pruebas que la mencionan
+
+| Tipo | Archivo |
+|---|---|
+| CONTROLADOR | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-site-availability.controller.spec.ts:64` |
+
+### Flujos
+
+- src / modules / pharmacy inventory — etapa `ctrl:PharmacySiteAvailabilityController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 10. GET /pharmacy-inventory/availability
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar qué sedes pueden surtir un conjunto de productos
@@ -352,7 +909,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Consultar qué sedes pueden surtir un conjunto de productos. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -364,9 +921,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:56` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | products (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -464,7 +1021,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 5. GET /pharmacy-inventory/sites/{siteId}/stock
+## 11. GET /pharmacy-inventory/sites/{siteId}/stock
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar el stock disponible de una sede
@@ -477,7 +1034,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 Consultar el stock disponible de una sede. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -489,9 +1046,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory-read.controller.ts:38` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -562,7 +1119,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 6. POST /pharmacy/{pharmacyId}/dispensations
+## 12. POST /pharmacy/{pharmacyId}/dispensations
 
 - **Origen:** CONTRATO
 - **Nombre:** Dispensar una prescripción a un paciente (UC-25-03)
@@ -575,7 +1132,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Dispensar una prescripción a un paciente (UC-25-03). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -587,11 +1144,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts:38` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -607,7 +1164,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:224` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → ReservationsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:116` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/dispense-medication.use-case.ts:197` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.medication_dispensation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:177` |
 | `pharmacy_inventory.medication_dispensation_lines` | LEE | LEE | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.findLines | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:131` |
 | `pharmacy_inventory.medication_dispensations` | ESCRIBE | CREA | DIRECTA | PharmacyDispensingController.dispense → MedicationDispensationsService.dispense → DispenseMedicationUseCase.execute → DispensationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:147` |
@@ -712,7 +1269,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 7. POST /pharmacy/{pharmacyId}/goods-receipts
+## 13. POST /pharmacy/{pharmacyId}/goods-receipts
 
 - **Origen:** CONTRATO
 - **Nombre:** Recepcionar mercancía por lote (UC-25-02)
@@ -725,7 +1282,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Recepcionar mercancía por lote (UC-25-02). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -737,11 +1294,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:81` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:81` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -753,8 +1310,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_lots` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → LotsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:69` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → LotsRepository.findByProductAndNumber | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:58` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods | `src/modules/pharmacy_inventory/application/pharmacy-procurement/pharmacy-procurement.use-cases.ts:373` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:112` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_goods_receipt_lines` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → GoodsReceiptsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/goods-receipts.repository.ts:166` |
 | `pharmacy_inventory.pharmacy_goods_receipt_lines` | LEE | LEE | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → GoodsReceiptsRepository.findLines | `src/modules/pharmacy_inventory/infrastructure/repositories/goods-receipts.repository.ts:123` |
 | `pharmacy_inventory.pharmacy_goods_receipts` | ESCRIBE | CREA | DIRECTA | PharmacyProcurementController.receiveGoods → PharmacyProcurementService.receiveGoods → PharmacyProcurementUseCases.receiveGoods → GoodsReceiptsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/goods-receipts.repository.ts:139` |
@@ -868,7 +1425,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 8. POST /pharmacy/{pharmacyId}/purchase-orders
+## 14. POST /pharmacy/{pharmacyId}/purchase-orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir una orden de compra a proveedor (UC-25-01)
@@ -881,7 +1438,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Emitir una orden de compra a proveedor (UC-25-01). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -893,11 +1450,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:61` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -997,7 +1554,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 9. POST /pharmacy/{pharmacyId}/reservations
+## 15. POST /pharmacy/{pharmacyId}/reservations
 
 - **Origen:** CONTRATO
 - **Nombre:** Reservar stock para una prescripción (UC-25-04)
@@ -1010,7 +1567,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reservar stock para una prescripción (UC-25-04). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -1022,11 +1579,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:84` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:84` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1040,7 +1597,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → ReservationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:188` |
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → ReservationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/reservations.repository.ts:158` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requirePatientContext → InventoryScopeRepository.patientServedByPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:133` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.reserve → InventoryReservationsService.reserve → ReserveInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
@@ -1136,7 +1693,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 10. POST /pharmacy/{pharmacyId}/suppliers
+## 16. POST /pharmacy/{pharmacyId}/suppliers
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar un proveedor de farmacia
@@ -1149,7 +1706,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Registrar un proveedor de farmacia. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -1161,11 +1718,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:43` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-procurement.controller.ts:43` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1236,7 +1793,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 11. POST /pharmacy/{pharmacyId}/transfers
+## 17. POST /pharmacy/{pharmacyId}/transfers
 
 - **Origen:** CONTRATO
 - **Nombre:** Transferir stock entre ubicaciones (UC-25-10)
@@ -1249,7 +1806,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Transferir stock entre ubicaciones (UC-25-10). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -1261,11 +1818,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:102` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: pharmacyId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:102` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1276,8 +1833,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireLocationInPharmacy → InventoryScopeRepository.findLocation | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:64` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-transfers/transfer-inventory.use-case.ts:125` |
-| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:112` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:124` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.transfer → InventoryTransfersService.transfer → TransferInventoryUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
@@ -1357,7 +1914,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 12. POST /pharmacy/{siteId}/count-sessions
+## 18. POST /pharmacy/{siteId}/count-sessions
 
 - **Origen:** CONTRATO
 - **Nombre:** Iniciar y congelar una sesión de conteo (UC-25-06)
@@ -1370,7 +1927,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Iniciar y congelar una sesión de conteo (UC-25-06). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -1382,11 +1939,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:119` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1397,7 +1954,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_count_sessions` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → CountSessionsRepository.countOpenAtLocation | `src/modules/pharmacy_inventory/infrastructure/repositories/count-sessions.repository.ts:97` |
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireLot → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:65` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:77` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.openCountSession → InventoryCountService.openSession → OpenInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:38` |
@@ -1479,7 +2036,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. POST /pharmacy/{siteId}/inventory-locations
+## 19. POST /pharmacy/{siteId}/inventory-locations
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una ubicación de inventario
@@ -1492,7 +2049,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Crear una ubicación de inventario. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -1504,17 +2061,17 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:66` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:66` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:68` |
+| `pharmacy_inventory.inventory_locations` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → LocationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/locations.repository.ts:84` |
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.createLocation → InventoryLocationsService.create → CreateInventoryLocationUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:38` |
@@ -1584,7 +2141,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 14. POST /pharmacy/count-sessions/{id}/approve
+## 20. POST /pharmacy/count-sessions/{id}/approve
 
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar conteo y ajustar ledger por varianza (UC-25-07)
@@ -1597,7 +2154,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Aprobar conteo y ajustar ledger por varianza (UC-25-07). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -1609,11 +2166,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:139` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:139` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1628,7 +2185,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findLot | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:86` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-count/approve-inventory-count.use-case.ts:122` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.assertStoredStockKey → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.approveCountSession → InventoryCountService.approve → ApproveInventoryCountUseCase.execute → PharmacyInventoryScopePolicy.requireManagedSite → InventoryScopeRepository.findSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:38` |
@@ -1707,7 +2264,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. POST /pharmacy/dispensations/{id}/reverse
+## 21. POST /pharmacy/dispensations/{id}/reverse
 
 - **Origen:** CONTRATO
 - **Nombre:** Reversar una dispensación (UC-25-11)
@@ -1720,7 +2277,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Reversar una dispensación (UC-25-11). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -1732,11 +2289,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-dispensing.controller.ts:58` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1746,7 +2303,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_ledger_entries` | LEE | LEE | POR_SQL | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → LedgerRepository.nextSequence | `src/modules/pharmacy_inventory/infrastructure/repositories/ledger.repository.ts:113` |
 | `pharmacy_inventory.inventory_locations` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → PharmacyInventoryScopePolicy.requireLocation → InventoryScopeRepository.findLocationInSite | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:56` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/reverse-medication-dispensation.use-case.ts:115` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.medication_dispensation_lines` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → DispensationsRepository.findLines | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:131` |
 | `pharmacy_inventory.medication_dispensations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute | `src/modules/pharmacy_inventory/application/medication-dispensations/reverse-medication-dispensation.use-case.ts:86` |
 | `pharmacy_inventory.medication_dispensations` | LEE | LEE | DIRECTA | PharmacyDispensingController.reverse → MedicationDispensationsService.reverse → ReverseMedicationDispensationUseCase.execute → DispensationsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:108` |
@@ -1812,7 +2369,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 16. GET /pharmacy/orders
+## 22. GET /pharmacy/orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Bandeja de pedidos de las farmacias del tenant (FAR-E2)
@@ -1825,7 +2382,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Bandeja de pedidos de las farmacias del tenant (FAR-E2). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -1837,8 +2394,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1868,7 +2425,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersRepository.findOrdersForPharmacies | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:99` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersRepository.findPharmaciesByTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:116` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.listForTenant → PharmacyOrdersService.listForPharmacyTenant → PharmacyOrdersUseCases.listForPharmacyTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -2022,7 +2579,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 17. POST /pharmacy/orders
+## 23. POST /pharmacy/orders
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un pedido de farmacia (FAR-E1)
@@ -2035,7 +2592,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 Crear un pedido de farmacia (FAR-E1). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -2047,10 +2604,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:94` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2256,7 +2813,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 18. GET /pharmacy/orders/{id}
+## 24. GET /pharmacy/orders/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar un pedido de farmacia (FAR-E1)
@@ -2269,7 +2826,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Consultar un pedido de farmacia (FAR-E1). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -2281,9 +2838,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:136` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:136` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2327,7 +2884,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersRepository.findOrderById | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:45` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.getOrder → PharmacyOrdersService.getOrder → PharmacyOrdersUseCases.getOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -2476,7 +3033,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 19. POST /pharmacy/orders/{id}/accept-substitutions
+## 25. POST /pharmacy/orders/{id}/accept-substitutions
 
 - **Origen:** CONTRATO
 - **Nombre:** Aceptar los genéricos propuestos (paciente)
@@ -2489,7 +3046,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 Aceptar los genéricos propuestos (paciente). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -2501,9 +3058,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:249` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:249` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2672,7 +3229,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 20. POST /pharmacy/orders/{id}/cancel
+## 26. POST /pharmacy/orders/{id}/cancel
 
 - **Origen:** CONTRATO
 - **Nombre:** Cancelar un pedido de farmacia (FAR-E1)
@@ -2685,7 +3242,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Cancelar un pedido de farmacia (FAR-E1). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -2697,9 +3254,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:178` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:178` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2719,7 +3276,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:740` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.cancel → PharmacyOrdersService.cancel → PharmacyOrdersUseCases.cancel → PharmacyOrdersUseCases.readOwnOrder → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -2866,7 +3423,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /pharmacy/orders/{id}/confirm
+## 27. POST /pharmacy/orders/{id}/confirm
 
 - **Origen:** CONTRATO
 - **Nombre:** Confirmar el pedido (FAR-E2)
@@ -2879,7 +3436,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Confirmar el pedido (FAR-E2). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -2891,11 +3448,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:224` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:224` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2925,7 +3482,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:972` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.persistProposals → PharmacyOrderSubstitutionsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:74` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.confirm → PharmacyOrdersService.confirm → PharmacyOrdersUseCases.confirm → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
@@ -3102,7 +3659,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 22. POST /pharmacy/orders/{id}/conversation
+## 28. POST /pharmacy/orders/{id}/conversation
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir el chat del pedido con la farmacia
@@ -3115,7 +3672,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Abrir el chat del pedido con la farmacia. Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -3127,9 +3684,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:156` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3187,7 +3744,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 23. POST /pharmacy/orders/{id}/dispense
+## 29. POST /pharmacy/orders/{id}/dispense
 
 - **Origen:** CONTRATO
 - **Nombre:** Dispensar el pedido en el mostrador (FAR-E3)
@@ -3200,7 +3757,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Dispensar el pedido en el mostrador (FAR-E3). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -3212,11 +3769,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:345` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:345` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3246,7 +3803,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1553` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1527` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.medication_dispensation_lines` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → DispensationsRepository.createLine | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:177` |
 | `pharmacy_inventory.medication_dispensations` | ESCRIBE | CREA | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → DispensationsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:147` |
 | `pharmacy_inventory.medication_dispensations` | LEE | LEE | DIRECTA | PharmacyOrdersController.dispense → PharmacyOrdersService.dispense → PharmacyOrdersUseCases.dispense → DispensationsRepository.findByIdempotencyKey | `src/modules/pharmacy_inventory/infrastructure/repositories/dispensations.repository.ts:117` |
@@ -3423,7 +3980,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. POST /pharmacy/orders/{id}/prefer-original
+## 30. POST /pharmacy/orders/{id}/prefer-original
 
 - **Origen:** CONTRATO
 - **Nombre:** Preferir los productos originales (paciente)
@@ -3436,7 +3993,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Preferir los productos originales (paciente). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -3448,9 +4005,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:273` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:273` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3612,7 +4169,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 25. POST /pharmacy/orders/{id}/ready
+## 31. POST /pharmacy/orders/{id}/ready
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar el pedido listo para retiro (FAR-E2/E3)
@@ -3625,7 +4182,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Marcar el pedido listo para retiro (FAR-E2/E3). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -3637,9 +4194,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:320` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:320` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3812,7 +4369,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 26. POST /pharmacy/orders/{id}/reject
+## 32. POST /pharmacy/orders/{id}/reject
 
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar el pedido (FAR-E2)
@@ -3825,7 +4382,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Rechazar el pedido (FAR-E2). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -3837,11 +4394,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:294` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:294` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3871,7 +4428,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1233` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findOrderByIdForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:61` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.loadTenantOrderForUpdate → PharmacyOrdersRepository.findPharmaciesByIdsInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:235` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.reject → PharmacyOrdersService.reject → PharmacyOrdersUseCases.reject → PharmacyOrdersUseCases.readOrderForTenant → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -4038,7 +4595,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 27. POST /pharmacy/orders/{id}/review
+## 33. POST /pharmacy/orders/{id}/review
 
 - **Origen:** CONTRATO
 - **Nombre:** Abrir revisión del pedido (FAR-E2)
@@ -4051,7 +4608,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Abrir revisión del pedido (FAR-E2). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -4063,9 +4620,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN, PHARMACY_STAFF | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:203` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:203` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4237,7 +4794,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 28. GET /pharmacy/orders/me
+## 34. GET /pharmacy/orders/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis pedidos de farmacia, más nuevos primero (FAR-E1)
@@ -4250,7 +4807,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Mis pedidos de farmacia, más nuevos primero (FAR-E1). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -4262,8 +4819,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-orders.controller.ts:119` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4306,7 +4863,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_reservations` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue | `src/modules/pharmacy_inventory/application/pharmacy-orders/pharmacy-orders.use-cases.ts:1696` |
 | `pharmacy_inventory.inventory_reservations` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersRepository.findOrdersByPatient | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:165` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-reservations/release-confirmed-reservation-lines.use-case.ts:72` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:82` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → InventoryReservationsService.releaseConfirmedLines → ReleaseConfirmedReservationLinesUseCase.execute → StockPositionsRepository.findByKeyForUpdate | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:94` |
 | `pharmacy_inventory.pharmacy_order_substitutions` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.composeOrders → PharmacyOrderSubstitutionsRepository.findByReservationIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-order-substitutions.repository.ts:62` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.expireDue → PharmacyOrdersRepository.findPharmaciesByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:265` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyOrdersController.listMine → PharmacyOrdersService.listMine → PharmacyOrdersUseCases.listMine → PharmacyOrdersUseCases.composeOrders → PharmacyOrdersRepository.findProductsByIds | `src/modules/pharmacy_inventory/infrastructure/repositories/pharmacy-orders.repository.ts:256` |
@@ -4451,7 +5008,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 ---
 
-## 29. POST /pharmacy/recall-holds
+## 35. POST /pharmacy/recall-holds
 
 - **Origen:** CONTRATO
 - **Nombre:** Aplicar retiro/recall de lote (UC-25-08)
@@ -4464,7 +5021,7 @@ El árbol de decisión completo está en [flujos](../flujos/pharmacy_inventory.m
 
 Aplicar retiro/recall de lote (UC-25-08). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -4476,10 +5033,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:159` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4492,7 +5049,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_lots` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → LotsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/lots.repository.ts:49` |
 | `pharmacy_inventory.inventory_recall_holds` | ESCRIBE | CREA | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → RecallHoldsRepository.create | `src/modules/pharmacy_inventory/infrastructure/repositories/recall-holds.repository.ts:67` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/create-recall-hold.use-case.ts:105` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:65` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → StockPositionsRepository.findByKey | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:77` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireStockKey → PharmacyInventoryScopePolicy.requireProduct → InventoryScopeRepository.findProductInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:73` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.createRecallHold → InventoryRecallService.createHold → CreateRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireSite → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |
@@ -4566,7 +5123,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 30. POST /pharmacy/recall-holds/{id}/release
+## 36. POST /pharmacy/recall-holds/{id}/release
 
 - **Origen:** CONTRATO
 - **Nombre:** Liberar recall y reactivar lote (UC-25-09)
@@ -4579,7 +5136,7 @@ _Ninguna prueba existente menciona esta operación._
 
 Liberar recall y reactivar lote (UC-25-09). Dentro del módulo (descripción del modelo, en inglés): «Prevents overselling and untraceable adjustments under concurrent manual, API, dispensing and receiving operations.» Dominio: Farmacia.
 
-_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:20`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_25_pharmacy_inventory.puml:23`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 
 ### Cómo se atiende (sistema)
 
@@ -4591,11 +5148,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:176` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/pharmacy_inventory/presentation/controllers/pharmacy-inventory.controller.ts:176` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4608,7 +5165,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `pharmacy_inventory.inventory_recall_holds` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/release-recall-hold.use-case.ts:98` |
 | `pharmacy_inventory.inventory_recall_holds` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → RecallHoldsRepository.findById | `src/modules/pharmacy_inventory/infrastructure/repositories/recall-holds.repository.ts:56` |
 | `pharmacy_inventory.inventory_stock_positions` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute | `src/modules/pharmacy_inventory/application/inventory-recall/release-recall-hold.use-case.ts:127` |
-| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → StockPositionsRepository.findByLot | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:98` |
+| `pharmacy_inventory.inventory_stock_positions` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → StockPositionsRepository.findByLot | `src/modules/pharmacy_inventory/infrastructure/repositories/stock-positions.repository.ts:110` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedProduct → PharmacyInventoryScopePolicy.requireManagedPharmacy → InventoryScopeRepository.findPharmacyInTenant | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:33` |
 | `pharmacy.pharmacy_products` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.requireManagedProduct → InventoryScopeRepository.findProduct | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:81` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyInventoryController.releaseRecallHold → InventoryRecallService.release → ReleaseRecallHoldUseCase.execute → PharmacyInventoryScopePolicy.resolveStoredLocation → InventoryScopeRepository.findSiteInPharmacy | `src/modules/pharmacy_inventory/infrastructure/repositories/inventory-scope.repository.ts:47` |

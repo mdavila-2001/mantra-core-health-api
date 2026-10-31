@@ -58,6 +58,8 @@ import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
+import { CatalogDocumentationSeedService } from './catalog/catalog-documentation-seed.service';
+import { MutabilityRegistrySeedService } from './mutability/mutability-registry-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
@@ -172,6 +174,8 @@ import { SeedCensusService } from './seed-census.service';
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
     TelemetryUxHeatmapSeedService,
+    MutabilityRegistrySeedService,
+    CatalogDocumentationSeedService,
     GlossarySeedService,
     BoGeographySeedService,
     AdminDivisionsSeedService,
@@ -214,6 +218,8 @@ import { SeedCensusService } from './seed-census.service';
     DynamicEnumSeedService,
     PatientPortalProxySeedService,
     TelemetryUxHeatmapSeedService,
+    MutabilityRegistrySeedService,
+    CatalogDocumentationSeedService,
     GlossarySeedService,
     BoGeographySeedService,
     AdminDivisionsSeedService,

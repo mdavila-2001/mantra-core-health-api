@@ -45,6 +45,8 @@ import { admissionsEnvSchema } from './modules/profiles/domain/admissions/admiss
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
 import { GovernanceAdminModule } from './modules/governance_admin/governance_admin.module';
+import { RuntimePiecesModule } from './modules/platform_ops/runtime_pieces/runtime_pieces.module';
+import { UiVisibilityModule } from './modules/ui_visibility/ui_visibility.module';
 import { ClinicalImportModule } from './modules/clinical_import/clinical-import.module';
 import { AdminCatalogsModule } from './modules/admin_catalogs/admin-catalogs.module';
 import { BillingModule } from './modules/billing/billing.module';
@@ -199,6 +201,8 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     AdminCatalogsModule,
     GovernanceAdminModule,
     ClinicalImportModule,
+    UiVisibilityModule,
+    RuntimePiecesModule,
     AdsModule,
     AuditModule,
     AudioAssetsModule,

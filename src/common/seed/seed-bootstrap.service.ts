@@ -13,6 +13,8 @@ import { InsurerAccountsSeedService } from './insurer-accounts-seed.service';
 import { DynamicEnumSeedService } from './dynamic-enum-seed.service';
 import { PatientPortalProxySeedService } from './patient-portal-proxy-seed.service';
 import { TelemetryUxHeatmapSeedService } from './telemetry-ux-heatmap-seed.service';
+import { CatalogDocumentationSeedService } from './catalog/catalog-documentation-seed.service';
+import { MutabilityRegistrySeedService } from './mutability/mutability-registry-seed.service';
 import { GlossarySeedService } from './glossary-seed.service';
 import { BoGeographySeedService } from './bo-geography-seed.service';
 import { AdminDivisionsSeedService } from './admin-divisions-seed.service';
@@ -264,6 +266,8 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
     private readonly dynamicEnums: DynamicEnumSeedService,
     private readonly patientPortalProxy: PatientPortalProxySeedService,
     private readonly telemetryUxHeatmap: TelemetryUxHeatmapSeedService,
+    private readonly mutabilityRegistry: MutabilityRegistrySeedService,
+    private readonly catalogDocumentation: CatalogDocumentationSeedService,
     private readonly glossary: GlossarySeedService,
     private readonly boGeography: BoGeographySeedService,
     private readonly adminDivisions: AdminDivisionsSeedService,
@@ -460,6 +464,22 @@ export class SeedBootstrapService implements OnApplicationBootstrap {
       // portal. Es `core` porque sin ellas el alta de un dependiente viola dos
       // FK NOT NULL, y va acá porque depende del tenant y del propósito de
       // procesamiento que el catálogo acaba de materializar.
+      // Registro de mutabilidad (system_ops.entity_registry y sus políticas), derivado del
+      // modelo con nivel de evidencia. Depende de los conceptos `SO_*` del catálogo; sin ellos
+      // no siembra nada y lo avisa. Idempotente por (schema, tabla).
+      {
+        name: 'registro de mutabilidad de datos',
+        kind: 'core',
+        run: () => this.mutabilityRegistry.run(),
+      },
+      // Documentación del catálogo (dominios, clasificaciones, glosario, linaje y fichas en
+      // borrador con procedencia). Nunca aprueba nada; las fichas necesitan que el escaneo haya
+      // observado los objetos (si no, informa NO_OBSERVED_OBJECTS y la corrida siguiente las siembra).
+      {
+        name: 'documentación del catálogo de datos',
+        kind: 'core',
+        run: () => this.catalogDocumentation.run(),
+      },
       {
         name: 'apoderamiento de portal',
         kind: 'core',

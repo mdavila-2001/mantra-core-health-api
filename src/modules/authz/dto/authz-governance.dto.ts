@@ -208,6 +208,25 @@ export class ResourceScopeGrantIdParamDto {
   @ApiProperty({ format: 'uuid' }) @IsUUID() grantId!: string;
 }
 
+/**
+ * Cuerpo opcional de `DELETE /authz/resource-scope-grants/:grantId`. Es opcional para no romper a
+ * los clientes que no lo envían; el servicio lo exige cuando el permiso a terminar es de efecto
+ * DENY (`RESOURCE_SCOPE_GRANT_DENY_REASON_REQUIRED`), porque levantar una denegación abre un acceso.
+ */
+export class EndResourceScopeGrantDto {
+  @ApiPropertyOptional({
+    minLength: GOVERNANCE_REASON_MIN,
+    maxLength: GOVERNANCE_REASON_MAX,
+    description:
+      'Por qué se termina. Obligatorio si el permiso es de efecto DENY; opcional en un ALLOW.',
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(GOVERNANCE_REASON_MIN)
+  @MaxLength(GOVERNANCE_REASON_MAX)
+  reason?: string;
+}
+
 export class EndedResourceScopeGrantDto {
   @ApiProperty() id!: string;
   @ApiProperty({ type: String, format: 'date-time' }) validTo!: Date;

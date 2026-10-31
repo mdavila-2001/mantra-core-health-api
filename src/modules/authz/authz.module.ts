@@ -1,3 +1,6 @@
+import { AuthzModulesCatalogController } from './controllers/authz-modules-catalog.controller';
+import { AuthzModulesCatalogService } from './services/authz-modules-catalog.service';
+import { AuthzModulesRouteInventory } from './services/authz-modules-route-inventory';
 import { AuthzGovernanceController } from './controllers/authz-governance.controller';
 import { AuthzUserLifecycleService } from './services/authz-user-lifecycle.service';
 import { AuthzAccessReviewsService } from './services/authz-access-reviews.service';
@@ -85,8 +88,11 @@ import {
     AuthzMeController,
     AuthzAdminController,
     AuthzGovernanceController,
+    AuthzModulesCatalogController,
   ],
   providers: [
+    AuthzModulesCatalogService,
+    AuthzModulesRouteInventory,
     AuthzUserLifecycleService,
     AuthzAccessReviewsService,
     AuthzGovernanceReadService,

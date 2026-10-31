@@ -2,7 +2,7 @@
 
 # Catálogo del schema `procedures_perioperative`
 
-- **Tablas:** 35 · **Columnas:** 446 (92 con descripción: 20.6 %) · **Índices:** 262
+- **Tablas:** 35 · **Columnas:** 450 (94 con descripción: 20.9 %) · **Índices:** 262
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -31,8 +31,8 @@
 | [procedure_case_locations](#procedure_case_locations) | Vincula casos con salas o espacios donde se planifica o realiza la intervención. | 8 | 6 | 3 | COINCIDE |
 | [procedure_case_milestones](#procedure_case_milestones) | Registra hitos de los casos para seguir etapas relevantes de preparación, intervención y recuperación. | 9 | 6 | 7 | COINCIDE |
 | [procedure_case_status_history](#procedure_case_status_history) | Preserva cambios de estado de los casos para reconstruir su evolución operativa y perioperatoria. | 10 | 7 | 9 | COINCIDE |
-| [procedure_case_team_members](#procedure_case_team_members) | Identifica integrantes del equipo asignado a un caso de procedimiento para conservar sus roles y participación. | 14 | 7 | 13 | COINCIDE |
-| [procedure_cases](#procedure_cases) | Agrupa el caso perioperatorio de un paciente desde su solicitud y programación hasta la intervención y seguimiento. | 27 | 20 | 15 | COINCIDE |
+| [procedure_case_team_members](#procedure_case_team_members) | Identifica integrantes del equipo asignado a un caso de procedimiento para conservar sus roles y participación. | 15 | 7 | 13 | DIVERGE |
+| [procedure_cases](#procedure_cases) | Agrupa el caso perioperatorio de un paciente desde su solicitud y programación hasta la intervención y seguimiento. | 30 | 20 | 15 | DIVERGE |
 | [procedure_charge_items](#procedure_charge_items) | Asocia conceptos facturables con procedimientos para trasladar cargos del acto médico al ciclo administrativo correspondiente. | 16 | 9 | 4 | COINCIDE |
 | [procedure_complications](#procedure_complications) | Documenta complicaciones asociadas a procedimientos para dar seguimiento a eventos clínicos adversos o no previstos. | 13 | 9 | 1 | COINCIDE |
 | [procedure_devices](#procedure_devices) | Registra dispositivos utilizados en procedimientos para conservar trazabilidad del equipamiento clínico relevante. | 11 | 5 | 1 | COINCIDE |
@@ -2005,7 +2005,7 @@ Identifica integrantes del equipo asignado a un caso de procedimiento para conse
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_case_team_members`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureCaseTeamMembers` — `src/modules/procedures_perioperative/entities/procedure_case_team_members.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 6 FK salientes · 0 entrantes · 13 operaciones
+- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 0 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -2025,6 +2025,7 @@ Identifica integrantes del equipo asignado a un caso de procedimiento para conse
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/procedures_perioperative/entities/procedure_case_team_members.entity.ts:109`)_ | coincide |
+| 15 | `accepted_version_number` | `integer` | Opcional | + v4.2.49 (DOC-MOD-002, issue #57): version del caso (procedure_cases.version_number) que acepto el integrante. NULL = acepto antes de que el caso tuviera version. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:108`)_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -2096,7 +2097,7 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml: procedure_cases`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml` · **DDL:** `SQL/53_procedures_perioperative/02_tables.sql`
 - **Entidad del ORM:** `ProcedureCases` — `src/modules/procedures_perioperative/entities/procedure_cases.entity.ts`
-- **Resumen:** 27 columnas · 20 índices · 17 FK salientes · 26 entrantes · 15 operaciones
+- **Resumen:** 30 columnas · 20 índices · 17 FK salientes · 28 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -2129,6 +2130,9 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 | 25 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 26 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 27 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/procedures_perioperative/entities/procedure_cases.entity.ts:208`)_ | coincide |
+| 28 | `prep_minutes` | `integer` | Opcional | + v4.2.49 (ORG-QUI-002 / DOC-MOD-002, issues #58 y #57): preparacion y limpieza del quirofano para este caso (NULL = las del espacio, practice.care_spaces) y numero de version del caso. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_53_procedures_perioperative.puml:74`)_ | **AUSENTE_EN_ORM** |
+| 29 | `cleanup_minutes` | `integer` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 30 | `version_number` | `integer` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -2177,6 +2181,8 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 | desde | id | procedures_perioperative.procedure_charge_items (procedure_case_id) | fk_procedure_charge_items_procedure_case_id |
 | desde | id | procedures_perioperative.operating_room_utilization_events (procedure_case_id) | fk_operating_room_utilization_events_procedure_case_id |
 | desde | id | procedures_perioperative.sterility_verification_checks (procedure_case_id) | fk_sterility_verification_checks_procedure_case_id |
+| desde | id | clinical.received_services (procedure_case_id) | fk_received_services_procedure_case_id |
+| desde | id | audit.procedure_cases_history (procedure_case_id) | fk_procedure_cases_history_procedure_case_id |
 
 #### Índices
 
@@ -2208,6 +2214,8 @@ Agrupa el caso perioperatorio de un paciente desde su solicitud y programación 
 | Restricción | Tipo | Definición |
 |---|---|---|
 | `uk_procedure_cases_tenant_number` | UNIQUE INDEX | UNIQUE INDEX ("custodian_tenant_id", "case_number") |
+| `ex_procedure_cases_operating_room_time` | EXCLUDE | EXCLUDE USING gist ("operating_room_id" WITH =, tstzrange("scheduled_start_at", "scheduled_end_at", '[)') WITH &&) WHERE ("operating_room_id" IS NOT NULL AND "scheduled_start_at" IS NOT NULL AND "scheduled_end_at" IS NOT NULL AND "status_concept_id" IN ('6fe38139-ad1d-5214-84c1-8c184e4e58fb', 'f6985cd5-f867-5d76-b70c-1138667fd2ab', 'fdc78cc9-eda6-5625-9a26-1bdcec4dc203')) |
+| `ck_procedure_cases_buffers` | CHECK | CHECK ((COALESCE("prep_minutes", 0) >= 0 AND COALESCE("cleanup_minutes", 0) >= 0)) |
 
 #### Operaciones que la tocan
 

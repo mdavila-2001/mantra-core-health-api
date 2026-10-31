@@ -2,7 +2,7 @@
 
 # Catálogo del schema `authz`
 
-- **Tablas:** 15 · **Columnas:** 214 (57 con descripción: 26.6 %) · **Índices:** 90
+- **Tablas:** 15 · **Columnas:** 222 (58 con descripción: 26.1 %) · **Índices:** 95
 - **Dominio:** Identidad y Seguridad
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -14,17 +14,17 @@
 | [break_glass_sessions](#break_glass_sessions) | Documenta sesiones de acceso de emergencia que pueden superar restricciones ordinarias bajo controles reforzados. | 20 | 5 | 1 | COINCIDE |
 | [care_relationships](#care_relationships) | Vincula profesionales con pacientes bajo una relación de cuidado que sirve como contexto de autorización clínica. | 15 | 3 | 77 | COINCIDE |
 | [clinical_access_grants](#clinical_access_grants) | Registra concesiones de acceso clínico a pacientes o expedientes bajo un propósito y alcance determinados. | 17 | 13 | 73 | COINCIDE |
-| [field_permissions](#field_permissions) | Controla permisos a nivel de campo para proteger atributos sensibles de registros de salud. | 13 | 4 | 62 | COINCIDE |
+| [field_permissions](#field_permissions) | Controla permisos a nivel de campo para proteger atributos sensibles de registros de salud. | 13 | 4 | 63 | COINCIDE |
 | [ip_access_rules](#ip_access_rules) | Aplica reglas de acceso por dirección de red para limitar orígenes de conexión permitidos. | 17 | 3 | 0 | COINCIDE |
 | [patient_legal_representations](#patient_legal_representations) | Registra representación legal de pacientes para determinar quién puede actuar en su nombre dentro de ámbitos permitidos. | 14 | 2 | 63 | COINCIDE |
 | [permission_categories](#permission_categories) | Agrupa permisos por área funcional para organizar la autorización en módulos del sistema médico. | 10 | 3 | 3 | COINCIDE |
-| [permissions](#permissions) | Define acciones que pueden autorizarse sobre recursos clínicos y administrativos. | 18 | 7 | 66 | COINCIDE |
-| [resource_scope_grants](#resource_scope_grants) | Limita accesos a recursos según alcance de tenant, paciente u organización. | 16 | 8 | 67 | DIVERGE |
-| [role_permissions](#role_permissions) | Relaciona roles con permisos para establecer qué acciones habilita cada función. | 13 | 8 | 62 | COINCIDE |
-| [roles](#roles) | Define conjuntos reutilizables de privilegios para asignar funciones de acceso a usuarios y servicios. | 16 | 8 | 78 | COINCIDE |
+| [permissions](#permissions) | Define acciones que pueden autorizarse sobre recursos clínicos y administrativos. | 26 | 12 | 67 | DIVERGE |
+| [resource_scope_grants](#resource_scope_grants) | Limita accesos a recursos según alcance de tenant, paciente u organización. | 16 | 8 | 70 | DIVERGE |
+| [role_permissions](#role_permissions) | Relaciona roles con permisos para establecer qué acciones habilita cada función. | 13 | 8 | 63 | COINCIDE |
+| [roles](#roles) | Define conjuntos reutilizables de privilegios para asignar funciones de acceso a usuarios y servicios. | 16 | 8 | 86 | COINCIDE |
 | [service_principals](#service_principals) | Representa identidades no humanas que ejecutan integraciones y procesos autorizados. | 1 | 0 | 0 | COINCIDE |
 | [user_permission_grants](#user_permission_grants) | Registra permisos otorgados directamente a usuarios cuando una asignación por rol no expresa el acceso requerido. | 16 | 9 | 61 | COINCIDE |
-| [user_role_assignments](#user_role_assignments) | Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso operativo. | 15 | 11 | 81 | COINCIDE |
+| [user_role_assignments](#user_role_assignments) | Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso operativo. | 15 | 11 | 89 | COINCIDE |
 
 ## Diagrama entidad-relación
 
@@ -79,6 +79,7 @@ erDiagram
     uuid state_concept_id FK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
+    uuid sensitivity_concept_id FK
   }
   authz_permission_categories["authz.permission_categories"] {
     uuid id PK
@@ -674,7 +675,7 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: field_permissions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `FieldPermissions` — `src/modules/authz/entities/field_permissions.entity.ts`
-- **Resumen:** 13 columnas · 4 índices · 4 FK salientes · 0 entrantes · 62 operaciones
+- **Resumen:** 13 columnas · 4 índices · 4 FK salientes · 0 entrantes · 63 operaciones
 
 #### Columnas
 
@@ -707,7 +708,7 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_field_permissions_role_id` | no | role_id | Soporta la clave foránea fk_field_permissions_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «role_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_field_permissions_role_id` | no | role_id | Soporta la clave foránea fk_field_permissions_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «role_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_field_permissions_mask_strategy_concept_id` | no | mask_strategy_concept_id | Soporta la clave foránea fk_field_permissions_mask_strategy_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_permissions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_field_permissions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_field_permissions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_field_permissions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -717,6 +718,7 @@ Controla permisos a nivel de campo para proteger atributos sensibles de registro
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| GET /authz/roles/{roleId}/field-permissions | LEE | DIRECTA |
 | PUT /authz/roles/{roleId}/field-permissions | ACTUALIZA | POR_TIPO |
 | PUT /authz/roles/{roleId}/field-permissions | CREA | DIRECTA |
 | PUT /authz/roles/{roleId}/field-permissions | LEE | DIRECTA |
@@ -1076,7 +1078,7 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: permissions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `Permissions` — `src/modules/authz/entities/permissions.entity.ts`
-- **Resumen:** 18 columnas · 7 índices · 6 FK salientes · 12 entrantes · 66 operaciones
+- **Resumen:** 26 columnas · 12 índices · 10 FK salientes · 13 entrantes · 67 operaciones
 
 #### Columnas
 
@@ -1100,6 +1102,14 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 | 16 | `is_role_restricted` | `boolean` | Obligatoria | _sin dato_ | coincide |
 | 17 | `required_role_code` | `varchar` | Opcional | _sin dato_ | coincide |
 | 18 | `allow_direct_user_grant` | `boolean` | Obligatoria | _sin dato_ | coincide |
+| 19 | `sensitivity_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.78 (gobierno de accesos): metadatos de cada permiso. Un permiso es un ATOMO `modulo.recurso.accion[.campo]`. sensibilidad: authz:SENSITIVITY_LOW¦MEDIUM¦HIGH¦CRITICAL. requires_reason / requires_step_up / approval_mode son las OBLIGACIONES que el motor exige al ejercerlo (motivo, MFA fresco, cuatro ojos). Los 15 codigos antiguos quedan como alias. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_06_authz.puml:53`)_ | **AUSENTE_EN_ORM** |
+| 20 | `requires_reason` | `boolean = false` | Obligatoria | _sin dato_ | **AUSENTE_EN_ORM** |
+| 21 | `requires_step_up` | `boolean = false` | Obligatoria | _sin dato_ | **AUSENTE_EN_ORM** |
+| 22 | `approval_mode_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 23 | `purpose_of_use_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 24 | `legal_basis_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 25 | `touches_clinical_data` | `boolean = false` | Obligatoria | _sin dato_ | **AUSENTE_EN_ORM** |
+| 26 | `support_assignable` | `boolean = false` | Obligatoria | _sin dato_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -1111,11 +1121,16 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 | hacia | state_concept_id | terminology.catalog_concepts (id) | fk_permissions_state_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_permissions_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_permissions_updated_by_user_id |
+| hacia | sensitivity_concept_id | terminology.catalog_concepts (id) | fk_permissions_sensitivity_concept_id |
+| hacia | approval_mode_concept_id | terminology.catalog_concepts (id) | fk_permissions_approval_mode_concept_id |
+| hacia | purpose_of_use_concept_id | terminology.catalog_concepts (id) | fk_permissions_purpose_of_use_concept_id |
+| hacia | legal_basis_concept_id | terminology.catalog_concepts (id) | fk_permissions_legal_basis_concept_id |
 | desde | id | authz.role_permissions (permission_id) | fk_role_permissions_permission_id |
 | desde | id | authz.user_permission_grants (permission_id) | fk_user_permission_grants_permission_id |
 | desde | id | authz.resource_scope_grants (permission_id) | fk_resource_scope_grants_permission_id |
 | desde | id | delegated_access.delegated_permission_set_items (permission_id) | fk_delegated_permission_set_items_permission_id |
 | desde | id | delegated_access.delegated_access_approval_requests (requested_permission_id) | fk_delegated_access_approval_requests_requested_permission_id |
+| desde | id | delegated_access.support_grant_actions (permission_id) | fk_support_grant_actions_permission_id |
 | desde | id | read_models.frontend_routes (required_permission_id) | fk_frontend_routes_required_permission_id |
 | desde | id | read_models.frontend_view_fields (permission_id) | fk_frontend_view_fields_permission_id |
 | desde | id | read_models.frontend_view_actions (required_permission_id) | fk_frontend_view_actions_required_permission_id |
@@ -1128,24 +1143,31 @@ Define acciones que pueden autorizarse sobre recursos clínicos y administrativo
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_permissions_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_permissions_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
 | `ix_permissions_category_id` | no | category_id | Soporta la clave foránea fk_permissions_category_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_permissions_action_concept_id` | no | action_concept_id | Soporta la clave foránea fk_permissions_action_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «action_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_permissions_default_scope_concept_id` | no | default_scope_concept_id | Soporta la clave foránea fk_permissions_default_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_permissions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_permissions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_permissions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_permissions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_permissions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_permissions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_sensitivity_concept_id` | no | sensitivity_concept_id | Soporta la clave foránea fk_permissions_sensitivity_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_approval_mode_concept_id` | no | approval_mode_concept_id | Soporta la clave foránea fk_permissions_approval_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_purpose_of_use_concept_id` | no | purpose_of_use_concept_id | Soporta la clave foránea fk_permissions_purpose_of_use_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_legal_basis_concept_id` | no | legal_basis_concept_id | Soporta la clave foránea fk_permissions_legal_basis_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_permissions_support_assignable` | no | support_assignable donde WHERE support_assignable | Índice parcial: sólo indexa las filas donde WHERE support_assignable _(ESTRUCTURAL)_ |
 
 #### Restricciones
 
 | Restricción | Tipo | Definición |
 |---|---|---|
 | `uq_permissions_code` | UNIQUE INDEX | UNIQUE INDEX ("code") |
+| `ck_permissions_approval_needs_sensitivity` | CHECK | CHECK (("approval_mode_concept_id" IS NULL OR "sensitivity_concept_id" IS NOT NULL)) |
 
 #### Operaciones que la tocan
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /authz/catalog/modules | LEE | DIRECTA |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
 | GET /authz/permissions | LEE | POR_SQL |
 | POST /authz/permissions | CREA | DIRECTA |
@@ -1236,7 +1258,7 @@ Limita accesos a recursos según alcance de tenant, paciente u organización.
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: resource_scope_grants`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `ResourceScopeGrants` — `src/modules/authz/entities/resource_scope_grants.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 0 entrantes · 67 operaciones
+- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 0 entrantes · 70 operaciones
 
 #### Columnas
 
@@ -1289,8 +1311,11 @@ Limita accesos a recursos según alcance de tenant, paciente u organización.
 | Operación | Efecto | Confianza |
 |---|---|---|
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
+| GET /authz/resource-scope-grants | LEE | DIRECTA |
 | POST /authz/resource-scope-grants | CREA | DIRECTA |
 | POST /authz/resource-scope-grants | LEE | DIRECTA |
+| DELETE /authz/resource-scope-grants/{grantId} | ACTUALIZA | DIRECTA |
+| DELETE /authz/resource-scope-grants/{grantId} | LEE | DIRECTA |
 | PATCH /charts/care-plans/{planId}/activities/{activityId} | LEE | DIRECTA |
 | GET /charts/documents/{documentId}/files/{fileId}/content | LEE | DIRECTA |
 | GET /charts/encounters/{id}/pdf | LEE | DIRECTA |
@@ -1379,7 +1404,7 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: role_permissions`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `RolePermissions` — `src/modules/authz/entities/role_permissions.entity.ts`
-- **Resumen:** 13 columnas · 8 índices · 8 FK salientes · 0 entrantes · 62 operaciones
+- **Resumen:** 13 columnas · 8 índices · 8 FK salientes · 0 entrantes · 63 operaciones
 
 #### Columnas
 
@@ -1421,7 +1446,7 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 | `ix_role_permissions_effect_concept_id` | no | effect_concept_id | Soporta la clave foránea fk_role_permissions_effect_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_role_permissions_scope_concept_id` | no | scope_concept_id | Soporta la clave foránea fk_role_permissions_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_role_permissions_field_value_set_id` | no | field_value_set_id | Soporta la clave foránea fk_role_permissions_field_value_set_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_role_permissions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_role_permissions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_role_permissions_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_role_permissions_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_role_permissions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_role_permissions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_role_permissions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_role_permissions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
@@ -1429,6 +1454,7 @@ Relaciona roles con permisos para establecer qué acciones habilita cada funció
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /authz/catalog/modules | LEE | DIRECTA |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
 | GET /authz/roles/{roleId}/permissions | LEE | POR_SQL |
 | PUT /authz/roles/{roleId}/permissions | ACTUALIZA | DIRECTA |
@@ -1515,7 +1541,7 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: roles`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `Roles` — `src/modules/authz/entities/roles.entity.ts`
-- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 4 entrantes · 78 operaciones
+- **Resumen:** 16 columnas · 8 índices · 7 FK salientes · 4 entrantes · 86 operaciones
 
 #### Columnas
 
@@ -1562,7 +1588,7 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 | `ix_roles_parent_role_id` | no | parent_role_id | Soporta la clave foránea fk_roles_parent_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_roles_base_role_concept_id` | no | base_role_concept_id | Soporta la clave foránea fk_roles_base_role_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_roles_scope_concept_id` | no | scope_concept_id | Soporta la clave foránea fk_roles_scope_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_roles_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_roles_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_roles_state_concept_id` | no | state_concept_id | Soporta la clave foránea fk_roles_state_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «state_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_roles_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_roles_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_roles_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_roles_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_roles_tenant_id_state_concept_id` | no | tenant_id, state_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -1571,11 +1597,13 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /authz/catalog/modules | LEE | DIRECTA |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
 | GET /authz/internal-users | LEE | POR_SQL |
 | GET /authz/roles | LEE | DIRECTA |
 | POST /authz/roles | CREA | DIRECTA |
 | POST /authz/roles | LEE | DIRECTA |
+| GET /authz/roles/{roleId}/field-permissions | LEE | DIRECTA |
 | PUT /authz/roles/{roleId}/field-permissions | LEE | DIRECTA |
 | GET /authz/roles/{roleId}/permissions | LEE | POR_SQL |
 | PUT /authz/roles/{roleId}/permissions | LEE | DIRECTA |
@@ -1644,11 +1672,17 @@ Define conjuntos reutilizables de privilegios para asignar funciones de acceso a
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/relink | LEE | DIRECTA |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
-| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
+| GET /admin/ui-visibility/preview | LEE | DIRECTA |
+| GET /admin/ui-visibility/rules | LEE | DIRECTA |
+| POST /admin/ui-visibility/rules | LEE | DIRECTA |
+| PATCH /admin/ui-visibility/rules/{id} | LEE | DIRECTA |
+| POST /admin/ui-visibility/rules/{id}/end | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1853,7 +1887,7 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_06_authz.puml: user_role_assignments`
 - **Dominio:** Identidad y Seguridad · **Diagrama:** `Mantra Core Health Context/modules/diagram_06_authz.puml` · **DDL:** `SQL/06_authz/02_tables.sql`
 - **Entidad del ORM:** `UserRoleAssignments` — `src/modules/authz/entities/user_role_assignments.entity.ts`
-- **Resumen:** 15 columnas · 11 índices · 9 FK salientes · 0 entrantes · 81 operaciones
+- **Resumen:** 15 columnas · 11 índices · 9 FK salientes · 0 entrantes · 89 operaciones
 
 #### Columnas
 
@@ -1893,13 +1927,13 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_user_role_assignments_user_id` | no | user_id | Soporta la clave foránea fk_user_role_assignments_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_user_role_assignments_user_id` | no | user_id | Soporta la clave foránea fk_user_role_assignments_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 6 consulta(s) de repositorio filtran u ordenan por «user_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_role_id` | no | role_id | Soporta la clave foránea fk_user_role_assignments_role_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «role_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_user_role_assignments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_branch_id` | no | branch_id | Soporta la clave foránea fk_user_role_assignments_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «branch_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_practice_id` | no | practice_id | Soporta la clave foránea fk_user_role_assignments_practice_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «practice_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_assigned_by_user_id` | no | assigned_by_user_id | Soporta la clave foránea fk_user_role_assignments_assigned_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
-| `ix_user_role_assignments_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_user_role_assignments_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_user_role_assignments_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_user_role_assignments_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_user_role_assignments_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_user_role_assignments_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_role_assignments_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_user_role_assignments_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_user_role_assignments_tenant_id_status_concept_id` | no | tenant_id, status_concept_id, ("updated_at" DESC) | _sin uso detectado estáticamente_ |
@@ -1909,8 +1943,13 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 
 | Operación | Efecto | Confianza |
 |---|---|---|
+| GET /authz/access-reviews/due | LEE | DIRECTA |
 | POST /authz/decisions/evaluate | LEE | DIRECTA |
 | GET /authz/internal-users | LEE | POR_SQL |
+| POST /authz/users/{userId}/access-reviews | LEE | DIRECTA |
+| POST /authz/users/{userId}/lifecycle/offboard | ACTUALIZA | DIRECTA |
+| POST /authz/users/{userId}/lifecycle/reactivate | ACTUALIZA | DIRECTA |
+| POST /authz/users/{userId}/lifecycle/suspend | ACTUALIZA | DIRECTA |
 | GET /authz/users/{userId}/role-assignments | LEE | POR_SQL |
 | POST /authz/users/{userId}/role-assignments | CREA | DIRECTA |
 | POST /authz/users/{userId}/role-assignments | LEE | DIRECTA |
@@ -1984,12 +2023,15 @@ Asigna roles a usuarios dentro del ámbito correspondiente para controlar acceso
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | ACTUALIZA | POR_TIPO |
 | POST /pharma-labs/{pharmaLabId}/medical-visitors/{medicalVisitorId}/unlink | LEE | DIRECTA |
 | GET /procedure-cases/{id} | LEE | DIRECTA |
-| POST /profiles/credentials/{credentialId}/verify | CREA | DIRECTA |
-| POST /profiles/credentials/{credentialId}/verify | LEE | DIRECTA |
+| POST /admissions/{id}/decision | CREA | DIRECTA |
+| POST /admissions/{id}/decision | LEE | DIRECTA |
+| POST /admissions/{id}/reinstate | CREA | DIRECTA |
+| POST /admissions/{id}/reinstate | LEE | DIRECTA |
 | GET /quotations | LEE | DIRECTA |
 | POST /quotations | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/actions | LEE | DIRECTA |
 | GET /portals/{portalCode}/routes/{routeCode}/views/{viewCode}/data | LEE | DIRECTA |
+| GET /admin/ui-visibility/preview | LEE | DIRECTA |
 
 #### Gobierno
 

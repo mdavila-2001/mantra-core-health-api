@@ -16,6 +16,22 @@ export enum AuthzGovernanceErrorReason {
   USER_LIFECYCLE_ALREADY_OFFBOARDED = 'USER_LIFECYCLE_ALREADY_OFFBOARDED',
   /** Quien pide la acción es la propia persona: nadie se suspende ni se da de baja a sí mismo. */
   USER_LIFECYCLE_SELF_ACTION = 'USER_LIFECYCLE_SELF_ACTION',
+  /**
+   * El usuario objetivo ejerce `SUPERADMIN` y quien actúa no: sólo otro `SUPERADMIN` puede
+   * suspenderlo, reactivarlo, darlo de baja o revisar sus accesos.
+   */
+  GOVERNANCE_TARGET_REQUIRES_SUPERADMIN = 'GOVERNANCE_TARGET_REQUIRES_SUPERADMIN',
+  /**
+   * El usuario objetivo es administrador de seguridad de plataforma (rol global, sin ámbito de
+   * tenant) y quien actúa tiene alcance de una organización: sólo la plataforma actúa sobre él.
+   */
+  GOVERNANCE_TARGET_REQUIRES_PLATFORM = 'GOVERNANCE_TARGET_REQUIRES_PLATFORM',
+  /**
+   * Un administrador con alcance quiso suspender, reactivar o dar de baja una cuenta que también
+   * pertenece a otros tenants: la cuenta es una sola, así que el efecto cruzaría organizaciones.
+   * Lo hace un administrador de plataforma.
+   */
+  USER_LIFECYCLE_MULTI_TENANT = 'USER_LIFECYCLE_MULTI_TENANT',
 
   /** No existe el usuario cuya revisión de accesos se pidió. */
   ACCESS_REVIEW_USER_NOT_FOUND = 'ACCESS_REVIEW_USER_NOT_FOUND',
@@ -28,4 +44,6 @@ export enum AuthzGovernanceErrorReason {
   RESOURCE_SCOPE_GRANT_NOT_FOUND = 'RESOURCE_SCOPE_GRANT_NOT_FOUND',
   /** El permiso por alcance de recurso ya terminó su vigencia. */
   RESOURCE_SCOPE_GRANT_ALREADY_ENDED = 'RESOURCE_SCOPE_GRANT_ALREADY_ENDED',
+  /** Terminar un permiso de efecto DENY exige un motivo (levantar una denegación abre un acceso). */
+  RESOURCE_SCOPE_GRANT_DENY_REASON_REQUIRED = 'RESOURCE_SCOPE_GRANT_DENY_REASON_REQUIRED',
 }

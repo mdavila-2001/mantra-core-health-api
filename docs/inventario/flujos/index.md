@@ -2,35 +2,37 @@
 
 # Inventario de flujos
 
-**74 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 72 de módulo), **12 máquinas de estado** y **1627 árboles de decisión**.
+**78 procesos** (2 críticos curados en `docs/business/critical-workflows.md` y 76 de módulo), **14 máquinas de estado** y **1709 árboles de decisión**.
 
-- Operaciones con decisiones propias: 1469 · sin ellas: 158
+- Operaciones con decisiones propias: 1534 · sin ellas: 175
 - Operaciones sin proceso asignado: 0
-- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 32 · CASO_DE_USO_README 15 · MIXTO 25 · CURADO_EN_DOCUMENTO 2
+- Procesos por agrupación: AGRUPACION_POR_CONTROLADOR 36 · CASO_DE_USO_README 13 · MIXTO 27 · CURADO_EN_DOCUMENTO 2
 
 Método y límites: [README del inventario](../README.md). Los procesos de módulo se construyen del README de cada módulo (tabla UC → ruta); lo que el README no asigna a un caso de uso se agrupa por controlador y se marca `AGRUPACION_POR_CONTROLADOR`.
 
 | Módulo | Procesos | Operaciones | Máquinas | Documento |
 |---|---|---|---|---|
 | `accounting` | 1 | 59 | 1 | [accounting.md](accounting.md) |
+| `admin_catalogs` | 1 | 7 | 0 | [admin_catalogs.md](admin_catalogs.md) |
 | `ads` | 1 | 18 | 0 | [ads.md](ads.md) |
 | `app` | 1 | 6 | 0 | [app.md](app.md) |
 | `audio_assets` | 1 | 10 | 0 | [audio_assets.md](audio_assets.md) |
 | `audit` | 1 | 14 | 0 | [audit.md](audit.md) |
 | `auth_providers` | 1 | 12 | 0 | [auth_providers.md](auth_providers.md) |
-| `authz` | 2 | 32 | 0 | [authz.md](authz.md) |
+| `authz` | 2 | 43 | 0 | [authz.md](authz.md) |
 | `automation` | 1 | 17 | 0 | [automation.md](automation.md) |
 | `billing` | 1 | 38 | 0 | [billing.md](billing.md) |
 | `chart` | 1 | 23 | 0 | [chart.md](chart.md) |
 | `clinical` | 1 | 42 | 1 | [clinical.md](clinical.md) |
 | `clinical_ext` | 1 | 32 | 0 | [clinical_ext.md](clinical_ext.md) |
+| `clinical_import` | 1 | 8 | 1 | [clinical_import.md](clinical_import.md) |
 | `common` | 1 | 19 | 0 | [common.md](common.md) |
 | `community` | 1 | 104 | 0 | [community.md](community.md) |
 | `consent` | 2 | 27 | 0 | [consent.md](consent.md) |
 | `content_packs` | 1 | 2 | 0 | [content_packs.md](content_packs.md) |
 | `crm` | 1 | 16 | 0 | [crm.md](crm.md) |
 | `cross_store_consistency` | 1 | 16 | 0 | [cross_store_consistency.md](cross_store_consistency.md) |
-| `data_catalog` | 1 | 38 | 0 | [data_catalog.md](data_catalog.md) |
+| `data_catalog` | 1 | 41 | 0 | [data_catalog.md](data_catalog.md) |
 | `delegated_access` | 1 | 12 | 0 | [delegated_access.md](delegated_access.md) |
 | `diagnostic_units` | 1 | 21 | 0 | [diagnostic_units.md](diagnostic_units.md) |
 | `diagnostics` | 1 | 31 | 0 | [diagnostics.md](diagnostics.md) |
@@ -40,6 +42,7 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `erp` | 1 | 17 | 0 | [erp.md](erp.md) |
 | `forms` | 1 | 25 | 0 | [forms.md](forms.md) |
 | `geo` | 1 | 11 | 0 | [geo.md](geo.md) |
+| `governance_admin` | 1 | 7 | 1 | [governance_admin.md](governance_admin.md) |
 | `graph_intelligence` | 1 | 15 | 1 | [graph_intelligence.md](graph_intelligence.md) |
 | `health_context` | 1 | 13 | 0 | [health_context.md](health_context.md) |
 | `health_data` | 1 | 16 | 0 | [health_data.md](health_data.md) |
@@ -58,13 +61,13 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `organization_extensions` | 1 | 9 | 0 | [organization_extensions.md](organization_extensions.md) |
 | `payments` | 1 | 14 | 1 | [payments.md](payments.md) |
 | `pharma_lab` | 1 | 76 | 3 | [pharma_lab.md](pharma_lab.md) |
-| `pharmacy` | 1 | 33 | 0 | [pharmacy.md](pharmacy.md) |
-| `pharmacy_inventory` | 1 | 30 | 1 | [pharmacy_inventory.md](pharmacy_inventory.md) |
-| `platform_ops` | 1 | 15 | 0 | [platform_ops.md](platform_ops.md) |
+| `pharmacy` | 1 | 37 | 0 | [pharmacy.md](pharmacy.md) |
+| `pharmacy_inventory` | 1 | 36 | 1 | [pharmacy_inventory.md](pharmacy_inventory.md) |
+| `platform_ops` | 1 | 18 | 0 | [platform_ops.md](platform_ops.md) |
 | `polyglot_storage` | 1 | 15 | 0 | [polyglot_storage.md](polyglot_storage.md) |
 | `practice` | 1 | 37 | 1 | [practice.md](practice.md) |
 | `procedures_perioperative` | 1 | 32 | 0 | [procedures_perioperative.md](procedures_perioperative.md) |
-| `profiles` | 1 | 67 | 0 | [profiles.md](profiles.md) |
+| `profiles` | 1 | 85 | 0 | [profiles.md](profiles.md) |
 | `promotions` | 1 | 20 | 0 | [promotions.md](promotions.md) |
 | `public` | 1 | 4 | 0 | [public.md](public.md) |
 | `qa_execution` | 1 | 9 | 0 | [qa_execution.md](qa_execution.md) |
@@ -77,11 +80,12 @@ Método y límites: [README del inventario](../README.md). Los procesos de módu
 | `search_platform` | 1 | 4 | 0 | [search_platform.md](search_platform.md) |
 | `surveys` | 1 | 18 | 0 | [surveys.md](surveys.md) |
 | `system_context` | 1 | 13 | 0 | [system_context.md](system_context.md) |
-| `system_ops` | 1 | 24 | 0 | [system_ops.md](system_ops.md) |
+| `system_ops` | 1 | 30 | 0 | [system_ops.md](system_ops.md) |
 | `telemetry` | 1 | 25 | 0 | [telemetry.md](telemetry.md) |
 | `terminology` | 1 | 25 | 0 | [terminology.md](terminology.md) |
 | `time_series` | 1 | 14 | 0 | [time_series.md](time_series.md) |
 | `tracking` | 1 | 11 | 0 | [tracking.md](tracking.md) |
+| `ui_visibility` | 1 | 9 | 0 | [ui_visibility.md](ui_visibility.md) |
 | `vector_rag` | 1 | 16 | 0 | [vector_rag.md](vector_rag.md) |
 | `workflow` | 1 | 11 | 0 | [workflow.md](workflow.md) |
 

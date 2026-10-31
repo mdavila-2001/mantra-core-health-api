@@ -3,51 +3,133 @@
 # Endpoints del módulo `authz`
 
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
-- **Operaciones:** 32 (32 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 0 · MEDIO 18 · BAJO 14
-- **Tablas distintas que tocan:** 35
+- **Operaciones:** 43 (32 en el contrato, 11 sólo en el código)
+- **Riesgo:** ALTO 0 · MEDIO 23 · BAJO 20
+- **Tablas distintas que tocan:** 37
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/authz.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
 
 | # | Método | Ruta | Nombre | Riesgo | Tablas | Acceso |
 |---|---|---|---|---|---|---|
-| 1 | GET | `/authz/care-relationships` | Listar relaciones asistenciales de un paciente | BAJO | 1 | CLINICIAN, SECURITY_ADMIN |
-| 2 | POST | `/authz/care-relationships` | Establecer una relación asistencial | MEDIO | 6 | CLINICIAN, SECURITY_ADMIN |
-| 3 | POST | `/authz/care-relationships/{id}/respond` | Responder (aceptar/rechazar) una solicitud de relación asistencial | MEDIO | 8 | PATIENT |
-| 4 | POST | `/authz/care-relationships/{id}/revoke` | Revocar o expirar una relación asistencial | BAJO | 1 | CLINICIAN, SECURITY_ADMIN |
-| 5 | POST | `/authz/care-relationships/request` | Solicitar autorización del paciente para una relación asistencial | MEDIO | 17 | CLINICIAN, PRACTITIONER |
-| 6 | GET | `/authz/care-relationships/requests/mine` | Mis solicitudes de relación asistencial pendientes de decidir | BAJO | 1 | PATIENT |
-| 7 | DELETE | `/authz/clinical-access-grants/{grantId}` | Revocar o expirar una concesión de acceso clínico | MEDIO | 4 | CLINICAL_APPROVER, SECURITY_ADMIN |
-| 8 | POST | `/authz/decisions/evaluate` | Recalcular la decisión de autorización efectiva (PDP) | BAJO | 11 | SECURITY_ADMIN |
-| 9 | GET | `/authz/internal-users` | Usuarios internos con sus roles | BAJO | 4 | SECURITY_ADMIN |
-| 10 | GET | `/authz/legal-representations` | Listar representaciones legales de un paciente | BAJO | 1 | SECURITY_ADMIN |
-| 11 | POST | `/authz/legal-representations` | Registrar una representación legal del paciente | MEDIO | 6 | SECURITY_ADMIN |
-| 12 | POST | `/authz/legal-representations/{id}/revoke` | Revocar o expirar una representación legal | BAJO | 1 | SECURITY_ADMIN |
-| 13 | GET | `/authz/me/access` | Quién ve mi historia | BAJO | 5 | PATIENT |
-| 14 | POST | `/authz/me/care-relationships/{id}/revoke` | Revocar una de mis relaciones asistenciales | BAJO | 3 | PATIENT |
-| 15 | POST | `/authz/me/clinical-access-grants/{grantId}/revoke` | Revocar uno de los accesos clínicos a mi historia | MEDIO | 6 | PATIENT |
-| 16 | POST | `/authz/patients/{patientProfileId}/break-the-glass` | Break-the-glass / anulación de emergencia | MEDIO | 14 | CLINICAL_APPROVER, SECURITY_ADMIN |
-| 17 | POST | `/authz/patients/{patientProfileId}/clinical-access-grants` | Otorgar acceso clínico con propósito de uso | MEDIO | 11 | CLINICAL_APPROVER, SECURITY_ADMIN |
-| 18 | POST | `/authz/pdp/cache/invalidate` | Invalidar la cache de decisiones del PDP | BAJO | 0 | SECURITY_ADMIN |
-| 19 | POST | `/authz/permission-categories` | Definir una categoría de permiso | MEDIO | 2 | SECURITY_ADMIN |
-| 20 | GET | `/authz/permissions` | Catálogo de permisos, paginado por código | BAJO | 1 | SECURITY_ADMIN |
-| 21 | POST | `/authz/permissions` | Definir un permiso del catálogo global | MEDIO | 3 | SECURITY_ADMIN |
-| 22 | POST | `/authz/resource-scope-grants` | Otorgar acceso a un recurso específico (grant polimórfico) | MEDIO | 3 | SECURITY_ADMIN |
-| 23 | GET | `/authz/roles` | Listar los roles asignables | BAJO | 1 | SECURITY_ADMIN |
-| 24 | POST | `/authz/roles` | Componer un rol (con herencia opcional) | MEDIO | 2 | SECURITY_ADMIN |
-| 25 | PUT | `/authz/roles/{roleId}/field-permissions` | Configurar el enmascaramiento de campos del rol | MEDIO | 4 | SECURITY_ADMIN |
-| 26 | GET | `/authz/roles/{roleId}/permissions` | Permisos activos de un rol, con su efecto y ámbito | BAJO | 3 | SECURITY_ADMIN |
-| 27 | PUT | `/authz/roles/{roleId}/permissions` | Asignar permisos al rol (reemplaza los activos) | MEDIO | 4 | SECURITY_ADMIN |
-| 28 | POST | `/authz/tenants/{tenantId}/access-policies` | Definir una política de acceso ABAC con enmascaramiento | MEDIO | 2 | SECURITY_ADMIN |
-| 29 | POST | `/authz/users/{userId}/permission-grants` | Otorgar una excepción de permiso por usuario | MEDIO | 3 | SECURITY_ADMIN |
-| 30 | GET | `/authz/users/{userId}/role-assignments` | Asignaciones de rol de un usuario, activas o no | BAJO | 3 | SECURITY_ADMIN |
-| 31 | POST | `/authz/users/{userId}/role-assignments` | Asignar un rol a un usuario con vigencia y ámbito | MEDIO | 3 | SECURITY_ADMIN |
-| 32 | DELETE | `/authz/users/{userId}/role-assignments/{assignmentId}` | Revocar una asignación de rol (revocación lógica: la fila queda como historia) | MEDIO | 2 | SECURITY_ADMIN |
+| 1 | GET | `/authz/access-reviews/due` | — | BAJO | 3 | SECURITY_ADMIN |
+| 2 | GET | `/authz/care-relationships` | Listar relaciones asistenciales de un paciente | BAJO | 1 | CLINICIAN, SECURITY_ADMIN |
+| 3 | POST | `/authz/care-relationships` | Establecer una relación asistencial | MEDIO | 6 | CLINICIAN, SECURITY_ADMIN |
+| 4 | POST | `/authz/care-relationships/{id}/respond` | Responder (aceptar/rechazar) una solicitud de relación asistencial | MEDIO | 8 | PATIENT |
+| 5 | POST | `/authz/care-relationships/{id}/revoke` | Revocar o expirar una relación asistencial | BAJO | 1 | CLINICIAN, SECURITY_ADMIN |
+| 6 | POST | `/authz/care-relationships/request` | Solicitar autorización del paciente para una relación asistencial | MEDIO | 17 | CLINICIAN, PRACTITIONER |
+| 7 | GET | `/authz/care-relationships/requests/mine` | Mis solicitudes de relación asistencial pendientes de decidir | BAJO | 1 | PATIENT |
+| 8 | GET | `/authz/catalog/modules` | — | BAJO | 3 | SECURITY_ADMIN |
+| 9 | DELETE | `/authz/clinical-access-grants/{grantId}` | Revocar o expirar una concesión de acceso clínico | MEDIO | 4 | CLINICAL_APPROVER, SECURITY_ADMIN |
+| 10 | POST | `/authz/decisions/evaluate` | Recalcular la decisión de autorización efectiva (PDP) | BAJO | 11 | SECURITY_ADMIN |
+| 11 | GET | `/authz/internal-users` | Usuarios internos con sus roles | BAJO | 4 | SECURITY_ADMIN |
+| 12 | GET | `/authz/legal-representations` | Listar representaciones legales de un paciente | BAJO | 1 | SECURITY_ADMIN |
+| 13 | POST | `/authz/legal-representations` | Registrar una representación legal del paciente | MEDIO | 6 | SECURITY_ADMIN |
+| 14 | POST | `/authz/legal-representations/{id}/revoke` | Revocar o expirar una representación legal | BAJO | 1 | SECURITY_ADMIN |
+| 15 | GET | `/authz/me/access` | Quién ve mi historia | BAJO | 5 | PATIENT |
+| 16 | POST | `/authz/me/care-relationships/{id}/revoke` | Revocar una de mis relaciones asistenciales | BAJO | 3 | PATIENT |
+| 17 | POST | `/authz/me/clinical-access-grants/{grantId}/revoke` | Revocar uno de los accesos clínicos a mi historia | MEDIO | 6 | PATIENT |
+| 18 | POST | `/authz/patients/{patientProfileId}/break-the-glass` | Break-the-glass / anulación de emergencia | MEDIO | 14 | CLINICAL_APPROVER, SECURITY_ADMIN |
+| 19 | POST | `/authz/patients/{patientProfileId}/clinical-access-grants` | Otorgar acceso clínico con propósito de uso | MEDIO | 11 | CLINICAL_APPROVER, SECURITY_ADMIN |
+| 20 | POST | `/authz/pdp/cache/invalidate` | Invalidar la cache de decisiones del PDP | BAJO | 0 | SECURITY_ADMIN |
+| 21 | POST | `/authz/permission-categories` | Definir una categoría de permiso | MEDIO | 2 | SECURITY_ADMIN |
+| 22 | GET | `/authz/permissions` | Catálogo de permisos, paginado por código | BAJO | 1 | SECURITY_ADMIN |
+| 23 | POST | `/authz/permissions` | Definir un permiso del catálogo global | MEDIO | 3 | SECURITY_ADMIN |
+| 24 | GET | `/authz/resource-scope-grants` | — | BAJO | 1 | SECURITY_ADMIN |
+| 25 | POST | `/authz/resource-scope-grants` | Otorgar acceso a un recurso específico (grant polimórfico) | MEDIO | 3 | SECURITY_ADMIN |
+| 26 | DELETE | `/authz/resource-scope-grants/{grantId}` | — | MEDIO | 2 | SECURITY_ADMIN |
+| 27 | GET | `/authz/roles` | Listar los roles asignables | BAJO | 1 | SECURITY_ADMIN |
+| 28 | POST | `/authz/roles` | Componer un rol (con herencia opcional) | MEDIO | 2 | SECURITY_ADMIN |
+| 29 | GET | `/authz/roles/{roleId}/field-permissions` | — | BAJO | 2 | SECURITY_ADMIN |
+| 30 | PUT | `/authz/roles/{roleId}/field-permissions` | Configurar el enmascaramiento de campos del rol | MEDIO | 4 | SECURITY_ADMIN |
+| 31 | GET | `/authz/roles/{roleId}/permissions` | Permisos activos de un rol, con su efecto y ámbito | BAJO | 3 | SECURITY_ADMIN |
+| 32 | PUT | `/authz/roles/{roleId}/permissions` | Asignar permisos al rol (reemplaza los activos) | MEDIO | 4 | SECURITY_ADMIN |
+| 33 | POST | `/authz/tenants/{tenantId}/access-policies` | Definir una política de acceso ABAC con enmascaramiento | MEDIO | 2 | SECURITY_ADMIN |
+| 34 | GET | `/authz/users/{userId}/access-reviews` | — | BAJO | 2 | SECURITY_ADMIN |
+| 35 | POST | `/authz/users/{userId}/access-reviews` | — | MEDIO | 3 | SECURITY_ADMIN |
+| 36 | GET | `/authz/users/{userId}/lifecycle` | — | BAJO | 2 | SECURITY_ADMIN |
+| 37 | POST | `/authz/users/{userId}/lifecycle/offboard` | — | MEDIO | 8 | SECURITY_ADMIN |
+| 38 | POST | `/authz/users/{userId}/lifecycle/reactivate` | — | MEDIO | 8 | SECURITY_ADMIN |
+| 39 | POST | `/authz/users/{userId}/lifecycle/suspend` | — | MEDIO | 8 | SECURITY_ADMIN |
+| 40 | POST | `/authz/users/{userId}/permission-grants` | Otorgar una excepción de permiso por usuario | MEDIO | 3 | SECURITY_ADMIN |
+| 41 | GET | `/authz/users/{userId}/role-assignments` | Asignaciones de rol de un usuario, activas o no | BAJO | 3 | SECURITY_ADMIN |
+| 42 | POST | `/authz/users/{userId}/role-assignments` | Asignar un rol a un usuario con vigencia y ámbito | MEDIO | 3 | SECURITY_ADMIN |
+| 43 | DELETE | `/authz/users/{userId}/role-assignments/{assignmentId}` | Revocar una asignación de rol (revocación lógica: la fila queda como historia) | MEDIO | 2 | SECURITY_ADMIN |
 
 ---
 
-## 1. GET /authz/care-relationships
+## 1. GET /authz/access-reviews/due
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.due` — `src/modules/authz/controllers/authz-governance.controller.ts:150`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /authz/access-reviews/due` la atiende `AuthzGovernanceController.due` (src/modules/authz/controllers/authz-governance.controller.ts:150). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AuthzAccessReviewsService.due`. Lee authz.user_role_assignments, iam.security_events, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:150` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AuthzGovernanceController.due → AuthzAccessReviewsService.due | `src/modules/authz/services/authz-access-reviews.service.ts:157` |
+| `iam.security_events` | LEE | LEE | DIRECTA | AuthzGovernanceController.due → AuthzAccessReviewsService.due | `src/modules/authz/services/authz-access-reviews.service.ts:178` |
+| `iam.users` | LEE | LEE | DIRECTA | AuthzGovernanceController.due → AuthzAccessReviewsService.due | `src/modules/authz/services/authz-access-reviews.service.ts:177` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `AccessReviewDueQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 2. GET /authz/care-relationships
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar relaciones asistenciales de un paciente
@@ -72,10 +154,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/authz/controllers/authz-care-relationships.controller.ts:106` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -129,7 +211,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 2. POST /authz/care-relationships
+## 3. POST /authz/care-relationships
 
 - **Origen:** CONTRATO
 - **Nombre:** Establecer una relación asistencial
@@ -154,10 +236,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/authz/controllers/authz-care-relationships.controller.ts:60` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -248,7 +330,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 3. POST /authz/care-relationships/{id}/respond
+## 4. POST /authz/care-relationships/{id}/respond
 
 - **Origen:** CONTRATO
 - **Nombre:** Responder (aceptar/rechazar) una solicitud de relación asistencial
@@ -273,11 +355,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/authz/controllers/authz-care-relationships.controller.ts:175` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/authz/controllers/authz-care-relationships.controller.ts:175` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -368,7 +450,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 4. POST /authz/care-relationships/{id}/revoke
+## 5. POST /authz/care-relationships/{id}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Revocar o expirar una relación asistencial
@@ -393,9 +475,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/authz/controllers/authz-care-relationships.controller.ts:83` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/authz/controllers/authz-care-relationships.controller.ts:83` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -443,7 +525,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 5. POST /authz/care-relationships/request
+## 6. POST /authz/care-relationships/request
 
 - **Origen:** CONTRATO
 - **Nombre:** Solicitar autorización del paciente para una relación asistencial
@@ -468,10 +550,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, PRACTITIONER | `src/modules/authz/controllers/authz-care-relationships.controller.ts:146` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -565,7 +647,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 6. GET /authz/care-relationships/requests/mine
+## 7. GET /authz/care-relationships/requests/mine
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis solicitudes de relación asistencial pendientes de decidir
@@ -590,8 +672,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/authz/controllers/authz-care-relationships.controller.ts:127` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -639,7 +721,157 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 7. DELETE /authz/clinical-access-grants/{grantId}
+## 8. GET /authz/catalog/modules
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzModulesCatalogController.modules` — `src/modules/authz/controllers/authz-modules-catalog.controller.ts:28`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /authz/catalog/modules` la atiende `AuthzModulesCatalogController.modules` (src/modules/authz/controllers/authz-modules-catalog.controller.ts:28). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AuthzModulesCatalogService.catalog`. Lee authz.permissions, authz.role_permissions, authz.roles.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-modules-catalog.controller.ts:28` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.permissions` | LEE | LEE | DIRECTA | AuthzModulesCatalogController.modules → AuthzModulesCatalogService.catalog | `src/modules/authz/services/authz-modules-catalog.service.ts:138` |
+| `authz.role_permissions` | LEE | LEE | DIRECTA | AuthzModulesCatalogController.modules → AuthzModulesCatalogService.catalog | `src/modules/authz/services/authz-modules-catalog.service.ts:162` |
+| `authz.roles` | LEE | LEE | DIRECTA | AuthzModulesCatalogController.modules → AuthzModulesCatalogService.catalog | `src/modules/authz/services/authz-modules-catalog.service.ts:146` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `ModulesCatalogQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<ModulesCatalogDto>` · DTO `ModulesCatalogDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `generatedAt` | `string` | Sí | formato date-time | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:204` |
+| `canonicalActions` | `array<string>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:205` |
+| `notes` | `array<string>` | Sí | — | — | Lo que esta lectura NO prueba: léase antes de interpretar los números | `src/modules/authz/dto/authz-modules-catalog.dto.ts:211` |
+| `truncated` | `boolean` | Sí | — | — | Si el catálogo, los roles o los vínculos superaron el tope de lectura. Con `true`, no editar roles desde estos datos. | `src/modules/authz/dto/authz-modules-catalog.dto.ts:216` |
+| `availableModules` | `array<string>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:217` |
+| `summary` | `ModulesCatalogSummaryDto` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:219` |
+| `summary.modules` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:194` |
+| `summary.permissions` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:195` |
+| `summary.routes` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:196` |
+| `summary.roleOnlyRoutes` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:197` |
+| `summary.undeclaredAuthRoutes` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:198` |
+| `summary.gaps` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:199` |
+| `summary.modulesWithoutFinePermissions` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:200` |
+| `roles` | `array<ModuleRoleRefDto>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:220` |
+| `roles[].id` | `string` | Sí | formato uuid | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:185` |
+| `roles[].code` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:186` |
+| `roles[].name` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:187` |
+| `roles[].isSystem` | `boolean` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:188` |
+| `roles[].tenantId` | `string` | No | formato uuid; admite null | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:190` |
+| `modules` | `array<ModuleEntryDto>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:221` |
+| `modules[].key` | `string` | Sí | — | — | Clave del módulo (snake_case) | `src/modules/authz/dto/authz-modules-catalog.dto.ts:173` |
+| `modules[].routes` | `ModuleRouteStatsDto` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:174` |
+| `modules[].routes.total` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:59` |
+| `modules[].routes.publicRoutes` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:60` |
+| `modules[].routes.roleOnly` | `number` | Sí | — | — | Autorizadas por `@Roles(...)` y nada más | `src/modules/authz/dto/authz-modules-catalog.dto.ts:62` |
+| `modules[].routes.guardOnly` | `number` | Sí | — | — | Sin `@Roles`, con un `@UseGuards` de dominio | `src/modules/authz/dto/authz-modules-catalog.dto.ts:64` |
+| `modules[].routes.selfService` | `number` | Sí | — | — | Rutas `/me/...`: operan sobre el titular | `src/modules/authz/dto/authz-modules-catalog.dto.ts:66` |
+| `modules[].routes.undeclaredAuth` | `number` | Sí | — | — | Sin `@Roles`, sin `@Public` y sin guard: la autorización no está declarada en el controlador (puede resolverse en el servicio por pertenencia o propiedad) | `src/modules/authz/dto/authz-modules-catalog.dto.ts:71` |
+| `modules[].routes.mutating` | `number` | Sí | — | — | Rutas que cambian estado | `src/modules/authz/dto/authz-modules-catalog.dto.ts:72` |
+| `modules[].routes.mutatingRoleOnly` | `number` | Sí | — | — | Rutas que cambian estado y sólo tienen `@Roles` | `src/modules/authz/dto/authz-modules-catalog.dto.ts:76` |
+| `modules[].permissionCount` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:175` |
+| `modules[].grantCount` | `number` | Sí | — | — | Vínculos rol→permiso activos del módulo | `src/modules/authz/dto/authz-modules-catalog.dto.ts:177` |
+| `modules[].roleCodesInCode` | `array<string>` | Sí | — | — | Roles que el código exige | `src/modules/authz/dto/authz-modules-catalog.dto.ts:179` |
+| `modules[].resources` | `array<ModuleResourceDto>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:180` |
+| `modules[].resources[].resource` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:144` |
+| `modules[].resources[].permissions` | `array<ModulePermissionDto>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:146` |
+| `modules[].resources[].permissions[].id` | `string` | Sí | formato uuid | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:101` |
+| `modules[].resources[].permissions[].code` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:102` |
+| `modules[].resources[].permissions[].name` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:103` |
+| `modules[].resources[].permissions[].resource` | `string` | Sí | — | — | Recurso tal como está en el catálogo | `src/modules/authz/dto/authz-modules-catalog.dto.ts:105` |
+| `modules[].resources[].permissions[].legacyAction` | `string` | No | admite null | — | Acción sembrada (READ, WRITE…), tal como está en el catálogo | `src/modules/authz/dto/authz-modules-catalog.dto.ts:110` |
+| `modules[].resources[].permissions[].action` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:111` |
+| `modules[].resources[].permissions[].canonicalCode` | `boolean` | Sí | — | — | El código ya tiene la forma `<modulo>.<recurso>.<accion>` | `src/modules/authz/dto/authz-modules-catalog.dto.ts:115` |
+| `modules[].resources[].permissions[].isDangerous` | `boolean` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:116` |
+| `modules[].resources[].permissions[].isActive` | `boolean` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:117` |
+| `modules[].resources[].permissions[].grants` | `array<ModuleGrantDto>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:118` |
+| `modules[].resources[].permissions[].grants[].roleId` | `string` | Sí | formato uuid | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:80` |
+| `modules[].resources[].permissions[].grants[].roleCode` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:81` |
+| `modules[].resources[].permissions[].grants[].roleName` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:82` |
+| `modules[].resources[].permissions[].grants[].effect` | `string` | Sí | valores: ALLOW, DENY | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:83` |
+| `modules[].resources[].permissions[].grants[].scope` | `string` | No | admite null | — | SELF \| BRANCH \| TENANT \| GLOBAL; nulo si no tiene ámbito | `src/modules/authz/dto/authz-modules-catalog.dto.ts:88` |
+| `modules[].resources[].permissions[].grants[].constraintJson` | `object` | No | admite null | — | Restricción ABAC del vínculo. Viaja para que quien reemplaza los permisos del rol pueda conservarla. | `src/modules/authz/dto/authz-modules-catalog.dto.ts:95` |
+| `modules[].resources[].permissions[].grants[].fieldValueSetId` | `string` | No | formato uuid; admite null | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:97` |
+| `modules[].resources[].cells` | `array<ModuleCellDto>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:147` |
+| `modules[].resources[].cells[].action` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:122` |
+| `modules[].resources[].cells[].proposedCode` | `string` | No | admite null | — | Código sugerido, derivado de las rutas reales. No está sembrado. | `src/modules/authz/dto/authz-modules-catalog.dto.ts:128` |
+| `modules[].resources[].cells[].coverage` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof CELL_COVERAGES)[number] | `src/modules/authz/dto/authz-modules-catalog.dto.ts:129` |
+| `modules[].resources[].cells[].permissionIds` | `array<string>` | Sí | — | — | Permisos finos de esta celda | `src/modules/authz/dto/authz-modules-catalog.dto.ts:131` |
+| `modules[].resources[].cells[].routeCount` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:132` |
+| `modules[].resources[].cells[].mutatingRouteCount` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:133` |
+| `modules[].resources[].cells[].undeclaredRouteCount` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:134` |
+| `modules[].resources[].cells[].publicRouteCount` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:135` |
+| `modules[].resources[].cells[].routeRoles` | `array<string>` | Sí | — | — | Códigos de rol que las rutas de la celda exigen con `@Roles` | `src/modules/authz/dto/authz-modules-catalog.dto.ts:140` |
+| `modules[].gaps` | `array<ModuleGapDto>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:181` |
+| `modules[].gaps[].kind` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GAP_KINDS)[number] | `src/modules/authz/dto/authz-modules-catalog.dto.ts:159` |
+| `modules[].gaps[].severity` | `object` | Sí | — | — | Tipo TypeScript no expandido: (typeof GAP_SEVERITIES)[number] | `src/modules/authz/dto/authz-modules-catalog.dto.ts:160` |
+| `modules[].gaps[].module` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:161` |
+| `modules[].gaps[].resource` | `string` | No | admite null | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:162` |
+| `modules[].gaps[].action` | `string` | No | admite null | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:164` |
+| `modules[].gaps[].proposedCode` | `string` | No | admite null | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:165` |
+| `modules[].gaps[].routeCount` | `number` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:166` |
+| `modules[].gaps[].sampleRoutes` | `array<ModuleGapRouteDto>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:168` |
+| `modules[].gaps[].sampleRoutes[].method` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:151` |
+| `modules[].gaps[].sampleRoutes[].template` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:152` |
+| `modules[].gaps[].sampleRoutes[].controller` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:153` |
+| `modules[].gaps[].sampleRoutes[].handler` | `string` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:154` |
+| `modules[].gaps[].sampleRoutes[].roles` | `array<string>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:155` |
+| `modules[].gaps[].roles` | `array<string>` | Sí | — | — | — | `src/modules/authz/dto/authz-modules-catalog.dto.ts:169` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzModulesCatalogController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 9. DELETE /authz/clinical-access-grants/{grantId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Revocar o expirar una concesión de acceso clínico
@@ -664,9 +896,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICAL_APPROVER, SECURITY_ADMIN | `src/modules/authz/controllers/authz-clinical.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: grantId | `src/modules/authz/controllers/authz-clinical.controller.ts:78` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -719,7 +951,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 8. POST /authz/decisions/evaluate
+## 10. POST /authz/decisions/evaluate
 
 - **Origen:** CONTRATO
 - **Nombre:** Recalcular la decisión de autorización efectiva (PDP)
@@ -744,10 +976,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-pdp.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -847,7 +1079,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 9. GET /authz/internal-users
+## 11. GET /authz/internal-users
 
 - **Origen:** CONTRATO
 - **Nombre:** Usuarios internos con sus roles
@@ -872,8 +1104,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-admin.controller.ts:108` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -923,7 +1155,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 10. GET /authz/legal-representations
+## 12. GET /authz/legal-representations
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar representaciones legales de un paciente
@@ -948,10 +1180,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-care-relationships.controller.ts:250` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
 | PARAMETRO_QUERY | patientProfileId (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1005,7 +1237,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 11. POST /authz/legal-representations
+## 13. POST /authz/legal-representations
 
 - **Origen:** CONTRATO
 - **Nombre:** Registrar una representación legal del paciente
@@ -1030,10 +1262,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-care-relationships.controller.ts:204` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1120,7 +1352,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 12. POST /authz/legal-representations/{id}/revoke
+## 14. POST /authz/legal-representations/{id}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Revocar o expirar una representación legal
@@ -1145,9 +1377,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-care-relationships.controller.ts:227` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/authz/controllers/authz-care-relationships.controller.ts:227` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1195,7 +1427,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 13. GET /authz/me/access
+## 15. GET /authz/me/access
 
 - **Origen:** CONTRATO
 - **Nombre:** Quién ve mi historia
@@ -1220,8 +1452,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/authz/controllers/authz-me.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1285,7 +1517,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 14. POST /authz/me/care-relationships/{id}/revoke
+## 16. POST /authz/me/care-relationships/{id}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Revocar una de mis relaciones asistenciales
@@ -1310,9 +1542,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/authz/controllers/authz-me.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/authz/controllers/authz-me.controller.ts:46` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1363,7 +1595,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 15. POST /authz/me/clinical-access-grants/{grantId}/revoke
+## 17. POST /authz/me/clinical-access-grants/{grantId}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Revocar uno de los accesos clínicos a mi historia
@@ -1388,9 +1620,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: PATIENT | `src/modules/authz/controllers/authz-me.controller.ts:62` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: grantId | `src/modules/authz/controllers/authz-me.controller.ts:62` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1446,7 +1678,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 16. POST /authz/patients/{patientProfileId}/break-the-glass
+## 18. POST /authz/patients/{patientProfileId}/break-the-glass
 
 - **Origen:** CONTRATO
 - **Nombre:** Break-the-glass / anulación de emergencia
@@ -1471,11 +1703,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICAL_APPROVER, SECURITY_ADMIN | `src/modules/authz/controllers/authz-clinical.controller.ts:61` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/authz/controllers/authz-clinical.controller.ts:61` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1574,7 +1806,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 17. POST /authz/patients/{patientProfileId}/clinical-access-grants
+## 19. POST /authz/patients/{patientProfileId}/clinical-access-grants
 
 - **Origen:** CONTRATO
 - **Nombre:** Otorgar acceso clínico con propósito de uso
@@ -1599,11 +1831,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICAL_APPROVER, SECURITY_ADMIN | `src/modules/authz/controllers/authz-clinical.controller.ts:40` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: patientProfileId | `src/modules/authz/controllers/authz-clinical.controller.ts:40` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1708,7 +1940,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 18. POST /authz/pdp/cache/invalidate
+## 20. POST /authz/pdp/cache/invalidate
 
 - **Origen:** CONTRATO
 - **Nombre:** Invalidar la cache de decisiones del PDP
@@ -1733,10 +1965,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-pdp.controller.ts:36` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1800,7 +2032,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 19. POST /authz/permission-categories
+## 21. POST /authz/permission-categories
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir una categoría de permiso
@@ -1825,10 +2057,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-catalog.controller.ts:29` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1901,7 +2133,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 20. GET /authz/permissions
+## 22. GET /authz/permissions
 
 - **Origen:** CONTRATO
 - **Nombre:** Catálogo de permisos, paginado por código
@@ -1926,8 +2158,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-admin.controller.ts:89` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1974,7 +2206,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 21. POST /authz/permissions
+## 23. POST /authz/permissions
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir un permiso del catálogo global
@@ -1999,10 +2231,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-catalog.controller.ts:46` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2092,7 +2324,76 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 22. POST /authz/resource-scope-grants
+## 24. GET /authz/resource-scope-grants
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.scopeGrants` — `src/modules/authz/controllers/authz-governance.controller.ts:207`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /authz/resource-scope-grants` la atiende `AuthzGovernanceController.scopeGrants` (src/modules/authz/controllers/authz-governance.controller.ts:207). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AuthzGovernanceReadService.resourceScopeGrants`. Lee authz.resource_scope_grants.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:207` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | AuthzGovernanceController.scopeGrants → AuthzGovernanceReadService.resourceScopeGrants | `src/modules/authz/services/authz-governance-read.service.ts:131` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | query | sin dato | `ResourceScopeGrantsQueryDto` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 25. POST /authz/resource-scope-grants
 
 - **Origen:** CONTRATO
 - **Nombre:** Otorgar acceso a un recurso específico (grant polimórfico)
@@ -2117,10 +2418,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-grants.controller.ts:76` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2209,7 +2510,98 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 23. GET /authz/roles
+## 26. DELETE /authz/resource-scope-grants/{grantId}
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.endScopeGrant` — `src/modules/authz/controllers/authz-governance.controller.ts:218`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`DELETE /authz/resource-scope-grants/{grantId}` la atiende `AuthzGovernanceController.endScopeGrant` (src/modules/authz/controllers/authz-governance.controller.ts:218). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `EndResourceScopeGrantDto` (1 campo, 0 obligatorios). Delega en `AuthzGovernanceReadService.endResourceScopeGrant`. Actualiza authz.resource_scope_grants. Lee authz.resource_scope_grants.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:218` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.resource_scope_grants` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.endScopeGrant → AuthzGovernanceReadService.endResourceScopeGrant | `src/modules/authz/services/authz-governance-read.service.ts:180` |
+| `authz.resource_scope_grants` | LEE | LEE | DIRECTA | AuthzGovernanceController.endScopeGrant → AuthzGovernanceReadService.endResourceScopeGrant | `src/modules/authz/services/authz-governance-read.service.ts:157` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `—` | path | Sí | `ResourceScopeGrantIdParamDto` | — |
+
+### Cuerpo — DTO `EndResourceScopeGrantDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | No | longitud mínima GOVERNANCE_REASON_MIN; longitud máxima GOVERNANCE_REASON_MAX | `@IsOptional()` `@IsString()` `@MinLength(GOVERNANCE_REASON_MIN)` `@MaxLength(GOVERNANCE_REASON_MAX)` | Por qué se termina. Obligatorio si el permiso es de efecto DENY; opcional en un ALLOW. | `src/modules/authz/dto/authz-governance.dto.ts:227` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: {NOT_FOUND.message} |
+| 409 | `CONFLICT` | ConflictException: El permiso por alcance ya terminó su vigencia |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Terminar un permiso de efecto DENY exige un motivo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 27. GET /authz/roles
 
 - **Origen:** CONTRATO
 - **Nombre:** Listar los roles asignables
@@ -2234,8 +2626,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-roles.controller.ts:50` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2278,7 +2670,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 24. POST /authz/roles
+## 28. POST /authz/roles
 
 - **Origen:** CONTRATO
 - **Nombre:** Componer un rol (con herencia opcional)
@@ -2303,10 +2695,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-roles.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2392,7 +2784,80 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 25. PUT /authz/roles/{roleId}/field-permissions
+## 29. GET /authz/roles/{roleId}/field-permissions
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.fieldPermissions` — `src/modules/authz/controllers/authz-governance.controller.ts:199`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /authz/roles/{roleId}/field-permissions` la atiende `AuthzGovernanceController.fieldPermissions` (src/modules/authz/controllers/authz-governance.controller.ts:199). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AuthzGovernanceReadService.roleFieldPermissions`. Lee authz.field_permissions, authz.roles.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:199` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/authz/controllers/authz-governance.controller.ts:199` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.field_permissions` | LEE | LEE | DIRECTA | AuthzGovernanceController.fieldPermissions → AuthzGovernanceReadService.roleFieldPermissions | `src/modules/authz/services/authz-governance-read.service.ts:90` |
+| `authz.roles` | LEE | LEE | DIRECTA | AuthzGovernanceController.fieldPermissions → AuthzGovernanceReadService.roleFieldPermissions | `src/modules/authz/services/authz-governance-read.service.ts:83` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `roleId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Rol no encontrado |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 30. PUT /authz/roles/{roleId}/field-permissions
 
 - **Origen:** CONTRATO
 - **Nombre:** Configurar el enmascaramiento de campos del rol
@@ -2417,11 +2882,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-roles.controller.ts:93` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/authz/controllers/authz-roles.controller.ts:93` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2517,7 +2982,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 26. GET /authz/roles/{roleId}/permissions
+## 31. GET /authz/roles/{roleId}/permissions
 
 - **Origen:** CONTRATO
 - **Nombre:** Permisos activos de un rol, con su efecto y ámbito
@@ -2542,8 +3007,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-admin.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2589,7 +3054,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 27. PUT /authz/roles/{roleId}/permissions
+## 32. PUT /authz/roles/{roleId}/permissions
 
 - **Origen:** CONTRATO
 - **Nombre:** Asignar permisos al rol (reemplaza los activos)
@@ -2614,11 +3079,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-roles.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: roleId | `src/modules/authz/controllers/authz-roles.controller.ts:75` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2712,7 +3177,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 28. POST /authz/tenants/{tenantId}/access-policies
+## 33. POST /authz/tenants/{tenantId}/access-policies
 
 - **Origen:** CONTRATO
 - **Nombre:** Definir una política de acceso ABAC con enmascaramiento
@@ -2737,11 +3202,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-policies.controller.ts:33` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: tenantId | `src/modules/authz/controllers/authz-policies.controller.ts:33` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2822,7 +3287,552 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 29. POST /authz/users/{userId}/permission-grants
+## 34. GET /authz/users/{userId}/access-reviews
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.reviewsOf` — `src/modules/authz/controllers/authz-governance.controller.ts:165`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /authz/users/{userId}/access-reviews` la atiende `AuthzGovernanceController.reviewsOf` (src/modules/authz/controllers/authz-governance.controller.ts:165). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AuthzAccessReviewsService.historyOf`. Lee iam.security_events, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:165` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: userId | `src/modules/authz/controllers/authz-governance.controller.ts:165` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `iam.security_events` | LEE | LEE | DIRECTA | AuthzGovernanceController.reviewsOf → AuthzAccessReviewsService.historyOf | `src/modules/authz/services/authz-access-reviews.service.ts:130` |
+| `iam.users` | LEE | LEE | DIRECTA | AuthzGovernanceController.reviewsOf → AuthzAccessReviewsService.historyOf | `src/modules/authz/services/authz-access-reviews.service.ts:127` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `userId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 35. POST /authz/users/{userId}/access-reviews
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.recordReview` — `src/modules/authz/controllers/authz-governance.controller.ts:176`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /authz/users/{userId}/access-reviews` la atiende `AuthzGovernanceController.recordReview` (src/modules/authz/controllers/authz-governance.controller.ts:176). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `RecordAccessReviewDto` (3 campos, 3 obligatorios). Delega en `AuthzAccessReviewsService.record`. Crea filas en iam.security_events. Lee authz.user_role_assignments, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:176` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: userId | `src/modules/authz/controllers/authz-governance.controller.ts:176` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.user_role_assignments` | LEE | LEE | DIRECTA | AuthzGovernanceController.recordReview → AuthzAccessReviewsService.record | `src/modules/authz/services/authz-access-reviews.service.ts:85` |
+| `iam.security_events` | ESCRIBE | CREA | DIRECTA | AuthzGovernanceController.recordReview → AuthzAccessReviewsService.record | `src/modules/authz/services/authz-access-reviews.service.ts:100` |
+| `iam.users` | LEE | LEE | DIRECTA | AuthzGovernanceController.recordReview → AuthzAccessReviewsService.record | `src/modules/authz/services/authz-access-reviews.service.ts:79` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `userId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `RecordAccessReviewDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `decision` | `object` | Sí | — | `@IsIn(ACCESS_REVIEW_DECISIONS)` | Tipo TypeScript no expandido: (typeof ACCESS_REVIEW_DECISIONS)[number] | `src/modules/authz/dto/authz-governance.dto.ts:81` |
+| `reason` | `string` | Sí | longitud mínima GOVERNANCE_REASON_MIN; longitud máxima GOVERNANCE_REASON_MAX | `@IsString()` `@MinLength(GOVERNANCE_REASON_MIN)` `@MaxLength(GOVERNANCE_REASON_MAX)` | — | `src/modules/authz/dto/authz-governance.dto.ts:87` |
+| `assignmentIds` | `array<string>` | Sí | formato uuid; máximo 200 elemento(s) | `@IsArray()` `@ArrayMaxSize(200)` `@IsUUID('all', { each: true })` | Las asignaciones activas que se revisaron. Deben ser de ese usuario y seguir activas. | `src/modules/authz/dto/authz-governance.dto.ts:97` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "decision": {},
+  "reason": "Texto descriptivo de ejemplo",
+  "assignmentIds": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "decision": {},
+  "reason": "Texto descriptivo de ejemplo",
+  "assignmentIds": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.CREATED`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Nadie revisa sus propios accesos; PreconditionFailedException: Alguna asignación citada no es de esa persona o ya no está activa |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 36. GET /authz/users/{userId}/lifecycle
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.lifecycleOf` — `src/modules/authz/controllers/authz-governance.controller.ts:67`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`GET /authz/users/{userId}/lifecycle` la atiende `AuthzGovernanceController.lifecycleOf` (src/modules/authz/controllers/authz-governance.controller.ts:67). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `AuthzUserLifecycleService.lifecycleOf`. Lee iam.security_events, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:67` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: userId | `src/modules/authz/controllers/authz-governance.controller.ts:67` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `iam.security_events` | LEE | LEE | DIRECTA | AuthzGovernanceController.lifecycleOf → AuthzUserLifecycleService.lifecycleOf → AuthzUserLifecycleService.history | `src/modules/authz/services/authz-user-lifecycle.service.ts:426` |
+| `iam.users` | LEE | LEE | DIRECTA | AuthzGovernanceController.lifecycleOf → AuthzUserLifecycleService.lifecycleOf | `src/modules/authz/services/authz-user-lifecycle.service.ts:230` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `userId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `no declarado`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 37. POST /authz/users/{userId}/lifecycle/offboard
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.offboard` — `src/modules/authz/controllers/authz-governance.controller.ts:125`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /authz/users/{userId}/lifecycle/offboard` la atiende `AuthzGovernanceController.offboard` (src/modules/authz/controllers/authz-governance.controller.ts:125). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LifecycleActionDto` (1 campo, 1 obligatorio). Delega en `AuthzUserLifecycleService.offboard`. Crea filas en iam.security_events. Actualiza authz.user_role_assignments, iam.refresh_tokens, iam.sessions, iam.users. Lee iam.security_events, iam.sessions, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:125` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: userId | `src/modules/authz/controllers/authz-governance.controller.ts:125` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.user_role_assignments` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.offboard → AuthzUserLifecycleService.offboard → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:366` |
+| `iam.refresh_tokens` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.offboard → AuthzUserLifecycleService.offboard → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:356` |
+| `iam.security_events` | ESCRIBE | CREA | DIRECTA | AuthzGovernanceController.offboard → AuthzUserLifecycleService.offboard → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:382` |
+| `iam.security_events` | LEE | LEE | DIRECTA | AuthzGovernanceController.offboard → AuthzUserLifecycleService.offboard → AuthzUserLifecycleService.act → AuthzUserLifecycleService.history | `src/modules/authz/services/authz-user-lifecycle.service.ts:426` |
+| `iam.sessions` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.offboard → AuthzUserLifecycleService.offboard → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:350` |
+| `iam.sessions` | LEE | LEE | DIRECTA | AuthzGovernanceController.offboard → AuthzUserLifecycleService.offboard → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:345` |
+| `iam.users` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.offboard → AuthzUserLifecycleService.offboard → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:328` |
+| `iam.users` | LEE | LEE | DIRECTA | AuthzGovernanceController.offboard → AuthzUserLifecycleService.offboard → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:284` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `userId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `LifecycleActionDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | Sí | longitud mínima GOVERNANCE_REASON_MIN; longitud máxima GOVERNANCE_REASON_MAX | `@IsString()` `@MinLength(GOVERNANCE_REASON_MIN)` `@MaxLength(GOVERNANCE_REASON_MAX)` | Por qué se hace; queda en el historial | `src/modules/authz/dto/authz-governance.dto.ts:31` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Nadie puede suspenderse ni darse de baja a sí mismo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 38. POST /authz/users/{userId}/lifecycle/reactivate
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.reactivate` — `src/modules/authz/controllers/authz-governance.controller.ts:101`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /authz/users/{userId}/lifecycle/reactivate` la atiende `AuthzGovernanceController.reactivate` (src/modules/authz/controllers/authz-governance.controller.ts:101). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LifecycleActionDto` (1 campo, 1 obligatorio). Delega en `AuthzUserLifecycleService.reactivate`. Crea filas en iam.security_events. Actualiza authz.user_role_assignments, iam.refresh_tokens, iam.sessions, iam.users. Lee iam.security_events, iam.sessions, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:101` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: userId | `src/modules/authz/controllers/authz-governance.controller.ts:101` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.user_role_assignments` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.reactivate → AuthzUserLifecycleService.reactivate → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:366` |
+| `iam.refresh_tokens` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.reactivate → AuthzUserLifecycleService.reactivate → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:356` |
+| `iam.security_events` | ESCRIBE | CREA | DIRECTA | AuthzGovernanceController.reactivate → AuthzUserLifecycleService.reactivate → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:382` |
+| `iam.security_events` | LEE | LEE | DIRECTA | AuthzGovernanceController.reactivate → AuthzUserLifecycleService.reactivate → AuthzUserLifecycleService.act → AuthzUserLifecycleService.history | `src/modules/authz/services/authz-user-lifecycle.service.ts:426` |
+| `iam.sessions` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.reactivate → AuthzUserLifecycleService.reactivate → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:350` |
+| `iam.sessions` | LEE | LEE | DIRECTA | AuthzGovernanceController.reactivate → AuthzUserLifecycleService.reactivate → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:345` |
+| `iam.users` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.reactivate → AuthzUserLifecycleService.reactivate → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:328` |
+| `iam.users` | LEE | LEE | DIRECTA | AuthzGovernanceController.reactivate → AuthzUserLifecycleService.reactivate → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:284` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `userId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `LifecycleActionDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | Sí | longitud mínima GOVERNANCE_REASON_MIN; longitud máxima GOVERNANCE_REASON_MAX | `@IsString()` `@MinLength(GOVERNANCE_REASON_MIN)` `@MaxLength(GOVERNANCE_REASON_MAX)` | Por qué se hace; queda en el historial | `src/modules/authz/dto/authz-governance.dto.ts:31` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Nadie puede suspenderse ni darse de baja a sí mismo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 39. POST /authz/users/{userId}/lifecycle/suspend
+
+- **Origen:** CONTRATO_AUSENTE _(existe en el código pero `openapi.json` no la publica)_
+- **Nombre:** —
+- **Bloque:** Identidad y Seguridad
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `AuthzGovernanceController.suspend` — `src/modules/authz/controllers/authz-governance.controller.ts:79`
+
+### Qué es y para qué sirve (negocio)
+
+Dentro del módulo (descripción del modelo, en inglés): «Fine-grained control of who can do what, down to the individual field and the individual patient record.» Dominio: Identidad y Seguridad.
+
+_Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_06_authz.puml:12`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
+
+### Cómo se atiende (sistema)
+
+`POST /authz/users/{userId}/lifecycle/suspend` la atiende `AuthzGovernanceController.suspend` (src/modules/authz/controllers/authz-governance.controller.ts:79). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `LifecycleActionDto` (1 campo, 1 obligatorio). Delega en `AuthzUserLifecycleService.suspend`. Crea filas en iam.security_events. Actualiza authz.user_role_assignments, iam.refresh_tokens, iam.sessions, iam.users. Lee iam.security_events, iam.sessions, iam.users.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-governance.controller.ts:79` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: userId | `src/modules/authz/controllers/authz-governance.controller.ts:79` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `authz.user_role_assignments` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.suspend → AuthzUserLifecycleService.suspend → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:366` |
+| `iam.refresh_tokens` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.suspend → AuthzUserLifecycleService.suspend → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:356` |
+| `iam.security_events` | ESCRIBE | CREA | DIRECTA | AuthzGovernanceController.suspend → AuthzUserLifecycleService.suspend → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:382` |
+| `iam.security_events` | LEE | LEE | DIRECTA | AuthzGovernanceController.suspend → AuthzUserLifecycleService.suspend → AuthzUserLifecycleService.act → AuthzUserLifecycleService.history | `src/modules/authz/services/authz-user-lifecycle.service.ts:426` |
+| `iam.sessions` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.suspend → AuthzUserLifecycleService.suspend → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:350` |
+| `iam.sessions` | LEE | LEE | DIRECTA | AuthzGovernanceController.suspend → AuthzUserLifecycleService.suspend → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:345` |
+| `iam.users` | ESCRIBE | ACTUALIZA | DIRECTA | AuthzGovernanceController.suspend → AuthzUserLifecycleService.suspend → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:328` |
+| `iam.users` | LEE | LEE | DIRECTA | AuthzGovernanceController.suspend → AuthzUserLifecycleService.suspend → AuthzUserLifecycleService.act | `src/modules/authz/services/authz-user-lifecycle.service.ts:284` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `userId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `LifecycleActionDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `reason` | `string` | Sí | longitud mínima GOVERNANCE_REASON_MIN; longitud máxima GOVERNANCE_REASON_MAX | `@IsString()` `@MinLength(GOVERNANCE_REASON_MIN)` `@MaxLength(GOVERNANCE_REASON_MAX)` | Por qué se hace; queda en el historial | `src/modules/authz/dto/authz-governance.dto.ts:31` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `no declarado` · HTTP `HttpStatus.OK`
+
+_No se identificó un DTO de respuesta con campos._
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Nadie puede suspenderse ni darse de baja a sí mismo |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/authz.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo 06 — authz (Authorization, Purpose of Use & Field Masking) — etapa `ctrl:AuthzGovernanceController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 40. POST /authz/users/{userId}/permission-grants
 
 - **Origen:** CONTRATO
 - **Nombre:** Otorgar una excepción de permiso por usuario
@@ -2847,11 +3857,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-grants.controller.ts:58` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: userId | `src/modules/authz/controllers/authz-grants.controller.ts:58` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2941,7 +3951,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 30. GET /authz/users/{userId}/role-assignments
+## 41. GET /authz/users/{userId}/role-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Asignaciones de rol de un usuario, activas o no
@@ -2966,8 +3976,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-admin.controller.ts:54` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3013,7 +4023,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 31. POST /authz/users/{userId}/role-assignments
+## 42. POST /authz/users/{userId}/role-assignments
 
 - **Origen:** CONTRATO
 - **Nombre:** Asignar un rol a un usuario con vigencia y ámbito
@@ -3038,11 +4048,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-grants.controller.ts:38` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: userId | `src/modules/authz/controllers/authz-grants.controller.ts:38` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3129,7 +4139,7 @@ El árbol de decisión completo está en [flujos](../flujos/authz.md).
 
 ---
 
-## 32. DELETE /authz/users/{userId}/role-assignments/{assignmentId}
+## 43. DELETE /authz/users/{userId}/role-assignments/{assignmentId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Revocar una asignación de rol (revocación lógica: la fila queda como historia)
@@ -3154,8 +4164,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/authz/controllers/authz-admin.controller.ts:67` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 

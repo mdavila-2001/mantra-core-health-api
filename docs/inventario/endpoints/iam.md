@@ -4,8 +4,8 @@
 
 - **Bloque:** Identidad y Seguridad (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:27`)
 - **Operaciones:** 41 (40 en el contrato, 1 sólo en el código)
-- **Riesgo:** ALTO 19 · MEDIO 9 · BAJO 13
-- **Tablas distintas que tocan:** 56
+- **Riesgo:** ALTO 20 · MEDIO 8 · BAJO 13
+- **Tablas distintas que tocan:** 60
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/iam.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -21,7 +21,7 @@
 | 7 | POST | `/iam/auth/logout-all` | Cerrar todas las sesiones del usuario actual | ALTO | 4 | sesión (sin roles) |
 | 8 | POST | `/iam/auth/register-organization` | Registrar una organización con su cuenta owner | ALTO | 40 | pública |
 | 9 | POST | `/iam/auth/register-patient` | Registrarse como paciente con documento de identidad | ALTO | 21 | pública |
-| 10 | POST | `/iam/auth/register-practitioner` | Registrarse como profesional de salud con su matrícula | ALTO | 45 | pública |
+| 10 | POST | `/iam/auth/register-practitioner` | Registrarse como profesional de salud con su matrícula | ALTO | 65 | pública |
 | 11 | POST | `/iam/auth/resend-verification` | Reenviar el enlace de verificación del correo | ALTO | 9 | pública |
 | 12 | POST | `/iam/auth/reset-password` | Fijar una contraseña nueva con el token recibido por correo | ALTO | 8 | pública |
 | 13 | POST | `/iam/auth/sessions/purge` | Expirar sesiones y tokens vencidos | MEDIO | 3 | SECURITY_ADMIN |
@@ -50,7 +50,7 @@
 | 36 | GET | `/iam/users/{id}/mfa-factors` | Factores de MFA del usuario | BAJO | 2 | SECURITY_ADMIN |
 | 37 | POST | `/iam/users/{id}/mfa-factors` | Enrolar o verificar un factor MFA | ALTO | 6 | sesión (sin roles) |
 | 38 | GET | `/iam/users/{id}/sessions` | Sesiones del usuario | BAJO | 2 | SECURITY_ADMIN |
-| 39 | POST | `/iam/users/assisted-practitioner-registration` | Alta administrativa de un profesional (devuelve token de activación) | MEDIO | 42 | SECURITY_ADMIN |
+| 39 | POST | `/iam/users/assisted-practitioner-registration` | Alta administrativa de un profesional (devuelve token de activación) | ALTO | 62 | SECURITY_ADMIN |
 | 40 | POST | `/iam/users/assisted-registration` | Registro asistido de un paciente (devuelve token de activación) | MEDIO | 10 | CLINICIAN, SECURITY_ADMIN |
 | 41 | POST | `/iam/users/search` | Listado paginado de usuarios, con los filtros en el cuerpo | BAJO | 2 | SECURITY_ADMIN |
 
@@ -81,8 +81,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:460` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -617,7 +617,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:477` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:477` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -688,7 +688,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:501` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:501` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -798,8 +798,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `messaging.recipient_preferences` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → IamOrganizationSelfRegistrationService.sendVerificationEmail → MessagingEmailNoticeAdapter.enqueueEmail → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
 | `pharmacy.pharmacies` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PharmaciesRepository.create | `src/modules/pharmacy/repositories/pharmacies.repository.ts:76` |
 | `pharmacy.pharmacy_product_categories` | ESCRIBE | CREA | POR_SQL | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PharmacyCategoriesService.provisionDefaults → PharmacyCatalogRepository.insertMissingCategories | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:126` |
-| `pharmacy.pharmacy_sites` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PharmacyProvisioningService.createSite → PharmacySitesRepository.create | `src/modules/pharmacy/repositories/pharmacy-sites.repository.ts:73` |
-| `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PharmacyProvisioningService.createSite → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:111` |
+| `pharmacy.pharmacy_sites` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PharmacyProvisioningService.addSite → PharmacySitesRepository.create | `src/modules/pharmacy/repositories/pharmacy-sites.repository.ts:73` |
+| `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PharmacyProvisioningService.addSite → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:111` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → DirectoryRegistrationAdapter.materializeProfile → TenantTypeProfileService.materializeProfile → DiagnosticUnitProvisioningService.provision → DiagnosticUnitProvisioningService.createPracticeSite → PracticeSitesRepository.findByPracticeAndCode | `src/modules/practice/repositories/practice-sites.repository.ts:85` |
 | `practice.practices` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → PharmacyRegistrationAdapter.provision → PharmacyProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:150` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IamAuthController.registerOrganization → IamOrganizationSelfRegistrationService.registerOrganization → IamOrganizationSelfRegistrationService.performRegisterOrganization → DirectoryRegistrationAdapter.assertConceptsExist → TenantTypeProfileService.assertConceptsExist → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
@@ -1518,7 +1518,7 @@ El árbol de decisión completo está en [flujos](../flujos/iam.md).
 - **Origen:** CONTRATO
 - **Nombre:** Registrarse como profesional de salud con su matrícula
 - **Bloque:** Identidad y Seguridad
-- **Riesgo:** ALTO — Ruta pública que escribe en la base
+- **Riesgo:** ALTO — Ruta pública que escribe en la base; Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `IamAuthController.registerPractitioner` — `src/modules/iam/presentation/controllers/iam-auth.controller.ts:266`
 
@@ -1530,7 +1530,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/auth/register-practitioner` la atiende `IamAuthController.registerPractitioner` (src/modules/iam/presentation/controllers/iam-auth.controller.ts:266). Es una ruta pública: no exige token. Valida el cuerpo como `RegisterPractitionerDto` (75 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.registerPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 18 más. Actualiza common.files, messaging.queued_jobs. Lee authz.roles, authz.user_role_assignments, common.file_versions, common.files, iam.authentication_credentials, messaging.message_channels, messaging.message_queues, messaging.message_templates y 9 más.
+`POST /iam/auth/register-practitioner` la atiende `IamAuthController.registerPractitioner` (src/modules/iam/presentation/controllers/iam-auth.controller.ts:266). Es una ruta pública: no exige token. Valida el cuerpo como `RegisterPractitionerDto` (75 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.registerPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 21 más. Actualiza common.files, messaging.queued_jobs, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.authentication_credentials y 21 más.
 
 ### Requerimientos
 
@@ -1549,13 +1549,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
 | `common.addresses` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:154` |
+| `common.addresses` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRecordsAdapter.createContactPoint → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
+| `common.contact_points` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
 | `common.file_versions` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FilesService.createFile → FileVersionsRepository.create | `src/modules/common/repositories/file-versions.repository.ts:142` |
 | `common.file_versions` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
 | `common.files` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FilesService.createFile → FilesRepository.create | `src/modules/common/repositories/files.repository.ts:52` |
 | `common.files` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload | `src/modules/common/services/attachable-file.service.ts:270` |
 | `common.files` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:182` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
+| `common.identifiers` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
 | `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → DirectoryRegistrationAdapter.createTenantMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:136` |
 | `iam.account_activations` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AccountActivationsRepository.create | `src/modules/iam/infrastructure/repositories/account-activations.repository.ts:46` |
 | `iam.authentication_credentials` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CredentialsRepository.createPendingPassword | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:262` |
@@ -1578,15 +1581,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practices` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:150` |
 | `practice.practices` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticesRepository.findOwnOffice | `src/modules/practice/repositories/practices.repository.ts:135` |
 | `practice.practitioner_role_assignments` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PractitionerRoleAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:311` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
 | `profiles.health_practitioner_profiles` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPractitionerProfile → HealthPractitionerProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:161` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.findPractitionerByCode → HealthPractitionerProfilesRepository.findByCode | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:79` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createJurisdictionAuthorization → JurisdictionAuthorizationsRepository.create | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:114` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
 | `profiles.person_account_links` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createAccountLink → PersonAccountLinksRepository.create | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:50` |
 | `profiles.person_profiles` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPersonProfile → PersonProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/person-profiles.repository.ts:57` |
 | `profiles.persons` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPerson → PersonsRepository.create | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:119` |
+| `profiles.persons` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:90` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.findOpenByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:135` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPractitionerLanguage → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_specialties` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPractitionerSpecialty → PractitionerSpecialtiesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:61` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
 | `profiles.professional_credentials` | ESCRIBE | CREA | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createProfessionalCredential → ProfessionalCredentialsRepository.create | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:122` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
 | `terminology.value_sets` | LEE | LEE | DIRECTA | IamAuthController.registerPractitioner → IamPractitionerSelfRegistrationService.registerPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
@@ -1662,14 +1682,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `ownSite.contactPhone` | `string` | No | longitud máxima 40 | — | — | sin fuente |
 | `ownSite.logoFileId` | `string` | No | formato uuid | — | — | sin fuente |
 | `credentials` | `array<RegisterPractitionerCredentialDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => RegisterPractitionerCredentialDto)` | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:802` |
-| `credentials[].credentialTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:827` |
-| `credentials[].number` | `string` | No | longitud máxima 100; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'number no puede estar vacío' })` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:842` |
-| `credentials[].issuingInstitutionText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:854` |
-| `credentials[].issuingCityText` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:865` |
-| `credentials[].issuingCountryText` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:875` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de VS_BO_PROFESSION (COB-2023) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:887` |
-| `credentials[].titleText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:897` |
-| `credentials[].fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:911` |
+| `credentials[].credentialTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:851` |
+| `credentials[].number` | `string` | No | longitud máxima 100; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'number no puede estar vacío' })` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:866` |
+| `credentials[].issuingInstitutionText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:878` |
+| `credentials[].issuingCityText` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:889` |
+| `credentials[].issuingCountryText` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:899` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de VS_BO_PROFESSION (COB-2023) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:911` |
+| `credentials[].titleText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:921` |
+| `credentials[].fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:935` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1780,20 +1800,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `userId` | `string` | Sí | formato uuid | — | Cuenta creada, con la que ya puede iniciar sesión. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:920` |
-| `personId` | `string` | Sí | formato uuid | — | Persona creada para el profesional. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:926` |
-| `practitionerProfileId` | `string` | Sí | formato uuid | — | Perfil profesional (comparte id con la persona). | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:932` |
-| `practitionerCode` | `string` | Sí | — | — | Código interno asignado al profesional. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:938` |
-| `licenseId` | `string` | Sí | formato uuid | — | Licencia registrada, pendiente de verificación por la plataforma. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:944` |
-| `credentialId` | `string` | No | formato uuid | — | Credencial profesional creada, pendiente de verificación. Se devuelve porque `POST /profiles/credentials/{credentialId}/verify` —el acto que habilita al profesional a ejercer— la exige por id, y no había ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no expone ningún listado de credenciales. La verificación quedaba fuera de alcance salvo consultando la base de datos a mano. Ausente cuando el alta no declara `credentialNumber`, que dejó de ser obligatorio: sin credencial no hay id que devolver. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:959` |
-| `sedesLicenseId` | `string` | No | formato uuid | — | Autorización del SEDES creada, pendiente de verificación. El equivalente de para la habilitación departamental: se devuelve para poder verificarla por id sin consultar la base. Ausente cuando el alta no declara `sedesLicenseNumber`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:969` |
-| `collegeLicenseId` | `string` | No | formato uuid | — | Registro del colegio profesional creado, pendiente de verificación. Ausente cuando el alta no declara `collegeLicenseNumber`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:976` |
-| `verificationStatus` | `string` | Sí | — | — | Estado de verificación del perfil al terminar el alta. Siempre PENDING: registrarse no habilita a ejercer. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:983` |
-| `emailVerificationSent` | `boolean` | Sí | — | — | Si se pudo encolar el correo de verificación. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:989` |
-| `photoFileId` | `string` | No | formato uuid | — | Identificador del archivo de foto de perfil (FK → common.files), si se subió. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:995` |
-| `profilePhotoStored` | `boolean` | No | — | — | Presente sólo si el alta trajo foto: `false` cuando el almacenamiento no pudo guardarla y la cuenta se creó igual, sin foto. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1002` |
-| `ownPracticeId` | `string` | No | formato uuid | — | Práctica personal creada o reutilizada para el consultorio propio. Ausente cuando el alta no declaró `ownSite`. Se devuelve por el mismo motivo que : poder referenciarla por id sin consultar la base. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1012` |
-| `ownSiteId` | `string` | No | formato uuid | — | Consultorio propio creado a partir de `ownSite`. Ausente cuando el alta no lo declaró. Es el mismo id que devuelve `POST /practitioners/me/sites` y que acepta `GET /practitioners/:id/sites`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1021` |
+| `userId` | `string` | Sí | formato uuid | — | Cuenta creada, con la que ya puede iniciar sesión. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:944` |
+| `personId` | `string` | Sí | formato uuid | — | Persona creada para el profesional. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:950` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | — | Perfil profesional (comparte id con la persona). | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:956` |
+| `practitionerCode` | `string` | Sí | — | — | Código interno asignado al profesional. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:962` |
+| `licenseId` | `string` | Sí | formato uuid | — | Licencia registrada, pendiente de verificación por la plataforma. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:968` |
+| `credentialId` | `string` | No | formato uuid | — | Credencial profesional creada, pendiente de verificación. Se devuelve porque `POST /profiles/credentials/{credentialId}/verify` —el acto que habilita al profesional a ejercer— la exige por id, y no había ninguna otra forma de obtenerla: el alta no la devolvía y `profiles` no expone ningún listado de credenciales. La verificación quedaba fuera de alcance salvo consultando la base de datos a mano. Ausente cuando el alta no declara `credentialNumber`, que dejó de ser obligatorio: sin credencial no hay id que devolver. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:983` |
+| `sedesLicenseId` | `string` | No | formato uuid | — | Autorización del SEDES creada, pendiente de verificación. El equivalente de para la habilitación departamental: se devuelve para poder verificarla por id sin consultar la base. Ausente cuando el alta no declara `sedesLicenseNumber`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:993` |
+| `collegeLicenseId` | `string` | No | formato uuid | — | Registro del colegio profesional creado, pendiente de verificación. Ausente cuando el alta no declara `collegeLicenseNumber`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1000` |
+| `verificationStatus` | `string` | Sí | — | — | Estado de verificación del perfil al terminar el alta. Siempre PENDING: registrarse no habilita a ejercer. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1007` |
+| `emailVerificationSent` | `boolean` | Sí | — | — | Si se pudo encolar el correo de verificación. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1013` |
+| `photoFileId` | `string` | No | formato uuid | — | Identificador del archivo de foto de perfil (FK → common.files), si se subió. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1019` |
+| `profilePhotoStored` | `boolean` | No | — | — | Presente sólo si el alta trajo foto: `false` cuando el almacenamiento no pudo guardarla y la cuenta se creó igual, sin foto. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1026` |
+| `ownPracticeId` | `string` | No | formato uuid | — | Práctica personal creada o reutilizada para el consultorio propio. Ausente cuando el alta no declaró `ownSite`. Se devuelve por el mismo motivo que : poder referenciarla por id sin consultar la base. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1036` |
+| `ownSiteId` | `string` | No | formato uuid | — | Consultorio propio creado a partir de `ownSite`. Ausente cuando el alta no lo declaró. Es el mismo id que devuelve `POST /practitioners/me/sites` y que acepta `GET /practitioners/:id/sites`. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1045` |
 
 ### Respuestas posibles
 
@@ -1803,7 +1823,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La fecha del registro del SEDES necesita su número de registro; PreconditionFailedException: Los datos del registro del colegio necesitan su número de registro; PreconditionFailedException: El registro del colegio no puede compartir el archivo de otra habilitación; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La fecha del registro del SEDES necesita su número de registro; PreconditionFailedException: Los datos del registro del colegio necesitan su número de registro; PreconditionFailedException: El registro del colegio no puede compartir el archivo de otra habilitación; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: La atestación necesita la versión del texto aceptado; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 
@@ -2076,8 +2096,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:517` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2639,7 +2659,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:62` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:62` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2709,7 +2729,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:71` |
 | TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:71` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:71` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2992,8 +3012,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:110` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3080,10 +3100,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:330` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3193,9 +3213,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:200` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:200` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3276,9 +3296,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:455` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:455` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3360,9 +3380,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:210` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:210` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3444,9 +3464,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:367` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id, cid | `src/modules/iam/presentation/controllers/iam-users.controller.ts:367` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3523,11 +3543,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:349` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:349` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3578,7 +3598,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/iam/presentation/dto/credential-response.dto.ts:9` |
 | `state` | `string` | Sí | formato uuid | — | Concept id del estado de la credencial | sin fuente |
 | `verifiedAt` | `string` | No | formato date-time | — | Valor de verified at mantenido por la instancia. | sin fuente |
-| `practitionerVerified` | `boolean` | Sí | — | — | true si al verificar quedó habilitado todo el perfil profesional | sin fuente |
+| `practitionerVerified` | `boolean` | Sí | — | — | Siempre false desde v4.2.67: verificar una credencial ya no habilita el perfil; | sin fuente |
 
 ### Respuestas posibles
 
@@ -3632,9 +3652,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:223` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:223` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3714,11 +3734,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:402` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:402` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3823,9 +3843,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:262` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:262` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -3903,11 +3923,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:437` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:437` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4014,11 +4034,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:419` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:419` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4118,9 +4138,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:236` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:236` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4199,11 +4219,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:385` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:385` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4315,9 +4335,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:249` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/iam/presentation/controllers/iam-users.controller.ts:249` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4377,7 +4397,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Alta administrativa de un profesional (devuelve token de activación)
 - **Bloque:** Identidad y Seguridad
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `IamUsersController.assistedPractitionerRegistration` — `src/modules/iam/presentation/controllers/iam-users.controller.ts:307`
 
@@ -4389,7 +4409,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /iam/users/assisted-practitioner-registration` la atiende `IamUsersController.assistedPractitionerRegistration` (src/modules/iam/presentation/controllers/iam-users.controller.ts:307). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AssistedPractitionerRegistrationDto` (76 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.assistedRegisterPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 17 más. Actualiza common.files. Lee authz.roles, authz.user_role_assignments, common.file_versions, common.files, iam.authentication_credentials, messaging.message_channels, messaging.message_templates, messaging.notification_requests y 8 más.
+`POST /iam/users/assisted-practitioner-registration` la atiende `IamUsersController.assistedPractitionerRegistration` (src/modules/iam/presentation/controllers/iam-users.controller.ts:307). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `AssistedPractitionerRegistrationDto` (76 campos, 5 obligatorios). Delega en `IamPractitionerSelfRegistrationService.assistedRegisterPractitioner`. Crea filas en authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, directory.tenant_memberships, iam.account_activations y 20 más. Actualiza common.files, profiles.jurisdiction_authorizations, profiles.practitioner_admission_reviews, profiles.practitioner_specialties, profiles.professional_credentials. Borra de profiles.practitioner_admission_reviews. Lee authz.roles, authz.user_role_assignments, common.addresses, common.contact_points, common.file_versions, common.files, common.identifiers, iam.authentication_credentials y 20 más.
 
 ### Requerimientos
 
@@ -4397,10 +4417,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:307` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4410,13 +4430,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AuthzBusinessRolesAdapter.ensureRoleByCode → AuthzEffectiveRolesService.ensureRoleByCode → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
 | `common.addresses` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:154` |
+| `common.addresses` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.addresses | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:137` |
 | `common.contact_points` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRecordsAdapter.createContactPoint → ContactPointsRepository.create | `src/modules/common/repositories/contact-points.repository.ts:198` |
+| `common.contact_points` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.buildSnapshot → AdmissionForeignReadsAdapter.contactPoints | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:125` |
 | `common.file_versions` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FilesService.createFile → FileVersionsRepository.create | `src/modules/common/repositories/file-versions.repository.ts:142` |
 | `common.file_versions` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:190` |
 | `common.files` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → IamPractitionerSelfRegistrationService.uploadProfilePhoto → CommonRegistrationFilesAdapter.uploadAnonymous → FileUploadService.uploadAnonymous → FilesService.createFile → FilesRepository.create | `src/modules/common/repositories/files.repository.ts:52` |
 | `common.files` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload | `src/modules/common/services/attachable-file.service.ts:270` |
 | `common.files` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRegistrationFilesAdapter.claimAnonymousUpload → AttachableFileService.claimAnonymousUpload → StoragePublicationService.guardFile | `src/common/storage/storage-publication.service.ts:182` |
 | `common.identifiers` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CommonRecordsAdapter.createIdentifier → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
+| `common.identifiers` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → AdmissionForeignReadsAdapter.nationalIds | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:105` |
 | `directory.tenant_memberships` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → DirectoryRegistrationAdapter.createTenantMembership → TenantMembershipsRepository.create | `src/modules/directory/repositories/tenant-memberships.repository.ts:136` |
 | `iam.account_activations` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → AccountActivationsRepository.create | `src/modules/iam/infrastructure/repositories/account-activations.repository.ts:46` |
 | `iam.authentication_credentials` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → CredentialsRepository.createPendingPassword | `src/modules/iam/infrastructure/repositories/credentials.repository.ts:262` |
@@ -4436,15 +4459,32 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `practice.practices` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:150` |
 | `practice.practices` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PracticesRepository.findOwnOffice | `src/modules/practice/repositories/practices.repository.ts:135` |
 | `practice.practitioner_role_assignments` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → PracticeOwnSiteProvisioningAdapter.provision → OwnSiteProvisioningService.provision → PractitionerRoleAssignmentsRepository.create | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:311` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.practiceSites → AdmissionForeignReadsAdapter.practiceSites | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:154` |
+| `profiles.admission_requirements` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionChecklistService.requirementsOf → AdmissionRequirementsRepository.findActiveByType | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:152` |
 | `profiles.health_practitioner_profiles` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPractitionerProfile → HealthPractitionerProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:161` |
 | `profiles.health_practitioner_profiles` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.findPractitionerByCode → HealthPractitionerProfilesRepository.findByCode | `src/modules/profiles/infrastructure/repositories/health-practitioner-profiles.repository.ts:79` |
 | `profiles.jurisdiction_authorizations` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createJurisdictionAuthorization → JurisdictionAuthorizationsRepository.create | `src/modules/profiles/infrastructure/repositories/jurisdiction-authorizations.repository.ts:114` |
+| `profiles.jurisdiction_authorizations` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:279` |
+| `profiles.jurisdiction_authorizations` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:223` |
 | `profiles.person_account_links` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createAccountLink → PersonAccountLinksRepository.create | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:50` |
 | `profiles.person_profiles` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPersonProfile → PersonProfilesRepository.create | `src/modules/profiles/infrastructure/repositories/person-profiles.repository.ts:57` |
 | `profiles.persons` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPerson → PersonsRepository.create | `src/modules/profiles/infrastructure/repositories/persons.repository.ts:119` |
+| `profiles.persons` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:229` |
+| `profiles.practitioner_admission_events` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsService.appendEvent → PractitionerAdmissionEventsRepository.append | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:395` |
+| `profiles.practitioner_admission_reviews` | BORRA | BORRA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.remove | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:140` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionReviewsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:123` |
+| `profiles.practitioner_admission_reviews` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.clearReview | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:253` |
+| `profiles.practitioner_admission_reviews` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.buildView → PractitionerAdmissionReviewsRepository.findByAdmission | `src/modules/profiles/infrastructure/repositories/practitioner-admission-reviews.repository.ts:88` |
+| `profiles.practitioner_admissions` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:90` |
+| `profiles.practitioner_admissions` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionsRepository.findOpenByPractitioner | `src/modules/profiles/infrastructure/repositories/practitioner-admissions.repository.ts:135` |
 | `profiles.practitioner_languages` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPractitionerLanguage → PractitionerLanguagesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-languages.repository.ts:62` |
 | `profiles.practitioner_specialties` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createPractitionerSpecialty → PractitionerSpecialtiesRepository.create | `src/modules/profiles/infrastructure/repositories/practitioner-specialties.repository.ts:61` |
+| `profiles.practitioner_specialties` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:317` |
+| `profiles.practitioner_specialties` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:225` |
 | `profiles.professional_credentials` | ESCRIBE | CREA | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.createProfessionalCredential → ProfessionalCredentialsRepository.create | `src/modules/profiles/infrastructure/repositories/professional-credentials.repository.ts:122` |
+| `profiles.professional_credentials` | ESCRIBE | ACTUALIZA | POR_TIPO | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionChecklistService.materialize → PractitionerAdmissionChecklistService.applyEntityDecision | `src/modules/profiles/application/services/practitioner-admission-checklist.service.ts:298` |
+| `profiles.professional_credentials` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect | `src/modules/profiles/application/services/practitioner-admission-evidence.service.ts:224` |
+| `terminology.catalog_concepts` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.openPractitionerAdmission → PractitionerAdmissionsService.openForRegistration → PractitionerAdmissionEvidenceService.collect → PractitionerAdmissionEvidenceService.conceptNames → AdmissionForeignReadsAdapter.conceptNames | `src/modules/profiles/infrastructure/adapters/admission-foreign-reads.adapter.ts:42` |
 | `terminology.value_set_members` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet | `src/modules/terminology/repositories/value-sets.repository.ts:437` |
 | `terminology.value_set_versions` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findIncludedConceptIdsByValueSet → ValueSetsRepository.findIncludedConceptIdsByValueSet → ValueSetsRepository.findDefaultVersion | `src/modules/terminology/repositories/value-sets.repository.ts:611` |
 | `terminology.value_sets` | LEE | LEE | DIRECTA | IamUsersController.assistedPractitionerRegistration → IamPractitionerSelfRegistrationService.assistedRegisterPractitioner → IamPractitionerSelfRegistrationService.performRegisterPractitioner → ProfilesRegistrationAdapter.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.assertIsMedicalSpecialty → MedicalSpecialtyCatalogService.listMemberIds → ProfilesTerminologyAdapter.findByInternalCode → ValueSetsRepository.findByInternalCode | `src/modules/terminology/repositories/value-sets.repository.ts:120` |
@@ -4519,16 +4559,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | `ownSite.contactPhone` | `string` | No | longitud máxima 40 | — | — | sin fuente |
 | `ownSite.logoFileId` | `string` | No | formato uuid | — | — | sin fuente |
 | `credentials` | `array<RegisterPractitionerCredentialDto>` | No | — | `@IsOptional()` `@IsArray()` `@ValidateNested({ each: true })` `@Type(() => RegisterPractitionerCredentialDto)` | Títulos académicos declarados en el alta; cada uno crea una fila de professional_credentials. No se combina con credentialNumber. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:802` |
-| `credentials[].credentialTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:827` |
-| `credentials[].number` | `string` | No | longitud máxima 100; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'number no puede estar vacío' })` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:842` |
-| `credentials[].issuingInstitutionText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:854` |
-| `credentials[].issuingCityText` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:865` |
-| `credentials[].issuingCountryText` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:875` |
-| `credentials[].professionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de VS_BO_PROFESSION (COB-2023) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:887` |
-| `credentials[].titleText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:897` |
-| `credentials[].fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:911` |
-| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | Motivo del alta administrativa (trazabilidad C-18) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1058` |
-| `clinicalRoles` | `array<string>` | No | longitud máxima 100; máximo 10 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(10)` `@IsString({ each: true })` `@MaxLength(100, { each: true })` | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1085` |
+| `credentials[].credentialTypeConceptId` | `string` | No | formato uuid | `@IsUUID()` | Concept id del tipo de credencial (título universitario, diplomado, maestría, doctorado o título de especialidad) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:851` |
+| `credentials[].number` | `string` | No | longitud máxima 100; patrón runtime /\S/ | `@IsString()` `@Matches(/\S/, { message: 'number no puede estar vacío' })` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:866` |
+| `credentials[].issuingInstitutionText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:878` |
+| `credentials[].issuingCityText` | `string` | No | longitud máxima 120 | `@IsOptional()` `@IsString()` `@MaxLength(120)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:889` |
+| `credentials[].issuingCountryText` | `string` | No | longitud máxima 100 | `@IsOptional()` `@IsString()` `@MaxLength(100)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:899` |
+| `credentials[].professionConceptId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Concept id de VS_BO_PROFESSION (COB-2023) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:911` |
+| `credentials[].titleText` | `string` | No | longitud máxima 200 | `@IsOptional()` `@IsString()` `@MaxLength(200)` | — | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:921` |
+| `credentials[].fileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | fileId del PDF subido por POST /iam/auth/upload-registration-document | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:935` |
+| `reason` | `string` | Sí | longitud máxima 500 | `@IsString()` `@MaxLength(500)` | Motivo del alta administrativa (trazabilidad C-18) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1082` |
+| `clinicalRoles` | `array<string>` | No | longitud máxima 100; máximo 10 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMaxSize(10)` `@IsString({ each: true })` `@MaxLength(100, { each: true })` | Roles asistenciales a conceder (códigos de `GET /authz/roles`) | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1109` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -4643,9 +4683,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `activationToken` | `string` | Sí | — | — | Token de un solo uso a entregar al titular por canal seguro | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1102` |
-| `activationExpiresAt` | `string` | Sí | formato date-time | — | Cuándo caduca el token. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1108` |
-| `clinicalRoles` | `array<string>` | No | — | — | Roles asistenciales efectivamente concedidos. Se devuelven para que el administrador vea con qué quedó operativo el profesional sin tener que consultarlo aparte. Si alguno de los pedidos no existía, el alta entera falla, así que esta lista coincide siempre con lo solicitado. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1119` |
+| `activationToken` | `string` | Sí | — | — | Token de un solo uso a entregar al titular por canal seguro | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1126` |
+| `activationExpiresAt` | `string` | Sí | formato date-time | — | Cuándo caduca el token. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1132` |
+| `clinicalRoles` | `array<string>` | No | — | — | Roles asistenciales efectivamente concedidos. Se devuelven para que el administrador vea con qué quedó operativo el profesional sin tener que consultarlo aparte. Si alguno de los pedidos no existía, el alta entera falla, así que esta lista coincide siempre con lo solicitado. | `src/modules/iam/presentation/dto/register-practitioner.dto.ts:1143` |
 
 ### Respuestas posibles
 
@@ -4656,7 +4696,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 409 | `CONFLICT` | ConflictException: Ya existe una cuenta con ese correo; ConflictException: El practitioner_code ya está en uso |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La fecha del registro del SEDES necesita su número de registro; PreconditionFailedException: Los datos del registro del colegio necesitan su número de registro; PreconditionFailedException: El registro del colegio no puede compartir el archivo de otra habilitación; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Declare los títulos en `credentials` o el número suelto en `credentialNumber`, no los dos; PreconditionFailedException: El archivo del registro del SEDES necesita su número de registro; PreconditionFailedException: La matrícula y el registro del SEDES no pueden compartir el mismo archivo; PreconditionFailedException: La fecha del registro del SEDES necesita su número de registro; PreconditionFailedException: Los datos del registro del colegio necesitan su número de registro; PreconditionFailedException: El registro del colegio no puede compartir el archivo de otra habilitación; PreconditionFailedException: La foto de perfil no es una imagen válida; PreconditionFailedException: El departamento emisor es obligatorio para el alta del profesional; PreconditionFailedException: {labels.subject} no corresponde a un archivo subido en este registro; PreconditionFailedException: La firma y el sello requieren una imagen privada de hasta 2 MB; PreconditionFailedException: Ese concepto no es un tipo de credencial profesional; PreconditionFailedException: El número del título no puede estar vacío; PreconditionFailedException: Esa profesión no está en la Clasificación de Ocupaciones de Bolivia; PreconditionFailedException: La especialidad no pertenece al catálogo de especialidades médicas; PreconditionFailedException: La atestación necesita la versión del texto aceptado; PreconditionFailedException: Alguno de los roles indicados no existe o no es asignable |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 | 500 | `INTERNAL` | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING |
 
@@ -4699,10 +4739,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: CLINICIAN, SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:276` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -4819,10 +4859,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SECURITY_ADMIN | `src/modules/iam/presentation/controllers/iam-users.controller.ts:171` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 

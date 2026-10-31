@@ -17,16 +17,30 @@ import type {
   UserAccessReviewsDto,
 } from '../dto/authz-governance.dto';
 import { UserRoleAssignments } from '../entities';
+import {
+  assertTargetActionable,
+  nonActionableUserIds,
+  resolveGovernanceScope,
+  userBelongsToTenant,
+} from './authz-user-lifecycle.service';
 
 /** Tope de usuarios de la cola de revisión: una cola infinita no se revisa. */
 export const ACCESS_REVIEW_DUE_LIMIT = 200;
 export const ACCESS_REVIEW_HISTORY_LIMIT = 50;
+/**
+ * Con alcance, el historial se filtra por el tenant sellado en el evento y el tope se aplica
+ * después: se leen hasta tantas filas del usuario para que los eventos de otros tenants no
+ * desplacen a los propios fuera de la página.
+ */
+const SCOPED_HISTORY_SCAN_LIMIT = 1000;
 const DAY_MS = 86_400_000;
 
 interface ReviewDetail {
   readonly decision?: AccessReviewDecision;
   readonly reason?: string;
   readonly assignmentIds?: readonly string[];
+  /** Tenant del actor con alcance que revisó; `null`/ausente = revisión de plataforma. */
+  readonly tenantId?: string | null;
 }
 
 /**
@@ -37,6 +51,12 @@ interface ReviewDetail {
  *
  * Revisar no cambia ningún acceso: si hay que quitar un rol se usa la revocación de siempre, que
  * deja su propio rastro. Nadie revisa sus propios accesos.
+ *
+ * **Alcance de tenant.** Un actor de plataforma ve y revisa todas las cuentas. Un actor con alcance
+ * sólo la cola, el historial y la revisión de las cuentas de SU organización, y sólo de las
+ * asignaciones de su tenant: el evento se sella con el tenant del revisor y el historial y la fecha
+ * de «última revisión» sólo cuentan eventos de ese mismo tenant. Una cuenta ajena responde el 404
+ * de una inexistente. Nadie que no sea `SUPERADMIN` revisa a un `SUPERADMIN` ni lo ve en la cola, y con alcance tampoco a un administrador de plataforma.
  */
 @Injectable()
 export class AuthzAccessReviewsService {
@@ -53,20 +73,20 @@ export class AuthzAccessReviewsService {
         { userId },
         Reason.ACCESS_REVIEW_SELF_REVIEW,
       );
+    const scope = resolveGovernanceScope(actor);
     return this.em.transactional(async (tx) => {
       const user = await tx.findOne(Users, { id: userId });
-      if (!user)
-        throw new ResourceNotFoundException(
-          'Usuario no encontrado',
-          { userId },
-          Reason.ACCESS_REVIEW_USER_NOT_FOUND,
-        );
+      if (!user || !(await this.inScope(tx, userId, scope)))
+        throw this.notFound(userId);
+      await assertTargetActionable(tx, userId, actor, scope);
       const ids = [...new Set(dto.assignmentIds)];
       if (ids.length > 0) {
         const found = await tx.count(UserRoleAssignments, {
           id: { $in: ids },
           userId,
           statusConceptId: CONCEPTS.STATE_ACTIVE,
+          // Con alcance, sólo se pueden citar asignaciones de la propia organización.
+          ...(scope !== undefined ? { tenantId: scope } : {}),
         });
         if (found !== ids.length)
           throw new PreconditionFailedException(
@@ -86,6 +106,7 @@ export class AuthzAccessReviewsService {
             decision: dto.decision,
             reason: dto.reason,
             assignmentIds: ids,
+            tenantId: scope ?? null,
           } satisfies ReviewDetail,
           recordedByUserId: actor.id,
           recordedAt: now,
@@ -97,23 +118,29 @@ export class AuthzAccessReviewsService {
     });
   }
 
-  async historyOf(userId: string): Promise<UserAccessReviewsDto> {
+  async historyOf(
+    userId: string,
+    actor: AuthenticatedUser,
+  ): Promise<UserAccessReviewsDto> {
+    const scope = resolveGovernanceScope(actor);
     const user = await this.em.findOne(Users, { id: userId });
-    if (!user)
-      throw new ResourceNotFoundException(
-        'Usuario no encontrado',
-        { userId },
-        Reason.ACCESS_REVIEW_USER_NOT_FOUND,
-      );
+    if (!user || !(await this.inScope(this.em, userId, scope)))
+      throw this.notFound(userId);
     const rows = await this.em.find(
       SecurityEvents,
       { userId, eventTypeConceptId: AUTHZ_GOVERNANCE.EVENT_ACCESS_REVIEWED },
       {
         orderBy: { recordedAt: 'DESC' },
-        limit: ACCESS_REVIEW_HISTORY_LIMIT,
+        limit:
+          scope === undefined
+            ? ACCESS_REVIEW_HISTORY_LIMIT
+            : SCOPED_HISTORY_SCAN_LIMIT,
       },
     );
-    return { userId, items: rows.map((r) => this.view(r)) };
+    const visible = rows
+      .filter((r) => this.isVisibleIn(r, scope))
+      .slice(0, ACCESS_REVIEW_HISTORY_LIMIT);
+    return { userId, items: visible.map((r) => this.view(r)) };
   }
 
   /**
@@ -121,32 +148,58 @@ export class AuthzAccessReviewsService {
    * nunca). Sin `olderThanDays` se listan todos con la fecha de su última revisión: la cadencia es
    * una decisión de quien gobierna, no un número de esta API.
    */
-  async due(olderThanDays?: number): Promise<AccessReviewDuePageDto> {
+  async due(
+    actor: AuthenticatedUser,
+    olderThanDays?: number,
+  ): Promise<AccessReviewDuePageDto> {
+    const scope = resolveGovernanceScope(actor);
     const active = await this.em.find(
       UserRoleAssignments,
-      { statusConceptId: CONCEPTS.STATE_ACTIVE },
+      {
+        statusConceptId: CONCEPTS.STATE_ACTIVE,
+        // Con alcance, la cola es sólo de las asignaciones de su tenant (las globales, no).
+        ...(scope !== undefined ? { tenantId: scope } : {}),
+      },
       { fields: ['userId'] },
     );
     const perUser = new Map<string, number>();
-    for (const a of active) perUser.set(a.userId, (perUser.get(a.userId) ?? 0) + 1);
+    for (const a of active)
+      perUser.set(a.userId, (perUser.get(a.userId) ?? 0) + 1);
+    // Tampoco se ofrece en la cola a quien este actor no puede revisar (SUPERADMIN; y, con
+    // alcance, un administrador de plataforma).
+    for (const id of await nonActionableUserIds(
+      this.em,
+      [...perUser.keys()],
+      actor,
+      scope,
+    ))
+      perUser.delete(id);
     const userIds = [...perUser.keys()];
     if (userIds.length === 0)
       return { items: [], olderThanDays: olderThanDays ?? null };
 
     const [users, reviews] = await Promise.all([
-      this.em.find(Users, { id: { $in: userIds } }, { fields: ['id', 'displayName'] }),
+      this.em.find(
+        Users,
+        { id: { $in: userIds } },
+        { fields: ['id', 'displayName'] },
+      ),
       this.em.find(
         SecurityEvents,
         {
           userId: { $in: userIds },
           eventTypeConceptId: AUTHZ_GOVERNANCE.EVENT_ACCESS_REVIEWED,
         },
-        { orderBy: { recordedAt: 'DESC' }, fields: ['userId', 'recordedAt'] },
+        {
+          orderBy: { recordedAt: 'DESC' },
+          fields: ['userId', 'recordedAt', 'detailJson'],
+        },
       ),
     ]);
     const lastReview = new Map<string, Date>();
     for (const r of reviews)
-      if (r.userId && !lastReview.has(r.userId)) lastReview.set(r.userId, r.recordedAt);
+      if (r.userId && this.isVisibleIn(r, scope) && !lastReview.has(r.userId))
+        lastReview.set(r.userId, r.recordedAt);
 
     const limit =
       olderThanDays === undefined ? null : Date.now() - olderThanDays * DAY_MS;
@@ -172,6 +225,37 @@ export class AuthzAccessReviewsService {
       )
       .slice(0, ACCESS_REVIEW_DUE_LIMIT);
     return { items, olderThanDays: olderThanDays ?? null };
+  }
+
+  private async inScope(
+    em: EntityManager,
+    userId: string,
+    scope: string | undefined,
+  ): Promise<boolean> {
+    return scope === undefined || userBelongsToTenant(em, userId, scope);
+  }
+
+  /**
+   * Una revisión es visible para la plataforma siempre y para un actor con alcance sólo si se selló
+   * con su tenant. Una revisión sin sello (anterior a este control o de plataforma) no se le
+   * muestra: ante la duda no se divulga.
+   */
+  private isVisibleIn(
+    event: { detailJson?: unknown },
+    scope: string | undefined,
+  ): boolean {
+    if (scope === undefined) return true;
+    return (
+      (event.detailJson as ReviewDetail | null | undefined)?.tenantId === scope
+    );
+  }
+
+  private notFound(userId: string) {
+    return new ResourceNotFoundException(
+      'Usuario no encontrado',
+      { userId },
+      Reason.ACCESS_REVIEW_USER_NOT_FOUND,
+    );
   }
 
   private view(event: SecurityEvents): AccessReviewDto {

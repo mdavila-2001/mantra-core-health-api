@@ -61,11 +61,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:109` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging-internal.controller.ts:109` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -165,11 +165,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:91` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: domainEventId | `src/modules/messaging/controllers/messaging-internal.controller.ts:91` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -277,11 +277,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:141` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging-internal.controller.ts:141` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -381,11 +381,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:157` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging-internal.controller.ts:157` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -490,11 +490,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:191` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: requestId | `src/modules/messaging/controllers/messaging-internal.controller.ts:191` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -507,7 +507,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `messaging.messaging_providers` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.countDeliveries | `src/modules/messaging/repositories/notifications.repository.ts:562` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:519` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification | `src/modules/messaging/services/notifications.service.ts:537` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findRequestForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:330` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | MessagingInternalController.deliverNotification → NotificationsService.deliverNotification → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
 
@@ -619,16 +619,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:179` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_QUERY | limit (obligatorio) | `contrato (parameters)` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `messaging.message_channels` | LEE | LEE | DIRECTA | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable | `src/modules/messaging/services/notifications.service.ts:316` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable | `src/modules/messaging/services/notifications.service.ts:334` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | MessagingInternalController.listPendingNotifications → NotificationsService.listDeliverable → NotificationsRepository.findClaimableRequests | `src/modules/messaging/repositories/notifications.repository.ts:359` |
 
 ### Parámetros
@@ -703,10 +703,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -807,10 +807,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging-internal.controller.ts:124` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -915,15 +915,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:208` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/messaging/controllers/messaging.controller.ts:208` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markInAppRead → NotificationsService.markInAppRead | `src/modules/messaging/services/notifications.service.ts:706` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markInAppRead → NotificationsService.markInAppRead | `src/modules/messaging/services/notifications.service.ts:724` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.markInAppRead → NotificationsService.markInAppRead → NotificationsRepository.findInAppForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:745` |
 
 ### Parámetros
@@ -996,14 +996,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:149` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead | `src/modules/messaging/services/notifications.service.ts:894` |
+| `messaging.in_app_notifications` | ESCRIBE | ACTUALIZA | POR_TIPO | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead | `src/modules/messaging/services/notifications.service.ts:912` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | MessagingController.markAllInAppRead → NotificationsService.markAllInAppRead → NotificationsRepository.findUnreadInApp | `src/modules/messaging/repositories/notifications.repository.ts:895` |
 
 ### Cuerpo
@@ -1063,8 +1063,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:128` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1151,8 +1151,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:172` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1223,10 +1223,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:190` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1331,10 +1331,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:97` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1457,8 +1457,8 @@ _Fuentes:_ MODELO (`Mantra Core Health Context/modules/diagram_35_messaging.puml
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/messaging/controllers/web-push.controller.ts:78` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1519,8 +1519,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/web-push.controller.ts:37` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1583,10 +1583,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/web-push.controller.ts:63` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1670,10 +1670,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: USER, MESSAGING_ADMIN | `src/modules/messaging/controllers/web-push.controller.ts:47` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1770,10 +1770,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: SYSTEM, MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:53` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -1892,11 +1892,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
 | ROL | Alguno de: MESSAGING_ADMIN | `src/modules/messaging/controllers/messaging.controller.ts:75` |
-| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:290` |
 | PARAMETRO_RUTA | Deben ser UUID válidos: deadLetterJobId | `src/modules/messaging/controllers/messaging.controller.ts:75` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2000,7 +2000,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | AUTENTICACION | Ruta pública: no exige token | `src/modules/messaging/controllers/provider-webhooks.controller.ts:33` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
-| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:152` |
 
 ### Tablas que afecta
 
@@ -2009,9 +2009,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/messagi
 | `messaging.delivery_receipts` | ESCRIBE | CREA | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.createReceipt | `src/modules/messaging/repositories/notifications.repository.ts:608` |
 | `messaging.delivery_receipts` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findReceipt | `src/modules/messaging/repositories/notifications.repository.ts:629` |
 | `messaging.messaging_providers` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findProviderByCode | `src/modules/messaging/repositories/notifications.repository.ts:423` |
-| `messaging.notification_deliveries` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:631` |
+| `messaging.notification_deliveries` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:649` |
 | `messaging.notification_deliveries` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findDeliveryByProviderRefForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:571` |
-| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:636` |
+| `messaging.notification_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt | `src/modules/messaging/services/notifications.service.ts:654` |
 | `messaging.notification_requests` | LEE | LEE | DIRECTA | ProviderWebhooksController.recordReceipt → NotificationsService.recordProviderReceipt → NotificationsRepository.findRequestForUpdate | `src/modules/messaging/repositories/notifications.repository.ts:330` |
 
 ### Parámetros
