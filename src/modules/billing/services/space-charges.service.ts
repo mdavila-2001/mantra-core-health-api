@@ -7,6 +7,7 @@ import {
   type AuthenticatedUser,
 } from '../../../common';
 import { CONCEPTS } from '../../../common/constants/concepts';
+import { InsufficientRoleException } from '../../../common/errors/domain.exception';
 import { OutboxService } from '../../messaging/services/outbox.service';
 import { CLIN } from '../../clinical/clinical.concepts';
 import { zoneOffsetMinutes } from '../../clinical/domain/inpatient/census';
@@ -572,17 +573,43 @@ export class SpaceChargesService {
     const em = this.em.fork();
     const req = { actor, tenantId };
     await this.encounter(em, encounterId, req);
+    // Objetivos de autorización: sedes de los movimientos del encuentro y de
+    // los espacios de sus cargos. Sin sede, la práctica de los cargos. Sin
+    // ninguna de las dos, se deniega (nunca se autoriza sobre una lista vacía).
     const sites = await em.execute<{ practice_site_id: string }[]>(
-      'SELECT DISTINCT practice_site_id FROM clinical.encounter_locations WHERE encounter_id = ?',
-      [encounterId],
+      `SELECT practice_site_id FROM clinical.encounter_locations
+        WHERE encounter_id = ? AND tenant_id = ?
+       UNION
+       SELECT cs.practice_site_id
+         FROM billing.charge_captures c
+         JOIN practice.care_spaces cs ON cs.id = c.care_space_id
+        WHERE c.encounter_id = ? AND c.tenant_id = ?`,
+      [encounterId, tenantId, encounterId, tenantId],
       'all',
     );
-    await this.assertSites(
-      em,
-      req,
-      sites.map((s) => s.practice_site_id),
-      'f5e.charge.read',
-    );
+    if (sites.length > 0) {
+      await this.assertSites(
+        em,
+        req,
+        sites.map((s) => s.practice_site_id),
+        'f5e.charge.read',
+      );
+    } else {
+      const practices = await em.execute<{ practice_id: string }[]>(
+        'SELECT DISTINCT practice_id FROM billing.charge_captures WHERE encounter_id = ? AND tenant_id = ?',
+        [encounterId, tenantId],
+        'all',
+      );
+      if (practices.length === 0) this.denyWithoutTarget('f5e.charge.read');
+      for (const p of practices)
+        await this.assertPractice(
+          em,
+          actor,
+          p.practice_id,
+          tenantId,
+          'f5e.charge.read',
+        );
+    }
     const rows = await em.find(
       ChargeCaptures,
       { encounterId, statusConceptId: BILL.CHG_PENDING },
@@ -611,16 +638,18 @@ export class SpaceChargesService {
         throw new ResourceNotFoundException('Cargo no encontrado', {
           chargeId,
         });
-      if (c.careSpaceId) {
-        const [s] = await tx.execute<{ practice_site_id: string }[]>(
-          'SELECT practice_site_id FROM practice.care_spaces WHERE id = ?',
-          [c.careSpaceId],
-          'all',
-        );
+      const [s] = c.careSpaceId
+        ? await tx.execute<{ practice_site_id: string }[]>(
+            'SELECT practice_site_id FROM practice.care_spaces WHERE id = ? AND tenant_id = ?',
+            [c.careSpaceId, tenantId],
+            'all',
+          )
+        : [];
+      if (s) {
         await this.assertSites(
           tx,
           { actor, tenantId },
-          s ? [s.practice_site_id] : [],
+          [s.practice_site_id],
           'f5e.charge.write',
         );
       } else {
@@ -837,6 +866,15 @@ export class SpaceChargesService {
     );
   }
 
+  /** Sin objetivo de autorización no hay permiso: se deniega (fail-closed). */
+  private denyWithoutTarget(action: string): never {
+    throw new InsufficientRoleException(
+      'No hay un objetivo sobre el que autorizar esta acción',
+      { action },
+      'INFRA_ACTION_NOT_ALLOWED',
+    );
+  }
+
   /** Facturación a nivel sede en cada sede tocada. */
   private async assertSites(
     em: EntityManager,
@@ -844,7 +882,9 @@ export class SpaceChargesService {
     siteIds: string[],
     action: string,
   ) {
-    if (!req.actor || !req.tenantId) return;
+    // Sin actor = job del sistema (contexto de sistema dentro de la tx).
+    if (!req.actor) return;
+    if (!req.tenantId || siteIds.length === 0) this.denyWithoutTarget(action);
     for (const siteId of siteIds) {
       const filter = await this.access.scopeFilter(
         req.actor,

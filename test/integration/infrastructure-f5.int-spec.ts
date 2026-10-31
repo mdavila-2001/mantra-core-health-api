@@ -211,6 +211,80 @@ describe('Infraestructura F5 · integración', () => {
       .expect(403);
   });
 
+  it('F5e: encuentro sin movimientos y con cargos — sin objetivo no se autoriza: enfermería 403/404; sede del espacio del cargo o práctica deciden', async () => {
+    const nuevoEncuentro = async () => {
+      const id = randomUUID();
+      await q(
+        `insert into clinical.encounters (id, patient_profile_id, tenant_id, class_concept_id, status_concept_id, start_at, created_at, updated_at)
+         values (?, ?, ?, ?, ?, now(), now(), now())`,
+        [
+          id,
+          patientId,
+          orgA.tenantId,
+          CLIN.ENCOUNTER_CLASS_INPATIENT,
+          CLIN.ENCOUNTER_FINISHED,
+        ],
+      );
+      return id;
+    };
+    const cargo = (enc: string, careSpaceId: string | null) =>
+      q(
+        `insert into billing.charge_captures
+           (id, tenant_id, practice_id, encounter_id, patient_profile_id, source_kind_concept_id, source_ref_id,
+            service_date, care_space_id, quantity, status_concept_id, idempotency_key, created_at, updated_at)
+         values (gen_random_uuid(), ?, ?, ?, ?, ?, gen_random_uuid(), '2026-10-27', ?, 1, ?, ?, now(), now())`,
+        [
+          orgA.tenantId,
+          orgA.practiceId,
+          enc,
+          patientId,
+          BILL.CHG_SRC_BED_DAY,
+          careSpaceId,
+          BILL.CHG_PENDING,
+          `T5:${enc}`,
+        ],
+      );
+    const nurse = await crearPersonal(
+      ctx,
+      orgA,
+      `F5M-${tag}`,
+      DELEG.ASSIGN_ROLE_NURSE,
+      { site: orgA.siteId },
+    );
+
+    // Cargo sin espacio y encuentro sin movimientos: decide la práctica.
+    const sinEspacio = await nuevoEncuentro();
+    await cargo(sinEspacio, null);
+    const denegado = await http()
+      .get(`/billing/encounters/${sinEspacio}/pending-charges`)
+      .set(como(nurse));
+    expect([403, 404]).toContain(denegado.status);
+    const admin = await http()
+      .get(`/billing/encounters/${sinEspacio}/pending-charges`)
+      .set(como(orgA))
+      .expect(200);
+    expect(admin.body).toHaveLength(1);
+
+    // Cargo con espacio: decide la sede del espacio del cargo.
+    const conEspacio = await nuevoEncuentro();
+    await cargo(conEspacio, planta.beds[0]);
+    const denegado2 = await http()
+      .get(`/billing/encounters/${conEspacio}/pending-charges`)
+      .set(como(nurse));
+    expect([403, 404]).toContain(denegado2.status);
+    await http()
+      .get(`/billing/encounters/${conEspacio}/pending-charges`)
+      .set(como(billing))
+      .expect(200);
+
+    // Sin movimientos ni cargos: no hay objetivo → se deniega aun al admin.
+    const vacio = await nuevoEncuentro();
+    const sinObjetivo = await http()
+      .get(`/billing/encounters/${vacio}/pending-charges`)
+      .set(como(orgA));
+    expect([403, 404]).toContain(sinObjetivo.status);
+  });
+
   it('F5a: ubicar un equipo en una sala propia; sala de otro tenant → 404; AE Title de 17 → 422', async () => {
     const unit = randomUUID();
     const unitSite = randomUUID();
