@@ -12,6 +12,7 @@ describe('delegated_access.concepts — enlace compartido de receta', () => {
     'SHARE_RESOURCE_MEDICATION_REQUEST',
     'SHARE_SCOPE_PHARMACY_DISPENSE',
     'SHARE_ACTION_OPEN',
+    'SHARE_ACTION_PUBLIC_VIEW',
     'SHARE_OUTCOME_OPENED',
     'SHARE_OUTCOME_DENIED',
   ] as const;
