@@ -102,6 +102,8 @@ const SIN_ROLES_AUTORIZADOS = [
       'POST :practiceId/healthcare-services',
       'PATCH :practiceId/healthcare-services/:id',
     ],
+  },
+  {
     file: 'src/modules/practice/controllers/practice-invitations.controller.ts',
     why: 'Membresía administrativa en la organización de la ruta: `PracticeAffiliationInvitationsService.invite` llama a `PracticeAdministrationService.assertCanAdministerPractice` antes de leer nada (403 si el actor administra otra organización; pasan los roles de plataforma). Un rol global dejaría invitar al administrador de otro centro.',
     endpoints: ['POST :practiceId/role-assignments/invitations'],
