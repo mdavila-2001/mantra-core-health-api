@@ -97,7 +97,7 @@ export class ChangeAvailabilityUseCase {
     req: OpsRequest,
   ): Promise<AvailabilityResultDto> {
     return this.em.transactional(async (tx) => {
-      const { target, roles } = await this.access.assertCan(
+      const { target, roles, scope } = await this.access.assertCan(
         req.actor,
         actionKeyFor(dto.action, dto.kindCode),
         { careSpaceId: spaceId },
@@ -127,6 +127,7 @@ export class ChangeAvailabilityUseCase {
                 'f2.availability.admin',
                 roles,
                 target.isOperatingRoom,
+                scope,
               )
             : true,
         );
@@ -136,6 +137,7 @@ export class ChangeAvailabilityUseCase {
               'f2.availability.admin',
               roles,
               target.isOperatingRoom,
+              scope,
             );
           throw opsError('BLOCK_NOT_OPEN');
         }

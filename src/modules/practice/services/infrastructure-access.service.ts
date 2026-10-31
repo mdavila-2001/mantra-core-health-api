@@ -82,8 +82,15 @@ export interface ResolvedTarget {
 
 /** Lo que el evaluador sabe del actor dentro de un tenant. */
 export interface ActorScope {
+  /** Plataforma y administración: valen sobre cualquier objetivo del tenant. */
   readonly base: readonly InfraRole[];
   readonly grants: readonly InfraGrant[];
+  /**
+   * Roles globales equivalentes (`PERIOP_ADMIN` → `OR_MANAGER`, `BILLING`).
+   * No se suman a los roles del alcance: sólo cuentan donde la regla los
+   * admite (`allows`).
+   */
+  readonly globals: readonly InfraRole[];
 }
 
 const ROLE_BY_CONCEPT = new Map<string, InfraRole>([
@@ -110,7 +117,11 @@ const SCOPE_BY_CONCEPT = new Map<string, GrantScope>([
 /** Roles globales de plataforma (§0.3 «Superadmin»). */
 const PLATFORM_ROLES = ['SECURITY_ADMIN', 'PLATFORM_ADMIN', 'SUPERADMIN'];
 
-/** Roles globales que equivalen a un rol del contrato. */
+/**
+ * Roles globales que equivalen a un rol del contrato. Sólo cuentan para su
+ * objetivo (`allows`): `OR_MANAGER` sobre quirófanos, `BILLING` en las
+ * acciones que lo nombran en `globalRoles`.
+ */
 const GLOBAL_ROLE_MAP: Record<string, InfraRole> = {
   PERIOP_ADMIN: 'OR_MANAGER',
   BILLING: 'BILLING',
@@ -225,8 +236,9 @@ export class InfrastructureAccessService {
     const base: InfraRole[] = [];
     const roles = actor.roles ?? [];
     if (PLATFORM_ROLES.some((r) => roles.includes(r))) base.push('SUPERADMIN');
+    const globals: InfraRole[] = [];
     for (const [global, mapped] of Object.entries(GLOBAL_ROLE_MAP)) {
-      if (roles.includes(global)) base.push(mapped);
+      if (roles.includes(global)) globals.push(mapped);
     }
     const level = await this.structureAccess.adminLevelOf(tx, site, actor);
     if (level === 'ORG') base.push('ORG_ADMIN', 'SITE_ADMIN');
@@ -246,7 +258,7 @@ export class InfrastructureAccessService {
         spaceId: row.care_space_id,
       });
     }
-    return { base, grants };
+    return { base, grants, globals };
   }
 
   /**
@@ -285,7 +297,13 @@ export class InfrastructureAccessService {
     const resolved = await this.resolve(tx, target, tenantId);
     const scope = await this.actorScope(tx, actor, resolved.site);
     const roles = this.rolesOn(scope, this.siteWide(resolved, scope));
-    this.decide(action, roles, resolved.isOperatingRoom);
+    this.decide(
+      action,
+      roles,
+      resolved.isOperatingRoom,
+      scope,
+      !resolved.space,
+    );
     return { target: resolved, roles, scope };
   }
 
@@ -295,13 +313,20 @@ export class InfrastructureAccessService {
    * @param action - Acción registrada.
    * @param roles - Roles del actor sobre el objetivo.
    * @param isOperatingRoom - El objetivo es un quirófano.
+   * @param scope - Alcance del actor (aporta sus roles globales).
    */
   can(
     action: string,
     roles: ReadonlySet<InfraRole>,
     isOperatingRoom = false,
+    scope?: ActorScope,
   ): boolean {
-    return allows(this.registry.rule(action), roles, isOperatingRoom);
+    return allows(
+      this.registry.rule(action),
+      roles,
+      isOperatingRoom,
+      scope?.globals ?? [],
+    );
   }
 
   /**
@@ -310,14 +335,19 @@ export class InfrastructureAccessService {
    * @param action - Acción registrada.
    * @param roles - Roles del actor.
    * @param isOperatingRoom - El objetivo es un quirófano.
+   * @param scope - Alcance del actor (aporta sus roles globales).
+   * @param partial - Objetivo de colección (sede o unidad).
    */
   decide(
     action: string,
     roles: ReadonlySet<InfraRole>,
     isOperatingRoom = false,
+    scope?: ActorScope,
+    partial = false,
   ): void {
     const rule = this.registry.rule(action);
-    if (allows(rule, roles, isOperatingRoom)) return;
+    if (allows(rule, roles, isOperatingRoom, scope?.globals ?? [], partial))
+      return;
     throw new InsufficientRoleException(
       'Su rol no permite esta acción sobre este espacio',
       {

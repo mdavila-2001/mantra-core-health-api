@@ -142,6 +142,7 @@ export class BedBoardReadService {
           'f2.board.read',
           roles,
           space.spaceTypeConceptId === PRAC.SPACE_FN_OPERATING_ROOM,
+          scope,
         )
       )
         continue;
@@ -370,6 +371,7 @@ export class BedBoardReadService {
           'f2.cleaning.read',
           roles,
           space.spaceTypeConceptId === PRAC.SPACE_FN_OPERATING_ROOM,
+          scope,
         )
       )
         continue;
