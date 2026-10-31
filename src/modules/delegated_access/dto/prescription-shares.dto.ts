@@ -11,6 +11,12 @@ export type PrescriptionShareResourceType =
   (typeof PRESCRIPTION_SHARE_RESOURCE_TYPES)[number];
 
 /** Estado del enlace al leerlo. */
+/** Por qué un enlace `EXPIRED` terminó: su plazo, o la receta dejó de valer. */
+export const PRESCRIPTION_SHARE_ENDED_REASONS = [
+  'LINK_EXPIRED',
+  'PRESCRIPTION_NOT_ACTIVE',
+] as const;
+
 export const PRESCRIPTION_SHARE_STATUSES = [
   'VALID',
   'EXPIRED',
@@ -91,7 +97,19 @@ export class PrescriptionShareSummaryDto {
   @ApiProperty({ enum: PRESCRIPTION_SHARE_STATUSES })
   status!: 'VALID' | 'EXPIRED' | 'REVOKED';
 
-  /** Aperturas `OPENED`: de una farmacia o de la vista pública del enlace. */
+  /**
+   * Con `status` `EXPIRED`: `LINK_EXPIRED` si venció el plazo del enlace,
+   * `PRESCRIPTION_NOT_ACTIVE` si la receta se anuló, se reemplazó o se
+   * completó antes. `null` en cualquier otro estado.
+   */
+  @ApiProperty({
+    enum: PRESCRIPTION_SHARE_ENDED_REASONS,
+    nullable: true,
+    type: String,
+  })
+  endedReason!: (typeof PRESCRIPTION_SHARE_ENDED_REASONS)[number] | null;
+
+  /** Aperturas `OPENED` de una farmacia. La vista pública no cuenta. */
   @ApiProperty()
   uses!: number;
 }
@@ -115,6 +133,18 @@ export class PrescriptionShareOwnershipDto {
 export class PublicPrescriptionShareDto {
   @ApiProperty({ enum: PRESCRIPTION_SHARE_STATUSES })
   status!: 'VALID' | 'EXPIRED' | 'REVOKED';
+
+  /**
+   * Con `status` `EXPIRED`: `LINK_EXPIRED` si venció el plazo del enlace,
+   * `PRESCRIPTION_NOT_ACTIVE` si la receta se anuló, se reemplazó o se
+   * completó antes. `null` en cualquier otro estado.
+   */
+  @ApiProperty({
+    enum: PRESCRIPTION_SHARE_ENDED_REASONS,
+    nullable: true,
+    type: String,
+  })
+  endedReason!: (typeof PRESCRIPTION_SHARE_ENDED_REASONS)[number] | null;
 
   /** Emisión más antigua de los ítems compartidos. */
   @ApiProperty({ type: String, format: 'date-time', nullable: true })

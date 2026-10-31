@@ -103,6 +103,27 @@ describe('share-token-redaction', () => {
     });
 
     it.each([
+      `https://app.alovida.test/auth?returnUrl=%2Frx%2F${TOKEN}`,
+      `https://app.alovida.test/auth?returnUrl=/rx/${TOKEN}`,
+      `https://app.alovida.test/auth?returnUrl=%252Frx%252F${TOKEN}&x=1`,
+      `https://app.alovida.test/auth#/rx/${TOKEN}`,
+      `https://app.alovida.test/auth?next=%2Fpublic%2Fprescription-shares%2F${TOKEN}`,
+    ])('en la query: %s', (referer) => {
+      const redacted = redactShareTokenInReferer(referer);
+      expect(redacted).toContain(REDACTED_SHARE_TOKEN);
+      expect(redacted).not.toContain(TOKEN);
+      expect(redacted.startsWith('https://app.alovida.test/auth')).toBe(true);
+    });
+
+    it.each([
+      `https://app.alovida.test/auth?returnUrl=%2Fverify%2Frx%2F${TOKEN}`,
+      `https://app.alovida.test/auth?returnUrl=%2Frxnorm%2F${TOKEN}`,
+      `https://app.alovida.test/auth?q=${TOKEN}`,
+    ])('una query sin ruta con token no cambia: %s', (referer) => {
+      expect(redactShareTokenInReferer(referer)).toBe(referer);
+    });
+
+    it.each([
       `https://app.alovida.test/verify/rx/${UUID}`,
       `https://app.alovida.test/verify//rx/${UUID}`,
       'https://app.alovida.test/account/pharmacy/prescriptions',

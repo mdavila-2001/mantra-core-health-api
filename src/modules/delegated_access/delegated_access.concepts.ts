@@ -86,6 +86,20 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
     SCOPE_UNIT: { code: 'DA_SCOPE_UNIT', display: 'Clinical unit scope' },
     // F2–F5 §0.3: alcance de un espacio (`organization_user_assignments.care_space_id`).
     SCOPE_SPACE: { code: 'DA_SCOPE_SPACE', display: 'Care space scope' },
+    // Quién inició un vínculo de secretaria (`initiated_by_party_concept_id`).
+    // Se escribe al crear el vínculo y nunca se infiere de quién escribió la fila.
+    INITIATOR_SUPPORT_STAFF: {
+      code: 'DA_INITIATOR_SUPPORT_STAFF',
+      display: 'Initiated by the support staff member',
+    },
+    INITIATOR_ORGANIZATION: {
+      code: 'DA_INITIATOR_ORGANIZATION',
+      display: 'Initiated by an organization administrator',
+    },
+    INITIATOR_PRACTITIONER: {
+      code: 'DA_INITIATOR_PRACTITIONER',
+      display: 'Initiated by the practitioner',
+    },
 
     // --- Tipo de delegado del set de permisos (delegate_type_concept_id) ---
     DELEGATE_TYPE_SECRETARY: {
@@ -239,6 +253,12 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
     },
     // Acción y resultado de cada uso (action_concept_id / outcome_concept_id).
     SHARE_ACTION_OPEN: { code: 'DA_SHARE_ACT_OPEN', display: 'Open' },
+    // La vista sin sesión (`GET /public/prescription-shares/:token`): queda
+    // registrada, pero no es una apertura de farmacia ni cuenta como tal.
+    SHARE_ACTION_PUBLIC_VIEW: {
+      code: 'DA_SHARE_ACT_PUBLIC_VIEW',
+      display: 'Public view',
+    },
     SHARE_OUTCOME_OPENED: { code: 'DA_SHARE_OUT_OPENED', display: 'Opened' },
     SHARE_OUTCOME_DENIED: { code: 'DA_SHARE_OUT_DENIED', display: 'Denied' },
   });

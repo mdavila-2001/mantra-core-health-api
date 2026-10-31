@@ -3,6 +3,7 @@ export { OpsIncidentsRepository } from './ops-incidents.repository';
 export { OpsReliabilityRepository } from './ops-reliability.repository';
 export { OpsPracticesRepository } from './ops-practices.repository';
 export { OpsImprovementsRepository } from './ops-improvements.repository';
+export { OpsToolsRepository } from './ops-tools.repository';
 export type {
   CreateChangeRequestData,
   CreateArtifactData,

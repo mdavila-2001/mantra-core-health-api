@@ -21,6 +21,8 @@ import {
   ProfessionalCredentialsRepository,
   RelatedPersonsRepository,
 } from '../../../profiles/infrastructure/repositories';
+import { SecretaryProfiles } from '../../../profiles/entities';
+import { createdBy } from '../../../../common/persistence/audit-fields';
 import type {
   ContactPersonInput,
   GuardianInput,
@@ -70,6 +72,28 @@ export class ProfilesRegistrationAdapter implements ProfileRegistrationPort {
     return this.patientProfilesRepo.create(
       tx,
       data as Parameters<PatientProfilesRepository['create']>[1],
+    );
+  }
+
+  createSecretaryProfile(
+    tx: EntityManager,
+    data: {
+      readonly profileId: string;
+      readonly roleConceptId?: string;
+      readonly actorUserId: string;
+    },
+  ): { profileId: string } {
+    // `profiles` no tiene repositorio para esta tabla: la fila son tres columnas
+    // y nadie más la escribe, así que se crea acá con las marcas de auditoría
+    // de siempre.
+    return tx.create(
+      SecretaryProfiles,
+      {
+        profileId: data.profileId,
+        roleConceptId: data.roleConceptId,
+        ...createdBy(data.actorUserId),
+      },
+      { partial: true },
     );
   }
 

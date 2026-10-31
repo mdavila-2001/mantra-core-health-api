@@ -340,6 +340,40 @@ describe('ClinicalReadService · getPatientSummary trae lo que el modelo ya tien
     expect(summary.encounters[0].rowVersion).toBe(3);
   });
 
+  it('la receta del resumen trae su cantidad recetada como número, y sin cantidad no la trae', async () => {
+    const d = build();
+    d.vacio.findByPatient
+      .mockResolvedValueOnce([]) // conditions
+      .mockResolvedValueOnce([]) // allergies
+      .mockResolvedValueOnce([
+        {
+          id: 'mr-1',
+          medicationConceptId: 'med-1',
+          statusConceptId: 'status-1',
+          quantityDecimal: '4',
+          createdAt: new Date(),
+        },
+        {
+          id: 'mr-2',
+          medicationConceptId: 'med-2',
+          statusConceptId: 'status-1',
+          createdAt: new Date(),
+        },
+      ]) // medicationRequests
+      .mockResolvedValueOnce([]) // observations
+      .mockResolvedValueOnce([]) // encounters
+      .mockResolvedValueOnce([]); // careEpisodes
+
+    const summary = await d.service.getPatientSummary(
+      HOLDER_PERSON,
+      50,
+      medical,
+    );
+
+    expect(summary.medicationRequests[0].quantityDecimal).toBe(4);
+    expect(summary.medicationRequests[1].quantityDecimal).toBeUndefined();
+  });
+
   it('CL-11: la alergia trae sus reacciones', async () => {
     const d = build();
     d.vacio.findByPatient

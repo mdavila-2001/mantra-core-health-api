@@ -117,6 +117,9 @@ export enum BillingErrorReason {
   /** El archivo propuesto como imagen del servicio no existe o el actor no puede usarlo (mismo 404 en todos los casos). */
   SERVICE_CATALOG_IMAGE_NOT_USABLE = 'SERVICE_CATALOG_IMAGE_NOT_USABLE',
 
+  /** `expectedRowVersion` no coincide con la versión actual del servicio (409). */
+  SERVICE_CATALOG_VERSION_MISMATCH = 'SERVICE_CATALOG_VERSION_MISMATCH',
+
   /** El monto del pago recibido debe ser positivo. */
   PAYMENT_RECEIVED_AMOUNT_NOT_POSITIVE = 'PAYMENT_RECEIVED_AMOUNT_NOT_POSITIVE',
 

@@ -136,12 +136,19 @@ export function isInStock(product: DeclaredStock): boolean {
 }
 
 /**
- * Filtro de MikroORM con la misma regla que {@link isInStock}: lo que pide
- * disponibilidad, precios de sede y un pedido nuevo.
+ * Filtro de MikroORM de lo que la farmacia **no** apagó para todas sus sedes:
+ * sin el «no tengo» del catálogo. Lo piden disponibilidad, precios de sede y
+ * un pedido nuevo.
+ *
+ * El conteo del catálogo (`stock_quantity`) no filtra acá: cuántas hay en
+ * cada sede lo decide la regla por sede (`siteProductAvailabilitySql`), que
+ * da el libro cuando el producto tiene posición en la sede y el conteo del
+ * catálogo cuando no. Filtrar por el conteo antes escondía un producto con
+ * catálogo en 0 que una sede marcó «Lo tengo»: el paciente lo veía en una
+ * pantalla y en otra no, y al pedirlo recibía 404.
  */
 export const SELLABLE_STOCK_FILTER = {
   outOfStockDeclared: false,
-  $or: [{ stockQuantity: null }, { stockQuantity: { $gt: 0 } }],
 } satisfies FilterQuery<PharmacyProducts>;
 
 /** Los cambios de existencias que pide una línea o un producto. */

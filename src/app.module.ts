@@ -46,6 +46,7 @@ import { admissionsEnvSchema } from './modules/profiles/domain/admissions/admiss
 import { AuthProvidersModule } from './modules/auth_providers/auth_providers.module';
 import { AutomationModule } from './modules/automation/automation.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { BulkImportModule } from './modules/bulk_import/bulk-import.module';
 import { ChartModule } from './modules/chart/chart.module';
 import { ClinicalModule } from './modules/clinical/clinical.module';
 import { ClinicalExtModule } from './modules/clinical_ext/clinical_ext.module';
@@ -203,6 +204,7 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
     AuthProvidersModule,
     AutomationModule,
     BillingModule,
+    BulkImportModule,
     ChartModule,
     ClinicalModule,
     ClinicalExtModule,

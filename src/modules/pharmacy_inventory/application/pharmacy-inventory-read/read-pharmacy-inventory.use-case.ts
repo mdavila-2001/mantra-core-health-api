@@ -201,6 +201,36 @@ export class ReadPharmacyInventoryUseCase {
       return { requestedProductIds: [...productIds], items: [], count: 0 };
     }
 
+    const items = (
+      await this.siteCandidates(em, pharmacies, products, productIds, origin)
+    )
+      // Una sede sin ninguno de los solicitados no es una candidata: servirla
+      // sería ruido, no información.
+      .filter((item) => item.availableCount > 0)
+      .sort(compareAvailability)
+      .slice(0, limit);
+
+    return { requestedProductIds: [...productIds], items, count: items.length };
+  }
+
+  /**
+   * Cada sede activa de las farmacias dueñas de `products`, evaluada contra
+   * `requestedIds`: cobertura, precios, distancia y antigüedad del stock. Sin
+   * filtrar ni ordenar: eso lo decide quien la llama.
+   *
+   * @param em - Contexto de persistencia de la lectura.
+   * @param pharmacies - Farmacias visibles del tenant.
+   * @param products - Productos vendibles ya acotados a esas farmacias.
+   * @param requestedIds - Contra qué ids se miden los faltantes.
+   * @param origin - Punto desde el que medir distancia, si lo hay.
+   */
+  async siteCandidates(
+    em: EntityManager,
+    pharmacies: readonly PharmacySnapshot[],
+    products: readonly PharmacyProductSnapshot[],
+    requestedIds: readonly string[],
+    origin: GeoPoint | undefined,
+  ): Promise<AvailabilitySiteDto[]> {
     // Todas las sedes de las farmacias que publican alguno de los productos.
     const ownerIds = unique(products.map((product) => product.pharmacyId));
     const sites = await this.pharmacyRepo.findActiveSites(em, ownerIds);
@@ -280,30 +310,21 @@ export class ReadPharmacyInventoryUseCase {
       siteByLocation,
     );
 
-    const items = sites
-      .map((site): AvailabilitySiteDto => ({
-        ...this.toAvailabilitySite(
-          site,
-          pharmacyById.get(site.pharmacyId)!,
-          productIds,
-          products,
-          availableBySite.get(site.id) ?? new Map(),
-          prices,
-          listById,
-          conceptById,
-          practiceContext.get(site.id),
-          origin,
-        ),
-        stockUpdatedAt:
-          stockUpdatedAtBySite.get(site.id)?.toISOString() ?? null,
-      }))
-      // Una sede sin ninguno de los solicitados no es una candidata: servirla
-      // sería ruido, no información.
-      .filter((item) => item.availableCount > 0)
-      .sort(compareAvailability)
-      .slice(0, limit);
-
-    return { requestedProductIds: [...productIds], items, count: items.length };
+    return sites.map((site): AvailabilitySiteDto => ({
+      ...this.toAvailabilitySite(
+        site,
+        pharmacyById.get(site.pharmacyId)!,
+        requestedIds,
+        products,
+        availableBySite.get(site.id) ?? new Map(),
+        prices,
+        listById,
+        conceptById,
+        practiceContext.get(site.id),
+        origin,
+      ),
+      stockUpdatedAt: stockUpdatedAtBySite.get(site.id)?.toISOString() ?? null,
+    }));
   }
 
   /** Dirección por sede: pharmacy_site → practice_site → common.addresses. */
@@ -514,7 +535,7 @@ function currentPriceFor(
  * monedas difieren, no hay total: una suma con huecos o que mezcla monedas
  * afirma un costo que nadie publicó.
  */
-function totalOf(
+export function totalOf(
   products: readonly {
     price: AvailabilityPriceDto | null;
   }[],
@@ -537,10 +558,16 @@ function totalOf(
   };
 }
 
+/** Lo que decide el orden de una candidata, sea por producto o por fármaco. */
+export type AvailabilityOrderKey = Pick<
+  AvailabilitySiteDto,
+  'complete' | 'distanceKm' | 'totalAmount' | 'siteName'
+>;
+
 /** El orden de candidatura: completas, cerca, baratas, y por nombre. */
 export function compareAvailability(
-  a: AvailabilitySiteDto,
-  b: AvailabilitySiteDto,
+  a: AvailabilityOrderKey,
+  b: AvailabilityOrderKey,
 ): number {
   if (a.complete !== b.complete) return a.complete ? -1 : 1;
   const byDistance = nullsLast(a.distanceKm, b.distanceKm);

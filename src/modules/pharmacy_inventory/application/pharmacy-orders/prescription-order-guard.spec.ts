@@ -63,6 +63,7 @@ function build() {
       dispensed: new Map(),
       reserved: new Map(),
     })),
+    orderedCountByConcept: mockFn(async () => new Map()),
     dispensedByConcept: mockFn(async () => new Map()),
     reservedByConcept: mockFn(async () => new Map()),
   };
@@ -319,7 +320,7 @@ describe('PrescriptionOrderGuard', () => {
     expect(balances.balanceByConcept).not.toHaveBeenCalled();
   });
 
-  it('los cinco mensajes son los textos acordados para el paciente', () => {
+  it('los seis mensajes son los textos acordados para el paciente', () => {
     expect(PRESCRIPTION_ORDER_MESSAGES).toEqual({
       PRESCRIPTION_NOT_ACTIVE:
         'Esta receta ya no se puede usar: fue anulada, reemplazada o ya se entregó.',
@@ -328,8 +329,198 @@ describe('PrescriptionOrderGuard', () => {
         'Uno de los productos no es el medicamento de su receta. Quítelo del pedido para continuar.',
       QUANTITY_EXCEEDS_PRESCRIPTION:
         'Está pidiendo más de lo que le queda en su receta.',
+      PRESCRIPTION_ITEM_ALREADY_ORDERED:
+        'Este medicamento de su receta ya tiene un pedido en curso o ya se entregó. Si necesita más, pida a su médico una receta nueva.',
       PRESCRIPTION_REQUIRED:
         'Uno de los productos se vende solo con receta. Elíjalo desde «Mis recetas».',
+    });
+  });
+
+  describe('D-6: la receta no se vuelve a pedir sin saldo', () => {
+    /** Un ítem en comprimidos: no hay saldo comparable. */
+    const tablets = (extra: Partial<PrescriptionOrderItem> = {}) =>
+      item({ quantity: 21, unitConceptId: 'unit-tablet', ...extra });
+
+    it('un ítem ya pedido o entregado → 422 PRESCRIPTION_ITEM_ALREADY_ORDERED, sin tocar la receta', async () => {
+      const { balances, guard } = build();
+      balances.orderedCountByConcept.mockResolvedValue(
+        new Map([['concept-x', 1]]),
+      );
+
+      const error = await failureOf(
+        guard.assertOrderRespectsPrescription(
+          em,
+          locked(tablets()),
+          [product('prod-x', 'concept-x')],
+          [{ productId: 'prod-x', quantity: 1 }],
+        ),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.reason).toBe('PRESCRIPTION_ITEM_ALREADY_ORDERED');
+      expect(error.details).toEqual({
+        reason: 'PRESCRIPTION_ITEM_ALREADY_ORDERED',
+        medicationRequestId: 'rx-1',
+        productIds: ['prod-x'],
+      });
+      expect(error.message).toBe(
+        PRESCRIPTION_ORDER_MESSAGES.PRESCRIPTION_ITEM_ALREADY_ORDERED,
+      );
+      expect(balances.orderedCountByConcept).toHaveBeenCalledWith(
+        em,
+        ['rx-1'],
+        ['concept-x'],
+      );
+    });
+
+    it('sin pedidos vivos ni entregas (cancelado o rechazado no cuenta) → pasa', async () => {
+      const { guard } = build();
+
+      await expect(
+        guard.assertOrderRespectsPrescription(
+          em,
+          locked(tablets()),
+          [product('prod-x', 'concept-x')],
+          [{ productId: 'prod-x', quantity: 1 }],
+        ),
+      ).resolves.toBeUndefined();
+    });
+
+    it('una receta de dos ítems: pedir uno deja disponible el otro', async () => {
+      const { balances, guard } = build();
+      // Ya se pidió X; Y nunca.
+      balances.orderedCountByConcept.mockResolvedValue(
+        new Map([['concept-x', 1]]),
+      );
+      const prescription = locked(tablets(), [
+        tablets({ id: 'rx-2', medicationConceptId: 'concept-y' }),
+      ]);
+      const products = [
+        product('prod-x', 'concept-x'),
+        product('prod-y', 'concept-y'),
+      ];
+
+      await expect(
+        guard.assertOrderRespectsPrescription(em, prescription, products, [
+          { productId: 'prod-y', quantity: 1 },
+        ]),
+      ).resolves.toBeUndefined();
+      const error = await failureOf(
+        guard.assertOrderRespectsPrescription(em, prescription, products, [
+          { productId: 'prod-x', quantity: 1 },
+        ]),
+      );
+      expect(error.reason).toBe('PRESCRIPTION_ITEM_ALREADY_ORDERED');
+      expect(error.details.productIds).toEqual(['prod-x']);
+    });
+
+    it('una renovación del mismo fármaco deja pedir una vez más, no dos', async () => {
+      const { balances, guard } = build();
+      const prescription = locked(tablets(), [tablets({ id: 'rx-2' })]);
+      const products = [product('prod-x', 'concept-x')];
+      const lines = [{ productId: 'prod-x', quantity: 1 }];
+
+      balances.orderedCountByConcept.mockResolvedValue(
+        new Map([['concept-x', 1]]),
+      );
+      await expect(
+        guard.assertOrderRespectsPrescription(
+          em,
+          prescription,
+          products,
+          lines,
+        ),
+      ).resolves.toBeUndefined();
+
+      balances.orderedCountByConcept.mockResolvedValue(
+        new Map([['concept-x', 2]]),
+      );
+      const error = await failureOf(
+        guard.assertOrderRespectsPrescription(
+          em,
+          prescription,
+          products,
+          lines,
+        ),
+      );
+      expect(error.reason).toBe('PRESCRIPTION_ITEM_ALREADY_ORDERED');
+    });
+
+    it('con saldo por envase manda el saldo: un pedido previo no bloquea lo que queda', async () => {
+      const { balances, guard } = build();
+      // 2 frascos recetados, 1 entregado: queda 1.
+      balances.balanceByConcept.mockResolvedValue({
+        dispensed: new Map([['concept-x', 1]]),
+        reserved: new Map(),
+      });
+      balances.orderedCountByConcept.mockResolvedValue(
+        new Map([['concept-x', 1]]),
+      );
+
+      await expect(
+        guard.assertOrderRespectsPrescription(
+          em,
+          locked(),
+          [product('prod-x', 'concept-x')],
+          [{ productId: 'prod-x', quantity: 1 }],
+        ),
+      ).resolves.toBeUndefined();
+      expect(balances.orderedCountByConcept).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('un reemplazo no reinicia el saldo', () => {
+    it('lo entregado y lo pedido sobre el original reemplazado cuentan contra el reemplazo', async () => {
+      const { balances, guard } = build();
+      // El original rx-0 ya entregó 2 frascos: el reemplazo rx-1 (2 frascos)
+      // no tiene saldo.
+      balances.balanceByConcept.mockResolvedValue({
+        dispensed: new Map([['concept-x', 2]]),
+        reserved: new Map(),
+      });
+
+      const error = await failureOf(
+        guard.assertOrderRespectsPrescription(
+          em,
+          { item: item(), siblings: [], replacedIds: ['rx-0'] },
+          [product('prod-x', 'concept-x')],
+          [{ productId: 'prod-x', quantity: 1 }],
+        ),
+      );
+
+      expect(error.reason).toBe('QUANTITY_EXCEEDS_PRESCRIPTION');
+      expect(balances.balanceByConcept).toHaveBeenCalledWith(
+        em,
+        ['rx-1', 'rx-0'],
+        ['concept-x'],
+      );
+    });
+
+    it('sin saldo, un pedido sobre el original reemplazado consume el reemplazo', async () => {
+      const { balances, guard } = build();
+      balances.orderedCountByConcept.mockResolvedValue(
+        new Map([['concept-x', 1]]),
+      );
+
+      const error = await failureOf(
+        guard.assertOrderRespectsPrescription(
+          em,
+          {
+            item: item({ quantity: null }),
+            siblings: [],
+            replacedIds: ['rx-0'],
+          },
+          [product('prod-x', 'concept-x')],
+          [{ productId: 'prod-x', quantity: 1 }],
+        ),
+      );
+
+      expect(error.reason).toBe('PRESCRIPTION_ITEM_ALREADY_ORDERED');
+      expect(balances.orderedCountByConcept).toHaveBeenCalledWith(
+        em,
+        ['rx-1', 'rx-0'],
+        ['concept-x'],
+      );
     });
   });
 });

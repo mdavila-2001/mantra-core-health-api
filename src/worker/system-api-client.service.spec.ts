@@ -19,6 +19,7 @@ const ENV: WorkerEnv = {
   stuckTickMs: 600_000,
   drainTimeoutMs: 20_000,
   shutdownTimeoutMs: 30_000,
+  heartbeatIntervalMs: 15_000,
   // Reintentos y backoff mínimos: la lógica del reintento ya está cubierta en
   // `retry.spec.ts`; aquí sólo interesa QUÉ verbos lo activan.
   httpRetryAttempts: 3,

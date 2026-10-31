@@ -14,6 +14,7 @@ import {
   PharmacyOrdersService,
 } from '../application/pharmacy-orders/pharmacy-orders.service';
 import { PharmacyOrdersUseCases } from '../application/pharmacy-orders/pharmacy-orders.use-cases';
+import { PendingOrderLines } from '../application/pharmacy-orders/pending-order-lines';
 import { PrescriptionOrderGuard } from '../application/pharmacy-orders/prescription-order-guard';
 import { toPrescriptionOrderItem } from '../infrastructure/repositories/prescription-balance.repository';
 import { PINV } from '../domain/pharmacy_inventory.concepts';
@@ -183,9 +184,12 @@ function build() {
       dispensed: new Map(),
       reserved: new Map(),
     })),
+    orderedCountByConcept: mockFn(async () => new Map()),
   };
   const prescriptionGuard = new PrescriptionOrderGuard(balances as any);
   const logger = { setContext: mockFn(), info: mockFn() };
+  // El escritor por sede: por defecto no escribe nada.
+  const siteStockWriter = { write: mockFn(async () => []) };
   const useCases = new PharmacyOrdersUseCases(
     em as any,
     ordersRepo as any,
@@ -205,6 +209,8 @@ function build() {
     orderChat as any,
     accountLinks as any,
     prescriptionGuard,
+    // Las líneas «por confirmar», con el escritor por sede doblado.
+    new PendingOrderLines(inventoryReadRepo as any, siteStockWriter as any),
   );
   const service = new PharmacyOrdersService(useCases, logger as any);
   return {
@@ -228,6 +234,7 @@ function build() {
     reservationsService,
     outbox,
     orderNotifications,
+    siteStockWriter,
   };
 }
 
@@ -303,7 +310,11 @@ describe('PharmacyOrdersService', () => {
 
     it('a line without stock stays SIN_STOCK and does NOT sink the order', async () => {
       const d = build();
-      const products = [PRODUCT, { ...PRODUCT, id: 'prod-2' }];
+      // prod-2 no tiene posición en la sede y el catálogo dice 0: no hay.
+      const products = [
+        PRODUCT,
+        { ...PRODUCT, id: 'prod-2', stockQuantity: 0 },
+      ];
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue(products);
       // Solo prod-1 tiene posición; prod-2 no existe en el estante.
       d.inventoryReadRepo.findStockPositions.mockResolvedValue([position()]);
@@ -421,6 +432,248 @@ describe('PharmacyOrdersService', () => {
           ),
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
+  describe('create · lo ofrecido se puede reservar (D-5)', () => {
+    /** El error de la promesa. */
+    async function failure(promise: Promise<unknown>): Promise<any> {
+      try {
+        await promise;
+      } catch (error) {
+        return error;
+      }
+      throw new Error('se esperaba un rechazo');
+    }
+
+    function createWith(
+      d: ReturnType<typeof build>,
+      lines: { productId: string; quantity: number }[],
+    ) {
+      return runWithTenant('tenant-a', () =>
+        d.service.create({ siteId: 'site-1', lines }, patient),
+      );
+    }
+
+    it('a product offered by its catalogue without a position enters «por confirmar», without touching stock', async () => {
+      const d = build();
+      // «Como en el catálogo»: sin posición en la sede, catálogo sin conteo.
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
+        { ...PRODUCT, stockQuantity: null },
+      ]);
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([]);
+      withReading(d, order(), [
+        {
+          inventoryReservationId: 'order-1',
+          pharmacyProductId: 'prod-1',
+          requestedQuantity: '2',
+          reservedQuantity: '0',
+          statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+        },
+      ]);
+
+      const res = await createWith(d, [{ productId: 'prod-1', quantity: 2 }]);
+
+      expect(d.reservationsRepo.createLine).toHaveBeenCalledTimes(1);
+      expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          pharmacyProductId: 'prod-1',
+          requestedQuantity: '2',
+          reservedQuantity: '0',
+          statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+        }),
+      );
+      // Ni candado de posición, ni asiento, ni stock escrito.
+      expect(d.stockRepo.findByKeyForUpdate).not.toHaveBeenCalled();
+      expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+      expect(d.ledgerRepo.nextSequence).not.toHaveBeenCalled();
+      // El paciente lo ve «por confirmar», no sin stock.
+      expect(res.status.code).toBe('PINV_ORDER_ENVIADO');
+      expect(res.lines[0].status.code).toBe(
+        'PINV_RES_LINE_PENDING_CONFIRMATION',
+      );
+      expect(res.lines[0].reservedQuantity).toBe(0);
+    });
+
+    it('a catalogue with a positive count and no position also enters «por confirmar»', async () => {
+      const d = build();
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
+        { ...PRODUCT, stockQuantity: 7 },
+      ]);
+      withReading(d, order(), []);
+
+      await createWith(d, [{ productId: 'prod-1', quantity: 2 }]);
+
+      expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+        }),
+      );
+      expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+    });
+
+    it('catalogue 0 and «Lo tengo» in the site: the ledger reserves it', async () => {
+      const d = build();
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
+        { ...PRODUCT, stockQuantity: 0 },
+      ]);
+      const site = position({
+        inventoryLotId: undefined,
+        onHandQuantity: '1',
+        availableQuantity: '1',
+      });
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([site]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(site);
+      withReading(d, order(), []);
+
+      await createWith(d, [{ productId: 'prod-1', quantity: 1 }]);
+
+      expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          reservedQuantity: '1',
+          statusConceptId: PINV.RES_LINE_CONFIRMED,
+        }),
+      );
+      expect(site.availableQuantity).toBe('0');
+    });
+
+    it('an order with only «No lo tengo» lines answers 422 PRODUCT_OUT_OF_STOCK and writes nothing that survives', async () => {
+      const d = build();
+      const products = [
+        { ...PRODUCT, stockQuantity: 9 },
+        { ...PRODUCT, id: 'prod-2', stockQuantity: 0 },
+      ];
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue(products);
+      // prod-1: la sede dijo «No lo tengo» (posición en 0). prod-2: sin
+      // posición y el catálogo en 0.
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([
+        position({ onHandQuantity: '0', availableQuantity: '0' }),
+      ]);
+
+      const error = await failure(
+        createWith(d, [
+          { productId: 'prod-1', quantity: 1 },
+          { productId: 'prod-2', quantity: 1 },
+        ]),
+      );
+
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.getStatus()).toBe(422);
+      expect(error.getResponse()).toEqual(
+        expect.objectContaining({
+          code: 'PRECONDITION_FAILED',
+          reason: 'PRODUCT_OUT_OF_STOCK',
+          details: expect.objectContaining({
+            reason: 'PRODUCT_OUT_OF_STOCK',
+            siteId: 'site-1',
+          }),
+        }),
+      );
+      // El rechazo sale de adentro de la transacción (la deshace entera) y
+      // antes del evento: nada se reservó ni se publicó.
+      expect(d.em.transactional).toHaveBeenCalledTimes(1);
+      expect(d.ledgerRepo.append).not.toHaveBeenCalled();
+      expect(d.outbox.publish).not.toHaveBeenCalled();
+      expect(d.ordersRepo.findOrderById).not.toHaveBeenCalled();
+    });
+
+    it('one line «por confirmar» is enough for the order to enter', async () => {
+      const d = build();
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([
+        { ...PRODUCT, stockQuantity: 9 },
+        { ...PRODUCT, id: 'prod-2', stockQuantity: null },
+      ]);
+      // prod-1 «No lo tengo» en la sede; prod-2 sin posición.
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([
+        position({ onHandQuantity: '0', availableQuantity: '0' }),
+      ]);
+      withReading(d, order(), []);
+
+      await createWith(d, [
+        { productId: 'prod-1', quantity: 1 },
+        { productId: 'prod-2', quantity: 1 },
+      ]);
+
+      expect(d.outbox.publish).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ eventType: 'PharmacyOrderSubmitted' }),
+      );
+      expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          pharmacyProductId: 'prod-1',
+          statusConceptId: PINV.RES_LINE_OUT_OF_STOCK,
+        }),
+      );
+      expect(d.reservationsRepo.createLine).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          pharmacyProductId: 'prod-2',
+          statusConceptId: PINV.RES_LINE_PENDING_CONFIRMATION,
+        }),
+      );
+    });
+
+    it('two orders for the last unit: only one takes the reservation', async () => {
+      const d = build();
+      // La última unidad, compartida por los dos pedidos. La lectura previa
+      // (sin candado) dice 1 a los dos; la que manda es la que se relee con
+      // FOR UPDATE.
+      const last = position({
+        inventoryLotId: undefined,
+        onHandQuantity: '1',
+        availableQuantity: '1',
+      });
+      d.inventoryReadRepo.findStockPositions.mockImplementation(async () => [
+        { ...last, availableQuantity: '1' },
+      ]);
+      // El candado de fila, como en la base: el segundo FOR UPDATE espera a
+      // que la transacción del primero termine.
+      let tail: Promise<void> = Promise.resolve();
+      d.stockRepo.findByKeyForUpdate.mockImplementation(async (tx: any) => {
+        const previous = tail;
+        tail = new Promise<void>((release) => {
+          tx.release = release;
+        });
+        await previous;
+        return last;
+      });
+      d.em.transactional.mockImplementation(async (cb: any) => {
+        const tx: any = { flush: mockFn() };
+        try {
+          return await cb(tx);
+        } finally {
+          tx.release?.();
+        }
+      });
+      withReading(d, order(), []);
+
+      const results = await Promise.allSettled([
+        createWith(d, [{ productId: 'prod-1', quantity: 1 }]),
+        createWith(d, [{ productId: 'prod-1', quantity: 1 }]),
+      ]);
+
+      expect(results.map((result) => result.status).sort()).toEqual([
+        'fulfilled',
+        'rejected',
+      ]);
+      const rejected = results.find(
+        (result): result is PromiseRejectedResult =>
+          result.status === 'rejected',
+      );
+      expect(rejected?.reason.getResponse().reason).toBe(
+        'PRODUCT_OUT_OF_STOCK',
+      );
+      // Una sola reserva en el libro, y la posición no queda en negativo.
+      const reserves = d.ledgerRepo.append.mock.calls.filter(
+        ([, entry]: any) => entry.movementTypeConceptId === PINV.MV_RESERVE,
+      );
+      expect(reserves).toHaveLength(1);
+      expect(last.reservedQuantity).toBe('1');
+      expect(last.availableQuantity).toBe('0');
     });
   });
 
@@ -593,6 +846,26 @@ describe('PharmacyOrdersService', () => {
       expectNoEffects(d);
     });
 
+    it('una receta en comprimidos ya pedida → 422 PRESCRIPTION_ITEM_ALREADY_ORDERED, sin efectos', async () => {
+      const d = build();
+      // 21 comprimidos: sin saldo comparable. Ya tiene un pedido vivo.
+      d.balances.lockRequest.mockResolvedValue(
+        rxLocked({ quantityDecimal: '21', unitConceptId: 'unit-tablet' }),
+      );
+      d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([RX_PRODUCT]);
+      d.balances.orderedCountByConcept.mockResolvedValue(
+        new Map([['concept-amoxi', 1]]),
+      );
+
+      expect422(
+        await failureOf(createOrder(d, 1)),
+        'PRESCRIPTION_ITEM_ALREADY_ORDERED',
+        'Este medicamento de su receta ya tiene un pedido en curso o ya se entregó. Si necesita más, pida a su médico una receta nueva.',
+        { medicationRequestId: 'rx-1', productIds: ['prod-1'] },
+      );
+      expectNoEffects(d);
+    });
+
     it('sin receta, un producto de receta obligatoria → 422 PRESCRIPTION_REQUIRED', async () => {
       const d = build();
       d.pharmacyRepo.findSellableProductsByIds.mockResolvedValue([RX_PRODUCT]);
@@ -651,6 +924,13 @@ describe('PharmacyOrdersService', () => {
         { ...RX_PRODUCT, medicationConceptId: 'concept-ibu' },
       ]);
       readyToCreate(d);
+      // La sede tiene los 50: lo que se mide acá es la receta, no el stock.
+      d.inventoryReadRepo.findStockPositions.mockResolvedValue([
+        position({ availableQuantity: '50', onHandQuantity: '50' }),
+      ]);
+      d.stockRepo.findByKeyForUpdate.mockResolvedValue(
+        position({ availableQuantity: '50', onHandQuantity: '50' }),
+      );
 
       // Comprimidos no se comparan con envases: 50 pasa (D-5).
       await createOrder(d, 50);
@@ -1176,6 +1456,140 @@ describe('PharmacyOrdersService', () => {
         'tenant-b',
         ['ph-1'],
       );
+    });
+
+    describe('cross-tenant pharmacy (H3-02)', () => {
+      /** Farmacia del tenant `tenant-a`; el filtro de tenant se aplica de verdad. */
+      function withTenantScopedPharmacies(d: ReturnType<typeof build>) {
+        d.ordersRepo.findPharmaciesByIdsInTenant.mockImplementation(
+          async (_em: unknown, tenantId: string | undefined) =>
+            tenantId === undefined || tenantId === PHARMACY.tenantId
+              ? [PHARMACY]
+              : [],
+        );
+      }
+
+      it('the owner patient reads the order although the pharmacy belongs to another tenant', async () => {
+        const d = build();
+        withReading(d, order(), []);
+        withTenantScopedPharmacies(d);
+
+        const res = await runWithTenant('tenant-patient', () =>
+          d.service.getOrder('order-1', patient),
+        );
+
+        expect(res.id).toBe('order-1');
+        // La vista del titular no acota la farmacia por el tenant del request.
+        expect(
+          d.ordersRepo.findPharmaciesByIdsInTenant,
+        ).toHaveBeenNthCalledWith(1, d.fork, undefined, ['ph-1']);
+        expect(d.settlements.forOrders).toHaveBeenCalledWith(
+          d.fork,
+          patient.id,
+          ['order-1'],
+        );
+        expect(d.tenantAdministration.canAdminister).not.toHaveBeenCalled();
+      });
+
+      it('the owner patient reads the order even without an active tenant', async () => {
+        const d = build();
+        withReading(d, order(), []);
+        withTenantScopedPharmacies(d);
+
+        const res = await d.service.getOrder('order-1', patient);
+
+        expect(res.id).toBe('order-1');
+      });
+
+      it('the pharmacy staff of the owning tenant still reads it', async () => {
+        const d = build();
+        withReading(d, order(), []);
+        withTenantScopedPharmacies(d);
+        const pharmacyStaff = {
+          id: 'user-ph',
+          roles: ['PHARMACY_STAFF'],
+        } as any;
+
+        const res = await runWithTenant('tenant-a', () =>
+          d.service.getOrder('order-1', pharmacyStaff),
+        );
+
+        expect(res.id).toBe('order-1');
+        expect(
+          d.ordersRepo.findPharmaciesByIdsInTenant,
+        ).toHaveBeenNthCalledWith(1, d.fork, 'tenant-a', ['ph-1']);
+        expect(d.settlements.forOrders).not.toHaveBeenCalled();
+      });
+
+      it('another patient gets 404 even with the pharmacy in the same tenant', async () => {
+        const d = build();
+        withReading(d, order({ patientProfileId: 'pat-2' }), []);
+        withTenantScopedPharmacies(d);
+        d.tenantAdministration.canAdminister.mockResolvedValue(false);
+
+        await expect(
+          runWithTenant('tenant-a', () =>
+            d.service.getOrder('order-1', patient),
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        await expect(
+          runWithTenant('tenant-b', () =>
+            d.service.getOrder('order-1', patient),
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        // El tercero sí queda acotado al tenant del request.
+        expect(d.ordersRepo.findPharmaciesByIdsInTenant).toHaveBeenCalledWith(
+          d.fork,
+          'tenant-b',
+          ['ph-1'],
+        );
+        expect(d.settlements.forOrders).not.toHaveBeenCalled();
+      });
+
+      it('a third party without the owner claim gets 404 from another tenant', async () => {
+        const d = build();
+        withReading(d, order(), []);
+        withTenantScopedPharmacies(d);
+        const thirdParty = { id: 'user-x', roles: ['PHARMACY_STAFF'] } as any;
+
+        await expect(
+          runWithTenant('tenant-b', () =>
+            d.service.getOrder('order-1', thirdParty),
+          ),
+        ).rejects.toBeInstanceOf(ResourceNotFoundException);
+        expect(d.settlements.forOrders).not.toHaveBeenCalled();
+      });
+
+      it('without an active tenant a non-owner gets the same 404 as a missing order', async () => {
+        const d = build();
+        withTenantScopedPharmacies(d);
+        const thirdParty = { id: 'user-x', roles: ['PHARMACY_STAFF'] } as any;
+
+        d.ordersRepo.findOrderById.mockResolvedValue(order());
+        const existing = await d.service
+          .getOrder('order-1', thirdParty)
+          .catch((e: unknown) => e);
+        const otherPatient = await d.service
+          .getOrder('order-1', { ...patient, patientProfileId: 'pat-2' })
+          .catch((e: unknown) => e);
+
+        d.ordersRepo.findOrderById.mockResolvedValue(null);
+        const missing = await d.service
+          .getOrder('order-1', thirdParty)
+          .catch((e: unknown) => e);
+
+        expect(existing).toBeInstanceOf(ResourceNotFoundException);
+        expect(otherPatient).toBeInstanceOf(ResourceNotFoundException);
+        // Ni 422 de tenant ni otro detalle: la existencia no se filtra.
+        expect((existing as any).getResponse()).toEqual(
+          (missing as any).getResponse(),
+        );
+        expect((otherPatient as any).getResponse()).toEqual(
+          (missing as any).getResponse(),
+        );
+        expect(d.ordersRepo.findPharmaciesByIdsInTenant).not.toHaveBeenCalled();
+        expect(d.tenantAdministration.canAdminister).not.toHaveBeenCalled();
+      });
     });
 
     it('lazily expires an overdue order before serving it', async () => {

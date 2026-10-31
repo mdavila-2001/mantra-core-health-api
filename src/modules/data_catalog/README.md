@@ -14,7 +14,7 @@ equipo de datos curó encima (fichas, evidencia, revisiones), sobre el esquema `
   find src/modules/data_catalog -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **3 controllers, 37 rutas HTTP, 8 entidades y 6 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **3 controllers, 37 rutas HTTP, 8 entidades y 6 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -24,31 +24,31 @@ Entidades (`tableName`, 13 de 13 archivos `*.entity.ts`): `catalog_annotation_re
 
 Roles (`data_catalog.constants.ts`): `PORTAL_READ_ROLES` = `SECURITY_ADMIN`, `PLATFORM_ADMIN`, `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DPO`, `AUDITOR`, `DATA_STEWARD`; `CATALOG_WRITE_ROLES` = `GOVERNANCE_ADMIN`, `DATA_PLATFORM_ADMIN`, `DATA_STEWARD`. Los cinco roles de `data_catalog.roles.ts` (todos de ámbito `GLOBAL`) los siembra la API; se asignan **sin tenant**.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /internal/catalog/scans/run-next` | SYSTEM | `data-catalog-internal` |
-| `POST /internal/catalog/inventory/import` | SYSTEM | `data-catalog-internal` |
-| `GET /admin/catalog/schemas` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `GET /admin/catalog/objects` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `GET /admin/catalog/objects/:id` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `GET /admin/catalog/objects/:id/columns` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `GET /admin/catalog/objects/:id/evidence` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `POST /admin/catalog/objects/:id/evidence` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
-| `GET /admin/catalog/columns/:id/evidence` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `POST /admin/catalog/columns/:id/evidence` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
-| `GET /admin/catalog/objects/:id/history` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `GET /admin/catalog/objects/:id/changes` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `GET /admin/catalog/objects/:id/impact` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `PUT /admin/catalog/objects/:id/annotation` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
-| `PUT /admin/catalog/columns/:id/annotation` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
-| `POST /admin/catalog/annotations/:id/review` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
-| `POST /admin/catalog/classification/run` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
-| `GET /admin/catalog/permission-drift` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `GET /admin/catalog/coverage` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `GET /admin/catalog/scans` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `GET /admin/catalog/scans/:id` | ...PORTAL_READ_ROLES | `admin-catalog` |
-| `POST /admin/catalog/scans` | ...CATALOG_WRITE_ROLES | `admin-catalog` |
-| 16 rutas `GET /admin/portal/*` (versión, operaciones, flujos, catálogo estático, deriva, linaje, glosario) | ...PORTAL_READ_ROLES | `admin-portal` |
+| Método y ruta                                                                                              | Acceso                 | Controller              |
+| ---------------------------------------------------------------------------------------------------------- | ---------------------- | ----------------------- |
+| `POST /internal/catalog/scans/run-next`                                                                    | SYSTEM                 | `data-catalog-internal` |
+| `POST /internal/catalog/inventory/import`                                                                  | SYSTEM                 | `data-catalog-internal` |
+| `GET /admin/catalog/schemas`                                                                               | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `GET /admin/catalog/objects`                                                                               | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `GET /admin/catalog/objects/:id`                                                                           | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `GET /admin/catalog/objects/:id/columns`                                                                   | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `GET /admin/catalog/objects/:id/evidence`                                                                  | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `POST /admin/catalog/objects/:id/evidence`                                                                 | ...CATALOG_WRITE_ROLES | `admin-catalog`         |
+| `GET /admin/catalog/columns/:id/evidence`                                                                  | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `POST /admin/catalog/columns/:id/evidence`                                                                 | ...CATALOG_WRITE_ROLES | `admin-catalog`         |
+| `GET /admin/catalog/objects/:id/history`                                                                   | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `GET /admin/catalog/objects/:id/changes`                                                                   | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `GET /admin/catalog/objects/:id/impact`                                                                    | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `PUT /admin/catalog/objects/:id/annotation`                                                                | ...CATALOG_WRITE_ROLES | `admin-catalog`         |
+| `PUT /admin/catalog/columns/:id/annotation`                                                                | ...CATALOG_WRITE_ROLES | `admin-catalog`         |
+| `POST /admin/catalog/annotations/:id/review`                                                               | ...CATALOG_WRITE_ROLES | `admin-catalog`         |
+| `POST /admin/catalog/classification/run`                                                                   | ...CATALOG_WRITE_ROLES | `admin-catalog`         |
+| `GET /admin/catalog/permission-drift`                                                                      | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `GET /admin/catalog/coverage`                                                                              | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `GET /admin/catalog/scans`                                                                                 | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `GET /admin/catalog/scans/:id`                                                                             | ...PORTAL_READ_ROLES   | `admin-catalog`         |
+| `POST /admin/catalog/scans`                                                                                | ...CATALOG_WRITE_ROLES | `admin-catalog`         |
+| 16 rutas `GET /admin/portal/*` (versión, operaciones, flujos, catálogo estático, deriva, linaje, glosario) | ...PORTAL_READ_ROLES   | `admin-portal`          |
 
 ## Endpoints
 

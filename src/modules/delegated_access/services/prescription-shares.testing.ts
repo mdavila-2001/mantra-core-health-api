@@ -49,7 +49,9 @@ export function item(overrides: Record<string, unknown> = {}): any {
     medicationConceptId: 'concept-med',
     statusConceptId: CLIN.MEDICATION_REQUEST_ISSUED,
     prescriberProfileId: DOCTOR,
-    issuedAt: new Date(Date.now() - DAY),
+    // Emitido antes de que se cree el enlace sintético (`link`, hace un día):
+    // lo emitido después de compartir no se muestra.
+    issuedAt: new Date(Date.now() - 2 * DAY),
     validTo: undefined,
     ...overrides,
   };

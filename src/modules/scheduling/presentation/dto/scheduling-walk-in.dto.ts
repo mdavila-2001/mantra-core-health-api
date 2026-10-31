@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsIn,
   IsISO8601,
   IsInt,
@@ -234,6 +235,21 @@ export class WalkInAppointmentDto {
   @IsOptional()
   @IsIn(APPOINTMENT_CHANNELS as readonly string[])
   channel?: AppointmentChannel;
+
+  /**
+   * Si la atención arranca ya. Ausente = sí: es el turno de quien está en el
+   * mostrador. Con `false` el paciente se registra y la cita queda confirmada
+   * para su hora, sin encuentro abierto: agendar a alguien para otro día no es
+   * atenderlo hoy.
+   */
+  @ApiPropertyOptional({
+    default: true,
+    description:
+      'Si abre el encuentro y arranca la atención. Con false la cita queda CONFIRMED y sin encuentro.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  startAttention?: boolean;
 }
 
 /** Respuesta 201 del turno de mostrador. */
@@ -262,11 +278,14 @@ export class WalkInAppointmentResponseDto {
   @ApiProperty({ format: 'uuid' })
   appointmentId!: string;
 
-  /** El encuentro abierto, listo para registrar la atención. */
-  @ApiProperty({ format: 'uuid' })
-  encounterId!: string;
+  /**
+   * El encuentro abierto, listo para registrar la atención. Ausente con
+   * `startAttention: false`: todavía no hay nada que registrar.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  encounterId?: string;
 
-  /** Estado de la reserva: nace `IN_PROGRESS`. */
+  /** Estado de la reserva: `IN_PROGRESS`, o `CONFIRMED` si no arrancó. */
   @ApiProperty({ format: 'uuid' })
   statusConceptId!: string;
 
