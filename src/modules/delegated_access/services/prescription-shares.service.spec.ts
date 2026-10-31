@@ -218,6 +218,7 @@ describe('PrescriptionSharesService', () => {
           createdAt: expect.any(Date),
           expiresAt: expect.any(Date),
           status: 'VALID',
+          endedReason: null,
           uses: 3,
         },
       ]);

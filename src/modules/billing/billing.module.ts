@@ -14,6 +14,7 @@ import {
   BillingPayablesController,
   BillingOperationsController,
   BillingServiceCatalogController,
+  AdminServiceCatalogController,
   BillingSimulatedController,
   PatientSpendingController,
 } from './controllers';
@@ -29,6 +30,7 @@ import {
   DunningService,
   KpiSnapshotsService,
   BillingServiceCatalogService,
+  AdminServiceCatalogService,
   ProcedureNomenclatureService,
   ProcedureImportService,
   BillingSimulatedService,
@@ -78,6 +80,8 @@ import {
     BillingPayablesController,
     BillingOperationsController,
     BillingServiceCatalogController,
+    // H3 — editor administrativo global del catálogo de servicios.
+    AdminServiceCatalogController,
     BillingSimulatedController,
     // P44 — «Mis gastos» del paciente: lectura sobre sus facturas.
     PatientSpendingController,
@@ -111,6 +115,7 @@ import {
     DunningService,
     KpiSnapshotsService,
     BillingServiceCatalogService,
+    AdminServiceCatalogService,
     ProcedureNomenclatureService,
     ProcedureImportService,
     BillingSimulatedService,

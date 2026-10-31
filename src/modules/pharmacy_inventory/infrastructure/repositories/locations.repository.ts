@@ -89,6 +89,18 @@ export class LocationsRepository {
     });
   }
 
+  /** Todas las ubicaciones activas de una sede, la primera creada primero. */
+  findActiveInSite(
+    em: EntityManager,
+    pharmacySiteId: string,
+  ): Promise<InventoryLocations[]> {
+    return em.find(
+      InventoryLocations,
+      { pharmacySiteId, statusConceptId: PINV.LOCATION_ACTIVE },
+      { orderBy: { createdAt: 'asc', id: 'asc' } },
+    );
+  }
+
   /**
    * Crea create.
    *

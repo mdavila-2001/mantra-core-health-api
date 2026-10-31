@@ -99,4 +99,11 @@ export enum AuthzErrorReason {
   ROLE_ASSIGNMENT_NOT_ACTIVE = 'ROLE_ASSIGNMENT_NOT_ACTIVE',
   /** No se encontró el usuario cuyas asignaciones se piden. */
   ROLE_ASSIGNMENT_USER_NOT_FOUND = 'ROLE_ASSIGNMENT_USER_NOT_FOUND',
+
+  /** No se encontró el usuario cuyo mapa de accesos, concesiones o simulación se pide. */
+  GOVERNANCE_USER_NOT_FOUND = 'GOVERNANCE_USER_NOT_FOUND',
+  /** No se encontró el permiso cuyos titulares se piden. */
+  GOVERNANCE_PERMISSION_NOT_FOUND = 'GOVERNANCE_PERMISSION_NOT_FOUND',
+  /** Nadie revisa sus propios accesos: la revisión la hace otra persona. */
+  ACCESS_REVIEW_SELF_REVIEW_FORBIDDEN = 'ACCESS_REVIEW_SELF_REVIEW_FORBIDDEN',
 }

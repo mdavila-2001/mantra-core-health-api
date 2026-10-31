@@ -90,3 +90,32 @@ export function effectiveShareStatus(
   if (status === 'VALID' && activeItemCount === 0) return 'EXPIRED';
   return status;
 }
+
+/**
+ * Por qué terminó un enlace que se lee `EXPIRED`: venció su plazo, o la
+ * receta dejó de valer antes (se anuló, se reemplazó o se completó). Un ítem
+ * vencido por fecha también vence el enlace, que nace con el `validTo` más
+ * próximo: si la fila sigue en plazo y no queda ningún ítem vigente, fue la
+ * receta.
+ */
+export type PrescriptionShareEndedReason =
+  'LINK_EXPIRED' | 'PRESCRIPTION_NOT_ACTIVE';
+
+/**
+ * @param row - Estado, vencimiento y revocación de la fila.
+ * @param activeItemCount - Ítems vigentes de la receta al leer.
+ * @param now - Instante de la lectura.
+ * @returns El motivo, o `null` si el enlace no terminó por vencimiento.
+ */
+export function shareEndedReason(
+  row: ShareStatusInput,
+  activeItemCount: number,
+  now: Date,
+): PrescriptionShareEndedReason | null {
+  if (effectiveShareStatus(row, activeItemCount, now) !== 'EXPIRED') {
+    return null;
+  }
+  return shareStatusOf(row, now) === 'VALID'
+    ? 'PRESCRIPTION_NOT_ACTIVE'
+    : 'LINK_EXPIRED';
+}

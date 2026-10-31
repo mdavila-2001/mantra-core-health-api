@@ -26,6 +26,8 @@ export interface PharmacyProductSnapshot {
   readonly packageSizeText?: string;
   readonly medicationConceptId?: string;
   readonly requiresPrescription?: boolean;
+  /** Conteo del catálogo de toda la farmacia; sin él, «hay» sin conteo. */
+  readonly stockQuantity?: number | null;
 }
 
 export interface PharmacyPriceListSnapshot {

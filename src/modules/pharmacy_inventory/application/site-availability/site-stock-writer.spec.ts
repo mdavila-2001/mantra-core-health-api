@@ -36,6 +36,10 @@ function position(overrides: Partial<Position> = {}): Position {
 function build(options: {
   location?: { id: string } | null;
   existing?: Position | null;
+  /** Ubicaciones activas de la sede, además de la por defecto. */
+  otherLocations?: { id: string }[];
+  /** Posiciones sin lote en esas otras ubicaciones. */
+  elsewhere?: Position[];
 }) {
   const tx = {
     execute: jest.fn(async () => []),
@@ -46,10 +50,17 @@ function build(options: {
       options.location === undefined ? { id: 'loc-1' } : options.location,
     ),
     create: jest.fn(() => ({ id: 'loc-new' })),
+    findActiveInSite: jest.fn(async () => [
+      ...(options.location === null
+        ? []
+        : [options.location ?? { id: 'loc-1' }]),
+      ...(options.otherLocations ?? []),
+    ]),
   };
   const created: Position[] = [];
   const positions = {
     findByKeyForUpdate: jest.fn(async () => options.existing ?? null),
+    findLooseForUpdate: jest.fn(async () => options.elsewhere ?? []),
     create: jest.fn((_tx: unknown, data: Partial<Position>) => {
       const row = position({
         onHandQuantity: '0',
@@ -105,10 +116,97 @@ describe('SiteStockWriter', () => {
     );
 
     expect(d.created.map((p) => p.pharmacyProductId)).toEqual(['product-a']);
-    // Pasar a «No lo tengo» sin posición previa no mueve existencias: sin asiento.
-    expect(d.ledger.append).not.toHaveBeenCalled();
-    expect(result.changed).toBe(false);
     expect(result.position.availableQuantity).toBe('0');
+  });
+
+  it('the first «No lo tengo» on a product without a position leaves an entry', async () => {
+    const d = build({});
+
+    const [result] = await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 0 }],
+      movement,
+    );
+
+    // No mueve unidades, pero desde ahí la sede lo lleva por el libro: queda
+    // el asiento de quién y cuándo lo decidió.
+    expect(d.ledger.append).toHaveBeenCalledTimes(1);
+    expect(d.ledger.append).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        pharmacyProductId: 'product-a',
+        quantityDelta: '0',
+        movementTypeConceptId: PINV.MV_COUNT_ADJUSTMENT,
+        recordedByUserId: 'user-1',
+      }),
+    );
+    expect(result.changed).toBe(true);
+    expect(result.position.lastLedgerSequence).toBe('41');
+  });
+
+  it('«No lo tengo» also zeroes the loose stock left in another active location', async () => {
+    const other = position({
+      inventoryLocationId: 'loc-2',
+      onHandQuantity: '5',
+      reservedQuantity: '1',
+      availableQuantity: '4',
+    });
+    const d = build({
+      existing: position({ onHandQuantity: '2', availableQuantity: '2' }),
+      otherLocations: [{ id: 'loc-2' }],
+      elsewhere: [other],
+    });
+
+    const [result] = await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 0 }],
+      movement,
+    );
+
+    // Solo se buscan las otras ubicaciones, y con bloqueo.
+    expect(d.positions.findLooseForUpdate).toHaveBeenCalledWith(
+      d.tx,
+      ['loc-2'],
+      ['product-a'],
+    );
+    expect(result.position.availableQuantity).toBe('0');
+    // Lo reservado por un pedido sigue en pie; lo vendible queda en cero.
+    expect(other.onHandQuantity).toBe('1');
+    expect(other.availableQuantity).toBe('0');
+    expect(d.ledger.append).toHaveBeenCalledWith(
+      d.tx,
+      expect.objectContaining({
+        inventoryLocationId: 'loc-2',
+        quantityDelta: '-4',
+      }),
+    );
+    expect(d.ledger.append).toHaveBeenCalledTimes(2);
+    expect(result.changed).toBe(true);
+  });
+
+  it('«Lo tengo, 3» leaves 3 for sale in the site, not 3 plus what another location held', async () => {
+    const other = position({
+      inventoryLocationId: 'loc-2',
+      onHandQuantity: '4',
+      availableQuantity: '4',
+    });
+    const d = build({
+      existing: position({ onHandQuantity: '0', availableQuantity: '0' }),
+      otherLocations: [{ id: 'loc-2' }],
+      elsewhere: [other],
+    });
+
+    const [result] = await d.writer.write(
+      d.tx as any,
+      SITE,
+      [{ productId: 'product-a', availableQuantity: 3 }],
+      movement,
+    );
+
+    expect(result.position.availableQuantity).toBe('3');
+    expect(other.availableQuantity).toBe('0');
   });
 
   it('creates the general location when the site has none', async () => {

@@ -650,6 +650,20 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
       code: 'SUP_ACTIVE',
       display: 'Support assignment active',
     },
+    // Vínculo secretaria–doctor por solicitud y aceptación: nace PENDING y
+    // sólo la otra parte lo lleva a ACTIVE o REJECTED.
+    SUPPORT_PENDING: {
+      code: 'SUP_PENDING',
+      display: 'Support assignment pending acceptance',
+    },
+    SUPPORT_REJECTED: {
+      code: 'SUP_REJECTED',
+      display: 'Support assignment rejected',
+    },
+    SUPPORT_ENDED: {
+      code: 'SUP_ENDED',
+      display: 'Support assignment ended',
+    },
 
     // --- practice_accreditations -----------------------------------------------
     ACCRED_TYPE_ISO: {

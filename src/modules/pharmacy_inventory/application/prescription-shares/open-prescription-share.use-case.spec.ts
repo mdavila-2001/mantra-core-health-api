@@ -150,7 +150,12 @@ function build(
     findConcepts: mockFn(async () => [
       { id: 'med-syrup', code: 'MED_SYRUP', display: 'Jarabe' },
       { id: 'med-tablet', code: 'MED_TABLET', display: 'Comprimido' },
-      { id: BOTTLE, code: 'UNIT_{bottle}', display: 'Bottle' },
+      // El código como lo guarda el catálogo: la clave del concepto de módulo.
+      {
+        id: BOTTLE,
+        code: 'clinical:MEDICATION_UNIT_BOTTLE',
+        display: 'Bottle',
+      },
       { id: TABLET_UNIT, code: 'UNIT_{tbl}', display: 'Tablet' },
       { id: 'cur-bob', code: 'BOB', display: 'Boliviano' },
     ]),
@@ -414,7 +419,7 @@ describe('OpenPrescriptionShareUseCase (FAR-02)', () => {
     )!;
     expect(syrup).toMatchObject({
       prescribedQuantity: 2,
-      unitCode: 'UNIT_{bottle}',
+      unitCode: '{bottle}',
       dispensedQuantity: 1,
       remainingQuantity: 1,
       dosageText: '5 mL · cada 8 horas',
@@ -471,7 +476,7 @@ describe('OpenPrescriptionShareUseCase (FAR-02)', () => {
     )!;
     expect(tablet).toMatchObject({
       prescribedQuantity: 30,
-      unitCode: 'UNIT_{tbl}',
+      unitCode: '{tbl}',
       dispensedQuantity: null,
       remainingQuantity: null,
       dosageText: null,

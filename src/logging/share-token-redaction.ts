@@ -43,6 +43,12 @@ const TOKEN_LENGTH = 43;
 /** Una corrida de base64url del largo de un token, o más. */
 const TOKEN_LIKE_RUN = new RegExp(`[A-Za-z0-9_-]{${TOKEN_LENGTH},}`, 'g');
 
+/** Un escape `%XX` (también doble, `%25XX`) o una corrida del largo de un token. */
+const ESCAPE_OR_TOKEN_RUN = new RegExp(
+  `%(?:25)*[0-9A-Fa-f]{2}|[A-Za-z0-9_-]{${TOKEN_LENGTH},}`,
+  'g',
+);
+
 /**
  * Un segmento como lo compara el ruteo: sin códigos `%XX` (también dobles,
  * `%252D`) y en minúsculas, como Express, que no distingue mayúsculas.
@@ -114,9 +120,44 @@ function redactPath(
 }
 
 /**
+ * Redacta el token en la query o el fragmento de una URL. Ahí la ruta viaja
+ * como valor, casi siempre codificada (`/auth?returnUrl=%2Frx%2F<token>`, el
+ * `Referer` del flujo «Soy farmacia»): si el texto decodificado nombra una ruta
+ * con token, se cambia cualquier corrida base64url del largo de un token.
+ */
+function redactQuery(
+  query: string,
+  prefixes: readonly (readonly string[])[],
+  excludedAfter?: string,
+): string {
+  if (query === '') return query;
+  const decoded = normalizedSegment(query).replace(/\/+/g, '/');
+  const named = prefixes.some((prefix) => {
+    const needle = `/${prefix.join('/')}/`;
+    let at = decoded.indexOf(needle);
+    while (at !== -1) {
+      const before = decoded
+        .slice(0, at)
+        .split(/[/=&?#]/)
+        .pop();
+      if (excludedAfter === undefined || before !== excludedAfter) return true;
+      at = decoded.indexOf(needle, at + 1);
+    }
+    return false;
+  });
+  // Un escape (`%2F`, `%252F`) se salta entero: sus dígitos son base64url y,
+  // pegados al token, harían que la corrida se comiera el separador.
+  return named
+    ? query.replace(ESCAPE_OR_TOKEN_RUN, (match: string) =>
+        match.startsWith('%') ? match : REDACTED_SHARE_TOKEN,
+      )
+    : query;
+}
+
+/**
  * Aplica `redactPath` a cada tramo sin espacios de un texto (una URL, una
- * ruta, o el `Cannot GET /…` del 404 de una ruta no declarada), solo sobre la
- * parte anterior a `?` o `#`.
+ * ruta, o el `Cannot GET /…` del 404 de una ruta no declarada) sobre la parte
+ * anterior a `?` o `#`, y `redactQuery` a lo que sigue.
  */
 function redactText(
   text: string,
@@ -128,7 +169,10 @@ function redactText(
     const path = cut === -1 ? chunk : chunk.slice(0, cut);
     const rest = cut === -1 ? '' : chunk.slice(cut);
     const redacted = redactPath(path, prefixes, excludedAfter);
-    return redacted === path ? chunk : redacted + rest;
+    const redactedRest = redactQuery(rest, prefixes, excludedAfter);
+    return redacted === path && redactedRest === rest
+      ? chunk
+      : redacted + redactedRest;
   });
 }
 
@@ -145,7 +189,8 @@ export function redactShareTokenInUrl(url: string): string {
 
 /**
  * Reemplaza el token en un `Referer`: el de las rutas de la API y el de las
- * páginas `/rx/<token>` del front.
+ * páginas `/rx/<token>` del front, también cuando viajan en la query
+ * (`/auth?returnUrl=/rx/<token>`).
  *
  * @param referer - Valor de la cabecera.
  * @returns El mismo valor con el token cambiado por `[token]`.
