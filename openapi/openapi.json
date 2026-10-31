@@ -124307,6 +124307,31 @@
         ],
         "additionalProperties": false
       },
+      "IdentityVerificationDto": {
+        "type": "object",
+        "properties": {
+          "methodCode": {
+            "type": "string",
+            "enum": [
+              "IDV_CI",
+              "IDV_PASSPORT",
+              "IDV_FOREIGN_ID",
+              "IDV_BIRTH_CERT",
+              "IDV_OTHER"
+            ]
+          },
+          "documentReference": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Número o referencia del documento"
+          }
+        },
+        "required": [
+          "methodCode",
+          "documentReference"
+        ],
+        "additionalProperties": false
+      },
       "CreateAdmissionDto": {
         "type": "object",
         "properties": {
@@ -124374,6 +124399,22 @@
           },
           "override": {
             "$ref": "#/components/schemas/PlacementOverrideDto"
+          },
+          "admissionOriginCode": {
+            "type": "string",
+            "enum": [
+              "EMERGENCY",
+              "REFERRAL",
+              "SCHEDULED",
+              "TRANSFER_IN"
+            ]
+          },
+          "identityVerification": {
+            "$ref": "#/components/schemas/IdentityVerificationDto"
+          },
+          "referralId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [

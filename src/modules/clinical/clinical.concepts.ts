@@ -97,6 +97,31 @@ export const { seeds: CLINICAL_CONCEPT_SEEDS, ids: CLIN } =
       code: 'LOC_CARE_NEONATAL_ICU',
       display: 'Terapia intensiva neonatal',
     },
+    // --- Admisión crea el vínculo (patient_admission_footprints) ---
+    ADM_ORIGIN_EMERGENCY: {
+      code: 'ADM_ORIGIN_EMERGENCY',
+      display: 'Ingreso por emergencia',
+    },
+    ADM_ORIGIN_REFERRAL: {
+      code: 'ADM_ORIGIN_REFERRAL',
+      display: 'Ingreso por derivación',
+    },
+    ADM_ORIGIN_SCHEDULED: {
+      code: 'ADM_ORIGIN_SCHEDULED',
+      display: 'Ingreso programado',
+    },
+    ADM_ORIGIN_TRANSFER_IN: {
+      code: 'ADM_ORIGIN_TRANSFER_IN',
+      display: 'Ingreso por traslado',
+    },
+    IDV_CI: { code: 'IDV_CI', display: 'Cédula de identidad' },
+    IDV_PASSPORT: { code: 'IDV_PASSPORT', display: 'Pasaporte' },
+    IDV_FOREIGN_ID: { code: 'IDV_FOREIGN_ID', display: 'Documento extranjero' },
+    IDV_BIRTH_CERT: {
+      code: 'IDV_BIRTH_CERT',
+      display: 'Certificado de nacimiento',
+    },
+    IDV_OTHER: { code: 'IDV_OTHER', display: 'Otro documento' },
     ADM_SRC_EMERGENCY: {
       code: 'ADM_SRC_EMERGENCY',
       display: 'Desde emergencias',

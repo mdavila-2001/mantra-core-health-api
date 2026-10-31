@@ -26,6 +26,8 @@ const KNOWN_READERS: Record<string, string> = {
     'F5a: sede de práctica y zona horaria de la sede de la unidad de un equipo ya acotado al tenant (DiagnosticUnitScopeService); la sede se autoriza enseguida con assertCan.',
   'scheduling/infrastructure/adapters/practice-care-space-directory.adapter.ts':
     'R0/F5d: práctica de la sede de un espacio (LEFT JOIN por practice_site_id) para comparar con la práctica del recurso; el tenant del espacio se compara con el del recurso antes (404).',
+  'clinical/services/inpatient/adt.use-cases.ts':
+    'Admisión crea el vínculo: sólo el TIPO PracticeSites de la sede ya resuelta por assertCan (tenant comprobado) para decidir el permiso de ingreso a nivel sede; no consulta la tabla.',
   'delegated_access/services/assignment-targets.ts':
     'F5g: comprueba que la sede de una asignación sea del tenant de la membresía (compara tenant_id; 404 si no).',
   'clinical/services/inpatient/inpatient-read.use-cases.ts':

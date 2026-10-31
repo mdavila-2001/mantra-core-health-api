@@ -13,6 +13,12 @@ export const INFRA_F3_POLICY: InfraPolicy = {
   name: 'F3',
   actions: {
     'f3.adt.place': { roles: ['NURSE', 'ADMISSION'] },
+    // «Admisión crea el vínculo»: internar a un paciente SIN huella previa en
+    // el tenant. Sólo roles de nivel sede del hospital (se decide con
+    // siteLevelRoles); sin roles globales ni plataforma suelta.
+    'f3.adt.admit_without_footprint': {
+      roles: ['ORG_ADMIN', 'SITE_ADMIN', 'ADMISSION', 'NURSE_SUPERVISOR'],
+    },
     'f3.adt.override': { roles: ['NURSE_SUPERVISOR'] },
     'f3.adt.read': {
       roles: ['SUPERADMIN', 'ORG_ADMIN', 'SITE_ADMIN', 'NURSE', 'ADMISSION'],

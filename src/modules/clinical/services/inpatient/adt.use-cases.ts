@@ -1,6 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { ResourceNotFoundException, touch } from '../../../../common';
+import {
+  PreconditionFailedException,
+  ResourceNotFoundException,
+  touch,
+} from '../../../../common';
+import type { ActorScope } from '../../../practice/services/infrastructure-access.service';
+import type { PracticeSites } from '../../../practice/entities';
+import { admissionIdHmacKey, protectDocument } from './admission-identity';
 import { InfrastructureAccessService } from '../../../practice/services/infrastructure-access.service';
 import { AuthzClinicalScopeService } from '../../../authz/services/authz-clinical-scope.service';
 import { CLIN } from '../../clinical.concepts';
@@ -82,17 +89,18 @@ export class AdmitPatientUseCase {
             this.access.decide('f3.adt.place', levelRoles, false, site.scope);
             return { roles: levelRoles };
           })();
-      if (
-        !(await this.scope.isPatientInTenant(
-          tx,
-          dto.patientProfileId,
-          req.tenantId,
-        ))
-      ) {
-        throw new ResourceNotFoundException('Paciente no encontrado', {
-          patientProfileId: dto.patientProfileId,
-        });
-      }
+      // «Admisión crea el vínculo» (decisión del usuario 2026-10-31): un
+      // paciente sin huella en el tenant sólo se interna si el actor tiene el
+      // permiso de ingreso a NIVEL SEDE de este hospital (sin roles globales
+      // ni plataforma suelta) y el paciente no es de otra organización. Sin
+      // permiso, inexistente o de otro tenant: el MISMO 404.
+      const footprint = (await this.scope.isPatientInTenant(
+        tx,
+        dto.patientProfileId,
+        req.tenantId,
+      ))
+        ? null
+        : await this.footprintFor(tx, dto, site.scope, target.site, req);
       if (
         await this.repo.inpatientInProgress(
           tx,
@@ -165,6 +173,8 @@ export class AdmitPatientUseCase {
         { partial: true },
       );
       await this.support.flush(tx);
+      if (footprint)
+        await this.recordFootprint(tx, footprint, encounter, dto, req);
       const result: AdtResultDto = { episodeId, encounterId: encounter.id };
       if (dto.bed) {
         const placed = await this.support.place(tx, {
@@ -200,6 +210,128 @@ export class AdmitPatientUseCase {
       return result;
     });
   }
+
+  /**
+   * Valida el ingreso sin huella previa y prepara la huella. 404 genérico si
+   * el actor no tiene el permiso de nivel sede, si el paciente no existe o si
+   * es de otra organización; 422 si falta origen o identidad; 404 si la
+   * derivación no es del paciente o no está dirigida a este tenant.
+   */
+  private async footprintFor(
+    tx: EntityManager,
+    dto: CreateAdmissionDto,
+    scope: ActorScope,
+    site: PracticeSites,
+    req: AdtRequest,
+  ): Promise<AdmissionFootprint> {
+    const notFound = () =>
+      new ResourceNotFoundException('Paciente no encontrado', {
+        patientProfileId: dto.patientProfileId,
+      });
+    // Sólo roles de nivel sede (plataforma, admin, asignaciones TENANT/
+    // PRACTICE/SITE) y sin `scope`: los roles globales no cuentan.
+    const levelRoles = this.access.siteLevelRoles(scope, site);
+    if (!this.access.can('f3.adt.admit_without_footprint', levelRoles, false))
+      throw notFound();
+    if (
+      !(await this.scope.canAdmitWithoutFootprint(
+        tx,
+        dto.patientProfileId,
+        req.tenantId,
+      ))
+    )
+      throw notFound();
+    if (!dto.admissionOriginCode || !dto.identityVerification)
+      throw new PreconditionFailedException(
+        'El ingreso de un paciente sin vínculo previo exige origen e identidad verificada',
+        { fields: ['admissionOriginCode', 'identityVerification'] },
+        'ADMISSION_ORIGIN_AND_IDENTITY_REQUIRED',
+      );
+    if (dto.referralId) {
+      const [r] = await tx.execute<{ ok: boolean }[]>(
+        `SELECT (patient_profile_id = ? AND target_tenant_id = ?) AS ok
+           FROM clinical_ext.referrals WHERE id = ?`,
+        [dto.patientProfileId, req.tenantId, dto.referralId],
+        'all',
+      );
+      if (!r?.ok)
+        throw new ResourceNotFoundException('Derivación no encontrada');
+    }
+    return {
+      originConceptId:
+        CLIN[`ADM_ORIGIN_${dto.admissionOriginCode}` as keyof typeof CLIN],
+      identityMethodConceptId:
+        CLIN[dto.identityVerification.methodCode as keyof typeof CLIN],
+      document: protectDocument(
+        dto.identityVerification.methodCode,
+        dto.identityVerification.documentReference,
+        admissionIdHmacKey((m) => new Logger(AdmitPatientUseCase.name).warn(m)),
+      ),
+      referralId: dto.referralId ?? null,
+    };
+  }
+
+  /** Escribe la huella (append-only) y su evento, en la tx del ingreso. */
+  private async recordFootprint(
+    tx: EntityManager,
+    f: AdmissionFootprint,
+    encounter: Encounters,
+    dto: CreateAdmissionDto,
+    req: AdtRequest,
+  ): Promise<void> {
+    try {
+      await tx.execute(
+        `INSERT INTO clinical.patient_admission_footprints
+           (id, tenant_id, patient_profile_id, encounter_id, practice_site_id,
+            admission_origin_concept_id, identity_verification_method_concept_id,
+            identity_document_type, identity_document_last4, identity_document_hmac,
+            referral_id, recorded_by_user_id, created_at)
+         VALUES (gen_random_uuid(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())`,
+        [
+          req.tenantId,
+          dto.patientProfileId,
+          encounter.id,
+          dto.practiceSiteId,
+          f.originConceptId,
+          f.identityMethodConceptId,
+          f.document.type,
+          f.document.last4,
+          f.document.hmac,
+          f.referralId,
+          req.actor.id,
+        ],
+      );
+    } catch {
+      // 23503 (derivación de otro paciente/tenant, paciente distinto del
+      // encuentro) y 23505 (huella ya escrita por una carrera): sin detalle.
+      throw new ResourceNotFoundException('Paciente no encontrado', {
+        patientProfileId: dto.patientProfileId,
+      });
+    }
+    await this.support.publish(
+      tx,
+      'clinical.patient.admitted_without_prior_footprint' as never,
+      encounter,
+      encounter.id,
+      {
+        patientProfileId: dto.patientProfileId,
+        siteId: dto.practiceSiteId,
+        admissionOriginCode: dto.admissionOriginCode,
+        identityMethodCode: dto.identityVerification?.methodCode ?? null,
+        referralId: f.referralId,
+        reasonRecorded: true,
+      },
+      req,
+    );
+  }
+}
+
+/** Lo que el ingreso sin huella previa guarda (sin el número del documento). */
+interface AdmissionFootprint {
+  readonly originConceptId: string;
+  readonly identityMethodConceptId: string;
+  readonly document: { type: string; last4: string; hmac: string };
+  readonly referralId: string | null;
 }
 
 /**

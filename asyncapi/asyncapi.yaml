@@ -427,6 +427,7 @@ components:
           type: string
           enum:
             - clinical.adt.admitted
+            - clinical.patient.admitted_without_prior_footprint
             - clinical.adt.bed_assigned
             - clinical.adt.reservation_created
             - clinical.adt.transferred

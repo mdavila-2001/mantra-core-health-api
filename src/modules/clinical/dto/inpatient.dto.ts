@@ -12,6 +12,7 @@ import {
   IsUUID,
   MaxLength,
   Min,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -73,6 +74,28 @@ export class AdmissionBedDto {
 }
 
 /** `POST /clinical/admissions`. */
+const ADMISSION_ORIGINS = ['EMERGENCY', 'REFERRAL', 'SCHEDULED', 'TRANSFER_IN'];
+const IDV_METHODS = [
+  'IDV_CI',
+  'IDV_PASSPORT',
+  'IDV_FOREIGN_ID',
+  'IDV_BIRTH_CERT',
+  'IDV_OTHER',
+];
+
+/** Verificación de identidad del paciente al ingresar sin huella previa. */
+export class IdentityVerificationDto {
+  @ApiProperty({ enum: IDV_METHODS }) @IsIn(IDV_METHODS) methodCode!: string;
+  @ApiProperty({
+    maxLength: 64,
+    description: 'Número o referencia del documento',
+  })
+  @IsString()
+  @MinLength(3)
+  @MaxLength(64)
+  documentReference!: string;
+}
+
 export class CreateAdmissionDto {
   @ApiProperty({ format: 'uuid' }) @IsUUID() patientProfileId!: string;
   @ApiProperty({ format: 'uuid' }) @IsUUID() practiceSiteId!: string;
@@ -115,6 +138,26 @@ export class CreateAdmissionDto {
   @ValidateNested()
   @Type(() => PlacementOverrideDto)
   override?: PlacementOverrideDto;
+
+  /**
+   * «Admisión crea el vínculo»: obligatorio cuando el paciente no tiene huella
+   * en el tenant (el ingreso la crea). EMERGENCY | REFERRAL | SCHEDULED | TRANSFER_IN.
+   */
+  @ApiPropertyOptional({ enum: ADMISSION_ORIGINS })
+  @IsOptional()
+  @IsIn(ADMISSION_ORIGINS)
+  admissionOriginCode?: string;
+  /** Obligatorio junto con admissionOriginCode cuando el ingreso crea la huella. */
+  @ApiPropertyOptional({ type: IdentityVerificationDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => IdentityVerificationDto)
+  identityVerification?: IdentityVerificationDto;
+  /** REFERRAL: la derivación (clinical_ext.referrals) hacia este tenant, si existe. */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  referralId?: string;
 }
 
 /** `POST /clinical/encounters/:id/bed-assignment`. */
