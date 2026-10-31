@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals';
 import { Logger as NestLogger } from '@nestjs/common';
+import { sqlSink } from '../../observability/capture/sql-sink';
 import { OrmLogger, isRawSqlLoggingAllowed } from './orm.logger';
 import { QueryMetrics } from './query-metrics';
 import {
@@ -127,5 +128,54 @@ describe('sql-redaction (ORMN-02)', () => {
     expect(redactDriverMessage('x'.repeat(1000)).length).toBeLessThanOrEqual(
       301,
     );
+  });
+});
+
+describe('OrmLogger → SqlSink (H4.S1.M1: MikroORM invoca logQuery con `took` sin debug)', () => {
+  const saved = { ...process.env };
+  afterEach(() => {
+    jest.restoreAllMocks();
+    process.env = { ...saved };
+  });
+
+  it('con debug apagado, logQuery igual alimenta el sink con la duración y la clasificación de lenta', () => {
+    sqlSink.setEnabled(true);
+    try {
+      sqlSink.drain();
+      const logger = new OrmLogger(
+        { debugMode: false } as never,
+        100,
+        new QueryMetrics(),
+      );
+      jest
+        .spyOn(NestLogger.prototype, 'warn')
+        .mockImplementation(() => undefined);
+      logger.logQuery({
+        query: 'select 1 from iam.users where id = 7',
+        took: 250,
+        results: 1,
+      } as never);
+      logger.logQuery({
+        query: 'select 1 from iam.users where id = 8',
+        took: 10,
+        results: 1,
+      } as never);
+      logger.logQuery({
+        query: 'select 1 from iam.users where id = 9',
+        took: 3,
+        level: 'error',
+      } as never);
+      const { series } = sqlSink.drain();
+      expect(series).toHaveLength(1);
+      expect(series[0]).toMatchObject({
+        executions: 3,
+        sumMs: 263,
+        maxMs: 250,
+        slowCount: 1,
+        failedCount: 1,
+      });
+    } finally {
+      sqlSink.setEnabled(false);
+    }
   });
 });
