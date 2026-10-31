@@ -209,6 +209,130 @@ describe('Infraestructura F5 · integración', () => {
       .post(`/billing/encounters/${enc}/bed-day-charges/run`)
       .set(como(nurse))
       .expect(403);
+
+    // Vista de tarifas (la API manda las formas).
+    const tarifas = await http()
+      .get('/billing/space-tariffs')
+      .query({ practiceId: orgA.practiceId })
+      .set(como(orgA))
+      .expect(200);
+    const tarifaCompartida = tarifas.body.find(
+      (t: any) => t.bedCategory?.code === 'BED_CAT_SHARED',
+    );
+    expect(tarifaCompartida).toMatchObject({
+      serviceName: 'Día-cama',
+      status: 'ACTIVE',
+      careSpace: null,
+    });
+
+    // Estancias para Facturación: la sede, con sus cargos pendientes.
+    const stays = await http()
+      .get('/billing/bed-day/stays')
+      .query({ siteId: orgA.siteId, from: '2026-10-26', to: '2026-10-31' })
+      .set(como(billing))
+      .expect(200);
+    const stay = stays.body.items.find((i: any) => i.encounterId === enc);
+    expect(stay).toMatchObject({
+      patient: { patientProfileId: patientId },
+      pendingCharges: 3,
+      bed: { id: icu },
+    });
+    await http()
+      .get('/billing/bed-day/stays')
+      .query({ siteId: orgA.siteId })
+      .set(como(nurse))
+      .expect(403);
+    await http()
+      .get('/billing/bed-day/stays')
+      .query({ siteId: orgA.siteId })
+      .set(como(orgB))
+      .expect(404);
+
+    // Factura desde el encuentro con los cargos devengados: quedan INVOICED
+    // con su línea; facturarlos otra vez → 409; un cargo de otro encuentro → 404.
+    const cargos = (
+      await q(
+        'select id from billing.charge_captures where encounter_id = ? order by service_date',
+        [enc],
+      )
+    ).map((r: any) => r.id as string);
+    const admin = { ...bearer(ctx.adminToken), 'X-Tenant-Id': orgA.tenantId };
+    const factura = await http()
+      .post('/billing/invoices:issue-from-encounter')
+      .set(admin)
+      .send({
+        practiceId: orgA.practiceId,
+        patientProfileId: patientId,
+        encounterId: enc,
+        lines: [],
+        chargeCaptureIds: cargos.slice(0, 2),
+      })
+      .expect(201);
+    const facturados = await q(
+      `select c.status_concept_id, l.invoice_id from billing.charge_captures c
+         join billing.invoice_lines l on l.id = c.invoice_line_id where c.id = any(?::uuid[])`,
+      [`{${cargos.slice(0, 2).join(',')}}`],
+    );
+    expect(facturados).toHaveLength(2);
+    for (const f of facturados)
+      expect(f).toEqual({
+        status_concept_id: BILL.CHG_INVOICED,
+        invoice_id: factura.body.id,
+      });
+    const otraVez = await http()
+      .post('/billing/invoices:issue-from-encounter')
+      .set(admin)
+      .send({
+        practiceId: orgA.practiceId,
+        patientProfileId: patientId,
+        encounterId: enc,
+        lines: [],
+        chargeCaptureIds: [cargos[0]],
+      })
+      .expect(409);
+    expect(otraVez.body.reason).toBe('CHARGE_ALREADY_INVOICED');
+    await http()
+      .post('/billing/invoices:issue-from-encounter')
+      .set(admin)
+      .send({
+        practiceId: orgA.practiceId,
+        patientProfileId: patientId,
+        encounterId: enc,
+        lines: [],
+        chargeCaptureIds: [randomUUID()],
+      })
+      .expect(404);
+    await http()
+      .post('/billing/invoices:issue-from-encounter')
+      .set(admin)
+      .send({
+        practiceId: orgA.practiceId,
+        patientProfileId: patientId,
+        lines: [],
+      })
+      .expect(400);
+
+    // Cambiar la categoría de una cama cierra el período vigente y abre otro.
+    const [cama] = await q(
+      'select row_version from practice.care_spaces where id = ?',
+      [planta.beds[0]],
+    );
+    await http()
+      .patch(`/care-spaces/${planta.beds[0]}`)
+      .set(como(orgA))
+      .set('If-Match', String(cama.row_version))
+      .send({ bedCategoryCode: 'BED_CAT_PRIVATE' })
+      .expect(200);
+    const periodos = await q(
+      `select bed_category_concept_id, valid_to is null as abierto
+         from practice.care_space_category_periods where care_space_id = ? order by valid_from`,
+      [planta.beds[0]],
+    );
+    expect(periodos.filter((x: any) => x.abierto)).toHaveLength(1);
+    expect(periodos[periodos.length - 1]).toEqual({
+      bed_category_concept_id: PRAC.BED_CAT_PRIVATE,
+      abierto: true,
+    });
   });
 
   it('F5e: encuentro sin movimientos y con cargos — sin objetivo no se autoriza: enfermería 403/404; sede del espacio del cargo o práctica deciden', async () => {

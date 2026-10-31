@@ -24481,6 +24481,51 @@ paths:
       description: >-
         Cerrar la vigencia de una tarifa. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /billing/bed-day/stays:
+    get:
+      operationId: BillingSpaceChargesController_stays
+      parameters:
+        - name: siteId
+          required: true
+          in: query
+          schema:
+            format: uuid
+            type: string
+        - name: from
+          required: false
+          in: query
+          schema:
+            example: '2026-10-01'
+            type: string
+        - name: to
+          required: false
+          in: query
+          schema:
+            example: '2026-10-31'
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Estancias de internación de una sede (F5e)
+      tags:
+        - billing-space-charges
+      description: >-
+        Estancias de internación de una sede (F5e). Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /billing/encounters/{encounterId}/pending-charges:
     get:
       operationId: BillingSpaceChargesController_pending
@@ -88683,10 +88728,16 @@ components:
           description: Tenant (directory.tenants); requerido para registrar el vínculo de documento
           format: uuid
         lines:
-          description: Líneas de cargo (al menos una)
+          description: Líneas de cargo (al menos una, salvo que se facturen cargos devengados con chargeCaptureIds)
           type: array
           items:
             $ref: '#/components/schemas/InvoiceLineInputDto'
+        chargeCaptureIds:
+          description: Cargos devengados a facturar (F5e), hasta 200, sin repetir
+          type: array
+          items:
+            type: string
+            format: uuid
       required:
         - practiceId
         - patientProfileId

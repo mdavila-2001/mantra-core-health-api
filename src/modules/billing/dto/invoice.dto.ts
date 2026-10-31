@@ -1,6 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayUnique,
+  ValidateBy,
   ArrayMinSize,
   IsArray,
   IsBoolean,
@@ -209,13 +212,44 @@ export class IssueInvoiceFromEncounterDto {
    */
   @ApiProperty({
     type: [InvoiceLineInputDto],
-    description: 'Líneas de cargo (al menos una)',
+    description:
+      'Líneas de cargo (al menos una, salvo que se facturen cargos devengados con chargeCaptureIds)',
   })
   @IsArray()
-  @ArrayMinSize(1)
+  @ValidateBy({
+    name: 'linesOrCharges',
+    validator: {
+      validate: (value: unknown, args): boolean =>
+        (Array.isArray(value) && value.length > 0) ||
+        (Array.isArray(
+          (args?.object as { chargeCaptureIds?: unknown }).chargeCaptureIds,
+        ) &&
+          ((args?.object as { chargeCaptureIds: unknown[] }).chargeCaptureIds
+            .length ?? 0) > 0),
+      defaultMessage: () =>
+        'lines must contain at least 1 elements (o enviar chargeCaptureIds)',
+    },
+  })
   @ValidateNested({ each: true })
   @Type(() => InvoiceLineInputDto)
   lines!: InvoiceLineInputDto[];
+
+  /**
+   * F5e: cargos devengados (día-cama, quirófano por tiempo) que se facturan:
+   * cada uno se vuelve una línea y queda `CHG_INVOICED` con su `invoice_line_id`
+   * en la misma transacción (409 `CHARGE_ALREADY_INVOICED`).
+   */
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description: 'Cargos devengados a facturar (F5e), hasta 200, sin repetir',
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(200)
+  @ArrayUnique()
+  @IsUUID('all', { each: true })
+  chargeCaptureIds?: string[];
 }
 
 /** Línea de reverso para una nota de crédito (UC-17-03). */

@@ -156,7 +156,7 @@ export class SpaceChargesService {
       { practiceId },
       { orderBy: { validFrom: 'desc' }, limit: 500 },
     );
-    return rows.map(tariffView);
+    return this.tariffViews(em, rows);
   }
 
   /**
@@ -270,7 +270,7 @@ export class SpaceChargesService {
         { tariffId: tariff.id, practiceId: input.practiceId },
         actor.id,
       );
-      return tariffView(tariff);
+      return (await this.tariffViews(tx, [tariff]))[0];
     });
   }
 
@@ -324,7 +324,7 @@ export class SpaceChargesService {
         { tariffId: tariff.id, validTo },
         actor.id,
       );
-      return tariffView(tariff);
+      return (await this.tariffViews(tx, [tariff]))[0];
     });
   }
 
@@ -691,7 +691,181 @@ export class SpaceChargesService {
     });
   }
 
+  /**
+   * `GET /billing/bed-day/stays?siteId&from&to`: estancias de internación de
+   * la sede con algún tramo en cama dentro del rango (por defecto, los
+   * últimos 30 días hasta hoy), para que Facturación elija qué devengar.
+   * Lectura de cargos a nivel sede (`f5e.charge.read`, el mismo criterio que
+   * `pending-charges`): sin rol de nivel sede, 403. Del paciente sólo el
+   * nombre para mostrar (lo que la factura necesita).
+   *
+   * @param q - Sede y rango `yyyy-mm-dd`.
+   * @param actor - Actor.
+   * @param tenantId - Tenant activo.
+   */
+  async stays(
+    q: { siteId: string; from?: string; to?: string },
+    actor: AuthenticatedUser,
+    tenantId: string,
+  ) {
+    const em = this.em.fork();
+    await this.assertSites(
+      em,
+      { actor, tenantId },
+      [q.siteId],
+      'f5e.charge.read',
+    );
+    const to =
+      q.to && DATE_RE.test(q.to) ? q.to : new Date().toISOString().slice(0, 10);
+    const from =
+      q.from && DATE_RE.test(q.from)
+        ? q.from
+        : new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
+    if (from > to || (Date.parse(to) - Date.parse(from)) / 86_400_000 > 366)
+      throw new PreconditionFailedException(
+        'Rango inválido (máximo 366 días)',
+        { from, to },
+        'STAYS_RANGE_INVALID',
+      );
+    const rows = await em.execute<
+      {
+        encounter_id: string;
+        patient_profile_id: string;
+        display_name: string | null;
+        start_at: Date | null;
+        end_at: Date | null;
+        status_concept_id: string;
+        bed_id: string | null;
+        bed_code: string | null;
+        bed_name: string | null;
+        pending: number;
+      }[]
+    >(
+      `SELECT e.id AS encounter_id, e.patient_profile_id, pr.display_name,
+              e.start_at, e.end_at, e.status_concept_id,
+              cur.care_space_id AS bed_id, cs.code AS bed_code, cs.name AS bed_name,
+              (SELECT count(*)::int FROM billing.charge_captures c
+                WHERE c.encounter_id = e.id AND c.status_concept_id = ?) AS pending
+         FROM clinical.encounters e
+         LEFT JOIN profiles.person_profiles pp ON pp.id = e.patient_profile_id
+         LEFT JOIN profiles.persons pr ON pr.id = pp.person_id
+         LEFT JOIN LATERAL (
+           SELECT l.care_space_id FROM clinical.encounter_locations l
+            WHERE l.encounter_id = e.id AND l.is_bed_assignment
+            ORDER BY l.period_start DESC LIMIT 1) cur ON true
+         LEFT JOIN practice.care_spaces cs ON cs.id = cur.care_space_id
+        WHERE e.tenant_id = ? AND e.class_concept_id = ?
+          AND EXISTS (
+            SELECT 1 FROM clinical.encounter_locations l
+             WHERE l.encounter_id = e.id AND l.is_bed_assignment
+               AND l.practice_site_id = ? AND l.location_status_concept_id IN (?, ?)
+               AND l.period_start < (?::date + 1)
+               AND (l.period_end IS NULL OR l.period_end >= ?::date))
+        ORDER BY e.start_at DESC NULLS LAST, e.id
+        LIMIT 500`,
+      [
+        BILL.CHG_PENDING,
+        tenantId,
+        CLIN.ENCOUNTER_CLASS_INPATIENT,
+        q.siteId,
+        CLIN.LOCATION_ACTIVE,
+        CLIN.LOCATION_COMPLETED,
+        to,
+        from,
+      ],
+      'all',
+    );
+    const iso = (d: Date | null) => (d ? new Date(d).toISOString() : null);
+    return {
+      siteId: q.siteId,
+      from,
+      to,
+      items: rows.map((r) => ({
+        encounterId: r.encounter_id,
+        patient: {
+          patientProfileId: r.patient_profile_id,
+          displayName: r.display_name ?? '',
+        },
+        admittedAt: iso(r.start_at),
+        dischargedAt: iso(r.end_at),
+        inProgress: r.status_concept_id === CLIN.ENCOUNTER_IN_PROGRESS,
+        bed: r.bed_id
+          ? { id: r.bed_id, code: r.bed_code ?? '', name: r.bed_name ?? '' }
+          : null,
+        pendingCharges: Number(r.pending),
+      })),
+    };
+  }
+
   // --- Internos ------------------------------------------------------------------
+
+  /**
+   * Vista de tarifas para la web (decisión del orquestador: la API manda las
+   * formas): categoría {code, display}, sala {id, code, name}, nombre del
+   * servicio, código de moneda y estado de vigencia (`SCHEDULED|ACTIVE|CLOSED`).
+   */
+  private async tariffViews(
+    em: EntityManager,
+    tariffs: readonly SpaceTariffs[],
+  ): Promise<Record<string, unknown>[]> {
+    if (tariffs.length === 0) return [];
+    const uuids = (xs: (string | undefined | null)[]) =>
+      `{${[...new Set(xs.filter((x): x is string => !!x))].join(',')}}`;
+    const [concepts, spaces, services] = await Promise.all([
+      em.execute<{ id: string; code: string; display: string | null }[]>(
+        'SELECT id, code, display FROM terminology.catalog_concepts WHERE id = ANY(?::uuid[])',
+        [
+          uuids(
+            tariffs.flatMap((t) => [
+              t.bedCategoryConceptId,
+              t.currencyConceptId,
+            ]),
+          ),
+        ],
+        'all',
+      ),
+      em.execute<{ id: string; code: string; name: string }[]>(
+        'SELECT id, code, name FROM practice.care_spaces WHERE id = ANY(?::uuid[])',
+        [uuids(tariffs.map((t) => t.careSpaceId))],
+        'all',
+      ),
+      em.execute<{ id: string; name: string }[]>(
+        'SELECT id, name FROM billing.service_catalog WHERE id = ANY(?::uuid[])',
+        [uuids(tariffs.map((t) => t.serviceCatalogId))],
+        'all',
+      ),
+    ]);
+    const concept = new Map(concepts.map((c) => [c.id, c]));
+    const space = new Map(spaces.map((c) => [c.id, c]));
+    const service = new Map(services.map((c) => [c.id, c]));
+    const today = new Date().toISOString().slice(0, 10);
+    return tariffs.map((t) => {
+      const base = tariffView(t);
+      const cat = t.bedCategoryConceptId
+        ? concept.get(t.bedCategoryConceptId)
+        : undefined;
+      const cur = t.currencyConceptId
+        ? concept.get(t.currencyConceptId)
+        : undefined;
+      const from = base.validFrom as string;
+      const to = base.validTo as string | null;
+      return {
+        ...base,
+        bedCategory: t.bedCategoryConceptId
+          ? {
+              code:
+                PRAC_CODE_BY_ID.get(t.bedCategoryConceptId) ?? cat?.code ?? '',
+              display: cat?.display ?? cat?.code ?? '',
+            }
+          : null,
+        careSpace: t.careSpaceId ? (space.get(t.careSpaceId) ?? null) : null,
+        serviceName: service.get(t.serviceCatalogId)?.name ?? null,
+        currencyCode: cur ? shortCode(cur.code) : null,
+        status:
+          from > today ? 'SCHEDULED' : to && to <= today ? 'CLOSED' : 'ACTIVE',
+      };
+    });
+  }
 
   private async encounter(
     em: EntityManager,
@@ -962,3 +1136,14 @@ function tariffView(t: SpaceTariffs): Record<string, unknown> {
     rowVersion: t.rowVersion,
   };
 }
+
+/** `billing:CURRENCY_BOB` → `CURRENCY_BOB`; sin prefijo, igual. */
+function shortCode(code: string): string {
+  const i = code.lastIndexOf(':');
+  return i >= 0 ? code.slice(i + 1) : code;
+}
+
+/** Código de concepto de `practice` por id (categorías de cama). */
+const PRAC_CODE_BY_ID = new Map<string, string>(
+  Object.entries(PRAC).map(([k, id]) => [id, k]),
+);
