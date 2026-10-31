@@ -3,7 +3,6 @@ import { Type } from 'class-transformer';
 import {
   IsIn,
   IsInt,
-  IsISO8601,
   IsOptional,
   IsString,
   Max,
@@ -13,8 +12,9 @@ import {
 } from 'class-validator';
 
 /**
- * Ventana común de las lecturas. `from`/`to` son ISO-8601; `tz` una zona IANA
- * (se valida en el servicio: una zona o ventana inválida es 422 con `reason`).
+ * Ventana común de las lecturas. `from`/`to` son ISO-8601 y `tz` una zona IANA;
+ * ambos se validan en el dominio (no con class-validator) para que una ventana
+ * inválida sea 422 con `reason` y no un 400 genérico del pipe.
  */
 export class WindowQueryDto {
   @ApiPropertyOptional({
@@ -22,7 +22,8 @@ export class WindowQueryDto {
     description: 'Por defecto: 00:00 de `to` en la zona `tz`',
   })
   @IsOptional()
-  @IsISO8601()
+  @IsString()
+  @MaxLength(40)
   from?: string;
 
   @ApiPropertyOptional({
@@ -30,7 +31,8 @@ export class WindowQueryDto {
     description: 'Por defecto: ahora',
   })
   @IsOptional()
-  @IsISO8601()
+  @IsString()
+  @MaxLength(40)
   to?: string;
 
   @ApiPropertyOptional({

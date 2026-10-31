@@ -62,6 +62,8 @@ describe('resolveObsWindow', () => {
 
   it.each([
     [{ from: 'basura' }, 'INVALID_DATE'],
+    [{ from: '1' }, 'INVALID_DATE'],
+    [{ to: '2026-13-45' }, 'INVALID_DATE'],
     [{ to: 'basura' }, 'INVALID_DATE'],
     [
       { from: '2026-10-31T10:00:00Z', to: '2026-10-31T10:00:00Z' },

@@ -44,6 +44,15 @@ function invalid(
 }
 
 /** ¿Es una zona IANA que el runtime conoce? */
+/** ISO-8601 estricto (fecha o fecha-hora); lo demás es `Invalid Date`. */
+function parseIso(value: string): Date {
+  return /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/.test(
+    value,
+  )
+    ? new Date(value)
+    : new Date(Number.NaN);
+}
+
 export function isValidTimezone(tz: string): boolean {
   if (typeof tz !== 'string' || tz.length === 0 || tz.length > 64) return false;
   if (!/^[A-Za-z0-9_+\-/]+$/.test(tz)) return false;
@@ -107,7 +116,7 @@ export function resolveObsWindow(
     );
   }
 
-  const to = input.to ? new Date(input.to) : now;
+  const to = input.to ? parseIso(input.to) : now;
   if (Number.isNaN(to.getTime())) {
     throw invalid(
       ObservabilityErrorReason.INVALID_DATE,
@@ -116,7 +125,7 @@ export function resolveObsWindow(
   }
   let from: Date;
   if (input.from) {
-    from = new Date(input.from);
+    from = parseIso(input.from);
   } else {
     const startOfDay = startOfLocalDay(to, timezone);
     // `to` justo a medianoche: el «hoy» ya terminó, se mira el día anterior.
