@@ -884,6 +884,17 @@ export class MedicalGroupsService {
         'Sólo quien creó el grupo puede modificarlo o eliminarlo',
       );
     }
+    // Como en `create`: quien ya no está vinculado a la práctica del grupo
+    // (salió de la organización) no lo modifica, y no se le revela que existe.
+    const ownPractices =
+      await this.practiceTenantLookup.findActivePracticeIdsForPractitioner(
+        practitionerProfileId,
+      );
+    if (!ownPractices.includes(group.practiceId)) {
+      throw new ResourceNotFoundException('Grupo médico no encontrado', {
+        id: groupId,
+      });
+    }
     const justClosed = await this.closeIfExpired(tx, group);
     if (justClosed || isClosedNow(group)) {
       throw new PreconditionFailedException(
