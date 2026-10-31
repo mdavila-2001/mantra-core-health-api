@@ -175,6 +175,7 @@ export class OperatingRoomsReadUseCases {
       touchMinutes: number;
       roomUtilizationPct: number | null;
       turnoverMinutesP50: number | null;
+      turnovers: number[];
       blocks: {
         allocated: number;
         released: number;
@@ -241,6 +242,7 @@ export class OperatingRoomsReadUseCases {
         roomUtilizationPct:
           sessionMinutes > 0 ? (touchMinutes / sessionMinutes) * 100 : null,
         turnoverMinutesP50: median(turnovers),
+        turnovers,
         blocks: {
           allocated,
           released,
@@ -256,6 +258,7 @@ export class OperatingRoomsReadUseCases {
     const totalSession = sum((r) => r.sessionMinutes);
     const totalTouch = sum((r) => r.touchMinutes);
     const totalAvailable = sum((r) => r.blocks.allocated - r.blocks.released);
+    const allTurnovers = result.flatMap((r) => r.turnovers);
     return {
       from: q.from,
       to: q.to,
@@ -267,8 +270,11 @@ export class OperatingRoomsReadUseCases {
           totalSession > 0 ? (totalTouch / totalSession) * 100 : null,
         blockUtilizationPct:
           totalAvailable > 0 ? (totalTouch / totalAvailable) * 100 : null,
+        turnoverMinutesP50: median(allTurnovers),
+        allocatedMinutes: sum((r) => r.blocks.allocated),
+        releasedMinutes: sum((r) => r.blocks.released),
       },
-      rooms: result,
+      rooms: result.map(({ turnovers: _t, ...r }) => r),
     };
   }
 }

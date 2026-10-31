@@ -8,6 +8,7 @@ import {
 } from './harness';
 import { CONCEPTS } from '../../src/common';
 import { DELEG } from '../../src/modules/delegated_access/delegated_access.concepts';
+import { PRAC } from '../../src/modules/practice/practice.concepts';
 import { PERIOP } from '../../src/modules/procedures_perioperative/procedures_perioperative.concepts';
 import {
   PASSWORD,
@@ -489,6 +490,60 @@ describe('Infraestructura F4 · quirófanos', () => {
     expect(util.body.totals.sessionMinutes).toBe(
       util.body.rooms.reduce((a: number, r: any) => a + r.sessionMinutes, 0),
     );
+    expect(util.body.totals).toMatchObject({
+      allocatedMinutes: util.body.rooms.reduce(
+        (a: number, r: any) => a + r.blocks.allocated,
+        0,
+      ),
+      releasedMinutes: util.body.rooms.reduce(
+        (a: number, r: any) => a + r.blocks.released,
+        0,
+      ),
+    });
+    expect('turnoverMinutesP50' in util.body.totals).toBe(true);
+  });
+
+  it('recambio: con la orden de la sala abierta por un caso anterior, el detalle del caso siguiente la muestra (una orden abierta por espacio)', async () => {
+    // El caso A dejó la orden de recambio abierta (source_ref_id = A); la salida
+    // de sala de B la reutiliza (la regla de una orden abierta por espacio).
+    const order = randomUUID();
+    await q(
+      `insert into practice.cleaning_orders
+         (id, tenant_id, practice_site_id, care_space_id, cleaning_type_concept_id, trigger_concept_id,
+          source_ref_id, priority_concept_id, status_concept_id, requested_at, created_at, updated_at)
+       values (?, ?, ?, ?, ?, ?, ?, ?, ?, now() - interval '30 minutes', now(), now())`,
+      [
+        order,
+        orgA.tenantId,
+        orgA.siteId,
+        orId,
+        PRAC.CLEAN_OR_TURNOVER,
+        PRAC.CLN_TRG_OR_TURNOVER,
+        ids.caseA,
+        PRAC.CLN_PRIO_ROUTINE,
+        PRAC.CLN_PENDING,
+      ],
+    );
+    await q(
+      `insert into procedures_perioperative.operating_room_utilization_events
+         (id, operating_room_id, procedure_case_id, event_type_concept_id, occurred_at, created_at, tenant_id)
+       values (gen_random_uuid(), ?, ?, ?, now(), now(), ?)`,
+      [orId, ids.caseB, PERIOP.OR_EVENT_PATIENT_OUT_OF_ROOM, orgA.tenantId],
+    );
+    const b = await http()
+      .get(`/procedure-cases/${ids.caseB}`)
+      .set(como(manager))
+      .expect(200);
+    expect(b.body.turnoverCleaning).toMatchObject({
+      id: order,
+      status: 'CLN_PENDING',
+      allowedTransitions: expect.any(Array),
+    });
+    const a = await http()
+      .get(`/procedure-cases/${ids.caseA}`)
+      .set(como(manager))
+      .expect(200);
+    expect(a.body.turnoverCleaning?.id).toBe(order);
   });
 
   it('PERIOP_NURSE con ámbito del tenant: ve sus sedes en /me y la agenda de quirófanos; en otro tenant no', async () => {

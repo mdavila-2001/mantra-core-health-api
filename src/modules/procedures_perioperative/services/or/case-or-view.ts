@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import type { AuthenticatedUser } from '../../../../common';
 import {
   CLEANING_STATUS,
+  OPEN_CLEANING_STATUSES,
   type CleaningStatusCode,
 } from '../../../practice/domain/ops/ops-catalog';
 import { allowedCleaningActions } from '../../../practice/domain/ops/cleaning-rules';
@@ -220,7 +221,38 @@ export class CaseOrViewBuilder {
       ),
     ]);
     const [cl] = checklists;
-    const [order] = cleaning;
+    // Una sola orden abierta por espacio: si un caso anterior dejó la suya
+    // abierta, la salida de sala de este caso la reutiliza (y su
+    // source_ref_id sigue siendo el del caso anterior). El recambio de este
+    // caso es entonces la orden de la sala que estaba abierta al salir el
+    // paciente: la misma que devolvió POST …/room-events.
+    let [order] = cleaning;
+    const out = events.find(
+      (e) => e.event_type_concept_id === PERIOP.OR_EVENT_PATIENT_OUT_OF_ROOM,
+    );
+    if (!order && out && c.operatingRoomId) {
+      [order] = await em.execute<
+        {
+          id: string;
+          status_concept_id: string;
+          row_version: number;
+          care_space_id: string;
+        }[]
+      >(
+        `SELECT id, status_concept_id, row_version, care_space_id FROM practice.cleaning_orders
+          WHERE care_space_id = ? AND tenant_id = ? AND requested_at <= ?
+            AND (status_concept_id = ANY(?::uuid[]) OR updated_at >= ?)
+          ORDER BY requested_at DESC, id LIMIT 1`,
+        [
+          c.operatingRoomId,
+          tenantId,
+          out.occurred_at,
+          `{${OPEN_CLEANING_STATUSES.map((st) => CLEANING_STATUS[st]).join(',')}}`,
+          out.occurred_at,
+        ],
+        'all',
+      );
+    }
     let allowed: string[] = [];
     const status = order
       ? STATUS_BY_ID.get(order.status_concept_id)
