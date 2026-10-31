@@ -223,3 +223,69 @@ export class HallazgoIdParamDto {
   @Matches(/^[A-Z]{3}-\d{2}$/, { message: 'id de hallazgo inválido' })
   id!: string;
 }
+
+const TIPOS_NODO = ['OPERACION', 'TABLA', 'DOMINIO'] as const;
+const TIPOS_ARISTA = [
+  'LEE',
+  'ESCRIBE',
+  'BORRA',
+  'REFERENCIA',
+  'PERTENECE',
+] as const;
+
+/** Filtros del listado de nodos del linaje. */
+export class LinajeNodosQueryDto extends PaginacionQueryDto {
+  @ApiPropertyOptional({ enum: TIPOS_NODO })
+  @IsOptional()
+  @IsIn(TIPOS_NODO)
+  tipo?: (typeof TIPOS_NODO)[number];
+
+  @ApiPropertyOptional({
+    maxLength: 120,
+    description:
+      'Busca (sin tildes ni mayúsculas) en el identificador y la etiqueta',
+  })
+  @IsOptional()
+  @Transform(sinEspacios)
+  @IsString()
+  @MaxLength(120)
+  q?: string;
+
+  @ApiPropertyOptional({
+    maxLength: 120,
+    description: 'Etiqueta exacta del dominio al que pertenece el nodo',
+  })
+  @IsOptional()
+  @Transform(sinEspacios)
+  @IsString()
+  @MaxLength(120)
+  dominio?: string;
+}
+
+/** Filtros del listado de aristas del linaje. */
+export class LinajeAristasQueryDto extends PaginacionQueryDto {
+  @ApiPropertyOptional({ enum: TIPOS_ARISTA })
+  @IsOptional()
+  @IsIn(TIPOS_ARISTA)
+  tipo?: (typeof TIPOS_ARISTA)[number];
+
+  @ApiPropertyOptional({
+    maxLength: 240,
+    description: 'Id exacto del nodo de origen (`op:…`, `tabla:schema.tabla`)',
+  })
+  @IsOptional()
+  @Transform(sinEspacios)
+  @IsString()
+  @MaxLength(240)
+  de?: string;
+
+  @ApiPropertyOptional({
+    maxLength: 240,
+    description: 'Id exacto del nodo de destino',
+  })
+  @IsOptional()
+  @Transform(sinEspacios)
+  @IsString()
+  @MaxLength(240)
+  a?: string;
+}
