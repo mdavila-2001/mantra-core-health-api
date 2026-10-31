@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { AdminCatalogController } from './presentation/controllers/admin-catalog.controller';
+import { GovernanceQueueController } from './presentation/controllers/governance-queue.controller';
+import { GovernanceQueueRepository } from './infrastructure/repositories/governance-queue.repository';
+import { GovernanceQueueService } from './application/governance-queue.service';
 import { AdminPortalController } from './presentation/controllers/admin-portal.controller';
 import {
   InternalCatalogInventoryController,
@@ -43,6 +46,7 @@ import { IamPlatformRoleCodesAdapter } from './infrastructure/adapters/iam-platf
   controllers: [
     AdminPortalController,
     AdminCatalogController,
+    GovernanceQueueController,
     InternalCatalogScansController,
     InternalCatalogInventoryController,
   ],
@@ -53,6 +57,8 @@ import { IamPlatformRoleCodesAdapter } from './infrastructure/adapters/iam-platf
     CatalogInventoryRepository,
     CatalogInsightsRepository,
     CatalogInsightsService,
+    GovernanceQueueRepository,
+    GovernanceQueueService,
     CatalogReadService,
     CatalogGovernanceService,
     CatalogClassificationService,
