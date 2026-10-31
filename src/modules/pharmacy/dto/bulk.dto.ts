@@ -127,6 +127,14 @@ export class BulkRowResultDto {
    */
   @ApiPropertyOptional({ type: [BulkRowErrorDto] })
   errors?: BulkRowErrorDto[];
+
+  /**
+   * Avisos de una fila que se carga igual (en la vista previa, que se cargaría):
+   * por ejemplo `MEDICATION_NOT_LINKED`, un producto que pide receta sin
+   * medicamento vinculado, que ninguna receta va a encontrar.
+   */
+  @ApiPropertyOptional({ type: [BulkRowErrorDto] })
+  warnings?: BulkRowErrorDto[];
 }
 
 /** Respuesta de una carga masiva: una entrada por fila, en orden. */

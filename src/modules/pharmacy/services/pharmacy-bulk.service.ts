@@ -90,36 +90,21 @@ export class PharmacyBulkService {
       });
     }
     const ctx: BulkContext = { pharmacy, actor };
-    const seen = new Set<string>();
+    const keys = body.rows.map((raw) => handler.keyOf(raw));
+    const repeated = repeatedRows(handler, body.rows, keys);
     const results: BulkRowResultDto[] = [];
     for (const [index, raw] of body.rows.entries()) {
       const row = index + 1;
-      const key = handler.keyOf(raw);
+      const key = keys[index];
       if (key === null) {
-        results.push(
-          rejected(row, [
-            {
-              field: handler.keyField,
-              reason: 'REQUIRED',
-              message: 'Falta el dato que identifica la fila',
-            },
-          ]),
-        );
+        results.push(rejected(row, await missingKeyErrors(handler, raw)));
         continue;
       }
-      if (seen.has(key)) {
-        results.push(
-          rejected(row, [
-            {
-              field: handler.keyField,
-              reason: PharmacyErrorReason.DUPLICATE_IN_FILE,
-              message: 'Ya vino en una fila anterior del archivo',
-            },
-          ]),
-        );
+      const duplicate = repeated.get(index);
+      if (duplicate !== undefined) {
+        results.push(rejected(row, duplicate));
         continue;
       }
-      seen.add(key);
       results.push({
         row,
         ...(await this.runRow(ctx, body.mode, dryRun, key, raw, handler)),
@@ -175,18 +160,25 @@ export class PharmacyBulkService {
             existing,
             input,
           );
-          if (!changed) throw new DryRunRollback({ outcome: 'UNCHANGED', id });
+          if (!changed) {
+            throw new DryRunRollback(
+              await withWarnings(tx, ctx, handler, {
+                outcome: 'UNCHANGED',
+                id,
+              }),
+            );
+          }
           outcome = { outcome: 'UPDATED', id };
         }
         await tx.flush();
+        outcome = await withWarnings(tx, ctx, handler, outcome);
         if (dryRun) throw new DryRunRollback(outcome);
         return outcome;
       });
     } catch (error) {
       if (error instanceof DryRunRollback) {
-        return dryRun
-          ? { outcome: error.result.outcome }
-          : { outcome: error.result.outcome, id: error.result.id };
+        const { id, ...result } = error.result;
+        return dryRun ? result : { ...result, id };
       }
       if (error instanceof BulkRowRejection) {
         return { outcome: 'REJECTED', errors: [...error.errors] };
@@ -216,8 +208,113 @@ export class PharmacyBulkService {
   }
 }
 
-function rejected(row: number, errors: BulkRowError[]): BulkRowResultDto {
-  return { row, outcome: 'REJECTED', errors };
+function rejected(
+  row: number,
+  errors: readonly BulkRowError[],
+): BulkRowResultDto {
+  return { row, outcome: 'REJECTED', errors: [...errors] };
+}
+
+/** El resultado con los avisos del manejador, si tiene alguno. */
+async function withWarnings<
+  Existing,
+  CreateRow extends object,
+  UpdateRow extends object,
+>(
+  tx: EntityManager,
+  ctx: BulkContext,
+  handler: BulkHandler<Existing, CreateRow, UpdateRow>,
+  outcome: Omit<BulkRowResultDto, 'row'>,
+): Promise<Omit<BulkRowResultDto, 'row'>> {
+  if (outcome.id === undefined || handler.warningsFor === undefined) {
+    return outcome;
+  }
+  const warnings = await handler.warningsFor(tx, ctx, outcome.id);
+  return warnings.length === 0
+    ? outcome
+    : { ...outcome, warnings: [...warnings] };
+}
+
+/**
+ * Las filas que comparten su clave (o una de sus otras claves) con otra fila
+ * del pedido, con su motivo. Se rechazan **todas**, la primera también: elegir
+ * una por el orden sería decidir en silencio cuál vale. Así la vista previa y
+ * la carga real dicen lo mismo, porque ninguna de ellas se ejecuta.
+ */
+function repeatedRows<
+  Existing,
+  CreateRow extends object,
+  UpdateRow extends object,
+>(
+  handler: BulkHandler<Existing, CreateRow, UpdateRow>,
+  rows: readonly Record<string, unknown>[],
+  keys: readonly (string | null)[],
+): Map<number, BulkRowError[]> {
+  const byKey = new Map<string, { field: string; indexes: number[] }>();
+  const note = (field: string, key: string, index: number): void => {
+    const entry = byKey.get(`${field}\u0000${key}`) ?? { field, indexes: [] };
+    entry.indexes.push(index);
+    byKey.set(`${field}\u0000${key}`, entry);
+  };
+  rows.forEach((raw, index) => {
+    const key = keys[index];
+    if (key === null) return;
+    note(handler.keyField, key, index);
+    for (const other of handler.otherKeysOf?.(raw) ?? []) {
+      note(other.field, other.key, index);
+    }
+  });
+  const repeated = new Map<number, BulkRowError[]>();
+  for (const { field, indexes } of byKey.values()) {
+    if (indexes.length < 2) continue;
+    const list = indexes.map((index) => index + 1).join(', ');
+    for (const index of indexes) {
+      const errors = repeated.get(index) ?? [];
+      errors.push({
+        field,
+        reason: PharmacyErrorReason.DUPLICATE_IN_FILE,
+        message: `El mismo dato viene en las filas ${list} del archivo: no se carga ninguna, deje una sola`,
+      });
+      repeated.set(index, errors);
+    }
+  }
+  return repeated;
+}
+
+/**
+ * Por qué una fila no tiene clave. Si el campo vino pero no sirve (un número,
+ * un nombre demasiado largo), el motivo es el de su DTO y no «falta»: decir
+ * `REQUIRED` de un dato que sí vino manda a buscar lo que no está mal.
+ */
+async function missingKeyErrors<
+  Existing,
+  CreateRow extends object,
+  UpdateRow extends object,
+>(
+  handler: BulkHandler<Existing, CreateRow, UpdateRow>,
+  raw: Record<string, unknown>,
+): Promise<BulkRowError[]> {
+  const value = raw[handler.keyField];
+  const blank =
+    value === undefined ||
+    value === null ||
+    (typeof value === 'string' && value.trim() === '');
+  if (!blank) {
+    try {
+      await validateRow(handler.createRow, raw);
+    } catch (error) {
+      if (!(error instanceof BulkRowRejection)) throw error;
+      const own = error.errors.filter((e) => e.field === handler.keyField);
+      if (own.length > 0) return [...own];
+    }
+  }
+  return [
+    {
+      field: handler.keyField,
+      reason: 'REQUIRED',
+      message: 'Falta el dato que identifica la fila',
+    },
+  ];
 }
 
 /**
