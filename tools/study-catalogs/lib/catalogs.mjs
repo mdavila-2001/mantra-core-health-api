@@ -9,6 +9,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const DATA_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'src', 'modules', 'study_catalog', 'data');
+export const LOCAL_KEYS = JSON.parse(readFileSync(join(DATA_DIR, 'local-concept-keys.json'), 'utf8'));
 export const FILES = ['laboratorio.json', 'imagenologia.json', 'regiones-cuerpo-3d.json'];
 // Admite dígito inicial (17_OH_PROGESTERONA, 5_HIAA): son nombres de analito reales.
 export const SNAKE = /^(?=.*[A-Z])[A-Z0-9]+(_[A-Z0-9]+)*$/;
@@ -54,9 +55,10 @@ export function classify({ lab, img }) {
   for (const e of img.estudios) {
     if (e.verificar === true) { pending.push({ kind: 'estudio', code: e.codigo, why: 'verificar' }); continue; }
     let loinc = e.loinc;
-    if (e.verificar_loinc === true) { pending.push({ kind: 'loinc', code: e.codigo, why: 'verificar_loinc' }); loinc = null; }
-    if (e.loinc_estado) { pending.push({ kind: 'loinc', code: e.codigo, why: `loinc_estado=${e.loinc_estado}` }); loinc = null; }
-    imgSeed.push({ ...e, loinc });
+    let porLateralidad = e.loinc_por_lateralidad;
+    if (e.verificar_loinc === true) { pending.push({ kind: 'loinc', code: e.codigo, why: 'verificar_loinc' }); loinc = null; porLateralidad = undefined; }
+    if (e.loinc_estado) { pending.push({ kind: 'loinc', code: e.codigo, why: `loinc_estado=${e.loinc_estado}` }); loinc = null; porLateralidad = undefined; }
+    imgSeed.push({ ...e, loinc, loinc_por_lateralidad: porLateralidad });
   }
   return { pending, labSeed, imgSeed };
 }

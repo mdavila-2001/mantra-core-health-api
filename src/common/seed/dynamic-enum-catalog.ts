@@ -11,6 +11,11 @@ import {
 } from '../../modules/diagnostics/diagnostics.concepts';
 import { MODULE_CONCEPT_SEEDS } from './module-concepts';
 import { ALLERGY_DYNAMIC_ENUMS } from './data/allergies/allergy-dynamic-enums';
+import {
+  BODY_SITE_CONCEPT_IDS,
+  CONTRAST_CONCEPT_IDS,
+  MODALITY_CONCEPT_IDS,
+} from '../../modules/study_catalog/study_catalog.concepts';
 
 /**
  * Catálogo declarativo de las enumeraciones bien conocidas de la plataforma.
@@ -1321,7 +1326,11 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
       CLIN.CONDITION_LATERALITY_RIGHT,
       CLIN.CONDITION_LATERALITY_BILATERAL,
     ],
-    targets: ['clinical.conditions.laterality_concept_id'],
+    targets: [
+      'clinical.conditions.laterality_concept_id',
+      // La orden de estudios de imagen reutiliza el mismo vocabulario de lado.
+      'clinical.service_requests.laterality_concept_id',
+    ],
   },
   /* Patch v4.0.8 — estado clínico y cronicidad. `condition-clinical-status`
      gobierna la transición que ofrece `POST /clinical/conditions/:id/change-status`
@@ -1668,7 +1677,11 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     description:
       'Qué muestra se tomó al paciente: sangre, suero, orina, heces, líquido cefalorraquídeo, etc.',
     concepts: SPECIMEN_TYPE_CONCEPTS,
-    targets: ['diagnostics.specimens.specimen_type_concept_id'],
+    targets: [
+      'diagnostics.specimens.specimen_type_concept_id',
+      // La muestra que el médico pide en la orden de laboratorio.
+      'clinical.service_requests.specimen_type_concept_id',
+    ],
   },
   {
     code: 'specimen-container-type',
@@ -1682,6 +1695,36 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     ],
   }, // --- clinical: alergias e intolerancias (HL7 FHIR AllergyIntolerance) ---
   ...ALLERGY_DYNAMIC_ENUMS,
+  /* --- Detalle de la orden de imagen (modelo v4.2.80) ------------------------
+     Modalidad, región del cuerpo y contraste de `clinical.service_requests`.
+     Los conceptos los declara `study_catalog.concepts.ts` desde el catálogo
+     versionado `imagenologia.json`. La lateralidad y la muestra no abren
+     enumeraciones nuevas: suman su destino a `condition-laterality` y
+     `specimen-type`. */
+  {
+    code: 'service-request-imaging-modality',
+    name: 'Modalidad del estudio de imagen',
+    description:
+      'Modalidad de adquisición del estudio pedido (DICOM PS3.16 CID 29): radiografía, ecografía, tomografía, resonancia, etc.',
+    concepts: MODALITY_CONCEPT_IDS,
+    targets: ['clinical.service_requests.modality_concept_id'],
+  },
+  {
+    code: 'imaging-body-structure',
+    name: 'Región del cuerpo del estudio de imagen',
+    description:
+      'Regiones anatómicas pedibles en imagenología (DICOM PS3.16 Annex L con enlace SNOMED CT); el catálogo trae su jerarquía.',
+    concepts: BODY_SITE_CONCEPT_IDS,
+    targets: ['clinical.service_requests.body_site_concept_id'],
+  },
+  {
+    code: 'imaging-contrast',
+    name: 'Contraste del estudio de imagen',
+    description:
+      'Sin contraste, con contraste, o sin y con contraste. La vía de administración es un dato del estudio, no de esta lista.',
+    concepts: CONTRAST_CONCEPT_IDS,
+    targets: ['clinical.service_requests.contrast_concept_id'],
+  },
 ];
 
 /**
