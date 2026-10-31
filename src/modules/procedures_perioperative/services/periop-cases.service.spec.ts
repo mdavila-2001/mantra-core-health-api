@@ -165,6 +165,7 @@ describe('PeriopCasesService', () => {
       expect(d.casesRepo.createUtilizationEvent).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
+          tenantId: TENANT,
           eventTypeConceptId: CONCEPTS.OR_EVENT_RESERVED,
         }),
       );
@@ -1009,6 +1010,7 @@ describe('PeriopCasesService', () => {
       const d = build();
       const surgicalCase: any = {
         id: CASE,
+        custodianTenantId: TENANT,
         statusConceptId: CONCEPTS.CASE_SCHEDULED,
         operatingRoomId: ROOM,
       };
@@ -1026,6 +1028,7 @@ describe('PeriopCasesService', () => {
       expect(d.casesRepo.createUtilizationEvent).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
+          tenantId: TENANT,
           eventTypeConceptId: CONCEPTS.OR_EVENT_SLOT_RELEASED,
         }),
       );

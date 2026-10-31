@@ -676,6 +676,12 @@ export class PeriopCasesRepository {
     em: EntityManager,
     data: {
       /**
+       * Tenant de la sala (= `custodian_tenant_id` del caso, por la FK
+       * compuesta de F4). NOT NULL desde la integración F2–F5 y con RLS forzada:
+       * la API lo escribe siempre en vez de depender del trigger de relleno.
+       */
+      tenantId: string;
+      /**
        * Identificador asociado a operating room.
        */
       operatingRoomId: string;
@@ -712,6 +718,7 @@ export class PeriopCasesRepository {
     return em.create(
       OperatingRoomUtilizationEvents,
       {
+        tenantId: data.tenantId,
         operatingRoomId: data.operatingRoomId,
         procedureCaseId: data.procedureCaseId,
         eventTypeConceptId: data.eventTypeConceptId,

@@ -251,6 +251,7 @@ describe('ClinicalStructureService', () => {
       const d = build();
       d.practicesRepo.findById.mockResolvedValue({
         id: 'p1',
+        tenantId: 't1',
         statusConceptId: PRAC.PRACTICE_ACTIVE,
       });
       const created = {
@@ -262,6 +263,11 @@ describe('ClinicalStructureService', () => {
       d.servicesRepo.create.mockReturnValue(created);
       const res = await d.service.publishHealthcareService('p1', {}, actor);
       expect(res.status).toBe(PRAC.SERVICE_ACTIVE);
+      // F1c: healthcare_services.tenant_id NOT NULL = tenant de la práctica.
+      expect(d.servicesRepo.create).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ tenantId: 't1', practiceId: 'p1' }),
+      );
     });
   });
 });

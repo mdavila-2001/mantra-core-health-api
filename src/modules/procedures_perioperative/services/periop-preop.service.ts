@@ -912,6 +912,7 @@ export class PeriopPreopService {
         });
         if (surgicalCase.operatingRoomId) {
           this.casesRepo.createUtilizationEvent(tx, {
+            tenantId: surgicalCase.custodianTenantId,
             operatingRoomId: surgicalCase.operatingRoomId,
             procedureCaseId: caseId,
             eventTypeConceptId: CONCEPTS.OR_EVENT_CASE_START,

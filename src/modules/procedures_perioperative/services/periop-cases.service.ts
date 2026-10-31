@@ -304,6 +304,7 @@ export class PeriopCasesService {
       });
 
       this.casesRepo.createUtilizationEvent(tx, {
+        tenantId: dto.custodianTenantId,
         operatingRoomId: dto.operatingRoomId,
         procedureCaseId: surgicalCase.id,
         eventTypeConceptId: CONCEPTS.OR_EVENT_RESERVED,
@@ -1493,6 +1494,7 @@ export class PeriopCasesService {
       let operatingRoomReleased = false;
       if (surgicalCase.operatingRoomId) {
         this.casesRepo.createUtilizationEvent(tx, {
+          tenantId: surgicalCase.custodianTenantId,
           operatingRoomId: surgicalCase.operatingRoomId,
           procedureCaseId: caseId,
           eventTypeConceptId: CONCEPTS.OR_EVENT_SLOT_RELEASED,
@@ -1612,6 +1614,7 @@ export class PeriopCasesService {
         }
 
         this.casesRepo.createUtilizationEvent(tx, {
+          tenantId: surgicalCase.custodianTenantId,
           operatingRoomId: surgicalCase.operatingRoomId,
           procedureCaseId: caseId,
           eventTypeConceptId: CONCEPTS.OR_EVENT_CASE_END,
@@ -1624,6 +1627,7 @@ export class PeriopCasesService {
 
         if (dto.turnoverSeconds !== undefined) {
           this.casesRepo.createUtilizationEvent(tx, {
+            tenantId: surgicalCase.custodianTenantId,
             operatingRoomId: surgicalCase.operatingRoomId,
             procedureCaseId: caseId,
             eventTypeConceptId: CONCEPTS.OR_EVENT_TURNOVER,

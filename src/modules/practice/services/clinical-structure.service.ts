@@ -209,6 +209,7 @@ export class ClinicalStructureService {
       }
 
       const service = this.servicesRepo.create(tx, {
+        tenantId: practice.tenantId,
         practiceId,
         practiceSiteId: dto.practiceSiteId,
         clinicalUnitId: dto.clinicalUnitId,
