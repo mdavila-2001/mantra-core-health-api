@@ -1042,7 +1042,7 @@ describe('MedicationsService · validTo en el pasado', () => {
     expect(d.historyRepo.append).not.toHaveBeenCalled();
   }
 
-  const draft = (extra: Record<string, unknown> = {}) => ({
+  const draft = (extra: Record<string, unknown> = {}): any => ({
     id: 'mr1',
     custodianTenantId: 't1',
     patientProfileId: 'p1',
