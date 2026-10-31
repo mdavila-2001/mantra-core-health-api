@@ -449,4 +449,33 @@ describe('GovernanceReadController (HTTP, repositorio doble)', () => {
       expect(repo.fieldRegistry).not.toHaveBeenCalled();
     });
   });
+
+  describe('cursor forjado → 400 INVALID_CURSOR, nunca 500', () => {
+    const forjado = (o: Record<string, unknown>): string =>
+      Buffer.from(JSON.stringify(o)).toString('base64url');
+    const U = '00000000-0000-4000-8000-0000000000a1';
+    it.each([
+      [
+        '/admin/governance/policies',
+        { m: 'code:asc', k: 'a', t: 'NOPE', i: U },
+      ],
+      [
+        '/admin/governance/policies',
+        { m: 'code:asc', k: 'a', t: 'WRITE', i: 'x' },
+      ],
+      [
+        '/admin/governance/policies?sort=updatedAt',
+        { m: 'updatedAt:asc', k: 'abc', t: 'WRITE', i: U },
+      ],
+      ['/admin/governance/change-log', { t: 'abc', i: 'x' }],
+      ['/admin/governance/entity-registry', { s: 'a', t: 'b', i: 'x' }],
+      [`/admin/governance/entity-registry/${U}/fields`, { c: 'a', i: 'x' }],
+    ])('%s con %j', async (ruta, cursor) => {
+      const sep = ruta.includes('?') ? '&' : '?';
+      const res = await get(`${ruta}${sep}cursor=${forjado(cursor)}`, [
+        'DPO',
+      ]).expect(400);
+      expect(res.body.reason).toBe('INVALID_CURSOR');
+    });
+  });
 });

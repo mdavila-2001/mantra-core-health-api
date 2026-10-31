@@ -18,7 +18,10 @@ import { TracingService } from '../../../observability';
 import { RouteMetadataService } from '../../../observability/route-index/route-metadata.service';
 import { AuditOversightReadRepository } from '../repositories/audit-oversight-read.repository';
 import { AuditQueryRepository } from '../repositories/audit-query.repository';
-import { AuditOversightReadService } from '../services/audit-oversight-read.service';
+import {
+  AuditOversightReadService,
+  suppressSmallGroups,
+} from '../services/audit-oversight-read.service';
 import { AuditQueryService } from '../services/audit-query.service';
 import { ComplianceService } from '../services/compliance.service';
 import {
@@ -67,6 +70,7 @@ describe('Supervisión agregada y DSAR (HTTP, repositorios dobles)', () => {
         ? [
             { key: 'TREATMENT', events: 30, distinct_actors: 3 },
             { key: 'SECURITY_OVERSIGHT', events: 2, distinct_actors: 1 },
+            { key: 'AUDIT_READ', events: 4, distinct_actors: 1 },
           ]
         : dim === 'operation'
           ? [{ key: 'ACTION_READ', events: 40, distinct_actors: 3 }]
@@ -199,25 +203,120 @@ describe('Supervisión agregada y DSAR (HTTP, repositorios dobles)', () => {
       expect(res.body.byPurpose).toEqual([
         { key: 'TREATMENT', events: 30, distinctActors: 3 },
       ]);
-      expect(res.body.suppressed).toEqual({ buckets: 1, events: 2 });
+      // 2 + 4 = 6 ≥ 5: lo oculto, sumado, no singulariza a nadie.
+      expect(res.body.suppressed).toEqual({
+        byPurpose: 6,
+        byResourceType: 0,
+        byOperation: 0,
+        daily: 0,
+      });
       expect(res.body.minSample).toBe(5);
       expect(res.body.byOperation).toEqual([
         { key: 'READ', events: 40, distinctActors: 3 },
       ]);
       expect(res.body.notMeasured.map((n: any) => n.field)).toContain('byRole');
-      const texto = JSON.stringify(res.body);
-      expect(texto).not.toMatch(/patient_profile_id|resource_id|userId/);
-    });
-
-    it('minSample=1 muestra todo; la ventana por omisión son 30 días', async () => {
-      const res = await get('/audit/data-access/summary?minSample=1', [
-        'DPO',
-      ]).expect(200);
-      expect(res.body.suppressed).toEqual({ buckets: 0, events: 0 });
+      expect(JSON.stringify(res.body)).not.toMatch(
+        /patient_profile_id|resource_id|userId/,
+      );
       const { from, to } = res.body.window;
       expect(Math.round((Date.parse(to) - Date.parse(from)) / 86400000)).toBe(
         30,
       );
+    });
+
+    it('minSample por debajo del piso del servidor (0..4) → 400: el cliente no puede bajar el k-anonimato', async () => {
+      for (const m of [0, 1, 2, 4])
+        await get(`/audit/data-access/summary?minSample=${m}`, [
+          'AUDITOR',
+        ]).expect(400);
+      expect(repo.accessTotals).not.toHaveBeenCalled();
+    });
+
+    it('minSample=1 NO revela grupos de 1 evento (aunque el DTO lo dejara pasar, el servicio aplica el piso)', async () => {
+      const service = new AuditOversightReadService(
+        { fork: () => ({}) } as any,
+        {
+          ...repo,
+          accessBuckets: mockFn(async () => [
+            { key: 'A', events: 1, distinct_actors: 1 },
+            { key: 'B', events: 9, distinct_actors: 2 },
+          ]),
+          accessTotals: mockFn(async () => ({
+            events: 10,
+            distinct_actors: 2,
+            patient_scoped_events: 0,
+          })),
+          accessDaily: mockFn(async () => [{ day: '2026-10-30', events: 10 }]),
+        } as any,
+      );
+      const r = await service.dataAccessSummary({ minSample: 1 } as any);
+      expect(r.minSample).toBe(5);
+      // el 1 oculto sólo se deduciría por resta (10 − 9): se oculta también B
+      expect(r.byPurpose).toEqual([]);
+      expect(r.suppressed.byPurpose).toBe(10);
+    });
+
+    it('supresión complementaria: nunca queda oculto un grupo chico deducible por resta', () => {
+      const r = suppressSmallGroups(
+        [{ events: 50 }, { events: 7 }, { events: 1 }],
+        5,
+      );
+      expect(r).toEqual({ visible: [{ events: 50 }], suppressed: 8 });
+      expect(suppressSmallGroups([{ events: 9 }, { events: 1 }], 5)).toEqual({
+        visible: [],
+        suppressed: 10,
+      });
+      expect(
+        suppressSmallGroups([{ events: 9 }, { events: 6 }], 5).suppressed,
+      ).toBe(0);
+      expect(suppressSmallGroups([{ events: 3 }], 5)).toEqual({
+        visible: [],
+        suppressed: 3,
+      });
+    });
+
+    it('totales bajo el mínimo → null con motivo (no se muestran cifras de 1 a 4 eventos)', async () => {
+      repo.accessTotals.mockResolvedValueOnce({
+        events: 3,
+        distinct_actors: 1,
+        patient_scoped_events: 2,
+      });
+      const res = await get('/audit/data-access/summary', ['AUDITOR']).expect(
+        200,
+      );
+      expect(res.body.totals).toEqual({
+        events: null,
+        distinctActors: null,
+        patientScopedEvents: null,
+      });
+      expect(res.body.notMeasured.map((n: any) => n.field)).toEqual(
+        expect.arrayContaining(['totals']),
+      );
+    });
+
+    it('una ventana menor de 24 horas → 400', async () => {
+      const to = new Date().toISOString();
+      const from = new Date(Date.now() - 3600_000).toISOString();
+      const res = await get(
+        `/audit/data-access/summary?from=${from}&to=${to}`,
+        ['AUDITOR'],
+      ).expect(400);
+      expect(res.body.reason).toBe('INVALID_DATE');
+      expect(repo.accessTotals).not.toHaveBeenCalled();
+    });
+
+    it('la serie diaria también respeta el mínimo, con supresión complementaria', async () => {
+      repo.accessDaily.mockResolvedValueOnce([
+        { day: '2026-10-29', events: 30 },
+        { day: '2026-10-30', events: 2 },
+        { day: '2026-10-31', events: 8 },
+      ]);
+      const res = await get('/audit/data-access/summary', ['AUDITOR']).expect(
+        200,
+      );
+      // 2 oculto < 5: se oculta también el día de 8 → oculto 10
+      expect(res.body.daily.map((d: any) => d.day)).toEqual(['2026-10-29']);
+      expect(res.body.suppressed.daily).toBe(10);
     });
 
     it.each([
@@ -227,6 +326,7 @@ describe('Supervisión agregada y DSAR (HTTP, repositorios dobles)', () => {
       ],
       ['una fecha no ISO', '?from=ayer'],
       ['minSample cero', '?minSample=0'],
+      ['minSample 4 (bajo el piso)', '?minSample=4'],
       ['minSample enorme', '?minSample=5000'],
       ['un parámetro no declarado', '?userId=x'],
     ])('%s → 400, nunca 500', async (_c, query) => {
@@ -317,6 +417,22 @@ describe('Supervisión agregada y DSAR (HTTP, repositorios dobles)', () => {
         .set('Authorization', `Bearer ${token(['DPO'])}`)
         .send({ status: 'COMPLETED' });
       expect(res.status).toBe(403);
+    });
+  });
+
+  describe('cursor forjado de DSAR → 400 INVALID_CURSOR', () => {
+    const forjado = (o: Record<string, unknown>): string =>
+      Buffer.from(JSON.stringify(o)).toString('base64url');
+    it.each([
+      { t: 'abc', i: 'x' },
+      { t: '2026-10-01T00:00:00.000000Z', i: 'x' },
+      { t: '2026-13-01T00:00:00.000000Z', i: ID },
+    ])('%j', async (cursor) => {
+      const res = await get(`/privacy/dsar?cursor=${forjado(cursor)}`, [
+        'DPO',
+      ]).expect(400);
+      expect(res.body.reason).toBe('INVALID_CURSOR');
+      expect(repo.dsarList).not.toHaveBeenCalled();
     });
   });
 });

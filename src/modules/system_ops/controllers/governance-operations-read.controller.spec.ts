@@ -391,4 +391,34 @@ describe('GovernanceOperationsReadController (HTTP, repositorio doble)', () => {
       expect(repo.retentionExecutions).not.toHaveBeenCalled();
     });
   });
+
+  describe('cursor forjado → 400 con reason INVALID_CURSOR, nunca 500', () => {
+    const forjado = (o: Record<string, unknown>): string =>
+      Buffer.from(JSON.stringify(o)).toString('base64url');
+    const U = '00000000-0000-4000-8000-0000000000a1';
+    it.each([
+      ['/admin/governance/domains', { c: 'a', i: 'x' }],
+      ['/admin/governance/domains', { c: 'a' }],
+      ['/admin/governance/legal-holds', { t: 'abc', i: 'x' }],
+      [
+        '/admin/governance/legal-holds',
+        { t: '2026-10-01T00:00:00.000000Z', i: 'x' },
+      ],
+      [
+        '/admin/governance/legal-holds',
+        { t: '2026-02-31T00:00:00.000000Z', i: U },
+      ],
+      ['/admin/governance/retention-executions', { t: 'abc', i: 'x' }],
+      [
+        '/admin/governance/retention-executions',
+        { t: '2026-10-01T00:00:00.000000Z', i: "'; drop table x; --" },
+      ],
+    ])('%s con %j', async (ruta, cursor) => {
+      const res = await get(`${ruta}?cursor=${forjado(cursor)}`, [
+        'DPO',
+      ]).expect(400);
+      expect(res.body.reason).toBe('INVALID_CURSOR');
+      for (const f of Object.values(repo)) expect(f).not.toHaveBeenCalled();
+    });
+  });
 });

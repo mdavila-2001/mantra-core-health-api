@@ -27,6 +27,10 @@ export const DSAR_STATUSES = [
 
 /** Tope inferior y valor por omisión del mínimo de muestra de los agregados. */
 export const SUMMARY_MIN_SAMPLE_DEFAULT = 5;
+/** Piso del servidor: el cliente puede pedir más, nunca menos (k-anonimato de los agregados). */
+export const SUMMARY_MIN_SAMPLE_FLOOR = 5;
+/** Ventana mínima del resumen: una ventana corta aísla a una sola persona. */
+export const SUMMARY_MIN_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /** Filtros de `GET /audit/data-access/summary`. */
 export class DataAccessSummaryQueryDto {
@@ -43,16 +47,16 @@ export class DataAccessSummaryQueryDto {
   to?: string;
 
   @ApiPropertyOptional({
-    minimum: 1,
+    minimum: 5,
     maximum: 1000,
     default: SUMMARY_MIN_SAMPLE_DEFAULT,
     description:
-      'Un grupo con menos eventos que esto no se muestra: se suma a `suppressed`',
+      'Un grupo con menos eventos que esto no se muestra: se suma a `suppressed`. El mínimo es 5 (piso del servidor)',
   })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(1)
+  @Min(SUMMARY_MIN_SAMPLE_FLOOR)
   @Max(1000)
   minSample?: number;
 }

@@ -289,4 +289,32 @@ describe('GovernanceQueueController (HTTP, repositorio doble)', () => {
       expect(repo.jobs).not.toHaveBeenCalled();
     });
   });
+
+  describe('cursor forjado → 400 INVALID_CURSOR, nunca 500', () => {
+    const forjado = (o: Record<string, unknown>): string =>
+      Buffer.from(JSON.stringify(o)).toString('base64url');
+    it.each([
+      ['/admin/governance/review-queue', { t: 'abc', i: 'x' }],
+      [
+        '/admin/governance/review-queue',
+        { t: '2026-10-01T00:00:00.000000Z', i: 'x' },
+      ],
+      ['/admin/governance/jobs', { t: 'abc', ty: 'RETENTION', i: ID }],
+      [
+        '/admin/governance/jobs',
+        { t: '2026-10-01T00:00:00.000000Z', ty: 'DROP', i: ID },
+      ],
+      [
+        '/admin/governance/jobs',
+        { t: '2026-10-01T00:00:00.000000Z', ty: 'RETENTION', i: 'x' },
+      ],
+    ])('%s con %j', async (ruta, cursor) => {
+      const res = await get(`${ruta}?cursor=${forjado(cursor)}`, [
+        'DPO',
+      ]).expect(400);
+      expect(res.body.reason).toBe('INVALID_CURSOR');
+      expect(repo.reviewQueue).not.toHaveBeenCalled();
+      expect(repo.jobs).not.toHaveBeenCalled();
+    });
+  });
 });

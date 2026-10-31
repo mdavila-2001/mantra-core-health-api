@@ -254,14 +254,14 @@ describe('AuditQueryService.log', () => {
         {
           cursor: encodeKeysetCursor({
             t: '2026-10-24T10:00:00.000000Z',
-            i: 'a9',
+            i: '00000000-0000-4000-8000-0000000000a9',
           }),
         },
         AHORA,
       );
       expect(repo.auditLog.mock.calls[0][1].cursor).toEqual({
         t: '2026-10-24T10:00:00.000000Z',
-        i: 'a9',
+        i: '00000000-0000-4000-8000-0000000000a9',
       });
     });
   });

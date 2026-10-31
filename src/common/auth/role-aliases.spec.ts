@@ -1,81 +1,70 @@
-import {
-  ROLE_ALIAS_GROUPS,
-  expandRoleAliases,
-  roleEquivalents,
-} from './role-aliases';
 import { roleAuthorizesInTenant } from './roles.guard';
 import { hasPlatformScope } from '../tenant/platform-scope';
 import type { AuthenticatedUser } from './authenticated-user.interface';
+import {
+  GOVERNANCE_VIEW_ROLES,
+  LEGAL_HOLD_VIEW_ROLES,
+} from '../../modules/system_ops/governance-read.roles';
+import {
+  CATALOG_WRITE_ROLES,
+  PORTAL_VIEW_ROLES,
+} from '../../modules/data_catalog/data_catalog.constants';
 
-const usuario = (
-  roles: string[],
-  scopedRoles?: Record<string, string[]>,
-): AuthenticatedUser => ({ id: 'u1', roles, scopedRoles }) as AuthenticatedUser;
-const T1 = '00000000-0000-4000-8000-0000000000a1';
+const usuario = (roles: string[]): AuthenticatedUser =>
+  ({ id: 'u1', roles }) as AuthenticatedUser;
 
-describe('alias de roles (decisión X-6)', () => {
-  it('GOVERNANCE_ADMIN y DATA_GOVERNANCE_ADMIN son equivalentes; el resto no tiene alias', () => {
-    expect(ROLE_ALIAS_GROUPS).toEqual([
-      ['GOVERNANCE_ADMIN', 'DATA_GOVERNANCE_ADMIN'],
-    ]);
-    expect(roleEquivalents('DATA_GOVERNANCE_ADMIN')).toContain(
-      'GOVERNANCE_ADMIN',
-    );
-    expect(roleEquivalents('DPO')).toEqual(['DPO']);
-    expect(expandRoleAliases(['GOVERNANCE_ADMIN', 'DPO'])).toEqual([
-      'GOVERNANCE_ADMIN',
-      'DATA_GOVERNANCE_ADMIN',
-      'DPO',
-    ]);
-  });
-
-  it.each([
-    ['GOVERNANCE_ADMIN', 'DATA_GOVERNANCE_ADMIN'],
-    ['DATA_GOVERNANCE_ADMIN', 'GOVERNANCE_ADMIN'],
-  ])('quien tiene %s autoriza una ruta que exige %s', (tiene, exige) => {
-    expect(roleAuthorizesInTenant(usuario([tiene]), exige, undefined)).toBe(
-      true,
-    );
-  });
-
-  it('un rol ajeno no pasa por alias', () => {
-    for (const ajeno of ['DATA_PLATFORM_ADMIN', 'DPO', 'SECURITY_ADMIN'])
-      expect(
-        roleAuthorizesInTenant(
-          usuario([ajeno]),
-          'DATA_GOVERNANCE_ADMIN',
-          undefined,
-        ),
-      ).toBe(false);
+/**
+ * Decisión X-6, contrato corregido tras la revisión independiente: `GOVERNANCE_ADMIN` y
+ * `DATA_GOVERNANCE_ADMIN` NO son alias globales. El guard sigue comparando nombres exactos; el alias
+ * es un opt-in explícito: ambos nombres figuran en las listas de LECTURA de gobierno.
+ */
+describe('GOVERNANCE_ADMIN y DATA_GOVERNANCE_ADMIN: alias sólo de lectura, explícito', () => {
+  it('el guard compara nombres exactos (sin alias global)', () => {
     expect(
-      roleAuthorizesInTenant(usuario([]), 'GOVERNANCE_ADMIN', undefined),
+      roleAuthorizesInTenant(
+        usuario(['GOVERNANCE_ADMIN']),
+        'DATA_GOVERNANCE_ADMIN',
+        undefined,
+      ),
     ).toBe(false);
-  });
-
-  it('el ámbito de tenant de cada código se respeta (acotado a T1 no es global)', () => {
-    const acotado = usuario(['DATA_GOVERNANCE_ADMIN'], {
-      [T1]: ['DATA_GOVERNANCE_ADMIN'],
-    });
-    expect(roleAuthorizesInTenant(acotado, 'GOVERNANCE_ADMIN', undefined)).toBe(
-      false,
-    );
-    expect(roleAuthorizesInTenant(acotado, 'GOVERNANCE_ADMIN', T1)).toBe(true);
-  });
-
-  it('el alcance plataforma lo da cualquiera de los dos nombres, si la ruta acepta el rol', () => {
-    expect(hasPlatformScope(usuario(['DATA_GOVERNANCE_ADMIN']))).toBe(true);
     expect(
-      hasPlatformScope(usuario(['DATA_GOVERNANCE_ADMIN']), [
+      roleAuthorizesInTenant(
+        usuario(['DATA_GOVERNANCE_ADMIN']),
         'GOVERNANCE_ADMIN',
-      ]),
+        undefined,
+      ),
+    ).toBe(false);
+    expect(
+      roleAuthorizesInTenant(
+        usuario(['GOVERNANCE_ADMIN']),
+        'GOVERNANCE_ADMIN',
+        undefined,
+      ),
     ).toBe(true);
+  });
+
+  it('el alcance plataforma no se hereda por el otro nombre', () => {
+    expect(hasPlatformScope(usuario(['DATA_GOVERNANCE_ADMIN']))).toBe(false);
     expect(
       hasPlatformScope(usuario(['GOVERNANCE_ADMIN']), [
         'DATA_GOVERNANCE_ADMIN',
       ]),
+    ).toBe(false);
+    expect(
+      hasPlatformScope(usuario(['GOVERNANCE_ADMIN']), ['GOVERNANCE_ADMIN']),
     ).toBe(true);
-    expect(hasPlatformScope(usuario(['DATA_GOVERNANCE_ADMIN']), ['DPO'])).toBe(
-      false,
-    );
+  });
+
+  it.each([
+    ['GOVERNANCE_VIEW_ROLES', GOVERNANCE_VIEW_ROLES],
+    ['LEGAL_HOLD_VIEW_ROLES', LEGAL_HOLD_VIEW_ROLES],
+    ['PORTAL_VIEW_ROLES', PORTAL_VIEW_ROLES],
+  ])('%s (lectura) lista los dos nombres', (_n, lista) => {
+    expect(lista).toContain('GOVERNANCE_ADMIN');
+    expect(lista).toContain('DATA_GOVERNANCE_ADMIN');
+  });
+
+  it('las listas de escritura del catálogo NO llevan el nombre de alias', () => {
+    expect(CATALOG_WRITE_ROLES).not.toContain('DATA_GOVERNANCE_ADMIN');
   });
 });

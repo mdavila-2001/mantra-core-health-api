@@ -25,6 +25,15 @@ import {
 import { GovernanceReadController } from '../system_ops/controllers/governance-read.controller';
 import { GovernanceReadRepository } from '../system_ops/repositories/governance-read.repository';
 import { GovernanceReadService } from '../system_ops/services/governance-read.service';
+import { Reflector } from '@nestjs/core';
+import { ROLES_KEY } from '../../common/auth/roles.decorator';
+import { GraphQueryController } from '../graph_intelligence/controllers/graph-query.controller';
+import { StorageGovernanceController } from '../polyglot_storage/controllers/storage-governance.controller';
+import { WorkflowDefinitionsController } from '../workflow/controllers/workflow-definitions.controller';
+import { DATA_CATALOG_ROLE_SEED } from './data_catalog.roles';
+import { AuthzGrantsService } from '../authz/services/authz-grants.service';
+import { AUTHZ } from '../authz/authz.concepts';
+import { PreconditionFailedException } from '../../common';
 import { AdminCatalogController } from './presentation/controllers/admin-catalog.controller';
 import { CatalogInsightsService } from './application/catalog-insights.service';
 import { CatalogClassificationService } from './application/catalog-classification.service';
@@ -153,19 +162,22 @@ describe('alias GOVERNANCE_ADMIN = DATA_GOVERNANCE_ADMIN en rutas de ambos módu
   });
 
   it.each(['GOVERNANCE_ADMIN', 'DATA_GOVERNANCE_ADMIN'])(
-    '%s pasa en las rutas de data_catalog y de system_ops (lo exige GOVERNANCE_ADMIN)',
+    '%s pasa en las LECTURAS de data_catalog y de system_ops (ambos nombres figuran en el @Roles de cada GET)',
     async (rol) => {
       await get('/admin/catalog/pii/summary', [rol]).expect(200);
       await get('/admin/governance/policies', [rol]).expect(200);
     },
   );
 
-  it.each(['GOVERNANCE_ADMIN', 'DATA_GOVERNANCE_ADMIN'])(
-    '%s pasa la puerta de cross_store (lo exige DATA_GOVERNANCE_ADMIN): llega a la validación → 400, no 403',
-    async (rol) => {
-      await post([rol]).expect(400);
-    },
-  );
+  // Contrato (revisión independiente): el alias es SÓLO de lectura. Cada rol conserva únicamente las
+  // rutas de escritura que su nombre exacto ya autorizaba.
+  it('DATA_GOVERNANCE_ADMIN pasa la puerta de cross_store (lo exige por su nombre): llega a la validación → 400', async () => {
+    await post(['DATA_GOVERNANCE_ADMIN']).expect(400);
+  });
+
+  it('GOVERNANCE_ADMIN SIN DATA_GOVERNANCE_ADMIN NO pasa la escritura de cross_store → 403', async () => {
+    await post(['GOVERNANCE_ADMIN']).expect(403);
+  });
 
   it.each(['DATA_STEWARD', 'DPO', 'PHARMACIST', 'CLINICIAN'])(
     'un rol ajeno (%s) no pasa por el alias en cross_store → 403',
@@ -178,4 +190,138 @@ describe('alias GOVERNANCE_ADMIN = DATA_GOVERNANCE_ADMIN en rutas de ambos módu
     await get('/admin/governance/policies', ['PHARMACIST']).expect(403);
     await get('/admin/catalog/pii/summary', ['PHARMACIST']).expect(403);
   });
+
+  it('ninguna lectura nueva exige uno solo de los dos nombres', () => {
+    const lectura = (controller: any, handler: string): string[] =>
+      new Reflector().getAllAndOverride<string[]>(ROLES_KEY, [
+        controller.prototype[handler],
+        controller,
+      ]);
+    for (const handler of ['piiSummary', 'piiColumns', 'piiReconciliation'])
+      expect(lectura(AdminCatalogController, handler)).toEqual(
+        expect.arrayContaining(['GOVERNANCE_ADMIN', 'DATA_GOVERNANCE_ADMIN']),
+      );
+    expect(lectura(GovernanceReadController, 'policies')).toEqual(
+      expect.arrayContaining(['GOVERNANCE_ADMIN', 'DATA_GOVERNANCE_ADMIN']),
+    );
+  });
+});
+
+/**
+ * Escrituras que exigen UNO de los dos nombres: el guard REAL con el `@Roles` REAL de cada handler.
+ * Prueba que el alias no amplía privilegios de escritura en ningún sentido.
+ */
+describe('el alias no concede escritura (RolesGuard real sobre el @Roles real de cada handler)', () => {
+  const pasa = (controller: any, handler: string, roles: string[]): boolean => {
+    const guard = new RolesGuard(new Reflector());
+    const ctx = {
+      switchToHttp: () => ({
+        getRequest: () => ({
+          user: { id: 'u1', roles },
+          resolvedTenantId: undefined,
+        }),
+      }),
+      getHandler: () => controller.prototype[handler],
+      getClass: () => controller,
+    };
+    try {
+      return guard.canActivate(ctx as never) === true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Rutas que exigen DATA_GOVERNANCE_ADMIN por su nombre exacto.
+  it.each([
+    [CrossStoreAdminController, 'registerProjection'],
+    [CrossStoreAdminController, 'replayDeadLetter'],
+    [CrossStoreAdminController, 'repairDrift'],
+    [CrossStoreAdminController, 'moveData'],
+    [GraphQueryController, 'defineAccessScope'],
+  ])('%p.%s: DATA_GOVERNANCE_ADMIN pasa, GOVERNANCE_ADMIN solo NO', (c, h) => {
+    expect(pasa(c, h as string, ['DATA_GOVERNANCE_ADMIN'])).toBe(true);
+    expect(pasa(c, h as string, ['GOVERNANCE_ADMIN'])).toBe(false);
+  });
+
+  // Rutas que exigen GOVERNANCE_ADMIN por su nombre exacto.
+  it.each([
+    [AdminCatalogController, 'saveAnnotation'],
+    [StorageGovernanceController, 'defineDataset'],
+    [StorageGovernanceController, 'defineCollection'],
+    [StorageGovernanceController, 'approvePlacement'],
+    [WorkflowDefinitionsController, 'registerStateMachine'],
+  ])('%p.%s: GOVERNANCE_ADMIN pasa, DATA_GOVERNANCE_ADMIN solo NO', (c, h) => {
+    expect(pasa(c, h as string, ['GOVERNANCE_ADMIN'])).toBe(true);
+    expect(pasa(c, h as string, ['DATA_GOVERNANCE_ADMIN'])).toBe(false);
+  });
+
+  it('con ambos nombres pasan las dos familias (cada uno por el suyo)', () => {
+    const ambos = ['GOVERNANCE_ADMIN', 'DATA_GOVERNANCE_ADMIN'];
+    expect(pasa(CrossStoreAdminController, 'registerProjection', ambos)).toBe(
+      true,
+    );
+    expect(pasa(AdminCatalogController, 'saveAnnotation', ambos)).toBe(true);
+  });
+});
+
+/**
+ * DPO, AUDITOR y DATA_STEWARD (y los demás roles de gobierno) son de ámbito GLOBAL y NO se pueden
+ * asignar con tenant (`authz-grants.service.ts`). De eso depende que no lean datos de toda la
+ * plataforma «desde su propio tenant»: un rol con tenant entra a `scopedRoles` y deja de autorizar
+ * las rutas sin tenant.
+ */
+describe('roles de gobierno: ámbito GLOBAL y sin asignación con tenant', () => {
+  const ROLES = [
+    'DPO',
+    'AUDITOR',
+    'DATA_STEWARD',
+    'GOVERNANCE_ADMIN',
+    'DATA_PLATFORM_ADMIN',
+  ];
+
+  it.each(ROLES)('%s se siembra con ámbito GLOBAL', (codigo) => {
+    const fila = DATA_CATALOG_ROLE_SEED.find((r) => r.code === codigo);
+    expect(fila?.scope).toBe('GLOBAL');
+  });
+
+  it.each(ROLES)(
+    'asignar %s con tenant → 412 ROLE_ASSIGNMENT_GLOBAL_ROLE_WITH_SCOPE',
+    async (codigo) => {
+      const rolesRepo = {
+        findById: mockFn(async () => ({
+          id: 'r1',
+          code: codigo,
+          isAssignable: true,
+          scopeConceptId: AUTHZ.SCOPE_GLOBAL,
+        })),
+      };
+      const assignments = {
+        findActive: mockFn(async () => null),
+        create: mockFn(),
+      };
+      const tx = { flush: mockFn(async () => undefined) };
+      const service = new AuthzGrantsService(
+        { transactional: mockFn((cb: any) => cb(tx)) } as any,
+        rolesRepo as any,
+        assignments as any,
+        {} as any,
+        {} as any,
+        {} as any,
+        { setContext: mockFn(), info: mockFn(), warn: mockFn() } as any,
+      );
+      const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
+      const conTenant = service.assignRole(
+        'u1',
+        {
+          roleId: 'r1',
+          tenantId: '00000000-0000-4000-8000-0000000000a1',
+        } as any,
+        actor,
+      );
+      await expect(conTenant).rejects.toBeInstanceOf(
+        PreconditionFailedException,
+      );
+      expect(assignments.create).not.toHaveBeenCalled();
+    },
+  );
 });

@@ -26,6 +26,7 @@ export const AUDIT_READ_ROLES = ['AUDITOR', 'DPO', 'SECURITY_ADMIN'] as const;
 export const AUDIT_SUMMARY_ROLES = [
   ...AUDIT_READ_ROLES,
   'GOVERNANCE_ADMIN',
+  'DATA_GOVERNANCE_ADMIN',
 ] as const;
 
 /** Propósito con que se sella la lectura de la bitácora: supervisión, no atención del paciente. */

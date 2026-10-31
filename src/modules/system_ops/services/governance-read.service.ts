@@ -6,7 +6,13 @@ import {
   encodeKeysetCursor,
 } from '../../../common/pagination/keyset-cursor';
 import {
+  assertOneOf,
+  invalidCursor,
+  readCursorFields,
+} from '../../../common/pagination/keyset-fields';
+import {
   GOV_CHANGE_LOG_WINDOW_DAYS,
+  POLICY_TYPES,
   GOV_DEFAULT_PAGE_SIZE,
   type ChangeLogQueryDto,
   type EntityRegistryQueryDto,
@@ -19,10 +25,7 @@ import {
   GovernanceReadRepository,
 } from '../repositories/governance-read.repository';
 
-const CURSOR_INVALIDO = 'El cursor de paginación no es válido';
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
-
-const esTexto = (v: unknown): v is string => typeof v === 'string';
 
 /**
  * Lecturas de gobierno de datos de `system_ops`: políticas, bitácora de cambios y registro de
@@ -54,14 +57,14 @@ export class GovernanceReadService {
     if (q.cursor) {
       const k = decodeKeysetCursor(q.cursor);
       // El cursor lleva el orden con que se emitió: uno de otro orden saltaría filas en silencio.
-      if (
-        k.m !== `${sort}:${order}` ||
-        !esTexto(k.k) ||
-        !esTexto(k.t) ||
-        !esTexto(k.i)
-      )
-        throw new BadRequestException(CURSOR_INVALIDO);
-      cursor = { k: k.k, t: k.t, i: k.i };
+      if (k.m !== `${sort}:${order}`) throw invalidCursor();
+      const c = readCursorFields(k, {
+        k: sort === 'code' ? 'text' : 'timestamp',
+        t: 'text',
+        i: 'uuid',
+      });
+      assertOneOf(c.t, POLICY_TYPES);
+      cursor = c;
     }
     const filas = await this.repo.policies(this.db(), {
       type: q.type,
@@ -142,10 +145,10 @@ export class GovernanceReadService {
       throw new BadRequestException('«to» debe ser posterior a «from»');
     let cursor: { t: string; i: string } | undefined;
     if (q.cursor) {
-      const k = decodeKeysetCursor(q.cursor);
-      if (!esTexto(k.t) || !esTexto(k.i))
-        throw new BadRequestException(CURSOR_INVALIDO);
-      cursor = { t: k.t, i: k.i };
+      cursor = readCursorFields(decodeKeysetCursor(q.cursor), {
+        t: 'timestamp',
+        i: 'uuid',
+      });
     }
     const filas = await this.repo.changeLog(this.db(), {
       from,
@@ -184,10 +187,11 @@ export class GovernanceReadService {
     const limit = this.limit(q);
     let cursor: { s: string; t: string; i: string } | undefined;
     if (q.cursor) {
-      const k = decodeKeysetCursor(q.cursor);
-      if (!esTexto(k.s) || !esTexto(k.t) || !esTexto(k.i))
-        throw new BadRequestException(CURSOR_INVALIDO);
-      cursor = { s: k.s, t: k.t, i: k.i };
+      cursor = readCursorFields(decodeKeysetCursor(q.cursor), {
+        s: 'text',
+        t: 'text',
+        i: 'uuid',
+      });
     }
     const filas = await this.repo.entityRegistry(this.db(), {
       schema: q.schema,
@@ -260,10 +264,10 @@ export class GovernanceReadService {
     const limit = this.limit(q);
     let cursor: { c: string; i: string } | undefined;
     if (q.cursor) {
-      const k = decodeKeysetCursor(q.cursor);
-      if (!esTexto(k.c) || !esTexto(k.i))
-        throw new BadRequestException(CURSOR_INVALIDO);
-      cursor = { c: k.c, i: k.i };
+      cursor = readCursorFields(decodeKeysetCursor(q.cursor), {
+        c: 'text',
+        i: 'uuid',
+      });
     }
     const em = this.db();
     if (!(await this.repo.entityExists(em, entityId)))

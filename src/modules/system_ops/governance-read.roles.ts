@@ -4,8 +4,12 @@ import { PLATFORM_SCOPE_ROLES } from '../../common/tenant/platform-scope';
  * Roles de lectura del gobierno de datos (matriz de roles §3.12 del frente 04 del portal).
  *
  * `SUPERADMIN` no se enumera: es comodín en `RolesGuard`. Las asignaciones de estos roles se hacen
- * sin tenant (ver `data_catalog.roles.ts`). `DATA_GOVERNANCE_ADMIN` autoriza como
- * `GOVERNANCE_ADMIN` por el alias de `common/auth/role-aliases.ts`.
+ * sin tenant (ver `data_catalog.roles.ts`).
+ *
+ * ALIAS (decisión X-6) **sólo de lectura y explícito**: `GOVERNANCE_ADMIN` y `DATA_GOVERNANCE_ADMIN`
+ * figuran los dos en cada lista de LECTURA. No hay alias global en `RolesGuard`: uno de los dos
+ * nombres NO gana por eso ninguna ruta de escritura de `cross_store_consistency`,
+ * `graph_intelligence`, el catálogo, `polyglot_storage` ni `workflow`.
  *
  * La API es la autoridad: ocultar el menú en la pantalla no protege nada.
  */
@@ -19,6 +23,7 @@ export const GOVERNANCE_VIEW_ROLES = [
   'SECURITY_ADMIN',
   'PLATFORM_ADMIN',
   'GOVERNANCE_ADMIN',
+  'DATA_GOVERNANCE_ADMIN',
   'DATA_PLATFORM_ADMIN',
   'DPO',
   'AUDITOR',
@@ -33,6 +38,7 @@ export const LEGAL_HOLD_VIEW_ROLES = [
   'SECURITY_ADMIN',
   'PLATFORM_ADMIN',
   'GOVERNANCE_ADMIN',
+  'DATA_GOVERNANCE_ADMIN',
   'DPO',
   'AUDITOR',
 ] as const;

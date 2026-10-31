@@ -5,6 +5,10 @@ import {
   encodeKeysetCursor,
 } from '../../../common/pagination/keyset-cursor';
 import {
+  readCursorFields,
+  type CursorFieldKind,
+} from '../../../common/pagination/keyset-fields';
+import {
   GOV_DEFAULT_PAGE_SIZE,
   type DomainListQueryDto,
   type GovPageQueryDto,
@@ -12,9 +16,6 @@ import {
   type RetentionExecutionListQueryDto,
 } from '../dto/governance-read.dto';
 import { GovernanceOperationsReadRepository } from '../repositories/governance-operations-read.repository';
-
-const CURSOR_INVALIDO = 'El cursor de paginación no es válido';
-const esTexto = (v: unknown): v is string => typeof v === 'string';
 
 /** Página genérica: corta la fila extra que delata que hay más y arma el cursor. */
 function paginar<T>(
@@ -52,24 +53,16 @@ export class GovernanceOperationsReadService {
 
   private cursor<K extends string>(
     raw: string | undefined,
-    claves: readonly K[],
+    spec: Readonly<Record<K, CursorFieldKind>>,
   ): Record<K, string> | undefined {
-    if (!raw) return undefined;
-    const k = decodeKeysetCursor(raw);
-    const salida = {} as Record<K, string>;
-    for (const c of claves) {
-      const v = k[c];
-      if (!esTexto(v)) throw new BadRequestException(CURSOR_INVALIDO);
-      salida[c] = v;
-    }
-    return salida;
+    return raw ? readCursorFields(decodeKeysetCursor(raw), spec) : undefined;
   }
 
   async domains(q: DomainListQueryDto) {
     const limit = this.limit(q);
     const filas = await this.repo.domains(this.db(), {
       q: q.q,
-      cursor: this.cursor(q.cursor, ['c', 'i'] as const),
+      cursor: this.cursor(q.cursor, { c: 'text', i: 'uuid' }),
       limit,
     });
     const { pagina, nextCursor } = paginar(filas, limit, (f) => ({
@@ -117,7 +110,7 @@ export class GovernanceOperationsReadService {
       targetType: q.targetType,
       tenantId: q.tenantId,
       targetId: q.targetId,
-      cursor: this.cursor(q.cursor, ['t', 'i'] as const),
+      cursor: this.cursor(q.cursor, { t: 'timestamp', i: 'uuid' }),
       limit,
     });
     const { pagina, nextCursor } = paginar(filas, limit, (f) => ({
@@ -164,7 +157,7 @@ export class GovernanceOperationsReadService {
       status: q.status ? `EXEC_${q.status}` : undefined,
       from,
       to,
-      cursor: this.cursor(q.cursor, ['t', 'i'] as const),
+      cursor: this.cursor(q.cursor, { t: 'timestamp', i: 'uuid' }),
       limit,
     });
     const { pagina, nextCursor } = paginar(filas, limit, (f) => ({

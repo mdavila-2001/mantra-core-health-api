@@ -4,17 +4,20 @@ import {
   decodeKeysetCursor,
   encodeKeysetCursor,
 } from '../../../common/pagination/keyset-cursor';
+import {
+  assertOneOf,
+  readCursorFields,
+} from '../../../common/pagination/keyset-fields';
 import { DEFAULT_PAGE_SIZE } from '../data_catalog.constants';
 import { GovernanceQueueRepository } from '../infrastructure/repositories/governance-queue.repository';
+import { JOB_TYPES } from '../presentation/dto/governance-queue.dto';
 import type {
   JobsQueryDto,
   ReviewQueueQueryDto,
 } from '../presentation/dto/governance-queue.dto';
 
-const CURSOR_INVALIDO = 'El cursor de paginación no es válido';
 const MS_POR_DIA = 24 * 60 * 60 * 1000;
 const VENTANA_DIAS = 30;
-const esTexto = (v: unknown): v is string => typeof v === 'string';
 
 /**
  * Agregadores de lectura del portal de gobierno: cola de revisión y trabajos. Cada fuente que aún
@@ -31,10 +34,10 @@ export class GovernanceQueueService {
     const limit = q.limit ?? DEFAULT_PAGE_SIZE;
     let cursor: { t: string; i: string } | undefined;
     if (q.cursor) {
-      const k = decodeKeysetCursor(q.cursor);
-      if (!esTexto(k.t) || !esTexto(k.i))
-        throw new BadRequestException(CURSOR_INVALIDO);
-      cursor = { t: k.t, i: k.i };
+      cursor = readCursorFields(decodeKeysetCursor(q.cursor), {
+        t: 'timestamp',
+        i: 'uuid',
+      });
     }
     const em = this.em.fork();
     const [filas, conteos] = await Promise.all([
@@ -118,10 +121,12 @@ export class GovernanceQueueService {
       throw new BadRequestException('«to» debe ser posterior a «from»');
     let cursor: { t: string; ty: string; i: string } | undefined;
     if (q.cursor) {
-      const k = decodeKeysetCursor(q.cursor);
-      if (!esTexto(k.t) || !esTexto(k.ty) || !esTexto(k.i))
-        throw new BadRequestException(CURSOR_INVALIDO);
-      cursor = { t: k.t, ty: k.ty, i: k.i };
+      cursor = readCursorFields(decodeKeysetCursor(q.cursor), {
+        t: 'timestamp',
+        ty: 'text',
+        i: 'uuid',
+      });
+      assertOneOf(cursor.ty, JOB_TYPES);
     }
     const filas = await this.repo.jobs(this.em.fork(), {
       type: q.type,

@@ -1,13 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ResourceNotFoundException } from '../../../common';
+import { badRequestWithReason } from '../../../common/errors/reasoned-http-exceptions';
+import { SystemErrorReason } from '../../../common/errors/system-error-reasons';
 import {
   decodeKeysetCursor,
   encodeKeysetCursor,
 } from '../../../common/pagination/keyset-cursor';
+import { readCursorFields } from '../../../common/pagination/keyset-fields';
 import { AUDIT_DEFAULT_PAGE_SIZE } from '../dto/audit-query.dto';
 import {
   SUMMARY_MIN_SAMPLE_DEFAULT,
+  SUMMARY_MIN_SAMPLE_FLOOR,
+  SUMMARY_MIN_WINDOW_MS,
   type DataAccessSummaryQueryDto,
   type DsarListQueryDto,
 } from '../dto/audit-oversight.dto';
@@ -30,6 +35,33 @@ const sinPrefijo = (codigo: string | null, prefijo: string): string | null =>
     : codigo.startsWith(prefijo)
       ? codigo.slice(prefijo.length)
       : codigo;
+
+/**
+ * Suprime los grupos con menos de `minSample` eventos y aplica supresión COMPLEMENTARIA: si lo
+ * suprimido suma menos que `minSample` (restarlo del total revelaría un grupo chico), se suprimen
+ * también los grupos visibles más pequeños hasta que lo oculto sea 0 o ≥ `minSample`.
+ */
+export function suppressSmallGroups<T extends { events: number }>(
+  items: T[],
+  minSample: number,
+): { visible: T[]; suppressed: number } {
+  const ocultos = new Set<T>(items.filter((i) => i.events < minSample));
+  let suprimido = [...ocultos].reduce((a, i) => a + i.events, 0);
+  if (suprimido > 0 && suprimido < minSample) {
+    const menores = items
+      .filter((i) => !ocultos.has(i))
+      .sort((a, b) => a.events - b.events);
+    for (const i of menores) {
+      if (suprimido >= minSample) break;
+      ocultos.add(i);
+      suprimido += i.events;
+    }
+  }
+  return {
+    visible: items.filter((i) => !ocultos.has(i)),
+    suppressed: suprimido,
+  };
+}
 
 const ESTADOS_CERRADOS = new Set(['COMPLETED', 'REJECTED']);
 
@@ -59,7 +91,17 @@ export class AuditOversightReadService {
     now: Date = new Date(),
   ) {
     const { from, to } = this.rango(q, now);
-    const minSample = q.minSample ?? SUMMARY_MIN_SAMPLE_DEFAULT;
+    // El piso lo pone el SERVIDOR: el cliente puede subir el mínimo, nunca bajarlo (k-anonimato).
+    const minSample = Math.max(
+      q.minSample ?? SUMMARY_MIN_SAMPLE_DEFAULT,
+      SUMMARY_MIN_SAMPLE_FLOOR,
+    );
+    if (to.getTime() - from.getTime() < SUMMARY_MIN_WINDOW_MS)
+      throw badRequestWithReason(
+        'La ventana del resumen debe abarcar al menos 24 horas',
+        SystemErrorReason.INVALID_DATE,
+        { parameter: 'from' },
+      );
     const em = this.em.fork();
     const dims: SummaryDimension[] = ['purpose', 'resource_type', 'operation'];
     const [totales, daily, ...grupos] = await Promise.all([
@@ -67,43 +109,47 @@ export class AuditOversightReadService {
       this.repo.accessDaily(em, from, to),
       ...dims.map((d) => this.repo.accessBuckets(em, d, from, to)),
     ]);
-    let suppressedBuckets = 0;
-    let suppressedEvents = 0;
-    const visibles = (filas: SummaryBucketRow[], quitar?: string) => {
-      const salida: {
-        key: string | null;
-        events: number;
-        distinctActors: number;
-      }[] = [];
-      for (const f of filas) {
-        if (f.events < minSample) {
-          suppressedBuckets += 1;
-          suppressedEvents += f.events;
-        } else
-          salida.push({
-            key: quitar ? sinPrefijo(f.key, quitar) : f.key,
-            events: f.events,
-            distinctActors: f.distinct_actors,
-          });
-      }
-      return salida;
-    };
-    const byPurpose = visibles(grupos[0]);
-    const byResourceType = visibles(grupos[1]);
-    const byOperation = visibles(grupos[2], 'ACTION_');
+    const bucket = (filas: SummaryBucketRow[], quitar?: string) =>
+      suppressSmallGroups(
+        filas.map((f) => ({
+          key: quitar ? sinPrefijo(f.key, quitar) : f.key,
+          events: f.events,
+          distinctActors: f.distinct_actors,
+        })),
+        minSample,
+      );
+    const byPurpose = bucket(grupos[0]);
+    const byResourceType = bucket(grupos[1]);
+    const byOperation = bucket(grupos[2], 'ACTION_');
+    const porDia = suppressSmallGroups(
+      daily.map((d) => ({ key: d.day, events: d.events })),
+      minSample,
+    );
+    const totalVisible = totales.events >= minSample;
+    const pacienteVisible =
+      totales.patient_scoped_events === 0 ||
+      totales.patient_scoped_events >= minSample;
     return {
       window: { from: from.toISOString(), to: to.toISOString() },
       totals: {
-        events: totales.events,
-        distinctActors: totales.distinct_actors,
-        patientScopedEvents: totales.patient_scoped_events,
+        events: totalVisible ? totales.events : null,
+        distinctActors: totalVisible ? totales.distinct_actors : null,
+        patientScopedEvents: pacienteVisible
+          ? totales.patient_scoped_events
+          : null,
       },
-      byPurpose,
-      byResourceType,
-      byOperation,
-      daily: daily.map((d) => ({ day: d.day, events: d.events })),
+      byPurpose: byPurpose.visible,
+      byResourceType: byResourceType.visible,
+      byOperation: byOperation.visible,
+      daily: porDia.visible.map((d) => ({ day: d.key, events: d.events })),
       minSample,
-      suppressed: { buckets: suppressedBuckets, events: suppressedEvents },
+      // Cada cifra es 0 o ≥ minSample: restarle a un total lo visible nunca revela un grupo chico.
+      suppressed: {
+        byPurpose: byPurpose.suppressed,
+        byResourceType: byResourceType.suppressed,
+        byOperation: byOperation.suppressed,
+        daily: porDia.suppressed,
+      },
       notMeasured: [
         {
           field: 'byRole',
@@ -115,11 +161,19 @@ export class AuditOversightReadService {
           reason:
             'La tabla no marca qué lecturas tocaron PHI: patientScopedEvents cuenta las que identifican a un paciente',
         },
-        ...(totales.events === 0
+        ...(!totalVisible
           ? [
               {
-                field: 'events',
-                reason: 'No hay lecturas registradas en la ventana pedida',
+                field: 'totals',
+                reason: `Hay menos de ${minSample} eventos en la ventana: no se muestran cifras para no singularizar a nadie`,
+              },
+            ]
+          : []),
+        ...(!pacienteVisible
+          ? [
+              {
+                field: 'totals.patientScopedEvents',
+                reason: `Hay menos de ${minSample} lecturas con paciente: no se muestra la cifra`,
               },
             ]
           : []),
@@ -157,10 +211,10 @@ export class AuditOversightReadService {
       throw new BadRequestException('«to» debe ser posterior a «from»');
     let cursor: { t: string; i: string } | undefined;
     if (q.cursor) {
-      const k = decodeKeysetCursor(q.cursor);
-      if (typeof k.t !== 'string' || typeof k.i !== 'string')
-        throw new BadRequestException('El cursor de paginación no es válido');
-      cursor = { t: k.t, i: k.i };
+      cursor = readCursorFields(decodeKeysetCursor(q.cursor), {
+        t: 'timestamp',
+        i: 'uuid',
+      });
     }
     const filas = await this.repo.dsarList(this.em.fork(), {
       status: q.status ? `DSAR_${q.status}` : undefined,

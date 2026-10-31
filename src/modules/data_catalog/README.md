@@ -215,14 +215,18 @@ Las lecturas de `admin/governance/*` viven aquí (`review-queue`, `jobs`) y en `
 bajo el mismo prefijo; ambas usan `GOVERNANCE_VIEW_ROLES` (`system_ops/governance-read.roles.ts`) =
 `PORTAL_READ_ROLES`.
 
-## Roles de gobierno: un solo concepto, dos nombres
+## Roles de gobierno: dos nombres, alias SOLO de lectura
 
 `GOVERNANCE_ADMIN` (sembrado aquí, `data_catalog.roles.ts`) y `DATA_GOVERNANCE_ADMIN` (sembrado por
-`authz`, exigido por `cross_store_consistency` y `graph_intelligence`) son **alias** (decisión X-6):
-`src/common/auth/role-aliases.ts` hace que `RolesGuard`, el alcance plataforma y
-`@PlatformTenantOptional` traten a los dos como uno, **sin migrar datos**: ambas filas de `authz.roles`
-y los tokens vigentes siguen valiendo, y el ámbito de tenant de cada código se respeta por separado.
-Prueba: `data_catalog.role-alias.spec.ts` (rutas reales de ambos módulos) y `role-aliases.spec.ts`.
+`authz`, exigido por `cross_store_consistency` y `graph_intelligence`) son el mismo concepto con dos
+nombres (decisión X-6), pero **el alias es explícito y sólo de lectura**: ambos nombres figuran en el
+`@Roles` de cada `GET` de gobierno (`PORTAL_VIEW_ROLES`, `GOVERNANCE_VIEW_ROLES`,
+`LEGAL_HOLD_VIEW_ROLES`, `AUDIT_SUMMARY_ROLES`). **No hay alias en `RolesGuard`**: en las rutas de
+escritura cada nombre conserva sólo lo que ya autorizaba (un alias global ampliaba privilegios de
+escritura en `cross_store_consistency`, `graph_intelligence`, el catálogo, `polyglot_storage` y
+`workflow`). Ambas filas de `authz.roles` y los tokens vigentes no cambian.
+Pruebas: `data_catalog.role-alias.spec.ts` (guard real sobre el `@Roles` real de cada handler de
+escritura, en los dos sentidos) y `common/auth/role-aliases.spec.ts`.
 
 ## Qué no cubre
 
