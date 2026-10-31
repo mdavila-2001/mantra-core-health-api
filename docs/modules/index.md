@@ -68,7 +68,7 @@
 | [`health_context`](health_context.md) | 1 | 2 | 1 | 10 | 1 |
 | [`medical_centers`](medical_centers.md) | 1 | 2 | 3 | 0 | 1 |
 | [`medical_groups`](medical_groups.md) | 1 | 1 | 2 | 2 | 1 |
-| [`ops_console`](ops_console.md) | 1 | 2 | 2 | 0 | 1 |
+| [`ops_console`](ops_console.md) | 4 | 4 | 3 | 0 | 2 |
 | [`platform_ops`](platform_ops.md) | 1 | 5 | 5 | 38 | 1 |
 | [`public`](public.md) | 1 | 2 | 2 | 0 | 2 |
 | [`qa_execution`](qa_execution.md) | 1 | 1 | 0 | 4 | 1 |
@@ -78,4 +78,4 @@
 | [`search_platform`](search_platform.md) | 1 | 1 | 0 | 0 | 1 |
 | [`system_context`](system_context.md) | 1 | 2 | 1 | 9 | 1 |
 | [`tracking`](tracking.md) | 1 | 1 | 1 | 8 | 1 |
-| **Total** | **306** | **496** | **450** | **1289** | **558** |
+| **Total** | **309** | **498** | **451** | **1289** | **559** |
