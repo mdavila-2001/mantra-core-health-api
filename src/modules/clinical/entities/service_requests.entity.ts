@@ -94,16 +94,6 @@ export class ServiceRequests {
   suggestedPracticeSiteId?: string;
 
   /**
-   * Identificador asociado a suggested practice site.
-   */
-  @Property({
-    fieldName: 'suggested_practice_site_id',
-    type: 'uuid',
-    nullable: true,
-  }) // FK (destino no resuelto)
-  suggestedPracticeSiteId?: string;
-
-  /**
    * El informe diagnóstico previo que satisface este pedido (antiduplicación,
    * v4.2.17). Presente cuando el motor de duplicidad encontró un informe
    * liberado o final del mismo estudio dentro de la ventana: `null` significa
