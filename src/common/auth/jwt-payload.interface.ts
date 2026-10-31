@@ -101,6 +101,41 @@ export interface JwtPayload {
    * administradores, cuentas de sistema.
    */
   hpid?: string;
+  /**
+   * Tipo de cuenta de quien inicia sesión: `ORGANIZATION` si alguna de sus
+   * organizaciones (`tenants`) está en modo de cuenta de organización, `PERSON`
+   * en cualquier otro caso. Lo gobierna el interruptor `org_account_mode` de
+   * cada organización; sin él todo es `PERSON`.
+   *
+   * Es dato de presentación —el cliente decide qué menú mostrar— y **no
+   * participa de ninguna decisión de autorización**.
+   */
+  accountKind?: 'PERSON' | 'ORGANIZATION';
+  /** Tipo de cuenta de cada tenant de `tenants`, indexado por id (presentación). */
+  tenantAccountKinds?: Record<string, 'PERSON' | 'ORGANIZATION'>;
+  /**
+   * Minutos de inactividad (5-480) tras los cuales el cliente cierra la sesión:
+   * el menor plazo de las políticas de sesión que alcanzan a la persona. Se
+   * omite si ninguna aplica. Es presentación: el cliente lo usa para su reloj y
+   * **no autoriza nada**; la sesión la sigue gobernando el servidor.
+   */
+  idleTimeoutMinutes?: number;
+  /**
+   * Organizaciones de la persona que NO la dejan actuar ahora, con el motivo
+   * estable (`OUTSIDE_ALLOWED_HOURS`, `OUTSIDE_ALLOWED_NETWORK`, `IDLE_TIMEOUT`,
+   * `MFA_REQUIRED`, `MFA_ENROLLMENT_REQUIRED`). Esas organizaciones NO figuran en
+   * `tenants` ni en `scopedRoles`: la política de una organización rige solo
+   * cuando la persona actúa en ella, y no le cierra la sesión en las demás.
+   * Una petición con `X-Tenant-Id` de una de ellas recibe 403 con ese motivo.
+   */
+  deniedTenants?: Record<string, string>;
+  /**
+   * `true` en el token de alcance limitado: la persona debe dar de alta un
+   * segundo factor antes de usar la API. Solo deja pasar `/iam/me/mfa*`,
+   * `/iam/auth/logout`, el refresco y `GET /iam/me`; el refresco lo conserva y
+   * lo reemite completo al confirmar el factor.
+   */
+  mfaEnrollment?: true;
   /** Marca de tipo para distinguir access de otros usos futuros del secreto. */
   typ: 'access';
 }

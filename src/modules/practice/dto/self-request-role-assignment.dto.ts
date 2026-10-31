@@ -80,6 +80,13 @@ export class RoleAssignmentTransitionDto {
 export class MyRoleAssignmentResponseDto extends RoleAssignmentRowDto {
   /** Nombre legible de la organización. */
   @ApiProperty() practiceName!: string;
+  /**
+   * Organización (tenant) a la que pertenece la vinculación: es el
+   * `X-Tenant-Id` con el que se consulta lo de esa organización (por ejemplo
+   * «¿por qué pudo?»). `null` si la organización ya no se encuentra.
+   */
+  @ApiProperty({ format: 'uuid', nullable: true, type: String })
+  tenantId!: string | null;
   /** Tipo de organización (concepto). */
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   practiceType!: string | null;

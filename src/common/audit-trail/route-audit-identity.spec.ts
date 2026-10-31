@@ -130,4 +130,34 @@ describe('route-audit-identity', () => {
       }),
     ).toMatchObject({ entityId: undefined });
   });
+
+  it('M7: en una ruta sin tenant el sello toma el tenant de la RESPUESTA, no del cuerpo', () => {
+    const T = '33333333-3333-4333-8333-333333333333';
+    const options = {
+      action: 'SUPPORT_ENGAGEMENT_REQUESTED',
+      entity: 'engagement_request',
+      entityId: 'result.id' as const,
+      tenantId: 'result.tenantId' as const,
+    };
+    expect(
+      deriveRouteAuditIdentity({
+        method: 'POST',
+        routeTemplate: '/support-engagement-requests',
+        params: {},
+        result: { id: A, tenantId: T },
+        body: { tenantId: '44444444-4444-4444-8444-444444444444' },
+        options,
+      }),
+    ).toMatchObject({ entityId: A, tenantId: T });
+    // Sin respuesta (un fallo) no hay tenant: el cuerpo es del cliente.
+    expect(
+      deriveRouteAuditIdentity({
+        method: 'POST',
+        routeTemplate: '/support-engagement-requests',
+        params: {},
+        body: { tenantId: T },
+        options,
+      }).tenantId,
+    ).toBeUndefined();
+  });
 });

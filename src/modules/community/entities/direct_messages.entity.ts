@@ -105,4 +105,28 @@ export class DirectMessages {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /** Columna `authored_by_user_id`. */
+  @Property({ fieldName: 'authored_by_user_id', type: 'uuid', nullable: true }) // FK → iam.users
+  authoredByUserId?: string;
+
+  /** Columna `on_behalf_of_profile_id`. */
+  @Property({
+    fieldName: 'on_behalf_of_profile_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → profiles.health_practitioner_profiles (el doctor)
+  onBehalfOfProfileId?: string;
+
+  /** Columna `delegate_assignment_id`. */
+  @Property({
+    fieldName: 'delegate_assignment_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → delegated_access.practitioner_delegate_assignments
+  delegateAssignmentId?: string;
+
+  /** Columna `disclosure_shown`. */
+  @Property({ fieldName: 'disclosure_shown', type: 'boolean' })
+  disclosureShown!: boolean;
 }

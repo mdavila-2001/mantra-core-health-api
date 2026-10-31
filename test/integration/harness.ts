@@ -104,6 +104,16 @@ export async function resetBusinessData(): Promise<void> {
     );
     if (rows.length > 0) {
       const list = rows.map((r) => r.qualified).join(', ');
+      // v4.2.73 (A-B2): la bitácora de decisiones (`access_decision_log`) lleva un disparador BEFORE
+      // TRUNCATE que lo prohíbe también al dueño. Reiniciar una base DESCARTABLE es el único
+      // TRUNCATE legítimo: con `session_replication_role = replica` (solo superusuario) los
+      // disparadores ordinarios no corren y el resto del esquema se vacía igual. Si el usuario no
+      // puede cambiarlo se intenta sin él (una base sin v4.2.73 no lo necesita).
+      try {
+        await client.query("set session_replication_role = 'replica'");
+      } catch {
+        // sin privilegio: se sigue con el rol de replicación por omisión
+      }
       await client.query(`TRUNCATE ${list} RESTART IDENTITY CASCADE`);
     }
   } finally {

@@ -60,7 +60,12 @@ export class AcceptBookingUseCase {
     );
 
     const result = await this.em.transactional(async (tx) => {
-      const booking = await this.access.loadForOperation(tx, bookingId, actor);
+      const booking = await this.access.loadForOperation(
+        tx,
+        bookingId,
+        actor,
+        'schedule.confirm',
+      );
       await this.access.assertAffiliationCurrent(booking.tenantId, actor);
       const fromState = booking.statusConceptId;
       this.transitions.assertTransition(fromState, CONCEPTS.BOOKING_CONFIRMED);

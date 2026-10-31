@@ -6,6 +6,11 @@ import { createdBy } from '../../../common';
 /** Datos para dar de alta una asignación de usuario de organización. */
 export interface CreateOrgAssignmentData {
   /**
+   * Organización del vínculo (la del contexto verificado, no la del cuerpo). El
+   * disparador de la base exige que sea la de su membresía.
+   */
+  tenantId: string;
+  /**
    * Identificador asociado a tenant membership.
    */
   tenantMembershipId: string;
@@ -114,6 +119,7 @@ export class OrganizationUserAssignmentsRepository {
     return em.create(
       OrganizationUserAssignments,
       {
+        tenantId: data.tenantId,
         tenantMembershipId: data.tenantMembershipId,
         practiceId: data.practiceId,
         practiceSiteId: data.practiceSiteId,

@@ -73,6 +73,24 @@ savepoint, desde `ClinicalNotificationsService.serviceRequestPlaced`.
 | `ProjectionDriftDetected` | `reconciliation.service.ts` |
 | `ProjectionRepairRequested` | `reconciliation.service.ts` |
 
+### `delegated_access` (1 evento)
+
+| Evento | Servicio productor |
+|---|---|
+| `profiles.patient_portal_invitation.requested` | `support-patient-registration.service.ts` |
+
+Nombre en `dot.case` y con el prefijo `profiles.` (el paciente es de `profiles`); lo publica
+`delegated_access` al registrar un paciente con `POST /me/support-patients` y `inviteToPortal: true`,
+dentro de la misma transacción del alta (constante `PATIENT_PORTAL_INVITATION_EVENT`). Versión `1`
+(el productor no fija `eventVersion`, rige el valor por defecto). `aggregateType`: `patient_profile`;
+`aggregateId`: el perfil del paciente recién creado.
+
+Payload: sólo identificadores (`patientProfileId`, `tenantId`, `requestedByUserId`, la persona de
+apoyo que lo pidió). Ni nombre, ni documento, ni teléfono, ni correo, ni token o contraseña viajan en
+el outbox. Consumidores: ninguno hoy; nada en el código lo suscribe ni lo lee. El consumidor que
+entregue la invitación deberá tomar el destino de la cuenta o del contacto verificado del paciente,
+nunca del registro que escribió el mostrador (el paciente nace sin verificar).
+
 ### `graph_intelligence` (10 eventos)
 
 | Evento | Servicio productor |

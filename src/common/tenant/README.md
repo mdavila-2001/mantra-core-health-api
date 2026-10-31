@@ -8,6 +8,7 @@ Agrupa los componentes relacionados con **tenant** y mantiene cohesionada esta r
 
 | Archivo | Responsabilidad |
 | --- | --- |
+| `system-read-scope.ts` | `withSystemRead`: contexto de sistema acotado a una lectura de autenticación (login y renovación), restaurado en `finally`. `withSystemWrite`: el análogo para UNA escritura sin organización en ese mismo límite (el bloqueo de cuenta de `iam.account_lockouts`): vuelca lo pendiente antes de abrir el contexto y lo escrito antes de cerrarlo, exige transacción y lo restaura en `finally`. |
 | `tenant-context.interceptor.spec.ts` | Pruebas unitarias del componente homónimo. |
 | `tenant-context.interceptor.ts` | Implementación o recurso de soporte de esta carpeta. |
 | `tenant-context.ts` | Implementación o recurso de soporte de esta carpeta. |

@@ -3,7 +3,6 @@ import { jest } from '@jest/globals';
 const fn = jest.fn as unknown as (impl?: (...a: any[]) => any) => any;
 import { ForbiddenException } from '@nestjs/common';
 import {
-  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -59,7 +58,7 @@ function build(
     fork: fn(() => tx),
   };
   const identifiersRepo = {
-    findActiveDuplicate: fn().mockResolvedValue(
+    findActiveNationalIdDuplicate: fn().mockResolvedValue(
       'identificador' in options
         ? options.identificador
         : { ownerId: 'person-abuelo' },
@@ -300,10 +299,9 @@ describe('DependentLinkRequestsService', () => {
 
       expect(r).toEqual({ id: REQUEST_ID, status: 'PENDING' });
       // El documento se busca sin los espacios que deja un pegado.
-      expect(identifiersRepo.findActiveDuplicate).toHaveBeenCalledWith(
-        expect.anything(),
-        { typeConceptId: CONCEPTS.ID_TYPE_NATIONAL, value: '7654321' },
-      );
+      expect(
+        identifiersRepo.findActiveNationalIdDuplicate,
+      ).toHaveBeenCalledWith(expect.anything(), '7654321');
       const data = portalProxiesRepo.create.mock.calls[0][1];
       expect(data).toMatchObject({
         patientProfileId: 'person-abuelo',
@@ -411,7 +409,9 @@ describe('DependentLinkRequestsService', () => {
         );
 
         expect(r).toEqual({ id: REQUEST_ID, status: 'PENDING' });
-        expect(identifiersRepo.findActiveDuplicate).not.toHaveBeenCalled();
+        expect(
+          identifiersRepo.findActiveNationalIdDuplicate,
+        ).not.toHaveBeenCalled();
         expect(portalProxiesRepo.create.mock.calls[0][1]).toMatchObject({
           patientProfileId: 'person-abuelo',
           proxyUserId: 'user-madre',

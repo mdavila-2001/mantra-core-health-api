@@ -39,7 +39,7 @@ _Fuente: `src/modules/pharmacy_inventory/README.md:3`_
 |  |  | GET /pharmacy-inventory/sites/{siteId}/stock | Cualquier sesión válida | BAJO | 6 |
 | `ctrl:PharmacyOrdersController` | Operaciones de PharmacyOrdersController que el README no asigna a un caso de uso | GET /pharmacy/orders | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 32 |
 |  |  | POST /pharmacy/orders | PATIENT | MEDIO | 25 |
-|  |  | GET /pharmacy/orders/{id} | Cualquier sesión válida | ALTO | 47 |
+|  |  | GET /pharmacy/orders/{id} | Cualquier sesión válida | ALTO | 48 |
 |  |  | POST /pharmacy/orders/{id}/accept-substitutions | PATIENT | MEDIO | 24 |
 |  |  | POST /pharmacy/orders/{id}/cancel | PATIENT | MEDIO | 21 |
 |  |  | POST /pharmacy/orders/{id}/confirm | SECURITY_ADMIN · PHARMACY_STAFF | MEDIO | 35 |
@@ -88,9 +88,9 @@ flowchart LR
   t52[("terminology.catalog_concepts")]:::tabla
   t58[("messaging.outbox_messages")]:::tabla
   t61[("clinical.service_requests")]:::tabla
-  t62[("diagnostic_units.diagnostic_study_offerings")]:::tabla
-  t63[("diagnostic_units.diagnostic_units")]:::tabla
-  t64[("directory.tenant_memberships")]:::tabla
+  t62[("delegated_access.organization_user_assignments")]:::tabla
+  t63[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t64[("diagnostic_units.diagnostic_units")]:::tabla
   t73[("insurance.insurance_claims")]:::tabla
   t8[("+13 tablas más")]
   t12[("+4 tablas más")]
@@ -127,7 +127,7 @@ flowchart LR
   end
   t55[("+26 tablas más")]
   t59[("+19 tablas más")]
-  t65[("+41 tablas más")]
+  t65[("+42 tablas más")]
   t67[("+18 tablas más")]
   t69[("+15 tablas más")]
   t71[("+29 tablas más")]
@@ -362,8 +362,8 @@ flowchart LR
   o83 -->|"LEE"| t3
   o83 -->|"LEE"| t61
   o83 -->|"LEE"| t46
-  o83 -->|"LEE"| t62
   o83 -->|"LEE"| t63
+  o83 -->|"LEE"| t64
   o83 -->|"ACTUALIZA"| t39
   o83 -.-> t84
   o83 -->|"evento"| e43

@@ -186,4 +186,20 @@ export class AppointmentBookings {
    */
   @Property({ fieldName: 'form_instance_id', type: 'uuid', nullable: true }) // FK → forms.form_instances
   formInstanceId?: string;
+
+  /** Columna `care_space_id`. */
+  @Property({ fieldName: 'care_space_id', type: 'uuid', nullable: true }) // FK → practice.care_spaces
+  careSpaceId?: string;
+
+  /** Columna `healthcare_service_id`. */
+  @Property({
+    fieldName: 'healthcare_service_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → practice.healthcare_services
+  healthcareServiceId?: string;
+
+  /** Columna `booked_via_grant_id`. */
+  @Property({ fieldName: 'booked_via_grant_id', type: 'uuid', nullable: true }) // FK → delegated_access.support_scope_grants
+  bookedViaGrantId?: string;
 }

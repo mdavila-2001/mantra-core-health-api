@@ -14,7 +14,7 @@ de uso, break-the-glass, enmascaramiento de campos, grants polimórficos y el PD
   find src/modules/authz -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **8 controllers, 27 rutas HTTP, 15 entidades y 9 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **8 controllers, 27 rutas HTTP, 15 entidades y 9 servicios**. La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -22,54 +22,54 @@ Importa (`AuditModule`, `MessagingModule`).
 
 Entidades (`tableName`, 15 de 15 archivos `*.entity.ts`): `access_policies`, `break_glass_sessions`, `care_relationships`, `clinical_access_grants`, `field_permissions`, `ip_access_rules`, `patient_legal_representations`, `permission_categories`, `permissions`, `resource_scope_grants`, `role_permissions`, `roles`, `service_principals`, `user_permission_grants`, `user_role_assignments`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /authz/care-relationships` | CLINICIAN, SECURITY_ADMIN | `authz-care-relationships` |
-| `POST /authz/care-relationships/:id/revoke` | CLINICIAN, SECURITY_ADMIN | `authz-care-relationships` |
-| `GET /authz/care-relationships` | CLINICIAN, SECURITY_ADMIN | `authz-care-relationships` |
-| `GET /authz/care-relationships/requests/mine` | PATIENT | `authz-care-relationships` |
-| `POST /authz/care-relationships/request` | CLINICIAN, PRACTITIONER | `authz-care-relationships` |
-| `POST /authz/care-relationships/:id/respond` | PATIENT | `authz-care-relationships` |
-| `POST /authz/legal-representations` | SECURITY_ADMIN | `authz-care-relationships` |
-| `POST /authz/legal-representations/:id/revoke` | SECURITY_ADMIN | `authz-care-relationships` |
-| `GET /authz/legal-representations` | SECURITY_ADMIN | `authz-care-relationships` |
-| `POST /authz/permission-categories` | SECURITY_ADMIN | `authz-catalog` |
-| `POST /authz/permissions` | SECURITY_ADMIN | `authz-catalog` |
-| `POST /authz/patients/:patientProfileId/clinical-access-grants` | CLINICAL_APPROVER, SECURITY_ADMIN | `authz-clinical` |
-| `POST /authz/patients/:patientProfileId/break-the-glass` | CLINICAL_APPROVER, SECURITY_ADMIN | `authz-clinical` |
-| `DELETE /authz/clinical-access-grants/:grantId` | SECURITY_ADMIN | `authz-clinical` |
-| `POST /authz/users/:userId/role-assignments` | SECURITY_ADMIN | `authz-grants` |
-| `POST /authz/users/:userId/permission-grants` | SECURITY_ADMIN | `authz-grants` |
-| `POST /authz/resource-scope-grants` | SECURITY_ADMIN | `authz-grants` |
-| `GET /authz/me/access` | PATIENT | `authz-me` |
-| `POST /authz/me/care-relationships/:id/revoke` | PATIENT | `authz-me` |
-| `POST /authz/me/clinical-access-grants/:grantId/revoke` | PATIENT | `authz-me` |
-| `POST /authz/pdp/cache/invalidate` | SECURITY_ADMIN | `authz-pdp` |
-| `POST /authz/decisions/evaluate` | SECURITY_ADMIN | `authz-pdp` |
-| `POST /authz/tenants/:tenantId/access-policies` | SECURITY_ADMIN | `authz-policies` |
-| `GET /authz/roles` | SECURITY_ADMIN | `authz-roles` |
-| `POST /authz/roles` | SECURITY_ADMIN | `authz-roles` |
-| `PUT /authz/roles/:roleId/permissions` | SECURITY_ADMIN | `authz-roles` |
-| `PUT /authz/roles/:roleId/field-permissions` | SECURITY_ADMIN | `authz-roles` |
+| Método y ruta                                                   | Acceso                            | Controller                 |
+| --------------------------------------------------------------- | --------------------------------- | -------------------------- |
+| `POST /authz/care-relationships`                                | CLINICIAN, SECURITY_ADMIN         | `authz-care-relationships` |
+| `POST /authz/care-relationships/:id/revoke`                     | CLINICIAN, SECURITY_ADMIN         | `authz-care-relationships` |
+| `GET /authz/care-relationships`                                 | CLINICIAN, SECURITY_ADMIN         | `authz-care-relationships` |
+| `GET /authz/care-relationships/requests/mine`                   | PATIENT                           | `authz-care-relationships` |
+| `POST /authz/care-relationships/request`                        | CLINICIAN, PRACTITIONER           | `authz-care-relationships` |
+| `POST /authz/care-relationships/:id/respond`                    | PATIENT                           | `authz-care-relationships` |
+| `POST /authz/legal-representations`                             | SECURITY_ADMIN                    | `authz-care-relationships` |
+| `POST /authz/legal-representations/:id/revoke`                  | SECURITY_ADMIN                    | `authz-care-relationships` |
+| `GET /authz/legal-representations`                              | SECURITY_ADMIN                    | `authz-care-relationships` |
+| `POST /authz/permission-categories`                             | SECURITY_ADMIN                    | `authz-catalog`            |
+| `POST /authz/permissions`                                       | SECURITY_ADMIN                    | `authz-catalog`            |
+| `POST /authz/patients/:patientProfileId/clinical-access-grants` | CLINICAL_APPROVER, SECURITY_ADMIN | `authz-clinical`           |
+| `POST /authz/patients/:patientProfileId/break-the-glass`        | CLINICAL_APPROVER, SECURITY_ADMIN | `authz-clinical`           |
+| `DELETE /authz/clinical-access-grants/:grantId`                 | SECURITY_ADMIN                    | `authz-clinical`           |
+| `POST /authz/users/:userId/role-assignments`                    | SECURITY_ADMIN                    | `authz-grants`             |
+| `POST /authz/users/:userId/permission-grants`                   | SECURITY_ADMIN                    | `authz-grants`             |
+| `POST /authz/resource-scope-grants`                             | SECURITY_ADMIN                    | `authz-grants`             |
+| `GET /authz/me/access`                                          | PATIENT                           | `authz-me`                 |
+| `POST /authz/me/care-relationships/:id/revoke`                  | PATIENT                           | `authz-me`                 |
+| `POST /authz/me/clinical-access-grants/:grantId/revoke`         | PATIENT                           | `authz-me`                 |
+| `POST /authz/pdp/cache/invalidate`                              | SECURITY_ADMIN                    | `authz-pdp`                |
+| `POST /authz/decisions/evaluate`                                | SECURITY_ADMIN                    | `authz-pdp`                |
+| `POST /authz/tenants/:tenantId/access-policies`                 | SECURITY_ADMIN                    | `authz-policies`           |
+| `GET /authz/roles`                                              | SECURITY_ADMIN                    | `authz-roles`              |
+| `POST /authz/roles`                                             | SECURITY_ADMIN                    | `authz-roles`              |
+| `PUT /authz/roles/:roleId/permissions`                          | SECURITY_ADMIN                    | `authz-roles`              |
+| `PUT /authz/roles/:roleId/field-permissions`                    | SECURITY_ADMIN                    | `authz-roles`              |
 
 ## Endpoints (UC → ruta)
 
-| UC | Método y ruta | Rol | Descripción |
-|---|---|---|---|
-| 06-01 | `POST /authz/permission-categories` | SECURITY_ADMIN | Define una categoría de permiso |
-| 06-01 | `POST /authz/permissions` | SECURITY_ADMIN | Define un permiso del catálogo global |
-| 06-02 | `POST /authz/tenants/{tenantId}/access-policies` | SECURITY_ADMIN | Política ABAC con enmascaramiento (deny gana) |
-| 06-03 | `POST /authz/roles` | SECURITY_ADMIN | Compone un rol (herencia por `parentRoleId`) |
-| 06-03 | `PUT /authz/roles/{roleId}/permissions` | SECURITY_ADMIN | Asigna permisos al rol (reemplaza activos; deny prevalece) |
-| 06-04 | `POST /authz/users/{userId}/role-assignments` | SECURITY_ADMIN | Asigna rol con vigencia y ámbito |
-| 06-05 | `POST /authz/users/{userId}/permission-grants` | SECURITY_ADMIN | Excepción de permiso por usuario |
-| 06-06 | `POST /authz/patients/{patientProfileId}/clinical-access-grants` | autenticado | Acceso clínico con purpose-of-use |
-| 06-07 | `POST /authz/patients/{patientProfileId}/break-the-glass` | autenticado | Anulación de emergencia (grant elevado + sesión BTG) |
-| 06-08 | `PUT /authz/roles/{roleId}/field-permissions` | SECURITY_ADMIN | Enmascaramiento de campos por rol |
-| 06-09 | `POST /authz/resource-scope-grants` | SECURITY_ADMIN | Grant polimórfico sujeto→recurso (REC 3.1) |
-| 06-10 | `DELETE /authz/clinical-access-grants/{grantId}` | SECURITY_ADMIN | Revoca/expira un acceso clínico |
-| 06-11 | `POST /authz/pdp/cache/invalidate` | SECURITY_ADMIN | Invalida la cache de decisiones del PDP |
-| 06-12 | `POST /authz/decisions/evaluate` | SECURITY_ADMIN | Evalúa la decisión efectiva (PDP) |
+| UC    | Método y ruta                                                    | Rol            | Descripción                                                |
+| ----- | ---------------------------------------------------------------- | -------------- | ---------------------------------------------------------- |
+| 06-01 | `POST /authz/permission-categories`                              | SECURITY_ADMIN | Define una categoría de permiso                            |
+| 06-01 | `POST /authz/permissions`                                        | SECURITY_ADMIN | Define un permiso del catálogo global                      |
+| 06-02 | `POST /authz/tenants/{tenantId}/access-policies`                 | SECURITY_ADMIN | Política ABAC con enmascaramiento (deny gana)              |
+| 06-03 | `POST /authz/roles`                                              | SECURITY_ADMIN | Compone un rol (herencia por `parentRoleId`)               |
+| 06-03 | `PUT /authz/roles/{roleId}/permissions`                          | SECURITY_ADMIN | Asigna permisos al rol (reemplaza activos; deny prevalece) |
+| 06-04 | `POST /authz/users/{userId}/role-assignments`                    | SECURITY_ADMIN | Asigna rol con vigencia y ámbito                           |
+| 06-05 | `POST /authz/users/{userId}/permission-grants`                   | SECURITY_ADMIN | Excepción de permiso por usuario                           |
+| 06-06 | `POST /authz/patients/{patientProfileId}/clinical-access-grants` | autenticado    | Acceso clínico con purpose-of-use                          |
+| 06-07 | `POST /authz/patients/{patientProfileId}/break-the-glass`        | autenticado    | Anulación de emergencia (grant elevado + sesión BTG)       |
+| 06-08 | `PUT /authz/roles/{roleId}/field-permissions`                    | SECURITY_ADMIN | Enmascaramiento de campos por rol                          |
+| 06-09 | `POST /authz/resource-scope-grants`                              | SECURITY_ADMIN | Grant polimórfico sujeto→recurso (REC 3.1)                 |
+| 06-10 | `DELETE /authz/clinical-access-grants/{grantId}`                 | SECURITY_ADMIN | Revoca/expira un acceso clínico                            |
+| 06-11 | `POST /authz/pdp/cache/invalidate`                               | SECURITY_ADMIN | Invalida la cache de decisiones del PDP                    |
+| 06-12 | `POST /authz/decisions/evaluate`                                 | SECURITY_ADMIN | Evalúa la decisión efectiva (PDP)                          |
 
 ### Enrutado de `decisions:evaluate`
 

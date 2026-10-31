@@ -280,6 +280,7 @@ export class BootstrapAdminSeedService {
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_UNKNOWN,
         ...createdBy(BOOTSTRAP_ACTOR_ID),
       },
       { partial: true },

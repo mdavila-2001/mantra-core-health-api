@@ -56,6 +56,17 @@ export interface AuthenticatedUser {
    * `practitionerProfileId`: es identificación, no permiso.
    */
   readonly patientProfileId?: string;
+  /**
+   * Organizaciones que no dejan actuar a la persona ahora, con su motivo
+   * (claim `deniedTenants`); no figuran en `tenantIds`.
+   */
+  readonly deniedTenants?: Record<string, string>;
+  /**
+   * `true` si el token es de alcance limitado hasta dar de alta el segundo
+   * factor (claim `mfaEnrollment`): `MfaEnrollmentScopeGuard` solo deja pasar
+   * las rutas de alta del factor, el refresco y el cierre de sesión.
+   */
+  readonly mfaEnrollment?: boolean;
 }
 
 /** Request de Express después de que `JwtAuthGuard` adjunta el sujeto validado. */

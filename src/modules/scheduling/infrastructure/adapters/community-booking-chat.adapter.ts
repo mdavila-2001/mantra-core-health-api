@@ -32,10 +32,15 @@ export class CommunityBookingChatAdapter implements BookingChatPort {
       const em = this.em.fork();
       const cita = await this.noticeRepo.describeBooking(em, bookingId);
       if (!cita || !cita.resourceId || !cita.startAt) return false;
-      const [pacienteUserId, profesionalUserId] = await Promise.all([
-        this.noticeRepo.findAccountForProfile(em, cita.patientProfileId),
-        this.noticeRepo.findResourceAccount(em, cita.resourceId),
-      ]);
+      const [pacienteUserId, profesionalUserId, profesionalPerfilId] =
+        await Promise.all([
+          this.noticeRepo.findAccountForProfile(em, cita.patientProfileId),
+          this.noticeRepo.findResourceAccount(em, cita.resourceId),
+          this.noticeRepo.findResourcePractitionerProfileId(
+            em,
+            cita.resourceId,
+          ),
+        ]);
       if (!pacienteUserId || !profesionalUserId) return false;
       const cuando = new Intl.DateTimeFormat('es-BO', {
         dateStyle: 'full',
@@ -46,7 +51,9 @@ export class CommunityBookingChatAdapter implements BookingChatPort {
         {
           profesional: {
             userId: profesionalUserId,
-            practitionerProfileId: actor.practitionerProfileId,
+            // El profesional de la CITA, no el de quien la acepta: quien acepta
+            // puede ser personal de apoyo o la recepción.
+            practitionerProfileId: profesionalPerfilId ?? undefined,
           },
           pacienteUserId,
           texto: `Su cita con ${cita.resourceLabel} del ${cuando} quedó confirmada.`,
@@ -54,7 +61,9 @@ export class CommunityBookingChatAdapter implements BookingChatPort {
         actor,
       );
     } catch (error) {
-      this.logger.warn(
+      // El puerto no lanza (la cita ya está confirmada), pero el fallo NO se
+      // esconde: queda con nivel `error` y su causa para poder atenderlo.
+      this.logger.error(
         { operation: 'scheduling.booking.chat', bookingId, err: error },
         'No se pudo dejar la confirmación en el chat',
       );

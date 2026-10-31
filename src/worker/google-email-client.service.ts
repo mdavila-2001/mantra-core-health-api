@@ -11,6 +11,12 @@ const TOKEN_REFRESH_SKEW_MS = 60_000;
 
 export interface SendEmailInput {
   to: string;
+  /**
+   * Nombre visible del remitente (p. ej. el doctor en cuyo nombre responde su
+   * equipo). La dirección sigue siendo la de la plataforma: solo cambia el
+   * nombre que ve quien recibe.
+   */
+  fromName?: string;
   subject: string;
   bodyText?: string;
   bodyHtml?: string;
@@ -61,7 +67,7 @@ export class GoogleEmailClient {
   async sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
     const accessToken = await this.getAccessToken();
     const raw = encodeMimeMessage({
-      from: this.env.googleSenderEmail,
+      from: formatFrom(this.env.googleSenderEmail, input.fromName),
       to: input.to,
       subject: input.subject,
       bodyText: input.bodyText,
@@ -133,6 +139,19 @@ export class GoogleEmailClient {
 /** Palabra codificada RFC 2047: soporta tildes/ñ en el asunto sin romper el header. */
 function encodeHeaderWord(value: string): string {
   return `=?UTF-8?B?${Buffer.from(value, 'utf8').toString('base64')}?=`;
+}
+
+/**
+ * Cabecera `From`: `nombre <dirección>` con el nombre codificado RFC 2047, o la
+ * dirección sola. Se quitan saltos de línea, comillas y ángulos del nombre: va
+ * a una cabecera y un valor ajeno no puede abrir otra.
+ */
+export function formatFrom(address: string, name?: string): string {
+  const clean = (name ?? '')
+    .replace(/[\r\n"<>]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return clean === '' ? address : `${encodeHeaderWord(clean)} <${address}>`;
 }
 
 /** Compone un mensaje RFC 2822 (texto plano, HTML, o ambos como multipart/alternative). */

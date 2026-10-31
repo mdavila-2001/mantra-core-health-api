@@ -607,6 +607,176 @@
       "routes": [
         "GET /billing/service-catalog/:id/image"
       ]
+    },
+    {
+      "reason": "Seguridad de la propia cuenta: el dispositivo y el factor se buscan por el `id` de la sesión (`findByIdAndUser(…, actor.id)`) y uno ajeno responde igual que uno inexistente (404). Reconocer un dispositivo exige estar en otra sesión de confianza o el código de un solo uso enviado al correo verificado de la cuenta; alta y baja de factores exigen reautenticación (`assertReauthenticated`). Ninguna ruta recibe el identificador de otra cuenta.",
+      "evidence": [
+        "src/modules/iam/application/services/iam-account-security.service.ts#confirmDevice",
+        "src/modules/iam/application/services/iam-account-security.service.ts#requestDeviceCode",
+        "src/modules/iam/application/services/iam-account-security.service.ts#reportDeviceNotMe",
+        "src/modules/iam/application/services/iam-my-mfa.service.ts#status",
+        "src/modules/iam/application/services/iam-my-mfa.service.ts#startTotp",
+        "src/modules/iam/application/services/iam-my-mfa.service.ts#revokeFactor",
+        "src/modules/iam/application/services/iam-my-mfa.service.ts#confirmTotp"
+      ],
+      "routes": [
+        "GET /iam/me/mfa",
+        "POST /iam/me/devices/:id/confirm",
+        "POST /iam/me/devices/:id/confirm-code",
+        "POST /iam/me/devices/:id/not-me",
+        "POST /iam/me/mfa/:factorId/revoke",
+        "POST /iam/me/mfa/totp",
+        "POST /iam/me/mfa/totp/:factorId/confirm"
+      ]
+    },
+    {
+      "reason": "La IP con la que el servidor ve la propia petición y los saltos de proxy configurados: no lee ni escribe datos de ninguna cuenta ni organización, así que no hay nada que autorizar más allá de la sesión.",
+      "evidence": [
+        "src/modules/iam/application/services/ip-access-rules.service.ts#describeOrigin"
+      ],
+      "routes": [
+        "GET /iam/me/network"
+      ]
+    },
+    {
+      "reason": "Paso extra de la propia sesión: el servicio opera solo sobre el `id` y el `sid` del token (nunca un identificador del cuerpo ni de la ruta), exige un factor propio ya verificado (422 `MFA_NOT_ENROLLED`) y gasta el código con `IamTotpService` (un solo uso, contador de fallos del segundo factor, 429 al llegar al umbral); el sello vive en Redis atado a la sesión y, si Redis no responde, falla cerrado (503 `STEP_UP_UNAVAILABLE`). No lee ni escribe datos de ninguna organización.",
+      "evidence": [
+        "src/modules/iam/application/services/iam-step-up.service.ts#verify",
+        "src/modules/iam/application/services/iam-step-up.service.ts#status"
+      ],
+      "routes": [
+        "GET /iam/me/step-up",
+        "POST /iam/me/step-up"
+      ]
+    },
+    {
+      "reason": "Membresías pendientes propias: el sujeto sale de la sesión (`actor.id`) y no hay parámetro que apunte a otra cuenta; aceptar o rechazar una membresía ajena, inexistente o ya decidida responde el mismo 404 (`decideMine` la busca por `findByIdAndUser`). Quien solo tiene invitaciones pendientes aún no pertenece a ninguna organización, así que no hay un rol de organización que exigir.",
+      "evidence": [
+        "src/modules/directory/services/directory-memberships.service.ts#listMyInvitations",
+        "src/modules/directory/services/directory-memberships.service.ts#acceptMine",
+        "src/modules/directory/services/directory-memberships.service.ts#declineMine",
+        "src/modules/directory/services/directory-memberships.service.ts#decideMine"
+      ],
+      "routes": [
+        "GET /tenants/me/membership-invitations",
+        "POST /tenants/me/membership-invitations/:membershipId/accept",
+        "POST /tenants/me/membership-invitations/:membershipId/decline"
+      ]
+    },
+    {
+      "reason": "Canje de un código o QR de afiliación: lo que autoriza es el código (la invitación se busca por su hash). Una invitación revocada, vencida, agotada, ya usada por la persona o dirigida a otra persona responde el mismo 422 opaco, y el cupo se descuenta en SQL con la condición del tope. Solo un código atado a una persona concreta afilia directo; uno multiuso deja una solicitud pendiente que decide la organización. Quien canjea aún no pertenece a la organización, así que no hay rol que exigir.",
+      "evidence": [
+        "src/modules/delegated_access/services/affiliation-invitations.service.ts#redeem",
+        "src/modules/delegated_access/services/affiliation-invitations.service.ts#redeemInTransaction",
+        "src/modules/delegated_access/services/affiliation-invitations.service.ts#refusalOutcome",
+        "src/modules/delegated_access/services/affiliation-invitations.service.ts#affiliate"
+      ],
+      "routes": [
+        "POST /affiliation-invitations/redeem"
+      ]
+    },
+    {
+      "reason": "Vínculos y actividad propios del personal de apoyo: se buscan por el usuario de la sesión (`actor.id`), sin parámetro que apunte a otra persona. Confirmar un vínculo ajeno responde 404 y la confirmación solo deja el asiento (no renueva ni reactiva); la actividad solo abre las organizaciones con vínculo vivo (`isEngagementLive`). Los vínculos se leen y se confirman también suspendidos por no recertificarse a tiempo, así que estas rutas no pueden exigir el rol de runtime `SUPPORT_STAFF`, que solo existe con un vínculo activo.",
+      "evidence": [
+        "src/modules/delegated_access/services/support-engagements.service.ts#listMine",
+        "src/modules/delegated_access/services/support-engagements.service.ts#confirmMine",
+        "src/modules/delegated_access/services/engagement-requests.service.ts#listMine",
+        "src/modules/delegated_access/services/support-activity.service.ts#forPerson"
+      ],
+      "routes": [
+        "GET /me/support-activity",
+        "GET /me/support-engagements",
+        "POST /me/support-engagements/:id/confirm"
+      ]
+    },
+    {
+      "reason": "Compromiso de confidencialidad de la propia persona de apoyo: el vínculo se busca por su `id` Y por el usuario de la sesión (`actor.id`), así que uno ajeno responde 404 como uno inexistente; solo acepta quien tiene el vínculo activo y con membresía viva (422 si no) y la organización del asiento sale de la respuesta del servidor, no del cuerpo. Es idempotente y solo deja la fecha en la lista de ingreso. Quien aún no completó su ingreso puede no tener el rol de runtime `SUPPORT_STAFF` con permisos vivos, por eso la ruta no puede exigirlo.",
+      "evidence": [
+        "src/modules/delegated_access/services/lifecycle.service.ts#confidentialityAckMine"
+      ],
+      "routes": [
+        "POST /me/support-engagements/:id/confidentiality-ack"
+      ]
+    },
+    {
+      "reason": "La persona pide y otro decide: la solicitud queda a nombre de `actor.id`, pendiente y con tope de solicitudes abiertas por organización; la decide `SECURITY_ADMIN` de esa organización (nunca quien pide: `SUPPORT_DECISION_SELF`) o, para el acceso clínico temporal, el doctor titular de la delegación. Pedir acceso exige un vínculo en la organización y una delegación ya aceptada por el doctor; el catálogo exige un vínculo activo o una solicitud pendiente vigente (403 si no). Quien pide su primer vínculo aún no tiene el rol `SUPPORT_STAFF`, por eso estas rutas no pueden exigirlo.",
+      "evidence": [
+        "src/modules/delegated_access/services/engagement-requests.service.ts#create",
+        "src/modules/delegated_access/services/engagement-requests.service.ts#decide",
+        "src/modules/delegated_access/services/access-requests.service.ts#requestAsSupport",
+        "src/modules/delegated_access/services/access-requests.service.ts#decide",
+        "src/modules/delegated_access/services/support-catalog.service.ts#forPerson"
+      ],
+      "routes": [
+        "GET /me/support-catalog",
+        "POST /me/support-access-requests",
+        "POST /support-engagement-requests"
+      ]
+    },
+    {
+      "reason": "Bandeja de conversaciones del equipo de apoyo: cada lectura y escritura pasa por `resolveAccess`/`requireAccess`, que acotan a las organizaciones con vínculo vivo (`liveEngagementTenants`) y a los doctores que la política deja atender (`inboxDoctorsOfTenant`: vínculo vivo, aceptación del doctor, `may_reply_on_behalf` y permiso `messages.reply_on_behalf`). Una conversación fuera de ese conjunto responde 404 como una inexistente; asignar valida al destinatario con `canReplyOnBehalf` y las respuestas preparadas solo salen a quien puede responder en nombre de algún doctor. `@Roles` no lo expresa: depende de la organización, el doctor y el permiso.",
+      "evidence": [
+        "src/modules/community/services/community-support-inbox.service.ts#resolveAccess",
+        "src/modules/community/services/community-support-inbox.service.ts#requireAccess",
+        "src/modules/community/services/community-support-inbox.service.ts#listInbox",
+        "src/modules/community/services/community-support-inbox.service.ts#getConversation",
+        "src/modules/community/services/community-support-inbox.service.ts#applyAssignment",
+        "src/modules/community/services/community-support-inbox.service.ts#eligibleAssignee",
+        "src/modules/community/services/community-support-inbox.service.ts#addNote",
+        "src/modules/community/services/community-support-inbox.service.ts#listNotes",
+        "src/modules/community/services/community-support-inbox.service.ts#templatesForPerson",
+        "src/modules/delegated_access/services/support-access.policy.ts#liveEngagementTenants",
+        "src/modules/delegated_access/services/support-access.policy.ts#inboxDoctorsOfTenant",
+        "src/modules/delegated_access/services/support-access.policy.ts#canReplyOnBehalf"
+      ],
+      "routes": [
+        "GET /community/conversations/:conversationId/internal-notes",
+        "GET /me/support-inbox",
+        "GET /me/support-inbox/:conversationId",
+        "GET /me/support-reply-templates",
+        "POST /community/conversations/:conversationId/assignment",
+        "POST /community/conversations/:conversationId/internal-notes"
+      ]
+    },
+    {
+      "reason": "Agenda combinada del personal de apoyo: sin vínculo vigente en la organización pedida (nunca lo tuvo, terminó, venció o está suspendido) responde 403, y cada cita se evalúa con la política (`schedule.*` por doctor, servicio y ubicación): una cita sin permiso aplicable no sale ni como bloque, y las que sí se ven quedan selladas. Un vínculo vivo no da la agenda de toda la organización, y eso no lo expresa `@Roles`.",
+      "evidence": [
+        "src/modules/scheduling/application/agenda/scheduling-support-agenda.service.ts#list",
+        "src/modules/scheduling/infrastructure/adapters/delegated-access-support-agenda.adapter.ts#evaluator",
+        "src/modules/delegated_access/services/support-access.policy.ts#evaluatorFor"
+      ],
+      "routes": [
+        "GET /me/support-agenda"
+      ]
+    },
+    {
+      "reason": "Búsqueda y alta de pacientes en el mostrador: la organización viene en el cuerpo y se contrasta con los vínculos de la persona (`loadPatientStanding`): sin vínculo vivo o sin una acción que trate con pacientes (`canSearchPatients`: `schedule.create|reschedule|check_in|walk_in` o `patient.register`; el alta exige `patient.register`, `canRegisterPatients`) responde 403 y el rechazo queda sellado. El tope de consultas por persona e IP se cuenta antes de resolver el cuerpo; la búsqueda es exacta y cada acierto deja un asiento.",
+      "evidence": [
+        "src/modules/delegated_access/services/support-patient-access.ts#loadPatientStanding",
+        "src/modules/delegated_access/services/support-patient-search.service.ts#search",
+        "src/modules/delegated_access/services/support-patient-registration.service.ts#registerInTransaction",
+        "src/modules/delegated_access/domain/support-access.evaluation.ts#canSearchPatients",
+        "src/modules/delegated_access/domain/support-access.evaluation.ts#canRegisterPatients"
+      ],
+      "routes": [
+        "POST /me/support-patient-search",
+        "POST /me/support-patients"
+      ]
+    },
+    {
+      "reason": "Autoservicio de la persona de apoyo (cuatro ojos y «¿por qué no puedo?»): la organización va en el cuerpo y se contrasta con los vínculos de la propia persona (`findEngagements` por `actor.id` y organización: sin vínculo, 404 uniforme); pedir una aprobación solo vale si la política real responde `CHALLENGE` para esa persona y ese objetivo (con `peek`, sin consumir nada), una solicitud ajena responde 404 como una inexistente (se busca por `requesterUserId = actor.id`) y explicar solo mira lo propio, sin datos de terceros. Quien tiene el vínculo suspendido o aún sin permisos vivos no tiene el rol de runtime `SUPPORT_STAFF`, por eso estas rutas no pueden exigirlo.",
+      "evidence": [
+        "src/modules/delegated_access/services/four-eyes.service.ts#createAction",
+        "src/modules/delegated_access/services/four-eyes.service.ts#listMine",
+        "src/modules/delegated_access/services/four-eyes.service.ts#cancel",
+        "src/modules/delegated_access/services/access-explain.service.ts#explainMine"
+      ],
+      "routes": [
+        "POST /me/support-approvals",
+        "GET /me/support-approvals",
+        "POST /me/support-approvals/:id/cancel",
+        "POST /me/support-access/explain"
+      ]
     }
   ]
 }

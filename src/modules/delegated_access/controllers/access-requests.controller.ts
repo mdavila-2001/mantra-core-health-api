@@ -36,7 +36,7 @@ export class AccessRequestsController {
     entityId: 'param:id',
   })
   @Post(':id/decision')
-  @Roles('SECURITY_ADMIN')
+  @Roles('PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Aprobar/Denegar solicitud y emitir grant scoped' })
   decide(

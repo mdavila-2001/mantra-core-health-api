@@ -2,13 +2,13 @@
 
 # Flujos del módulo `community`
 
-- **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 102 (90 con decisiones propias, 12 sin ellas)
+- **Procesos:** 1 · **Máquinas de estado:** 1
+- **Operaciones:** 111 (98 con decisiones propias, 13 sin ellas)
 - Inventario de endpoints del módulo: [community](../endpoints/community.md)
 
 ## Proceso: Módulo Community (19)
 
-- **Código:** `community` · **Agrupación:** MIXTO · **Operaciones:** 102
+- **Código:** `community` · **Agrupación:** MIXTO · **Operaciones:** 111
 - **Actores:** Cualquier sesión válida · PATIENT · Público (sin sesión) · SEARCH_ADMIN · SECURITY_ADMIN · SYSTEM
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/community/README.md`
@@ -28,7 +28,7 @@ _Fuente: `src/modules/community/README.md:3`_
 | `UC-19-03` | Reacciona (upsert una reacción por actor/objeto) | PUT /community/reactions | Cualquier sesión válida | ALTO | 4 |
 | `UC-19-04` | Guarda bookmark en colección | POST /community/bookmarks | Cualquier sesión válida | ALTO | 3 |
 | `UC-19-05` | Sigue objeto social (perfil/tópico/hashtag/grupo) | POST /community/follows | Cualquier sesión válida | ALTO | 4 |
-| `UC-19-06` | Envía mensaje directo | POST /community/conversations/{conversationId}/messages | Cualquier sesión válida | ALTO | 23 |
+| `UC-19-06` | Envía mensaje directo | POST /community/conversations/{conversationId}/messages | Cualquier sesión válida | ALTO | 39 |
 | `UC-19-07` | Marca mensajes como leídos (recibos) | POST /community/conversations/{conversationId}/read | Cualquier sesión válida | ALTO | 6 |
 | `UC-19-08` | Reporta contenido y encola moderación | POST /community/reports | Cualquier sesión válida | ALTO | 3 |
 | `UC-19-09` | Resuelve moderación (decisión + strike) | POST /community/moderation/queue/{queueId}/decision | SECURITY_ADMIN | MEDIO | 6 |
@@ -49,10 +49,10 @@ _Fuente: `src/modules/community/README.md:3`_
 |  |  | PATCH /community/groups/{groupId}/members/{member} | Cualquier sesión válida | ALTO | 12 |
 |  |  | GET /community/groups/{groupId}/posts | Cualquier sesión válida | BAJO | 7 |
 |  |  | POST /community/groups/{groupId}/posts | Cualquier sesión válida | ALTO | 15 |
-| `ctrl:CommunityMessagingController` | Operaciones de CommunityMessagingController que el README no asigna a un caso de uso | GET /community/conversations | Cualquier sesión válida | BAJO | 4 |
+| `ctrl:CommunityMessagingController` | Operaciones de CommunityMessagingController que el README no asigna a un caso de uso | GET /community/conversations | Cualquier sesión válida | BAJO | 5 |
 |  |  | POST /community/conversations | Cualquier sesión válida | ALTO | 6 |
 |  |  | GET /community/conversations/{conversationId}/attachments/{fileId}/content | Cualquier sesión válida | BAJO | 6 |
-|  |  | GET /community/conversations/{conversationId}/messages | Cualquier sesión válida | BAJO | 5 |
+|  |  | GET /community/conversations/{conversationId}/messages | Cualquier sesión válida | BAJO | 6 |
 |  |  | DELETE /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 6 |
 |  |  | PATCH /community/conversations/{conversationId}/messages/{messageId} | Cualquier sesión válida | ALTO | 4 |
 |  |  | PATCH /community/conversations/{conversationId}/participant | Cualquier sesión válida | BAJO | 2 |
@@ -114,6 +114,15 @@ _Fuente: `src/modules/community/README.md:3`_
 |  |  | PUT /community/profiles/me | Cualquier sesión válida | ALTO | 4 |
 |  |  | GET /community/profiles/me/stats | Cualquier sesión válida | BAJO | 1 |
 |  |  | POST /community/public-profiles | SECURITY_ADMIN | MEDIO | 1 |
+| `ctrl:CommunitySupportInboxController` | Operaciones de CommunitySupportInboxController que el README no asigna a un caso de uso | POST /community/conversations/{conversationId}/assignment | Cualquier sesión válida | ALTO | 15 |
+|  |  | GET /community/conversations/{conversationId}/internal-notes | Cualquier sesión válida | BAJO | 13 |
+|  |  | POST /community/conversations/{conversationId}/internal-notes | Cualquier sesión válida | ALTO | 13 |
+|  |  | GET /me/support-inbox | Cualquier sesión válida | BAJO | 17 |
+|  |  | GET /me/support-inbox/{conversationId} | Cualquier sesión válida | BAJO | 24 |
+|  |  | GET /me/support-reply-templates | Cualquier sesión válida | BAJO | 8 |
+|  |  | GET /org/reply-templates | SECURITY_ADMIN | BAJO | 1 |
+|  |  | POST /org/reply-templates | SECURITY_ADMIN | MEDIO | 3 |
+|  |  | PATCH /org/reply-templates/{id} | SECURITY_ADMIN | MEDIO | 2 |
 | `ctrl:CommunityTimelineController` | Operaciones de CommunityTimelineController que el README no asigna a un caso de uso | GET /community/feed | Cualquier sesión válida | BAJO | 7 |
 |  |  | GET /community/notifications | Cualquier sesión válida | BAJO | 2 |
 | `ctrl:CommunityTopicsController` | Operaciones de CommunityTopicsController que el README no asigna a un caso de uso | GET /community/topics | Cualquier sesión válida | BAJO | 1 |
@@ -131,8 +140,8 @@ _Fuente: `src/modules/community/README.md:3`_
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a31(["SECURITY_ADMIN"]):::actor
-  a54(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a32(["SECURITY_ADMIN"]):::actor
+  a55(["SYSTEM · SECURITY_ADMIN"]):::actor
   t3[("common.file_versions")]:::tabla
   t4[("common.files")]:::tabla
   t5[("community.content_hashtags")]:::tabla
@@ -144,27 +153,28 @@ flowchart LR
   t16[("community.bookmarks")]:::tabla
   t18[("community.social_follows")]:::tabla
   t20[("community.chat_auto_replies")]:::tabla
-  t21[("community.conversation_participants")]:::tabla
-  t22[("community.conversations")]:::tabla
-  t25[("community.direct_messages")]:::tabla
-  t26[("community.message_receipts")]:::tabla
-  t28[("community.content_reports")]:::tabla
-  t29[("community.moderation_queue")]:::tabla
-  t32[("community.moderation_decisions")]:::tabla
-  t33[("community.moderation_strikes")]:::tabla
-  t35[("community.moderation_appeals")]:::tabla
-  t38[("clinical.encounter_participants")]:::tabla
-  t39[("clinical.encounters")]:::tabla
-  t40[("community.review_dimension_scores")]:::tabla
-  t41[("community.service_reviews")]:::tabla
-  t43[("community.poll_options")]:::tabla
-  t44[("community.poll_votes")]:::tabla
-  t45[("community.polls")]:::tabla
-  t48[("community.group_members")]:::tabla
-  t49[("community.groups")]:::tabla
-  t52[("community.user_blocks")]:::tabla
-  t55[("community.feed_items")]:::tabla
-  t56[("community.social_posts")]:::tabla
+  t21[("community.conversation_assignments")]:::tabla
+  t24[("community.conversation_participants")]:::tabla
+  t25[("community.conversations")]:::tabla
+  t26[("community.direct_messages")]:::tabla
+  t27[("community.message_receipts")]:::tabla
+  t29[("community.content_reports")]:::tabla
+  t30[("community.moderation_queue")]:::tabla
+  t33[("community.moderation_decisions")]:::tabla
+  t34[("community.moderation_strikes")]:::tabla
+  t36[("community.moderation_appeals")]:::tabla
+  t39[("clinical.encounter_participants")]:::tabla
+  t40[("clinical.encounters")]:::tabla
+  t41[("community.review_dimension_scores")]:::tabla
+  t42[("community.service_reviews")]:::tabla
+  t44[("community.poll_options")]:::tabla
+  t45[("community.poll_votes")]:::tabla
+  t46[("community.polls")]:::tabla
+  t49[("community.group_members")]:::tabla
+  t50[("community.groups")]:::tabla
+  t53[("community.user_blocks")]:::tabla
+  t56[("community.feed_items")]:::tabla
+  t57[("community.social_posts")]:::tabla
   t7[("+4 tablas más")]
   subgraph s0["UC-19-01 · Publica post con hashtags, media y menciones"]
     o1["POST /community/profiles/{profileId}/posts"]:::op
@@ -182,44 +192,44 @@ flowchart LR
   subgraph s4["UC-19-05 · Sigue objeto social (perfil/tópico/hashtag/grupo)"]
     o17["POST /community/follows"]:::op
   end
-  t23[("+17 tablas más")]
+  t22[("+33 tablas más")]
   subgraph s5["UC-19-06 · Envía mensaje directo"]
     o19["POST /community/conversations/{conversationId}/messages"]:::op
   end
   subgraph s6["UC-19-07 · Marca mensajes como leídos (recibos)"]
-    o24["POST /community/conversations/{conversationId}/read"]:::op
+    o23["POST /community/conversations/{conversationId}/read"]:::op
   end
   subgraph s7["UC-19-08 · Reporta contenido y encola moderación"]
-    o27["POST /community/reports"]:::op
+    o28["POST /community/reports"]:::op
   end
   subgraph s8["UC-19-09 · Resuelve moderación (decisión + strike)"]
-    o30["POST /community/moderation/queue/{queueId}/decision"]:::op
+    o31["POST /community/moderation/queue/{queueId}/decision"]:::op
   end
-  t36[("+1 tablas más")]
+  t37[("+1 tablas más")]
   subgraph s9["UC-19-10 · Apela una decisión"]
-    o34["POST /community/moderation/decisions/{decisionId}/appeal"]:::op
+    o35["POST /community/moderation/decisions/{decisionId}/appeal"]:::op
   end
   subgraph s10["UC-19-11 · Publica review verificada de servicio"]
-    o37["POST /community/profiles/{profileId}/reviews"]:::op
+    o38["POST /community/profiles/{profileId}/reviews"]:::op
   end
-  t46[("+4 tablas más")]
+  t47[("+4 tablas más")]
   subgraph s11["UC-19-12 · Vota en encuesta"]
-    o42["POST /community/polls/{pollId}/votes"]:::op
+    o43["POST /community/polls/{pollId}/votes"]:::op
   end
-  t50[("+3 tablas más")]
+  t51[("+3 tablas más")]
   subgraph s12["UC-19-13 · Se une a grupo/comunidad"]
-    o47["POST /community/groups/{groupId}/members"]:::op
+    o48["POST /community/groups/{groupId}/members"]:::op
   end
   subgraph s13["UC-19-14 · Bloquea a un usuario"]
-    o51["POST /community/blocks"]:::op
+    o52["POST /community/blocks"]:::op
   end
   subgraph s14["UC-19-15 · Lote de posts publicados sin repartir, con sus seguidores"]
-    o53["GET /internal/community/feed/pending"]:::op
-    o57["POST /internal/community/feed/rebuild"]:::op
+    o54["GET /internal/community/feed/pending"]:::op
+    o58["POST /internal/community/feed/rebuild"]:::op
   end
   subgraph s15["ctrl:CommunityFeedController · Operaciones de CommunityFeedController que el RE…"]
-    o58["POST /internal/community/feed/ranking/apply"]:::op
-    o59["GET /internal/community/feed/ranking/pending"]:::op
+    o59["POST /internal/community/feed/ranking/apply"]:::op
+    o60["GET /internal/community/feed/ranking/pending"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -256,79 +266,79 @@ flowchart LR
   o19 -->|"LEE"| t4
   o19 -->|"LEE"| t20
   o19 -->|"ACTUALIZA"| t21
+  o19 -->|"CREA"| t21
   o19 -->|"LEE"| t21
-  o19 -->|"ACTUALIZA"| t22
-  o19 -.-> t23
-  a2 --> o24
-  o24 -->|"ACTUALIZA"| t21
-  o24 -->|"LEE"| t21
-  o24 -->|"LEE"| t22
-  o24 -->|"LEE"| t25
-  o24 -->|"CREA"| t26
-  o24 -->|"LEE"| t13
-  a2 --> o27
-  o27 -->|"CREA"| t28
-  o27 -->|"CREA"| t29
-  o27 -->|"LEE"| t29
-  a31 --> o30
-  o30 -->|"ACTUALIZA"| t28
-  o30 -->|"LEE"| t28
-  o30 -->|"CREA"| t32
-  o30 -->|"ACTUALIZA"| t29
-  o30 -->|"LEE"| t29
-  o30 -->|"CREA"| t33
-  a2 --> o34
-  o34 -->|"CREA"| t35
-  o34 -->|"LEE"| t35
-  o34 -->|"LEE"| t32
-  o34 -->|"CREA"| t29
-  o34 -->|"LEE"| t29
-  o34 -->|"LEE"| t33
-  o34 -.-> t36
-  a2 --> o37
-  o37 -->|"LEE"| t38
-  o37 -->|"LEE"| t39
-  o37 -->|"LEE"| t13
-  o37 -->|"CREA"| t40
-  o37 -->|"CREA"| t41
-  o37 -->|"LEE"| t41
-  a2 --> o42
-  o42 -->|"ACTUALIZA"| t43
-  o42 -->|"LEE"| t43
-  o42 -->|"CREA"| t44
-  o42 -->|"LEE"| t44
-  o42 -->|"ACTUALIZA"| t45
-  o42 -->|"LEE"| t45
-  o42 -.-> t46
-  a2 --> o47
-  o47 -->|"LEE"| t39
-  o47 -->|"ACTUALIZA"| t48
-  o47 -->|"CREA"| t48
-  o47 -->|"LEE"| t48
-  o47 -->|"ACTUALIZA"| t49
-  o47 -->|"LEE"| t49
-  o47 -.-> t50
-  a2 --> o51
-  o51 -->|"LEE"| t13
-  o51 -->|"ACTUALIZA"| t18
-  o51 -->|"LEE"| t18
-  o51 -->|"ACTUALIZA"| t52
-  o51 -->|"CREA"| t52
-  o51 -->|"LEE"| t52
-  a54 --> o53
-  o53 -->|"LEE"| t55
-  o53 -->|"LEE"| t18
-  o53 -->|"LEE"| t56
-  a54 --> o57
-  o57 -->|"CREA"| t55
-  o57 -->|"LEE"| t55
-  a54 --> o58
-  o58 -->|"ACTUALIZA"| t55
-  a54 --> o59
-  o59 -->|"LEE"| t10
-  o59 -->|"LEE"| t55
-  o59 -->|"LEE"| t14
-  o59 -->|"LEE"| t56
+  o19 -.-> t22
+  a2 --> o23
+  o23 -->|"ACTUALIZA"| t24
+  o23 -->|"LEE"| t24
+  o23 -->|"LEE"| t25
+  o23 -->|"LEE"| t26
+  o23 -->|"CREA"| t27
+  o23 -->|"LEE"| t13
+  a2 --> o28
+  o28 -->|"CREA"| t29
+  o28 -->|"CREA"| t30
+  o28 -->|"LEE"| t30
+  a32 --> o31
+  o31 -->|"ACTUALIZA"| t29
+  o31 -->|"LEE"| t29
+  o31 -->|"CREA"| t33
+  o31 -->|"ACTUALIZA"| t30
+  o31 -->|"LEE"| t30
+  o31 -->|"CREA"| t34
+  a2 --> o35
+  o35 -->|"CREA"| t36
+  o35 -->|"LEE"| t36
+  o35 -->|"LEE"| t33
+  o35 -->|"CREA"| t30
+  o35 -->|"LEE"| t30
+  o35 -->|"LEE"| t34
+  o35 -.-> t37
+  a2 --> o38
+  o38 -->|"LEE"| t39
+  o38 -->|"LEE"| t40
+  o38 -->|"LEE"| t13
+  o38 -->|"CREA"| t41
+  o38 -->|"CREA"| t42
+  o38 -->|"LEE"| t42
+  a2 --> o43
+  o43 -->|"ACTUALIZA"| t44
+  o43 -->|"LEE"| t44
+  o43 -->|"CREA"| t45
+  o43 -->|"LEE"| t45
+  o43 -->|"ACTUALIZA"| t46
+  o43 -->|"LEE"| t46
+  o43 -.-> t47
+  a2 --> o48
+  o48 -->|"LEE"| t40
+  o48 -->|"ACTUALIZA"| t49
+  o48 -->|"CREA"| t49
+  o48 -->|"LEE"| t49
+  o48 -->|"ACTUALIZA"| t50
+  o48 -->|"LEE"| t50
+  o48 -.-> t51
+  a2 --> o52
+  o52 -->|"LEE"| t13
+  o52 -->|"ACTUALIZA"| t18
+  o52 -->|"LEE"| t18
+  o52 -->|"ACTUALIZA"| t53
+  o52 -->|"CREA"| t53
+  o52 -->|"LEE"| t53
+  a55 --> o54
+  o54 -->|"LEE"| t56
+  o54 -->|"LEE"| t18
+  o54 -->|"LEE"| t57
+  a55 --> o58
+  o58 -->|"CREA"| t56
+  o58 -->|"LEE"| t56
+  a55 --> o59
+  o59 -->|"ACTUALIZA"| t56
+  a55 --> o60
+  o60 -->|"LEE"| t10
+  o60 -->|"LEE"| t56
+  o60 -->|"LEE"| t14
+  o60 -->|"LEE"| t57
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -340,7 +350,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a41(["SECURITY_ADMIN"]):::actor
+  a43(["SECURITY_ADMIN"]):::actor
   t3[("clinical.encounters")]:::tabla
   t4[("community.groups")]:::tabla
   t5[("community.public_profiles")]:::tabla
@@ -349,22 +359,24 @@ flowchart LR
   t9[("community.group_members")]:::tabla
   t10[("community.topics")]:::tabla
   t19[("community.comments")]:::tabla
-  t24[("community.conversation_participants")]:::tabla
-  t25[("community.conversations")]:::tabla
-  t26[("community.direct_messages")]:::tabla
-  t28[("community.user_blocks")]:::tabla
-  t30[("common.file_versions")]:::tabla
-  t31[("common.files")]:::tabla
-  t42[("community.moderation_appeals")]:::tabla
-  t43[("community.moderation_decisions")]:::tabla
-  t45[("community.moderation_queue")]:::tabla
-  t48[("community.moderation_strikes")]:::tabla
-  t50[("community.content_reports")]:::tabla
-  t52[("community.poll_options")]:::tabla
-  t53[("community.poll_votes")]:::tabla
-  t54[("community.polls")]:::tabla
-  t55[("community.social_follows")]:::tabla
-  t56[("community.social_posts")]:::tabla
+  t24[("community.conversation_assignments")]:::tabla
+  t25[("community.conversation_participants")]:::tabla
+  t26[("community.conversations")]:::tabla
+  t27[("community.direct_messages")]:::tabla
+  t29[("community.user_blocks")]:::tabla
+  t31[("common.file_versions")]:::tabla
+  t32[("common.files")]:::tabla
+  t34[("iam.users")]:::tabla
+  t44[("community.moderation_appeals")]:::tabla
+  t45[("community.moderation_decisions")]:::tabla
+  t47[("community.moderation_queue")]:::tabla
+  t50[("community.moderation_strikes")]:::tabla
+  t52[("community.content_reports")]:::tabla
+  t54[("community.poll_options")]:::tabla
+  t55[("community.poll_votes")]:::tabla
+  t56[("community.polls")]:::tabla
+  t57[("community.social_follows")]:::tabla
+  t58[("community.social_posts")]:::tabla
   t11[("+3 tablas más")]
   t15[("+2 tablas más")]
   t17[("+6 tablas más")]
@@ -382,28 +394,28 @@ flowchart LR
   end
   subgraph s1["ctrl:CommunityMessagingController · Operaciones de CommunityMessagingController…"]
     o23["GET /community/conversations"]:::op
-    o27["POST /community/conversations"]:::op
-    o29["GET /community/conversations/{conversationId}/attachments/{fileId}/co…"]:::op
-    o32["GET /community/conversations/{conversationId}/messages"]:::op
-    o33["DELETE /community/conversations/{conversationId}/messages/{messageId}"]:::op
-    o34["PATCH /community/conversations/{conversationId}/messages/{messageId}"]:::op
-    o35["PATCH /community/conversations/{conversationId}/participant"]:::op
-    o36["DELETE /community/conversations/{conversationId}/pin"]:::op
-    o37["POST /community/conversations/{conversationId}/pin"]:::op
-    o38["GET /community/conversations/{conversationId}/presence"]:::op
-    o39["POST /community/conversations/contacts/search"]:::op
+    o28["POST /community/conversations"]:::op
+    o30["GET /community/conversations/{conversationId}/attachments/{fileId}/co…"]:::op
+    o33["GET /community/conversations/{conversationId}/messages"]:::op
+    o35["DELETE /community/conversations/{conversationId}/messages/{messageId}"]:::op
+    o36["PATCH /community/conversations/{conversationId}/messages/{messageId}"]:::op
+    o37["PATCH /community/conversations/{conversationId}/participant"]:::op
+    o38["DELETE /community/conversations/{conversationId}/pin"]:::op
+    o39["POST /community/conversations/{conversationId}/pin"]:::op
+    o40["GET /community/conversations/{conversationId}/presence"]:::op
+    o41["POST /community/conversations/contacts/search"]:::op
   end
   subgraph s2["ctrl:CommunityModerationController · Operaciones de CommunityModerationControll…"]
-    o40["GET /community/moderation/appeals"]:::op
-    o44["POST /community/moderation/appeals/{appealId}/resolve"]:::op
-    o46["GET /community/moderation/decisions"]:::op
-    o47["GET /community/moderation/decisions/mine"]:::op
-    o49["GET /community/moderation/queue"]:::op
+    o42["GET /community/moderation/appeals"]:::op
+    o46["POST /community/moderation/appeals/{appealId}/resolve"]:::op
+    o48["GET /community/moderation/decisions"]:::op
+    o49["GET /community/moderation/decisions/mine"]:::op
+    o51["GET /community/moderation/queue"]:::op
   end
-  t57[("+1 tablas más")]
+  t59[("+1 tablas más")]
   subgraph s3["ctrl:CommunityPollsController · Operaciones de CommunityPollsController que el…"]
-    o51["GET /community/polls/{pollId}"]:::op
-    o58["POST /community/posts/{postId}/polls"]:::op
+    o53["GET /community/polls/{pollId}"]:::op
+    o60["POST /community/posts/{postId}/polls"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -469,91 +481,93 @@ flowchart LR
   o23 -->|"LEE"| t24
   o23 -->|"LEE"| t25
   o23 -->|"LEE"| t26
+  o23 -->|"LEE"| t27
   o23 -->|"LEE"| t5
-  a2 --> o27
-  o27 -->|"CREA"| t24
-  o27 -->|"LEE"| t24
-  o27 -->|"CREA"| t25
-  o27 -->|"LEE"| t25
-  o27 -->|"LEE"| t5
-  o27 -->|"LEE"| t28
-  a2 --> o29
-  o29 -->|"LEE"| t30
-  o29 -->|"LEE"| t31
-  o29 -->|"LEE"| t24
-  o29 -->|"LEE"| t26
-  o29 -->|"LEE"| t5
-  o29 -->|"LEE"| t28
-  a2 --> o32
-  o32 -->|"LEE"| t24
-  o32 -->|"LEE"| t25
-  o32 -->|"LEE"| t26
-  o32 -->|"LEE"| t5
-  o32 -->|"LEE"| t28
+  a2 --> o28
+  o28 -->|"CREA"| t25
+  o28 -->|"LEE"| t25
+  o28 -->|"CREA"| t26
+  o28 -->|"LEE"| t26
+  o28 -->|"LEE"| t5
+  o28 -->|"LEE"| t29
+  a2 --> o30
+  o30 -->|"LEE"| t31
+  o30 -->|"LEE"| t32
+  o30 -->|"LEE"| t25
+  o30 -->|"LEE"| t27
+  o30 -->|"LEE"| t5
+  o30 -->|"LEE"| t29
   a2 --> o33
-  o33 -->|"LEE"| t24
-  o33 -->|"ACTUALIZA"| t25
   o33 -->|"LEE"| t25
-  o33 -->|"ACTUALIZA"| t26
   o33 -->|"LEE"| t26
+  o33 -->|"LEE"| t27
   o33 -->|"LEE"| t5
-  a2 --> o34
-  o34 -->|"LEE"| t24
-  o34 -->|"ACTUALIZA"| t26
-  o34 -->|"LEE"| t26
-  o34 -->|"LEE"| t5
+  o33 -->|"LEE"| t29
+  o33 -->|"LEE"| t34
   a2 --> o35
-  o35 -->|"LEE"| t24
+  o35 -->|"LEE"| t25
+  o35 -->|"ACTUALIZA"| t26
+  o35 -->|"LEE"| t26
+  o35 -->|"ACTUALIZA"| t27
+  o35 -->|"LEE"| t27
   o35 -->|"LEE"| t5
   a2 --> o36
-  o36 -->|"LEE"| t24
-  o36 -->|"ACTUALIZA"| t25
   o36 -->|"LEE"| t25
+  o36 -->|"ACTUALIZA"| t27
+  o36 -->|"LEE"| t27
   o36 -->|"LEE"| t5
   a2 --> o37
-  o37 -->|"LEE"| t24
-  o37 -->|"ACTUALIZA"| t25
   o37 -->|"LEE"| t25
-  o37 -->|"LEE"| t26
   o37 -->|"LEE"| t5
   a2 --> o38
-  o38 -->|"LEE"| t24
+  o38 -->|"LEE"| t25
+  o38 -->|"ACTUALIZA"| t26
+  o38 -->|"LEE"| t26
   o38 -->|"LEE"| t5
   a2 --> o39
+  o39 -->|"LEE"| t25
+  o39 -->|"ACTUALIZA"| t26
+  o39 -->|"LEE"| t26
+  o39 -->|"LEE"| t27
   o39 -->|"LEE"| t5
-  o39 -->|"LEE"| t28
-  a41 --> o40
-  o40 -->|"LEE"| t42
-  o40 -->|"LEE"| t43
-  a41 --> o44
-  o44 -->|"ACTUALIZA"| t42
-  o44 -->|"LEE"| t42
-  o44 -->|"LEE"| t43
-  o44 -->|"ACTUALIZA"| t45
-  o44 -->|"LEE"| t45
-  a41 --> o46
-  o46 -->|"LEE"| t43
-  a2 --> o47
-  o47 -->|"LEE"| t42
-  o47 -->|"LEE"| t43
-  o47 -->|"LEE"| t48
-  o47 -->|"LEE"| t5
-  a41 --> o49
-  o49 -->|"LEE"| t50
+  a2 --> o40
+  o40 -->|"LEE"| t25
+  o40 -->|"LEE"| t5
+  a2 --> o41
+  o41 -->|"LEE"| t5
+  o41 -->|"LEE"| t29
+  a43 --> o42
+  o42 -->|"LEE"| t44
+  o42 -->|"LEE"| t45
+  a43 --> o46
+  o46 -->|"ACTUALIZA"| t44
+  o46 -->|"LEE"| t44
+  o46 -->|"LEE"| t45
+  o46 -->|"ACTUALIZA"| t47
+  o46 -->|"LEE"| t47
+  a43 --> o48
+  o48 -->|"LEE"| t45
+  a2 --> o49
+  o49 -->|"LEE"| t44
   o49 -->|"LEE"| t45
-  a2 --> o51
+  o49 -->|"LEE"| t50
+  o49 -->|"LEE"| t5
+  a43 --> o51
   o51 -->|"LEE"| t52
-  o51 -->|"LEE"| t53
-  o51 -->|"LEE"| t54
-  o51 -->|"LEE"| t5
-  o51 -->|"LEE"| t55
-  o51 -->|"LEE"| t56
-  o51 -.-> t57
-  a2 --> o58
-  o58 -->|"CREA"| t52
-  o58 -->|"CREA"| t54
-  o58 -->|"LEE"| t5
-  o58 -->|"LEE"| t56
+  o51 -->|"LEE"| t47
+  a2 --> o53
+  o53 -->|"LEE"| t54
+  o53 -->|"LEE"| t55
+  o53 -->|"LEE"| t56
+  o53 -->|"LEE"| t5
+  o53 -->|"LEE"| t57
+  o53 -->|"LEE"| t58
+  o53 -.-> t59
+  a2 --> o60
+  o60 -->|"CREA"| t54
+  o60 -->|"CREA"| t56
+  o60 -->|"LEE"| t5
+  o60 -->|"LEE"| t58
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -811,13 +825,12 @@ flowchart LR
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 4 de 5 — etapas `ctrl:CommunitySocialController`, `ctrl:CommunityTimelineController`, `ctrl:CommunityTopicsController`…
+### Diagrama 4 de 5 — etapas `ctrl:CommunitySocialController`, `ctrl:CommunitySupportInboxController`
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
   a40(["SECURITY_ADMIN"]):::actor
-  a52(["SYSTEM · SECURITY_ADMIN"]):::actor
   t3[("community.public_profiles")]:::tabla
   t4[("community.user_blocks")]:::tabla
   t7[("community.bookmarks")]:::tabla
@@ -835,10 +848,19 @@ flowchart LR
   t29[("community.prestige_scores")]:::tabla
   t30[("community.verified_badges")]:::tabla
   t32[("community.chat_auto_replies")]:::tabla
-  t42[("community.feed_items")]:::tabla
-  t45[("community.social_notifications")]:::tabla
-  t47[("community.topics")]:::tabla
-  t49[("audit.verified_badges_history")]:::tabla
+  t42[("community.conversation_assignments")]:::tabla
+  t43[("community.conversation_participants")]:::tabla
+  t44[("community.conversations")]:::tabla
+  t45[("community.direct_messages")]:::tabla
+  t48[("community.conversation_internal_notes")]:::tabla
+  t49[("delegated_access.organization_user_assignments")]:::tabla
+  t58[("community.reply_templates")]:::tabla
+  t59[("delegated_access.practitioner_delegate_assignments")]:::tabla
+  t60[("delegated_access.support_grant_actions")]:::tabla
+  t61[("delegated_access.support_scope_grants")]:::tabla
+  t62[("directory.tenant_memberships")]:::tabla
+  t66[("practice.practices")]:::tabla
+  t67[("practice.practitioner_role_assignments")]:::tabla
   t15[("+2 tablas más")]
   t23[("+4 tablas más")]
   subgraph s0["ctrl:CommunitySocialController · Operaciones de CommunitySocialController que e…"]
@@ -862,18 +884,22 @@ flowchart LR
     o38["GET /community/profiles/me/stats"]:::op
     o39["POST /community/public-profiles"]:::op
   end
-  t43[("+1 tablas más")]
-  subgraph s1["ctrl:CommunityTimelineController · Operaciones de CommunityTimelineController q…"]
-    o41["GET /community/feed"]:::op
-    o44["GET /community/notifications"]:::op
-  end
-  subgraph s2["ctrl:CommunityTopicsController · Operaciones de CommunityTopicsController que e…"]
-    o46["GET /community/topics"]:::op
-  end
-  subgraph s3["ctrl:CommunityVerificationController · Operaciones de CommunityVerificationCont…"]
-    o48["POST /internal/community/verification/badges"]:::op
-    o50["POST /internal/community/verification/badges/{targetId}/revoke"]:::op
-    o51["POST /internal/community/verification/badges/expire-sweep"]:::op
+  t46[("+9 tablas más")]
+  t50[("+7 tablas más")]
+  t52[("+7 tablas más")]
+  t54[("+11 tablas más")]
+  t56[("+18 tablas más")]
+  t63[("+2 tablas más")]
+  subgraph s1["ctrl:CommunitySupportInboxController · Operaciones de CommunitySupportInboxCont…"]
+    o41["POST /community/conversations/{conversationId}/assignment"]:::op
+    o47["GET /community/conversations/{conversationId}/internal-notes"]:::op
+    o51["POST /community/conversations/{conversationId}/internal-notes"]:::op
+    o53["GET /me/support-inbox"]:::op
+    o55["GET /me/support-inbox/{conversationId}"]:::op
+    o57["GET /me/support-reply-templates"]:::op
+    o64["GET /org/reply-templates"]:::op
+    o65["POST /org/reply-templates"]:::op
+    o68["PATCH /org/reply-templates/{id}"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -960,95 +986,202 @@ flowchart LR
   a40 --> o39
   o39 -->|"CREA"| t3
   a2 --> o41
-  o41 -->|"LEE"| t13
+  o41 -->|"ACTUALIZA"| t42
+  o41 -->|"CREA"| t42
   o41 -->|"LEE"| t42
-  o41 -->|"LEE"| t3
-  o41 -->|"LEE"| t27
-  o41 -->|"LEE"| t14
-  o41 -->|"LEE"| t25
-  o41 -.-> t43
-  a2 --> o44
-  o44 -->|"LEE"| t3
-  o44 -->|"LEE"| t45
-  a2 --> o46
-  o46 -->|"LEE"| t47
-  a40 --> o48
-  o48 -->|"CREA"| t49
-  o48 -->|"ACTUALIZA"| t3
-  o48 -->|"LEE"| t3
-  o48 -->|"ACTUALIZA"| t30
-  o48 -->|"CREA"| t30
-  o48 -->|"LEE"| t30
-  a40 --> o50
-  o50 -->|"CREA"| t49
-  o50 -->|"ACTUALIZA"| t3
-  o50 -->|"LEE"| t3
-  o50 -->|"ACTUALIZA"| t30
-  o50 -->|"LEE"| t30
-  a52 --> o51
-  o51 -->|"CREA"| t49
-  o51 -->|"ACTUALIZA"| t3
+  o41 -->|"LEE"| t43
+  o41 -->|"LEE"| t44
+  o41 -->|"LEE"| t45
+  o41 -.-> t46
+  a2 --> o47
+  o47 -->|"LEE"| t48
+  o47 -->|"LEE"| t43
+  o47 -->|"LEE"| t44
+  o47 -->|"LEE"| t45
+  o47 -->|"LEE"| t3
+  o47 -->|"LEE"| t49
+  o47 -.-> t50
+  a2 --> o51
+  o51 -->|"CREA"| t48
+  o51 -->|"LEE"| t43
+  o51 -->|"LEE"| t44
+  o51 -->|"LEE"| t45
   o51 -->|"LEE"| t3
-  o51 -->|"ACTUALIZA"| t30
-  o51 -->|"LEE"| t30
+  o51 -->|"LEE"| t49
+  o51 -.-> t52
+  a2 --> o53
+  o53 -->|"LEE"| t42
+  o53 -->|"LEE"| t43
+  o53 -->|"LEE"| t44
+  o53 -->|"LEE"| t45
+  o53 -->|"LEE"| t3
+  o53 -->|"LEE"| t49
+  o53 -.-> t54
+  a2 --> o55
+  o55 -->|"LEE"| t42
+  o55 -->|"LEE"| t48
+  o55 -->|"LEE"| t43
+  o55 -->|"LEE"| t44
+  o55 -->|"LEE"| t45
+  o55 -->|"LEE"| t3
+  o55 -.-> t56
+  a2 --> o57
+  o57 -->|"LEE"| t58
+  o57 -->|"LEE"| t49
+  o57 -->|"LEE"| t59
+  o57 -->|"LEE"| t60
+  o57 -->|"LEE"| t61
+  o57 -->|"LEE"| t62
+  o57 -.-> t63
+  a40 --> o64
+  o64 -->|"LEE"| t58
+  a40 --> o65
+  o65 -->|"CREA"| t58
+  o65 -->|"LEE"| t66
+  o65 -->|"LEE"| t67
+  a40 --> o68
+  o68 -->|"ACTUALIZA"| t58
+  o68 -->|"LEE"| t58
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
 
-### Diagrama 5 de 5 — etapas `ctrl:PartyRatingsController`, `ctrl:PatientReviewsController`
+### Diagrama 5 de 5 — etapas `ctrl:CommunityTimelineController`, `ctrl:CommunityTopicsController`, `ctrl:CommunityVerificationController`…
 
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  a12(["PATIENT"]):::actor
-  t3[("community.party_ratings")]:::tabla
-  t4[("practice.practices")]:::tabla
-  t6[("clinical.encounter_participants")]:::tabla
-  t7[("clinical.encounters")]:::tabla
-  t13[("community.public_profiles")]:::tabla
-  t14[("community.review_dimension_scores")]:::tabla
-  t15[("community.service_reviews")]:::tabla
-  t8[("+3 tablas más")]
-  subgraph s0["ctrl:PartyRatingsController · Operaciones de PartyRatingsController que el READ…"]
-    o1["GET /community/ratings"]:::op
-    o5["PUT /community/ratings"]:::op
-    o9["GET /community/ratings/mine"]:::op
-    o10["GET /community/ratings/summary"]:::op
+  a15(["SECURITY_ADMIN"]):::actor
+  a20(["SYSTEM · SECURITY_ADMIN"]):::actor
+  a31(["PATIENT"]):::actor
+  t3[("community.comments")]:::tabla
+  t4[("community.feed_items")]:::tabla
+  t5[("community.public_profiles")]:::tabla
+  t6[("community.reactions")]:::tabla
+  t7[("community.social_follows")]:::tabla
+  t8[("community.social_posts")]:::tabla
+  t11[("community.social_notifications")]:::tabla
+  t13[("community.topics")]:::tabla
+  t16[("audit.verified_badges_history")]:::tabla
+  t17[("community.verified_badges")]:::tabla
+  t22[("community.party_ratings")]:::tabla
+  t23[("practice.practices")]:::tabla
+  t25[("clinical.encounter_participants")]:::tabla
+  t26[("clinical.encounters")]:::tabla
+  t32[("community.review_dimension_scores")]:::tabla
+  t33[("community.service_reviews")]:::tabla
+  t9[("+1 tablas más")]
+  subgraph s0["ctrl:CommunityTimelineController · Operaciones de CommunityTimelineController q…"]
+    o1["GET /community/feed"]:::op
+    o10["GET /community/notifications"]:::op
   end
-  subgraph s1["ctrl:PatientReviewsController · Operaciones de PatientReviewsController que el…"]
-    o11["POST /patients/me/reviews"]:::op
+  subgraph s1["ctrl:CommunityTopicsController · Operaciones de CommunityTopicsController que e…"]
+    o12["GET /community/topics"]:::op
+  end
+  subgraph s2["ctrl:CommunityVerificationController · Operaciones de CommunityVerificationCont…"]
+    o14["POST /internal/community/verification/badges"]:::op
+    o18["POST /internal/community/verification/badges/{targetId}/revoke"]:::op
+    o19["POST /internal/community/verification/badges/expire-sweep"]:::op
+  end
+  t27[("+3 tablas más")]
+  subgraph s3["ctrl:PartyRatingsController · Operaciones de PartyRatingsController que el READ…"]
+    o21["GET /community/ratings"]:::op
+    o24["PUT /community/ratings"]:::op
+    o28["GET /community/ratings/mine"]:::op
+    o29["GET /community/ratings/summary"]:::op
+  end
+  subgraph s4["ctrl:PatientReviewsController · Operaciones de PatientReviewsController que el…"]
+    o30["POST /patients/me/reviews"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
   o1 -->|"LEE"| t4
-  a2 --> o5
-  o5 -->|"LEE"| t6
-  o5 -->|"LEE"| t7
-  o5 -->|"ACTUALIZA"| t3
-  o5 -->|"CREA"| t3
-  o5 -->|"LEE"| t3
-  o5 -->|"LEE"| t4
-  o5 -.-> t8
-  a2 --> o9
-  o9 -->|"LEE"| t3
-  o9 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  o1 -->|"LEE"| t6
+  o1 -->|"LEE"| t7
+  o1 -->|"LEE"| t8
+  o1 -.-> t9
   a2 --> o10
-  o10 -->|"LEE"| t3
-  o10 -->|"LEE"| t4
-  a12 --> o11
-  o11 -->|"LEE"| t6
-  o11 -->|"LEE"| t7
-  o11 -->|"LEE"| t13
-  o11 -->|"CREA"| t14
-  o11 -->|"CREA"| t15
-  o11 -->|"LEE"| t15
+  o10 -->|"LEE"| t5
+  o10 -->|"LEE"| t11
+  a2 --> o12
+  o12 -->|"LEE"| t13
+  a15 --> o14
+  o14 -->|"CREA"| t16
+  o14 -->|"ACTUALIZA"| t5
+  o14 -->|"LEE"| t5
+  o14 -->|"ACTUALIZA"| t17
+  o14 -->|"CREA"| t17
+  o14 -->|"LEE"| t17
+  a15 --> o18
+  o18 -->|"CREA"| t16
+  o18 -->|"ACTUALIZA"| t5
+  o18 -->|"LEE"| t5
+  o18 -->|"ACTUALIZA"| t17
+  o18 -->|"LEE"| t17
+  a20 --> o19
+  o19 -->|"CREA"| t16
+  o19 -->|"ACTUALIZA"| t5
+  o19 -->|"LEE"| t5
+  o19 -->|"ACTUALIZA"| t17
+  o19 -->|"LEE"| t17
+  a2 --> o21
+  o21 -->|"LEE"| t22
+  o21 -->|"LEE"| t23
+  a2 --> o24
+  o24 -->|"LEE"| t25
+  o24 -->|"LEE"| t26
+  o24 -->|"ACTUALIZA"| t22
+  o24 -->|"CREA"| t22
+  o24 -->|"LEE"| t22
+  o24 -->|"LEE"| t23
+  o24 -.-> t27
+  a2 --> o28
+  o28 -->|"LEE"| t22
+  o28 -->|"LEE"| t23
+  a2 --> o29
+  o29 -->|"LEE"| t22
+  o29 -->|"LEE"| t23
+  a31 --> o30
+  o30 -->|"LEE"| t25
+  o30 -->|"LEE"| t26
+  o30 -->|"LEE"| t5
+  o30 -->|"CREA"| t32
+  o30 -->|"CREA"| t33
+  o30 -->|"LEE"| t33
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
   classDef evento fill:#efe,stroke:#3a3
 ```
+
+## Máquinas de estado
+
+### Máquina de estados `TRANSITIONS`
+
+Declarada en `src/modules/community/domain/support-inbox.rules.ts:5`. Los estados llevan el nombre del identificador del código; no se resuelven al catálogo de conceptos.
+
+```mermaid
+stateDiagram-v2
+  [*] --> NEW
+  NEW --> TAKEN : POST …/{conversationId}/assignment
+  NEW --> WAITING_DOCTOR : POST …/{conversationId}/assignment
+  TAKEN --> WAITING_DOCTOR : POST …/{conversationId}/assignment
+  TAKEN --> RESOLVED : POST …/{conversationId}/assignment
+  WAITING_DOCTOR --> TAKEN : POST …/{conversationId}/assignment
+  WAITING_DOCTOR --> RESOLVED : POST …/{conversationId}/assignment
+  RESOLVED --> TAKEN : POST …/{conversationId}/assignment
+```
+
+**Operaciones que ejercen esta máquina** _(POR_REFERENCIA: el handler alcanza un método que valida contra la tabla; «sin destino nombrado» significa que el estado de destino llega por el cuerpo de la petición)_:
+
+| Operación | Estados de destino que nombra | A través de |
+|---|---|---|
+| POST /community/conversations/{conversationId}/assignment | NEW, RESOLVED, TAKEN, WAITING_DOCTOR | CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.writeAssignment |
+| PATCH /insurance-campaigns/{id}/status | sin destino nombrado | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus |
+| PATCH /insurance/campaigns/{id}/status | sin destino nombrado | InsuranceCampaignsController.changeStatus → InsuranceCampaignsService.changeStatus |
 
 ## Árbol de decisión por operación
 
@@ -1701,9 +1834,24 @@ flowchart TD
   n27[("LEE community.direct_messages")]:::efecto
   n26 --> n27
   n25 -->|"no"| n27
-  n28(("200 Responde con éxito")):::ok
+  n28{"this.teamView"}:::decision
   n27 --> n28
   n17 -->|"al terminar"| n28
+  n29["Llama a CommunitySupportTeamViewService.awaitingDoctor"]:::llamada
+  n28 -->|"sí"| n29
+  n30["Llama a SupportInboxRepository.findAssignments"]:::llamada
+  n29 --> n30
+  n31[("LEE community.conversation_assignments")]:::efecto
+  n30 --> n31
+  n32["Llama a CommunitySupportTeamViewService.reader"]:::llamada
+  n31 --> n32
+  n33["Llama a PublicProfilesRepository.findById"]:::llamada
+  n32 --> n33
+  n34[("LEE community.public_profiles")]:::efecto
+  n33 --> n34
+  n35(("200 Responde con éxito")):::ok
+  n34 --> n35
+  n28 -->|"no"| n35
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1740,59 +1888,62 @@ flowchart TD
   n4 -->|"no"| n6
   n7["Transacción: transactional(…)"]:::transaccion
   n6 --> n7
-  n8["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n8{"!trustedSystemChannel"}:::decision
   n7 --> n8
-  n9["Llama a PublicProfilesRepository.findById"]:::llamada
-  n8 --> n9
-  n10[("LEE community.public_profiles")]:::efecto
+  n9["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n8 -->|"sí"| n9
+  n10["Llama a PublicProfilesRepository.findById"]:::llamada
   n9 --> n10
-  n11(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n11[("LEE community.public_profiles")]:::efecto
   n10 --> n11
-  n12{"participantIds.size !== dto.participantProfileIds.length"}:::decision
-  n13(["422 PRECONDITION_FAILED Los participantes de una conversación deben ser distintos"]):::error
-  n12 -->|"sí"| n13
-  n14{"dto.participantProfileIds.length !== 2"}:::decision
-  n12 -->|"no"| n14
-  n15(["422 PRECONDITION_FAILED Una conversación directa requiere exactamente dos participantes"]):::error
-  n14 -->|"sí"| n15
-  n16["Llama a PublicProfilesRepository.findById"]:::llamada
-  n14 -->|"no"| n16
-  n17[("LEE community.public_profiles")]:::efecto
-  n16 --> n17
-  n18{"!eligibleRecipient"}:::decision
+  n12(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
+  n11 --> n12
+  n13{"participantIds.size !== dto.participantProfileIds.length"}:::decision
+  n8 -->|"no"| n13
+  n14(["422 PRECONDITION_FAILED Los participantes de una conversación deben ser distintos"]):::error
+  n13 -->|"sí"| n14
+  n15{"dto.participantProfileIds.length !== 2"}:::decision
+  n13 -->|"no"| n15
+  n16(["422 PRECONDITION_FAILED Una conversación directa requiere exactamente dos participantes"]):::error
+  n15 -->|"sí"| n16
+  n17["Llama a PublicProfilesRepository.findById"]:::llamada
+  n15 -->|"no"| n17
+  n18[("LEE community.public_profiles")]:::efecto
   n17 --> n18
-  n19(["422 PRECONDITION_FAILED La persona no está disponible para iniciar una conversación"]):::error
-  n18 -->|"sí"| n19
-  n20["Llama a BlocksRepository.existsBetween"]:::llamada
-  n18 -->|"no"| n20
-  n21[("LEE community.user_blocks")]:::efecto
-  n20 --> n21
-  n22{"blocked"}:::decision
+  n19{"!eligibleRecipient"}:::decision
+  n18 --> n19
+  n20(["422 PRECONDITION_FAILED La persona no está disponible para iniciar una conversación"]):::error
+  n19 -->|"sí"| n20
+  n21["Llama a BlocksRepository.existsBetween"]:::llamada
+  n19 -->|"no"| n21
+  n22[("LEE community.user_blocks")]:::efecto
   n21 --> n22
-  n23(["422 PRECONDITION_FAILED No se puede iniciar una conversación entre perfiles bloqueados"]):::error
-  n22 -->|"sí"| n23
-  n24["Llama a ConversationsRepository.findDirectBetween"]:::llamada
-  n22 -->|"no"| n24
-  n25[("LEE community.conversation_participants · LEE community.conversations")]:::efecto
-  n24 --> n25
-  n26["Repite: por cada const conversation de candidates"]:::bucle
+  n23{"blocked"}:::decision
+  n22 --> n23
+  n24(["422 PRECONDITION_FAILED No se puede iniciar una conversación entre perfiles bloqueados"]):::error
+  n23 -->|"sí"| n24
+  n25["Llama a ConversationsRepository.findDirectBetween"]:::llamada
+  n23 -->|"no"| n25
+  n26[("LEE community.conversation_participants · LEE community.conversations")]:::efecto
   n25 --> n26
-  n27[("LEE community.conversation_participants")]:::efecto
-  n26 -->|"cada elemento"| n27
-  n28["Llama a ConversationsRepository.createConversation"]:::llamada
-  n27 --> n28
-  n26 -->|"al terminar"| n28
-  n29[("CREA community.conversations")]:::efecto
+  n27["Repite: por cada const conversation de candidates"]:::bucle
+  n26 --> n27
+  n28[("LEE community.conversation_participants")]:::efecto
+  n27 -->|"cada elemento"| n28
+  n29["Llama a ConversationsRepository.createConversation"]:::llamada
   n28 --> n29
-  n30["Repite: por cada const profileId de dto.participantProfileIds"]:::bucle
+  n27 -->|"al terminar"| n29
+  n30[("CREA community.conversations")]:::efecto
   n29 --> n30
-  n31["Llama a ConversationsRepository.createParticipant"]:::llamada
-  n30 -->|"cada elemento"| n31
-  n32[("CREA community.conversation_participants")]:::efecto
-  n31 --> n32
-  n33(("201 Responde con éxito")):::ok
+  n31["Repite: por cada const profileId de dto.participantProfileIds"]:::bucle
+  n30 --> n31
+  n32["Llama a ConversationsRepository.createParticipant"]:::llamada
+  n31 -->|"cada elemento"| n32
+  n33[("CREA community.conversation_participants")]:::efecto
   n32 --> n33
-  n30 -->|"al terminar"| n33
+  n34(("201 Responde con éxito")):::ok
+  n33 --> n34
+  n31 -->|"al terminar"| n34
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1801,7 +1952,117 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 11. GET /community/conversations/{conversationId}/attachments/{fileId}/content
+#### 11. POST /community/conversations/{conversationId}/assignment
+
+Tomar, asignar o cambiar el estado de una conversación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa conversación no es de ese doctor; PreconditionFailedException: Cambiar la asignación exige indicar la acción o el estado; PreconditionFailedException: Esa persona no puede responder por este doctor; PreconditionFailedException: Cambiar el estado exige indicar el estado; PreconditionFailedException: No se puede pasar de {current} a {target} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunitySupportInboxService.applyAssignment"]:::llamada
+  n2 --> n3
+  n4["Transacción: withPersonScope(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CommunitySupportInboxService.requireAccess"]:::llamada
+  n4 --> n5
+  n6["Llama a SupportInboxRepository.findConversation"]:::llamada
+  n5 --> n6
+  n7[("LEE community.conversations · LEE community.conversation_participants · LEE community.public_profiles · LEE c…")]:::efecto
+  n6 --> n7
+  n8{"!conversation || !doctor"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10{"dto.practitionerProfileId && dto.practitionerProfileId !== conversation.practitionerProfileId"}:::decision
+  n8 -->|"no"| n10
+  n11(["422 PRECONDITION_FAILED Esa conversación no es de ese doctor"]):::error
+  n10 -->|"sí"| n11
+  n12{"!dto.action && !dto.status"}:::decision
+  n10 -->|"no"| n12
+  n13(["422 PRECONDITION_FAILED Cambiar la asignación exige indicar la acción o el estado"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a CommunitySupportInboxService.writeAssignment"]:::llamada
+  n12 -->|"no"| n14
+  n15["Llama a SupportInboxRepository.findAssignmentForUpdate"]:::llamada
+  n14 --> n15
+  n16[("LEE community.conversation_assignments")]:::efecto
+  n15 --> n16
+  n17{"heldByOther(holder, actor.id)"}:::decision
+  n16 --> n17
+  n18(["↩ (relanza el error capturado)"]):::error
+  n17 -->|"sí"| n18
+  n19{"dto.action === 'TAKE'"}:::decision
+  n17 -->|"no"| n19
+  n20{"!plan.ok"}:::decision
+  n19 -->|"sí"| n20
+  n21(["↩ (relanza el error capturado)"]):::error
+  n20 -->|"sí"| n21
+  n22{"dto.action === 'ASSIGN'"}:::decision
+  n19 -->|"no"| n22
+  n23["Llama a CommunitySupportInboxService.eligibleAssignee"]:::llamada
+  n22 -->|"sí"| n23
+  n24{"!verdict.allowed"}:::decision
+  n23 --> n24
+  n25(["422 PRECONDITION_FAILED Esa persona no puede responder por este doctor"]):::error
+  n24 -->|"sí"| n25
+  n26{"dto.action === 'SET_STATUS'"}:::decision
+  n22 -->|"no"| n26
+  n27{"!dto.status"}:::decision
+  n26 -->|"sí"| n27
+  n28(["422 PRECONDITION_FAILED Cambiar el estado exige indicar el estado"]):::error
+  n27 -->|"sí"| n28
+  n29{"target === 'TAKEN'"}:::decision
+  n26 -->|"no"| n29
+  n30["Llama a CommunitySupportInboxService.eligibleAssignee"]:::llamada
+  n29 -->|"sí"| n30
+  n31{"!verdict.allowed"}:::decision
+  n30 --> n31
+  n32(["422 PRECONDITION_FAILED Esa persona no puede responder por este doctor"]):::error
+  n31 -->|"sí"| n32
+  n33{"current !== target && !transitionOk"}:::decision
+  n20 -->|"no"| n33
+  n24 -->|"no"| n33
+  n27 -->|"no"| n33
+  n31 -->|"no"| n33
+  n29 -->|"no"| n33
+  n34(["422 PRECONDITION_FAILED No se puede pasar de {current} a {target}"]):::error
+  n33 -->|"sí"| n34
+  n35{"!row"}:::decision
+  n33 -->|"no"| n35
+  n36["Llama a SupportInboxRepository.createAssignment"]:::llamada
+  n35 -->|"sí"| n36
+  n37[("CREA community.conversation_assignments")]:::efecto
+  n36 --> n37
+  n38[("ACTUALIZA community.conversation_assignments · ACTUALIZA community.conversation_assignments · ACTUALIZA commu…")]:::efecto
+  n35 -->|"no"| n38
+  n39["Llama a SupportInboxRepository.userNames"]:::llamada
+  n37 --> n39
+  n38 --> n39
+  n40[("LEE iam.users")]:::efecto
+  n39 --> n40
+  n41(("200 Responde con éxito")):::ok
+  n40 --> n41
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 12. GET /community/conversations/{conversationId}/attachments/{fileId}/content
 
 Descargar el adjunto de una conversación (participante activo)
 
@@ -1940,7 +2201,109 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 12. GET /community/conversations/{conversationId}/messages
+#### 13. GET /community/conversations/{conversationId}/internal-notes
+
+Notas internas de una conversación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunitySupportInboxService.listNotes"]:::llamada
+  n2 --> n3
+  n4["Transacción: withPersonScope(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CommunitySupportInboxService.requireAccess"]:::llamada
+  n4 --> n5
+  n6["Llama a SupportInboxRepository.findConversation"]:::llamada
+  n5 --> n6
+  n7[("LEE community.conversations · LEE community.conversation_participants · LEE community.public_profiles · LEE c…")]:::efecto
+  n6 --> n7
+  n8{"!conversation || !doctor"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a SupportInboxRepository.findNotes"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE community.conversation_internal_notes")]:::efecto
+  n10 --> n11
+  n12["Llama a SupportInboxRepository.userNames"]:::llamada
+  n11 --> n12
+  n13[("LEE iam.users")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 14. POST /community/conversations/{conversationId}/internal-notes
+
+Agregar una nota interna a una conversación
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunitySupportInboxService.addNote"]:::llamada
+  n2 --> n3
+  n4["Transacción: withPersonScope(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CommunitySupportInboxService.requireAccess"]:::llamada
+  n4 --> n5
+  n6["Llama a SupportInboxRepository.findConversation"]:::llamada
+  n5 --> n6
+  n7[("LEE community.conversations · LEE community.conversation_participants · LEE community.public_profiles · LEE c…")]:::efecto
+  n6 --> n7
+  n8{"!conversation || !doctor"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10["Transacción: inTenant(…)"]:::transaccion
+  n8 -->|"no"| n10
+  n11["Llama a SupportInboxRepository.createNote"]:::llamada
+  n10 --> n11
+  n12[("CREA community.conversation_internal_notes")]:::efecto
+  n11 --> n12
+  n13["Llama a SupportInboxRepository.userNames"]:::llamada
+  n12 --> n13
+  n14[("LEE iam.users")]:::efecto
+  n13 --> n14
+  n15(("201 Responde con éxito")):::ok
+  n14 --> n15
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 15. GET /community/conversations/{conversationId}/messages
 
 Mensajes de una conversación
 
@@ -2012,12 +2375,24 @@ flowchart TD
   n27 --> n28
   n29[("LEE community.direct_messages")]:::efecto
   n28 --> n29
-  n30["Llama a ConversationsRepository.findMessageById"]:::llamada
+  n30["Llama a CommunitySupportTeamViewService.reader"]:::llamada
   n29 --> n30
-  n31[("LEE community.direct_messages")]:::efecto
+  n31["Llama a PublicProfilesRepository.findById"]:::llamada
   n30 --> n31
-  n32(("200 Responde con éxito")):::ok
+  n32[("LEE community.public_profiles")]:::efecto
   n31 --> n32
+  n33["Llama a ConversationsRepository.findMessageById"]:::llamada
+  n32 --> n33
+  n34[("LEE community.direct_messages")]:::efecto
+  n33 --> n34
+  n35["Llama a CommunitySupportTeamViewService.annotate"]:::llamada
+  n34 --> n35
+  n36["Llama a SupportInboxRepository.userNames"]:::llamada
+  n35 --> n36
+  n37[("LEE iam.users")]:::efecto
+  n36 --> n37
+  n38(("200 Responde con éxito")):::ok
+  n37 --> n38
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2026,7 +2401,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 13. POST /community/conversations/{conversationId}/messages
+#### 16. POST /community/conversations/{conversationId}/messages
 
 Enviar un mensaje directo en la conversación
 
@@ -2035,9 +2410,10 @@ Enviar un mensaje directo en la conversación
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Archivo adjunto no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El remitente no es participante activo; PreconditionFailedException: Existe un bloqueo entre los participantes; PreconditionFailedException: No se puede adjuntar un archivo sin un actor que lo autorice; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno; ForbiddenException: No puede responder en nombre de este profesional; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Archivo adjunto no encontrado; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: La conversación ya la tiene otra persona del equipo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Se responde en nombre del profesional con su propio perfil como remitente; PreconditionFailedException: El correo solo sirve para responder en nombre del doctor; PreconditionFailedException: El remitente no es participante activo; PreconditionFailedException: Existe un bloqueo entre los participantes; PreconditionFailedException: El mensaje del paciente es clínico: solo el doctor puede responderlo. Derívelo al doctor.; PreconditionFailedException: Un mensaje con contenido clínico lo responde el doctor: derívelo; PreconditionFailedException: No se puede adjuntar un archivo sin un actor que lo autorice; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -2051,143 +2427,141 @@ flowchart TD
   n3 --> n4
   n5["Transacción: transactional(…)"]:::transaccion
   n4 --> n5
-  n6{"authorizingActor"}:::decision
+  n6["Llama a CommunityMessagingService.resolveProvenance"]:::llamada
   n5 --> n6
-  n7["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
-  n6 -->|"sí"| n7
-  n8["Llama a PublicProfilesRepository.findById"]:::llamada
-  n7 --> n8
-  n9[("LEE community.public_profiles")]:::efecto
-  n8 --> n9
+  n7{"authorizingActor"}:::decision
+  n6 --> n7
+  n8{"!dto.onBehalfOfProfileId || (await this.visibility.actsAsProfile( tx, dto.senderProfileId, authorizingActor,…"}:::decision
+  n7 -->|"sí"| n8
+  n9["Llama a CommunityVisibilityService.assertActsAsProfile"]:::llamada
+  n8 -->|"sí"| n9
   n10(["403 FORBIDDEN No se puede escribir en el grafo social con un perfil ajeno"]):::error
   n9 --> n10
-  n11["Llama a ConversationsRepository.findConversationById"]:::llamada
-  n6 -->|"no"| n11
-  n12[("LEE community.conversations")]:::efecto
-  n11 --> n12
-  n13{"!conversation"}:::decision
-  n12 --> n13
-  n14(["404 NOT_FOUND Conversación no encontrada"]):::error
-  n13 -->|"sí"| n14
-  n15["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
-  n13 -->|"no"| n15
-  n16[("LEE community.conversation_participants")]:::efecto
-  n15 --> n16
-  n17{"!sender"}:::decision
-  n16 --> n17
-  n18(["422 PRECONDITION_FAILED El remitente no es participante activo"]):::error
+  n11{"dto.onBehalfOfProfileId !== dto.senderProfileId"}:::decision
+  n8 -->|"no"| n11
+  n12(["422 PRECONDITION_FAILED Se responde en nombre del profesional con su propio perfil como remitente"]):::error
+  n11 -->|"sí"| n12
+  n13["Llama a PublicProfilesRepository.findById"]:::llamada
+  n11 -->|"no"| n13
+  n14[("LEE community.public_profiles")]:::efecto
+  n13 --> n14
+  n15{"!profile || !verdict?.allowed"}:::decision
+  n14 --> n15
+  n16(["403 FORBIDDEN No puede responder en nombre de este profesional"]):::error
+  n15 -->|"sí"| n16
+  n17{"agendaActor"}:::decision
+  n15 -->|"no"| n17
+  n7 -->|"no"| n17
+  n18["Llama a PublicProfilesRepository.findById"]:::llamada
   n17 -->|"sí"| n18
-  n19["Llama a ConversationsRepository.findParticipants"]:::llamada
-  n17 -->|"no"| n19
-  n20[("LEE community.conversation_participants")]:::efecto
+  n19[("LEE community.public_profiles")]:::efecto
+  n18 --> n19
+  n20{"dto.channels?.includes('EMAIL') && !supportReply"}:::decision
   n19 --> n20
-  n21["Repite: por cada const p de participants"]:::bucle
-  n20 --> n21
-  n22["Llama a BlocksRepository.existsBetween"]:::llamada
-  n21 -->|"cada elemento"| n22
-  n23[("LEE community.user_blocks")]:::efecto
+  n17 -->|"no"| n20
+  n21(["422 PRECONDITION_FAILED El correo solo sirve para responder en nombre del doctor"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a ConversationsRepository.findConversationById"]:::llamada
+  n20 -->|"no"| n22
+  n23[("LEE community.conversations")]:::efecto
   n22 --> n23
-  n24{"blocked"}:::decision
+  n24{"!conversation"}:::decision
   n23 --> n24
-  n25(["422 PRECONDITION_FAILED Existe un bloqueo entre los participantes"]):::error
+  n25(["404 NOT_FOUND Conversación no encontrada"]):::error
   n24 -->|"sí"| n25
-  n26{"dto.attachmentFileId"}:::decision
+  n26["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
   n24 -->|"no"| n26
-  n21 -->|"al terminar"| n26
-  n27{"!authorizingActor"}:::decision
-  n26 -->|"sí"| n27
-  n28(["422 PRECONDITION_FAILED No se puede adjuntar un archivo sin un actor que lo autorice"]):::error
-  n27 -->|"sí"| n28
-  n29["Llama a CommunityMessagingService.assertAttachmentCanBeAssociated"]:::llamada
-  n27 -->|"no"| n29
-  n30["Intenta"]:::intento
-  n29 --> n30
-  n31["Llama a AttachableFileService.assertUsableBy"]:::llamada
+  n27[("LEE community.conversation_participants")]:::efecto
+  n26 --> n27
+  n28{"!sender"}:::decision
+  n27 --> n28
+  n29(["422 PRECONDITION_FAILED El remitente no es participante activo"]):::error
+  n28 -->|"sí"| n29
+  n30["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n28 -->|"no"| n30
+  n31[("LEE community.conversation_participants")]:::efecto
   n30 --> n31
-  n32{"!file"}:::decision
+  n32["Repite: por cada const p de participants"]:::bucle
   n31 --> n32
-  n33(["404 NOT_FOUND {labels.notFound}"]):::error
-  n32 -->|"sí"| n33
-  n34{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
-  n32 -->|"no"| n34
-  n35(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
-  n34 -->|"sí"| n35
-  n36{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
-  n34 -->|"no"| n36
-  n37(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
-  n36 -->|"sí"| n37
-  n38{"!file.currentVersionId"}:::decision
-  n36 -->|"no"| n38
-  n39(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n33["Llama a BlocksRepository.existsBetween"]:::llamada
+  n32 -->|"cada elemento"| n33
+  n34[("LEE community.user_blocks")]:::efecto
+  n33 --> n34
+  n35{"blocked"}:::decision
+  n34 --> n35
+  n36(["422 PRECONDITION_FAILED Existe un bloqueo entre los participantes"]):::error
+  n35 -->|"sí"| n36
+  n37{"supportReply && authorizingActor"}:::decision
+  n35 -->|"no"| n37
+  n32 -->|"al terminar"| n37
+  n38{"!this.supportReply"}:::decision
+  n37 -->|"sí"| n38
+  n39(["403 FORBIDDEN No puede responder en nombre de este profesional"]):::error
   n38 -->|"sí"| n39
-  n40{"!(error instanceof ForbiddenException)"}:::decision
-  n30 -->|"si falla"| n40
-  n41(["↩ (relanza el error capturado)"]):::error
-  n40 -->|"sí"| n41
-  n42["Llama a ConversationsRepository.findLiveMessagesByAttachmentFileId"]:::llamada
-  n38 -->|"no"| n42
-  n40 -->|"no"| n42
-  n43[("LEE community.direct_messages")]:::efecto
+  n40["Llama a CommunitySupportReplyService.guardReply"]:::llamada
+  n38 -->|"no"| n40
+  n41["Llama a SupportInboxRepository.findConversation"]:::llamada
+  n40 --> n41
+  n42[("LEE community.conversations · LEE community.conversation_participants · LEE community.public_profiles · LEE c…")]:::efecto
+  n41 --> n42
+  n43{"!inInbox"}:::decision
   n42 --> n43
-  n44["Repite: por cada const source de sources"]:::bucle
-  n43 --> n44
-  n45["Llama a ConversationsRepository.findActiveParticipant"]:::llamada
-  n44 -->|"cada elemento"| n45
-  n46[("LEE community.conversation_participants")]:::efecto
+  n44(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n43 -->|"sí"| n44
+  n45["Llama a SupportInboxRepository.findAssignmentForUpdate"]:::llamada
+  n43 -->|"no"| n45
+  n46[("LEE community.conversation_assignments")]:::efecto
   n45 --> n46
-  n47["Llama a ConversationsRepository.findParticipants"]:::llamada
+  n47["Llama a SupportInboxRepository.openPatientTexts"]:::llamada
   n46 --> n47
-  n48[("LEE community.conversation_participants")]:::efecto
+  n48[("LEE community.direct_messages")]:::efecto
   n47 --> n48
-  n49["Repite: por cada const sourceParticipant de sourceParticipants"]:::bucle
+  n49{"plan.reason === 'HELD_BY_OTHER'"}:::decision
   n48 --> n49
-  n50["Llama a BlocksRepository.existsBetween"]:::llamada
-  n49 -->|"cada elemento"| n50
-  n51[("LEE community.user_blocks")]:::efecto
+  n50["Llama a SupportInboxRepository.userNames"]:::llamada
+  n49 -->|"sí"| n50
+  n51[("LEE iam.users")]:::efecto
   n50 --> n51
-  n52["Llama a AttachableFileService.assertUsableForAuthorizedContext"]:::llamada
+  n52(["409 CONFLICT La conversación ya la tiene otra persona del equipo"]):::error
   n51 --> n52
-  n49 -->|"al terminar"| n52
-  n53{"!file"}:::decision
-  n52 --> n53
-  n54(["404 NOT_FOUND {labels.notFound}"]):::error
-  n53 -->|"sí"| n54
-  n55(["404 NOT_FOUND Archivo adjunto no encontrado"]):::error
-  n53 -->|"no"| n55
-  n44 -->|"al terminar"| n55
-  n56["Llama a ConversationsRepository.createMessage"]:::llamada
-  n26 -->|"no"| n56
-  n57[("CREA community.direct_messages")]:::efecto
-  n56 --> n57
-  n58[("ACTUALIZA community.conversations · ACTUALIZA community.conversations")]:::efecto
-  n57 --> n58
-  n59["Repite: por cada const p de participants"]:::bucle
-  n58 --> n59
-  n60["Llama a ConversationsRepository.createReceipt"]:::llamada
-  n59 -->|"cada elemento"| n60
-  n61[("CREA community.message_receipts")]:::efecto
+  n53(["422 PRECONDITION_FAILED El mensaje del paciente es clínico: solo el doctor puede responderlo. Derívelo al doc…"]):::error
+  n49 -->|"no"| n53
+  n54{"looksClinical(dto.bodyText, clinicalKeywordsFromEnv(process.env)) .clinical"}:::decision
+  n55(["422 PRECONDITION_FAILED Un mensaje con contenido clínico lo responde el doctor: derívelo"]):::error
+  n54 -->|"sí"| n55
+  n56{"dto.attachmentFileId"}:::decision
+  n54 -->|"no"| n56
+  n37 -->|"no"| n56
+  n57{"!authorizingActor"}:::decision
+  n56 -->|"sí"| n57
+  n58(["422 PRECONDITION_FAILED No se puede adjuntar un archivo sin un actor que lo autorice"]):::error
+  n57 -->|"sí"| n58
+  n59["Llama a CommunityMessagingService.assertAttachmentCanBeAssociated"]:::llamada
+  n57 -->|"no"| n59
+  n60["Intenta"]:::intento
+  n59 --> n60
+  n61["Llama a AttachableFileService.assertUsableBy"]:::llamada
   n60 --> n61
-  n62["Llama a CommunityMessageNotificationsService.newMessage"]:::llamada
+  n62{"!file"}:::decision
   n61 --> n62
-  n59 -->|"al terminar"| n62
-  n63["Intenta"]:::intento
-  n62 --> n63
-  n64["Llama a PublicProfilesRepository.findById"]:::llamada
-  n63 --> n64
-  n65[("LEE community.public_profiles")]:::efecto
-  n64 --> n65
-  n66{"evaluateAutomaticResponse"}:::decision
-  n65 --> n66
-  n67["Llama a CommunityMessagingService.responderOnly"]:::llamada
+  n63(["404 NOT_FOUND {labels.notFound}"]):::error
+  n62 -->|"sí"| n63
+  n64{"file.createdByUserId !== actor.id && !enAllowlist"}:::decision
+  n62 -->|"no"| n64
+  n65(["403 FORBIDDEN {labels.subject} no le pertenece"]):::error
+  n64 -->|"sí"| n65
+  n66{"file.deletedAt || file.lifecycleStatusConceptId === CONCEPTS.FILE_DELETED"}:::decision
+  n64 -->|"no"| n66
+  n67(["422 PRECONDITION_FAILED {labels.subject} está borrado"]):::error
   n66 -->|"sí"| n67
-  n68["Repite: por cada const recipient de recipients"]:::bucle
-  n67 --> n68
-  n69["Intenta"]:::intento
-  n68 -->|"cada elemento"| n69
-  n70["Llama a CommunityChatAutoReplyService.textForResponder"]:::llamada
-  n69 --> n70
-  n71["… el resto del árbol (3 nodos) está en el JSON del inventario"]:::corte
-  n70 --> n71
+  n68{"!file.currentVersionId"}:::decision
+  n66 -->|"no"| n68
+  n69(["422 PRECONDITION_FAILED {labels.subject} no tiene una versión vigente"]):::error
+  n68 -->|"sí"| n69
+  n70{"!(error instanceof ForbiddenException)"}:::decision
+  n60 -->|"si falla"| n70
+  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n70 -->|"sí"| n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2196,7 +2570,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 14. DELETE /community/conversations/{conversationId}/messages/{messageId}
+#### 17. DELETE /community/conversations/{conversationId}/messages/{messageId}
 
 Eliminar un mensaje propio
 
@@ -2281,7 +2655,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 15. PATCH /community/conversations/{conversationId}/messages/{messageId}
+#### 18. PATCH /community/conversations/{conversationId}/messages/{messageId}
 
 Editar el texto de un mensaje propio
 
@@ -2367,7 +2741,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 16. PATCH /community/conversations/{conversationId}/participant
+#### 19. PATCH /community/conversations/{conversationId}/participant
 
 Marcar la conversación como favorita, fijada o archivada
 
@@ -2416,7 +2790,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 17. DELETE /community/conversations/{conversationId}/pin
+#### 20. DELETE /community/conversations/{conversationId}/pin
 
 Soltar el mensaje fijado de la conversación
 
@@ -2481,7 +2855,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 18. POST /community/conversations/{conversationId}/pin
+#### 21. POST /community/conversations/{conversationId}/pin
 
 Fijar un mensaje de la conversación
 
@@ -2554,7 +2928,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 19. GET /community/conversations/{conversationId}/presence
+#### 22. GET /community/conversations/{conversationId}/presence
 
 Presencia de los demás participantes
 
@@ -2603,7 +2977,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 20. POST /community/conversations/{conversationId}/read
+#### 23. POST /community/conversations/{conversationId}/read
 
 Marcar mensajes como leídos (recibos)
 
@@ -2672,7 +3046,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 21. POST /community/conversations/contacts/search
+#### 24. POST /community/conversations/contacts/search
 
 Buscar personas para iniciar una conversación
 
@@ -2714,7 +3088,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 22. GET /community/feed
+#### 25. GET /community/feed
 
 Timeline de un perfil
 
@@ -2782,7 +3156,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 23. DELETE /community/follows
+#### 26. DELETE /community/follows
 
 Dejar de seguir un objeto social
 
@@ -2826,7 +3200,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 24. GET /community/follows
+#### 27. GET /community/follows
 
 Seguimientos activos de un perfil
 
@@ -2866,7 +3240,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 25. POST /community/follows
+#### 28. POST /community/follows
 
 Seguir un objeto social
 
@@ -2927,7 +3301,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 26. GET /community/groups
+#### 29. GET /community/groups
 
 Grupos de una organización
 
@@ -2979,7 +3353,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 27. POST /community/groups
+#### 30. POST /community/groups
 
 Crear un grupo/comunidad
 
@@ -3104,7 +3478,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 28. GET /community/groups/{groupId}
+#### 31. GET /community/groups/{groupId}
 
 Ficha de un grupo
 
@@ -3178,7 +3552,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 29. GET /community/groups/{groupId}/members
+#### 32. GET /community/groups/{groupId}/members
 
 Integrantes de un grupo
 
@@ -3267,7 +3641,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 30. POST /community/groups/{groupId}/members
+#### 33. POST /community/groups/{groupId}/members
 
 Unirse a un grupo / comunidad
 
@@ -3373,7 +3747,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 31. DELETE /community/groups/{groupId}/members/{member}
+#### 34. DELETE /community/groups/{groupId}/members/{member}
 
 Salir del grupo o dar de baja a un integrante
 
@@ -3502,7 +3876,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 32. PATCH /community/groups/{groupId}/members/{member}
+#### 35. PATCH /community/groups/{groupId}/members/{member}
 
 Aprobar/rechazar un alta o cambiar el rol
 
@@ -3653,7 +4027,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 33. GET /community/groups/{groupId}/posts
+#### 36. GET /community/groups/{groupId}/posts
 
 Muro de un grupo
 
@@ -3734,7 +4108,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 34. POST /community/groups/{groupId}/posts
+#### 37. POST /community/groups/{groupId}/posts
 
 Publicar en el muro del grupo
 
@@ -3896,7 +4270,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 35. POST /community/moderation/appeals/{appealId}/resolve
+#### 38. POST /community/moderation/appeals/{appealId}/resolve
 
 Resolver una apelación de moderación
 
@@ -3963,7 +4337,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 36. POST /community/moderation/decisions/{decisionId}/appeal
+#### 39. POST /community/moderation/decisions/{decisionId}/appeal
 
 Apelar una decisión de moderación
 
@@ -4042,7 +4416,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 37. GET /community/moderation/decisions/mine
+#### 40. GET /community/moderation/decisions/mine
 
 Mis propias decisiones de moderación
 
@@ -4090,7 +4464,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 38. POST /community/moderation/queue/{queueId}/decision
+#### 41. POST /community/moderation/queue/{queueId}/decision
 
 Resolver moderación (decisión + strike)
 
@@ -4157,7 +4531,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 39. GET /community/notifications
+#### 42. GET /community/notifications
 
 Notificaciones sociales de un perfil
 
@@ -4201,7 +4575,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 40. GET /community/polls/{pollId}
+#### 43. GET /community/polls/{pollId}
 
 Encuesta con opciones, recuentos y voto propio
 
@@ -4295,7 +4669,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 41. POST /community/polls/{pollId}/votes
+#### 44. POST /community/polls/{pollId}/votes
 
 Votar en una encuesta
 
@@ -4406,7 +4780,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 42. GET /community/posts/{postId}
+#### 45. GET /community/posts/{postId}
 
 Publicación con media, hashtags y menciones
 
@@ -4510,7 +4884,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 43. GET /community/posts/{postId}/comments
+#### 46. GET /community/posts/{postId}/comments
 
 Comentarios de una publicación (hilo anidado)
 
@@ -4583,7 +4957,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 44. POST /community/posts/{postId}/polls
+#### 47. POST /community/posts/{postId}/polls
 
 Crear una encuesta con opciones sobre un post
 
@@ -4641,7 +5015,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 45. GET /community/posts/{postId}/reactions
+#### 48. GET /community/posts/{postId}/reactions
 
 Reacciones de una publicación, agrupadas por tipo
 
@@ -4708,7 +5082,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 46. GET /community/profiles/{profileId}
+#### 49. GET /community/profiles/{profileId}
 
 Ficha de un perfil público
 
@@ -4783,7 +5157,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 47. GET /community/profiles/{profileId}/auto-reply
+#### 50. GET /community/profiles/{profileId}/auto-reply
 
 Respuesta automática por inactividad del perfil
 
@@ -4821,7 +5195,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 48. PUT /community/profiles/{profileId}/auto-reply
+#### 51. PUT /community/profiles/{profileId}/auto-reply
 
 Configurar la respuesta automática del perfil
 
@@ -4861,7 +5235,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 49. GET /community/profiles/{profileId}/posts
+#### 52. GET /community/profiles/{profileId}/posts
 
 Publicaciones de un perfil
 
@@ -4937,7 +5311,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 50. POST /community/profiles/{profileId}/posts
+#### 53. POST /community/profiles/{profileId}/posts
 
 Publicar un post con hashtags, media y menciones
 
@@ -5067,7 +5441,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 51. GET /community/profiles/{profileId}/reviews
+#### 54. GET /community/profiles/{profileId}/reviews
 
 Reviews publicadas de un perfil
 
@@ -5123,7 +5497,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 52. POST /community/profiles/{profileId}/reviews
+#### 55. POST /community/profiles/{profileId}/reviews
 
 Publicar una review verificada de servicio
 
@@ -5216,7 +5590,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 53. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
+#### 56. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
 
 Responder una reseña de la propia vitrina
 
@@ -5284,7 +5658,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 54. GET /community/profiles/by-slug/{slug}
+#### 57. GET /community/profiles/by-slug/{slug}
 
 Ficha de un perfil público por su slug
 
@@ -5364,7 +5738,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 55. GET /community/profiles/me
+#### 58. GET /community/profiles/me
 
 Consultar la vitrina pública propia
 
@@ -5401,7 +5775,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 56. PUT /community/profiles/me
+#### 59. PUT /community/profiles/me
 
 Crear o actualizar la vitrina pública propia
 
@@ -5572,7 +5946,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 57. GET /community/profiles/me/stats
+#### 60. GET /community/profiles/me/stats
 
 Estadísticas de la vitrina pública propia
 
@@ -5626,7 +6000,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 58. GET /community/ratings
+#### 61. GET /community/ratings
 
 Calificaciones de un médico, paciente u organización
 
@@ -5670,7 +6044,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 59. PUT /community/ratings
+#### 62. PUT /community/ratings
 
 Calificar con estrellas a un médico, paciente u organización
 
@@ -5815,7 +6189,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 60. GET /community/ratings/mine
+#### 63. GET /community/ratings/mine
 
 Mis calificaciones
 
@@ -5878,7 +6252,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 61. GET /community/ratings/summary
+#### 64. GET /community/ratings/summary
 
 Nota media de un médico, paciente u organización
 
@@ -5918,7 +6292,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 62. PUT /community/reactions
+#### 65. PUT /community/reactions
 
 Reaccionar a contenido (upsert una reacción por actor/objeto)
 
@@ -5969,7 +6343,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 63. POST /community/reports
+#### 66. POST /community/reports
 
 Reportar contenido y encolar moderación
 
@@ -6015,7 +6389,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 64. GET /f/{slug}
+#### 67. GET /f/{slug}
 
 Ficha pública de una farmacia
 
@@ -6089,7 +6463,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 65. POST /internal/community/feed/ranking/apply
+#### 68. POST /internal/community/feed/ranking/apply
 
 Aplicar rank_score recalculado
 
@@ -6125,7 +6499,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 66. POST /internal/community/feed/rebuild
+#### 69. POST /internal/community/feed/rebuild
 
 Generar feed (fan-out y ranking)
 
@@ -6167,7 +6541,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 67. GET /internal/community/search/health
+#### 70. GET /internal/community/search/health
 
 Estado del índice del directorio público
 
@@ -6224,7 +6598,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 68. POST /internal/community/search/reindex
+#### 71. POST /internal/community/search/reindex
 
 Reindexar el directorio público
 
@@ -6360,7 +6734,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 69. POST /internal/community/verification/badges
+#### 72. POST /internal/community/verification/badges
 
 Emitir un sello a mano (auditado)
 
@@ -6412,7 +6786,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 70. POST /internal/community/verification/badges/{targetId}/revoke
+#### 73. POST /internal/community/verification/badges/{targetId}/revoke
 
 Bajar los sellos de un sujeto (auditado)
 
@@ -6472,7 +6846,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 71. POST /internal/community/verification/badges/expire-sweep
+#### 74. POST /internal/community/verification/badges/expire-sweep
 
 Bajar los sellos cuya vigencia ya venció
 
@@ -6536,7 +6910,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 72. GET /l/{slug}
+#### 75. GET /l/{slug}
 
 Ficha pública de un laboratorio
 
@@ -6610,7 +6984,283 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 73. GET /o/{slug}
+#### 76. GET /me/support-inbox
+
+Bandeja de conversaciones del equipo de apoyo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunitySupportInboxService.listInbox"]:::llamada
+  n2 --> n3
+  n4["Transacción: withPersonScope(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CommunitySupportInboxService.resolveAccess"]:::llamada
+  n4 --> n5
+  n6["Llama a SupportAccessPolicy.liveEngagementTenants"]:::llamada
+  n5 --> n6
+  n7["Llama a SupportAccessRepository.findEngagements"]:::llamada
+  n6 --> n7
+  n8{"filter.ids"}:::decision
+  n7 --> n8
+  n9[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n8 -->|"sí"| n9
+  n10[("LEE directory.tenant_memberships · LEE delegated_access.organization_user_assignments")]:::efecto
+  n8 -->|"no"| n10
+  n11["Repite: por cada const tenantId de tenants"]:::bucle
+  n9 --> n11
+  n10 --> n11
+  n12["Llama a SupportAccessPolicy.inboxDoctorsOfTenant"]:::llamada
+  n11 -->|"cada elemento"| n12
+  n13["Llama a SupportAccessRepository.findEngagements"]:::llamada
+  n12 --> n13
+  n14{"filter.ids"}:::decision
+  n13 --> n14
+  n15[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n14 -->|"sí"| n15
+  n16[("LEE directory.tenant_memberships · LEE delegated_access.organization_user_assignments")]:::efecto
+  n14 -->|"no"| n16
+  n17["Llama a SupportAccessRepository.findRoleAssignmentsOfTenant"]:::llamada
+  n15 --> n17
+  n16 --> n17
+  n18[("LEE practice.practices · LEE practice.practitioner_role_assignments")]:::efecto
+  n17 --> n18
+  n19["Llama a SupportAccessRepository.findDelegationsOfEngagements"]:::llamada
+  n18 --> n19
+  n20[("LEE delegated_access.practitioner_delegate_assignments")]:::efecto
+  n19 --> n20
+  n21{"query.tenantId"}:::decision
+  n20 --> n21
+  n11 -->|"al terminar"| n21
+  n22{"access.tenants.length === 0"}:::decision
+  n21 -->|"sí"| n22
+  n23(["↩ (relanza el error capturado)"]):::error
+  n22 -->|"sí"| n23
+  n24{"access.doctors.length === 0"}:::decision
+  n22 -->|"no"| n24
+  n25(["↩ (relanza el error capturado)"]):::error
+  n24 -->|"sí"| n25
+  n26["Llama a SupportInboxRepository.doctorInfo"]:::llamada
+  n24 -->|"no"| n26
+  n21 -->|"no"| n26
+  n27[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts · LEE profiles.persons")]:::efecto
+  n26 --> n27
+  n28["Llama a SupportInboxRepository.tenantNames"]:::llamada
+  n27 --> n28
+  n29[("LEE directory.tenants")]:::efecto
+  n28 --> n29
+  n30["Llama a SupportInboxRepository.findByDoctors"]:::llamada
+  n29 --> n30
+  n31[("LEE community.conversations · LEE community.conversation_participants · LEE community.public_profiles · LEE c…")]:::efecto
+  n30 --> n31
+  n32["Llama a CommunitySupportInboxService.assignmentsOf"]:::llamada
+  n31 --> n32
+  n33["Repite: por cada const tenantId de new Set(rows.map((r) =› r.tenantId))"]:::bucle
+  n32 --> n33
+  n34["Llama a SupportInboxRepository.findAssignments"]:::llamada
+  n33 -->|"cada elemento"| n34
+  n35[("LEE community.conversation_assignments")]:::efecto
+  n34 --> n35
+  n36["Llama a SupportInboxRepository.userNames"]:::llamada
+  n35 --> n36
+  n33 -->|"al terminar"| n36
+  n37[("LEE iam.users")]:::efecto
+  n36 --> n37
+  n38(("200 Responde con éxito")):::ok
+  n37 --> n38
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 77. GET /me/support-inbox/{conversationId}
+
+Una conversación de la bandeja, con la autora real y las notas
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunitySupportInboxService.getConversation"]:::llamada
+  n2 --> n3
+  n4["Transacción: withPersonScope(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CommunitySupportInboxService.requireAccess"]:::llamada
+  n4 --> n5
+  n6["Llama a SupportInboxRepository.findConversation"]:::llamada
+  n5 --> n6
+  n7[("LEE community.conversations · LEE community.conversation_participants · LEE community.public_profiles · LEE c…")]:::efecto
+  n6 --> n7
+  n8{"!conversation || !doctor"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Conversación no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10["Llama a SupportInboxRepository.findMessages"]:::llamada
+  n8 -->|"no"| n10
+  n11[("LEE community.direct_messages")]:::efecto
+  n10 --> n11
+  n12["Transacción: inTenant(…)"]:::transaccion
+  n11 --> n12
+  n13["Llama a SupportInboxRepository.findAssignments"]:::llamada
+  n12 --> n13
+  n14[("LEE community.conversation_assignments")]:::efecto
+  n13 --> n14
+  n15["Llama a SupportInboxRepository.findNotes"]:::llamada
+  n14 --> n15
+  n16[("LEE community.conversation_internal_notes")]:::efecto
+  n15 --> n16
+  n17["Llama a SupportAccessPolicy.replyersOfDoctor"]:::llamada
+  n16 --> n17
+  n18["Llama a SupportAccessRepository.findEngagements"]:::llamada
+  n17 --> n18
+  n19{"filter.ids"}:::decision
+  n18 --> n19
+  n20[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n19 -->|"sí"| n20
+  n21[("LEE directory.tenant_memberships · LEE delegated_access.organization_user_assignments")]:::efecto
+  n19 -->|"no"| n21
+  n22["Llama a SupportAccessPolicy.loadFacts"]:::llamada
+  n20 --> n22
+  n21 --> n22
+  n23["Llama a SupportAccessRepository.findGrantsWithActions"]:::llamada
+  n22 --> n23
+  n24[("LEE delegated_access.support_scope_grants · LEE delegated_access.support_grant_actions")]:::efecto
+  n23 --> n24
+  n25["Llama a SupportAccessRepository.findDelegationsOfEngagements"]:::llamada
+  n24 --> n25
+  n26[("LEE delegated_access.practitioner_delegate_assignments")]:::efecto
+  n25 --> n26
+  n27["Llama a SupportAccessRepository.findRoleAssignments"]:::llamada
+  n26 --> n27
+  n28[("LEE practice.practitioner_role_assignments · LEE practice.practices")]:::efecto
+  n27 --> n28
+  n29["Llama a SupportInboxRepository.patientContext"]:::llamada
+  n28 --> n29
+  n30[("LEE profiles.person_account_links · LEE profiles.patient_profiles · LEE scheduling.appointment_bookings · LEE…")]:::efecto
+  n29 --> n30
+  n31["Llama a SupportInboxRepository.clinicalAccessState"]:::llamada
+  n30 --> n31
+  n32[("LEE delegated_access.delegated_access_grants · LEE delegated_access.delegated_access_approval_requests")]:::efecto
+  n31 --> n32
+  n33["Llama a SupportInboxRepository.doctorInfo"]:::llamada
+  n32 --> n33
+  n34[("LEE profiles.practitioner_specialties · LEE terminology.catalog_concepts · LEE profiles.persons")]:::efecto
+  n33 --> n34
+  n35["Llama a SupportInboxRepository.tenantNames"]:::llamada
+  n34 --> n35
+  n36[("LEE directory.tenants")]:::efecto
+  n35 --> n36
+  n37["Llama a SupportInboxRepository.userNames"]:::llamada
+  n36 --> n37
+  n38[("LEE iam.users")]:::efecto
+  n37 --> n38
+  n39(("200 Responde con éxito")):::ok
+  n38 --> n39
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 78. GET /me/support-reply-templates
+
+Respuestas preparadas del equipo de apoyo
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de consulta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunitySupportInboxService.templatesForPerson"]:::llamada
+  n2 --> n3
+  n4["Transacción: withPersonScope(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a CommunitySupportInboxService.resolveAccess"]:::llamada
+  n4 --> n5
+  n6["Llama a SupportAccessPolicy.liveEngagementTenants"]:::llamada
+  n5 --> n6
+  n7["Llama a SupportAccessRepository.findEngagements"]:::llamada
+  n6 --> n7
+  n8{"filter.ids"}:::decision
+  n7 --> n8
+  n9[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n8 -->|"sí"| n9
+  n10[("LEE directory.tenant_memberships · LEE delegated_access.organization_user_assignments")]:::efecto
+  n8 -->|"no"| n10
+  n11["Repite: por cada const tenantId de tenants"]:::bucle
+  n9 --> n11
+  n10 --> n11
+  n12["Llama a SupportAccessPolicy.inboxDoctorsOfTenant"]:::llamada
+  n11 -->|"cada elemento"| n12
+  n13["Llama a SupportAccessRepository.findEngagements"]:::llamada
+  n12 --> n13
+  n14{"filter.ids"}:::decision
+  n13 --> n14
+  n15[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n14 -->|"sí"| n15
+  n16[("LEE directory.tenant_memberships · LEE delegated_access.organization_user_assignments")]:::efecto
+  n14 -->|"no"| n16
+  n17["Llama a SupportAccessRepository.findRoleAssignmentsOfTenant"]:::llamada
+  n15 --> n17
+  n16 --> n17
+  n18[("LEE practice.practices · LEE practice.practitioner_role_assignments")]:::efecto
+  n17 --> n18
+  n19["Llama a SupportAccessRepository.findDelegationsOfEngagements"]:::llamada
+  n18 --> n19
+  n20[("LEE delegated_access.practitioner_delegate_assignments")]:::efecto
+  n19 --> n20
+  n21{"doctors.length === 0"}:::decision
+  n20 --> n21
+  n11 -->|"al terminar"| n21
+  n22(["↩ (relanza el error capturado)"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a SupportInboxRepository.findTemplates"]:::llamada
+  n21 -->|"no"| n23
+  n24[("LEE community.reply_templates")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 79. GET /o/{slug}
 
 Ficha pública de una organización
 
@@ -6684,7 +7334,137 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 74. GET /p/{slug}
+#### 80. POST /org/reply-templates
+
+Crear una respuesta preparada
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una respuesta preparada no puede dar contenido clínico; PreconditionFailedException: El doctor indicado no es de esta organización |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · cuerpo válido (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunitySupportInboxService.createTemplate"]:::llamada
+  n2 --> n3
+  n4["Llama a CommunitySupportInboxService.assertAdministrative"]:::llamada
+  n3 --> n4
+  n5{"texts.some((text) =› looksClinical(text, keywords).clinical)"}:::decision
+  n4 --> n5
+  n6(["422 PRECONDITION_FAILED Una respuesta preparada no puede dar contenido clínico"]):::error
+  n5 -->|"sí"| n6
+  n7["Transacción: transactional(…)"]:::transaccion
+  n5 -->|"no"| n7
+  n8["Llama a SupportAccessPolicy.isDoctorOfTenant"]:::llamada
+  n7 --> n8
+  n9["Llama a SupportAccessRepository.findRoleAssignmentsOfPractitioner"]:::llamada
+  n8 --> n9
+  n10["Llama a SupportAccessRepository.findRoleAssignmentsOfTenant"]:::llamada
+  n9 --> n10
+  n11[("LEE practice.practices · LEE practice.practitioner_role_assignments")]:::efecto
+  n10 --> n11
+  n12{"dto.practitionerProfileId && !(await this.policy.isDoctorOfTenant( dto.practitionerProfileId, tenantId, tx, ))"}:::decision
+  n11 --> n12
+  n13(["422 PRECONDITION_FAILED El doctor indicado no es de esta organización"]):::error
+  n12 -->|"sí"| n13
+  n14["Llama a SupportInboxRepository.createTemplate"]:::llamada
+  n12 -->|"no"| n14
+  n15[("CREA community.reply_templates")]:::efecto
+  n14 --> n15
+  n16(("201 Responde con éxito")):::ok
+  n15 --> n16
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 81. PATCH /org/reply-templates/{id}
+
+Cambiar, retirar o reactivar una respuesta preparada
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Respuesta no encontrada |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: La respuesta cambió desde que la abrió: vuelva a cargarla |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una respuesta preparada no puede dar contenido clínico |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · cuerpo válido (400) · límite de…"}}:::acceso
+  n1 --> n2
+  n3["Llama a CommunitySupportInboxService.updateTemplate"]:::llamada
+  n2 --> n3
+  n4["Transacción: transactional(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a SupportInboxRepository.findTemplate"]:::llamada
+  n4 --> n5
+  n6[("LEE community.reply_templates")]:::efecto
+  n5 --> n6
+  n7{"!row || row.tenantId !== tenantId"}:::decision
+  n6 --> n7
+  n8(["404 NOT_FOUND Respuesta no encontrada"]):::error
+  n7 -->|"sí"| n8
+  n9{"dto.expectedVersion !== undefined && row.rowVersion !== dto.expectedVersion"}:::decision
+  n7 -->|"no"| n9
+  n10(["409 CONCURRENCY_CONFLICT La respuesta cambió desde que la abrió: vuelva a cargarla"]):::error
+  n9 -->|"sí"| n10
+  n11["Llama a CommunitySupportInboxService.assertAdministrative"]:::llamada
+  n9 -->|"no"| n11
+  n12{"texts.some((text) =› looksClinical(text, keywords).clinical)"}:::decision
+  n11 --> n12
+  n13(["422 PRECONDITION_FAILED Una respuesta preparada no puede dar contenido clínico"]):::error
+  n12 -->|"sí"| n13
+  n14[("ACTUALIZA community.reply_templates")]:::efecto
+  n12 -->|"no"| n14
+  n15{"dto.title !== undefined"}:::decision
+  n14 --> n15
+  n16[("ACTUALIZA community.reply_templates")]:::efecto
+  n15 -->|"sí"| n16
+  n17[("ACTUALIZA community.reply_templates")]:::efecto
+  n16 --> n17
+  n15 -->|"no"| n17
+  n18{"dto.bodyText !== undefined"}:::decision
+  n17 --> n18
+  n19[("ACTUALIZA community.reply_templates")]:::efecto
+  n18 -->|"sí"| n19
+  n20{"dto.category !== undefined"}:::decision
+  n19 --> n20
+  n18 -->|"no"| n20
+  n21[("ACTUALIZA community.reply_templates")]:::efecto
+  n20 -->|"sí"| n21
+  n22{"dto.retired !== undefined"}:::decision
+  n21 --> n22
+  n20 -->|"no"| n22
+  n23[("ACTUALIZA community.reply_templates")]:::efecto
+  n22 -->|"sí"| n23
+  n24(("200 Responde con éxito")):::ok
+  n23 --> n24
+  n22 -->|"no"| n24
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 82. GET /p/{slug}
 
 Ficha pública de un profesional
 
@@ -6758,7 +7538,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 75. POST /patients/me/reviews
+#### 83. POST /patients/me/reviews
 
 Calificar una atención recibida
 
@@ -6867,7 +7647,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 76. GET /public/comments/{commentId}/replies
+#### 84. GET /public/comments/{commentId}/replies
 
 Respuestas de un comentario público
 
@@ -6924,7 +7704,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 77. GET /public/media/{id}
+#### 85. GET /public/media/{id}
 
 Servir una imagen pública (avatar, portada o post)
 
@@ -7051,7 +7831,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 78. GET /public/nearby
+#### 86. GET /public/nearby
 
 Prestadores cercanos, en línea recta
 
@@ -7164,7 +7944,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 79. GET /public/posts/{postId}/comments
+#### 87. GET /public/posts/{postId}/comments
 
 Comentarios raíz de una publicación pública
 
@@ -7213,7 +7993,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 80. GET /public/posts/{postId}/reactions
+#### 88. GET /public/posts/{postId}/reactions
 
 Quiénes reaccionaron a una publicación pública
 
@@ -7256,7 +8036,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 81. GET /public/profiles/{prefijo}/{slug}
+#### 89. GET /public/profiles/{prefijo}/{slug}
 
 Ficha pública por prefijo de vertical
 
@@ -7334,7 +8114,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 82. GET /public/profiles/{prefijo}/{slug}/reviews
+#### 90. GET /public/profiles/{prefijo}/{slug}/reviews
 
 Opiniones publicadas de una ficha pública
 
@@ -7397,7 +8177,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 83. GET /public/search
+#### 91. GET /public/search
 
 Buscador público unificado
 
@@ -7569,7 +8349,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 84. GET /public/search/diagnostic-units
+#### 92. GET /public/search/diagnostic-units
 
 Laboratorios y centros de diagnóstico
 
@@ -7741,7 +8521,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 85. GET /public/search/insurers
+#### 93. GET /public/search/insurers
 
 Aseguradoras en el directorio público
 
@@ -7913,7 +8693,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 86. GET /public/search/medications
+#### 94. GET /public/search/medications
 
 Medicamentos ofertados públicamente
 
@@ -8085,7 +8865,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 87. GET /public/search/organizations
+#### 95. GET /public/search/organizations
 
 Organizaciones en el directorio público
 
@@ -8257,7 +9037,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 88. GET /public/search/pharmacies
+#### 96. GET /public/search/pharmacies
 
 Farmacias en el directorio público
 
@@ -8429,7 +9209,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 89. GET /public/search/practitioners
+#### 97. GET /public/search/practitioners
 
 Profesionales en el directorio público
 
@@ -8601,7 +9381,7 @@ flowchart TD
   classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
 ```
 
-#### 90. GET /s/{slug}
+#### 98. GET /s/{slug}
 
 Ficha pública de una aseguradora
 
@@ -8692,4 +9472,5 @@ Sólo comprueban el acceso y leen o escriben: no tienen ramas que dibujar. Su de
 | GET /community/topics | 200, 401, 403, 429 | 1 |
 | GET /internal/community/feed/pending | 200, 400, 401, 403, 429 | 3 |
 | GET /internal/community/feed/ranking/pending | 200, 400, 401, 403, 429 | 4 |
+| GET /org/reply-templates | 200, 401, 403, 429 | 1 |
 | GET /public/posts | 200, 400, 401, 429 | 5 |

@@ -8,6 +8,8 @@ import type {
 
 /** Forma que `payloadJson` puede traer para el canal EMAIL; todo opcional, con fallback. */
 interface EmailPayload {
+  /** Nombre visible del remitente; la dirección de envío es la de la plataforma. */
+  fromName?: string;
   subject?: string;
   bodyText?: string;
   bodyHtml?: string;
@@ -46,6 +48,9 @@ export function createGoogleEmailProviderAdapter(
     try {
       const result = await client.sendEmail({
         to,
+        ...(typeof payload.fromName === 'string' && payload.fromName !== ''
+          ? { fromName: payload.fromName }
+          : {}),
         subject,
         bodyText,
         bodyHtml: payload.bodyHtml,

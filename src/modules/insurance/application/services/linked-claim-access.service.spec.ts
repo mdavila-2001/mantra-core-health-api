@@ -37,6 +37,7 @@ function fixture() {
   const membership = { tenantRoleConceptId: DIR.ROLE_OWNER };
   const memberships = {
     findActiveByUserTenant: fn().mockResolvedValue(membership),
+    isSupportOnly: fn().mockResolvedValue(false),
   };
   const coverage = Object.assign(new PatientCoverages(), {
     id: 'coverage',

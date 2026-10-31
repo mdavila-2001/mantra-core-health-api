@@ -11,3 +11,4 @@ export * from './account-activations.repository';
 export * from './email-verifications.repository';
 export * from './security-events.repository';
 export * from './iam-api-keys.repository';
+export * from './session-policies.repository';

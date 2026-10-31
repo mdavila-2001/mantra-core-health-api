@@ -154,11 +154,30 @@ export class AuditLogRepository {
    * cadena es autoconsistente y no se entrelaza con la de otros tenants.
    */
   findChainTip(em: EntityManager, tenantId?: string): Promise<AuditLog | null> {
+    // El mismo orden `(recorded_at, id)` con el que la verificación recorre la
+    // cadena: si dos eslabones (de antes del desempate) compartieran milisegundo,
+    // el último que ve la verificación es el que se toma como previo.
     return em.findOne(
       AuditLog,
       { tenantId: tenantId ?? null },
-      { orderBy: { recordedAt: 'desc' } },
+      { orderBy: { recordedAt: 'desc', id: 'desc' } },
     );
+  }
+
+  /**
+   * Instante del nuevo eslabón, estrictamente posterior al del tip de su
+   * partición. `recorded_at` tiene precisión de milisegundo y varios asientos
+   * pueden sellarse en la misma transacción (una búsqueda de pacientes deja
+   * hasta media docena): con el reloj solo, dos compartirían instante, el tip
+   * (`order by recorded_at desc`) sería ambiguo y la cadena se bifurcaría, y la
+   * verificación, que ordena por `(recorded_at, id)` con `id` aleatorio, los
+   * recorrería en otro orden que el de inserción. Con un instante único por
+   * partición el orden de la cadena es el de `recorded_at`, sin empates.
+   */
+  static nextRecordedAt(previous: Date | undefined, now = new Date()): Date {
+    return previous && now.getTime() <= previous.getTime()
+      ? new Date(previous.getTime() + 1)
+      : now;
   }
 
   /**
@@ -171,11 +190,11 @@ export class AuditLogRepository {
     appendData: AppendAuditData,
   ): Promise<AuditLog> {
     const data = await this.withRequestOrigin(em, appendData);
-    const recordedAt = new Date();
     // Serializa el append por tenant ANTES de leer el tip: leer el último eslabón
     // e insertar el nuevo pasa a ser atómico frente a otros appends del tenant.
     await this.lockChainPartition(em, data.tenantId);
     const tip = await this.findChainTip(em, data.tenantId);
+    const recordedAt = AuditLogRepository.nextRecordedAt(tip?.recordedAt);
     const previousHash = tip?.recordHash;
     const content = AuditLogRepository.content(data);
     const recordHash = AuditLogRepository.hash(

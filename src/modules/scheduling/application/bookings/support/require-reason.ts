@@ -1,4 +1,5 @@
 import { PreconditionFailedException } from '../../../../../common';
+import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 import {
   MIN_REASON_LENGTH,
   judgeReason,
@@ -13,8 +14,8 @@ import {
  * @param raw - Lo que llegó en el cuerpo.
  * @param action - Qué se estaba haciendo, para que el error lo diga.
  * @returns El motivo listo para persistir.
- * @throws PreconditionFailedException si está vacío, es demasiado corto o es
- * relleno.
+ * @throws PreconditionFailedException (422, `reason` `REASON_REQUIRED` o
+ * `REASON_PLACEHOLDER`) si falta, está vacío, es demasiado corto o es relleno.
  */
 export function requireReason(raw: string | undefined, action: string): string {
   const verdict = judgeReason(raw);
@@ -24,11 +25,13 @@ export function requireReason(raw: string | undefined, action: string): string {
     throw new PreconditionFailedException(
       `Indique el motivo para ${action}: es obligatorio y debe explicar el cambio.`,
       { failureCode: 'REASON_REQUIRED', minLength: MIN_REASON_LENGTH },
+      SchedulingErrorReason.REASON_REQUIRED,
     );
   }
 
   throw new PreconditionFailedException(
     `El motivo para ${action} no puede ser un texto de relleno: escriba la razón real.`,
     { failureCode: 'REASON_PLACEHOLDER' },
+    SchedulingErrorReason.REASON_PLACEHOLDER,
   );
 }

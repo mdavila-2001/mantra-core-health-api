@@ -2,27 +2,143 @@
 
 # Endpoints del módulo `delegated_access`
 
-Referencia exhaustiva de 12 operación(es) del módulo `delegated_access`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 128 operación(es) del módulo `delegated_access`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `delegated-access-authz`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-requests`
-- **Controladores:** `AccessRequestsController`, `DelegatedAccessAuthzController`, `DelegatedPermissionSetsController`, `OrgUserAssignmentsController`, `PractitionerDelegatesController`
+- **Etiquetas OpenAPI:** `delegated-access-access-reviews`, `delegated-access-affiliation-invitations`, `delegated-access-authz`, `delegated-access-four-eyes`, `delegated-access-governance`, `delegated-access-governance-reports`, `delegated-access-my-reviews`, `delegated-access-org`, `delegated-access-permission-sets`, `delegated-access-practitioner-delegates`, `delegated-access-practitioner-support`, `delegated-access-requests`, `delegated-access-support-engagements`, `delegated-access-support-lifecycle`, `delegated-access-support-maintenance`, `delegated-access-support-patients`, `delegated-access-support-requests`, `delegated-access-team-admin`
+- **Controladores:** `AccessCatalogController`, `AccessExplainController`, `AccessRequestsController`, `AccessReviewCampaignsController`, `AffiliationInvitationsController`, `DelegatedAccessAuthzController`, `DelegatedPermissionSetsController`, `FourEyesController`, `GovernanceReportsController`, `GovernanceRulesController`, `GovernanceSodController`, `GovernanceSweepController`, `MyAccessReviewsController`, `OrgUserAssignmentsController`, `PatientRestrictionFlagsController`, `PractitionerDelegatesController`, `PractitionerGovernanceController`, `PractitionerSupportController`, `SupportEngagementRequestsController`, `SupportEngagementsController`, `SupportLifecycleController`, `SupportMaintenanceController`, `SupportPatientsController`, `TeamAdminController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
 ## Índice del módulo
 
 1. [POST /access-requests/{id}/decision](#1-post-access-requests-id-decision) — Aprobar/Denegar solicitud y emitir grant scoped
-2. [POST /authz/effective-actor/evaluate](#2-post-authz-effective-actor-evaluate) — Evaluar actor efectivo por propósito (step-up)
-3. [POST /delegated-access/expiry-sweep](#3-post-delegated-access-expiry-sweep) — Expirar delegaciones y grants vencidos (barrido)
-4. [GET /delegated-permission-sets](#4-get-delegated-permission-sets) — Listar los sets de permisos delegados del tenant
-5. [POST /delegated-permission-sets](#5-post-delegated-permission-sets) — Publicar set de permisos delegados (scoped)
-6. [POST /delegated-permission-sets/{id}/versions](#6-post-delegated-permission-sets-id-versions) — Versionar set de permisos delegados
-7. [POST /org/{tenantMembershipId}/user-assignments](#7-post-org-tenantmembershipid-user-assignments) — Asignar usuario de organización con alcance y vigencia
-8. [PATCH /org/user-assignments/{id}](#8-patch-org-user-assignments-id) — Reasignar supervisor / suspender asignación de organización
-9. [POST /practitioner-delegates](#9-post-practitioner-delegates) — Crear asignación de delegado de practitioner
-10. [POST /practitioner-delegates/{id}/access-requests](#10-post-practitioner-delegates-id-access-requests) — Solicitar acceso delegado (aprobación previa)
-11. [POST /practitioner-delegates/{id}/grants](#11-post-practitioner-delegates-id-grants) — Otorgar grant delegado por-propósito y temporal
-12. [POST /practitioner-delegates/{id}/revoke](#12-post-practitioner-delegates-id-revoke) — Revocar delegación de forma inmediata (cascada authz)
+2. [POST /affiliation-invitations/redeem](#2-post-affiliation-invitations-redeem) — Canjear un código o QR de afiliación
+3. [POST /approvals/{id}/decision](#3-post-approvals-id-decision) — Aprobar o rechazar una solicitud de cuatro ojos
+4. [GET /approvals/pending](#4-get-approvals-pending) — Aprobaciones pendientes que puedo decidir
+5. [POST /authz/effective-actor/evaluate](#5-post-authz-effective-actor-evaluate) — Evaluar actor efectivo por propósito (step-up)
+6. [POST /delegated-access/expiry-sweep](#6-post-delegated-access-expiry-sweep) — Expirar delegaciones y grants vencidos (barrido)
+7. [POST /delegated-access/support/anomaly-scan](#7-post-delegated-access-support-anomaly-scan) — Barrido horario de anomalías de actividad
+8. [POST /delegated-access/support/expire-requests](#8-post-delegated-access-support-expire-requests) — Vencer solicitudes de apoyo sin decidir (15 días)
+9. [POST /delegated-access/support/governance-sweep](#9-post-delegated-access-support-governance-sweep) — Barrido diario del gobierno de accesos
+10. [POST /delegated-access/support/recertification-sweep](#10-post-delegated-access-support-recertification-sweep) — Suspender vínculos sin recertificar (15 días)
+11. [POST /delegated-access/support/refresh-effective-access](#11-post-delegated-access-support-refresh-effective-access) — Recalcular el acceso efectivo del personal de apoyo
+12. [GET /delegated-permission-sets](#12-get-delegated-permission-sets) — Listar los sets de permisos delegados del tenant
+13. [POST /delegated-permission-sets](#13-post-delegated-permission-sets) — Publicar set de permisos delegados (scoped)
+14. [POST /delegated-permission-sets/{id}/versions](#14-post-delegated-permission-sets-id-versions) — Versionar set de permisos delegados
+15. [GET /me/access-reviews/items](#15-get-me-access-reviews-items) — Mis ítems de certificación
+16. [GET /me/access-reviews/items/{id}](#16-get-me-access-reviews-items-id) — Un ítem de certificación, con su evidencia
+17. [POST /me/access-reviews/items/{id}/decision](#17-post-me-access-reviews-items-id-decision) — Decidir un ítem: certificar, revocar o ajustar
+18. [POST /me/access-reviews/items/bulk-decision](#18-post-me-access-reviews-items-bulk-decision) — Certificar en lote lo de bajo riesgo (todo o nada)
+19. [GET /me/practitioner/governance-panel](#19-get-me-practitioner-governance-panel) — Panel «Mi equipo» del doctor
+20. [GET /me/practitioner/support-access-requests](#20-get-me-practitioner-support-access-requests) — Solicitudes de acceso clínico temporal de mi equipo
+21. [GET /me/practitioner/support-activity](#21-get-me-practitioner-support-activity) — Actividad de mi equipo de apoyo
+22. [GET /me/practitioner/support-team](#22-get-me-practitioner-support-team) — Mi equipo de apoyo
+23. [POST /me/practitioner/support-team/explain](#23-post-me-practitioner-support-team-explain) — El doctor explica una decisión sobre alguien de su equipo
+24. [POST /me/support-access-requests](#24-post-me-support-access-requests) — Pedir acceso clínico temporal a un paciente (lo decide el doctor)
+25. [POST /me/support-access/explain](#25-post-me-support-access-explain) — ¿Por qué no puedo hacer esto? (autoservicio)
+26. [GET /me/support-activity](#26-get-me-support-activity) — Mi actividad como personal de apoyo
+27. [GET /me/support-approvals](#27-get-me-support-approvals) — Mis solicitudes de aprobación
+28. [POST /me/support-approvals](#28-post-me-support-approvals) — Pedir la aprobación de una acción sensible
+29. [POST /me/support-approvals/{id}/cancel](#29-post-me-support-approvals-id-cancel) — Cancelar una solicitud de aprobación propia
+30. [GET /me/support-catalog](#30-get-me-support-catalog) — Catálogo de una organización para pedir permisos
+31. [GET /me/support-engagements](#31-get-me-support-engagements) — Mis vínculos de apoyo y mis solicitudes
+32. [POST /me/support-engagements/{id}/confidentiality-ack](#32-post-me-support-engagements-id-confidentiality-ack) — Aceptar mi compromiso de confidencialidad
+33. [POST /me/support-engagements/{id}/confirm](#33-post-me-support-engagements-id-confirm) — Confirmar mi propio vínculo de apoyo
+34. [POST /me/support-patient-search](#34-post-me-support-patient-search) — Buscar un paciente (búsqueda exacta, auditada)
+35. [POST /me/support-patients](#35-post-me-support-patients) — Registrar un paciente nuevo (con aviso de posibles duplicados)
+36. [POST /org/{tenantMembershipId}/user-assignments](#36-post-org-tenantmembershipid-user-assignments) — Asignar usuario de organización con alcance y vigencia
+37. [GET /org/access-lookup](#37-get-org-access-lookup) — Quién tiene acceso a un doctor, servicio o ubicación
+38. [GET /org/access-reviews/campaigns](#38-get-org-access-reviews-campaigns) — Campañas de certificación de accesos
+39. [POST /org/access-reviews/campaigns](#39-post-org-access-reviews-campaigns) — Crear una campaña de certificación (borrador)
+40. [GET /org/access-reviews/campaigns/{id}](#40-get-org-access-reviews-campaigns-id) — Una campaña de certificación
+41. [PATCH /org/access-reviews/campaigns/{id}](#41-patch-org-access-reviews-campaigns-id) — Editar una campaña en borrador
+42. [POST /org/access-reviews/campaigns/{id}/cancel](#42-post-org-access-reviews-campaigns-id-cancel) — Cancelar una campaña (no revoca nada)
+43. [POST /org/access-reviews/campaigns/{id}/close](#43-post-org-access-reviews-campaigns-id-close) — Cerrar una campaña (revoca lo no certificado)
+44. [GET /org/access-reviews/campaigns/{id}/export](#44-get-org-access-reviews-campaigns-id-export) — Exportar una campaña (auditado, con sha256)
+45. [GET /org/access-reviews/campaigns/{id}/items](#45-get-org-access-reviews-campaigns-id-items) — Ítems de una campaña y su estado
+46. [POST /org/access-reviews/campaigns/{id}/launch](#46-post-org-access-reviews-campaigns-id-launch) — Lanzar una campaña de certificación
+47. [GET /org/access-reviews/campaigns/{id}/results](#47-get-org-access-reviews-campaigns-id-results) — Resultados de una campaña
+48. [POST /org/access-reviews/campaigns/preview](#48-post-org-access-reviews-campaigns-preview) — Vista previa de una campaña (sin crear nada)
+49. [POST /org/access/explain](#49-post-org-access-explain) — Explicar por qué una persona de apoyo puede o no puede hacer algo
+50. [POST /org/access/simulate](#50-post-org-access-simulate) — Simular los efectos de un borrador de permisos (sin guardar nada)
+51. [GET /org/affiliation-invitations](#51-get-org-affiliation-invitations) — Listar las invitaciones de afiliación
+52. [POST /org/affiliation-invitations](#52-post-org-affiliation-invitations) — Crear un código o QR de afiliación
+53. [POST /org/affiliation-invitations/{id}/revoke](#53-post-org-affiliation-invitations-id-revoke) — Revocar un código o QR de afiliación
+54. [GET /org/governance/access-matrix](#54-get-org-governance-access-matrix) — Matriz de accesos por persona, doctor, servicio o espacio
+55. [GET /org/governance/anomalies](#55-get-org-governance-anomalies) — Anomalías de actividad
+56. [POST /org/governance/anomalies/{id}/ack](#56-post-org-governance-anomalies-id-ack) — Reconocer, descartar o escalar una anomalía
+57. [GET /org/governance/exceptions](#57-get-org-governance-exceptions) — Excepciones activas
+58. [POST /org/governance/normalize-legacy](#58-post-org-governance-normalize-legacy) — Normalizar los permisos heredados a permisos atómicos (simulacro por defecto)
+59. [POST /org/governance/normalize-legacy/revert](#59-post-org-governance-normalize-legacy-revert) — Revertir un lote de normalización
+60. [GET /org/governance/ownerless](#60-get-org-governance-ownerless) — Cuentas sin dueño
+61. [GET /org/governance/privilege-creep](#61-get-org-governance-privilege-creep) — Acumulación de privilegios
+62. [POST /org/governance/reports/{kind}/export](#62-post-org-governance-reports-kind-export) — Exportar un informe de gobierno (auditado)
+63. [GET /org/governance/rules](#63-get-org-governance-rules) — Reglas de gobierno de la organización
+64. [POST /org/governance/rules](#64-post-org-governance-rules) — Crear una regla de la organización
+65. [PATCH /org/governance/rules/{id}](#65-patch-org-governance-rules-id) — Editar una regla de la organización
+66. [POST /org/governance/rules/{id}/retire](#66-post-org-governance-rules-id-retire) — Retirar una regla de la organización
+67. [GET /org/governance/settings](#67-get-org-governance-settings) — Ajustes de gobierno de la organización
+68. [PUT /org/governance/settings](#68-put-org-governance-settings) — Guardar los ajustes de gobierno
+69. [GET /org/governance/sod-exceptions](#69-get-org-governance-sod-exceptions) — Excepciones de segregación de funciones vigentes
+70. [POST /org/governance/sod-exceptions](#70-post-org-governance-sod-exceptions) — Pedir una excepción de segregación de funciones (cuatro ojos)
+71. [POST /org/governance/sod-exceptions/{id}/revoke](#71-post-org-governance-sod-exceptions-id-revoke) — Revocar una excepción de segregación de funciones
+72. [GET /org/governance/sod-findings](#72-get-org-governance-sod-findings) — Conflictos de segregación de funciones de hoy
+73. [GET /org/governance/sod-rules](#73-get-org-governance-sod-rules) — Reglas de segregación de funciones
+74. [POST /org/governance/sod-rules](#74-post-org-governance-sod-rules) — Crear o endurecer una regla de segregación de funciones
+75. [PATCH /org/governance/sod-rules/{id}](#75-patch-org-governance-sod-rules-id) — Editar una regla de segregación de funciones propia
+76. [GET /org/governance/summary](#76-get-org-governance-summary) — Resumen del tablero de gobierno (10 mosaicos)
+77. [GET /org/governance/unused-access](#77-get-org-governance-unused-access) — Accesos sin uso
+78. [GET /org/lifecycle/cases](#78-get-org-lifecycle-cases) — Casos de ingreso, cambio, baja y suspensión
+79. [GET /org/lifecycle/cases/{id}](#79-get-org-lifecycle-cases-id) — Detalle de un caso de ciclo de vida
+80. [POST /org/lifecycle/cases/{id}/checklist/{code}](#80-post-org-lifecycle-cases-id-checklist-code) — Completar un ítem de la lista de un caso
+81. [GET /org/lifecycle/cases/{id}/export](#81-get-org-lifecycle-cases-id-export) — Exportar el registro de transferencia de un caso
+82. [POST /org/lifecycle/cases/{id}/handover/assign](#82-post-org-lifecycle-cases-id-handover-assign) — Asignar los traspasos pendientes de una baja
+83. [GET /org/patients/{patientProfileId}/restriction-flags](#83-get-org-patients-patientprofileid-restriction-flags) — Banderas de restricción de un paciente
+84. [PUT /org/patients/{patientProfileId}/restriction-flags](#84-put-org-patients-patientprofileid-restriction-flags) — Reemplazar las banderas de restricción de un paciente
+85. [GET /org/permission-catalog](#85-get-org-permission-catalog) — Catálogo de permisos del personal de apoyo
+86. [GET /org/role-templates](#86-get-org-role-templates) — Plantillas de rol de apoyo
+87. [POST /org/role-templates](#87-post-org-role-templates) — Crear una plantilla de rol propia
+88. [PATCH /org/role-templates/{id}](#88-patch-org-role-templates-id) — Versionar una plantilla de rol propia
+89. [GET /org/support-activity](#89-get-org-support-activity) — Actividad del personal de apoyo
+90. [GET /org/support-catalog](#90-get-org-support-catalog) — Catálogo de doctores, servicios y ubicaciones para los permisos
+91. [GET /org/support-engagement-requests](#91-get-org-support-engagement-requests) — Solicitudes de vínculo de apoyo de la organización
+92. [POST /org/support-engagement-requests/{id}/decision](#92-post-org-support-engagement-requests-id-decision) — Decidir una solicitud de apoyo ítem por ítem
+93. [GET /org/support-engagements](#93-get-org-support-engagements) — Vínculos de apoyo de la organización
+94. [GET /org/support-engagements/{id}/effective](#94-get-org-support-engagements-id-effective) — Permisos efectivos de un vínculo (alias y átomos)
+95. [POST /org/support-engagements/{id}/end](#95-post-org-support-engagements-id-end) — Terminar un vínculo de apoyo (revocación inmediata)
+96. [GET /org/support-engagements/{id}/grants](#96-get-org-support-engagements-id-grants) — Permisos de un vínculo de apoyo
+97. [PATCH /org/support-engagements/{id}/grants](#97-patch-org-support-engagements-id-grants) — Editar o dar de baja un permiso de apoyo
+98. [POST /org/support-engagements/{id}/grants](#98-post-org-support-engagements-id-grants) — Otorgar un permiso de apoyo (202 si agrega o amplía un permiso crítico y espera la aprobación de otra persona)
+99. [GET /org/support-engagements/{id}/handover-preview](#99-get-org-support-engagements-id-handover-preview) — Vista previa del traspaso de una baja
+100. [POST /org/support-engagements/{id}/identity-verification](#100-post-org-support-engagements-id-identity-verification) — Registrar la verificación de identidad de la persona
+101. [POST /org/support-engagements/{id}/move](#101-post-org-support-engagements-id-move) — Cambiar el rol o alcance de una persona de apoyo
+102. [POST /org/support-engagements/{id}/offboard](#102-post-org-support-engagements-id-offboard) — Dar de baja con traspaso del trabajo
+103. [PUT /org/support-engagements/{id}/owner](#103-put-org-support-engagements-id-owner) — Asignar el dueño de la cuenta de apoyo
+104. [POST /org/support-engagements/{id}/reactivate](#104-post-org-support-engagements-id-reactivate) — Pedir la reactivación de una persona suspendida
+105. [POST /org/support-engagements/{id}/recertify](#105-post-org-support-engagements-id-recertify) — Recertificar un vínculo de apoyo
+106. [GET /org/support-engagements/{id}/summary](#106-get-org-support-engagements-id-summary) — Resumen en lenguaje simple de los permisos de un vínculo
+107. [POST /org/support-engagements/{id}/suspend](#107-post-org-support-engagements-id-suspend) — Suspender a una persona de apoyo
+108. [GET /org/team/capabilities](#108-get-org-team-capabilities) — Mi alcance, mi techo y lo que puedo hacer
+109. [POST /org/team/invitations](#109-post-org-team-invitations) — Invitar personal de apoyo dentro de mi techo
+110. [GET /org/team/members](#110-get-org-team-members) — Personas del equipo que puedo administrar
+111. [GET /org/team/members/{id}](#111-get-org-team-members-id) — Una persona del equipo y sus permisos en mi alcance
+112. [PATCH /org/team/members/{id}/grants](#112-patch-org-team-members-id-grants) — Quitar o editar un permiso de mi alcance
+113. [POST /org/team/members/{id}/grants](#113-post-org-team-members-id-grants) — Otorgar un permiso dentro de mi techo
+114. [GET /org/team/members/{id}/handover-preview](#114-get-org-team-members-id-handover-preview) — Vista previa del traspaso de una persona de mi equipo
+115. [POST /org/team/members/{id}/offboard](#115-post-org-team-members-id-offboard) — Dar de baja con traspaso a una persona de mi equipo
+116. [POST /org/team/members/{id}/reactivate](#116-post-org-team-members-id-reactivate) — Pedir la reactivación de una persona de mi equipo
+117. [POST /org/team/members/{id}/recertify](#117-post-org-team-members-id-recertify) — Recertificar a una persona de mi equipo
+118. [POST /org/team/members/{id}/suspend](#118-post-org-team-members-id-suspend) — Suspender a una persona de mi equipo
+119. [GET /org/team/requests](#119-get-org-team-requests) — Solicitudes pendientes dentro de mi alcance
+120. [POST /org/team/requests/{id}/decision](#120-post-org-team-requests-id-decision) — Decidir los ítems de una solicitud dentro de mi alcance
+121. [PATCH /org/user-assignments/{id}](#121-patch-org-user-assignments-id) — Reasignar supervisor / suspender asignación de organización
+122. [POST /practitioner-delegates](#122-post-practitioner-delegates) — Crear asignación de delegado de practitioner
+123. [POST /practitioner-delegates/{id}/accept](#123-post-practitioner-delegates-id-accept) — Aceptar a una persona de apoyo
+124. [POST /practitioner-delegates/{id}/access-requests](#124-post-practitioner-delegates-id-access-requests) — Solicitar acceso delegado (aprobación previa)
+125. [POST /practitioner-delegates/{id}/grants](#125-post-practitioner-delegates-id-grants) — Otorgar grant delegado por-propósito y temporal
+126. [PATCH /practitioner-delegates/{id}/reply-settings](#126-patch-practitioner-delegates-id-reply-settings) — Permitir o no responder en mi nombre
+127. [POST /practitioner-delegates/{id}/revoke](#127-post-practitioner-delegates-id-revoke) — Revocar delegación de forma inmediata (cascada authz)
+128. [POST /support-engagement-requests](#128-post-support-engagement-requests) — Pedir un vínculo de apoyo o su ampliación
 
 ---
 
@@ -68,7 +184,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -143,7 +259,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Solicitud no encontrada | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La solicitud no está abierta | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
@@ -164,7 +280,565 @@ Ejemplo de error normalizado:
 
 ---
 
-## 2. POST /authz/effective-actor/evaluate
+## 2. POST /affiliation-invitations/redeem
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-affiliation-invitations`
+- **Nombre:** Canjear un código o QR de afiliación
+- **Operation ID:** `AffiliationInvitationsController_redeem`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AffiliationInvitationsController.redeem](../../src/modules/delegated_access/controllers/affiliation-invitations.controller.ts)
+
+### Descripción de negocio
+
+Canjear un código o QR de afiliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La persona canjea un código. Sin tenant activo: todavía no pertenece a la organización que la invita; el tenant sale de la invitación.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /affiliation-invitations/redeem` en `AffiliationInvitationsController_redeem`. El controlador delega en `AffiliationInvitationsService.redeem`. Valida el body como `RedeemAffiliationInvitationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationRedeemResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RedeemAffiliationInvitationDto`; los campos opcionales se omiten.
+
+```http
+POST /affiliation-invitations/redeem HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "CODIGO_EJEMPLO"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `code` | Sí | `string` | longitud mínima 8; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /affiliation-invitations/redeem HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "CODIGO_EJEMPLO"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AffiliationRedeemResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationRedeemResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "kind": {},
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "membershipId": "00000000-0000-4000-8000-000000000001",
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "requestId": "00000000-0000-4000-8000-000000000001",
+  "roleAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "pendingApproval": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo de invitación canjeada. | `{}` |
+| `tenantId` | Sí | `string` | formato `uuid` | Organización a la que quedó afiliada la persona (o a la que pidió afiliarse). | `00000000-0000-4000-8000-000000000001` |
+| `membershipId` | No | `string` | formato `uuid` | Membresía creada o reutilizada; ausente si el canje quedó pendiente de aprobación. | `00000000-0000-4000-8000-000000000001` |
+| `engagementId` | No | `string` | formato `uuid` | Vínculo de apoyo abierto, para `SUPPORT_STAFF` con código dirigido a la persona. | `00000000-0000-4000-8000-000000000001` |
+| `requestId` | No | `string` | formato `uuid` | Solicitud que quedó pendiente de aprobación (personal de apoyo): un código multiuso (sin persona destino) no afilia solo, la organización decide. | `00000000-0000-4000-8000-000000000001` |
+| `roleAssignmentId` | No | `string` | formato `uuid` | Solicitud de afiliación que quedó pendiente (doctor que canjea un código multiuso): es la fila de `practice.practitioner_role_assignments` en `PENDING` que la organización aprueba o rechaza con `POST /role-assignments/:roleAssignmentId/approve\|reject` y ve en `GET /practices/:practiceId/role-assignments`. | `00000000-0000-4000-8000-000000000001` |
+| `pendingApproval` | No | `boolean` | Sin restricción adicional declarada | `true` si el canje espera la decisión de la organización (apoyo o doctor). | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Plantilla de rol no encontrada | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La invitación no es válida | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para afiliarse como médico, su cuenta necesita un perfil profesional | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 422 | `PRECONDITION_FAILED` | La organización no tiene una práctica activa que reciba la solicitud | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/affiliation-invitations/redeem"
+}
+```
+
+---
+
+## 3. POST /approvals/{id}/decision
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-four-eyes`
+- **Nombre:** Aprobar o rechazar una solicitud de cuatro ojos
+- **Operation ID:** `FourEyesController_decide`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FourEyesController.decide](../../src/modules/delegated_access/controllers/four-eyes.controller.ts)
+
+### Descripción de negocio
+
+Aprobar o rechazar una solicitud de cuatro ojos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Decide (aprueba o rechaza) una solicitud.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /approvals/{id}/decision` en `FourEyesController_decide`. El controlador delega en `FourEyesService.decide`. Valida el body como `DelegatedAccessDecideApprovalDto` y consume `application/json`. El tipo de retorno estático es `Promise<DecideApprovalResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DelegatedAccessDecideApprovalDto`; los campos opcionales se omiten.
+
+```http
+POST /approvals/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "decision": "APPROVE"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle(DECISION_THROTTLE)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `decision` | Sí | `string` | valores: `APPROVE`, `REJECT` | Sin descripción específica en el contrato OpenAPI. | `APPROVE` |
+| `comment` | No | `string` | Sin restricción adicional declarada | Obligatorio al rechazar (al menos 5 caracteres). | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /approvals/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "decision": "APPROVE",
+  "comment": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<DecideApprovalResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `DecideApprovalResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "approval": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "tenantId": "00000000-0000-4000-8000-000000000001",
+    "kind": "ACTION",
+    "status": "PENDING",
+    "approverKind": "DOCTOR",
+    "atom": "valor-ejemplo",
+    "requesterUserId": "00000000-0000-4000-8000-000000000001",
+    "subjectUserId": "00000000-0000-4000-8000-000000000001",
+    "reasonText": "Texto descriptivo de ejemplo",
+    "decisionComment": "valor-ejemplo",
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "expiresAt": "2026-07-31T12:00:00.000Z",
+    "approvedUntil": "2026-07-31T12:00:00.000Z",
+    "decidedAt": "2026-07-31T12:00:00.000Z",
+    "consumedAt": "2026-07-31T12:00:00.000Z",
+    "summary": "valor-ejemplo",
+    "details": {
+      "op": "ADD",
+      "reasons": [
+        "Texto descriptivo de ejemplo"
+      ],
+      "atoms": [
+        {
+          "code": "billing.receipt.void",
+          "name": "Anular comprobantes",
+          "critical": true
+        }
+      ],
+      "criticalAtoms": [
+        {
+          "code": "billing.receipt.void",
+          "name": "Anular comprobantes",
+          "critical": true
+        }
+      ],
+      "target": {
+        "kind": "PRACTITIONER",
+        "expansionMode": "DYNAMIC",
+        "practitionerName": "Nombre de ejemplo",
+        "serviceName": "Nombre de ejemplo",
+        "locationName": "Nombre de ejemplo"
+      },
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "conditions": [
+        "valor-ejemplo"
+      ],
+      "changes": [
+        "valor-ejemplo"
+      ]
+    }
+  },
+  "execution": {
+    "clave": "valor"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `approval` | Sí | `SupportApprovalViewDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","kind":"ACTION","status":"PENDING","approverKind":"DOCTOR","atom":"valor-ejemplo","requesterUserId":"00000000-0000-4000-8000-000000000001","subjectUserId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","decisionComment":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","expiresAt":"2026-07-31T12:00:00.000Z","approvedUntil":"2026-07-31T12:00:00.000Z","decidedAt":"2026-07-31T12:00:00.000Z","consumedAt":"2026-07-31T12:00:00.000Z","summary":"valor-ejemplo","details":{"op":"ADD","reasons":["Texto descriptivo de ejemplo"],"atoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"criticalAtoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"target":{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","conditions":["valor-ejemplo"],"changes":["valor-ejemplo"]}}` |
+| `approval.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `approval.tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `approval.kind` | Sí | `string` | valores: `ACTION`, `GRANT_CHANGE`, `SOD_EXCEPTION`, `REACTIVATION`, `ENGAGEMENT_MOVE` | Sin descripción específica en el contrato OpenAPI. | `ACTION` |
+| `approval.status` | Sí | `string` | valores: `PENDING`, `APPROVED`, `REJECTED`, `EXPIRED`, `CANCELLED`, `EXECUTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `approval.approverKind` | Sí | `string` | valores: `DOCTOR`, `SERVICE_HEAD`, `SECOND_APPROVER` | Sin descripción específica en el contrato OpenAPI. | `DOCTOR` |
+| `approval.atom` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `approval.requesterUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `approval.subjectUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `approval.reasonText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `approval.decisionComment` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `approval.createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.approvedUntil` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.decidedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.consumedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.summary` | Sí | `string` | Sin restricción adicional declarada | Resumen en lenguaje simple de lo que se aprueba. | `valor-ejemplo` |
+| `approval.details` | No | `GrantChangeDetailsDto` | Sin restricción adicional declarada | Solo en `GET /approvals/pending` y solo para `GRANT_CHANGE`: el permiso completo que se otorgaría al aprobar. | `{"op":"ADD","reasons":["Texto descriptivo de ejemplo"],"atoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"criticalAtoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"target":{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","conditions":["valor-ejemplo"],"changes":["valor-ejemplo"]}` |
+| `approval.details.op` | No | `string` | valores: `ADD`, `UPDATE` | Sin descripción específica en el contrato OpenAPI. | `ADD` |
+| `approval.details.reasons` | No | `array<string>` | Sin restricción adicional declarada | Por qué pide aprobación: NEW_CRITICAL_ATOMS, SCOPE_WIDENED o VALIDITY_EXTENDED. | `["Texto descriptivo de ejemplo"]` |
+| `approval.details.atoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `approval.details.atoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `approval.details.atoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `approval.details.atoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `approval.details.criticalAtoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `approval.details.criticalAtoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `approval.details.criticalAtoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `approval.details.criticalAtoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `approval.details.target` | No | `GrantChangeTargetViewDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"}` |
+| `approval.details.target.kind` | No | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `approval.details.target.expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `approval.details.target.practitionerName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `approval.details.target.serviceName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `approval.details.target.locationName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `approval.details.validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.details.validTo` | No | `string` | formato `date-time` | Ausente = sin fin de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `approval.details.conditions` | No | `array<string>` | Sin restricción adicional declarada | Condiciones en lenguaje simple; vacío = sin condiciones. | `["valor-ejemplo"]` |
+| `approval.details.changes` | No | `array<string>` | Sin restricción adicional declarada | Solo en `UPDATE`: qué campos cambia (actions, validTo, expansionMode, condition, actionConditions). | `["valor-ejemplo"]` |
+| `execution` | No | `object` | Sin restricción adicional declarada | Lo que ejecutó la aprobación (solo cambios administrativos), con identificadores. | `{"clave":"valor"}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(DECISION_THROTTLE). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/approvals/{id}/decision"
+}
+```
+
+---
+
+## 4. GET /approvals/pending
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-four-eyes`
+- **Nombre:** Aprobaciones pendientes que puedo decidir
+- **Operation ID:** `FourEyesController_pending`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FourEyesController.pending](../../src/modules/delegated_access/controllers/four-eyes.controller.ts)
+
+### Descripción de negocio
+
+Aprobaciones pendientes que puedo decidir. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lo que el aprobador puede decidir ahora.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /approvals/pending` en `FourEyesController_pending`. El controlador delega en `FourEyesService.pending`. No recibe body. El tipo de retorno estático es `Promise<ListSupportApprovalsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `50` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | `nextCursor` de la página anterior. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /approvals/pending HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /approvals/pending?limit=50&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Lo que puedo decidir. Un cambio de permisos (`GRANT_CHANGE`) trae `details`: el permiso completo que se otorgaría al aprobar (todos los átomos con los críticos marcados, objetivo, vigencia y condiciones), sin datos de pacientes. | `Promise<ListSupportApprovalsResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSupportApprovalsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "kind": "ACTION",
+      "status": "PENDING",
+      "approverKind": "DOCTOR",
+      "atom": "valor-ejemplo",
+      "requesterUserId": "00000000-0000-4000-8000-000000000001",
+      "subjectUserId": "00000000-0000-4000-8000-000000000001",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "decisionComment": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "approvedUntil": "2026-07-31T12:00:00.000Z",
+      "decidedAt": "2026-07-31T12:00:00.000Z",
+      "consumedAt": "2026-07-31T12:00:00.000Z",
+      "summary": "valor-ejemplo",
+      "details": {
+        "op": "ADD",
+        "reasons": [
+          "Texto descriptivo de ejemplo"
+        ],
+        "atoms": [
+          {
+            "code": "billing.receipt.void",
+            "name": "Anular comprobantes",
+            "critical": true
+          }
+        ],
+        "criticalAtoms": [
+          {
+            "code": "billing.receipt.void",
+            "name": "Anular comprobantes",
+            "critical": true
+          }
+        ],
+        "target": {
+          "kind": "PRACTITIONER",
+          "expansionMode": "DYNAMIC",
+          "practitionerName": "Nombre de ejemplo",
+          "serviceName": "Nombre de ejemplo",
+          "locationName": "Nombre de ejemplo"
+        },
+        "validFrom": "2026-07-31T12:00:00.000Z",
+        "validTo": "2026-07-31T12:00:00.000Z",
+        "conditions": [
+          "valor-ejemplo"
+        ],
+        "changes": [
+          "valor-ejemplo"
+        ]
+      }
+    }
+  ],
+  "count": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportApprovalViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","kind":"ACTION","status":"PENDING","approverKind":"DOCTOR","atom":"valor-ejemplo","requesterUserId":"00000000-0000-4000-8000-000000000001","subjectUserId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","decisionComment":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","expiresAt":"2026-07-31T12:00:00.000Z","approvedUntil":"2026-07-31T12:00:00.000Z","decidedAt":"2026-07-31T12:00:00.000Z","consumedAt":"2026-07-31T12:00:00.000Z","summary":"valor-ejemplo","details":{"op":"ADD","reasons":["Texto descriptivo de ejemplo"],"atoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"criticalAtoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"target":{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","conditions":["valor-ejemplo"],"changes":["valor-ejemplo"]}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].kind` | Sí | `string` | valores: `ACTION`, `GRANT_CHANGE`, `SOD_EXCEPTION`, `REACTIVATION`, `ENGAGEMENT_MOVE` | Sin descripción específica en el contrato OpenAPI. | `ACTION` |
+| `items[].status` | Sí | `string` | valores: `PENDING`, `APPROVED`, `REJECTED`, `EXPIRED`, `CANCELLED`, `EXECUTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `items[].approverKind` | Sí | `string` | valores: `DOCTOR`, `SERVICE_HEAD`, `SECOND_APPROVER` | Sin descripción específica en el contrato OpenAPI. | `DOCTOR` |
+| `items[].atom` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].requesterUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].subjectUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reasonText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].decisionComment` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].approvedUntil` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].decidedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].consumedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].summary` | Sí | `string` | Sin restricción adicional declarada | Resumen en lenguaje simple de lo que se aprueba. | `valor-ejemplo` |
+| `items[].details` | No | `GrantChangeDetailsDto` | Sin restricción adicional declarada | Solo en `GET /approvals/pending` y solo para `GRANT_CHANGE`: el permiso completo que se otorgaría al aprobar. | `{"op":"ADD","reasons":["Texto descriptivo de ejemplo"],"atoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"criticalAtoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"target":{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","conditions":["valor-ejemplo"],"changes":["valor-ejemplo"]}` |
+| `items[].details.op` | No | `string` | valores: `ADD`, `UPDATE` | Sin descripción específica en el contrato OpenAPI. | `ADD` |
+| `items[].details.reasons` | No | `array<string>` | Sin restricción adicional declarada | Por qué pide aprobación: NEW_CRITICAL_ATOMS, SCOPE_WIDENED o VALIDITY_EXTENDED. | `["Texto descriptivo de ejemplo"]` |
+| `items[].details.atoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `items[].details.atoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `items[].details.atoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `items[].details.atoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `items[].details.criticalAtoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `items[].details.criticalAtoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `items[].details.criticalAtoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `items[].details.criticalAtoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `items[].details.target` | No | `GrantChangeTargetViewDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"}` |
+| `items[].details.target.kind` | No | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `items[].details.target.expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `items[].details.target.practitionerName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].details.target.serviceName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].details.target.locationName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].details.validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].details.validTo` | No | `string` | formato `date-time` | Ausente = sin fin de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `items[].details.conditions` | No | `array<string>` | Sin restricción adicional declarada | Condiciones en lenguaje simple; vacío = sin condiciones. | `["valor-ejemplo"]` |
+| `items[].details.changes` | No | `array<string>` | Sin restricción adicional declarada | Solo en `UPDATE`: qué campos cambia (actions, validTo, expansionMode, condition, actionConditions). | `["valor-ejemplo"]` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `nextCursor` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/approvals/pending"
+}
+```
+
+---
+
+## 5. POST /authz/effective-actor/evaluate
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-authz`
@@ -302,7 +976,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 3. POST /delegated-access/expiry-sweep
+## 6. POST /delegated-access/expiry-sweep
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-authz`
@@ -411,7 +1085,472 @@ Ejemplo de error normalizado:
 
 ---
 
-## 4. GET /delegated-permission-sets
+## 7. POST /delegated-access/support/anomaly-scan
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-maintenance`
+- **Nombre:** Barrido horario de anomalías de actividad
+- **Operation ID:** `GovernanceSweepController_anomalyScan`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceSweepController.anomalyScan](../../src/modules/delegated_access/controllers/governance-sweep.controller.ts)
+
+### Descripción de negocio
+
+Barrido horario de anomalías de actividad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Barrido horario de anomalías de actividad.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /delegated-access/support/anomaly-scan` en `GovernanceSweepController_anomalyScan`. El controlador delega en `GovernanceSweepService.runAnomalyScan`. No recibe body. El tipo de retorno estático es `Promise<SweepResult>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /delegated-access/support/anomaly-scan HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /delegated-access/support/anomaly-scan HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SweepResult>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 401 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 403 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 409 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 422 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 429 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 500 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 504 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+
+El controlador declara `SweepResult`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/delegated-access/support/anomaly-scan"
+}
+```
+
+---
+
+## 8. POST /delegated-access/support/expire-requests
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-maintenance`
+- **Nombre:** Vencer solicitudes de apoyo sin decidir (15 días)
+- **Operation ID:** `SupportMaintenanceController_expireRequests`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportMaintenanceController.expireRequests](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Vencer solicitudes de apoyo sin decidir (15 días). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Vence las solicitudes pendientes pasados los 15 días.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /delegated-access/support/expire-requests` en `SupportMaintenanceController_expireRequests`. El controlador delega en `SupportMaintenanceService.expireRequests`. No recibe body. El tipo de retorno estático es `Promise<RequestExpiryResult>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /delegated-access/support/expire-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /delegated-access/support/expire-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RequestExpiryResult>` | No |
+| 400 | Operación completada correctamente. | `Promise<RequestExpiryResult>` | No |
+| 401 | Operación completada correctamente. | `Promise<RequestExpiryResult>` | No |
+| 403 | Operación completada correctamente. | `Promise<RequestExpiryResult>` | No |
+| 409 | Operación completada correctamente. | `Promise<RequestExpiryResult>` | No |
+| 422 | Operación completada correctamente. | `Promise<RequestExpiryResult>` | No |
+| 429 | Operación completada correctamente. | `Promise<RequestExpiryResult>` | No |
+| 500 | Operación completada correctamente. | `Promise<RequestExpiryResult>` | No |
+| 504 | Operación completada correctamente. | `Promise<RequestExpiryResult>` | No |
+
+El controlador declara `RequestExpiryResult`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/delegated-access/support/expire-requests"
+}
+```
+
+---
+
+## 9. POST /delegated-access/support/governance-sweep
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-maintenance`
+- **Nombre:** Barrido diario del gobierno de accesos
+- **Operation ID:** `GovernanceSweepController_governanceSweep`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceSweepController.governanceSweep](../../src/modules/delegated_access/controllers/governance-sweep.controller.ts)
+
+### Descripción de negocio
+
+Barrido diario del gobierno de accesos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Barrido diario: vencimientos, campañas, recertificación, remediación y retención.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /delegated-access/support/governance-sweep` en `GovernanceSweepController_governanceSweep`. El controlador delega en `GovernanceSweepService.runDaily`. No recibe body. El tipo de retorno estático es `Promise<SweepResult>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /delegated-access/support/governance-sweep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /delegated-access/support/governance-sweep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SweepResult>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 401 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 403 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 409 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 422 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 429 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 500 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+| 504 | Operación completada correctamente. | `Promise<SweepResult>` | No |
+
+El controlador declara `SweepResult`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/delegated-access/support/governance-sweep"
+}
+```
+
+---
+
+## 10. POST /delegated-access/support/recertification-sweep
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-maintenance`
+- **Nombre:** Suspender vínculos sin recertificar (15 días)
+- **Operation ID:** `SupportMaintenanceController_recertificationSweep`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportMaintenanceController.recertificationSweep](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Suspender vínculos sin recertificar (15 días). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Suspende los vínculos sin recertificar a tiempo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /delegated-access/support/recertification-sweep` en `SupportMaintenanceController_recertificationSweep`. El controlador delega en `SupportMaintenanceService.sweepRecertification`. No recibe body. El tipo de retorno estático es `Promise<RecertificationSweepResult>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /delegated-access/support/recertification-sweep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /delegated-access/support/recertification-sweep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RecertificationSweepResult>` | No |
+| 400 | Operación completada correctamente. | `Promise<RecertificationSweepResult>` | No |
+| 401 | Operación completada correctamente. | `Promise<RecertificationSweepResult>` | No |
+| 403 | Operación completada correctamente. | `Promise<RecertificationSweepResult>` | No |
+| 409 | Operación completada correctamente. | `Promise<RecertificationSweepResult>` | No |
+| 422 | Operación completada correctamente. | `Promise<RecertificationSweepResult>` | No |
+| 429 | Operación completada correctamente. | `Promise<RecertificationSweepResult>` | No |
+| 500 | Operación completada correctamente. | `Promise<RecertificationSweepResult>` | No |
+| 504 | Operación completada correctamente. | `Promise<RecertificationSweepResult>` | No |
+
+El controlador declara `RecertificationSweepResult`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/delegated-access/support/recertification-sweep"
+}
+```
+
+---
+
+## 11. POST /delegated-access/support/refresh-effective-access
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-maintenance`
+- **Nombre:** Recalcular el acceso efectivo del personal de apoyo
+- **Operation ID:** `SupportMaintenanceController_refresh`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportMaintenanceController.refresh](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Recalcular el acceso efectivo del personal de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Recalcula el acceso efectivo de todas las organizaciones.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /delegated-access/support/refresh-effective-access` en `SupportMaintenanceController_refresh`. El controlador delega en `SupportMaintenanceService.refreshEffectiveAccess`. No recibe body. El tipo de retorno estático es `Promise<EffectiveRefreshAllResult>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /delegated-access/support/refresh-effective-access HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /delegated-access/support/refresh-effective-access HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<EffectiveRefreshAllResult>` | No |
+| 400 | Operación completada correctamente. | `Promise<EffectiveRefreshAllResult>` | No |
+| 401 | Operación completada correctamente. | `Promise<EffectiveRefreshAllResult>` | No |
+| 403 | Operación completada correctamente. | `Promise<EffectiveRefreshAllResult>` | No |
+| 409 | Operación completada correctamente. | `Promise<EffectiveRefreshAllResult>` | No |
+| 422 | Operación completada correctamente. | `Promise<EffectiveRefreshAllResult>` | No |
+| 429 | Operación completada correctamente. | `Promise<EffectiveRefreshAllResult>` | No |
+| 500 | Operación completada correctamente. | `Promise<EffectiveRefreshAllResult>` | No |
+| 504 | Operación completada correctamente. | `Promise<EffectiveRefreshAllResult>` | No |
+
+El controlador declara `EffectiveRefreshAllResult`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/delegated-access/support/refresh-effective-access"
+}
+```
+
+---
+
+## 12. GET /delegated-permission-sets
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-permission-sets`
@@ -543,7 +1682,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 5. POST /delegated-permission-sets
+## 13. POST /delegated-permission-sets
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-permission-sets`
@@ -695,7 +1834,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 6. POST /delegated-permission-sets/{id}/versions
+## 14. POST /delegated-permission-sets/{id}/versions
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-permission-sets`
@@ -837,7 +1976,3324 @@ Ejemplo de error normalizado:
 
 ---
 
-## 7. POST /org/{tenantMembershipId}/user-assignments
+## 15. GET /me/access-reviews/items
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-my-reviews`
+- **Nombre:** Mis ítems de certificación
+- **Operation ID:** `MyAccessReviewsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MyAccessReviewsController.list](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Mis ítems de certificación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Mis ítems por estado.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/access-reviews/items` en `MyAccessReviewsController_list`. El controlador delega en `AccessReviewItemsService.list`. No recibe body. El tipo de retorno estático es `Promise<ReviewItemListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `status` | query | No | `string` | valores: `PENDING`, `DECIDED`, `ALL` | Sin descripción específica en OpenAPI. | `PENDING` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/access-reviews/items HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/access-reviews/items?status=PENDING HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReviewItemListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewItemListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "campaignId": "00000000-0000-4000-8000-000000000001",
+      "engagementId": "00000000-0000-4000-8000-000000000001",
+      "grantId": "00000000-0000-4000-8000-000000000001",
+      "subjectUserId": "00000000-0000-4000-8000-000000000001",
+      "subjectName": "Nombre de ejemplo",
+      "reviewerKind": "DOCTOR_OWNER",
+      "state": "PENDING",
+      "dueAt": "2026-07-31T12:00:00.000Z",
+      "decidedAt": "2026-07-31T12:00:00.000Z",
+      "comment": "valor-ejemplo",
+      "escalated": true,
+      "reminderCount": 1,
+      "maxSensitivity": "valor-ejemplo",
+      "campaignName": "Nombre de ejemplo",
+      "evidence": {
+        "clave": "valor"
+      },
+      "evidenceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ReviewItemViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","campaignId":"00000000-0000-4000-8000-000000000001","engagementId":"00000000-0000-4000-8000-000000000001","grantId":"00000000-0000-4000-8000-000000000001","subjectUserId":"00000000-0000-4000-8000-000000000001","subjectName":"Nombre de ejemplo","reviewerKind":"DOCTOR_OWNER","state":"PENDING","dueAt":"2026-07-31T12:00:00.000Z","decidedAt":"2026-07-31T12:00:00.000Z","comment":"valor-ejemplo","escalated":true,"reminderCount":1,"maxSensitivity":"valor-ejemplo","campaignName":"Nombre de ejemplo","evidence":{"clave":"valor"},"evidenceHash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].campaignId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].grantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].subjectUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].subjectName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].reviewerKind` | Sí | `string` | valores: `DOCTOR_OWNER`, `SERVICE_HEAD`, `SUPERVISOR`, `ADMIN` | Sin descripción específica en el contrato OpenAPI. | `DOCTOR_OWNER` |
+| `items[].state` | Sí | `string` | valores: `PENDING`, `CERTIFIED`, `REVOKED`, `ADJUSTED`, `AUTO_REVOKED`, `SKIPPED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `items[].dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].decidedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].comment` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].escalated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].reminderCount` | Sí | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].maxSensitivity` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].campaignName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].evidence` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `items[].evidenceHash` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/access-reviews/items"
+}
+```
+
+---
+
+## 16. GET /me/access-reviews/items/{id}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-my-reviews`
+- **Nombre:** Un ítem de certificación, con su evidencia
+- **Operation ID:** `MyAccessReviewsController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MyAccessReviewsController.get](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Un ítem de certificación, con su evidencia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Un ítem mío, con su evidencia.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/access-reviews/items/{id}` en `MyAccessReviewsController_get`. El controlador delega en `AccessReviewItemsService.get`. No recibe body. El tipo de retorno estático es `Promise<ReviewItemViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/access-reviews/items/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/access-reviews/items/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReviewItemViewDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReviewItemViewDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReviewItemViewDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReviewItemViewDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ReviewItemViewDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReviewItemViewDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReviewItemViewDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReviewItemViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewItemViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "campaignId": "00000000-0000-4000-8000-000000000001",
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "grantId": "00000000-0000-4000-8000-000000000001",
+  "subjectUserId": "00000000-0000-4000-8000-000000000001",
+  "subjectName": "Nombre de ejemplo",
+  "reviewerKind": "DOCTOR_OWNER",
+  "state": "PENDING",
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "decidedAt": "2026-07-31T12:00:00.000Z",
+  "comment": "valor-ejemplo",
+  "escalated": true,
+  "reminderCount": 1,
+  "maxSensitivity": "valor-ejemplo",
+  "campaignName": "Nombre de ejemplo",
+  "evidence": {
+    "clave": "valor"
+  },
+  "evidenceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `campaignId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `grantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `subjectUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `subjectName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `reviewerKind` | Sí | `string` | valores: `DOCTOR_OWNER`, `SERVICE_HEAD`, `SUPERVISOR`, `ADMIN` | Sin descripción específica en el contrato OpenAPI. | `DOCTOR_OWNER` |
+| `state` | Sí | `string` | valores: `PENDING`, `CERTIFIED`, `REVOKED`, `ADJUSTED`, `AUTO_REVOKED`, `SKIPPED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `decidedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `comment` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `escalated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `reminderCount` | Sí | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `maxSensitivity` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `campaignName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `evidence` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `evidenceHash` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/access-reviews/items/{id}"
+}
+```
+
+---
+
+## 17. POST /me/access-reviews/items/{id}/decision
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-my-reviews`
+- **Nombre:** Decidir un ítem: certificar, revocar o ajustar
+- **Operation ID:** `MyAccessReviewsController_decide`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MyAccessReviewsController.decide](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Decidir un ítem: certificar, revocar o ajustar. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Certifica, revoca o ajusta un ítem (el ajuste solo reduce).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/access-reviews/items/{id}/decision` en `MyAccessReviewsController_decide`. El controlador delega en `AccessReviewItemsService.decide`. Valida el body como `DecideReviewItemDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReviewDecisionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DecideReviewItemDto`; los campos opcionales se omiten.
+
+```http
+POST /me/access-reviews/items/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "decision": "CERTIFY"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle(DECISION_THROTTLE)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `decision` | Sí | `string` | valores: `CERTIFY`, `REVOKE`, `ADJUST` | Sin descripción específica en el contrato OpenAPI. | `CERTIFY` |
+| `comment` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `adjustment` | No | `ReviewAdjustmentDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"atoms":["valor-ejemplo"],"validTo":{},"condition":{"clave":"valor"}}` |
+| `adjustment.atoms` | No | `array<string>` | longitud máxima 80; máximo 100 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `adjustment.validTo` | No | `object` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `adjustment.condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /me/access-reviews/items/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "decision": "CERTIFY",
+  "comment": "valor-ejemplo",
+  "adjustment": {
+    "atoms": [
+      "valor-ejemplo"
+    ],
+    "validTo": {},
+    "condition": {
+      "clave": "valor"
+    }
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReviewDecisionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewDecisionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "state": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `state` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Solo se recertifica un vínculo activo o suspendido por recertificación | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(DECISION_THROTTLE). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/access-reviews/items/{id}/decision"
+}
+```
+
+---
+
+## 18. POST /me/access-reviews/items/bulk-decision
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-my-reviews`
+- **Nombre:** Certificar en lote lo de bajo riesgo (todo o nada)
+- **Operation ID:** `MyAccessReviewsController_bulk`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [MyAccessReviewsController.bulk](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Certificar en lote lo de bajo riesgo (todo o nada). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Decisión en lote: solo `CERTIFY` de bajo riesgo, todo o nada.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/access-reviews/items/bulk-decision` en `MyAccessReviewsController_bulk`. El controlador delega en `AccessReviewItemsService.bulk`. Valida el body como `BulkReviewDecisionDto` y consume `application/json`. El tipo de retorno estático es `Promise<BulkReviewResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `BulkReviewDecisionDto`; los campos opcionales se omiten.
+
+```http
+POST /me/access-reviews/items/bulk-decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "itemIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
+  "decision": "CERTIFY"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`, `SUPPORT_STAFF`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle(DECISION_THROTTLE)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `itemIds` | Sí | `array<string>` | formato `uuid`; mínimo 1 elemento(s); máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `decision` | Sí | `string` | valores: `CERTIFY`, `REVOKE`, `ADJUST` | Sin descripción específica en el contrato OpenAPI. | `CERTIFY` |
+| `comment` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /me/access-reviews/items/bulk-decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "itemIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ],
+  "decision": "CERTIFY",
+  "comment": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<BulkReviewResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `BulkReviewResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "decided": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `decided` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(DECISION_THROTTLE). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/access-reviews/items/bulk-decision"
+}
+```
+
+---
+
+## 19. GET /me/practitioner/governance-panel
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Panel «Mi equipo» del doctor
+- **Operation ID:** `PractitionerGovernanceController_governancePanel`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerGovernanceController.governancePanel](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Panel «Mi equipo» del doctor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Panel «Mi equipo».
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/practitioner/governance-panel` en `PractitionerGovernanceController_governancePanel`. El controlador delega en `GovernancePanelService.panel`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/practitioner/governance-panel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/practitioner/governance-panel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/practitioner/governance-panel"
+}
+```
+
+---
+
+## 20. GET /me/practitioner/support-access-requests
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-practitioner-support`
+- **Nombre:** Solicitudes de acceso clínico temporal de mi equipo
+- **Operation ID:** `PractitionerSupportController_accessRequests`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSupportController.accessRequests](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Solicitudes de acceso clínico temporal de mi equipo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Solicitudes de acceso clínico temporal que mi equipo espera que decida.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/practitioner/support-access-requests` en `PractitionerSupportController_accessRequests`. El controlador delega en `PractitionerSupportService.accessRequests`. No recibe body. El tipo de retorno estático es `Promise<SupportAccessRequestsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/practitioner/support-access-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/practitioner/support-access-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportAccessRequestsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SupportAccessRequestsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportAccessRequestsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportAccessRequestsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportAccessRequestsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportAccessRequestsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportAccessRequestsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportAccessRequestsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "delegateId": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "encounterId": "00000000-0000-4000-8000-000000000001",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportAccessRequestViewDto>` | Sin restricción adicional declarada | Solicitudes abiertas. | `[{"id":"00000000-0000-4000-8000-000000000001","delegateId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","encounterId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id de la solicitud (el que se decide en `POST /access-requests/:id/decision`). | `00000000-0000-4000-8000-000000000001` |
+| `items[].delegateId` | Sí | `string` | formato `uuid` | Delegación del doctor con la persona que pide. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Persona de apoyo que pide. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientProfileId` | No | `string` | formato `uuid` | Paciente cuya historia pide ver. | `00000000-0000-4000-8000-000000000001` |
+| `items[].encounterId` | No | `string` | formato `uuid` | Encuentro, si pide una consulta concreta. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reasonText` | No | `string` | Sin restricción adicional declarada | Para qué lo necesita. | `Texto descriptivo de ejemplo` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se pidió. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La cuenta no tiene perfil profesional: no tiene equipo de apoyo. | Excepción explícita en src/modules/delegated_access/services/practitioner-support.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/practitioner/support-access-requests"
+}
+```
+
+---
+
+## 21. GET /me/practitioner/support-activity
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-practitioner-support`
+- **Nombre:** Actividad de mi equipo de apoyo
+- **Operation ID:** `PractitionerSupportController_teamActivity`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSupportController.teamActivity](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Actividad de mi equipo de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Qué hizo mi equipo de apoyo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/practitioner/support-activity` en `PractitionerSupportController_teamActivity`. El controlador delega en `SupportActivityService.forPractitioner`. No recibe body. El tipo de retorno estático es `Promise<SupportActivityResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `userId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `person` | query | No | `string` | longitud máxima 120 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `doctor` | query | No | `string` | longitud máxima 120 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `action` | query | No | `string` | longitud máxima 80 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `from` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-10-01` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-10-30` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `1` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/practitioner/support-activity HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/practitioner/support-activity?userId=00000000-0000-4000-8000-000000000001&tenantId=00000000-0000-4000-8000-000000000001&person=valor-ejemplo&doctor=valor-ejemplo&action=valor-ejemplo&from=2026-10-01&to=2026-10-30&limit=1&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportActivityResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "personName": "Nombre de ejemplo",
+      "actorName": "Nombre de ejemplo",
+      "action": "valor-ejemplo",
+      "auditAction": "valor-ejemplo",
+      "permission": "valor-ejemplo",
+      "entity": "valor-ejemplo",
+      "entityId": "00000000-0000-4000-8000-000000000001",
+      "bookingId": "00000000-0000-4000-8000-000000000001",
+      "appointmentId": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "summary": "valor-ejemplo",
+      "success": true,
+      "result": "SUCCESS",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "occurredAt": "2026-07-31T12:00:00.000Z",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportActivityEntryDto>` | Sin restricción adicional declarada | Asientos. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","personName":"Nombre de ejemplo","actorName":"Nombre de ejemplo","action":"valor-ejemplo","auditAction":"valor-ejemplo","permission":"valor-ejemplo","entity":"valor-ejemplo","entityId":"00000000-0000-4000-8000-000000000001","bookingId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","summary":"valor-ejemplo","success":true,"result":"SUCCESS","createdAt":"2026-07-31T12:00:00.000Z","occurredAt":"2026-07-31T12:00:00.000Z","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id del asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | No | `string` | formato `uuid` | Organización a la que pertenece el asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Persona que actuó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].personName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la persona que actuó. | `Nombre de ejemplo` |
+| `items[].actorName` | Sí | `string` | Sin restricción adicional declarada | Igual que `personName`. | `Nombre de ejemplo` |
+| `items[].action` | Sí | `string` | Sin restricción adicional declarada | Código de la entrada: el permiso con el que se actuó (`schedule.check_in`) o el evento (`engagement.ended`); un asiento que no se reconoce conserva el suyo (`auditAction`). | `valor-ejemplo` |
+| `items[].auditAction` | Sí | `string` | Sin restricción adicional declarada | Asiento de la cadena de auditoría tal como se selló (`BOOKING_CHECKED_IN`). | `valor-ejemplo` |
+| `items[].permission` | No | `string` | Sin restricción adicional declarada | Permiso de apoyo con el que se hizo, si es una acción de agenda. | `valor-ejemplo` |
+| `items[].entity` | Sí | `string` | Sin restricción adicional declarada | Recurso afectado. | `valor-ejemplo` |
+| `items[].entityId` | No | `string` | formato `uuid` | Id del recurso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].bookingId` | No | `string` | formato `uuid` | Reserva a la que se refiere el asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].appointmentId` | No | `string` | formato `uuid` | Cita a la que se refiere el asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerProfileId` | No | `string` | formato `uuid` | Doctor sobre cuya agenda o equipo se actuó (perfil profesional). | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Asignación de rol del doctor, si el asiento la nombra. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerName` | No | `string` | Sin restricción adicional declarada | Nombre del doctor; solo si quien consulta puede verlo. | `Nombre de ejemplo` |
+| `items[].summary` | Sí | `string` | Sin restricción adicional declarada | La acción en una frase. | `valor-ejemplo` |
+| `items[].success` | Sí | `boolean` | Sin restricción adicional declarada | ¿Se hizo? | `true` |
+| `items[].result` | Sí | `string` | valores: `SUCCESS`, `FAILURE` | Resultado: `SUCCESS` o `FAILURE`. | `SUCCESS` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+| `items[].occurredAt` | Sí | `string` | formato `date-time` | Igual que `createdAt`. | `2026-07-31T12:00:00.000Z` |
+| `items[].recordedAt` | Sí | `string` | formato `date-time` | Igual que `createdAt` (nombre de la primera versión). | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor de continuación. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La cuenta no tiene perfil profesional: no tiene equipo de apoyo. | Excepción explícita en src/modules/delegated_access/services/support-activity.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/practitioner/support-activity"
+}
+```
+
+---
+
+## 22. GET /me/practitioner/support-team
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-practitioner-support`
+- **Nombre:** Mi equipo de apoyo
+- **Operation ID:** `PractitionerSupportController_team`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSupportController.team](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Mi equipo de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Equipo de apoyo del doctor.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/practitioner/support-team` en `PractitionerSupportController_team`. El controlador delega en `PractitionerSupportService.supportTeam`. No recibe body. El tipo de retorno estático es `Promise<SupportTeamResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/practitioner/support-team HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/practitioner/support-team HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportTeamResponseDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<SupportTeamResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportTeamResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportTeamResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportTeamResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportTeamResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportTeamResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportTeamResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "delegateId": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "personName": "Nombre de ejemplo",
+      "engagementId": "00000000-0000-4000-8000-000000000001",
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "organizationName": "Nombre de ejemplo",
+      "roleTemplateCode": "CODIGO_EJEMPLO",
+      "roleTemplate": "valor-ejemplo",
+      "status": "PENDING_ACCEPTANCE",
+      "delegateStatus": "valor-ejemplo",
+      "accepted": true,
+      "acceptedAt": "2026-07-31T12:00:00.000Z",
+      "mayReplyOnBehalf": true,
+      "replyDisclosure": "SHOW",
+      "actions": [
+        "valor-ejemplo"
+      ],
+      "coverageSummary": "valor-ejemplo",
+      "lastActivityAt": "2026-07-31T12:00:00.000Z",
+      "pendingClinicalRequests": [
+        {
+          "requestId": "00000000-0000-4000-8000-000000000001",
+          "patientLabel": "valor-ejemplo",
+          "reasonText": "Texto descriptivo de ejemplo",
+          "requestedAt": "2026-07-31T12:00:00.000Z",
+          "requestedHours": 1
+        }
+      ]
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportTeamMemberDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"delegateId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","personName":"Nombre de ejemplo","engagementId":"00000000-0000-4000-8000-000000000001","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","roleTemplateCode":"CODIGO_EJEMPLO","roleTemplate":"valor-ejemplo","status":"PENDING_ACCEPTANCE","delegateStatus":"valor-ejemplo","accepted":true,"acceptedAt":"2026-07-31T12:00:00.000Z","mayReplyOnBehalf":true,"replyDisclosure":"SHOW","actions":["valor-ejemplo"],"coverageSummary":"valor-ejemplo","lastActivityAt":"2026-07-31T12:00:00.000Z","pendingClinicalRequests":[{"requestId":"00000000-0000-4000-8000-000000000001","patientLabel":"valor-ejemplo","reasonText":"Texto descriptivo de ejemplo","requestedAt":"2026-07-31T12:00:00.000Z","requestedHours":1}]}]` |
+| `items[].delegateId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].personName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerRoleAssignmentId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].organizationName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].roleTemplate` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].status` | Sí | `string` | valores: `PENDING_ACCEPTANCE`, `ACTIVE`, `REVOKED` | Sin descripción específica en el contrato OpenAPI. | `PENDING_ACCEPTANCE` |
+| `items[].delegateStatus` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].accepted` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].acceptedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].mayReplyOnBehalf` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].replyDisclosure` | Sí | `string` | valores: `SHOW`, `HIDE` | Sin descripción específica en el contrato OpenAPI. | `SHOW` |
+| `items[].actions` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].coverageSummary` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].lastActivityAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].pendingClinicalRequests` | Sí | `array<PendingClinicalAccessRequestDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"requestId":"00000000-0000-4000-8000-000000000001","patientLabel":"valor-ejemplo","reasonText":"Texto descriptivo de ejemplo","requestedAt":"2026-07-31T12:00:00.000Z","requestedHours":1}]` |
+| `items[].pendingClinicalRequests[].requestId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].pendingClinicalRequests[].patientLabel` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].pendingClinicalRequests[].reasonText` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].pendingClinicalRequests[].requestedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].pendingClinicalRequests[].requestedHours` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La cuenta no tiene perfil profesional: no tiene equipo de apoyo. | Excepción explícita en src/modules/delegated_access/services/practitioner-support.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/practitioner/support-team"
+}
+```
+
+---
+
+## 23. POST /me/practitioner/support-team/explain
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** El doctor explica una decisión sobre alguien de su equipo
+- **Operation ID:** `AccessExplainController_explainTeam`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessExplainController.explainTeam](../../src/modules/delegated_access/controllers/access-explain.controller.ts)
+
+### Descripción de negocio
+
+El doctor explica una decisión sobre alguien de su equipo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El doctor pregunta por alguien de su equipo, solo sobre su agenda.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/practitioner/support-team/explain` en `AccessExplainController_explainTeam`. El controlador delega en `AccessExplainService.explainTeam`. Valida el body como `ExplainTeamAccessDto` y consume `application/json`. El tipo de retorno estático es `Promise<ExplainAccessResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ExplainTeamAccessDto`; los campos opcionales se omiten.
+
+```http
+POST /me/practitioner/support-team/explain HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "action": "agenda.appointment.cancel"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle(EXPLAIN_THROTTLE)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `engagementId` | No | `string` | formato `uuid` | Vínculo de la persona (o `userId`). | `00000000-0000-4000-8000-000000000001` |
+| `userId` | No | `string` | formato `uuid` | Persona (o `engagementId`). | `00000000-0000-4000-8000-000000000001` |
+| `action` | Sí | `string` | Sin restricción adicional declarada | Permiso o código antiguo. | `agenda.appointment.cancel` |
+| `practitionerRoleAssignmentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `healthcareServiceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `careSpaceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `appointmentStartAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `at` | No | `string` | formato `date-time` | Por defecto, ahora. | `2026-07-31T12:00:00.000Z` |
+| `assume` | No | `ExplainAssumeDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"stepUpFresh":true,"doctorOnline":true,"reasonProvided":true,"approvalGranted":true,"forceFull":true}` |
+| `assume.stepUpFresh` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.doctorOnline` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.reasonProvided` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.approvalGranted` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.forceFull` | No | `boolean` | Sin restricción adicional declarada | Evalúa también los permisos aunque una denegación temprana ya decida. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /me/practitioner/support-team/explain HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "action": "agenda.appointment.cancel",
+  "practitionerRoleAssignmentId": {},
+  "healthcareServiceId": {},
+  "careSpaceId": {},
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "appointmentStartAt": "2026-07-31T12:00:00.000Z",
+  "at": "2026-07-31T12:00:00.000Z",
+  "assume": {
+    "stepUpFresh": true,
+    "doctorOnline": true,
+    "reasonProvided": true,
+    "approvalGranted": true,
+    "forceFull": true
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExplainAccessResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "decision": {
+    "clave": "valor"
+  },
+  "summary": "valor-ejemplo",
+  "decidedBy": {
+    "clave": "valor"
+  },
+  "reasons": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "missing": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "adminFixes": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "askAdmin": "valor-ejemplo",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "obligations": {
+    "clave": "valor"
+  },
+  "visibleFields": {
+    "clave": "valor"
+  },
+  "usage": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "evaluatedAt": "valor-ejemplo",
+  "correlationId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `decision` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `summary` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decidedBy` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `reasons` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `missing` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `adminFixes` | No | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `askAdmin` | No | `string` | Sin restricción adicional declarada | Autoservicio: qué pedirle al administrador. | `valor-ejemplo` |
+| `tenantId` | No | `string` | formato `uuid` | Autoservicio: organización consultada. | `00000000-0000-4000-8000-000000000001` |
+| `obligations` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `visibleFields` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `usage` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `evaluatedAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `correlationId` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(EXPLAIN_THROTTLE). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/practitioner/support-team/explain"
+}
+```
+
+---
+
+## 24. POST /me/support-access-requests
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-requests`
+- **Nombre:** Pedir acceso clínico temporal a un paciente (lo decide el doctor)
+- **Operation ID:** `SupportEngagementRequestsController_requestClinicalAccess`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementRequestsController.requestClinicalAccess](../../src/modules/delegated_access/controllers/support-engagement-requests.controller.ts)
+
+### Descripción de negocio
+
+Pedir acceso clínico temporal a un paciente (lo decide el doctor). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Caso 10: la persona de apoyo pide ver la historia clínica de un paciente por un rato. Sin tenant activo (la organización llega en el cuerpo y se contrasta con su vínculo); lo decide el doctor, no la administración.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/support-access-requests` en `SupportEngagementRequestsController_requestClinicalAccess`. El controlador delega en `AccessRequestsService.requestAsSupport`. Valida el body como `CreateSupportAccessRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateSupportAccessRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /me/support-access-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `encounterId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reasonText` | Sí | `string` | longitud mínima 5; longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /me/support-access-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "encounterId": "00000000-0000-4000-8000-000000000001",
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No tiene un vínculo de apoyo en esa organización | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
+| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
+| 409 | `CONFLICT` | Ya existe una solicitud pendiente equivalente | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La delegación no está activa | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-access-requests"
+}
+```
+
+---
+
+## 25. POST /me/support-access/explain
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** ¿Por qué no puedo hacer esto? (autoservicio)
+- **Operation ID:** `AccessExplainController_explainMine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessExplainController.explainMine](../../src/modules/delegated_access/controllers/access-explain.controller.ts)
+
+### Descripción de negocio
+
+¿Por qué no puedo hacer esto? (autoservicio). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La propia persona pregunta por qué no puede.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/support-access/explain` en `AccessExplainController_explainMine`. El controlador delega en `AccessExplainService.explainMine`. Valida el body como `ExplainMyAccessDto` y consume `application/json`. El tipo de retorno estático es `Promise<ExplainAccessResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ExplainMyAccessDto`; los campos opcionales se omiten.
+
+```http
+POST /me/support-access/explain HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "action": "agenda.appointment.cancel",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle(EXPLAIN_THROTTLE)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `engagementId` | No | `string` | formato `uuid` | Vínculo de la persona (o `userId`). | `00000000-0000-4000-8000-000000000001` |
+| `userId` | No | `string` | formato `uuid` | Persona (o `engagementId`). | `00000000-0000-4000-8000-000000000001` |
+| `action` | Sí | `string` | Sin restricción adicional declarada | Permiso o código antiguo. | `agenda.appointment.cancel` |
+| `practitionerRoleAssignmentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `healthcareServiceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `careSpaceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `appointmentStartAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `at` | No | `string` | formato `date-time` | Por defecto, ahora. | `2026-07-31T12:00:00.000Z` |
+| `assume` | No | `ExplainAssumeDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"stepUpFresh":true,"doctorOnline":true,"reasonProvided":true,"approvalGranted":true,"forceFull":true}` |
+| `assume.stepUpFresh` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.doctorOnline` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.reasonProvided` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.approvalGranted` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.forceFull` | No | `boolean` | Sin restricción adicional declarada | Evalúa también los permisos aunque una denegación temprana ya decida. | `true` |
+| `tenantId` | Sí | `string` | formato `uuid` | Organización (se verifica contra sus vínculos). | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /me/support-access/explain HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "action": "agenda.appointment.cancel",
+  "practitionerRoleAssignmentId": {},
+  "healthcareServiceId": {},
+  "careSpaceId": {},
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "appointmentStartAt": "2026-07-31T12:00:00.000Z",
+  "at": "2026-07-31T12:00:00.000Z",
+  "assume": {
+    "stepUpFresh": true,
+    "doctorOnline": true,
+    "reasonProvided": true,
+    "approvalGranted": true,
+    "forceFull": true
+  },
+  "tenantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExplainAccessResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "decision": {
+    "clave": "valor"
+  },
+  "summary": "valor-ejemplo",
+  "decidedBy": {
+    "clave": "valor"
+  },
+  "reasons": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "missing": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "adminFixes": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "askAdmin": "valor-ejemplo",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "obligations": {
+    "clave": "valor"
+  },
+  "visibleFields": {
+    "clave": "valor"
+  },
+  "usage": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "evaluatedAt": "valor-ejemplo",
+  "correlationId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `decision` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `summary` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decidedBy` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `reasons` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `missing` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `adminFixes` | No | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `askAdmin` | No | `string` | Sin restricción adicional declarada | Autoservicio: qué pedirle al administrador. | `valor-ejemplo` |
+| `tenantId` | No | `string` | formato `uuid` | Autoservicio: organización consultada. | `00000000-0000-4000-8000-000000000001` |
+| `obligations` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `visibleFields` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `usage` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `evaluatedAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `correlationId` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(EXPLAIN_THROTTLE). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-access/explain"
+}
+```
+
+---
+
+## 26. GET /me/support-activity
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-practitioner-support`
+- **Nombre:** Mi actividad como personal de apoyo
+- **Operation ID:** `PractitionerSupportController_myActivity`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSupportController.myActivity](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Mi actividad como personal de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Qué hizo la propia persona de apoyo, en las organizaciones donde tiene un vínculo. Sin organización activa: solo lo suyo, filtrable por `tenantId`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/support-activity` en `PractitionerSupportController_myActivity`. El controlador delega en `SupportActivityService.forPerson`. No recibe body. El tipo de retorno estático es `Promise<SupportActivityResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `userId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `person` | query | No | `string` | longitud máxima 120 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `doctor` | query | No | `string` | longitud máxima 120 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `action` | query | No | `string` | longitud máxima 80 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `from` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-10-01` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-10-30` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `1` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/support-activity HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/support-activity?userId=00000000-0000-4000-8000-000000000001&tenantId=00000000-0000-4000-8000-000000000001&person=valor-ejemplo&doctor=valor-ejemplo&action=valor-ejemplo&from=2026-10-01&to=2026-10-30&limit=1&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportActivityResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "personName": "Nombre de ejemplo",
+      "actorName": "Nombre de ejemplo",
+      "action": "valor-ejemplo",
+      "auditAction": "valor-ejemplo",
+      "permission": "valor-ejemplo",
+      "entity": "valor-ejemplo",
+      "entityId": "00000000-0000-4000-8000-000000000001",
+      "bookingId": "00000000-0000-4000-8000-000000000001",
+      "appointmentId": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "summary": "valor-ejemplo",
+      "success": true,
+      "result": "SUCCESS",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "occurredAt": "2026-07-31T12:00:00.000Z",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportActivityEntryDto>` | Sin restricción adicional declarada | Asientos. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","personName":"Nombre de ejemplo","actorName":"Nombre de ejemplo","action":"valor-ejemplo","auditAction":"valor-ejemplo","permission":"valor-ejemplo","entity":"valor-ejemplo","entityId":"00000000-0000-4000-8000-000000000001","bookingId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","summary":"valor-ejemplo","success":true,"result":"SUCCESS","createdAt":"2026-07-31T12:00:00.000Z","occurredAt":"2026-07-31T12:00:00.000Z","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id del asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | No | `string` | formato `uuid` | Organización a la que pertenece el asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Persona que actuó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].personName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la persona que actuó. | `Nombre de ejemplo` |
+| `items[].actorName` | Sí | `string` | Sin restricción adicional declarada | Igual que `personName`. | `Nombre de ejemplo` |
+| `items[].action` | Sí | `string` | Sin restricción adicional declarada | Código de la entrada: el permiso con el que se actuó (`schedule.check_in`) o el evento (`engagement.ended`); un asiento que no se reconoce conserva el suyo (`auditAction`). | `valor-ejemplo` |
+| `items[].auditAction` | Sí | `string` | Sin restricción adicional declarada | Asiento de la cadena de auditoría tal como se selló (`BOOKING_CHECKED_IN`). | `valor-ejemplo` |
+| `items[].permission` | No | `string` | Sin restricción adicional declarada | Permiso de apoyo con el que se hizo, si es una acción de agenda. | `valor-ejemplo` |
+| `items[].entity` | Sí | `string` | Sin restricción adicional declarada | Recurso afectado. | `valor-ejemplo` |
+| `items[].entityId` | No | `string` | formato `uuid` | Id del recurso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].bookingId` | No | `string` | formato `uuid` | Reserva a la que se refiere el asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].appointmentId` | No | `string` | formato `uuid` | Cita a la que se refiere el asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerProfileId` | No | `string` | formato `uuid` | Doctor sobre cuya agenda o equipo se actuó (perfil profesional). | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Asignación de rol del doctor, si el asiento la nombra. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerName` | No | `string` | Sin restricción adicional declarada | Nombre del doctor; solo si quien consulta puede verlo. | `Nombre de ejemplo` |
+| `items[].summary` | Sí | `string` | Sin restricción adicional declarada | La acción en una frase. | `valor-ejemplo` |
+| `items[].success` | Sí | `boolean` | Sin restricción adicional declarada | ¿Se hizo? | `true` |
+| `items[].result` | Sí | `string` | valores: `SUCCESS`, `FAILURE` | Resultado: `SUCCESS` o `FAILURE`. | `SUCCESS` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+| `items[].occurredAt` | Sí | `string` | formato `date-time` | Igual que `createdAt`. | `2026-07-31T12:00:00.000Z` |
+| `items[].recordedAt` | Sí | `string` | formato `date-time` | Igual que `createdAt` (nombre de la primera versión). | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor de continuación. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-activity"
+}
+```
+
+---
+
+## 27. GET /me/support-approvals
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-four-eyes`
+- **Nombre:** Mis solicitudes de aprobación
+- **Operation ID:** `FourEyesController_listMine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FourEyesController.listMine](../../src/modules/delegated_access/controllers/four-eyes.controller.ts)
+
+### Descripción de negocio
+
+Mis solicitudes de aprobación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Las solicitudes que la persona pidió.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/support-approvals` en `FourEyesController_listMine`. El controlador delega en `FourEyesService.listMine`. No recibe body. El tipo de retorno estático es `Promise<ListSupportApprovalsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/support-approvals HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/support-approvals HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSupportApprovalsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSupportApprovalsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "kind": "ACTION",
+      "status": "PENDING",
+      "approverKind": "DOCTOR",
+      "atom": "valor-ejemplo",
+      "requesterUserId": "00000000-0000-4000-8000-000000000001",
+      "subjectUserId": "00000000-0000-4000-8000-000000000001",
+      "reasonText": "Texto descriptivo de ejemplo",
+      "decisionComment": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "approvedUntil": "2026-07-31T12:00:00.000Z",
+      "decidedAt": "2026-07-31T12:00:00.000Z",
+      "consumedAt": "2026-07-31T12:00:00.000Z",
+      "summary": "valor-ejemplo",
+      "details": {
+        "op": "ADD",
+        "reasons": [
+          "Texto descriptivo de ejemplo"
+        ],
+        "atoms": [
+          {
+            "code": "billing.receipt.void",
+            "name": "Anular comprobantes",
+            "critical": true
+          }
+        ],
+        "criticalAtoms": [
+          {
+            "code": "billing.receipt.void",
+            "name": "Anular comprobantes",
+            "critical": true
+          }
+        ],
+        "target": {
+          "kind": "PRACTITIONER",
+          "expansionMode": "DYNAMIC",
+          "practitionerName": "Nombre de ejemplo",
+          "serviceName": "Nombre de ejemplo",
+          "locationName": "Nombre de ejemplo"
+        },
+        "validFrom": "2026-07-31T12:00:00.000Z",
+        "validTo": "2026-07-31T12:00:00.000Z",
+        "conditions": [
+          "valor-ejemplo"
+        ],
+        "changes": [
+          "valor-ejemplo"
+        ]
+      }
+    }
+  ],
+  "count": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportApprovalViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","kind":"ACTION","status":"PENDING","approverKind":"DOCTOR","atom":"valor-ejemplo","requesterUserId":"00000000-0000-4000-8000-000000000001","subjectUserId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","decisionComment":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","expiresAt":"2026-07-31T12:00:00.000Z","approvedUntil":"2026-07-31T12:00:00.000Z","decidedAt":"2026-07-31T12:00:00.000Z","consumedAt":"2026-07-31T12:00:00.000Z","summary":"valor-ejemplo","details":{"op":"ADD","reasons":["Texto descriptivo de ejemplo"],"atoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"criticalAtoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"target":{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","conditions":["valor-ejemplo"],"changes":["valor-ejemplo"]}}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].kind` | Sí | `string` | valores: `ACTION`, `GRANT_CHANGE`, `SOD_EXCEPTION`, `REACTIVATION`, `ENGAGEMENT_MOVE` | Sin descripción específica en el contrato OpenAPI. | `ACTION` |
+| `items[].status` | Sí | `string` | valores: `PENDING`, `APPROVED`, `REJECTED`, `EXPIRED`, `CANCELLED`, `EXECUTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `items[].approverKind` | Sí | `string` | valores: `DOCTOR`, `SERVICE_HEAD`, `SECOND_APPROVER` | Sin descripción específica en el contrato OpenAPI. | `DOCTOR` |
+| `items[].atom` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].requesterUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].subjectUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reasonText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `items[].decisionComment` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].approvedUntil` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].decidedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].consumedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].summary` | Sí | `string` | Sin restricción adicional declarada | Resumen en lenguaje simple de lo que se aprueba. | `valor-ejemplo` |
+| `items[].details` | No | `GrantChangeDetailsDto` | Sin restricción adicional declarada | Solo en `GET /approvals/pending` y solo para `GRANT_CHANGE`: el permiso completo que se otorgaría al aprobar. | `{"op":"ADD","reasons":["Texto descriptivo de ejemplo"],"atoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"criticalAtoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"target":{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","conditions":["valor-ejemplo"],"changes":["valor-ejemplo"]}` |
+| `items[].details.op` | No | `string` | valores: `ADD`, `UPDATE` | Sin descripción específica en el contrato OpenAPI. | `ADD` |
+| `items[].details.reasons` | No | `array<string>` | Sin restricción adicional declarada | Por qué pide aprobación: NEW_CRITICAL_ATOMS, SCOPE_WIDENED o VALIDITY_EXTENDED. | `["Texto descriptivo de ejemplo"]` |
+| `items[].details.atoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `items[].details.atoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `items[].details.atoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `items[].details.atoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `items[].details.criticalAtoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `items[].details.criticalAtoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `items[].details.criticalAtoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `items[].details.criticalAtoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `items[].details.target` | No | `GrantChangeTargetViewDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"}` |
+| `items[].details.target.kind` | No | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `items[].details.target.expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `items[].details.target.practitionerName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].details.target.serviceName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].details.target.locationName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].details.validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].details.validTo` | No | `string` | formato `date-time` | Ausente = sin fin de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `items[].details.conditions` | No | `array<string>` | Sin restricción adicional declarada | Condiciones en lenguaje simple; vacío = sin condiciones. | `["valor-ejemplo"]` |
+| `items[].details.changes` | No | `array<string>` | Sin restricción adicional declarada | Solo en `UPDATE`: qué campos cambia (actions, validTo, expansionMode, condition, actionConditions). | `["valor-ejemplo"]` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `nextCursor` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-approvals"
+}
+```
+
+---
+
+## 28. POST /me/support-approvals
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-four-eyes`
+- **Nombre:** Pedir la aprobación de una acción sensible
+- **Operation ID:** `FourEyesController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FourEyesController.create](../../src/modules/delegated_access/controllers/four-eyes.controller.ts)
+
+### Descripción de negocio
+
+Pedir la aprobación de una acción sensible. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La persona de apoyo pide la aprobación de una acción.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/support-approvals` en `FourEyesController_create`. El controlador delega en `FourEyesService.createAction`. Valida el body como `CreateSupportApprovalDto` y consume `application/json`. El tipo de retorno estático es `Promise<SupportApprovalCreatedDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateSupportApprovalDto`; los campos opcionales se omiten.
+
+```http
+POST /me/support-approvals HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "atom": "agenda.appointment.cancel",
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle(DECISION_THROTTLE)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | Sí | `string` | formato `uuid` | Organización donde se actúa. | `00000000-0000-4000-8000-000000000001` |
+| `atom` | Sí | `string` | longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `agenda.appointment.cancel` |
+| `practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `healthcareServiceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `careSpaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `appointmentStartAt` | No | `string` | formato `date-time` | Hora de la cita sobre la que se actúa. | `2026-07-31T12:00:00.000Z` |
+| `reasonText` | Sí | `string` | longitud mínima 10; longitud máxima 500 | Por qué se necesita (lo ve quien aprueba). | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /me/support-approvals HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "atom": "agenda.appointment.cancel",
+  "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "appointmentStartAt": "2026-07-31T12:00:00.000Z",
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SupportApprovalCreatedDto>` | No |
+
+El controlador declara `SupportApprovalCreatedDto`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(DECISION_THROTTLE). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-approvals"
+}
+```
+
+---
+
+## 29. POST /me/support-approvals/{id}/cancel
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-four-eyes`
+- **Nombre:** Cancelar una solicitud de aprobación propia
+- **Operation ID:** `FourEyesController_cancel`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [FourEyesController.cancel](../../src/modules/delegated_access/controllers/four-eyes.controller.ts)
+
+### Descripción de negocio
+
+Cancelar una solicitud de aprobación propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cancela una solicitud propia pendiente.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/support-approvals/{id}/cancel` en `FourEyesController_cancel`. El controlador delega en `FourEyesService.cancel`. No recibe body. El tipo de retorno estático es `Promise<SupportApprovalViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /me/support-approvals/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /me/support-approvals/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SupportApprovalViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportApprovalViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "kind": "ACTION",
+  "status": "PENDING",
+  "approverKind": "DOCTOR",
+  "atom": "valor-ejemplo",
+  "requesterUserId": "00000000-0000-4000-8000-000000000001",
+  "subjectUserId": "00000000-0000-4000-8000-000000000001",
+  "reasonText": "Texto descriptivo de ejemplo",
+  "decisionComment": "valor-ejemplo",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "approvedUntil": "2026-07-31T12:00:00.000Z",
+  "decidedAt": "2026-07-31T12:00:00.000Z",
+  "consumedAt": "2026-07-31T12:00:00.000Z",
+  "summary": "valor-ejemplo",
+  "details": {
+    "op": "ADD",
+    "reasons": [
+      "Texto descriptivo de ejemplo"
+    ],
+    "atoms": [
+      {
+        "code": "billing.receipt.void",
+        "name": "Anular comprobantes",
+        "critical": true
+      }
+    ],
+    "criticalAtoms": [
+      {
+        "code": "billing.receipt.void",
+        "name": "Anular comprobantes",
+        "critical": true
+      }
+    ],
+    "target": {
+      "kind": "PRACTITIONER",
+      "expansionMode": "DYNAMIC",
+      "practitionerName": "Nombre de ejemplo",
+      "serviceName": "Nombre de ejemplo",
+      "locationName": "Nombre de ejemplo"
+    },
+    "validFrom": "2026-07-31T12:00:00.000Z",
+    "validTo": "2026-07-31T12:00:00.000Z",
+    "conditions": [
+      "valor-ejemplo"
+    ],
+    "changes": [
+      "valor-ejemplo"
+    ]
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `kind` | Sí | `string` | valores: `ACTION`, `GRANT_CHANGE`, `SOD_EXCEPTION`, `REACTIVATION`, `ENGAGEMENT_MOVE` | Sin descripción específica en el contrato OpenAPI. | `ACTION` |
+| `status` | Sí | `string` | valores: `PENDING`, `APPROVED`, `REJECTED`, `EXPIRED`, `CANCELLED`, `EXECUTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `approverKind` | Sí | `string` | valores: `DOCTOR`, `SERVICE_HEAD`, `SECOND_APPROVER` | Sin descripción específica en el contrato OpenAPI. | `DOCTOR` |
+| `atom` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `requesterUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `subjectUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `reasonText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `decisionComment` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approvedUntil` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `decidedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `consumedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `summary` | Sí | `string` | Sin restricción adicional declarada | Resumen en lenguaje simple de lo que se aprueba. | `valor-ejemplo` |
+| `details` | No | `GrantChangeDetailsDto` | Sin restricción adicional declarada | Solo en `GET /approvals/pending` y solo para `GRANT_CHANGE`: el permiso completo que se otorgaría al aprobar. | `{"op":"ADD","reasons":["Texto descriptivo de ejemplo"],"atoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"criticalAtoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"target":{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","conditions":["valor-ejemplo"],"changes":["valor-ejemplo"]}` |
+| `details.op` | No | `string` | valores: `ADD`, `UPDATE` | Sin descripción específica en el contrato OpenAPI. | `ADD` |
+| `details.reasons` | No | `array<string>` | Sin restricción adicional declarada | Por qué pide aprobación: NEW_CRITICAL_ATOMS, SCOPE_WIDENED o VALIDITY_EXTENDED. | `["Texto descriptivo de ejemplo"]` |
+| `details.atoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `details.atoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `details.atoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `details.atoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `details.criticalAtoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `details.criticalAtoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `details.criticalAtoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `details.criticalAtoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `details.target` | No | `GrantChangeTargetViewDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"}` |
+| `details.target.kind` | No | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `details.target.expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `details.target.practitionerName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `details.target.serviceName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `details.target.locationName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `details.validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `details.validTo` | No | `string` | formato `date-time` | Ausente = sin fin de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `details.conditions` | No | `array<string>` | Sin restricción adicional declarada | Condiciones en lenguaje simple; vacío = sin condiciones. | `["valor-ejemplo"]` |
+| `details.changes` | No | `array<string>` | Sin restricción adicional declarada | Solo en `UPDATE`: qué campos cambia (actions, validTo, expansionMode, condition, actionConditions). | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-approvals/{id}/cancel"
+}
+```
+
+---
+
+## 30. GET /me/support-catalog
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-requests`
+- **Nombre:** Catálogo de una organización para pedir permisos
+- **Operation ID:** `SupportEngagementRequestsController_catalog`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementRequestsController.catalog](../../src/modules/delegated_access/controllers/support-engagement-requests.controller.ts)
+
+### Descripción de negocio
+
+Catálogo de una organización para pedir permisos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Doctores, servicios y ubicaciones de una organización, para que la persona arme lo que pide. Sin tenant activo: la organización llega en `org`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/support-catalog` en `SupportEngagementRequestsController_catalog`. El controlador delega en `SupportCatalogService.forPerson`. No recibe body. El tipo de retorno estático es `Promise<SupportCatalogResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `org` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/support-catalog?org=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/support-catalog?org=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportCatalogResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "doctors": [
+    {
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "placements": [
+        {
+          "careSpaceId": "00000000-0000-4000-8000-000000000001",
+          "healthcareServiceId": "00000000-0000-4000-8000-000000000001"
+        }
+      ]
+    }
+  ],
+  "services": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "locations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": "SITE",
+      "name": "Nombre de ejemplo",
+      "code": "CODIGO_EJEMPLO",
+      "parentId": "00000000-0000-4000-8000-000000000001",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | Sí | `string` | formato `uuid` | Organización del catálogo. | `00000000-0000-4000-8000-000000000001` |
+| `doctors` | Sí | `array<CatalogDoctorDto>` | Sin restricción adicional declarada | Doctores, cada uno con sus combinaciones espacio ↔ servicio. | `[{"practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","placements":[{"careSpaceId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001"}]}]` |
+| `doctors[].practitionerRoleAssignmentId` | Sí | `string` | formato `uuid` | Asignación de rol del doctor (lo que se nombra en un permiso). | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].practitionerProfileId` | No | `string` | formato `uuid` | Perfil profesional del doctor (solo lo ve la administración). | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre para mostrar. | `Nombre de ejemplo` |
+| `doctors[].practiceSiteId` | No | `string` | formato `uuid` | Sede de la asignación, si declara una. | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].placements` | Sí | `array<CatalogPlacementDto>` | Sin restricción adicional declarada | Combinaciones espacio ↔ servicio en las que atiende, para no cruzarlas. | `[{"careSpaceId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001"}]` |
+| `doctors[].placements[].careSpaceId` | No | `string` | formato `uuid` | Espacio de atención. | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].placements[].healthcareServiceId` | No | `string` | formato `uuid` | Servicio que presta en ese espacio. | `00000000-0000-4000-8000-000000000001` |
+| `services` | Sí | `array<CatalogServiceDto>` | Sin restricción adicional declarada | Servicios. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001"}]` |
+| `services[].id` | Sí | `string` | formato `uuid` | Servicio de la organización. | `00000000-0000-4000-8000-000000000001` |
+| `services[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre del servicio. | `Nombre de ejemplo` |
+| `services[].practiceSiteId` | No | `string` | formato `uuid` | Sede donde se presta, si es de una. | `00000000-0000-4000-8000-000000000001` |
+| `locations` | Sí | `array<CatalogLocationDto>` | Sin restricción adicional declarada | Sedes y espacios. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":"SITE","name":"Nombre de ejemplo","code":"CODIGO_EJEMPLO","parentId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001"}]` |
+| `locations[].id` | Sí | `string` | formato `uuid` | Sede o espacio. | `00000000-0000-4000-8000-000000000001` |
+| `locations[].kind` | Sí | `string` | valores: `SITE`, `SPACE` | Si es una sede o un espacio de atención. | `SITE` |
+| `locations[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre. | `Nombre de ejemplo` |
+| `locations[].code` | Sí | `string` | Sin restricción adicional declarada | Código. | `CODIGO_EJEMPLO` |
+| `locations[].parentId` | No | `string` | formato `uuid` | Padre: la sede o el espacio que lo contiene. | `00000000-0000-4000-8000-000000000001` |
+| `locations[].practiceSiteId` | Sí | `string` | formato `uuid` | Sede a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No tiene relación vigente con esa organización | Excepción explícita en src/modules/delegated_access/services/support-catalog.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-catalog"
+}
+```
+
+---
+
+## 31. GET /me/support-engagements
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-requests`
+- **Nombre:** Mis vínculos de apoyo y mis solicitudes
+- **Operation ID:** `SupportEngagementRequestsController_mine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementRequestsController.mine](../../src/modules/delegated_access/controllers/support-engagement-requests.controller.ts)
+
+### Descripción de negocio
+
+Mis vínculos de apoyo y mis solicitudes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Vínculos de apoyo de la persona y sus solicitudes. Sin tenant: una persona puede asistir a varias organizaciones y esta lectura es solo lo suyo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/support-engagements` en `SupportEngagementRequestsController_mine`. El controlador delega en `SupportEngagementsService.listMine`, `EngagementRequestsService.listMine`. No recibe body. El tipo de retorno estático es `Promise<MySupportEngagementsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/support-engagements HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/support-engagements HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MySupportEngagementsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MySupportEngagementsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MySupportEngagementsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MySupportEngagementsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MySupportEngagementsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MySupportEngagementsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MySupportEngagementsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MySupportEngagementsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "roleTemplateCode": "CODIGO_EJEMPLO",
+      "personName": "Nombre de ejemplo",
+      "organizationName": "Nombre de ejemplo",
+      "ownerKind": "valor-ejemplo",
+      "recertifyEveryMonths": 1,
+      "status": "ok",
+      "origin": "valor-ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "nextRecertificationAt": "2026-07-31T12:00:00.000Z",
+      "recertificationDue": true,
+      "endedReason": "Texto descriptivo de ejemplo",
+      "lastActivityAt": "2026-07-31T12:00:00.000Z",
+      "suspendedAt": "2026-07-31T12:00:00.000Z",
+      "lastConfirmedAt": "2026-07-31T12:00:00.000Z",
+      "lastConfirmedBy": "PERSON",
+      "personConfirmedAt": "2026-07-31T12:00:00.000Z",
+      "grants": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "actions": [
+            "valor-ejemplo"
+          ],
+          "expansionMode": "valor-ejemplo",
+          "status": "ok",
+          "validFrom": "2026-07-31T12:00:00.000Z",
+          "validTo": "2026-07-31T12:00:00.000Z"
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "requests": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "organizationName": "Nombre de ejemplo",
+      "requesterUserId": "00000000-0000-4000-8000-000000000001",
+      "requesterName": "Nombre de ejemplo",
+      "direction": "valor-ejemplo",
+      "roleTemplateId": "00000000-0000-4000-8000-000000000001",
+      "roleTemplateCode": "CODIGO_EJEMPLO",
+      "parentAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "message": "valor-ejemplo",
+      "status": "ok",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "decidedAt": "2026-07-31T12:00:00.000Z",
+      "decisionReason": "Texto descriptivo de ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "practitionerName": "Nombre de ejemplo",
+          "serviceName": "Nombre de ejemplo",
+          "locationName": "Nombre de ejemplo",
+          "proposedActions": [
+            "valor-ejemplo"
+          ],
+          "decision": "valor-ejemplo",
+          "decisionComment": "valor-ejemplo",
+          "resultingGrantId": "00000000-0000-4000-8000-000000000001"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportEngagementViewDto>` | Sin restricción adicional declarada | Vínculos de apoyo de la persona, en todas sus organizaciones. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","roleTemplateCode":"CODIGO_EJEMPLO","personName":"Nombre de ejemplo","organizationName":"Nombre de ejemplo","ownerKind":"valor-ejemplo","recertifyEveryMonths":1,"status":"ok","origin":"valor-ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","nextRecertificationAt":"2026-07-31T12:00:00.000Z","recertificationDue":true,"endedReason":"Texto descriptivo de ejemplo","lastActivityAt":"2026-07-31T12:00:00.000Z","suspendedAt":"2026-07-31T12:00:00.000Z","lastConfirmedAt":"2026-07-31T12:00:00.000Z","lastConfirmedBy":"PERSON","personConfirmedAt":"2026-07-31T12:00:00.000Z","grants":[{"id":"00000000-0000-4000-8000-000000000001","actions":["valor-ejemplo"],"expansionMode":"valor-ejemplo","status":"ok","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id del vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | Sí | `string` | formato `uuid` | Organización. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Persona de apoyo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Plantilla de rol (código). | `CODIGO_EJEMPLO` |
+| `items[].personName` | No | `string` | Sin restricción adicional declarada | Nombre de la persona de apoyo. | `Nombre de ejemplo` |
+| `items[].organizationName` | No | `string` | Sin restricción adicional declarada | Nombre de la organización. | `Nombre de ejemplo` |
+| `items[].ownerKind` | No | `string` | Sin restricción adicional declarada | Dueño del vínculo: `ORGANIZATION` o `PRIVATE_PRACTICE`. | `valor-ejemplo` |
+| `items[].recertifyEveryMonths` | No | `number` | Sin restricción adicional declarada | Cada cuántos meses se recertifica (6 o 12). | `1` |
+| `items[].status` | Sí | `string` | Sin restricción adicional declarada | Estado del vínculo. | `ok` |
+| `items[].origin` | No | `string` | Sin restricción adicional declarada | Origen (REQUEST, INVITATION, QR). | `valor-ejemplo` |
+| `items[].validFrom` | No | `string` | formato `date-time` | Inicio de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `items[].validTo` | No | `string` | formato `date-time` | Fin de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `items[].nextRecertificationAt` | No | `string` | formato `date-time` | Próxima recertificación. | `2026-07-31T12:00:00.000Z` |
+| `items[].recertificationDue` | Sí | `boolean` | Sin restricción adicional declarada | ¿Ya venció la fecha de recertificación y está esperando confirmación? | `true` |
+| `items[].endedReason` | No | `string` | Sin restricción adicional declarada | Motivo del fin de vínculo. | `Texto descriptivo de ejemplo` |
+| `items[].lastActivityAt` | No | `string` | formato `date-time` | Última actividad de la persona en la organización dentro de los últimos 90 días; ausente si no hubo. | `2026-07-31T12:00:00.000Z` |
+| `items[].suspendedAt` | No | `string` | formato `date-time` | Fecha en que el vínculo se suspende (o debió suspenderse) por no recertificarse: la de recertificación más 15 días. Solo si está suspendido por eso. | `2026-07-31T12:00:00.000Z` |
+| `items[].lastConfirmedAt` | No | `string` | formato `date-time` | Última vez que la ORGANIZACIÓN confirmó (recertificó) el vínculo, o su aprobación inicial: la recertificación vigente menos su período. | `2026-07-31T12:00:00.000Z` |
+| `items[].lastConfirmedBy` | No | `string` | valores: `PERSON`, `ORGANIZATION` | Quién hizo esa confirmación: siempre `ORGANIZATION` (la persona solo declara). | `PERSON` |
+| `items[].personConfirmedAt` | No | `string` | formato `date-time` | Última vez que la propia persona declaró «sigo trabajando aquí» (asiento `SUPPORT_ENGAGEMENT_CONFIRMED_BY_PERSON` más reciente). No renueva el período ni reactiva: es información para quien administra. | `2026-07-31T12:00:00.000Z` |
+| `items[].grants` | Sí | `array<SupportGrantViewDto>` | Sin restricción adicional declarada | Permisos del vínculo. | `[{"id":"00000000-0000-4000-8000-000000000001","actions":["valor-ejemplo"],"expansionMode":"valor-ejemplo","status":"ok","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].grants[].id` | Sí | `string` | formato `uuid` | Id del permiso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].grants[].actions` | Sí | `array<string>` | Sin restricción adicional declarada | Acciones incluidas. | `["valor-ejemplo"]` |
+| `items[].grants[].expansionMode` | Sí | `string` | Sin restricción adicional declarada | DYNAMIC o FIXED. | `valor-ejemplo` |
+| `items[].grants[].status` | Sí | `string` | Sin restricción adicional declarada | Estado (ACTIVE, REVOKED, EXPIRED...). | `ok` |
+| `items[].grants[].validFrom` | No | `string` | formato `date-time` | Inicio de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `items[].grants[].validTo` | No | `string` | formato `date-time` | Fin de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad de vínculos. | `1` |
+| `requests` | Sí | `array<EngagementRequestViewDto>` | Sin restricción adicional declarada | Solicitudes de la persona, recientes primero. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","requesterUserId":"00000000-0000-4000-8000-000000000001","requesterName":"Nombre de ejemplo","direction":"valor-ejemplo","roleTemplateId":"00000000-0000-4000-8000-000000000001","roleTemplateCode":"CODIGO_EJEMPLO","parentAssignmentId":"00000000-0000-4000-8000-000000000001","message":"valor-ejemplo","status":"ok","createdAt":"2026-07-31T12:00:00.000Z","expiresAt":"2026-07-31T12:00:00.000Z","decidedAt":"2026-07-31T12:00:00.000Z","decisionReason":"Texto descriptivo de ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo","proposedActions":["valor-ejemplo"],"decision":"valor-ejemplo","decisionComment":"valor-ejemplo","resultingGrantId":"00000000-0000-4000-8000-000000000001"}]}]` |
+| `requests[].id` | Sí | `string` | formato `uuid` | Id de la solicitud. | `00000000-0000-4000-8000-000000000001` |
+| `requests[].tenantId` | Sí | `string` | formato `uuid` | Organización. | `00000000-0000-4000-8000-000000000001` |
+| `requests[].organizationName` | No | `string` | Sin restricción adicional declarada | Nombre de la organización. | `Nombre de ejemplo` |
+| `requests[].requesterUserId` | Sí | `string` | formato `uuid` | Persona de apoyo. | `00000000-0000-4000-8000-000000000001` |
+| `requests[].requesterName` | No | `string` | Sin restricción adicional declarada | Nombre de la persona de apoyo. | `Nombre de ejemplo` |
+| `requests[].direction` | Sí | `string` | Sin restricción adicional declarada | REQUEST o INVITATION. | `valor-ejemplo` |
+| `requests[].roleTemplateId` | Sí | `string` | formato `uuid` | Plantilla pedida (id). | `00000000-0000-4000-8000-000000000001` |
+| `requests[].roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Plantilla pedida (código: `SECRETARY`, `FRONT_DESK`…). | `CODIGO_EJEMPLO` |
+| `requests[].parentAssignmentId` | No | `string` | formato `uuid` | Vínculo ampliado, si es una ampliación. | `00000000-0000-4000-8000-000000000001` |
+| `requests[].message` | No | `string` | Sin restricción adicional declarada | Mensaje de la persona. | `valor-ejemplo` |
+| `requests[].status` | Sí | `string` | Sin restricción adicional declarada | Estado: `PENDING`, `APPROVED`, `PARTIAL` (se aprobó parte y se rechazó parte), `REJECTED`, `EXPIRED` o `CANCELLED`. | `ok` |
+| `requests[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se creó. | `2026-07-31T12:00:00.000Z` |
+| `requests[].expiresAt` | Sí | `string` | formato `date-time` | Vencimiento (15 días). | `2026-07-31T12:00:00.000Z` |
+| `requests[].decidedAt` | No | `string` | formato `date-time` | Fecha de la decisión. | `2026-07-31T12:00:00.000Z` |
+| `requests[].decisionReason` | No | `string` | Sin restricción adicional declarada | Motivo general de la decisión. | `Texto descriptivo de ejemplo` |
+| `requests[].items` | Sí | `array<EngagementRequestItemViewDto>` | Sin restricción adicional declarada | Ítems. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo","proposedActions":["valor-ejemplo"],"decision":"valor-ejemplo","decisionComment":"valor-ejemplo","resultingGrantId":"00000000-0000-4000-8000-000000000001"}]` |
+| `requests[].items[].id` | Sí | `string` | formato `uuid` | Id del ítem. | `00000000-0000-4000-8000-000000000001` |
+| `requests[].items[].practitionerName` | No | `string` | Sin restricción adicional declarada | Nombre del doctor del ítem. | `Nombre de ejemplo` |
+| `requests[].items[].serviceName` | No | `string` | Sin restricción adicional declarada | Nombre del servicio del ítem. | `Nombre de ejemplo` |
+| `requests[].items[].locationName` | No | `string` | Sin restricción adicional declarada | Nombre de la ubicación (espacio o sede) del ítem. | `Nombre de ejemplo` |
+| `requests[].items[].proposedActions` | Sí | `array<string>` | Sin restricción adicional declarada | Acciones propuestas. | `["valor-ejemplo"]` |
+| `requests[].items[].decision` | Sí | `string` | Sin restricción adicional declarada | Decisión (PENDING, APPROVED, ADJUSTED, REJECTED). | `valor-ejemplo` |
+| `requests[].items[].decisionComment` | No | `string` | Sin restricción adicional declarada | Motivo de la decisión. | `valor-ejemplo` |
+| `requests[].items[].resultingGrantId` | No | `string` | formato `uuid` | Permiso emitido. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-engagements"
+}
+```
+
+---
+
+## 32. POST /me/support-engagements/{id}/confidentiality-ack
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Aceptar mi compromiso de confidencialidad
+- **Operation ID:** `SupportLifecycleController_confidentialityAck`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.confidentialityAck](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Aceptar mi compromiso de confidencialidad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La propia persona acepta el compromiso de confidencialidad (sin tenant activo).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/support-engagements/{id}/confidentiality-ack` en `SupportLifecycleController_confidentialityAck`. El controlador delega en `LifecycleService.confidentialityAckMine`. No recibe body. El tipo de retorno estático es `Promise<ConfidentialityAckResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /me/support-engagements/00000000-0000-4000-8000-000000000001/confidentiality-ack HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit particular: `Throttle({ default: { limit: 10, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /me/support-engagements/00000000-0000-4000-8000-000000000001/confidentiality-ack HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConfidentialityAckResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfidentialityAckResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "acknowledgedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Siempre `true`. | `true` |
+| `tenantId` | Sí | `string` | formato `uuid` | Organización del vínculo (para el sello de auditoría). | `00000000-0000-4000-8000-000000000001` |
+| `acknowledgedAt` | Sí | `string` | formato `date-time` | Cuándo aceptó. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-engagements/{id}/confidentiality-ack"
+}
+```
+
+---
+
+## 33. POST /me/support-engagements/{id}/confirm
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-requests`
+- **Nombre:** Confirmar mi propio vínculo de apoyo
+- **Operation ID:** `SupportEngagementRequestsController_confirmMine`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementRequestsController.confirmMine](../../src/modules/delegated_access/controllers/support-engagement-requests.controller.ts)
+
+### Descripción de negocio
+
+Confirmar mi propio vínculo de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La persona declara «sigo trabajando aquí» sobre su propio vínculo. Solo deja el asiento de auditoría: no renueva el período ni reactiva; eso lo hace la organización con `POST /org/support-engagements/:id/recertify`. Sin tenant activo, y la organización queda en el sello de auditoría.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/support-engagements/{id}/confirm` en `SupportEngagementRequestsController_confirmMine`. El controlador delega en `SupportEngagementsService.confirmMine`. No recibe body. El tipo de retorno estático es `Promise<ConfirmedSupportEngagementViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /me/support-engagements/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit particular: `Throttle({ default: { limit: 10, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /me/support-engagements/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConfirmedSupportEngagementViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfirmedSupportEngagementViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "declaredAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `declaredAt` | Sí | `string` | formato `date-time` | Instante de la declaración «sigo trabajando aquí». El vínculo no cambió. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo declara su vínculo quien lo tiene activo o suspendido por no recertificarse a tiempo | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-engagements/{id}/confirm"
+}
+```
+
+---
+
+## 34. POST /me/support-patient-search
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-practitioner-support`
+- **Nombre:** Buscar un paciente (búsqueda exacta, auditada)
+- **Operation ID:** `PractitionerSupportController_patientSearch`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSupportController.patientSearch](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Buscar un paciente (búsqueda exacta, auditada). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Búsqueda EXACTA de pacientes del personal de apoyo; cada búsqueda queda auditada. La organización viene en el cuerpo y la política la contrasta con los vínculos de la persona.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/support-patient-search` en `PractitionerSupportController_patientSearch`. El controlador delega en `SupportPatientSearchService.search`. Valida el body como `SupportPatientSearchDto` y consume `application/json`. El tipo de retorno estático es `Promise<SupportPatientSearchResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SupportPatientSearchDto`; los campos opcionales se omiten.
+
+```http
+POST /me/support-patient-search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | No | `string` | formato `uuid` | Organización. Alternativa: `org`. | `00000000-0000-4000-8000-000000000001` |
+| `org` | No | `string` | formato `uuid` | Alias de `tenantId`. | `00000000-0000-4000-8000-000000000001` |
+| `nationalId` | No | `string` | longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `document` | No | `string` | longitud máxima 40 | Alias de `nationalId`. | `valor-ejemplo` |
+| `phone` | No | `string` | longitud máxima 25 | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `fullName` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `birthDate` | No | `string` | longitud máxima 10; patrón runtime `/^\d{4}-\d{2}-\d{2}$/` | Sin descripción específica en el contrato OpenAPI. | `1984-05-17` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /me/support-patient-search HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "org": "00000000-0000-4000-8000-000000000001",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "document": "valor-ejemplo",
+  "phone": "+59170000000",
+  "fullName": "Nombre de ejemplo",
+  "birthDate": "1984-05-17"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SupportPatientSearchResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportPatientSearchResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "documentMasked": "valor-ejemplo",
+      "phoneMasked": "+59170000000",
+      "ageYears": 1,
+      "isMinor": true,
+      "representatives": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "name": "Nombre de ejemplo",
+          "relationship": "valor-ejemplo"
+        }
+      ]
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportPatientMatchDto>` | Sin restricción adicional declarada | Coincidencias exactas (a lo sumo cinco). | `[{"patientProfileId":"00000000-0000-4000-8000-000000000001","profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","documentMasked":"valor-ejemplo","phoneMasked":"+59170000000","ageYears":1,"isMinor":true,"representatives":[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","relationship":"valor-ejemplo"}]}]` |
+| `items[].patientProfileId` | Sí | `string` | formato `uuid` | Perfil del paciente (nombre del contrato compartido). | `00000000-0000-4000-8000-000000000001` |
+| `items[].profileId` | Sí | `string` | formato `uuid` | Perfil del paciente (nombre que usa el front). | `00000000-0000-4000-8000-000000000001` |
+| `items[].displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre para mostrar. | `Nombre de ejemplo` |
+| `items[].documentMasked` | No | `string` | Sin restricción adicional declarada | Documento con lo central tapado: `***556`. | `valor-ejemplo` |
+| `items[].phoneMasked` | No | `string` | Sin restricción adicional declarada | Teléfono con lo central tapado: `7******7`. Ausente si no tiene. | `+59170000000` |
+| `items[].ageYears` | No | `number` | Sin restricción adicional declarada | Edad cumplida; ausente si el paciente no tiene fecha de nacimiento. | `1` |
+| `items[].isMinor` | Sí | `boolean` | Sin restricción adicional declarada | Menor de 18 años. | `true` |
+| `items[].representatives` | No | `array<SupportPatientRepresentativeDto>` | Sin restricción adicional declarada | Solo en menores: quiénes pueden actuar por él. Vacío = sin representante. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","relationship":"valor-ejemplo"}]` |
+| `items[].representatives[].id` | No | `string` | formato `uuid` | Id de la fila de la que sale. | `00000000-0000-4000-8000-000000000001` |
+| `items[].representatives[].name` | No | `string` | Sin restricción adicional declarada | Nombre. | `Nombre de ejemplo` |
+| `items[].representatives[].relationship` | No | `string` | Sin restricción adicional declarada | «Madre», «Padre», «Tutor legal», «Abuela»… | `valor-ejemplo` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | EXACT_SEARCH_HELP | Excepción explícita en src/modules/delegated_access/services/support-patient-search.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-patient-search"
+}
+```
+
+---
+
+## 35. POST /me/support-patients
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-patients`
+- **Nombre:** Registrar un paciente nuevo (con aviso de posibles duplicados)
+- **Operation ID:** `SupportPatientsController_register`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportPatientsController.register](../../src/modules/delegated_access/controllers/support-patients.controller.ts)
+
+### Descripción de negocio
+
+Registrar un paciente nuevo (con aviso de posibles duplicados). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Registra a un paciente nuevo. Responde 201 `CREATED` con el paciente, o 200 `POSSIBLE_DUPLICATES` con los parecidos y sin crear nada; con `acknowledgeDuplicates` crea igual (salvo que el documento ya esté registrado). El paciente nace sin verificar y un representante de menor queda pendiente de verificación (`guardian`): el mostrador no crea representaciones legales.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /me/support-patients` en `SupportPatientsController_register`. El controlador delega en `SupportPatientRegistrationService.register`. Valida el body como `RegisterSupportPatientDto` y consume `application/json`. El tipo de retorno estático es `Promise<SupportPatientRegistrationResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RegisterSupportPatientDto`; los campos opcionales se omiten.
+
+```http
+POST /me/support-patients HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "birthDate": "1984-05-17",
+  "phone": "+59170000000"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | No | `string` | formato `uuid` | Organización. Alternativa: `org`. | `00000000-0000-4000-8000-000000000001` |
+| `org` | No | `string` | formato `uuid` | Alias de `tenantId`. | `00000000-0000-4000-8000-000000000001` |
+| `name` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `lastName` | Sí | `string` | longitud mínima 1; longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `motherLastName` | No | `string` | longitud máxima 100 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `document` | No | `string` | longitud mínima 5; longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `nationalId` | No | `string` | longitud mínima 5; longitud máxima 40 | Alias de `document`. | `00000000-0000-4000-8000-000000000001` |
+| `birthDate` | Sí | `string` | longitud máxima 10; patrón runtime `/^\d{4}-\d{2}-\d{2}$/` | Sin descripción específica en el contrato OpenAPI. | `1984-05-17` |
+| `phone` | Sí | `string` | longitud máxima 25; patrón runtime `/^\+?[\d\s()-]{7,25}$/` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `guardian` | No | `SupportPatientGuardianDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"name":"Nombre de ejemplo","document":"valor-ejemplo","phone":"+59170000000","relationship":"valor-ejemplo"}` |
+| `guardian.name` | No | `string` | longitud mínima 2; longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `guardian.document` | No | `string` | longitud mínima 5; longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `guardian.phone` | No | `string` | longitud máxima 25; patrón runtime `/^\+?[\d\s()-]{7,25}$/` | Sin descripción específica en el contrato OpenAPI. | `+59170000000` |
+| `guardian.relationship` | No | `string` | longitud mínima 2; longitud máxima 60 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `inviteToPortal` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `acknowledgeDuplicates` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /me/support-patients HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "org": "00000000-0000-4000-8000-000000000001",
+  "name": "Nombre de ejemplo",
+  "lastName": "Nombre de ejemplo",
+  "motherLastName": "Nombre de ejemplo",
+  "document": "valor-ejemplo",
+  "nationalId": "00000000-0000-4000-8000-000000000001",
+  "birthDate": "1984-05-17",
+  "phone": "+59170000000",
+  "guardian": {
+    "name": "Nombre de ejemplo",
+    "document": "valor-ejemplo",
+    "phone": "+59170000000",
+    "relationship": "valor-ejemplo"
+  },
+  "inviteToPortal": true,
+  "acknowledgeDuplicates": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SupportPatientRegistrationResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportPatientRegistrationResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "outcome": "CREATED",
+  "patient": {
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "profileId": "00000000-0000-4000-8000-000000000001",
+    "displayName": "Nombre de ejemplo",
+    "documentMasked": "valor-ejemplo",
+    "phoneMasked": "+59170000000",
+    "ageYears": 1,
+    "isMinor": true,
+    "representatives": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "name": "Nombre de ejemplo",
+        "relationship": "valor-ejemplo"
+      }
+    ]
+  },
+  "invitationSent": true,
+  "identityVerified": {},
+  "guardian": {
+    "recorded": {},
+    "status": "PENDING_VERIFICATION"
+  },
+  "duplicates": [
+    {
+      "profileId": "00000000-0000-4000-8000-000000000001",
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "documentMasked": "valor-ejemplo",
+      "phoneMasked": "+59170000000",
+      "ageYears": 1,
+      "isMinor": true,
+      "representatives": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "name": "Nombre de ejemplo",
+          "relationship": "valor-ejemplo"
+        }
+      ],
+      "linkedToOrganization": true,
+      "matchedBy": [
+        "valor-ejemplo"
+      ]
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `outcome` | Sí | `string` | valores: `CREATED`, `POSSIBLE_DUPLICATES` | `CREATED` (201) o `POSSIBLE_DUPLICATES` (200, no se creó nada). | `CREATED` |
+| `patient` | No | `SupportPatientMatchDto` | Sin restricción adicional declarada | El paciente creado (solo `CREATED`). | `{"patientProfileId":"00000000-0000-4000-8000-000000000001","profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","documentMasked":"valor-ejemplo","phoneMasked":"+59170000000","ageYears":1,"isMinor":true,"representatives":[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","relationship":"valor-ejemplo"}]}` |
+| `patient.patientProfileId` | No | `string` | formato `uuid` | Perfil del paciente (nombre del contrato compartido). | `00000000-0000-4000-8000-000000000001` |
+| `patient.profileId` | No | `string` | formato `uuid` | Perfil del paciente (nombre que usa el front). | `00000000-0000-4000-8000-000000000001` |
+| `patient.displayName` | No | `string` | Sin restricción adicional declarada | Nombre para mostrar. | `Nombre de ejemplo` |
+| `patient.documentMasked` | No | `string` | Sin restricción adicional declarada | Documento con lo central tapado: `***556`. | `valor-ejemplo` |
+| `patient.phoneMasked` | No | `string` | Sin restricción adicional declarada | Teléfono con lo central tapado: `7******7`. Ausente si no tiene. | `+59170000000` |
+| `patient.ageYears` | No | `number` | Sin restricción adicional declarada | Edad cumplida; ausente si el paciente no tiene fecha de nacimiento. | `1` |
+| `patient.isMinor` | No | `boolean` | Sin restricción adicional declarada | Menor de 18 años. | `true` |
+| `patient.representatives` | No | `array<SupportPatientRepresentativeDto>` | Sin restricción adicional declarada | Solo en menores: quiénes pueden actuar por él. Vacío = sin representante. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","relationship":"valor-ejemplo"}]` |
+| `patient.representatives[].id` | No | `string` | formato `uuid` | Id de la fila de la que sale. | `00000000-0000-4000-8000-000000000001` |
+| `patient.representatives[].name` | No | `string` | Sin restricción adicional declarada | Nombre. | `Nombre de ejemplo` |
+| `patient.representatives[].relationship` | No | `string` | Sin restricción adicional declarada | «Madre», «Padre», «Tutor legal», «Abuela»… | `valor-ejemplo` |
+| `invitationSent` | No | `boolean` | Sin restricción adicional declarada | ¿Quedó pedida la invitación al portal? (solo `CREATED`). | `true` |
+| `identityVerified` | No | `object` | Sin restricción adicional declarada | El paciente creado nace con la identidad SIN verificar: lo escribió el mostrador y nadie comprobó el documento (solo `CREATED`). Siempre `false`. | `{}` |
+| `guardian` | No | `SupportPatientGuardianResultDto` | Sin restricción adicional declarada | Representante de un menor (solo `CREATED` con menor). El mostrador nunca crea una representación legal: queda como persona relacionada, pendiente de verificación. La respuesta es la misma exista o no una cuenta con el documento del representante (no revela si la hay). | `{"recorded":{},"status":"PENDING_VERIFICATION"}` |
+| `guardian.recorded` | No | `object` | Sin restricción adicional declarada | El representante quedó anotado como persona relacionada. | `{}` |
+| `guardian.status` | No | `string` | valores: `PENDING_VERIFICATION` | `PENDING_VERIFICATION`: no es representante legal. La representación legal la crea un SECURITY_ADMIN con `documentRef` o la acepta el propio representante desde su cuenta. | `PENDING_VERIFICATION` |
+| `duplicates` | No | `array<SupportPatientDuplicateDto>` | Sin restricción adicional declarada | Los parecidos (solo `POSSIBLE_DUPLICATES`). | `[{"profileId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","documentMasked":"valor-ejemplo","phoneMasked":"+59170000000","ageYears":1,"isMinor":true,"representatives":[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","relationship":"valor-ejemplo"}],"linkedToOrganization":true,"matchedBy":["valor-ejemplo"]}]` |
+| `duplicates[].profileId` | No | `string` | formato `uuid` | Perfil (nombre del front). Solo si el paciente es de la organización. | `00000000-0000-4000-8000-000000000001` |
+| `duplicates[].patientProfileId` | No | `string` | formato `uuid` | Perfil (nombre del contrato compartido). Solo si es de la organización. | `00000000-0000-4000-8000-000000000001` |
+| `duplicates[].displayName` | No | `string` | Sin restricción adicional declarada | Nombre; de otra organización, un rótulo genérico. | `Nombre de ejemplo` |
+| `duplicates[].documentMasked` | No | `string` | Sin restricción adicional declarada | Documento tapado. | `valor-ejemplo` |
+| `duplicates[].phoneMasked` | No | `string` | Sin restricción adicional declarada | Teléfono tapado. Solo si el paciente es de la organización. | `+59170000000` |
+| `duplicates[].ageYears` | No | `number` | Sin restricción adicional declarada | Edad; de otra organización, la que sale de lo que quien registra escribió. | `1` |
+| `duplicates[].isMinor` | No | `boolean` | Sin restricción adicional declarada | Menor de 18 años. | `true` |
+| `duplicates[].representatives` | No | `array<SupportPatientRepresentativeDto>` | Sin restricción adicional declarada | Representantes (solo si es menor y de la organización). | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","relationship":"valor-ejemplo"}]` |
+| `duplicates[].representatives[].id` | No | `string` | formato `uuid` | Id de la fila de la que sale. | `00000000-0000-4000-8000-000000000001` |
+| `duplicates[].representatives[].name` | No | `string` | Sin restricción adicional declarada | Nombre. | `Nombre de ejemplo` |
+| `duplicates[].representatives[].relationship` | No | `string` | Sin restricción adicional declarada | «Madre», «Padre», «Tutor legal», «Abuela»… | `valor-ejemplo` |
+| `duplicates[].linkedToOrganization` | No | `boolean` | Sin restricción adicional declarada | ¿Es paciente de la organización que registra? | `true` |
+| `duplicates[].matchedBy` | No | `array<string>` | Sin restricción adicional declarada | Con qué coincide: `DOCUMENT`, `NAME_AND_BIRTH_DATE`, `PHONE_AND_SURNAME`. | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Un menor de edad se registra con su representante legal o un ' +             'familiar autorizado: indique su nombre, documento, teléfono y parentesco. | Excepción explícita en src/modules/delegated_access/services/support-patient-registration.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-patients"
+}
+```
+
+---
+
+## 36. POST /org/{tenantMembershipId}/user-assignments
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-org`
@@ -943,7 +5399,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
-  "status": "00000000-0000-4000-8000-000000000001"
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -951,8 +5409,10 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Id del recurso creado | `00000000-0000-4000-8000-000000000001` |
-| `status` | Sí | `string` | formato `uuid` | Concept id del estado del recurso | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -982,7 +5442,11829 @@ Ejemplo de error normalizado:
 
 ---
 
-## 8. PATCH /org/user-assignments/{id}
+## 37. GET /org/access-lookup
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Quién tiene acceso a un doctor, servicio o ubicación
+- **Operation ID:** `SupportEngagementsController_lookup`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.lookup](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Quién tiene acceso a un doctor, servicio o ubicación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Quién tiene acceso a un doctor, un servicio o una ubicación.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/access-lookup` en `SupportEngagementsController_lookup`. El controlador delega en `EffectiveSupportAccessService.lookup`, `DelegationScopeService.resolveTenant`. No recibe body. El tipo de retorno estático es `Promise<AccessLookupResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `doctor` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `service` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `location` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/access-lookup HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/access-lookup?doctor=00000000-0000-4000-8000-000000000001&service=00000000-0000-4000-8000-000000000001&location=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AccessLookupResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<AccessLookupResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AccessLookupResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AccessLookupResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AccessLookupResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AccessLookupResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AccessLookupResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccessLookupResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "actions": [
+        "valor-ejemplo"
+      ],
+      "grantIds": [
+        "valor-ejemplo"
+      ]
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<AccessLookupEntryDto>` | Sin restricción adicional declarada | Personas con acceso. | `[{"userId":"00000000-0000-4000-8000-000000000001","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","actions":["valor-ejemplo"],"grantIds":["valor-ejemplo"]}]` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Persona de apoyo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Doctor sobre el que tiene acceso; ausente = cualquier profesional. | `00000000-0000-4000-8000-000000000001` |
+| `items[].actions` | Sí | `array<string>` | Sin restricción adicional declarada | Acciones que tiene. | `["valor-ejemplo"]` |
+| `items[].grantIds` | Sí | `array<string>` | Sin restricción adicional declarada | Permisos que lo originan. | `["valor-ejemplo"]` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-lookup"
+}
+```
+
+---
+
+## 38. GET /org/access-reviews/campaigns
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Campañas de certificación de accesos
+- **Operation ID:** `AccessReviewCampaignsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.list](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Campañas de certificación de accesos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Campañas de la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/access-reviews/campaigns` en `AccessReviewCampaignsController_list`. El controlador delega en `AccessReviewCampaignsService.list`. No recibe body. El tipo de retorno estático es `Promise<CampaignListDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/access-reviews/campaigns HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/access-reviews/campaigns HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CampaignListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CampaignListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CampaignListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CampaignListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CampaignListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CampaignListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CampaignListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CampaignListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "kind": "PERIODIC",
+      "status": "DRAFT",
+      "scope": {
+        "clave": "valor"
+      },
+      "filters": {
+        "clave": "valor"
+      },
+      "dueAt": "2026-07-31T12:00:00.000Z",
+      "graceDays": 1,
+      "reminderDaysBefore": [
+        1
+      ],
+      "escalateAfterDays": 1,
+      "uncertifiedAction": "UNCERTIFIED_REVOKE",
+      "ownerUserId": "00000000-0000-4000-8000-000000000001",
+      "launchedAt": "2026-07-31T12:00:00.000Z",
+      "closedAt": "2026-07-31T12:00:00.000Z",
+      "cancelledAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<CampaignViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","kind":"PERIODIC","status":"DRAFT","scope":{"clave":"valor"},"filters":{"clave":"valor"},"dueAt":"2026-07-31T12:00:00.000Z","graceDays":1,"reminderDaysBefore":[1],"escalateAfterDays":1,"uncertifiedAction":"UNCERTIFIED_REVOKE","ownerUserId":"00000000-0000-4000-8000-000000000001","launchedAt":"2026-07-31T12:00:00.000Z","closedAt":"2026-07-31T12:00:00.000Z","cancelledAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].kind` | Sí | `string` | valores: `PERIODIC`, `RECERTIFICATION`, `MOVER`, `TARGETED`, `REMEDIATION` | Sin descripción específica en el contrato OpenAPI. | `PERIODIC` |
+| `items[].status` | Sí | `string` | valores: `DRAFT`, `OPEN`, `CLOSED`, `CANCELLED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `items[].scope` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `items[].filters` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `items[].dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].graceDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].reminderDaysBefore` | Sí | `array<number>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[1]` |
+| `items[].escalateAfterDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].uncertifiedAction` | Sí | `string` | valores: `UNCERTIFIED_REVOKE`, `UNCERTIFIED_ESCALATE` | Sin descripción específica en el contrato OpenAPI. | `UNCERTIFIED_REVOKE` |
+| `items[].ownerUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].launchedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].closedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].cancelledAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns"
+}
+```
+
+---
+
+## 39. POST /org/access-reviews/campaigns
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Crear una campaña de certificación (borrador)
+- **Operation ID:** `AccessReviewCampaignsController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.create](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Crear una campaña de certificación (borrador). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crea una campaña en borrador.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/access-reviews/campaigns` en `AccessReviewCampaignsController_create`. El controlador delega en `AccessReviewCampaignsService.create`. Valida el body como `DelegatedAccessCreateCampaignDto` y consume `application/json`. El tipo de retorno estático es `Promise<{ id: string }>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DelegatedAccessCreateCampaignDto`; los campos opcionales se omiten.
+
+```http
+POST /org/access-reviews/campaigns HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "kind": "PERIODIC",
+  "scope": {
+    "kind": "ORGANIZATION"
+  },
+  "dueAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 3; longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `PERIODIC`, `RECERTIFICATION`, `MOVER`, `TARGETED`, `REMEDIATION` | Sin descripción específica en el contrato OpenAPI. | `PERIODIC` |
+| `scope` | Sí | `CampaignScopeDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"kind":"ORGANIZATION","practitionerRoleAssignmentIds":["00000000-0000-4000-8000-000000000001"],"healthcareServiceIds":["00000000-0000-4000-8000-000000000001"],"careSpaceIds":["00000000-0000-4000-8000-000000000001"],"practiceSiteIds":["00000000-0000-4000-8000-000000000001"],"templateCodes":["CODIGO_EJEMPLO"]}` |
+| `scope.kind` | Sí | `string` | valores: `ORGANIZATION`, `PRACTITIONER`, `SERVICE`, `LOCATION`, `TEMPLATE` | Sin descripción específica en el contrato OpenAPI. | `ORGANIZATION` |
+| `scope.practitionerRoleAssignmentIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.healthcareServiceIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.careSpaceIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.practiceSiteIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.templateCodes` | No | `array<string>` | longitud máxima 64; máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["CODIGO_EJEMPLO"]` |
+| `filters` | No | `CampaignFiltersDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"minSensitivity":"ALTA","unusedDays":1,"onlyAboveCeiling":true,"onlySodFindings":true,"includeSuspended":true}` |
+| `filters.minSensitivity` | No | `string` | longitud máxima 16 | Sin descripción específica en el contrato OpenAPI. | `ALTA` |
+| `filters.unusedDays` | No | `number` | mínimo 1; máximo 365 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `filters.onlyAboveCeiling` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `filters.onlySodFindings` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `filters.includeSuspended` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `graceDays` | No | `number` | mínimo 0; máximo 30 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `reminderDaysBefore` | No | `array<number>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[1]` |
+| `escalateAfterDays` | No | `number` | mínimo 1; máximo 30 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `uncertifiedAction` | No | `string` | valores: `UNCERTIFIED_REVOKE`, `UNCERTIFIED_ESCALATE` | Sin descripción específica en el contrato OpenAPI. | `UNCERTIFIED_REVOKE` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/access-reviews/campaigns HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "kind": "PERIODIC",
+  "scope": {
+    "kind": "ORGANIZATION",
+    "practitionerRoleAssignmentIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "healthcareServiceIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "careSpaceIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "practiceSiteIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "templateCodes": [
+      "CODIGO_EJEMPLO"
+    ]
+  },
+  "filters": {
+    "minSensitivity": "ALTA",
+    "unusedDays": 1,
+    "onlyAboveCeiling": true,
+    "onlySodFindings": true,
+    "includeSuspended": true
+  },
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "graceDays": 1,
+  "reminderDaysBefore": [
+    1
+  ],
+  "escalateAfterDays": 1,
+  "uncertifiedAction": "UNCERTIFIED_REVOKE"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<{ id: string }>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<{ id: string }>` | No |
+| 401 | Operación completada correctamente. | `Promise<{ id: string }>` | No |
+| 403 | Operación completada correctamente. | `Promise<{ id: string }>` | No |
+| 409 | Operación completada correctamente. | `Promise<{ id: string }>` | No |
+| 413 | Operación completada correctamente. | `Promise<{ id: string }>` | No |
+| 422 | Operación completada correctamente. | `Promise<{ id: string }>` | No |
+| 429 | Operación completada correctamente. | `Promise<{ id: string }>` | No |
+| 500 | Operación completada correctamente. | `Promise<{ id: string }>` | No |
+| 504 | Operación completada correctamente. | `Promise<{ id: string }>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `{ id: string }`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Ya hay una campaña con ese nombre | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La fecha límite debe ser futura | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha límite debe estar al menos a ${REVIEW_DEFAULTS.delegateMinDueDays} días y la gracia ser de ${REVIEW_DEFAULTS.delegateMinGraceDays} días o más. | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns"
+}
+```
+
+---
+
+## 40. GET /org/access-reviews/campaigns/{id}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Una campaña de certificación
+- **Operation ID:** `AccessReviewCampaignsController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.get](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Una campaña de certificación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Una campaña.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/access-reviews/campaigns/{id}` en `AccessReviewCampaignsController_get`. El controlador delega en `AccessReviewCampaignsService.get`. No recibe body. El tipo de retorno estático es `Promise<CampaignViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CampaignViewDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CampaignViewDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CampaignViewDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CampaignViewDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<CampaignViewDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CampaignViewDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CampaignViewDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CampaignViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CampaignViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "name": "Nombre de ejemplo",
+  "kind": "PERIODIC",
+  "status": "DRAFT",
+  "scope": {
+    "clave": "valor"
+  },
+  "filters": {
+    "clave": "valor"
+  },
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "graceDays": 1,
+  "reminderDaysBefore": [
+    1
+  ],
+  "escalateAfterDays": 1,
+  "uncertifiedAction": "UNCERTIFIED_REVOKE",
+  "ownerUserId": "00000000-0000-4000-8000-000000000001",
+  "launchedAt": "2026-07-31T12:00:00.000Z",
+  "closedAt": "2026-07-31T12:00:00.000Z",
+  "cancelledAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `PERIODIC`, `RECERTIFICATION`, `MOVER`, `TARGETED`, `REMEDIATION` | Sin descripción específica en el contrato OpenAPI. | `PERIODIC` |
+| `status` | Sí | `string` | valores: `DRAFT`, `OPEN`, `CLOSED`, `CANCELLED` | Sin descripción específica en el contrato OpenAPI. | `DRAFT` |
+| `scope` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `filters` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `graceDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `reminderDaysBefore` | Sí | `array<number>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[1]` |
+| `escalateAfterDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `uncertifiedAction` | Sí | `string` | valores: `UNCERTIFIED_REVOKE`, `UNCERTIFIED_ESCALATE` | Sin descripción específica en el contrato OpenAPI. | `UNCERTIFIED_REVOKE` |
+| `ownerUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `launchedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `closedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `cancelledAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Campaña no encontrada | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns/{id}"
+}
+```
+
+---
+
+## 41. PATCH /org/access-reviews/campaigns/{id}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Editar una campaña en borrador
+- **Operation ID:** `AccessReviewCampaignsController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.update](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Editar una campaña en borrador. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Edita una campaña en borrador.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /org/access-reviews/campaigns/{id}` en `AccessReviewCampaignsController_update`. El controlador delega en `AccessReviewCampaignsService.update`. Valida el body como `UpdateCampaignDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateCampaignDto`; los campos opcionales se omiten.
+
+```http
+PATCH /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | No | `string` | longitud mínima 3; longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | No | `string` | valores: `PERIODIC`, `RECERTIFICATION`, `MOVER`, `TARGETED`, `REMEDIATION` | Sin descripción específica en el contrato OpenAPI. | `PERIODIC` |
+| `scope` | No | `CampaignScopeDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"kind":"ORGANIZATION","practitionerRoleAssignmentIds":["00000000-0000-4000-8000-000000000001"],"healthcareServiceIds":["00000000-0000-4000-8000-000000000001"],"careSpaceIds":["00000000-0000-4000-8000-000000000001"],"practiceSiteIds":["00000000-0000-4000-8000-000000000001"],"templateCodes":["CODIGO_EJEMPLO"]}` |
+| `scope.kind` | No | `string` | valores: `ORGANIZATION`, `PRACTITIONER`, `SERVICE`, `LOCATION`, `TEMPLATE` | Sin descripción específica en el contrato OpenAPI. | `ORGANIZATION` |
+| `scope.practitionerRoleAssignmentIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.healthcareServiceIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.careSpaceIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.practiceSiteIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.templateCodes` | No | `array<string>` | longitud máxima 64; máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["CODIGO_EJEMPLO"]` |
+| `filters` | No | `CampaignFiltersDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"minSensitivity":"ALTA","unusedDays":1,"onlyAboveCeiling":true,"onlySodFindings":true,"includeSuspended":true}` |
+| `filters.minSensitivity` | No | `string` | longitud máxima 16 | Sin descripción específica en el contrato OpenAPI. | `ALTA` |
+| `filters.unusedDays` | No | `number` | mínimo 1; máximo 365 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `filters.onlyAboveCeiling` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `filters.onlySodFindings` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `filters.includeSuspended` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `dueAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `graceDays` | No | `number` | mínimo 0; máximo 30 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `reminderDaysBefore` | No | `array<number>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[1]` |
+| `escalateAfterDays` | No | `number` | mínimo 1; máximo 30 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `uncertifiedAction` | No | `string` | valores: `UNCERTIFIED_REVOKE`, `UNCERTIFIED_ESCALATE` | Sin descripción específica en el contrato OpenAPI. | `UNCERTIFIED_REVOKE` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "kind": "PERIODIC",
+  "scope": {
+    "kind": "ORGANIZATION",
+    "practitionerRoleAssignmentIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "healthcareServiceIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "careSpaceIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "practiceSiteIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "templateCodes": [
+      "CODIGO_EJEMPLO"
+    ]
+  },
+  "filters": {
+    "minSensitivity": "ALTA",
+    "unusedDays": 1,
+    "onlyAboveCeiling": true,
+    "onlySodFindings": true,
+    "includeSuspended": true
+  },
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "graceDays": 1,
+  "reminderDaysBefore": [
+    1
+  ],
+  "escalateAfterDays": 1,
+  "uncertifiedAction": "UNCERTIFIED_REVOKE"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Campaña no encontrada | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 409 | `CONFLICT` | Solo se edita una campaña en borrador | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 409 | `CONFLICT` | Ya hay una campaña con ese nombre | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La fecha límite debe ser futura | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha límite debe estar al menos a ${REVIEW_DEFAULTS.delegateMinDueDays} días y la gracia ser de ${REVIEW_DEFAULTS.delegateMinGraceDays} días o más. | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns/{id}"
+}
+```
+
+---
+
+## 42. POST /org/access-reviews/campaigns/{id}/cancel
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Cancelar una campaña (no revoca nada)
+- **Operation ID:** `AccessReviewCampaignsController_cancel`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.cancel](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Cancelar una campaña (no revoca nada). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cancela la campaña: no revoca nada.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/access-reviews/campaigns/{id}/cancel` en `AccessReviewCampaignsController_cancel`. El controlador delega en `AccessReviewCampaignsService.cancel`. Valida el body como `CancelCampaignDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CancelCampaignDto`; los campos opcionales se omiten.
+
+```http
+POST /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/cancel HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Campaña no encontrada | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 409 | `CONFLICT` | La campaña ya terminó | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns/{id}/cancel"
+}
+```
+
+---
+
+## 43. POST /org/access-reviews/campaigns/{id}/close
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Cerrar una campaña (revoca lo no certificado)
+- **Operation ID:** `AccessReviewCampaignsController_close`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.close](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Cerrar una campaña (revoca lo no certificado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cierra la campaña y aplica la acción de lo no certificado.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/access-reviews/campaigns/{id}/close` en `AccessReviewCampaignsController_close`. El controlador delega en `AccessReviewCampaignsService.close`. No recibe body. El tipo de retorno estático es `Promise<CloseCampaignResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/close HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/close HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CloseCampaignResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CloseCampaignResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "autoRevoked": 1,
+  "skipped": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `autoRevoked` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `skipped` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Campaña no encontrada | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 409 | `CONFLICT` | La campaña no está abierta | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 409 | `CONFLICT` | Aún no vence la fecha límite de la campaña ni su gracia. | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns/{id}/close"
+}
+```
+
+---
+
+## 44. GET /org/access-reviews/campaigns/{id}/export
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Exportar una campaña (auditado, con sha256)
+- **Operation ID:** `AccessReviewCampaignsController_export`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.export](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Exportar una campaña (auditado, con sha256). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Exporta la campaña (CSV o JSON, con su `sha256`); queda un asiento. Pide un motivo (código) y el paso extra reciente (A-B4) y lleva tope de frecuencia: 5 por minuto por persona (B-B12).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/access-reviews/campaigns/{id}/export` en `AccessReviewCampaignsController_export`. El controlador delega en `GovernanceExportService.exportCampaign`. No recibe body. El tipo de retorno estático es `Promise<ExportedFileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `format` | query | No | `string` | valores: `csv`, `json` | Sin descripción específica en OpenAPI. | `json` |
+| `reasonCode` | query | No | `string` | valores: `AUDIT_REVIEW`, `REGULATORY`, `INTERNAL_CONTROL`, `INCIDENT`, `OTHER` | Obligatorio en la práctica: sin motivo la exportación responde 422 EXPORT_REASON_REQUIRED. | `AUDIT_REVIEW` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/export HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/export?format=json&reasonCode=AUDIT_REVIEW HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ExportedFileDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ExportedFileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExportedFileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "format": "csv",
+  "kind": "valor-ejemplo",
+  "generatedAt": "2026-07-31T12:00:00.000Z",
+  "generatedBy": "00000000-0000-4000-8000-000000000001",
+  "filters": {
+    "clave": "valor"
+  },
+  "rowCount": 1,
+  "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "content": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `format` | Sí | `string` | valores: `csv`, `json` | Sin descripción específica en el contrato OpenAPI. | `csv` |
+| `kind` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `generatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `generatedBy` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `filters` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `rowCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `sha256` | Sí | `string` | Sin restricción adicional declarada | SHA-256 (64 hex) del contenido. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `content` | Sí | `string` | Sin restricción adicional declarada | El archivo, como texto. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Campaña no encontrada | Excepción explícita en src/modules/delegated_access/services/governance-export.service.ts |
+| 422 | `PRECONDITION_FAILED` | Indique para qué exporta la campaña (el motivo es un código: auditoría, regulatorio, control interno, incidente u otro). | Excepción explícita en src/modules/delegated_access/services/governance-export.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns/{id}/export"
+}
+```
+
+---
+
+## 45. GET /org/access-reviews/campaigns/{id}/items
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Ítems de una campaña y su estado
+- **Operation ID:** `AccessReviewCampaignsController_items`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.items](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Ítems de una campaña y su estado. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Estado de cada ítem de la campaña.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/access-reviews/campaigns/{id}/items` en `AccessReviewCampaignsController_items`. El controlador delega en `AccessReviewCampaignsService.items`. No recibe body. El tipo de retorno estático es `Promise<ReviewItemListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/items HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/items HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReviewItemListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReviewItemListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReviewItemListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "campaignId": "00000000-0000-4000-8000-000000000001",
+      "engagementId": "00000000-0000-4000-8000-000000000001",
+      "grantId": "00000000-0000-4000-8000-000000000001",
+      "subjectUserId": "00000000-0000-4000-8000-000000000001",
+      "subjectName": "Nombre de ejemplo",
+      "reviewerKind": "DOCTOR_OWNER",
+      "state": "PENDING",
+      "dueAt": "2026-07-31T12:00:00.000Z",
+      "decidedAt": "2026-07-31T12:00:00.000Z",
+      "comment": "valor-ejemplo",
+      "escalated": true,
+      "reminderCount": 1,
+      "maxSensitivity": "valor-ejemplo",
+      "campaignName": "Nombre de ejemplo",
+      "evidence": {
+        "clave": "valor"
+      },
+      "evidenceHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ReviewItemViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","campaignId":"00000000-0000-4000-8000-000000000001","engagementId":"00000000-0000-4000-8000-000000000001","grantId":"00000000-0000-4000-8000-000000000001","subjectUserId":"00000000-0000-4000-8000-000000000001","subjectName":"Nombre de ejemplo","reviewerKind":"DOCTOR_OWNER","state":"PENDING","dueAt":"2026-07-31T12:00:00.000Z","decidedAt":"2026-07-31T12:00:00.000Z","comment":"valor-ejemplo","escalated":true,"reminderCount":1,"maxSensitivity":"valor-ejemplo","campaignName":"Nombre de ejemplo","evidence":{"clave":"valor"},"evidenceHash":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].campaignId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].grantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].subjectUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].subjectName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].reviewerKind` | Sí | `string` | valores: `DOCTOR_OWNER`, `SERVICE_HEAD`, `SUPERVISOR`, `ADMIN` | Sin descripción específica en el contrato OpenAPI. | `DOCTOR_OWNER` |
+| `items[].state` | Sí | `string` | valores: `PENDING`, `CERTIFIED`, `REVOKED`, `ADJUSTED`, `AUTO_REVOKED`, `SKIPPED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `items[].dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].decidedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].comment` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].escalated` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].reminderCount` | Sí | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].maxSensitivity` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].campaignName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].evidence` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `items[].evidenceHash` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Campaña no encontrada | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns/{id}/items"
+}
+```
+
+---
+
+## 46. POST /org/access-reviews/campaigns/{id}/launch
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Lanzar una campaña de certificación
+- **Operation ID:** `AccessReviewCampaignsController_launch`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.launch](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Lanzar una campaña de certificación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lanza la campaña: genera los ítems con su evidencia.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/access-reviews/campaigns/{id}/launch` en `AccessReviewCampaignsController_launch`. El controlador delega en `AccessReviewCampaignsService.launch`. No recibe body. El tipo de retorno estático es `Promise<LaunchCampaignResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/launch HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/launch HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LaunchCampaignResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LaunchCampaignResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "items": 1,
+  "withoutReviewer": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `withoutReviewer` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Campaña no encontrada | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 409 | `CONFLICT` | La campaña ya no está en borrador | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 422 | `PRECONDITION_FAILED` | La fecha límite debe estar al menos a ${REVIEW_DEFAULTS.delegateMinDueDays} días y la gracia ser de ${REVIEW_DEFAULTS.delegateMinGraceDays} días o más. | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns/{id}/launch"
+}
+```
+
+---
+
+## 47. GET /org/access-reviews/campaigns/{id}/results
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Resultados de una campaña
+- **Operation ID:** `AccessReviewCampaignsController_results`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.results](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Resultados de una campaña. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Resultados de la campaña.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/access-reviews/campaigns/{id}/results` en `AccessReviewCampaignsController_results`. El controlador delega en `AccessReviewCampaignsService.results`. No recibe body. El tipo de retorno estático es `Promise<CampaignResultsDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/results HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/access-reviews/campaigns/00000000-0000-4000-8000-000000000001/results HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CampaignResultsDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<CampaignResultsDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<CampaignResultsDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<CampaignResultsDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<CampaignResultsDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<CampaignResultsDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<CampaignResultsDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<CampaignResultsDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CampaignResultsDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "total": 1,
+  "byDecision": {
+    "clave": "valor"
+  },
+  "byReviewerKind": {
+    "clave": "valor"
+  },
+  "bySensitivity": {
+    "clave": "valor"
+  },
+  "pending": 1,
+  "coveragePercent": 1,
+  "meanResponseHours": {},
+  "autoRevokedItemIds": [
+    "00000000-0000-4000-8000-000000000001"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `byDecision` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `byReviewerKind` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `bySensitivity` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `pending` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `coveragePercent` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `meanResponseHours` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `autoRevokedItemIds` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Campaña no encontrada | Excepción explícita en src/modules/delegated_access/services/access-review-campaigns.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns/{id}/results"
+}
+```
+
+---
+
+## 48. POST /org/access-reviews/campaigns/preview
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-access-reviews`
+- **Nombre:** Vista previa de una campaña (sin crear nada)
+- **Operation ID:** `AccessReviewCampaignsController_preview`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessReviewCampaignsController.preview](../../src/modules/delegated_access/controllers/access-reviews.controller.ts)
+
+### Descripción de negocio
+
+Vista previa de una campaña (sin crear nada). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cuántos ítems tendría una campaña y quién los revisa, sin crear nada.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/access-reviews/campaigns/preview` en `AccessReviewCampaignsController_preview`. El controlador delega en `AccessReviewCampaignsService.preview`. Valida el body como `CampaignDraftDto` y consume `application/json`. El tipo de retorno estático es `Promise<CampaignPreviewDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CampaignDraftDto`; los campos opcionales se omiten.
+
+```http
+POST /org/access-reviews/campaigns/preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "kind": "PERIODIC",
+  "scope": {
+    "kind": "ORGANIZATION"
+  },
+  "dueAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | Sí | `string` | longitud mínima 3; longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `kind` | Sí | `string` | valores: `PERIODIC`, `RECERTIFICATION`, `MOVER`, `TARGETED`, `REMEDIATION` | Sin descripción específica en el contrato OpenAPI. | `PERIODIC` |
+| `scope` | Sí | `CampaignScopeDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"kind":"ORGANIZATION","practitionerRoleAssignmentIds":["00000000-0000-4000-8000-000000000001"],"healthcareServiceIds":["00000000-0000-4000-8000-000000000001"],"careSpaceIds":["00000000-0000-4000-8000-000000000001"],"practiceSiteIds":["00000000-0000-4000-8000-000000000001"],"templateCodes":["CODIGO_EJEMPLO"]}` |
+| `scope.kind` | Sí | `string` | valores: `ORGANIZATION`, `PRACTITIONER`, `SERVICE`, `LOCATION`, `TEMPLATE` | Sin descripción específica en el contrato OpenAPI. | `ORGANIZATION` |
+| `scope.practitionerRoleAssignmentIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.healthcareServiceIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.careSpaceIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.practiceSiteIds` | No | `array<string>` | formato `uuid`; máximo 200 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `scope.templateCodes` | No | `array<string>` | longitud máxima 64; máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["CODIGO_EJEMPLO"]` |
+| `filters` | No | `CampaignFiltersDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"minSensitivity":"ALTA","unusedDays":1,"onlyAboveCeiling":true,"onlySodFindings":true,"includeSuspended":true}` |
+| `filters.minSensitivity` | No | `string` | longitud máxima 16 | Sin descripción específica en el contrato OpenAPI. | `ALTA` |
+| `filters.unusedDays` | No | `number` | mínimo 1; máximo 365 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `filters.onlyAboveCeiling` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `filters.onlySodFindings` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `filters.includeSuspended` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `dueAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `graceDays` | No | `number` | mínimo 0; máximo 30 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `reminderDaysBefore` | No | `array<number>` | mínimo 1; máximo 60; mínimo 0 elemento(s); máximo 10 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[1]` |
+| `escalateAfterDays` | No | `number` | mínimo 1; máximo 30 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `uncertifiedAction` | No | `string` | valores: `UNCERTIFIED_REVOKE`, `UNCERTIFIED_ESCALATE` | Sin descripción específica en el contrato OpenAPI. | `UNCERTIFIED_REVOKE` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/access-reviews/campaigns/preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "kind": "PERIODIC",
+  "scope": {
+    "kind": "ORGANIZATION",
+    "practitionerRoleAssignmentIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "healthcareServiceIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "careSpaceIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "practiceSiteIds": [
+      "00000000-0000-4000-8000-000000000001"
+    ],
+    "templateCodes": [
+      "CODIGO_EJEMPLO"
+    ]
+  },
+  "filters": {
+    "minSensitivity": "ALTA",
+    "unusedDays": 1,
+    "onlyAboveCeiling": true,
+    "onlySodFindings": true,
+    "includeSuspended": true
+  },
+  "dueAt": "2026-07-31T12:00:00.000Z",
+  "graceDays": 1,
+  "reminderDaysBefore": [
+    1
+  ],
+  "escalateAfterDays": 1,
+  "uncertifiedAction": "UNCERTIFIED_REVOKE"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CampaignPreviewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CampaignPreviewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "total": 1,
+  "byReviewerKind": {
+    "clave": "valor"
+  },
+  "withoutReviewer": 1,
+  "items": [
+    {
+      "engagementId": "00000000-0000-4000-8000-000000000001",
+      "subjectUserId": "00000000-0000-4000-8000-000000000001",
+      "grantId": "00000000-0000-4000-8000-000000000001",
+      "reviewerKind": "valor-ejemplo",
+      "reviewerUserIds": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "maxSensitivity": "valor-ejemplo",
+      "suggestRevoke": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `total` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `byReviewerKind` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `withoutReviewer` | Sí | `number` | Sin restricción adicional declarada | Ítems sin revisor elegible (SOD-GOV-02). | `1` |
+| `items` | Sí | `array<CampaignPreviewItemDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"engagementId":"00000000-0000-4000-8000-000000000001","subjectUserId":"00000000-0000-4000-8000-000000000001","grantId":"00000000-0000-4000-8000-000000000001","reviewerKind":"valor-ejemplo","reviewerUserIds":["00000000-0000-4000-8000-000000000001"],"maxSensitivity":"valor-ejemplo","suggestRevoke":true}]` |
+| `items[].engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].subjectUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].grantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].reviewerKind` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].reviewerUserIds` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["00000000-0000-4000-8000-000000000001"]` |
+| `items[].maxSensitivity` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].suggestRevoke` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access-reviews/campaigns/preview"
+}
+```
+
+---
+
+## 49. POST /org/access/explain
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Explicar por qué una persona de apoyo puede o no puede hacer algo
+- **Operation ID:** `AccessExplainController_explainOrg`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessExplainController.explainOrg](../../src/modules/delegated_access/controllers/access-explain.controller.ts)
+
+### Descripción de negocio
+
+Explicar por qué una persona de apoyo puede o no puede hacer algo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Explica una decisión sobre una persona de apoyo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/access/explain` en `AccessExplainController_explainOrg`. El controlador delega en `AccessExplainService.explain`. Valida el body como `ExplainAccessDto` y consume `application/json`. El tipo de retorno estático es `Promise<ExplainAccessResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ExplainAccessDto`; los campos opcionales se omiten.
+
+```http
+POST /org/access/explain HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "action": "agenda.appointment.cancel"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle(EXPLAIN_THROTTLE)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `engagementId` | No | `string` | formato `uuid` | Vínculo de la persona (o `userId`). | `00000000-0000-4000-8000-000000000001` |
+| `userId` | No | `string` | formato `uuid` | Persona (o `engagementId`). | `00000000-0000-4000-8000-000000000001` |
+| `action` | Sí | `string` | longitud máxima 80 | Permiso o código antiguo. | `agenda.appointment.cancel` |
+| `practitionerRoleAssignmentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `healthcareServiceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `careSpaceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `appointmentStartAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `at` | No | `string` | formato `date-time` | Por defecto, ahora. | `2026-07-31T12:00:00.000Z` |
+| `assume` | No | `ExplainAssumeDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"stepUpFresh":true,"doctorOnline":true,"reasonProvided":true,"approvalGranted":true,"forceFull":true}` |
+| `assume.stepUpFresh` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.doctorOnline` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.reasonProvided` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.approvalGranted` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `assume.forceFull` | No | `boolean` | Sin restricción adicional declarada | Evalúa también los permisos aunque una denegación temprana ya decida. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/access/explain HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "action": "agenda.appointment.cancel",
+  "practitionerRoleAssignmentId": {},
+  "healthcareServiceId": {},
+  "careSpaceId": {},
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "appointmentStartAt": "2026-07-31T12:00:00.000Z",
+  "at": "2026-07-31T12:00:00.000Z",
+  "assume": {
+    "stepUpFresh": true,
+    "doctorOnline": true,
+    "reasonProvided": true,
+    "approvalGranted": true,
+    "forceFull": true
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExplainAccessResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExplainAccessResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "decision": {
+    "clave": "valor"
+  },
+  "summary": "valor-ejemplo",
+  "decidedBy": {
+    "clave": "valor"
+  },
+  "reasons": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "missing": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "adminFixes": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "askAdmin": "valor-ejemplo",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "obligations": {
+    "clave": "valor"
+  },
+  "visibleFields": {
+    "clave": "valor"
+  },
+  "usage": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "evaluatedAt": "valor-ejemplo",
+  "correlationId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `decision` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `summary` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `decidedBy` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `reasons` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `missing` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `adminFixes` | No | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `askAdmin` | No | `string` | Sin restricción adicional declarada | Autoservicio: qué pedirle al administrador. | `valor-ejemplo` |
+| `tenantId` | No | `string` | formato `uuid` | Autoservicio: organización consultada. | `00000000-0000-4000-8000-000000000001` |
+| `obligations` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `visibleFields` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `usage` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `evaluatedAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `correlationId` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(EXPLAIN_THROTTLE). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access/explain"
+}
+```
+
+---
+
+## 50. POST /org/access/simulate
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Simular los efectos de un borrador de permisos (sin guardar nada)
+- **Operation ID:** `AccessExplainController_simulate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessExplainController.simulate](../../src/modules/delegated_access/controllers/access-explain.controller.ts)
+
+### Descripción de negocio
+
+Simular los efectos de un borrador de permisos (sin guardar nada). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Simula un borrador de permisos antes de guardarlo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/access/simulate` en `AccessExplainController_simulate`. El controlador delega en `AccessExplainService.simulate`. Valida el body como `SimulateAccessDto` y consume `application/json`. El tipo de retorno estático es `Promise<SimulateAccessResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SimulateAccessDto`; los campos opcionales se omiten.
+
+```http
+POST /org/access/simulate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "draft": {
+    "mode": "PATCH",
+    "grants": [
+      {
+        "effect": "ALLOW",
+        "actions": [
+          "valor-ejemplo"
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle(SIMULATE_THROTTLE)`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `draft` | Sí | `SimulationDraftDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"mode":"PATCH","templateCode":{},"grants":[{"id":"00000000-0000-4000-8000-000000000001","effect":"ALLOW","actions":["valor-ejemplo"],"condition":{"clave":"valor"},"actionConditions":{"clave":"valor"},"targetKind":"valor-ejemplo","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001","careSpaceId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001","expansionMode":"DYNAMIC","validTo":"2026-07-31T12:00:00.000Z"}],"removeGrantIds":["valor-ejemplo"]}` |
+| `draft.mode` | Sí | `string` | valores: `PATCH`, `REPLACE` | Sin descripción específica en el contrato OpenAPI. | `PATCH` |
+| `draft.templateCode` | No | `object` | patrón runtime `/^[A-Z_]{3,40}$/`; admite null | Simula el cambio de plantilla (mover). | `{}` |
+| `draft.grants` | Sí | `array<SimulationDraftGrantDto>` | máximo 60 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","effect":"ALLOW","actions":["valor-ejemplo"],"condition":{"clave":"valor"},"actionConditions":{"clave":"valor"},"targetKind":"valor-ejemplo","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001","careSpaceId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001","expansionMode":"DYNAMIC","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `draft.grants[].id` | No | `string` | formato `uuid` | Con `id` reemplaza esa concesión; sin `id` es nueva. | `00000000-0000-4000-8000-000000000001` |
+| `draft.grants[].effect` | Sí | `string` | valores: `ALLOW`, `DENY` | Sin descripción específica en el contrato OpenAPI. | `ALLOW` |
+| `draft.grants[].actions` | Sí | `array<string>` | máximo 80 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `draft.grants[].condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `draft.grants[].actionConditions` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `draft.grants[].targetKind` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `draft.grants[].practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `draft.grants[].healthcareServiceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `draft.grants[].careSpaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `draft.grants[].practiceSiteId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `draft.grants[].expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `draft.grants[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `draft.removeGrantIds` | No | `array<string>` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `scenarios` | No | `array<SimulationScenarioDto>` | máximo 500 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"label":"valor-ejemplo","action":"valor-ejemplo","practitionerRoleAssignmentId":{},"healthcareServiceId":{},"careSpaceId":{},"patientProfileId":"00000000-0000-4000-8000-000000000001","appointmentStartAt":"2026-07-31T12:00:00.000Z","at":"2026-07-31T12:00:00.000Z","amount":{"currency":"BOB","minorUnits":1,"discountPercent":1}}]` |
+| `scenarios[].label` | No | `string` | longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `scenarios[].action` | No | `string` | longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `scenarios[].practitionerRoleAssignmentId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `scenarios[].healthcareServiceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `scenarios[].careSpaceId` | No | `object` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `scenarios[].patientProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `scenarios[].appointmentStartAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `scenarios[].at` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `scenarios[].amount` | No | `SimulationMoneyDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"currency":"BOB","minorUnits":1,"discountPercent":1}` |
+| `scenarios[].amount.currency` | No | `string` | valores: `BOB` | Sin descripción específica en el contrato OpenAPI. | `BOB` |
+| `scenarios[].amount.minorUnits` | No | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `scenarios[].amount.discountPercent` | No | `number` | mínimo 0 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `autoScenarios` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/access/simulate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "draft": {
+    "mode": "PATCH",
+    "templateCode": {},
+    "grants": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "effect": "ALLOW",
+        "actions": [
+          "valor-ejemplo"
+        ],
+        "condition": {
+          "clave": "valor"
+        },
+        "actionConditions": {
+          "clave": "valor"
+        },
+        "targetKind": "valor-ejemplo",
+        "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+        "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+        "careSpaceId": "00000000-0000-4000-8000-000000000001",
+        "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+        "expansionMode": "DYNAMIC",
+        "validTo": "2026-07-31T12:00:00.000Z"
+      }
+    ],
+    "removeGrantIds": [
+      "valor-ejemplo"
+    ]
+  },
+  "scenarios": [
+    {
+      "label": "valor-ejemplo",
+      "action": "valor-ejemplo",
+      "practitionerRoleAssignmentId": {},
+      "healthcareServiceId": {},
+      "careSpaceId": {},
+      "patientProfileId": "00000000-0000-4000-8000-000000000001",
+      "appointmentStartAt": "2026-07-31T12:00:00.000Z",
+      "at": "2026-07-31T12:00:00.000Z",
+      "amount": {
+        "currency": "BOB",
+        "minorUnits": 1,
+        "discountPercent": 1
+      }
+    }
+  ],
+  "autoScenarios": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SimulateAccessResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SimulateAccessResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "valid": true,
+  "validation": {
+    "clave": "valor"
+  },
+  "governance": {
+    "clave": "valor"
+  },
+  "summary": {
+    "clave": "valor"
+  },
+  "scenarios": [
+    {
+      "clave": "valor"
+    }
+  ],
+  "impact": {
+    "clave": "valor"
+  },
+  "simulationToken": "valor-ejemplo",
+  "limits": {
+    "clave": "valor"
+  },
+  "evaluatedAt": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `valid` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `validation` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `governance` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `summary` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `scenarios` | Sí | `array<object>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"clave":"valor"}]` |
+| `impact` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `simulationToken` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `limits` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `evaluatedAt` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle(SIMULATE_THROTTLE). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/access/simulate"
+}
+```
+
+---
+
+## 51. GET /org/affiliation-invitations
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-affiliation-invitations`
+- **Nombre:** Listar las invitaciones de afiliación
+- **Operation ID:** `AffiliationInvitationsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AffiliationInvitationsController.list](../../src/modules/delegated_access/controllers/affiliation-invitations.controller.ts)
+
+### Descripción de negocio
+
+Listar las invitaciones de afiliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Invitaciones de la organización, sin sus códigos.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/affiliation-invitations` en `AffiliationInvitationsController_list`. El controlador delega en `AffiliationInvitationsService.list`. No recibe body. El tipo de retorno estático es `Promise<ListAffiliationInvitationsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/affiliation-invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/affiliation-invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListAffiliationInvitationsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListAffiliationInvitationsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListAffiliationInvitationsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListAffiliationInvitationsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListAffiliationInvitationsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListAffiliationInvitationsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListAffiliationInvitationsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListAffiliationInvitationsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": {},
+      "targetPersonId": "00000000-0000-4000-8000-000000000001",
+      "roleTemplateCode": "CODIGO_EJEMPLO",
+      "maxUses": 1,
+      "usesCount": 1,
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "status": "ACTIVE",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<AffiliationInvitationViewDto>` | Sin restricción adicional declarada | Invitaciones de la organización. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":{},"targetPersonId":"00000000-0000-4000-8000-000000000001","roleTemplateCode":"CODIGO_EJEMPLO","maxUses":1,"usesCount":1,"expiresAt":"2026-07-31T12:00:00.000Z","status":"ACTIVE","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id de la invitación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].kind` | Sí | `object` | Sin restricción adicional declarada | A quién invita. | `{}` |
+| `items[].targetPersonId` | No | `string` | formato `uuid` | Persona específica a la que va dirigida, si la hay. | `00000000-0000-4000-8000-000000000001` |
+| `items[].roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Plantilla de rol, para personal de apoyo. | `CODIGO_EJEMPLO` |
+| `items[].maxUses` | Sí | `number` | Sin restricción adicional declarada | Usos máximos. | `1` |
+| `items[].usesCount` | Sí | `number` | Sin restricción adicional declarada | Veces que se canjeó. | `1` |
+| `items[].expiresAt` | Sí | `string` | formato `date-time` | Vencimiento. | `2026-07-31T12:00:00.000Z` |
+| `items[].status` | Sí | `string` | valores: `ACTIVE`, `EXHAUSTED`, `EXPIRED`, `REVOKED` | Estado efectivo: activa, agotada, vencida o revocada. | `ACTIVE` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se creó. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/affiliation-invitations"
+}
+```
+
+---
+
+## 52. POST /org/affiliation-invitations
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-affiliation-invitations`
+- **Nombre:** Crear un código o QR de afiliación
+- **Operation ID:** `AffiliationInvitationsController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AffiliationInvitationsController.create](../../src/modules/delegated_access/controllers/affiliation-invitations.controller.ts)
+
+### Descripción de negocio
+
+Crear un código o QR de afiliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La organización crea un código o QR.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/affiliation-invitations` en `AffiliationInvitationsController_create`. El controlador delega en `AffiliationInvitationsService.create`. Valida el body como `CreateAffiliationInvitationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationInvitationCreatedDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateAffiliationInvitationDto`; los campos opcionales se omiten.
+
+```http
+POST /org/affiliation-invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "PRACTITIONER"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `string` | valores: `PRACTITIONER`, `SUPPORT_STAFF` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `targetPersonId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `maxUses` | No | `number` | mínimo 1; máximo 500 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `expiresInDays` | No | `number` | mínimo 1; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `roleTemplateCode` | No | `string` | valores: `SECRETARY`, `MEDICAL_ASSISTANT`, `NURSING`, `FRONT_DESK`, `BILLING_CASHIER`, `CALL_CENTER`, `ORG_MANAGEMENT` | Sin descripción específica en el contrato OpenAPI. | `SECRETARY` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/affiliation-invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "PRACTITIONER",
+  "targetPersonId": "00000000-0000-4000-8000-000000000001",
+  "maxUses": 1,
+  "expiresInDays": 1,
+  "roleTemplateCode": "SECRETARY"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationInvitationCreatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "maxUses": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Id de la invitación. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código para el QR o para escribir; no se vuelve a mostrar. | `CODIGO_EJEMPLO` |
+| `expiresAt` | Sí | `string` | formato `date-time` | Vencimiento. | `2026-07-31T12:00:00.000Z` |
+| `maxUses` | Sí | `number` | Sin restricción adicional declarada | Usos máximos. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Plantilla de rol no encontrada | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La organización necesita una práctica activa para recibir solicitudes de médicos | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/affiliation-invitations"
+}
+```
+
+---
+
+## 53. POST /org/affiliation-invitations/{id}/revoke
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-affiliation-invitations`
+- **Nombre:** Revocar un código o QR de afiliación
+- **Operation ID:** `AffiliationInvitationsController_revoke`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AffiliationInvitationsController.revoke](../../src/modules/delegated_access/controllers/affiliation-invitations.controller.ts)
+
+### Descripción de negocio
+
+Revocar un código o QR de afiliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La organización apaga un código filtrado o ya innecesario.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/affiliation-invitations/{id}/revoke` en `AffiliationInvitationsController_revoke`. El controlador delega en `AffiliationInvitationsService.revoke`. No recibe body. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /org/affiliation-invitations/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /org/affiliation-invitations/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Invitación no encontrada | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/affiliation-invitations/{id}/revoke"
+}
+```
+
+---
+
+## 54. GET /org/governance/access-matrix
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Matriz de accesos por persona, doctor, servicio o espacio
+- **Operation ID:** `GovernanceReportsController_matrix`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReportsController.matrix](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Matriz de accesos por persona, doctor, servicio o espacio. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Matriz «quién tiene qué» o «quién puede actuar sobre un doctor, servicio o espacio».
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/access-matrix` en `GovernanceReportsController_matrix`. El controlador delega en `GovernanceReportsService.accessMatrix`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `by` | query | Sí | `string` | valores: `person`, `doctor`, `service`, `location` | Sin descripción específica en OpenAPI. | `person` |
+| `group` | query | No | `string` | valores: `category`, `atom` | Sin descripción específica en OpenAPI. | `category` |
+| `id` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/access-matrix?by=person HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/access-matrix?by=person&group=category&id=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/access-matrix"
+}
+```
+
+---
+
+## 55. GET /org/governance/anomalies
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Anomalías de actividad
+- **Operation ID:** `GovernanceReportsController_listAnomalies`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReportsController.listAnomalies](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Anomalías de actividad. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Anomalías de actividad.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/anomalies` en `GovernanceReportsController_listAnomalies`. El controlador delega en `GovernanceAnomaliesService.list`. No recibe body. El tipo de retorno estático es `Promise<AnomalyListDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `status` | query | No | `string` | valores: `OPEN`, `ACKNOWLEDGED`, `DISMISSED`, `ESCALATED` | Sin descripción específica en OpenAPI. | `OPEN` |
+| `kind` | query | No | `string` | valores: `ANOMALY_SEARCH_SPIKE`, `ANOMALY_CANCEL_SPIKE`, `ANOMALY_OFF_HOURS`, `ANOMALY_DENIED_BURST`, `ANOMALY_BROWSE_PATIENTS`, `ANOMALY_INACTIVE_ACCOUNT`, `ANOMALY_PRIVILEGE_CREEP` | Sin descripción específica en OpenAPI. | `ANOMALY_SEARCH_SPIKE` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/anomalies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/anomalies?status=OPEN&kind=ANOMALY_SEARCH_SPIKE HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AnomalyListDto>` | Sí |
+| 400 | Consulta completada correctamente. | `Promise<AnomalyListDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<AnomalyListDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<AnomalyListDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<AnomalyListDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<AnomalyListDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<AnomalyListDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AnomalyListDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "userName": "Nombre de ejemplo",
+      "kind": "ANOMALY_SEARCH_SPIKE",
+      "status": "OPEN",
+      "windowStart": "2026-07-31T12:00:00.000Z",
+      "windowEnd": "2026-07-31T12:00:00.000Z",
+      "observed": 1,
+      "baseline": {},
+      "threshold": 1,
+      "evidence": {
+        "clave": "valor"
+      },
+      "acknowledgedAt": "2026-07-31T12:00:00.000Z",
+      "resolutionComment": "valor-ejemplo"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<AnomalyViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","userName":"Nombre de ejemplo","kind":"ANOMALY_SEARCH_SPIKE","status":"OPEN","windowStart":"2026-07-31T12:00:00.000Z","windowEnd":"2026-07-31T12:00:00.000Z","observed":1,"baseline":{},"threshold":1,"evidence":{"clave":"valor"},"acknowledgedAt":"2026-07-31T12:00:00.000Z","resolutionComment":"valor-ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].kind` | Sí | `string` | valores: `ANOMALY_SEARCH_SPIKE`, `ANOMALY_CANCEL_SPIKE`, `ANOMALY_OFF_HOURS`, `ANOMALY_DENIED_BURST`, `ANOMALY_BROWSE_PATIENTS`, `ANOMALY_INACTIVE_ACCOUNT`, `ANOMALY_PRIVILEGE_CREEP` | Sin descripción específica en el contrato OpenAPI. | `ANOMALY_SEARCH_SPIKE` |
+| `items[].status` | Sí | `string` | valores: `OPEN`, `ACKNOWLEDGED`, `DISMISSED`, `ESCALATED` | Sin descripción específica en el contrato OpenAPI. | `OPEN` |
+| `items[].windowStart` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].windowEnd` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].observed` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].baseline` | No | `object` | admite null | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].threshold` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].evidence` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `items[].acknowledgedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].resolutionComment` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/anomalies"
+}
+```
+
+---
+
+## 56. POST /org/governance/anomalies/{id}/ack
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Reconocer, descartar o escalar una anomalía
+- **Operation ID:** `GovernanceReportsController_ack`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReportsController.ack](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Reconocer, descartar o escalar una anomalía. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reconoce, descarta o escala una anomalía (el servicio sella la acción exacta).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/governance/anomalies/{id}/ack` en `GovernanceReportsController_ack`. El controlador delega en `GovernanceAnomaliesService.ack`. Valida el body como `AckAnomalyDto` y consume `application/json`. El tipo de retorno estático es `Promise<AnomalyResolutionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AckAnomalyDto`; los campos opcionales se omiten.
+
+```http
+POST /org/governance/anomalies/00000000-0000-4000-8000-000000000001/ack HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "status": "ACKNOWLEDGED"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `status` | Sí | `string` | valores: `ACKNOWLEDGED`, `DISMISSED`, `ESCALATED` | Sin descripción específica en el contrato OpenAPI. | `ACKNOWLEDGED` |
+| `comment` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/governance/anomalies/00000000-0000-4000-8000-000000000001/ack HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "status": "ACKNOWLEDGED",
+  "comment": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AnomalyResolutionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AnomalyResolutionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "status": "ACKNOWLEDGED"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `status` | Sí | `string` | valores: `ACKNOWLEDGED`, `DISMISSED`, `ESCALATED` | Sin descripción específica en el contrato OpenAPI. | `ACKNOWLEDGED` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Esta alerta ya se atendió. | Excepción explícita en src/modules/delegated_access/services/governance-anomalies.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Escriba un comentario de al menos 10 caracteres para descartar la alerta. | Excepción explícita en src/modules/delegated_access/services/governance-anomalies.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/anomalies/{id}/ack"
+}
+```
+
+---
+
+## 57. GET /org/governance/exceptions
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Excepciones activas
+- **Operation ID:** `GovernanceReportsController_exceptions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReportsController.exceptions](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Excepciones activas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lo que está «fuera de regla».
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/exceptions` en `GovernanceReportsController_exceptions`. El controlador delega en `GovernanceReportsService.exceptions`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/exceptions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/exceptions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/exceptions"
+}
+```
+
+---
+
+## 58. POST /org/governance/normalize-legacy
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Normalizar los permisos heredados a permisos atómicos (simulacro por defecto)
+- **Operation ID:** `GovernanceRulesController_normalizeLegacy`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceRulesController.normalizeLegacy](../../src/modules/delegated_access/controllers/governance-rules.controller.ts)
+
+### Descripción de negocio
+
+Normalizar los permisos heredados a permisos atómicos (simulacro por defecto). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Normaliza permisos heredados a átomos (`dryRun` por defecto).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/governance/normalize-legacy` en `GovernanceRulesController_normalizeLegacy`. El controlador delega en `LegacyNormalizationService.normalize`. Valida el body como `NormalizeLegacyDto` y consume `application/json`. El tipo de retorno estático es `Promise<NormalizeLegacyResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `NormalizeLegacyDto`; los campos opcionales se omiten.
+
+```http
+POST /org/governance/normalize-legacy HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `dryRun` | No | `boolean` | Sin restricción adicional declarada | Simulacro: informa qué cambiaría sin escribir nada. | `true` |
+| `engagementIds` | No | `array<string>` | formato `uuid`; máximo 500 elemento(s) | Solo estos vínculos; vacío = todos los de la organización. | `["valor-ejemplo"]` |
+| `acknowledgeTightening` | No | `boolean` | Sin restricción adicional declarada | Reconoce que alguien perderá un permiso implícito (p. ej. pedir un acceso temporal) al normalizar. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/governance/normalize-legacy HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "dryRun": true,
+  "engagementIds": [
+    "valor-ejemplo"
+  ],
+  "acknowledgeTightening": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<NormalizeLegacyResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `NormalizeLegacyResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "dryRun": true,
+  "batchId": "00000000-0000-4000-8000-000000000001",
+  "engagements": [
+    {
+      "engagementId": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "templateCode": "CODIGO_EJEMPLO",
+      "grants": [
+        {
+          "grantId": "00000000-0000-4000-8000-000000000001",
+          "aliases": [
+            "valor-ejemplo"
+          ],
+          "atomsBefore": [
+            "valor-ejemplo"
+          ],
+          "atomsAfter": [
+            "valor-ejemplo"
+          ],
+          "atomsAdded": [
+            "valor-ejemplo"
+          ],
+          "newObligations": [
+            {
+              "atom": "valor-ejemplo",
+              "requiresReason": true,
+              "requiresStepUp": true,
+              "approval": "DOCTOR",
+              "message": "valor-ejemplo"
+            }
+          ]
+        }
+      ],
+      "tightening": [
+        {
+          "engagementId": "00000000-0000-4000-8000-000000000001",
+          "atom": "valor-ejemplo",
+          "message": "valor-ejemplo"
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "clave": "valor"
+  },
+  "requiresAcknowledgement": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `dryRun` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `batchId` | No | `string` | formato `uuid` | Solo al aplicar: para revertir. | `00000000-0000-4000-8000-000000000001` |
+| `engagements` | Sí | `array<NormalizeEngagementPlanDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"engagementId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","templateCode":"CODIGO_EJEMPLO","grants":[{"grantId":"00000000-0000-4000-8000-000000000001","aliases":["valor-ejemplo"],"atomsBefore":["valor-ejemplo"],"atomsAfter":["valor-ejemplo"],"atomsAdded":["valor-ejemplo"],"newObligations":[{"atom":"valor-ejemplo","requiresReason":true,"requiresStepUp":true,"approval":"DOCTOR","message":"valor-ejemplo"}]}],"tightening":[{"engagementId":"00000000-0000-4000-8000-000000000001","atom":"valor-ejemplo","message":"valor-ejemplo"}]}]` |
+| `engagements[].engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `engagements[].userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `engagements[].templateCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `engagements[].grants` | Sí | `array<NormalizeGrantPlanDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"grantId":"00000000-0000-4000-8000-000000000001","aliases":["valor-ejemplo"],"atomsBefore":["valor-ejemplo"],"atomsAfter":["valor-ejemplo"],"atomsAdded":["valor-ejemplo"],"newObligations":[{"atom":"valor-ejemplo","requiresReason":true,"requiresStepUp":true,"approval":"DOCTOR","message":"valor-ejemplo"}]}]` |
+| `engagements[].grants[].grantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `engagements[].grants[].aliases` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `engagements[].grants[].atomsBefore` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `engagements[].grants[].atomsAfter` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `engagements[].grants[].atomsAdded` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `engagements[].grants[].newObligations` | Sí | `array<NormalizeObligationDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"atom":"valor-ejemplo","requiresReason":true,"requiresStepUp":true,"approval":"DOCTOR","message":"valor-ejemplo"}]` |
+| `engagements[].grants[].newObligations[].atom` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `engagements[].grants[].newObligations[].requiresReason` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `engagements[].grants[].newObligations[].requiresStepUp` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `engagements[].grants[].newObligations[].approval` | No | `string` | valores: `DOCTOR`, `SECOND_APPROVER`; admite null | Sin descripción específica en el contrato OpenAPI. | `DOCTOR` |
+| `engagements[].grants[].newObligations[].message` | Sí | `string` | Sin restricción adicional declarada | Frase en lenguaje simple. | `valor-ejemplo` |
+| `engagements[].tightening` | Sí | `array<NormalizeTighteningDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"engagementId":"00000000-0000-4000-8000-000000000001","atom":"valor-ejemplo","message":"valor-ejemplo"}]` |
+| `engagements[].tightening[].engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `engagements[].tightening[].atom` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `engagements[].tightening[].message` | Sí | `string` | Sin restricción adicional declarada | Frase en lenguaje simple. | `valor-ejemplo` |
+| `totals` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `requiresAcknowledgement` | Sí | `boolean` | Sin restricción adicional declarada | Hay estrechamientos: aplicar exige `acknowledgeTightening`. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/normalize-legacy"
+}
+```
+
+---
+
+## 59. POST /org/governance/normalize-legacy/revert
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Revertir un lote de normalización
+- **Operation ID:** `GovernanceRulesController_revertNormalization`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceRulesController.revertNormalization](../../src/modules/delegated_access/controllers/governance-rules.controller.ts)
+
+### Descripción de negocio
+
+Revertir un lote de normalización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Revierte un lote de normalización.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/governance/normalize-legacy/revert` en `GovernanceRulesController_revertNormalization`. El controlador delega en `LegacyNormalizationService.revert`. Valida el body como `RevertNormalizeDto` y consume `application/json`. El tipo de retorno estático es `Promise<RevertNormalizeResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RevertNormalizeDto`; los campos opcionales se omiten.
+
+```http
+POST /org/governance/normalize-legacy/revert HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "batchId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `batchId` | Sí | `string` | formato `uuid` | Lote que devolvió la normalización. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/governance/normalize-legacy/revert HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "batchId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RevertNormalizeResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RevertNormalizeResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "batchId": "00000000-0000-4000-8000-000000000001",
+  "restoredAliasRows": 1,
+  "removedAtomRows": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `batchId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `restoredAliasRows` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `removedAtomRows` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/normalize-legacy/revert"
+}
+```
+
+---
+
+## 60. GET /org/governance/ownerless
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Cuentas sin dueño
+- **Operation ID:** `GovernanceReportsController_ownerless`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReportsController.ownerless](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Cuentas sin dueño. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cuentas sin dueño.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/ownerless` en `GovernanceReportsController_ownerless`. El controlador delega en `GovernanceReportsService.ownerless`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/ownerless HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/ownerless HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/ownerless"
+}
+```
+
+---
+
+## 61. GET /org/governance/privilege-creep
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Acumulación de privilegios
+- **Operation ID:** `GovernanceReportsController_creep`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReportsController.creep](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Acumulación de privilegios. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Quién acumuló de más.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/privilege-creep` en `GovernanceReportsController_creep`. El controlador delega en `GovernanceReportsService.privilegeCreep`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/privilege-creep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/privilege-creep HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/privilege-creep"
+}
+```
+
+---
+
+## 62. POST /org/governance/reports/{kind}/export
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Exportar un informe de gobierno (auditado)
+- **Operation ID:** `GovernanceReportsController_export`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReportsController.export](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Exportar un informe de gobierno (auditado). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Exportación auditable: motivo, paso extra, `sha256` y asiento. Tope de frecuencia: 5 por minuto por persona (B-B12).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/governance/reports/{kind}/export` en `GovernanceReportsController_export`. El controlador delega en `GovernanceExportService.exportReport`. Valida el body como `ExportGovernanceReportDto` y consume `application/json`. El tipo de retorno estático es `Promise<ExportedFileDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `kind` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ExportGovernanceReportDto`; los campos opcionales se omiten.
+
+```http
+POST /org/governance/reports/valor-ejemplo/export HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "format": "csv",
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `format` | Sí | `string` | valores: `csv`, `json` | Sin descripción específica en el contrato OpenAPI. | `csv` |
+| `reason` | Sí | `string` | longitud mínima 10; longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `reasonCode` | No | `string` | valores: `AUDIT_REVIEW`, `REGULATORY`, `INTERNAL_CONTROL`, `INCIDENT`, `OTHER` | Sin descripción específica en el contrato OpenAPI. | `OTHER` |
+| `filters` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/governance/reports/valor-ejemplo/export HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "format": "csv",
+  "reason": "Texto descriptivo de ejemplo",
+  "reasonCode": "OTHER",
+  "filters": {
+    "clave": "valor"
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ExportedFileDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ExportedFileDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ExportedFileDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "format": "csv",
+  "kind": "valor-ejemplo",
+  "generatedAt": "2026-07-31T12:00:00.000Z",
+  "generatedBy": "00000000-0000-4000-8000-000000000001",
+  "filters": {
+    "clave": "valor"
+  },
+  "rowCount": 1,
+  "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "content": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `format` | Sí | `string` | valores: `csv`, `json` | Sin descripción específica en el contrato OpenAPI. | `csv` |
+| `kind` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `generatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `generatedBy` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `filters` | Sí | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `rowCount` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `sha256` | Sí | `string` | Sin restricción adicional declarada | SHA-256 (64 hex) del contenido. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+| `content` | Sí | `string` | Sin restricción adicional declarada | El archivo, como texto. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Ese informe no se puede exportar. | Excepción explícita en src/modules/delegated_access/services/governance-export.service.ts |
+| 422 | `PRECONDITION_FAILED` | Escriba para qué exporta el informe (al menos 10 caracteres, sin datos de pacientes). | Excepción explícita en src/modules/delegated_access/services/governance-export.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/reports/{kind}/export"
+}
+```
+
+---
+
+## 63. GET /org/governance/rules
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Reglas de gobierno de la organización
+- **Operation ID:** `GovernanceRulesController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceRulesController.list](../../src/modules/delegated_access/controllers/governance-rules.controller.ts)
+
+### Descripción de negocio
+
+Reglas de gobierno de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reglas de la organización (activas y retiradas).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/rules` en `GovernanceRulesController_list`. El controlador delega en `GovernanceRulesService.list`. No recibe body. El tipo de retorno estático es `Promise<ListGovernanceRulesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `kind` | query | No | `string` | valores: `DENY_PERMISSION`, `CEILING`, `REQUIRE_CONDITION`, `FIELD_FLOOR` | Sin descripción específica en OpenAPI. | `DENY_PERMISSION` |
+| `status` | query | No | `string` | valores: `ACTIVE`, `REVOKED` | Sin descripción específica en OpenAPI. | `ACTIVE` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/rules?kind=DENY_PERMISSION&status=ACTIVE HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListGovernanceRulesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListGovernanceRulesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListGovernanceRulesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListGovernanceRulesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListGovernanceRulesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListGovernanceRulesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListGovernanceRulesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListGovernanceRulesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": {},
+      "status": "ACTIVE",
+      "roleTemplateCode": "CODIGO_EJEMPLO",
+      "permissionPattern": "valor-ejemplo",
+      "message": "valor-ejemplo",
+      "condition": {
+        "clave": "valor"
+      },
+      "maxVisibility": "valor-ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "updatedAt": "2026-07-31T12:00:00.000Z",
+      "rowVersion": 1
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<GovernanceRuleViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":{},"status":"ACTIVE","roleTemplateCode":"CODIGO_EJEMPLO","permissionPattern":"valor-ejemplo","message":"valor-ejemplo","condition":{"clave":"valor"},"maxVisibility":"valor-ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z","updatedAt":"2026-07-31T12:00:00.000Z","rowVersion":1}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GOVERNANCE_RULE_KINDS)[number] | `{}` |
+| `items[].status` | Sí | `string` | valores: `ACTIVE`, `REVOKED` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+| `items[].roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].permissionPattern` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `items[].maxVisibility` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/rules"
+}
+```
+
+---
+
+## 64. POST /org/governance/rules
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Crear una regla de la organización
+- **Operation ID:** `GovernanceRulesController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceRulesController.create](../../src/modules/delegated_access/controllers/governance-rules.controller.ts)
+
+### Descripción de negocio
+
+Crear una regla de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crea una regla (solo restringe).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/governance/rules` en `GovernanceRulesController_create`. El controlador delega en `GovernanceRulesService.create`. Valida el body como `CreateGovernanceRuleDto` y consume `application/json`. El tipo de retorno estático es `Promise<GovernanceRuleViewDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateGovernanceRuleDto`; los campos opcionales se omiten.
+
+```http
+POST /org/governance/rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "DENY_PERMISSION",
+  "permissionPattern": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `string` | valores: `DENY_PERMISSION`, `CEILING`, `REQUIRE_CONDITION`, `FIELD_FLOOR` | Sin descripción específica en el contrato OpenAPI. | `DENY_PERMISSION` |
+| `roleTemplateCode` | No | `string` | longitud máxima 64 | Plantilla a la que aplica; vacío = todas (obligatoria en CEILING). | `CODIGO_EJEMPLO` |
+| `permissionPattern` | Sí | `string` | patrón runtime `GOVERNANCE_PATTERN_REGEX` | Átomo o prefijo con comodín (`billing.*`). | `valor-ejemplo` |
+| `message` | No | `string` | longitud máxima 300 | Texto para la persona cuando la regla niega. | `valor-ejemplo` |
+| `condition` | No | `object` | Sin restricción adicional declarada | Condición v1 (solo en REQUIRE_CONDITION). | `{"clave":"valor"}` |
+| `appliesTo` | No | `string` | valores: `ALL` | Solo `ALL`: una regla no se vuelve opcional. | `ALL` |
+| `maxVisibility` | No | `string` | valores: `PARTIAL`, `REDACT`, `NULLIFY` | Sin descripción específica en el contrato OpenAPI. | `PARTIAL` |
+| `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/governance/rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "DENY_PERMISSION",
+  "roleTemplateCode": "CODIGO_EJEMPLO",
+  "permissionPattern": "valor-ejemplo",
+  "message": "valor-ejemplo",
+  "condition": {
+    "clave": "valor"
+  },
+  "appliesTo": "ALL",
+  "maxVisibility": "PARTIAL",
+  "validFrom": "2026-07-31T12:00:00.000Z",
+  "validTo": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GovernanceRuleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "kind": {},
+  "status": "ACTIVE",
+  "roleTemplateCode": "CODIGO_EJEMPLO",
+  "permissionPattern": "valor-ejemplo",
+  "message": "valor-ejemplo",
+  "condition": {
+    "clave": "valor"
+  },
+  "maxVisibility": "valor-ejemplo",
+  "validFrom": "2026-07-31T12:00:00.000Z",
+  "validTo": "2026-07-31T12:00:00.000Z",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "rowVersion": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GOVERNANCE_RULE_KINDS)[number] | `{}` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `REVOKED` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+| `roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `permissionPattern` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `maxVisibility` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/rules"
+}
+```
+
+---
+
+## 65. PATCH /org/governance/rules/{id}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Editar una regla de la organización
+- **Operation ID:** `GovernanceRulesController_update`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceRulesController.update](../../src/modules/delegated_access/controllers/governance-rules.controller.ts)
+
+### Descripción de negocio
+
+Editar una regla de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Edita mensaje, condición, piso o vigencia de una regla.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /org/governance/rules/{id}` en `GovernanceRulesController_update`. El controlador delega en `GovernanceRulesService.update`. Valida el body como `UpdateGovernanceRuleDto` y consume `application/json`. El tipo de retorno estático es `Promise<GovernanceRuleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateGovernanceRuleDto`; los campos opcionales se omiten.
+
+```http
+PATCH /org/governance/rules/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Versión de la fila que usted leyó (`rowVersion`). | `1` |
+| `message` | No | `string` | longitud máxima 300 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `maxVisibility` | No | `string` | valores: `PARTIAL`, `REDACT`, `NULLIFY` | Sin descripción específica en el contrato OpenAPI. | `PARTIAL` |
+| `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /org/governance/rules/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "message": "valor-ejemplo",
+  "condition": {
+    "clave": "valor"
+  },
+  "maxVisibility": "PARTIAL",
+  "validFrom": "2026-07-31T12:00:00.000Z",
+  "validTo": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GovernanceRuleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "kind": {},
+  "status": "ACTIVE",
+  "roleTemplateCode": "CODIGO_EJEMPLO",
+  "permissionPattern": "valor-ejemplo",
+  "message": "valor-ejemplo",
+  "condition": {
+    "clave": "valor"
+  },
+  "maxVisibility": "valor-ejemplo",
+  "validFrom": "2026-07-31T12:00:00.000Z",
+  "validTo": "2026-07-31T12:00:00.000Z",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "rowVersion": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GOVERNANCE_RULE_KINDS)[number] | `{}` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `REVOKED` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+| `roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `permissionPattern` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `maxVisibility` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/rules/{id}"
+}
+```
+
+---
+
+## 66. POST /org/governance/rules/{id}/retire
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Retirar una regla de la organización
+- **Operation ID:** `GovernanceRulesController_retire`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceRulesController.retire](../../src/modules/delegated_access/controllers/governance-rules.controller.ts)
+
+### Descripción de negocio
+
+Retirar una regla de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Retira una regla (nunca se borra).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/governance/rules/{id}/retire` en `GovernanceRulesController_retire`. El controlador delega en `GovernanceRulesService.retire`. Valida el body como `RetireRuleDto` y consume `application/json`. El tipo de retorno estático es `Promise<GovernanceRuleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RetireRuleDto`; los campos opcionales se omiten.
+
+```http
+POST /org/governance/rules/00000000-0000-4000-8000-000000000001/retire HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | No | `string` | longitud mínima 5; longitud máxima 500 | Por qué se retira. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/governance/rules/00000000-0000-4000-8000-000000000001/retire HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GovernanceRuleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GovernanceRuleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "kind": {},
+  "status": "ACTIVE",
+  "roleTemplateCode": "CODIGO_EJEMPLO",
+  "permissionPattern": "valor-ejemplo",
+  "message": "valor-ejemplo",
+  "condition": {
+    "clave": "valor"
+  },
+  "maxVisibility": "valor-ejemplo",
+  "validFrom": "2026-07-31T12:00:00.000Z",
+  "validTo": "2026-07-31T12:00:00.000Z",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "updatedAt": "2026-07-31T12:00:00.000Z",
+  "rowVersion": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `kind` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof GOVERNANCE_RULE_KINDS)[number] | `{}` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `REVOKED` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+| `roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `permissionPattern` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `message` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `maxVisibility` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `updatedAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `rowVersion` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/rules/{id}/retire"
+}
+```
+
+---
+
+## 67. GET /org/governance/settings
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Ajustes de gobierno de la organización
+- **Operation ID:** `GovernanceRulesController_getSettings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceRulesController.getSettings](../../src/modules/delegated_access/controllers/governance-rules.controller.ts)
+
+### Descripción de negocio
+
+Ajustes de gobierno de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ajustes de gobierno (`practice_settings['support.governance']`).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/settings` en `GovernanceRulesController_getSettings`. El controlador delega en `GovernanceSettingsService.get`. No recibe body. El tipo de retorno estático es `Promise<GovernanceSettingsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GovernanceSettingsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "settings": {
+    "onboardingRequired": true,
+    "onboardingRequiredSince": "2026-07-31T12:00:00.000Z",
+    "inactivityDays": 1,
+    "unusedDays": 1,
+    "autoSuspendInactiveDays": 1,
+    "reviewCadenceMonths": {},
+    "maxSodExceptionDays": 1,
+    "creepThreshold": 1,
+    "fourEyesActionTtlMinutes": 1,
+    "suspensionReviewAfterDays": 1
+  },
+  "isDefault": true,
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `settings` | Sí | `GovernanceSettingsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"onboardingRequired":true,"onboardingRequiredSince":"2026-07-31T12:00:00.000Z","inactivityDays":1,"unusedDays":1,"autoSuspendInactiveDays":1,"reviewCadenceMonths":{},"maxSodExceptionDays":1,"creepThreshold":1,"fourEyesActionTtlMinutes":1,"suspensionReviewAfterDays":1}` |
+| `settings.onboardingRequired` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `settings.onboardingRequiredSince` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `settings.inactivityDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.unusedDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.autoSuspendInactiveDays` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.reviewCadenceMonths` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: 6 \| 12 | `{}` |
+| `settings.maxSodExceptionDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.creepThreshold` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.fourEyesActionTtlMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.suspensionReviewAfterDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `isDefault` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero si la organización aún no guardó ajustes propios. | `true` |
+| `updatedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/settings"
+}
+```
+
+---
+
+## 68. PUT /org/governance/settings
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Guardar los ajustes de gobierno
+- **Operation ID:** `GovernanceRulesController_putSettings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceRulesController.putSettings](../../src/modules/delegated_access/controllers/governance-rules.controller.ts)
+
+### Descripción de negocio
+
+Guardar los ajustes de gobierno. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Guarda los ajustes de gobierno.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /org/governance/settings` en `GovernanceRulesController_putSettings`. El controlador delega en `GovernanceSettingsService.put`. Valida el body como `PutGovernanceSettingsDto` y consume `application/json`. El tipo de retorno estático es `Promise<GovernanceSettingsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PutGovernanceSettingsDto`; los campos opcionales se omiten.
+
+```http
+PUT /org/governance/settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `onboardingRequired` | No | `boolean` | Sin restricción adicional declarada | La compuerta de ingreso bloquea el acceso hasta completar la lista. | `true` |
+| `onboardingRequiredSince` | No | `object` | formato `date-time`; admite null | La compuerta rige solo para vínculos creados desde esta fecha. | `{}` |
+| `inactivityDays` | No | `number` | mínimo 7; máximo 365 | Sin descripción específica en el contrato OpenAPI. | `7` |
+| `unusedDays` | No | `number` | mínimo 1; máximo 365 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `autoSuspendInactiveDays` | No | `object` | mínimo 14; máximo 730; admite null | Suspende sola a quien no actúa en estos días; vacío = solo sugerir. | `{}` |
+| `reviewCadenceMonths` | No | `number` | valores: `6`, `12` | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `maxSodExceptionDays` | No | `number` | mínimo 1; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `creepThreshold` | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `fourEyesActionTtlMinutes` | No | `number` | mínimo 5; máximo 1440 | Sin descripción específica en el contrato OpenAPI. | `5` |
+| `suspensionReviewAfterDays` | No | `number` | mínimo 7; máximo 365 | Sin descripción específica en el contrato OpenAPI. | `7` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /org/governance/settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "onboardingRequired": true,
+  "onboardingRequiredSince": {},
+  "inactivityDays": 7,
+  "unusedDays": 1,
+  "autoSuspendInactiveDays": {},
+  "reviewCadenceMonths": 1,
+  "maxSodExceptionDays": 1,
+  "creepThreshold": 1,
+  "fourEyesActionTtlMinutes": 5,
+  "suspensionReviewAfterDays": 7
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<GovernanceSettingsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `GovernanceSettingsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "settings": {
+    "onboardingRequired": true,
+    "onboardingRequiredSince": "2026-07-31T12:00:00.000Z",
+    "inactivityDays": 1,
+    "unusedDays": 1,
+    "autoSuspendInactiveDays": 1,
+    "reviewCadenceMonths": {},
+    "maxSodExceptionDays": 1,
+    "creepThreshold": 1,
+    "fourEyesActionTtlMinutes": 1,
+    "suspensionReviewAfterDays": 1
+  },
+  "isDefault": true,
+  "updatedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `settings` | Sí | `GovernanceSettingsDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"onboardingRequired":true,"onboardingRequiredSince":"2026-07-31T12:00:00.000Z","inactivityDays":1,"unusedDays":1,"autoSuspendInactiveDays":1,"reviewCadenceMonths":{},"maxSodExceptionDays":1,"creepThreshold":1,"fourEyesActionTtlMinutes":1,"suspensionReviewAfterDays":1}` |
+| `settings.onboardingRequired` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `settings.onboardingRequiredSince` | No | `string` | formato `date-time`; admite null | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `settings.inactivityDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.unusedDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.autoSuspendInactiveDays` | Sí | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.reviewCadenceMonths` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: 6 \| 12 | `{}` |
+| `settings.maxSodExceptionDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.creepThreshold` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.fourEyesActionTtlMinutes` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `settings.suspensionReviewAfterDays` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `isDefault` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero si la organización aún no guardó ajustes propios. | `true` |
+| `updatedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/settings"
+}
+```
+
+---
+
+## 69. GET /org/governance/sod-exceptions
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Excepciones de segregación de funciones vigentes
+- **Operation ID:** `GovernanceSodController_exceptions`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceSodController.exceptions](../../src/modules/delegated_access/controllers/governance-sod.controller.ts)
+
+### Descripción de negocio
+
+Excepciones de segregación de funciones vigentes. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Excepciones vigentes.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/sod-exceptions` en `GovernanceSodController_exceptions`. El controlador delega en `SodService.listExceptions`. No recibe body. El tipo de retorno estático es `Promise<ListSodExceptionsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/sod-exceptions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/sod-exceptions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListSodExceptionsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListSodExceptionsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListSodExceptionsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListSodExceptionsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListSodExceptionsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListSodExceptionsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSodExceptionsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSodExceptionsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "ruleCode": "CODIGO_EJEMPLO",
+      "engagementId": "00000000-0000-4000-8000-000000000001",
+      "justification": "valor-ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "status": "ACTIVE",
+      "revokedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SodExceptionViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","ruleCode":"CODIGO_EJEMPLO","engagementId":"00000000-0000-4000-8000-000000000001","justification":"valor-ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","status":"ACTIVE","revokedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].ruleCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].justification` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].validFrom` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].validTo` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].status` | Sí | `string` | valores: `ACTIVE`, `EXPIRED`, `REVOKED` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+| `items[].revokedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/sod-exceptions"
+}
+```
+
+---
+
+## 70. POST /org/governance/sod-exceptions
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Pedir una excepción de segregación de funciones (cuatro ojos)
+- **Operation ID:** `GovernanceSodController_requestException`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceSodController.requestException](../../src/modules/delegated_access/controllers/governance-sod.controller.ts)
+
+### Descripción de negocio
+
+Pedir una excepción de segregación de funciones (cuatro ojos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Pide una excepción: crea el cuatro ojos `SOD_EXCEPTION`.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/governance/sod-exceptions` en `GovernanceSodController_requestException`. El controlador delega en `SodService.requestException`. Valida el body como `RequestSodExceptionDto` y consume `application/json`. El tipo de retorno estático es `Promise<FourEyesRequestedDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RequestSodExceptionDto`; los campos opcionales se omiten.
+
+```http
+POST /org/governance/sod-exceptions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "ruleCode": "SOD-BILL-03",
+  "justification": "valor-ejemploxxxxxxxxxxxxxxxxx",
+  "validTo": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ruleCode` | Sí | `string` | longitud máxima 40 | Sin descripción específica en el contrato OpenAPI. | `SOD-BILL-03` |
+| `justification` | Sí | `string` | longitud mínima 30; longitud máxima 1000 | Por qué se necesita (al menos 30 caracteres). | `valor-ejemploxxxxxxxxxxxxxxxxx` |
+| `validTo` | Sí | `string` | formato `date-time` | Fin de la excepción: obligatorio. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/governance/sod-exceptions HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "ruleCode": "SOD-BILL-03",
+  "justification": "valor-ejemploxxxxxxxxxxxxxxxxx",
+  "validTo": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 202 | Solicitud aceptada para procesamiento asíncrono. | `Promise<FourEyesRequestedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<FourEyesRequestedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<FourEyesRequestedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<FourEyesRequestedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<FourEyesRequestedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<FourEyesRequestedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<FourEyesRequestedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<FourEyesRequestedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<FourEyesRequestedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<FourEyesRequestedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `FourEyesRequestedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "approvalId": "00000000-0000-4000-8000-000000000001",
+  "status": "ok",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "approverKind": "DOCTOR"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `approvalId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `ok` |
+| `expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approverKind` | Sí | `string` | valores: `DOCTOR`, `SERVICE_HEAD`, `SECOND_APPROVER` | Sin descripción específica en el contrato OpenAPI. | `DOCTOR` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/sod-exceptions"
+}
+```
+
+---
+
+## 71. POST /org/governance/sod-exceptions/{id}/revoke
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Revocar una excepción de segregación de funciones
+- **Operation ID:** `GovernanceSodController_revokeException`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceSodController.revokeException](../../src/modules/delegated_access/controllers/governance-sod.controller.ts)
+
+### Descripción de negocio
+
+Revocar una excepción de segregación de funciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Revoca una excepción vigente.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/governance/sod-exceptions/{id}/revoke` en `GovernanceSodController_revokeException`. El controlador delega en `SodService.revokeException`. Valida el body como `RevokeSodExceptionDto` y consume `application/json`. El tipo de retorno estático es `Promise<SodExceptionViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RevokeSodExceptionDto`; los campos opcionales se omiten.
+
+```http
+POST /org/governance/sod-exceptions/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 5; longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/governance/sod-exceptions/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SodExceptionViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SodExceptionViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "ruleCode": "CODIGO_EJEMPLO",
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "justification": "valor-ejemplo",
+  "validFrom": "2026-07-31T12:00:00.000Z",
+  "validTo": "2026-07-31T12:00:00.000Z",
+  "status": "ACTIVE",
+  "revokedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `ruleCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `justification` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `validFrom` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `validTo` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `EXPIRED`, `REVOKED` | Sin descripción específica en el contrato OpenAPI. | `ACTIVE` |
+| `revokedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/sod-exceptions/{id}/revoke"
+}
+```
+
+---
+
+## 72. GET /org/governance/sod-findings
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Conflictos de segregación de funciones de hoy
+- **Operation ID:** `GovernanceSodController_findings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceSodController.findings](../../src/modules/delegated_access/controllers/governance-sod.controller.ts)
+
+### Descripción de negocio
+
+Conflictos de segregación de funciones de hoy. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Conflictos de hoy, con o sin excepción.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/sod-findings` en `GovernanceSodController_findings`. El controlador delega en `SodService.findings`. No recibe body. El tipo de retorno estático es `Promise<ListSodFindingsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/sod-findings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/sod-findings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListSodFindingsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListSodFindingsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListSodFindingsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListSodFindingsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListSodFindingsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListSodFindingsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSodFindingsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSodFindingsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "engagementId": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "ruleCode": "CODIGO_EJEMPLO",
+      "ruleName": "Nombre de ejemplo",
+      "action": "valor-ejemplo",
+      "outcome": "BLOCKED",
+      "atomsA": [
+        "valor-ejemplo"
+      ],
+      "atomsB": [
+        "valor-ejemplo"
+      ],
+      "exceptionId": "00000000-0000-4000-8000-000000000001",
+      "exceptionValidTo": "2026-07-31T12:00:00.000Z",
+      "admitsException": true,
+      "message": "valor-ejemplo"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SodFindingViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"engagementId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","ruleCode":"CODIGO_EJEMPLO","ruleName":"Nombre de ejemplo","action":"valor-ejemplo","outcome":"BLOCKED","atomsA":["valor-ejemplo"],"atomsB":["valor-ejemplo"],"exceptionId":"00000000-0000-4000-8000-000000000001","exceptionValidTo":"2026-07-31T12:00:00.000Z","admitsException":true,"message":"valor-ejemplo"}]` |
+| `items[].engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].ruleCode` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].ruleName` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].action` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].outcome` | Sí | `string` | valores: `BLOCKED`, `EXCEPTION_REQUIRED`, `WARNING`, `EXCEPTED` | Sin descripción específica en el contrato OpenAPI. | `BLOCKED` |
+| `items[].atomsA` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].atomsB` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].exceptionId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].exceptionValidTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `items[].admitsException` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].message` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/sod-findings"
+}
+```
+
+---
+
+## 73. GET /org/governance/sod-rules
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Reglas de segregación de funciones
+- **Operation ID:** `GovernanceSodController_rules`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceSodController.rules](../../src/modules/delegated_access/controllers/governance-sod.controller.ts)
+
+### Descripción de negocio
+
+Reglas de segregación de funciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reglas SoD efectivas: plataforma y organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/sod-rules` en `GovernanceSodController_rules`. El controlador delega en `SodService.listRules`. No recibe body. El tipo de retorno estático es `Promise<ListSodRulesResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/sod-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/sod-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListSodRulesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListSodRulesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListSodRulesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListSodRulesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListSodRulesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListSodRulesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSodRulesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSodRulesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "atomsA": [
+        "valor-ejemplo"
+      ],
+      "atomsB": [
+        "valor-ejemplo"
+      ],
+      "scope": "valor-ejemplo",
+      "action": "valor-ejemplo",
+      "isHard": true,
+      "maxExceptionDays": 1,
+      "rationale": "valor-ejemplo",
+      "baseRuleCode": "CODIGO_EJEMPLO",
+      "platform": true,
+      "rowVersion": 1
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SodRuleViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","atomsA":["valor-ejemplo"],"atomsB":["valor-ejemplo"],"scope":"valor-ejemplo","action":"valor-ejemplo","isHard":true,"maxExceptionDays":1,"rationale":"valor-ejemplo","baseRuleCode":"CODIGO_EJEMPLO","platform":true,"rowVersion":1}]` |
+| `items[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `items[].atomsA` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].atomsB` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `items[].scope` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].action` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].isHard` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `items[].maxExceptionDays` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `items[].rationale` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].baseRuleCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `items[].platform` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero si es de plataforma (solo lectura). | `true` |
+| `items[].rowVersion` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/sod-rules"
+}
+```
+
+---
+
+## 74. POST /org/governance/sod-rules
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Crear o endurecer una regla de segregación de funciones
+- **Operation ID:** `GovernanceSodController_createRule`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceSodController.createRule](../../src/modules/delegated_access/controllers/governance-sod.controller.ts)
+
+### Descripción de negocio
+
+Crear o endurecer una regla de segregación de funciones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crea una regla propia o endurece una de plataforma.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/governance/sod-rules` en `GovernanceSodController_createRule`. El controlador delega en `SodService.createRule`. Valida el body como `CreateSodRuleDto` y consume `application/json`. El tipo de retorno estático es `Promise<SodRuleViewDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateSodRuleDto`; los campos opcionales se omiten.
+
+```http
+POST /org/governance/sod-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "ORG-CAJA-01",
+  "name": "Nombre de ejemplo",
+  "atomsA": [
+    "valor-ejemplo"
+  ],
+  "atomsB": [
+    "valor-ejemplo"
+  ],
+  "scope": "PERSON",
+  "action": "BLOCK"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `code` | Sí | `string` | longitud máxima 40; patrón runtime `SOD_CODE_REGEX` | Sin descripción específica en el contrato OpenAPI. | `ORG-CAJA-01` |
+| `name` | Sí | `string` | longitud mínima 3; longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `baseRuleCode` | No | `string` | longitud máxima 40 | Código de la regla de plataforma que esta endurece. | `CODIGO_EJEMPLO` |
+| `atomsA` | Sí | `array<string>` | mínimo 1 elemento(s); máximo 40 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `atomsB` | Sí | `array<string>` | mínimo 1 elemento(s); máximo 40 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `scope` | Sí | `string` | valores: `PERSON`, `PERSON_OVERLAP`, `TRANSACTION` | Sin descripción específica en el contrato OpenAPI. | `PERSON` |
+| `action` | Sí | `string` | valores: `BLOCK`, `REQUIRE_APPROVAL`, `WARN` | Sin descripción específica en el contrato OpenAPI. | `BLOCK` |
+| `isHard` | No | `boolean` | Sin restricción adicional declarada | Sin excepción posible. | `true` |
+| `maxExceptionDays` | No | `number` | mínimo 1; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rationale` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/governance/sod-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "ORG-CAJA-01",
+  "name": "Nombre de ejemplo",
+  "baseRuleCode": "CODIGO_EJEMPLO",
+  "atomsA": [
+    "valor-ejemplo"
+  ],
+  "atomsB": [
+    "valor-ejemplo"
+  ],
+  "scope": "PERSON",
+  "action": "BLOCK",
+  "isHard": true,
+  "maxExceptionDays": 1,
+  "rationale": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SodRuleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "atomsA": [
+    "valor-ejemplo"
+  ],
+  "atomsB": [
+    "valor-ejemplo"
+  ],
+  "scope": "valor-ejemplo",
+  "action": "valor-ejemplo",
+  "isHard": true,
+  "maxExceptionDays": 1,
+  "rationale": "valor-ejemplo",
+  "baseRuleCode": "CODIGO_EJEMPLO",
+  "platform": true,
+  "rowVersion": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `atomsA` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `atomsB` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `scope` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `action` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `isHard` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `maxExceptionDays` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rationale` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `baseRuleCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `platform` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero si es de plataforma (solo lectura). | `true` |
+| `rowVersion` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/sod-rules"
+}
+```
+
+---
+
+## 75. PATCH /org/governance/sod-rules/{id}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Editar una regla de segregación de funciones propia
+- **Operation ID:** `GovernanceSodController_updateRule`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceSodController.updateRule](../../src/modules/delegated_access/controllers/governance-sod.controller.ts)
+
+### Descripción de negocio
+
+Editar una regla de segregación de funciones propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Edita una regla propia.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /org/governance/sod-rules/{id}` en `GovernanceSodController_updateRule`. El controlador delega en `SodService.updateRule`. Valida el body como `UpdateSodRuleDto` y consume `application/json`. El tipo de retorno estático es `Promise<SodRuleViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateSodRuleDto`; los campos opcionales se omiten.
+
+```http
+PATCH /org/governance/sod-rules/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `expectedRowVersion` | Sí | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `name` | No | `string` | longitud mínima 3; longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `atomsA` | No | `array<string>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `atomsB` | No | `array<string>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `scope` | No | `string` | valores: `PERSON`, `PERSON_OVERLAP`, `TRANSACTION` | Sin descripción específica en el contrato OpenAPI. | `PERSON` |
+| `action` | No | `string` | valores: `BLOCK`, `REQUIRE_APPROVAL`, `WARN` | Sin descripción específica en el contrato OpenAPI. | `BLOCK` |
+| `isHard` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `maxExceptionDays` | No | `number` | mínimo 1; máximo 180 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rationale` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /org/governance/sod-rules/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "expectedRowVersion": 1,
+  "name": "Nombre de ejemplo",
+  "atomsA": [
+    "valor-ejemplo"
+  ],
+  "atomsB": [
+    "valor-ejemplo"
+  ],
+  "scope": "PERSON",
+  "action": "BLOCK",
+  "isHard": true,
+  "maxExceptionDays": 1,
+  "rationale": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SodRuleViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SodRuleViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "atomsA": [
+    "valor-ejemplo"
+  ],
+  "atomsB": [
+    "valor-ejemplo"
+  ],
+  "scope": "valor-ejemplo",
+  "action": "valor-ejemplo",
+  "isHard": true,
+  "maxExceptionDays": 1,
+  "rationale": "valor-ejemplo",
+  "baseRuleCode": "CODIGO_EJEMPLO",
+  "platform": true,
+  "rowVersion": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `atomsA` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `atomsB` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `scope` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `action` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `isHard` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `maxExceptionDays` | No | `number` | admite null | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `rationale` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `baseRuleCode` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `platform` | Sí | `boolean` | Sin restricción adicional declarada | Verdadero si es de plataforma (solo lectura). | `true` |
+| `rowVersion` | No | `number` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/sod-rules/{id}"
+}
+```
+
+---
+
+## 76. GET /org/governance/summary
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Resumen del tablero de gobierno (10 mosaicos)
+- **Operation ID:** `GovernanceReportsController_summary`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReportsController.summary](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Resumen del tablero de gobierno (10 mosaicos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Los 10 mosaicos del tablero.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/summary` en `GovernanceReportsController_summary`. El controlador delega en `GovernanceReportsService.summary`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/summary"
+}
+```
+
+---
+
+## 77. GET /org/governance/unused-access
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance-reports`
+- **Nombre:** Accesos sin uso
+- **Operation ID:** `GovernanceReportsController_unused`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [GovernanceReportsController.unused](../../src/modules/delegated_access/controllers/governance-reports.controller.ts)
+
+### Descripción de negocio
+
+Accesos sin uso. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Concesiones sin uso.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/governance/unused-access` en `GovernanceReportsController_unused`. El controlador delega en `GovernanceReportsService.unusedAccess`. No recibe body. El tipo de retorno estático es `no declarado`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `days` | query | No | `number` | mínimo 1; máximo 365 | Sin descripción específica en OpenAPI. | `1` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/governance/unused-access HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/governance/unused-access?days=1 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `no declarado` | Sí |
+| 400 | Consulta completada correctamente. | `no declarado` | No |
+| 401 | Consulta completada correctamente. | `no declarado` | No |
+| 403 | Consulta completada correctamente. | `no declarado` | No |
+| 429 | Consulta completada correctamente. | `no declarado` | No |
+| 500 | Consulta completada correctamente. | `no declarado` | No |
+| 504 | Consulta completada correctamente. | `no declarado` | No |
+
+El controlador declara `no declarado`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/governance/unused-access"
+}
+```
+
+---
+
+## 78. GET /org/lifecycle/cases
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Casos de ingreso, cambio, baja y suspensión
+- **Operation ID:** `SupportLifecycleController_cases`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.cases](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Casos de ingreso, cambio, baja y suspensión. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Casos de ciclo de vida (filtros `kind` y `status`).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/lifecycle/cases` en `SupportLifecycleController_cases`. El controlador delega en `TeamAdminCasesService.cases`. No recibe body. El tipo de retorno estático es `Promise<ListLifecycleCasesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `kind` | query | No | `string` | valores: `JOINER`, `MOVER`, `LEAVER`, `SUSPENSION`, `REACTIVATION` | Sin descripción específica en OpenAPI. | `JOINER` |
+| `status` | query | No | `string` | valores: `OPEN`, `COMPLETED`, `CANCELLED` | Sin descripción específica en OpenAPI. | `OPEN` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/lifecycle/cases HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/lifecycle/cases?kind=JOINER&status=OPEN HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListLifecycleCasesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListLifecycleCasesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListLifecycleCasesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListLifecycleCasesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListLifecycleCasesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListLifecycleCasesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListLifecycleCasesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListLifecycleCasesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": "valor-ejemplo",
+      "status": "ok",
+      "engagementId": "00000000-0000-4000-8000-000000000001",
+      "subjectUserId": "00000000-0000-4000-8000-000000000001",
+      "openedByUserId": "00000000-0000-4000-8000-000000000001",
+      "openedAt": "2026-07-31T12:00:00.000Z",
+      "dueAt": "2026-07-31T12:00:00.000Z",
+      "completedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<LifecycleCaseSummaryDto>` | Sin restricción adicional declarada | Casos. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":"valor-ejemplo","status":"ok","engagementId":"00000000-0000-4000-8000-000000000001","subjectUserId":"00000000-0000-4000-8000-000000000001","openedByUserId":"00000000-0000-4000-8000-000000000001","openedAt":"2026-07-31T12:00:00.000Z","dueAt":"2026-07-31T12:00:00.000Z","completedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id del caso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].kind` | Sí | `string` | Sin restricción adicional declarada | Tipo de caso. | `valor-ejemplo` |
+| `items[].status` | Sí | `string` | Sin restricción adicional declarada | Estado del caso. | `ok` |
+| `items[].engagementId` | Sí | `string` | formato `uuid` | Vínculo del caso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].subjectUserId` | Sí | `string` | formato `uuid` | Persona del caso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].openedByUserId` | No | `string` | formato `uuid` | Quien abrió el caso; ausente si lo abrió el sistema. | `00000000-0000-4000-8000-000000000001` |
+| `items[].openedAt` | Sí | `string` | formato `date-time` | Apertura. | `2026-07-31T12:00:00.000Z` |
+| `items[].dueAt` | No | `string` | formato `date-time` | Fecha límite. | `2026-07-31T12:00:00.000Z` |
+| `items[].completedAt` | No | `string` | formato `date-time` | Cierre. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/lifecycle/cases"
+}
+```
+
+---
+
+## 79. GET /org/lifecycle/cases/{id}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Detalle de un caso de ciclo de vida
+- **Operation ID:** `SupportLifecycleController_getCase`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.getCase](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Detalle de un caso de ciclo de vida. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Un caso con su lista de verificación y sus traspasos.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/lifecycle/cases/{id}` en `SupportLifecycleController_getCase`. El controlador delega en `TeamAdminCasesService.caseOf`. No recibe body. El tipo de retorno estático es `Promise<LifecycleCaseDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/lifecycle/cases/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/lifecycle/cases/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LifecycleCaseDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo",
+  "checklist": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "required": true,
+      "completion": "valor-ejemplo",
+      "status": "ok",
+      "completedAt": "2026-07-31T12:00:00.000Z",
+      "pendingCount": 1
+    }
+  ],
+  "handover": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": "valor-ejemplo",
+      "sourceId": "00000000-0000-4000-8000-000000000001",
+      "fromUserId": "00000000-0000-4000-8000-000000000001",
+      "toUserId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "reassignedAt": "2026-07-31T12:00:00.000Z",
+      "reassignedByUserId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | No | `string` | Sin restricción adicional declarada | Motivo. | `Texto descriptivo de ejemplo` |
+| `checklist` | Sí | `array<ChecklistItemViewDto>` | Sin restricción adicional declarada | Lista de verificación. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","required":true,"completion":"valor-ejemplo","status":"ok","completedAt":"2026-07-31T12:00:00.000Z","pendingCount":1}]` |
+| `checklist[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable del ítem. | `CODIGO_EJEMPLO` |
+| `checklist[].label` | Sí | `string` | Sin restricción adicional declarada | Texto para la persona. | `valor-ejemplo` |
+| `checklist[].required` | Sí | `boolean` | Sin restricción adicional declarada | ¿Bloquea completar el caso? | `true` |
+| `checklist[].completion` | Sí | `string` | Sin restricción adicional declarada | `AUTOMATIC`, `MANUAL` o `EITHER`. | `valor-ejemplo` |
+| `checklist[].status` | Sí | `string` | Sin restricción adicional declarada | `PENDING`, `DONE` o `NOT_APPLICABLE`. | `ok` |
+| `checklist[].completedAt` | No | `string` | formato `date-time` | Cuándo se completó. | `2026-07-31T12:00:00.000Z` |
+| `checklist[].pendingCount` | No | `number` | Sin restricción adicional declarada | Solo `DOCTOR_ACCEPTANCES`: cuántos doctores faltan. | `1` |
+| `handover` | Sí | `array<HandoverItemViewDto>` | Sin restricción adicional declarada | Registro de traspaso. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":"valor-ejemplo","sourceId":"00000000-0000-4000-8000-000000000001","fromUserId":"00000000-0000-4000-8000-000000000001","toUserId":"00000000-0000-4000-8000-000000000001","status":"ok","reassignedAt":"2026-07-31T12:00:00.000Z","reassignedByUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `handover[].id` | Sí | `string` | formato `uuid` | Id de la fila. | `00000000-0000-4000-8000-000000000001` |
+| `handover[].kind` | Sí | `string` | Sin restricción adicional declarada | `CONVERSATION`, `WORKFLOW_TASK`, `SUPERVISED_ENGAGEMENT` o `PENDING_BOOKING`. | `valor-ejemplo` |
+| `handover[].sourceId` | Sí | `string` | formato `uuid` | Objeto traspasado. | `00000000-0000-4000-8000-000000000001` |
+| `handover[].fromUserId` | Sí | `string` | formato `uuid` | De quién. | `00000000-0000-4000-8000-000000000001` |
+| `handover[].toUserId` | No | `string` | formato `uuid` | A quién; ausente si volvió a la bandeja común. | `00000000-0000-4000-8000-000000000001` |
+| `handover[].status` | Sí | `string` | Sin restricción adicional declarada | `PENDING`, `REASSIGNED`, `RETURNED_TO_POOL` o `CLOSED`. | `ok` |
+| `handover[].reassignedAt` | No | `string` | formato `date-time` | Cuándo se reasignó. | `2026-07-31T12:00:00.000Z` |
+| `handover[].reassignedByUserId` | No | `string` | formato `uuid` | Quién reasignó. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Caso no encontrado | Excepción explícita en src/modules/delegated_access/services/team-admin-cases.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/lifecycle/cases/{id}"
+}
+```
+
+---
+
+## 80. POST /org/lifecycle/cases/{id}/checklist/{code}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Completar un ítem de la lista de un caso
+- **Operation ID:** `SupportLifecycleController_completeItem`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.completeItem](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Completar un ítem de la lista de un caso. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Marca a mano un ítem de la lista (los automáticos responden 409).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/lifecycle/cases/{id}/checklist/{code}` en `SupportLifecycleController_completeItem`. El controlador delega en `TeamAdminCasesService.completeItem`. Valida el body como `CompleteChecklistItemDto` y consume `application/json`. El tipo de retorno estático es `Promise<LifecycleCaseDetailDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `code` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `CODIGO_EJEMPLO` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CompleteChecklistItemDto`; los campos opcionales se omiten.
+
+```http
+POST /org/lifecycle/cases/00000000-0000-4000-8000-000000000001/checklist/CODIGO_EJEMPLO HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `note` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/lifecycle/cases/00000000-0000-4000-8000-000000000001/checklist/CODIGO_EJEMPLO HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "note": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<LifecycleCaseDetailDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LifecycleCaseDetailDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "reason": "Texto descriptivo de ejemplo",
+  "checklist": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "label": "valor-ejemplo",
+      "required": true,
+      "completion": "valor-ejemplo",
+      "status": "ok",
+      "completedAt": "2026-07-31T12:00:00.000Z",
+      "pendingCount": 1
+    }
+  ],
+  "handover": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": "valor-ejemplo",
+      "sourceId": "00000000-0000-4000-8000-000000000001",
+      "fromUserId": "00000000-0000-4000-8000-000000000001",
+      "toUserId": "00000000-0000-4000-8000-000000000001",
+      "status": "ok",
+      "reassignedAt": "2026-07-31T12:00:00.000Z",
+      "reassignedByUserId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | No | `string` | Sin restricción adicional declarada | Motivo. | `Texto descriptivo de ejemplo` |
+| `checklist` | Sí | `array<ChecklistItemViewDto>` | Sin restricción adicional declarada | Lista de verificación. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","required":true,"completion":"valor-ejemplo","status":"ok","completedAt":"2026-07-31T12:00:00.000Z","pendingCount":1}]` |
+| `checklist[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable del ítem. | `CODIGO_EJEMPLO` |
+| `checklist[].label` | Sí | `string` | Sin restricción adicional declarada | Texto para la persona. | `valor-ejemplo` |
+| `checklist[].required` | Sí | `boolean` | Sin restricción adicional declarada | ¿Bloquea completar el caso? | `true` |
+| `checklist[].completion` | Sí | `string` | Sin restricción adicional declarada | `AUTOMATIC`, `MANUAL` o `EITHER`. | `valor-ejemplo` |
+| `checklist[].status` | Sí | `string` | Sin restricción adicional declarada | `PENDING`, `DONE` o `NOT_APPLICABLE`. | `ok` |
+| `checklist[].completedAt` | No | `string` | formato `date-time` | Cuándo se completó. | `2026-07-31T12:00:00.000Z` |
+| `checklist[].pendingCount` | No | `number` | Sin restricción adicional declarada | Solo `DOCTOR_ACCEPTANCES`: cuántos doctores faltan. | `1` |
+| `handover` | Sí | `array<HandoverItemViewDto>` | Sin restricción adicional declarada | Registro de traspaso. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":"valor-ejemplo","sourceId":"00000000-0000-4000-8000-000000000001","fromUserId":"00000000-0000-4000-8000-000000000001","toUserId":"00000000-0000-4000-8000-000000000001","status":"ok","reassignedAt":"2026-07-31T12:00:00.000Z","reassignedByUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `handover[].id` | Sí | `string` | formato `uuid` | Id de la fila. | `00000000-0000-4000-8000-000000000001` |
+| `handover[].kind` | Sí | `string` | Sin restricción adicional declarada | `CONVERSATION`, `WORKFLOW_TASK`, `SUPERVISED_ENGAGEMENT` o `PENDING_BOOKING`. | `valor-ejemplo` |
+| `handover[].sourceId` | Sí | `string` | formato `uuid` | Objeto traspasado. | `00000000-0000-4000-8000-000000000001` |
+| `handover[].fromUserId` | Sí | `string` | formato `uuid` | De quién. | `00000000-0000-4000-8000-000000000001` |
+| `handover[].toUserId` | No | `string` | formato `uuid` | A quién; ausente si volvió a la bandeja común. | `00000000-0000-4000-8000-000000000001` |
+| `handover[].status` | Sí | `string` | Sin restricción adicional declarada | `PENDING`, `REASSIGNED`, `RETURNED_TO_POOL` o `CLOSED`. | `ok` |
+| `handover[].reassignedAt` | No | `string` | formato `date-time` | Cuándo se reasignó. | `2026-07-31T12:00:00.000Z` |
+| `handover[].reassignedByUserId` | No | `string` | formato `uuid` | Quién reasignó. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Caso no encontrado | Excepción explícita en src/modules/delegated_access/services/team-admin-cases.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/lifecycle/cases/{id}/checklist/{code}"
+}
+```
+
+---
+
+## 81. GET /org/lifecycle/cases/{id}/export
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Exportar el registro de transferencia de un caso
+- **Operation ID:** `SupportLifecycleController_exportCase`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.exportCase](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Exportar el registro de transferencia de un caso. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Registro de transferencia exportable (deja asiento de la exportación).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/lifecycle/cases/{id}/export` en `SupportLifecycleController_exportCase`. El controlador delega en `LifecycleService.exportCase`. No recibe body. El tipo de retorno estático es `Promise<LifecycleCaseExportDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/lifecycle/cases/00000000-0000-4000-8000-000000000001/export HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/lifecycle/cases/00000000-0000-4000-8000-000000000001/export HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<LifecycleCaseExportDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<LifecycleCaseExportDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<LifecycleCaseExportDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<LifecycleCaseExportDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<LifecycleCaseExportDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<LifecycleCaseExportDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<LifecycleCaseExportDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<LifecycleCaseExportDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `LifecycleCaseExportDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "case": {
+    "reason": "Texto descriptivo de ejemplo",
+    "checklist": [
+      {
+        "code": "CODIGO_EJEMPLO",
+        "label": "valor-ejemplo",
+        "required": true,
+        "completion": "valor-ejemplo",
+        "status": "ok",
+        "completedAt": "2026-07-31T12:00:00.000Z",
+        "pendingCount": 1
+      }
+    ],
+    "handover": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "kind": "valor-ejemplo",
+        "sourceId": "00000000-0000-4000-8000-000000000001",
+        "fromUserId": "00000000-0000-4000-8000-000000000001",
+        "toUserId": "00000000-0000-4000-8000-000000000001",
+        "status": "ok",
+        "reassignedAt": "2026-07-31T12:00:00.000Z",
+        "reassignedByUserId": "00000000-0000-4000-8000-000000000001"
+      }
+    ]
+  },
+  "exportedAt": "2026-07-31T12:00:00.000Z",
+  "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `case` | Sí | `LifecycleCaseDetailDto` | Sin restricción adicional declarada | El caso con su lista y sus traspasos. | `{"reason":"Texto descriptivo de ejemplo","checklist":[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","required":true,"completion":"valor-ejemplo","status":"ok","completedAt":"2026-07-31T12:00:00.000Z","pendingCount":1}],"handover":[{"id":"00000000-0000-4000-8000-000000000001","kind":"valor-ejemplo","sourceId":"00000000-0000-4000-8000-000000000001","fromUserId":"00000000-0000-4000-8000-000000000001","toUserId":"00000000-0000-4000-8000-000000000001","status":"ok","reassignedAt":"2026-07-31T12:00:00.000Z","reassignedByUserId":"00000000-0000-4000-8000-000000000001"}]}` |
+| `case.reason` | No | `string` | Sin restricción adicional declarada | Motivo. | `Texto descriptivo de ejemplo` |
+| `case.checklist` | Sí | `array<ChecklistItemViewDto>` | Sin restricción adicional declarada | Lista de verificación. | `[{"code":"CODIGO_EJEMPLO","label":"valor-ejemplo","required":true,"completion":"valor-ejemplo","status":"ok","completedAt":"2026-07-31T12:00:00.000Z","pendingCount":1}]` |
+| `case.checklist[].code` | Sí | `string` | Sin restricción adicional declarada | Código estable del ítem. | `CODIGO_EJEMPLO` |
+| `case.checklist[].label` | Sí | `string` | Sin restricción adicional declarada | Texto para la persona. | `valor-ejemplo` |
+| `case.checklist[].required` | Sí | `boolean` | Sin restricción adicional declarada | ¿Bloquea completar el caso? | `true` |
+| `case.checklist[].completion` | Sí | `string` | Sin restricción adicional declarada | `AUTOMATIC`, `MANUAL` o `EITHER`. | `valor-ejemplo` |
+| `case.checklist[].status` | Sí | `string` | Sin restricción adicional declarada | `PENDING`, `DONE` o `NOT_APPLICABLE`. | `ok` |
+| `case.checklist[].completedAt` | No | `string` | formato `date-time` | Cuándo se completó. | `2026-07-31T12:00:00.000Z` |
+| `case.checklist[].pendingCount` | No | `number` | Sin restricción adicional declarada | Solo `DOCTOR_ACCEPTANCES`: cuántos doctores faltan. | `1` |
+| `case.handover` | Sí | `array<HandoverItemViewDto>` | Sin restricción adicional declarada | Registro de traspaso. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":"valor-ejemplo","sourceId":"00000000-0000-4000-8000-000000000001","fromUserId":"00000000-0000-4000-8000-000000000001","toUserId":"00000000-0000-4000-8000-000000000001","status":"ok","reassignedAt":"2026-07-31T12:00:00.000Z","reassignedByUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `case.handover[].id` | Sí | `string` | formato `uuid` | Id de la fila. | `00000000-0000-4000-8000-000000000001` |
+| `case.handover[].kind` | Sí | `string` | Sin restricción adicional declarada | `CONVERSATION`, `WORKFLOW_TASK`, `SUPERVISED_ENGAGEMENT` o `PENDING_BOOKING`. | `valor-ejemplo` |
+| `case.handover[].sourceId` | Sí | `string` | formato `uuid` | Objeto traspasado. | `00000000-0000-4000-8000-000000000001` |
+| `case.handover[].fromUserId` | Sí | `string` | formato `uuid` | De quién. | `00000000-0000-4000-8000-000000000001` |
+| `case.handover[].toUserId` | No | `string` | formato `uuid` | A quién; ausente si volvió a la bandeja común. | `00000000-0000-4000-8000-000000000001` |
+| `case.handover[].status` | Sí | `string` | Sin restricción adicional declarada | `PENDING`, `REASSIGNED`, `RETURNED_TO_POOL` o `CLOSED`. | `ok` |
+| `case.handover[].reassignedAt` | No | `string` | formato `date-time` | Cuándo se reasignó. | `2026-07-31T12:00:00.000Z` |
+| `case.handover[].reassignedByUserId` | No | `string` | formato `uuid` | Quién reasignó. | `00000000-0000-4000-8000-000000000001` |
+| `exportedAt` | Sí | `string` | formato `date-time` | Cuándo se exportó. | `2026-07-31T12:00:00.000Z` |
+| `sha256` | Sí | `string` | Sin restricción adicional declarada | SHA-256 hexadecimal del contenido. | `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/lifecycle/cases/{id}/export"
+}
+```
+
+---
+
+## 82. POST /org/lifecycle/cases/{id}/handover/assign
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Asignar los traspasos pendientes de una baja
+- **Operation ID:** `SupportLifecycleController_assignHandover`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.assignHandover](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Asignar los traspasos pendientes de una baja. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reasigna los traspasos pendientes de un caso de baja.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/lifecycle/cases/{id}/handover/assign` en `SupportLifecycleController_assignHandover`. El controlador delega en `TeamAdminCasesService.assignHandover`. Valida el body como `AssignHandoverDto` y consume `application/json`. El tipo de retorno estático es `Promise<AssignHandoverResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AssignHandoverDto`; los campos opcionales se omiten.
+
+```http
+POST /org/lifecycle/cases/00000000-0000-4000-8000-000000000001/handover/assign HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `defaultToUserId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items` | No | `array<HandoverItemTargetDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","toUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].toUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `supervisedTo` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/lifecycle/cases/00000000-0000-4000-8000-000000000001/handover/assign HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "defaultToUserId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "toUserId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "supervisedTo": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AssignHandoverResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AssignHandoverResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "caseId": "00000000-0000-4000-8000-000000000001",
+  "handover": {
+    "status": "COMPLETED",
+    "pending": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `caseId` | Sí | `string` | formato `uuid` | Caso. | `00000000-0000-4000-8000-000000000001` |
+| `handover` | Sí | `OffboardHandoverStatusDto` | Sin restricción adicional declarada | Estado del traspaso. | `{"status":"COMPLETED","pending":1}` |
+| `handover.status` | Sí | `string` | valores: `COMPLETED`, `PENDING`, `FAILED` | `COMPLETED`, `PENDING` (a propósito) o `FAILED` (la baja ya es firme). | `COMPLETED` |
+| `handover.pending` | Sí | `number` | Sin restricción adicional declarada | Cuántos trabajos quedan pendientes. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Caso no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-handover.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/lifecycle/cases/{id}/handover/assign"
+}
+```
+
+---
+
+## 83. GET /org/patients/{patientProfileId}/restriction-flags
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Banderas de restricción de un paciente
+- **Operation ID:** `PatientRestrictionFlagsController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientRestrictionFlagsController.get](../../src/modules/delegated_access/controllers/patient-restriction-flags.controller.ts)
+
+### Descripción de negocio
+
+Banderas de restricción de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Banderas vigentes del paciente.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/patients/{patientProfileId}/restriction-flags` en `PatientRestrictionFlagsController_get`. El controlador delega en `PatientRestrictionFlagsService.get`. No recibe body. El tipo de retorno estático es `Promise<PatientRestrictionFlagsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/patients/00000000-0000-4000-8000-000000000001/restriction-flags HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `patientProfileId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/patients/00000000-0000-4000-8000-000000000001/restriction-flags HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientRestrictionFlagsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "flags": [
+    {
+      "flag": {},
+      "reason": "Texto descriptivo de ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `flags` | Sí | `array<RestrictionFlagViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"flag":{},"reason":"Texto descriptivo de ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `flags[].flag` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof PATIENT_RESTRICTION_FLAGS)[number] | `{}` |
+| `flags[].reason` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `flags[].validFrom` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `flags[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/patients/{patientProfileId}/restriction-flags"
+}
+```
+
+---
+
+## 84. PUT /org/patients/{patientProfileId}/restriction-flags
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Reemplazar las banderas de restricción de un paciente
+- **Operation ID:** `PatientRestrictionFlagsController_put`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PatientRestrictionFlagsController.put](../../src/modules/delegated_access/controllers/patient-restriction-flags.controller.ts)
+
+### Descripción de negocio
+
+Reemplazar las banderas de restricción de un paciente. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reemplaza el conjunto de banderas del paciente.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /org/patients/{patientProfileId}/restriction-flags` en `PatientRestrictionFlagsController_put`. El controlador delega en `PatientRestrictionFlagsService.put`. Valida el body como `PutRestrictionFlagsDto` y consume `application/json`. El tipo de retorno estático es `Promise<PatientRestrictionFlagsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `patientProfileId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PutRestrictionFlagsDto`; los campos opcionales se omiten.
+
+```http
+PUT /org/patients/00000000-0000-4000-8000-000000000001/restriction-flags HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "flags": [
+    {
+      "flag": "VIP",
+      "reason": "Texto descriptivo de ejemplo"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `patientProfileId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `flags` | Sí | `array<RestrictionFlagInputDto>` | máximo PATIENT_RESTRICTION_FLAGS.length elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"flag":"VIP","reason":"Texto descriptivo de ejemplo","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `flags[].flag` | Sí | `string` | valores: `VIP`, `CONFIDENTIAL`, `STAFF_RELATIVE`, `PROTECTED` | Sin descripción específica en el contrato OpenAPI. | `VIP` |
+| `flags[].reason` | Sí | `string` | longitud mínima 10; longitud máxima 500 | Por qué se restringe (al menos 10 caracteres). | `Texto descriptivo de ejemplo` |
+| `flags[].validTo` | No | `string` | formato `date-time` | Fin de la restricción; vacío = sin fin. | `2026-07-31T12:00:00.000Z` |
+| `removalReason` | No | `string` | longitud mínima 10; longitud máxima 500 | Por qué se retira o afloja una restricción (obligatorio si el conjunto quita una bandera o acorta su fin; al menos 10 caracteres, sin datos clínicos). Además exige el paso extra y ser el doctor titular o SECURITY_ADMIN. El asiento guarda solo su largo y su huella, nunca el texto. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /org/patients/00000000-0000-4000-8000-000000000001/restriction-flags HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "flags": [
+    {
+      "flag": "VIP",
+      "reason": "Texto descriptivo de ejemplo",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "removalReason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<PatientRestrictionFlagsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PatientRestrictionFlagsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "patientProfileId": "00000000-0000-4000-8000-000000000001",
+  "flags": [
+    {
+      "flag": {},
+      "reason": "Texto descriptivo de ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `patientProfileId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `flags` | Sí | `array<RestrictionFlagViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"flag":{},"reason":"Texto descriptivo de ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `flags[].flag` | Sí | `object` | Sin restricción adicional declarada | Tipo TypeScript no expandido: (typeof PATIENT_RESTRICTION_FLAGS)[number] | `{}` |
+| `flags[].reason` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `flags[].validFrom` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `flags[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/patients/{patientProfileId}/restriction-flags"
+}
+```
+
+---
+
+## 85. GET /org/permission-catalog
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Catálogo de permisos del personal de apoyo
+- **Operation ID:** `AccessCatalogController_catalog`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessCatalogController.catalog](../../src/modules/delegated_access/controllers/access-catalog.controller.ts)
+
+### Descripción de negocio
+
+Catálogo de permisos del personal de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Los 73 permisos con sus metadatos, las categorías y los alias.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/permission-catalog` en `AccessCatalogController_catalog`. El controlador delega en `AccessSummaryService.catalog`. No recibe body. El tipo de retorno estático es `Promise<PermissionCatalogResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/permission-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/permission-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<PermissionCatalogResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<PermissionCatalogResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<PermissionCatalogResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<PermissionCatalogResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<PermissionCatalogResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<PermissionCatalogResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<PermissionCatalogResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `PermissionCatalogResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "atoms": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "category": "valor-ejemplo",
+      "sensitivity": "LOW",
+      "requiresReason": true,
+      "requiresStepUp": true,
+      "approvalMode": "DOCTOR",
+      "purposeOfUse": "valor-ejemplo",
+      "legalBasis": "valor-ejemplo",
+      "touchesClinicalData": true,
+      "isFieldLevel": true,
+      "supportAssignable": true,
+      "isDangerous": true
+    }
+  ],
+  "categories": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo"
+    }
+  ],
+  "aliases": [
+    {
+      "code": "CODIGO_EJEMPLO",
+      "atoms": [
+        "valor-ejemplo"
+      ],
+      "primary": "valor-ejemplo"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `atoms` | Sí | `array<PermissionAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","category":"valor-ejemplo","sensitivity":"LOW","requiresReason":true,"requiresStepUp":true,"approvalMode":"DOCTOR","purposeOfUse":"valor-ejemplo","legalBasis":"valor-ejemplo","touchesClinicalData":true,"isFieldLevel":true,"supportAssignable":true,"isDangerous":true}]` |
+| `atoms[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `atoms[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `atoms[].category` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `atoms[].sensitivity` | Sí | `string` | valores: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` | Sin descripción específica en el contrato OpenAPI. | `LOW` |
+| `atoms[].requiresReason` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `atoms[].requiresStepUp` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `atoms[].approvalMode` | No | `string` | valores: `DOCTOR`, `SECOND_APPROVER`; admite null | Sin descripción específica en el contrato OpenAPI. | `DOCTOR` |
+| `atoms[].purposeOfUse` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `atoms[].legalBasis` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `atoms[].touchesClinicalData` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `atoms[].isFieldLevel` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `atoms[].supportAssignable` | Sí | `boolean` | Sin restricción adicional declarada | Falso: solo `SECURITY_ADMIN`, nunca personal de apoyo. | `true` |
+| `atoms[].isDangerous` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `categories` | Sí | `array<PermissionCategoryViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo"}]` |
+| `categories[].code` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `categories[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `aliases` | Sí | `array<LegacyAliasViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"CODIGO_EJEMPLO","atoms":["valor-ejemplo"],"primary":"valor-ejemplo"}]` |
+| `aliases[].code` | Sí | `string` | Sin restricción adicional declarada | Uno de los 15 códigos antiguos. | `CODIGO_EJEMPLO` |
+| `aliases[].atoms` | Sí | `array<string>` | Sin restricción adicional declarada | Permisos que da hoy. | `["valor-ejemplo"]` |
+| `aliases[].primary` | Sí | `string` | Sin restricción adicional declarada | Permiso que se exige cuando se pregunta con el código antiguo. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/permission-catalog"
+}
+```
+
+---
+
+## 86. GET /org/role-templates
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Plantillas de rol de apoyo
+- **Operation ID:** `SupportEngagementsController_listTemplates`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.listTemplates](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Plantillas de rol de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Plantillas de rol visibles para la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/role-templates` en `SupportEngagementsController_listTemplates`. El controlador delega en `RoleTemplatesService.list`. No recibe body. El tipo de retorno estático es `Promise<ListRoleTemplatesResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/role-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/role-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListRoleTemplatesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListRoleTemplatesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListRoleTemplatesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListRoleTemplatesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListRoleTemplatesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListRoleTemplatesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListRoleTemplatesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListRoleTemplatesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "code": "CODIGO_EJEMPLO",
+      "name": "Nombre de ejemplo",
+      "defaultActions": [
+        "valor-ejemplo"
+      ],
+      "platform": true,
+      "versionNumber": 1
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<RoleTemplateViewDto>` | Sin restricción adicional declarada | Plantillas. | `[{"id":"00000000-0000-4000-8000-000000000001","code":"CODIGO_EJEMPLO","name":"Nombre de ejemplo","defaultActions":["valor-ejemplo"],"platform":true,"versionNumber":1}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id de la plantilla. | `00000000-0000-4000-8000-000000000001` |
+| `items[].code` | Sí | `string` | Sin restricción adicional declarada | Código. | `CODIGO_EJEMPLO` |
+| `items[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre. | `Nombre de ejemplo` |
+| `items[].defaultActions` | Sí | `array<string>` | Sin restricción adicional declarada | Acciones por defecto. | `["valor-ejemplo"]` |
+| `items[].platform` | Sí | `boolean` | Sin restricción adicional declarada | ¿Es de plataforma (no editable por la organización)? | `true` |
+| `items[].versionNumber` | Sí | `number` | Sin restricción adicional declarada | Versión. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/role-templates"
+}
+```
+
+---
+
+## 87. POST /org/role-templates
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Crear una plantilla de rol propia
+- **Operation ID:** `SupportEngagementsController_createTemplate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.createTemplate](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Crear una plantilla de rol propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crea una plantilla propia.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/role-templates` en `SupportEngagementsController_createTemplate`. El controlador delega en `RoleTemplatesService.create`. Valida el body como `CreateRoleTemplateDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateRoleTemplateDto`; los campos opcionales se omiten.
+
+```http
+POST /org/role-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "defaultActions": [
+    "schedule.view"
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `code` | Sí | `string` | longitud máxima 60; patrón runtime `/^[A-Z][A-Z0-9_]{1,59}$/` | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `name` | Sí | `string` | longitud mínima 1; longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `defaultActions` | Sí | `array<string>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["schedule.view"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/role-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "CODIGO_EJEMPLO",
+  "name": "Nombre de ejemplo",
+  "defaultActions": [
+    "schedule.view"
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 409 | `CONFLICT` | Ya existe una plantilla con ese código | Excepción explícita en src/modules/delegated_access/services/role-templates.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/role-templates"
+}
+```
+
+---
+
+## 88. PATCH /org/role-templates/{id}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Versionar una plantilla de rol propia
+- **Operation ID:** `SupportEngagementsController_updateTemplate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.updateTemplate](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Versionar una plantilla de rol propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Publica una versión nueva de una plantilla propia.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /org/role-templates/{id}` en `SupportEngagementsController_updateTemplate`. El controlador delega en `RoleTemplatesService.update`. Valida el body como `UpdateRoleTemplateDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateRoleTemplateDto`; los campos opcionales se omiten.
+
+```http
+PATCH /org/role-templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `name` | No | `string` | longitud mínima 1; longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `defaultActions` | No | `array<string>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["schedule.view"]` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /org/role-templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "name": "Nombre de ejemplo",
+  "defaultActions": [
+    "schedule.view"
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay cambios que aplicar | Excepción explícita en src/modules/delegated_access/services/role-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla de plataforma no se edita | Excepción explícita en src/modules/delegated_access/services/role-templates.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa versión de la plantilla ya fue reemplazada: edite la vigente | Excepción explícita en src/modules/delegated_access/services/role-templates.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/role-templates/{id}"
+}
+```
+
+---
+
+## 89. GET /org/support-activity
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Actividad del personal de apoyo
+- **Operation ID:** `SupportEngagementsController_activityOfTenant`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.activityOfTenant](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Actividad del personal de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Qué hizo el personal de apoyo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/support-activity` en `SupportEngagementsController_activityOfTenant`. El controlador delega en `SupportActivityService.forTenant`. No recibe body. El tipo de retorno estático es `Promise<SupportActivityResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `userId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `person` | query | No | `string` | longitud máxima 120 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `doctor` | query | No | `string` | longitud máxima 120 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `action` | query | No | `string` | longitud máxima 80 | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+| `from` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-10-01` |
+| `to` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `2026-10-30` |
+| `limit` | query | No | `number` | mínimo 1; máximo 200 | Sin descripción específica en OpenAPI. | `1` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/support-activity HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/support-activity?userId=00000000-0000-4000-8000-000000000001&tenantId=00000000-0000-4000-8000-000000000001&person=valor-ejemplo&doctor=valor-ejemplo&action=valor-ejemplo&from=2026-10-01&to=2026-10-30&limit=1&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportActivityResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportActivityResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "personName": "Nombre de ejemplo",
+      "actorName": "Nombre de ejemplo",
+      "action": "valor-ejemplo",
+      "auditAction": "valor-ejemplo",
+      "permission": "valor-ejemplo",
+      "entity": "valor-ejemplo",
+      "entityId": "00000000-0000-4000-8000-000000000001",
+      "bookingId": "00000000-0000-4000-8000-000000000001",
+      "appointmentId": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "summary": "valor-ejemplo",
+      "success": true,
+      "result": "SUCCESS",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "occurredAt": "2026-07-31T12:00:00.000Z",
+      "recordedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportActivityEntryDto>` | Sin restricción adicional declarada | Asientos. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","personName":"Nombre de ejemplo","actorName":"Nombre de ejemplo","action":"valor-ejemplo","auditAction":"valor-ejemplo","permission":"valor-ejemplo","entity":"valor-ejemplo","entityId":"00000000-0000-4000-8000-000000000001","bookingId":"00000000-0000-4000-8000-000000000001","appointmentId":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","summary":"valor-ejemplo","success":true,"result":"SUCCESS","createdAt":"2026-07-31T12:00:00.000Z","occurredAt":"2026-07-31T12:00:00.000Z","recordedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id del asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | No | `string` | formato `uuid` | Organización a la que pertenece el asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Persona que actuó. | `00000000-0000-4000-8000-000000000001` |
+| `items[].personName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la persona que actuó. | `Nombre de ejemplo` |
+| `items[].actorName` | Sí | `string` | Sin restricción adicional declarada | Igual que `personName`. | `Nombre de ejemplo` |
+| `items[].action` | Sí | `string` | Sin restricción adicional declarada | Código de la entrada: el permiso con el que se actuó (`schedule.check_in`) o el evento (`engagement.ended`); un asiento que no se reconoce conserva el suyo (`auditAction`). | `valor-ejemplo` |
+| `items[].auditAction` | Sí | `string` | Sin restricción adicional declarada | Asiento de la cadena de auditoría tal como se selló (`BOOKING_CHECKED_IN`). | `valor-ejemplo` |
+| `items[].permission` | No | `string` | Sin restricción adicional declarada | Permiso de apoyo con el que se hizo, si es una acción de agenda. | `valor-ejemplo` |
+| `items[].entity` | Sí | `string` | Sin restricción adicional declarada | Recurso afectado. | `valor-ejemplo` |
+| `items[].entityId` | No | `string` | formato `uuid` | Id del recurso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].bookingId` | No | `string` | formato `uuid` | Reserva a la que se refiere el asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].appointmentId` | No | `string` | formato `uuid` | Cita a la que se refiere el asiento. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerProfileId` | No | `string` | formato `uuid` | Doctor sobre cuya agenda o equipo se actuó (perfil profesional). | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Asignación de rol del doctor, si el asiento la nombra. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerName` | No | `string` | Sin restricción adicional declarada | Nombre del doctor; solo si quien consulta puede verlo. | `Nombre de ejemplo` |
+| `items[].summary` | Sí | `string` | Sin restricción adicional declarada | La acción en una frase. | `valor-ejemplo` |
+| `items[].success` | Sí | `boolean` | Sin restricción adicional declarada | ¿Se hizo? | `true` |
+| `items[].result` | Sí | `string` | valores: `SUCCESS`, `FAILURE` | Resultado: `SUCCESS` o `FAILURE`. | `SUCCESS` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo. | `2026-07-31T12:00:00.000Z` |
+| `items[].occurredAt` | Sí | `string` | formato `date-time` | Igual que `createdAt`. | `2026-07-31T12:00:00.000Z` |
+| `items[].recordedAt` | Sí | `string` | formato `date-time` | Igual que `createdAt` (nombre de la primera versión). | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor de continuación. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-activity"
+}
+```
+
+---
+
+## 90. GET /org/support-catalog
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Catálogo de doctores, servicios y ubicaciones para los permisos
+- **Operation ID:** `SupportEngagementsController_catalog`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.catalog](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Catálogo de doctores, servicios y ubicaciones para los permisos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Doctores, servicios y ubicaciones que se pueden nombrar en un permiso.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/support-catalog` en `SupportEngagementsController_catalog`. El controlador delega en `SupportCatalogService.forActiveTenant`. No recibe body. El tipo de retorno estático es `Promise<SupportCatalogResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/support-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/support-catalog HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportCatalogResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportCatalogResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "doctors": [
+    {
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "displayName": "Nombre de ejemplo",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "placements": [
+        {
+          "careSpaceId": "00000000-0000-4000-8000-000000000001",
+          "healthcareServiceId": "00000000-0000-4000-8000-000000000001"
+        }
+      ]
+    }
+  ],
+  "services": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "locations": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": "SITE",
+      "name": "Nombre de ejemplo",
+      "code": "CODIGO_EJEMPLO",
+      "parentId": "00000000-0000-4000-8000-000000000001",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | Sí | `string` | formato `uuid` | Organización del catálogo. | `00000000-0000-4000-8000-000000000001` |
+| `doctors` | Sí | `array<CatalogDoctorDto>` | Sin restricción adicional declarada | Doctores, cada uno con sus combinaciones espacio ↔ servicio. | `[{"practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001","placements":[{"careSpaceId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001"}]}]` |
+| `doctors[].practitionerRoleAssignmentId` | Sí | `string` | formato `uuid` | Asignación de rol del doctor (lo que se nombra en un permiso). | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].practitionerProfileId` | No | `string` | formato `uuid` | Perfil profesional del doctor (solo lo ve la administración). | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].displayName` | Sí | `string` | Sin restricción adicional declarada | Nombre para mostrar. | `Nombre de ejemplo` |
+| `doctors[].practiceSiteId` | No | `string` | formato `uuid` | Sede de la asignación, si declara una. | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].placements` | Sí | `array<CatalogPlacementDto>` | Sin restricción adicional declarada | Combinaciones espacio ↔ servicio en las que atiende, para no cruzarlas. | `[{"careSpaceId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001"}]` |
+| `doctors[].placements[].careSpaceId` | No | `string` | formato `uuid` | Espacio de atención. | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].placements[].healthcareServiceId` | No | `string` | formato `uuid` | Servicio que presta en ese espacio. | `00000000-0000-4000-8000-000000000001` |
+| `services` | Sí | `array<CatalogServiceDto>` | Sin restricción adicional declarada | Servicios. | `[{"id":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","practiceSiteId":"00000000-0000-4000-8000-000000000001"}]` |
+| `services[].id` | Sí | `string` | formato `uuid` | Servicio de la organización. | `00000000-0000-4000-8000-000000000001` |
+| `services[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre del servicio. | `Nombre de ejemplo` |
+| `services[].practiceSiteId` | No | `string` | formato `uuid` | Sede donde se presta, si es de una. | `00000000-0000-4000-8000-000000000001` |
+| `locations` | Sí | `array<CatalogLocationDto>` | Sin restricción adicional declarada | Sedes y espacios. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":"SITE","name":"Nombre de ejemplo","code":"CODIGO_EJEMPLO","parentId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001"}]` |
+| `locations[].id` | Sí | `string` | formato `uuid` | Sede o espacio. | `00000000-0000-4000-8000-000000000001` |
+| `locations[].kind` | Sí | `string` | valores: `SITE`, `SPACE` | Si es una sede o un espacio de atención. | `SITE` |
+| `locations[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre. | `Nombre de ejemplo` |
+| `locations[].code` | Sí | `string` | Sin restricción adicional declarada | Código. | `CODIGO_EJEMPLO` |
+| `locations[].parentId` | No | `string` | formato `uuid` | Padre: la sede o el espacio que lo contiene. | `00000000-0000-4000-8000-000000000001` |
+| `locations[].practiceSiteId` | Sí | `string` | formato `uuid` | Sede a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-catalog"
+}
+```
+
+---
+
+## 91. GET /org/support-engagement-requests
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-requests`
+- **Nombre:** Solicitudes de vínculo de apoyo de la organización
+- **Operation ID:** `SupportEngagementRequestsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementRequestsController.list](../../src/modules/delegated_access/controllers/support-engagement-requests.controller.ts)
+
+### Descripción de negocio
+
+Solicitudes de vínculo de apoyo de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Solicitudes de la organización activa.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/support-engagement-requests` en `SupportEngagementRequestsController_list`. El controlador delega en `EngagementRequestsService.listForTenant`. No recibe body. El tipo de retorno estático es `Promise<ListEngagementRequestsResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `status` | query | No | `string` | valores: `PENDING`, `APPROVED`, `REJECTED`, `EXPIRED`, `CANCELLED` | Sin descripción específica en OpenAPI. | `PENDING` |
+| `limit` | query | No | `number` | mínimo 1; máximo 100 | Sin descripción específica en OpenAPI. | `1` |
+| `cursor` | query | No | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `valor-ejemplo` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/support-engagement-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/support-engagement-requests?status=PENDING&limit=1&cursor=valor-ejemplo HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListEngagementRequestsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListEngagementRequestsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListEngagementRequestsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListEngagementRequestsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListEngagementRequestsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListEngagementRequestsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListEngagementRequestsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListEngagementRequestsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "organizationName": "Nombre de ejemplo",
+      "requesterUserId": "00000000-0000-4000-8000-000000000001",
+      "requesterName": "Nombre de ejemplo",
+      "direction": "valor-ejemplo",
+      "roleTemplateId": "00000000-0000-4000-8000-000000000001",
+      "roleTemplateCode": "CODIGO_EJEMPLO",
+      "parentAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "message": "valor-ejemplo",
+      "status": "ok",
+      "createdAt": "2026-07-31T12:00:00.000Z",
+      "expiresAt": "2026-07-31T12:00:00.000Z",
+      "decidedAt": "2026-07-31T12:00:00.000Z",
+      "decisionReason": "Texto descriptivo de ejemplo",
+      "items": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "practitionerName": "Nombre de ejemplo",
+          "serviceName": "Nombre de ejemplo",
+          "locationName": "Nombre de ejemplo",
+          "proposedActions": [
+            "valor-ejemplo"
+          ],
+          "decision": "valor-ejemplo",
+          "decisionComment": "valor-ejemplo",
+          "resultingGrantId": "00000000-0000-4000-8000-000000000001"
+        }
+      ]
+    }
+  ],
+  "count": 1,
+  "nextCursor": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<EngagementRequestViewDto>` | Sin restricción adicional declarada | Solicitudes de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","requesterUserId":"00000000-0000-4000-8000-000000000001","requesterName":"Nombre de ejemplo","direction":"valor-ejemplo","roleTemplateId":"00000000-0000-4000-8000-000000000001","roleTemplateCode":"CODIGO_EJEMPLO","parentAssignmentId":"00000000-0000-4000-8000-000000000001","message":"valor-ejemplo","status":"ok","createdAt":"2026-07-31T12:00:00.000Z","expiresAt":"2026-07-31T12:00:00.000Z","decidedAt":"2026-07-31T12:00:00.000Z","decisionReason":"Texto descriptivo de ejemplo","items":[{"id":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo","proposedActions":["valor-ejemplo"],"decision":"valor-ejemplo","decisionComment":"valor-ejemplo","resultingGrantId":"00000000-0000-4000-8000-000000000001"}]}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id de la solicitud. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | Sí | `string` | formato `uuid` | Organización. | `00000000-0000-4000-8000-000000000001` |
+| `items[].organizationName` | No | `string` | Sin restricción adicional declarada | Nombre de la organización. | `Nombre de ejemplo` |
+| `items[].requesterUserId` | Sí | `string` | formato `uuid` | Persona de apoyo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].requesterName` | No | `string` | Sin restricción adicional declarada | Nombre de la persona de apoyo. | `Nombre de ejemplo` |
+| `items[].direction` | Sí | `string` | Sin restricción adicional declarada | REQUEST o INVITATION. | `valor-ejemplo` |
+| `items[].roleTemplateId` | Sí | `string` | formato `uuid` | Plantilla pedida (id). | `00000000-0000-4000-8000-000000000001` |
+| `items[].roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Plantilla pedida (código: `SECRETARY`, `FRONT_DESK`…). | `CODIGO_EJEMPLO` |
+| `items[].parentAssignmentId` | No | `string` | formato `uuid` | Vínculo ampliado, si es una ampliación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].message` | No | `string` | Sin restricción adicional declarada | Mensaje de la persona. | `valor-ejemplo` |
+| `items[].status` | Sí | `string` | Sin restricción adicional declarada | Estado: `PENDING`, `APPROVED`, `PARTIAL` (se aprobó parte y se rechazó parte), `REJECTED`, `EXPIRED` o `CANCELLED`. | `ok` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se creó. | `2026-07-31T12:00:00.000Z` |
+| `items[].expiresAt` | Sí | `string` | formato `date-time` | Vencimiento (15 días). | `2026-07-31T12:00:00.000Z` |
+| `items[].decidedAt` | No | `string` | formato `date-time` | Fecha de la decisión. | `2026-07-31T12:00:00.000Z` |
+| `items[].decisionReason` | No | `string` | Sin restricción adicional declarada | Motivo general de la decisión. | `Texto descriptivo de ejemplo` |
+| `items[].items` | Sí | `array<EngagementRequestItemViewDto>` | Sin restricción adicional declarada | Ítems. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo","proposedActions":["valor-ejemplo"],"decision":"valor-ejemplo","decisionComment":"valor-ejemplo","resultingGrantId":"00000000-0000-4000-8000-000000000001"}]` |
+| `items[].items[].id` | Sí | `string` | formato `uuid` | Id del ítem. | `00000000-0000-4000-8000-000000000001` |
+| `items[].items[].practitionerName` | No | `string` | Sin restricción adicional declarada | Nombre del doctor del ítem. | `Nombre de ejemplo` |
+| `items[].items[].serviceName` | No | `string` | Sin restricción adicional declarada | Nombre del servicio del ítem. | `Nombre de ejemplo` |
+| `items[].items[].locationName` | No | `string` | Sin restricción adicional declarada | Nombre de la ubicación (espacio o sede) del ítem. | `Nombre de ejemplo` |
+| `items[].items[].proposedActions` | Sí | `array<string>` | Sin restricción adicional declarada | Acciones propuestas. | `["valor-ejemplo"]` |
+| `items[].items[].decision` | Sí | `string` | Sin restricción adicional declarada | Decisión (PENDING, APPROVED, ADJUSTED, REJECTED). | `valor-ejemplo` |
+| `items[].items[].decisionComment` | No | `string` | Sin restricción adicional declarada | Motivo de la decisión. | `valor-ejemplo` |
+| `items[].items[].resultingGrantId` | No | `string` | formato `uuid` | Permiso emitido. | `00000000-0000-4000-8000-000000000001` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
+| `nextCursor` | Sí | `string` | admite null | Cursor de continuación, o `null` en la última página. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagement-requests"
+}
+```
+
+---
+
+## 92. POST /org/support-engagement-requests/{id}/decision
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-requests`
+- **Nombre:** Decidir una solicitud de apoyo ítem por ítem
+- **Operation ID:** `SupportEngagementRequestsController_decide`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementRequestsController.decide](../../src/modules/delegated_access/controllers/support-engagement-requests.controller.ts)
+
+### Descripción de negocio
+
+Decidir una solicitud de apoyo ítem por ítem. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Decisión por ítem: aprobar, ajustar o rechazar con motivo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/support-engagement-requests/{id}/decision` en `SupportEngagementRequestsController_decide`. El controlador delega en `EngagementRequestsService.decide`. Valida el body como `DecideEngagementRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<EngagementDecisionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DecideEngagementRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /org/support-engagement-requests/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "decision": "APPROVED"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ItemDecisionDto>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"itemId":"00000000-0000-4000-8000-000000000001","decision":"APPROVED","comment":"valor-ejemplo","actions":["agenda.appointment.view"],"condition":{},"adjustment":{"targetKind":"PRACTITIONER","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001","careSpaceId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001","actions":["agenda.appointment.view"],"condition":{}},"expansionMode":"DYNAMIC","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].itemId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decision` | Sí | `string` | valores: `APPROVED`, `ADJUSTED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `items[].comment` | No | `string` | longitud mínima 1; longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].actions` | No | `array<string>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["agenda.appointment.view"]` |
+| `items[].condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].adjustment` | No | `ItemAdjustmentDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"targetKind":"PRACTITIONER","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001","careSpaceId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001","actions":["agenda.appointment.view"],"condition":{}}` |
+| `items[].adjustment.targetKind` | No | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `items[].adjustment.practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].adjustment.healthcareServiceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].adjustment.careSpaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].adjustment.practiceSiteId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].adjustment.actions` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["agenda.appointment.view"]` |
+| `items[].adjustment.condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `items[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `recertifyEveryMonths` | No | `number` | valores: `6`, `12`; mínimo 6; máximo 12 | Sin descripción específica en el contrato OpenAPI. | `6` |
+| `reasonText` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/support-engagement-requests/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "decision": "APPROVED",
+      "comment": "valor-ejemplo",
+      "actions": [
+        "agenda.appointment.view"
+      ],
+      "condition": {},
+      "adjustment": {
+        "targetKind": "PRACTITIONER",
+        "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+        "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+        "careSpaceId": "00000000-0000-4000-8000-000000000001",
+        "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+        "actions": [
+          "agenda.appointment.view"
+        ],
+        "condition": {}
+      },
+      "expansionMode": "DYNAMIC",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "recertifyEveryMonths": 6,
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EngagementDecisionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "requestId": "00000000-0000-4000-8000-000000000001",
+  "status": "ok",
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "grantIds": [
+    "valor-ejemplo"
+  ],
+  "pendingItemIds": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `requestId` | Sí | `string` | formato `uuid` | Solicitud decidida. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Estado final de la solicitud. | `ok` |
+| `engagementId` | No | `string` | formato `uuid` | Vínculo abierto o ampliado, si algo se aprobó. | `00000000-0000-4000-8000-000000000001` |
+| `grantIds` | Sí | `array<string>` | Sin restricción adicional declarada | Permisos emitidos. | `["valor-ejemplo"]` |
+| `pendingItemIds` | No | `array<string>` | Sin restricción adicional declarada | Ítems que siguen pendientes (decisión parcial por alcance): los decide `SECURITY_ADMIN`. Ausente si la solicitud quedó completa. | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Ítem de solicitud no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La solicitud ya no está pendiente | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | La solicitud venció | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | La decisión debe cubrir todos los ítems pendientes | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El vínculo que se amplía ya no está activo | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | error instanceof Error ? error.message : 'Foto demasiado grande' | Excepción explícita en src/modules/delegated_access/services/support-targets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagement-requests/{id}/decision"
+}
+```
+
+---
+
+## 93. GET /org/support-engagements
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Vínculos de apoyo de la organización
+- **Operation ID:** `SupportEngagementsController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.list](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Vínculos de apoyo de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Vínculos de apoyo de la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/support-engagements` en `SupportEngagementsController_list`. El controlador delega en `SupportEngagementsService.listForTenant`. No recibe body. El tipo de retorno estático es `Promise<ListSupportEngagementsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/support-engagements HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/support-engagements HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListSupportEngagementsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListSupportEngagementsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListSupportEngagementsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListSupportEngagementsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListSupportEngagementsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListSupportEngagementsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListSupportEngagementsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListSupportEngagementsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "roleTemplateCode": "CODIGO_EJEMPLO",
+      "personName": "Nombre de ejemplo",
+      "organizationName": "Nombre de ejemplo",
+      "ownerKind": "valor-ejemplo",
+      "recertifyEveryMonths": 1,
+      "status": "ok",
+      "origin": "valor-ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "nextRecertificationAt": "2026-07-31T12:00:00.000Z",
+      "recertificationDue": true,
+      "endedReason": "Texto descriptivo de ejemplo",
+      "lastActivityAt": "2026-07-31T12:00:00.000Z",
+      "suspendedAt": "2026-07-31T12:00:00.000Z",
+      "lastConfirmedAt": "2026-07-31T12:00:00.000Z",
+      "lastConfirmedBy": "PERSON",
+      "personConfirmedAt": "2026-07-31T12:00:00.000Z",
+      "grants": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "actions": [
+            "valor-ejemplo"
+          ],
+          "expansionMode": "valor-ejemplo",
+          "status": "ok",
+          "validFrom": "2026-07-31T12:00:00.000Z",
+          "validTo": "2026-07-31T12:00:00.000Z"
+        }
+      ]
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportEngagementViewDto>` | Sin restricción adicional declarada | Vínculos. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","userId":"00000000-0000-4000-8000-000000000001","roleTemplateCode":"CODIGO_EJEMPLO","personName":"Nombre de ejemplo","organizationName":"Nombre de ejemplo","ownerKind":"valor-ejemplo","recertifyEveryMonths":1,"status":"ok","origin":"valor-ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","nextRecertificationAt":"2026-07-31T12:00:00.000Z","recertificationDue":true,"endedReason":"Texto descriptivo de ejemplo","lastActivityAt":"2026-07-31T12:00:00.000Z","suspendedAt":"2026-07-31T12:00:00.000Z","lastConfirmedAt":"2026-07-31T12:00:00.000Z","lastConfirmedBy":"PERSON","personConfirmedAt":"2026-07-31T12:00:00.000Z","grants":[{"id":"00000000-0000-4000-8000-000000000001","actions":["valor-ejemplo"],"expansionMode":"valor-ejemplo","status":"ok","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id del vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | Sí | `string` | formato `uuid` | Organización. | `00000000-0000-4000-8000-000000000001` |
+| `items[].userId` | Sí | `string` | formato `uuid` | Persona de apoyo. | `00000000-0000-4000-8000-000000000001` |
+| `items[].roleTemplateCode` | No | `string` | Sin restricción adicional declarada | Plantilla de rol (código). | `CODIGO_EJEMPLO` |
+| `items[].personName` | No | `string` | Sin restricción adicional declarada | Nombre de la persona de apoyo. | `Nombre de ejemplo` |
+| `items[].organizationName` | No | `string` | Sin restricción adicional declarada | Nombre de la organización. | `Nombre de ejemplo` |
+| `items[].ownerKind` | No | `string` | Sin restricción adicional declarada | Dueño del vínculo: `ORGANIZATION` o `PRIVATE_PRACTICE`. | `valor-ejemplo` |
+| `items[].recertifyEveryMonths` | No | `number` | Sin restricción adicional declarada | Cada cuántos meses se recertifica (6 o 12). | `1` |
+| `items[].status` | Sí | `string` | Sin restricción adicional declarada | Estado del vínculo. | `ok` |
+| `items[].origin` | No | `string` | Sin restricción adicional declarada | Origen (REQUEST, INVITATION, QR). | `valor-ejemplo` |
+| `items[].validFrom` | No | `string` | formato `date-time` | Inicio de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `items[].validTo` | No | `string` | formato `date-time` | Fin de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `items[].nextRecertificationAt` | No | `string` | formato `date-time` | Próxima recertificación. | `2026-07-31T12:00:00.000Z` |
+| `items[].recertificationDue` | Sí | `boolean` | Sin restricción adicional declarada | ¿Ya venció la fecha de recertificación y está esperando confirmación? | `true` |
+| `items[].endedReason` | No | `string` | Sin restricción adicional declarada | Motivo del fin de vínculo. | `Texto descriptivo de ejemplo` |
+| `items[].lastActivityAt` | No | `string` | formato `date-time` | Última actividad de la persona en la organización dentro de los últimos 90 días; ausente si no hubo. | `2026-07-31T12:00:00.000Z` |
+| `items[].suspendedAt` | No | `string` | formato `date-time` | Fecha en que el vínculo se suspende (o debió suspenderse) por no recertificarse: la de recertificación más 15 días. Solo si está suspendido por eso. | `2026-07-31T12:00:00.000Z` |
+| `items[].lastConfirmedAt` | No | `string` | formato `date-time` | Última vez que la ORGANIZACIÓN confirmó (recertificó) el vínculo, o su aprobación inicial: la recertificación vigente menos su período. | `2026-07-31T12:00:00.000Z` |
+| `items[].lastConfirmedBy` | No | `string` | valores: `PERSON`, `ORGANIZATION` | Quién hizo esa confirmación: siempre `ORGANIZATION` (la persona solo declara). | `PERSON` |
+| `items[].personConfirmedAt` | No | `string` | formato `date-time` | Última vez que la propia persona declaró «sigo trabajando aquí» (asiento `SUPPORT_ENGAGEMENT_CONFIRMED_BY_PERSON` más reciente). No renueva el período ni reactiva: es información para quien administra. | `2026-07-31T12:00:00.000Z` |
+| `items[].grants` | Sí | `array<SupportGrantViewDto>` | Sin restricción adicional declarada | Permisos del vínculo. | `[{"id":"00000000-0000-4000-8000-000000000001","actions":["valor-ejemplo"],"expansionMode":"valor-ejemplo","status":"ok","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].grants[].id` | Sí | `string` | formato `uuid` | Id del permiso. | `00000000-0000-4000-8000-000000000001` |
+| `items[].grants[].actions` | Sí | `array<string>` | Sin restricción adicional declarada | Acciones incluidas. | `["valor-ejemplo"]` |
+| `items[].grants[].expansionMode` | Sí | `string` | Sin restricción adicional declarada | DYNAMIC o FIXED. | `valor-ejemplo` |
+| `items[].grants[].status` | Sí | `string` | Sin restricción adicional declarada | Estado (ACTIVE, REVOKED, EXPIRED...). | `ok` |
+| `items[].grants[].validFrom` | No | `string` | formato `date-time` | Inicio de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `items[].grants[].validTo` | No | `string` | formato `date-time` | Fin de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad devuelta. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements"
+}
+```
+
+---
+
+## 94. GET /org/support-engagements/{id}/effective
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Permisos efectivos de un vínculo (alias y átomos)
+- **Operation ID:** `AccessCatalogController_effective`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessCatalogController.effective](../../src/modules/delegated_access/controllers/access-catalog.controller.ts)
+
+### Descripción de negocio
+
+Permisos efectivos de un vínculo (alias y átomos). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Permisos efectivos de un vínculo, con su origen.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/support-engagements/{id}/effective` en `AccessCatalogController_effective`. El controlador delega en `AccessSummaryService.effective`. No recibe body. El tipo de retorno estático es `Promise<EngagementEffectiveResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/support-engagements/00000000-0000-4000-8000-000000000001/effective HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/support-engagements/00000000-0000-4000-8000-000000000001/effective HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<EngagementEffectiveResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<EngagementEffectiveResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<EngagementEffectiveResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<EngagementEffectiveResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<EngagementEffectiveResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<EngagementEffectiveResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<EngagementEffectiveResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<EngagementEffectiveResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EngagementEffectiveResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "atoms": [
+    {
+      "atom": "valor-ejemplo",
+      "name": "Nombre de ejemplo",
+      "sensitivity": "LOW",
+      "origin": "LEGACY",
+      "grantIds": [
+        "valor-ejemplo"
+      ],
+      "conditional": true
+    }
+  ],
+  "denied": [
+    {
+      "atom": "valor-ejemplo",
+      "grantId": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `atoms` | Sí | `array<EffectiveAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"atom":"valor-ejemplo","name":"Nombre de ejemplo","sensitivity":"LOW","origin":"LEGACY","grantIds":["valor-ejemplo"],"conditional":true}]` |
+| `atoms[].atom` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `atoms[].name` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `atoms[].sensitivity` | Sí | `string` | valores: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` | Sin descripción específica en el contrato OpenAPI. | `LOW` |
+| `atoms[].origin` | Sí | `string` | valores: `LEGACY`, `ATOM`, `BOTH` | Sin descripción específica en el contrato OpenAPI. | `LEGACY` |
+| `atoms[].grantIds` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `atoms[].conditional` | Sí | `boolean` | Sin restricción adicional declarada | Algún permiso que lo da trae condiciones. | `true` |
+| `denied` | Sí | `array<DeniedAtomViewDto>` | Sin restricción adicional declarada | Prohibiciones expresas vigentes. | `[{"atom":"valor-ejemplo","grantId":"00000000-0000-4000-8000-000000000001"}]` |
+| `denied[].atom` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `denied[].grantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/effective"
+}
+```
+
+---
+
+## 95. POST /org/support-engagements/{id}/end
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Terminar un vínculo de apoyo (revocación inmediata)
+- **Operation ID:** `SupportEngagementsController_end`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.end](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Terminar un vínculo de apoyo (revocación inmediata). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Fin de vínculo: revocación inmediata en cascada; las citas se mantienen.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/support-engagements/{id}/end` en `SupportEngagementsController_end`. El controlador delega en `SupportEngagementsService.end`. Valida el body como `EndEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `EndEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/end HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/end HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/end"
+}
+```
+
+---
+
+## 96. GET /org/support-engagements/{id}/grants
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Permisos de un vínculo de apoyo
+- **Operation ID:** `SupportEngagementsController_listGrants`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.listGrants](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Permisos de un vínculo de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Permisos de un vínculo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/support-engagements/{id}/grants` en `SupportEngagementsController_listGrants`. El controlador delega en `SupportEngagementsService.listGrants`. No recibe body. El tipo de retorno estático es `Promise<SupportGrantViewDto[]>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/support-engagements/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/support-engagements/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportGrantViewDto[]>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SupportGrantViewDto[]>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportGrantViewDto[]>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportGrantViewDto[]>` | No |
+| 404 | Consulta completada correctamente. | `Promise<SupportGrantViewDto[]>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportGrantViewDto[]>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportGrantViewDto[]>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportGrantViewDto[]>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportGrantViewDto[]`. Ejemplo completo derivado de ese DTO:
+
+```json
+[
+  {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "actions": [
+      "valor-ejemplo"
+    ],
+    "expansionMode": "valor-ejemplo",
+    "status": "ok",
+    "validFrom": "2026-07-31T12:00:00.000Z",
+    "validTo": "2026-07-31T12:00:00.000Z"
+  }
+]
+```
+
+Campos de la respuesta:
+
+El DTO de respuesta no declara campos documentables.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/grants"
+}
+```
+
+---
+
+## 97. PATCH /org/support-engagements/{id}/grants
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Editar o dar de baja un permiso de apoyo
+- **Operation ID:** `SupportEngagementsController_updateGrant`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.updateGrant](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Editar o dar de baja un permiso de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Edición o baja de un permiso.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /org/support-engagements/{id}/grants` en `SupportEngagementsController_updateGrant`. El controlador delega en `SupportEngagementsService.updateGrant`. Valida el body como `UpdateSupportGrantDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto | GrantChangePendingDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateSupportGrantDto`; los campos opcionales se omiten.
+
+```http
+PATCH /org/support-engagements/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "grantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `grantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `actions` | No | `array<string>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["agenda.appointment.view"]` |
+| `condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `actionConditions` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `simulationToken` | No | `string` | longitud máxima 120 | Huella de `simulate`: guarda solo lo que se simuló. | `valor-ejemplo` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `revoke` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /org/support-engagements/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "grantId": "00000000-0000-4000-8000-000000000001",
+  "actions": [
+    "agenda.appointment.view"
+  ],
+  "condition": {
+    "clave": "valor"
+  },
+  "actionConditions": {
+    "clave": "valor"
+  },
+  "simulationToken": "valor-ejemplo",
+  "validTo": "2026-07-31T12:00:00.000Z",
+  "expansionMode": "DYNAMIC",
+  "revoke": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | Sí |
+| 202 | Agrega o amplía (alcance, modo DYNAMIC o vigencia) un permiso crítico: no se escribió nada y queda a la espera de la aprobación de otra persona (cuatro ojos). | `Promise<OperationResultDto | GrantChangePendingDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto | GrantChangePendingDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Permiso no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay cambios que aplicar | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 422 | `PRECONDITION_FAILED` | El vínculo de apoyo no está activo | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 422 | `PRECONDITION_FAILED` | error instanceof Error ? error.message : 'Foto demasiado grande' | Excepción explícita en src/modules/delegated_access/services/support-targets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/grants"
+}
+```
+
+---
+
+## 98. POST /org/support-engagements/{id}/grants
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Otorgar un permiso de apoyo (202 si agrega o amplía un permiso crítico y espera la aprobación de otra persona)
+- **Operation ID:** `SupportEngagementsController_addGrant`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.addGrant](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Otorgar un permiso de apoyo (202 si agrega o amplía un permiso crítico y espera la aprobación de otra persona). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Alta de un permiso.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/support-engagements/{id}/grants` en `SupportEngagementsController_addGrant`. El controlador delega en `SupportEngagementsService.addGrant`. Valida el body como `CreateSupportGrantDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto | GrantChangePendingDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateSupportGrantDto`; los campos opcionales se omiten.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "targetKind": "PRACTITIONER",
+  "actions": [
+    "agenda.appointment.view"
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `targetKind` | Sí | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `healthcareServiceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `careSpaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practiceSiteId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `actions` | Sí | `array<string>` | mínimo 1 elemento(s) | Permisos atómicos o códigos antiguos (los 15 se siguen aceptando). | `["agenda.appointment.view"]` |
+| `effect` | No | `string` | valores: `ALLOW`, `DENY` | Por defecto `ALLOW`. | `ALLOW` |
+| `condition` | No | `object` | Sin restricción adicional declarada | Condición v1 de todo el permiso. | `{"clave":"valor"}` |
+| `actionConditions` | No | `object` | Sin restricción adicional declarada | Condición v1 propia de cada permiso atómico (clave = permiso). | `{"clave":"valor"}` |
+| `simulationToken` | No | `string` | longitud máxima 120 | Huella de `simulate`: guarda solo lo que se simuló. | `valor-ejemplo` |
+| `expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "targetKind": "PRACTITIONER",
+  "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "actions": [
+    "agenda.appointment.view"
+  ],
+  "effect": "ALLOW",
+  "condition": {
+    "clave": "valor"
+  },
+  "actionConditions": {
+    "clave": "valor"
+  },
+  "simulationToken": "valor-ejemplo",
+  "expansionMode": "DYNAMIC",
+  "validFrom": "2026-07-31T12:00:00.000Z",
+  "validTo": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | Sí |
+| 202 | Agrega o amplía (alcance, modo DYNAMIC o vigencia) un permiso crítico: no se escribió nada y queda a la espera de la aprobación de otra persona (cuatro ojos). | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto | GrantChangePendingDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El vínculo de apoyo no está activo | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 422 | `PRECONDITION_FAILED` | error instanceof Error ? error.message : 'Foto demasiado grande' | Excepción explícita en src/modules/delegated_access/services/support-targets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/grants"
+}
+```
+
+---
+
+## 99. GET /org/support-engagements/{id}/handover-preview
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Vista previa del traspaso de una baja
+- **Operation ID:** `SupportLifecycleController_handoverPreview`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.handoverPreview](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Vista previa del traspaso de una baja. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lo que la persona tiene en las manos (sin datos del paciente).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/support-engagements/{id}/handover-preview` en `SupportLifecycleController_handoverPreview`. El controlador delega en `EngagementHandoverService.preview`. No recibe body. El tipo de retorno estático es `Promise<HandoverPreviewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/support-engagements/00000000-0000-4000-8000-000000000001/handover-preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/support-engagements/00000000-0000-4000-8000-000000000001/handover-preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HandoverPreviewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": "valor-ejemplo"
+    }
+  ],
+  "counts": {
+    "clave": "valor"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `engagementId` | Sí | `string` | formato `uuid` | Vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `items` | Sí | `array<HandoverPreviewItemDto>` | Sin restricción adicional declarada | Trabajos por tipo, sin datos del paciente. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":"valor-ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id del objeto (conversación, tarea, cuenta o cita). | `00000000-0000-4000-8000-000000000001` |
+| `items[].kind` | Sí | `string` | Sin restricción adicional declarada | Tipo de trabajo. | `valor-ejemplo` |
+| `counts` | Sí | `object` | Sin restricción adicional declarada | Cantidad por tipo. | `{"clave":"valor"}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-handover.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/handover-preview"
+}
+```
+
+---
+
+## 100. POST /org/support-engagements/{id}/identity-verification
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Registrar la verificación de identidad de la persona
+- **Operation ID:** `SupportLifecycleController_identityVerification`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.identityVerification](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Registrar la verificación de identidad de la persona. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Un administrador registra la identidad verificada en persona o con documento.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/support-engagements/{id}/identity-verification` en `SupportLifecycleController_identityVerification`. El controlador delega en `LifecycleService.identityVerification`. Valida el body como `IdentityVerificationDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `IdentityVerificationDto`; los campos opcionales se omiten.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/identity-verification HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "method": "IN_PERSON"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `method` | Sí | `string` | valores: `IN_PERSON`, `DOCUMENT_UPLOAD` | Sin descripción específica en el contrato OpenAPI. | `IN_PERSON` |
+| `note` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/identity-verification HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "method": "IN_PERSON",
+  "note": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/identity-verification"
+}
+```
+
+---
+
+## 101. POST /org/support-engagements/{id}/move
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Cambiar el rol o alcance de una persona de apoyo
+- **Operation ID:** `SupportLifecycleController_move`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.move](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Cambiar el rol o alcance de una persona de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cambio de rol o alcance: 200 si se ejecutó, 202 si pide cuatro ojos.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/support-engagements/{id}/move` en `SupportLifecycleController_move`. El controlador delega en `EngagementMoveService.move`. Valida el body como `MoveEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<MoveResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `MoveEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/move HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo",
+  "grants": [
+    {
+      "targetKind": "PRACTITIONER",
+      "actions": [
+        "valor-ejemplo"
+      ]
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 3; longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `effectiveAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `newTemplateCode` | No | `string` | longitud máxima 80 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `supervisorUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `grants` | Sí | `array<MoveGrantDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"targetKind":"PRACTITIONER","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001","careSpaceId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001","actions":["valor-ejemplo"],"effect":"ALLOW","condition":{},"expansionMode":"DYNAMIC","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `grants[].targetKind` | Sí | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `grants[].practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `grants[].healthcareServiceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `grants[].careSpaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `grants[].practiceSiteId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `grants[].actions` | Sí | `array<string>` | mínimo 1 elemento(s); máximo 80 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `grants[].effect` | No | `string` | valores: `ALLOW`, `DENY` | Sin descripción específica en el contrato OpenAPI. | `ALLOW` |
+| `grants[].condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `grants[].expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `grants[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `grants[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `simulationToken` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/move HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo",
+  "effectiveAt": "2026-07-31T12:00:00.000Z",
+  "newTemplateCode": "CODIGO_EJEMPLO",
+  "supervisorUserId": "00000000-0000-4000-8000-000000000001",
+  "grants": [
+    {
+      "targetKind": "PRACTITIONER",
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+      "careSpaceId": "00000000-0000-4000-8000-000000000001",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "actions": [
+        "valor-ejemplo"
+      ],
+      "effect": "ALLOW",
+      "condition": {},
+      "expansionMode": "DYNAMIC",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "simulationToken": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MoveResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MoveResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "status": "EXECUTED",
+  "approvalId": "00000000-0000-4000-8000-000000000001",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "scoreBefore": 1,
+  "scoreAfter": 1,
+  "delta": 1,
+  "fourEyesReasons": [
+    "Texto descriptivo de ejemplo"
+  ],
+  "grantIds": [
+    "valor-ejemplo"
+  ],
+  "revokedGrantIds": [
+    "valor-ejemplo"
+  ],
+  "campaignId": "00000000-0000-4000-8000-000000000001",
+  "caseId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `status` | Sí | `string` | valores: `EXECUTED`, `PENDING_APPROVAL` | `EXECUTED` o `PENDING_APPROVAL` (cuatro ojos). | `EXECUTED` |
+| `approvalId` | No | `string` | formato `uuid` | Solicitud de cuatro ojos, si la hay. | `00000000-0000-4000-8000-000000000001` |
+| `expiresAt` | No | `string` | formato `date-time` | Vencimiento de la solicitud pendiente. | `2026-07-31T12:00:00.000Z` |
+| `scoreBefore` | Sí | `number` | Sin restricción adicional declarada | Puntaje de privilegios antes. | `1` |
+| `scoreAfter` | Sí | `number` | Sin restricción adicional declarada | Puntaje de privilegios después. | `1` |
+| `delta` | Sí | `number` | Sin restricción adicional declarada | Diferencia. | `1` |
+| `fourEyesReasons` | Sí | `array<string>` | Sin restricción adicional declarada | Por qué pide cuatro ojos. | `["Texto descriptivo de ejemplo"]` |
+| `grantIds` | No | `array<string>` | Sin restricción adicional declarada | Concesiones creadas. | `["valor-ejemplo"]` |
+| `revokedGrantIds` | No | `array<string>` | Sin restricción adicional declarada | Concesiones que vencieron. | `["valor-ejemplo"]` |
+| `campaignId` | No | `string` | formato `uuid` | Campaña `MOVER` abierta. | `00000000-0000-4000-8000-000000000001` |
+| `caseId` | No | `string` | formato `uuid` | Caso de ciclo de vida. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-move.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | error instanceof Error ? error.message : 'Foto demasiado grande' | Excepción explícita en src/modules/delegated_access/services/support-targets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/move"
+}
+```
+
+---
+
+## 102. POST /org/support-engagements/{id}/offboard
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Dar de baja con traspaso del trabajo
+- **Operation ID:** `SupportLifecycleController_offboard`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.offboard](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Dar de baja con traspaso del trabajo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Baja con traspaso: revoca primero y reasigna después.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/support-engagements/{id}/offboard` en `SupportLifecycleController_offboard`. El controlador delega en `EngagementHandoverService.offboard`. Valida el body como `OffboardEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<OffboardResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `OffboardEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/offboard HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 3; longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `handover` | No | `HandoverDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"defaultToUserId":"00000000-0000-4000-8000-000000000001","items":[{"id":"00000000-0000-4000-8000-000000000001","toUserId":"00000000-0000-4000-8000-000000000001"}],"supervisedTo":"00000000-0000-4000-8000-000000000001"}` |
+| `handover.defaultToUserId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `handover.items` | No | `array<HandoverItemTargetDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","toUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `handover.items[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `handover.items[].toUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `handover.supervisedTo` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/offboard HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo",
+  "handover": {
+    "defaultToUserId": "00000000-0000-4000-8000-000000000001",
+    "items": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "toUserId": "00000000-0000-4000-8000-000000000001"
+      }
+    ],
+    "supervisedTo": "00000000-0000-4000-8000-000000000001"
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OffboardResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "revokedAt": "2026-07-31T12:00:00.000Z",
+  "caseId": "00000000-0000-4000-8000-000000000001",
+  "handover": {
+    "status": "COMPLETED",
+    "pending": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Siempre `true`: la baja es firme antes de reasignar. | `true` |
+| `engagementId` | Sí | `string` | formato `uuid` | Vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `revokedAt` | Sí | `string` | formato `date-time` | Cuándo quedó firme la revocación. | `2026-07-31T12:00:00.000Z` |
+| `caseId` | No | `string` | formato `uuid` | Caso de baja. | `00000000-0000-4000-8000-000000000001` |
+| `handover` | Sí | `OffboardHandoverStatusDto` | Sin restricción adicional declarada | Estado del traspaso. | `{"status":"COMPLETED","pending":1}` |
+| `handover.status` | Sí | `string` | valores: `COMPLETED`, `PENDING`, `FAILED` | `COMPLETED`, `PENDING` (a propósito) o `FAILED` (la baja ya es firme). | `COMPLETED` |
+| `handover.pending` | Sí | `number` | Sin restricción adicional declarada | Cuántos trabajos quedan pendientes. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/offboard"
+}
+```
+
+---
+
+## 103. PUT /org/support-engagements/{id}/owner
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Asignar el dueño de la cuenta de apoyo
+- **Operation ID:** `SupportLifecycleController_setOwner`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.setOwner](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Asignar el dueño de la cuenta de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Asigna el dueño de la cuenta (GP-8).
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /org/support-engagements/{id}/owner` en `SupportLifecycleController_setOwner`. El controlador delega en `LifecycleService.setOwner`. Valida el body como `PutOwnerDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PutOwnerDto`; los campos opcionales se omiten.
+
+```http
+PUT /org/support-engagements/00000000-0000-4000-8000-000000000001/owner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "supervisorUserId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `supervisorUserId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `note` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /org/support-engagements/00000000-0000-4000-8000-000000000001/owner HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "supervisorUserId": "00000000-0000-4000-8000-000000000001",
+  "note": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/owner"
+}
+```
+
+---
+
+## 104. POST /org/support-engagements/{id}/reactivate
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Pedir la reactivación de una persona suspendida
+- **Operation ID:** `SupportLifecycleController_reactivate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.reactivate](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Pedir la reactivación de una persona suspendida. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Pide reactivar: crea el cuatro ojos (202).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/support-engagements/{id}/reactivate` en `SupportLifecycleController_reactivate`. El controlador delega en `EngagementSuspensionService.reactivate`. Valida el body como `ReactivateEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<SuspensionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReactivateEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/reactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 3; longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/reactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 202 | Solicitud aceptada para procesamiento asíncrono. | `Promise<SuspensionResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SuspensionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "status": "ok",
+  "approvalId": "00000000-0000-4000-8000-000000000001",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "caseId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | No | `boolean` | Sin restricción adicional declarada | `true` si la suspensión quedó firme. | `true` |
+| `status` | No | `string` | Sin restricción adicional declarada | `PENDING_APPROVAL` al pedir la reactivación. | `ok` |
+| `approvalId` | No | `string` | formato `uuid` | Solicitud de cuatro ojos. | `00000000-0000-4000-8000-000000000001` |
+| `expiresAt` | No | `string` | formato `date-time` | Vencimiento de la solicitud. | `2026-07-31T12:00:00.000Z` |
+| `caseId` | No | `string` | formato `uuid` | Caso de ciclo de vida. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-suspension.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/reactivate"
+}
+```
+
+---
+
+## 105. POST /org/support-engagements/{id}/recertify
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-engagements`
+- **Nombre:** Recertificar un vínculo de apoyo
+- **Operation ID:** `SupportEngagementsController_recertify`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementsController.recertify](../../src/modules/delegated_access/controllers/support-engagements.controller.ts)
+
+### Descripción de negocio
+
+Recertificar un vínculo de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Recertifica el vínculo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/support-engagements/{id}/recertify` en `SupportEngagementsController_recertify`. El controlador delega en `SupportEngagementsService.recertify`. Valida el body como `RecertifyEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RecertifyEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/recertify HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `recertifyEveryMonths` | No | `number` | valores: `6`, `12`; mínimo 6; máximo 12 | Sin descripción específica en el contrato OpenAPI. | `6` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/recertify HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "recertifyEveryMonths": 6
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Solo se recertifica un vínculo activo o suspendido por recertificación | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/recertify"
+}
+```
+
+---
+
+## 106. GET /org/support-engagements/{id}/summary
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-governance`
+- **Nombre:** Resumen en lenguaje simple de los permisos de un vínculo
+- **Operation ID:** `AccessCatalogController_summaryOf`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [AccessCatalogController.summaryOf](../../src/modules/delegated_access/controllers/access-catalog.controller.ts)
+
+### Descripción de negocio
+
+Resumen en lenguaje simple de los permisos de un vínculo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Resumen en lenguaje simple de lo que puede hacer un vínculo.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/support-engagements/{id}/summary` en `AccessCatalogController_summaryOf`. El controlador delega en `AccessSummaryService.summary`. No recibe body. El tipo de retorno estático es `Promise<EngagementSummaryResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/support-engagements/00000000-0000-4000-8000-000000000001/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/support-engagements/00000000-0000-4000-8000-000000000001/summary HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<EngagementSummaryResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<EngagementSummaryResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<EngagementSummaryResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<EngagementSummaryResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<EngagementSummaryResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<EngagementSummaryResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<EngagementSummaryResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<EngagementSummaryResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EngagementSummaryResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "grants": [
+    {
+      "grantId": "00000000-0000-4000-8000-000000000001",
+      "effect": "ALLOW",
+      "targetKind": "valor-ejemplo",
+      "summary": "valor-ejemplo",
+      "atoms": [
+        "valor-ejemplo"
+      ]
+    }
+  ],
+  "plain": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `engagementId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `grants` | Sí | `array<GrantSummaryViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"grantId":"00000000-0000-4000-8000-000000000001","effect":"ALLOW","targetKind":"valor-ejemplo","summary":"valor-ejemplo","atoms":["valor-ejemplo"]}]` |
+| `grants[].grantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `grants[].effect` | Sí | `string` | valores: `ALLOW`, `DENY` | Sin descripción específica en el contrato OpenAPI. | `ALLOW` |
+| `grants[].targetKind` | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `grants[].summary` | Sí | `string` | Sin restricción adicional declarada | Frase en lenguaje simple (la arma el servidor). | `valor-ejemplo` |
+| `grants[].atoms` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+| `plain` | Sí | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/summary"
+}
+```
+
+---
+
+## 107. POST /org/support-engagements/{id}/suspend
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-lifecycle`
+- **Nombre:** Suspender a una persona de apoyo
+- **Operation ID:** `SupportLifecycleController_suspend`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportLifecycleController.suspend](../../src/modules/delegated_access/controllers/support-lifecycle.controller.ts)
+
+### Descripción de negocio
+
+Suspender a una persona de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Suspensión inmediata, sin aprobación (reduce acceso).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/support-engagements/{id}/suspend` en `SupportLifecycleController_suspend`. El controlador delega en `EngagementSuspensionService.suspend`. Valida el body como `SuspendEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<SuspensionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SuspendEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reasonCode": "MANUAL"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reasonCode` | Sí | `string` | valores: `MANUAL`, `LEAVE`, `INVESTIGATION`, `INACTIVITY` | Sin descripción específica en el contrato OpenAPI. | `MANUAL` |
+| `note` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/support-engagements/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reasonCode": "MANUAL",
+  "note": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SuspensionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "status": "ok",
+  "approvalId": "00000000-0000-4000-8000-000000000001",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "caseId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | No | `boolean` | Sin restricción adicional declarada | `true` si la suspensión quedó firme. | `true` |
+| `status` | No | `string` | Sin restricción adicional declarada | `PENDING_APPROVAL` al pedir la reactivación. | `ok` |
+| `approvalId` | No | `string` | formato `uuid` | Solicitud de cuatro ojos. | `00000000-0000-4000-8000-000000000001` |
+| `expiresAt` | No | `string` | formato `date-time` | Vencimiento de la solicitud. | `2026-07-31T12:00:00.000Z` |
+| `caseId` | No | `string` | formato `uuid` | Caso de ciclo de vida. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-suspension.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/support-engagements/{id}/suspend"
+}
+```
+
+---
+
+## 108. GET /org/team/capabilities
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Mi alcance, mi techo y lo que puedo hacer
+- **Operation ID:** `TeamAdminController_capabilities`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.capabilities](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Mi alcance, mi techo y lo que puedo hacer. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Mi alcance, mi techo y qué puedo hacer.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/team/capabilities` en `TeamAdminController_capabilities`. El controlador delega en `TeamAdminService.capabilities`. No recibe body. El tipo de retorno estático es `Promise<TeamCapabilitiesView>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/team/capabilities HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/team/capabilities HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TeamCapabilitiesView>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TeamCapabilitiesView>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TeamCapabilitiesView>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TeamCapabilitiesView>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TeamCapabilitiesView>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TeamCapabilitiesView>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TeamCapabilitiesView>` | No |
+
+El controlador declara `TeamCapabilitiesView`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/capabilities"
+}
+```
+
+---
+
+## 109. POST /org/team/invitations
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Invitar personal de apoyo dentro de mi techo
+- **Operation ID:** `TeamAdminController_invite`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.invite](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Invitar personal de apoyo dentro de mi techo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Invitación con plantillas de mi techo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/team/invitations` en `TeamAdminController_invite`. El controlador delega en `TeamAdminRequestsService.invite`. Valida el body como `CreateAffiliationInvitationDto` y consume `application/json`. El tipo de retorno estático es `Promise<AffiliationInvitationCreatedDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateAffiliationInvitationDto`; los campos opcionales se omiten.
+
+```http
+POST /org/team/invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "PRACTITIONER"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `kind` | Sí | `string` | valores: `PRACTITIONER`, `SUPPORT_STAFF` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `targetPersonId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `maxUses` | No | `number` | mínimo 1; máximo 500 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `expiresInDays` | No | `number` | mínimo 1; máximo 90 | Sin descripción específica en el contrato OpenAPI. | `1` |
+| `roleTemplateCode` | No | `string` | valores: `SECRETARY`, `MEDICAL_ASSISTANT`, `NURSING`, `FRONT_DESK`, `BILLING_CASHIER`, `CALL_CENTER`, `ORG_MANAGEMENT` | Sin descripción específica en el contrato OpenAPI. | `SECRETARY` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/team/invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "kind": "PRACTITIONER",
+  "targetPersonId": "00000000-0000-4000-8000-000000000001",
+  "maxUses": 1,
+  "expiresInDays": 1,
+  "roleTemplateCode": "SECRETARY"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AffiliationInvitationCreatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AffiliationInvitationCreatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "maxUses": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Id de la invitación. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Código para el QR o para escribir; no se vuelve a mostrar. | `CODIGO_EJEMPLO` |
+| `expiresAt` | Sí | `string` | formato `date-time` | Vencimiento. | `2026-07-31T12:00:00.000Z` |
+| `maxUses` | Sí | `number` | Sin restricción adicional declarada | Usos máximos. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Plantilla de rol no encontrada | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La organización necesita una práctica activa para recibir solicitudes de médicos | Excepción explícita en src/modules/delegated_access/services/affiliation-invitations.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/invitations"
+}
+```
+
+---
+
+## 110. GET /org/team/members
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Personas del equipo que puedo administrar
+- **Operation ID:** `TeamAdminController_members`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.members](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Personas del equipo que puedo administrar. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Solo las personas que puedo administrar y su parte dentro de mi alcance.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/team/members` en `TeamAdminController_members`. El controlador delega en `TeamAdminService.listMembers`. No recibe body. El tipo de retorno estático es `Promise<TeamMembersView>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/team/members HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/team/members HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TeamMembersView>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TeamMembersView>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TeamMembersView>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TeamMembersView>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TeamMembersView>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TeamMembersView>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TeamMembersView>` | No |
+
+El controlador declara `TeamMembersView`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/members"
+}
+```
+
+---
+
+## 111. GET /org/team/members/{id}
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Una persona del equipo y sus permisos en mi alcance
+- **Operation ID:** `TeamAdminController_member`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.member](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Una persona del equipo y sus permisos en mi alcance. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Una persona; fuera de mi alcance responde 404.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/team/members/{id}` en `TeamAdminController_member`. El controlador delega en `TeamAdminService.getMember`. No recibe body. El tipo de retorno estático es `Promise<TeamMemberView>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/team/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/team/members/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TeamMemberView>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TeamMemberView>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TeamMemberView>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TeamMemberView>` | No |
+| 404 | Consulta completada correctamente. | `Promise<TeamMemberView>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TeamMemberView>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TeamMemberView>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TeamMemberView>` | No |
+
+El controlador declara `TeamMemberView`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/members/{id}"
+}
+```
+
+---
+
+## 112. PATCH /org/team/members/{id}/grants
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Quitar o editar un permiso de mi alcance
+- **Operation ID:** `TeamAdminController_updateGrant`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.updateGrant](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Quitar o editar un permiso de mi alcance. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Quita o edita un permiso de mi alcance.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /org/team/members/{id}/grants` en `TeamAdminController_updateGrant`. El controlador delega en `TeamAdminService.updateGrant`. Valida el body como `UpdateSupportGrantDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto | GrantChangePendingDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateSupportGrantDto`; los campos opcionales se omiten.
+
+```http
+PATCH /org/team/members/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "grantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `grantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `actions` | No | `array<string>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["agenda.appointment.view"]` |
+| `condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `actionConditions` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"clave":"valor"}` |
+| `simulationToken` | No | `string` | longitud máxima 120 | Huella de `simulate`: guarda solo lo que se simuló. | `valor-ejemplo` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `revoke` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /org/team/members/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "grantId": "00000000-0000-4000-8000-000000000001",
+  "actions": [
+    "agenda.appointment.view"
+  ],
+  "condition": {
+    "clave": "valor"
+  },
+  "actionConditions": {
+    "clave": "valor"
+  },
+  "simulationToken": "valor-ejemplo",
+  "validTo": "2026-07-31T12:00:00.000Z",
+  "expansionMode": "DYNAMIC",
+  "revoke": true
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | Sí |
+| 202 | Agrega o amplía (alcance, modo DYNAMIC o vigencia) un permiso crítico: no se escribió nada y queda a la espera de la aprobación de otra persona (cuatro ojos). | `Promise<OperationResultDto | GrantChangePendingDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto | GrantChangePendingDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto | GrantChangePendingDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Permiso no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay cambios que aplicar | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 422 | `PRECONDITION_FAILED` | El vínculo de apoyo no está activo | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 422 | `PRECONDITION_FAILED` | error instanceof Error ? error.message : 'Foto demasiado grande' | Excepción explícita en src/modules/delegated_access/services/support-targets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/members/{id}/grants"
+}
+```
+
+---
+
+## 113. POST /org/team/members/{id}/grants
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Otorgar un permiso dentro de mi techo
+- **Operation ID:** `TeamAdminController_addGrant`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.addGrant](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Otorgar un permiso dentro de mi techo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Otorga un permiso dentro de mi alcance y techo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/team/members/{id}/grants` en `TeamAdminController_addGrant`. El controlador delega en `TeamAdminService.addGrant`. Valida el body como `CreateSupportGrantDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto | GrantChangePendingDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateSupportGrantDto`; los campos opcionales se omiten.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "targetKind": "PRACTITIONER",
+  "actions": [
+    "agenda.appointment.view"
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `targetKind` | Sí | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `healthcareServiceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `careSpaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `practiceSiteId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `actions` | Sí | `array<string>` | mínimo 1 elemento(s) | Permisos atómicos o códigos antiguos (los 15 se siguen aceptando). | `["agenda.appointment.view"]` |
+| `effect` | No | `string` | valores: `ALLOW`, `DENY` | Por defecto `ALLOW`. | `ALLOW` |
+| `condition` | No | `object` | Sin restricción adicional declarada | Condición v1 de todo el permiso. | `{"clave":"valor"}` |
+| `actionConditions` | No | `object` | Sin restricción adicional declarada | Condición v1 propia de cada permiso atómico (clave = permiso). | `{"clave":"valor"}` |
+| `simulationToken` | No | `string` | longitud máxima 120 | Huella de `simulate`: guarda solo lo que se simuló. | `valor-ejemplo` |
+| `expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/grants HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "targetKind": "PRACTITIONER",
+  "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+  "careSpaceId": "00000000-0000-4000-8000-000000000001",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "actions": [
+    "agenda.appointment.view"
+  ],
+  "effect": "ALLOW",
+  "condition": {
+    "clave": "valor"
+  },
+  "actionConditions": {
+    "clave": "valor"
+  },
+  "simulationToken": "valor-ejemplo",
+  "expansionMode": "DYNAMIC",
+  "validFrom": "2026-07-31T12:00:00.000Z",
+  "validTo": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | Sí |
+| 202 | Agrega o amplía (alcance, modo DYNAMIC o vigencia) un permiso crítico: no se escribió nada y queda a la espera de la aprobación de otra persona (cuatro ojos). | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | Sí |
+| 400 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto | GrantChangePendingDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto | GrantChangePendingDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El vínculo de apoyo no está activo | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 422 | `PRECONDITION_FAILED` | error instanceof Error ? error.message : 'Foto demasiado grande' | Excepción explícita en src/modules/delegated_access/services/support-targets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/members/{id}/grants"
+}
+```
+
+---
+
+## 114. GET /org/team/members/{id}/handover-preview
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Vista previa del traspaso de una persona de mi equipo
+- **Operation ID:** `TeamAdminController_handoverPreview`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.handoverPreview](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Vista previa del traspaso de una persona de mi equipo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Lo que la persona tiene en las manos.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/team/members/{id}/handover-preview` en `TeamAdminController_handoverPreview`. El controlador delega en `TeamAdminService.handoverPreview`. No recibe body. El tipo de retorno estático es `Promise<HandoverPreviewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/team/members/00000000-0000-4000-8000-000000000001/handover-preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/team/members/00000000-0000-4000-8000-000000000001/handover-preview HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<HandoverPreviewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `HandoverPreviewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": "valor-ejemplo"
+    }
+  ],
+  "counts": {
+    "clave": "valor"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `engagementId` | Sí | `string` | formato `uuid` | Vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `items` | Sí | `array<HandoverPreviewItemDto>` | Sin restricción adicional declarada | Trabajos por tipo, sin datos del paciente. | `[{"id":"00000000-0000-4000-8000-000000000001","kind":"valor-ejemplo"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id del objeto (conversación, tarea, cuenta o cita). | `00000000-0000-4000-8000-000000000001` |
+| `items[].kind` | Sí | `string` | Sin restricción adicional declarada | Tipo de trabajo. | `valor-ejemplo` |
+| `counts` | Sí | `object` | Sin restricción adicional declarada | Cantidad por tipo. | `{"clave":"valor"}` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-handover.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/members/{id}/handover-preview"
+}
+```
+
+---
+
+## 115. POST /org/team/members/{id}/offboard
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Dar de baja con traspaso a una persona de mi equipo
+- **Operation ID:** `TeamAdminController_offboard`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.offboard](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Dar de baja con traspaso a una persona de mi equipo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Baja con traspaso.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/team/members/{id}/offboard` en `TeamAdminController_offboard`. El controlador delega en `TeamAdminService.offboard`. Valida el body como `OffboardEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<OffboardResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `OffboardEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/offboard HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 3; longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `handover` | No | `HandoverDto` | admite null | Sin descripción específica en el contrato OpenAPI. | `{"defaultToUserId":"00000000-0000-4000-8000-000000000001","items":[{"id":"00000000-0000-4000-8000-000000000001","toUserId":"00000000-0000-4000-8000-000000000001"}],"supervisedTo":"00000000-0000-4000-8000-000000000001"}` |
+| `handover.defaultToUserId` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `handover.items` | No | `array<HandoverItemTargetDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"id":"00000000-0000-4000-8000-000000000001","toUserId":"00000000-0000-4000-8000-000000000001"}]` |
+| `handover.items[].id` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `handover.items[].toUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `handover.supervisedTo` | No | `string` | formato `uuid`; admite null | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/offboard HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo",
+  "handover": {
+    "defaultToUserId": "00000000-0000-4000-8000-000000000001",
+    "items": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "toUserId": "00000000-0000-4000-8000-000000000001"
+      }
+    ],
+    "supervisedTo": "00000000-0000-4000-8000-000000000001"
+  }
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OffboardResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OffboardResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "revokedAt": "2026-07-31T12:00:00.000Z",
+  "caseId": "00000000-0000-4000-8000-000000000001",
+  "handover": {
+    "status": "COMPLETED",
+    "pending": 1
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Siempre `true`: la baja es firme antes de reasignar. | `true` |
+| `engagementId` | Sí | `string` | formato `uuid` | Vínculo. | `00000000-0000-4000-8000-000000000001` |
+| `revokedAt` | Sí | `string` | formato `date-time` | Cuándo quedó firme la revocación. | `2026-07-31T12:00:00.000Z` |
+| `caseId` | No | `string` | formato `uuid` | Caso de baja. | `00000000-0000-4000-8000-000000000001` |
+| `handover` | Sí | `OffboardHandoverStatusDto` | Sin restricción adicional declarada | Estado del traspaso. | `{"status":"COMPLETED","pending":1}` |
+| `handover.status` | Sí | `string` | valores: `COMPLETED`, `PENDING`, `FAILED` | `COMPLETED`, `PENDING` (a propósito) o `FAILED` (la baja ya es firme). | `COMPLETED` |
+| `handover.pending` | Sí | `number` | Sin restricción adicional declarada | Cuántos trabajos quedan pendientes. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/members/{id}/offboard"
+}
+```
+
+---
+
+## 116. POST /org/team/members/{id}/reactivate
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Pedir la reactivación de una persona de mi equipo
+- **Operation ID:** `TeamAdminController_reactivate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.reactivate](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Pedir la reactivación de una persona de mi equipo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Pide reactivar (cuatro ojos, 202).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/team/members/{id}/reactivate` en `TeamAdminController_reactivate`. El controlador delega en `TeamAdminService.reactivate`. Valida el body como `ReactivateEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<SuspensionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReactivateEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/reactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reason` | Sí | `string` | longitud mínima 3; longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/reactivate HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reason": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 202 | Solicitud aceptada para procesamiento asíncrono. | `Promise<SuspensionResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SuspensionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "status": "ok",
+  "approvalId": "00000000-0000-4000-8000-000000000001",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "caseId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | No | `boolean` | Sin restricción adicional declarada | `true` si la suspensión quedó firme. | `true` |
+| `status` | No | `string` | Sin restricción adicional declarada | `PENDING_APPROVAL` al pedir la reactivación. | `ok` |
+| `approvalId` | No | `string` | formato `uuid` | Solicitud de cuatro ojos. | `00000000-0000-4000-8000-000000000001` |
+| `expiresAt` | No | `string` | formato `date-time` | Vencimiento de la solicitud. | `2026-07-31T12:00:00.000Z` |
+| `caseId` | No | `string` | formato `uuid` | Caso de ciclo de vida. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-suspension.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/members/{id}/reactivate"
+}
+```
+
+---
+
+## 117. POST /org/team/members/{id}/recertify
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Recertificar a una persona de mi equipo
+- **Operation ID:** `TeamAdminController_recertify`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.recertify](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Recertificar a una persona de mi equipo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Recertifica a la persona.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/team/members/{id}/recertify` en `TeamAdminController_recertify`. El controlador delega en `TeamAdminService.recertify`. Valida el body como `RecertifyEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RecertifyEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/recertify HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `recertifyEveryMonths` | No | `number` | valores: `6`, `12`; mínimo 6; máximo 12 | Sin descripción específica en el contrato OpenAPI. | `6` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/recertify HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "recertifyEveryMonths": 6
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Solo se recertifica un vínculo activo o suspendido por recertificación | Excepción explícita en src/modules/delegated_access/services/support-engagements.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/members/{id}/recertify"
+}
+```
+
+---
+
+## 118. POST /org/team/members/{id}/suspend
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Suspender a una persona de mi equipo
+- **Operation ID:** `TeamAdminController_suspend`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.suspend](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Suspender a una persona de mi equipo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Suspende a la persona al instante.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/team/members/{id}/suspend` en `TeamAdminController_suspend`. El controlador delega en `TeamAdminService.suspend`. Valida el body como `SuspendEngagementDto` y consume `application/json`. El tipo de retorno estático es `Promise<SuspensionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `SuspendEngagementDto`; los campos opcionales se omiten.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reasonCode": "MANUAL"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `reasonCode` | Sí | `string` | valores: `MANUAL`, `LEAVE`, `INVESTIGATION`, `INACTIVITY` | Sin descripción específica en el contrato OpenAPI. | `MANUAL` |
+| `note` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/team/members/00000000-0000-4000-8000-000000000001/suspend HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "reasonCode": "MANUAL",
+  "note": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SuspensionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SuspensionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true,
+  "status": "ok",
+  "approvalId": "00000000-0000-4000-8000-000000000001",
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "caseId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | No | `boolean` | Sin restricción adicional declarada | `true` si la suspensión quedó firme. | `true` |
+| `status` | No | `string` | Sin restricción adicional declarada | `PENDING_APPROVAL` al pedir la reactivación. | `ok` |
+| `approvalId` | No | `string` | formato `uuid` | Solicitud de cuatro ojos. | `00000000-0000-4000-8000-000000000001` |
+| `expiresAt` | No | `string` | formato `date-time` | Vencimiento de la solicitud. | `2026-07-31T12:00:00.000Z` |
+| `caseId` | No | `string` | formato `uuid` | Caso de ciclo de vida. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Vínculo de apoyo no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-suspension.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/members/{id}/suspend"
+}
+```
+
+---
+
+## 119. GET /org/team/requests
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Solicitudes pendientes dentro de mi alcance
+- **Operation ID:** `TeamAdminController_requests`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.requests](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Solicitudes pendientes dentro de mi alcance. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Solicitudes pendientes con los ítems de mi alcance.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/team/requests` en `TeamAdminController_requests`. El controlador delega en `TeamAdminRequestsService.listRequests`. No recibe body. El tipo de retorno estático es `Promise<TeamRequestsView>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/team/requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/team/requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<TeamRequestsView>` | No |
+| 400 | Consulta completada correctamente. | `Promise<TeamRequestsView>` | No |
+| 401 | Consulta completada correctamente. | `Promise<TeamRequestsView>` | No |
+| 403 | Consulta completada correctamente. | `Promise<TeamRequestsView>` | No |
+| 429 | Consulta completada correctamente. | `Promise<TeamRequestsView>` | No |
+| 500 | Consulta completada correctamente. | `Promise<TeamRequestsView>` | No |
+| 504 | Consulta completada correctamente. | `Promise<TeamRequestsView>` | No |
+
+El controlador declara `TeamRequestsView`, pero ese tipo no existe como esquema enlazable en `components.schemas`. No se inventa un body: el consumidor debe tratar la forma exacta como no formalizada hasta añadir el decorador Swagger de respuesta correspondiente.
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/requests"
+}
+```
+
+---
+
+## 120. POST /org/team/requests/{id}/decision
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-team-admin`
+- **Nombre:** Decidir los ítems de una solicitud dentro de mi alcance
+- **Operation ID:** `TeamAdminController_decide`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TeamAdminController.decide](../../src/modules/delegated_access/controllers/team-admin.controller.ts)
+
+### Descripción de negocio
+
+Decidir los ítems de una solicitud dentro de mi alcance. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Decide solo los ítems propios; el resto sigue pendiente.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/team/requests/{id}/decision` en `TeamAdminController_decide`. El controlador delega en `TeamAdminRequestsService.decide`. Valida el body como `DecideEngagementRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<EngagementDecisionResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `DecideEngagementRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /org/team/requests/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "decision": "APPROVED"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `SUPPORT_STAFF`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ItemDecisionDto>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"itemId":"00000000-0000-4000-8000-000000000001","decision":"APPROVED","comment":"valor-ejemplo","actions":["agenda.appointment.view"],"condition":{},"adjustment":{"targetKind":"PRACTITIONER","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001","careSpaceId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001","actions":["agenda.appointment.view"],"condition":{}},"expansionMode":"DYNAMIC","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].itemId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].decision` | Sí | `string` | valores: `APPROVED`, `ADJUSTED`, `REJECTED` | Sin descripción específica en el contrato OpenAPI. | `APPROVED` |
+| `items[].comment` | No | `string` | longitud mínima 1; longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items[].actions` | No | `array<string>` | mínimo 1 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["agenda.appointment.view"]` |
+| `items[].condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].adjustment` | No | `ItemAdjustmentDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"targetKind":"PRACTITIONER","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001","careSpaceId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001","actions":["agenda.appointment.view"],"condition":{}}` |
+| `items[].adjustment.targetKind` | No | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `items[].adjustment.practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].adjustment.healthcareServiceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].adjustment.careSpaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].adjustment.practiceSiteId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].adjustment.actions` | No | `array<string>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `["agenda.appointment.view"]` |
+| `items[].adjustment.condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+| `items[].expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `items[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `recertifyEveryMonths` | No | `number` | valores: `6`, `12`; mínimo 6; máximo 12 | Sin descripción específica en el contrato OpenAPI. | `6` |
+| `reasonText` | No | `string` | longitud máxima 500 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/team/requests/00000000-0000-4000-8000-000000000001/decision HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "itemId": "00000000-0000-4000-8000-000000000001",
+      "decision": "APPROVED",
+      "comment": "valor-ejemplo",
+      "actions": [
+        "agenda.appointment.view"
+      ],
+      "condition": {},
+      "adjustment": {
+        "targetKind": "PRACTITIONER",
+        "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+        "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+        "careSpaceId": "00000000-0000-4000-8000-000000000001",
+        "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+        "actions": [
+          "agenda.appointment.view"
+        ],
+        "condition": {}
+      },
+      "expansionMode": "DYNAMIC",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "recertifyEveryMonths": 6,
+  "reasonText": "Texto descriptivo de ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<EngagementDecisionResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `EngagementDecisionResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "requestId": "00000000-0000-4000-8000-000000000001",
+  "status": "ok",
+  "engagementId": "00000000-0000-4000-8000-000000000001",
+  "grantIds": [
+    "valor-ejemplo"
+  ],
+  "pendingItemIds": [
+    "valor-ejemplo"
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `requestId` | Sí | `string` | formato `uuid` | Solicitud decidida. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Estado final de la solicitud. | `ok` |
+| `engagementId` | No | `string` | formato `uuid` | Vínculo abierto o ampliado, si algo se aprobó. | `00000000-0000-4000-8000-000000000001` |
+| `grantIds` | Sí | `array<string>` | Sin restricción adicional declarada | Permisos emitidos. | `["valor-ejemplo"]` |
+| `pendingItemIds` | No | `array<string>` | Sin restricción adicional declarada | Ítems que siguen pendientes (decisión parcial por alcance): los decide `SECURITY_ADMIN`. Ausente si la solicitud quedó completa. | `["valor-ejemplo"]` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, SUPPORT_STAFF. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Ítem de solicitud no encontrado | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La solicitud ya no está pendiente | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | La solicitud venció | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | La decisión debe cubrir todos los ítems pendientes | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | El vínculo que se amplía ya no está activo | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | error instanceof Error ? error.message : 'Foto demasiado grande' | Excepción explícita en src/modules/delegated_access/services/support-targets.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/team/requests/{id}/decision"
+}
+```
+
+---
+
+## 121. PATCH /org/user-assignments/{id}
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-org`
@@ -1073,8 +17355,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
-  "ok": true,
-  "status": "ok"
+  "ok": true
 }
 ```
 
@@ -1082,8 +17363,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Indica éxito | `true` |
-| `status` | No | `string` | Sin restricción adicional declarada | Nuevo estado del recurso (concept id) | `ok` |
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1094,7 +17374,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Asignación no encontrada | Excepción explícita en src/modules/delegated_access/services/org-user-assignments.service.ts |
 | 409 | `CONCURRENCY_CONFLICT` | row_version no coincide | Excepción explícita en src/modules/delegated_access/services/org-user-assignments.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | No hay cambios que aplicar | Excepción explícita en src/modules/delegated_access/services/org-user-assignments.service.ts |
@@ -1116,7 +17395,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 9. POST /practitioner-delegates
+## 122. POST /practitioner-delegates
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1220,7 +17499,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
-  "status": "00000000-0000-4000-8000-000000000001"
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1228,8 +17509,10 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Id del recurso creado | `00000000-0000-4000-8000-000000000001` |
-| `status` | Sí | `string` | formato `uuid` | Concept id del estado del recurso | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1260,7 +17543,139 @@ Ejemplo de error normalizado:
 
 ---
 
-## 10. POST /practitioner-delegates/{id}/access-requests
+## 123. POST /practitioner-delegates/{id}/accept
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-practitioner-support`
+- **Nombre:** Aceptar a una persona de apoyo
+- **Operation ID:** `PractitionerSupportController_accept`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSupportController.accept](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Aceptar a una persona de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: El doctor acepta a una persona de apoyo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /practitioner-delegates/{id}/accept` en `PractitionerSupportController_accept`. El controlador delega en `PractitionerSupportService.accept`. Valida el body como `AcceptSupportDelegateDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `AcceptSupportDelegateDto`; los campos opcionales se omiten.
+
+```http
+POST /practitioner-delegates/00000000-0000-4000-8000-000000000001/accept HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "acceptsSupportClause": true
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `acceptsSupportClause` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `mayReplyOnBehalf` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `replyDisclosure` | No | `string` | valores: `SHOW`, `HIDE` | Sin descripción específica en el contrato OpenAPI. | `SHOW` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /practitioner-delegates/00000000-0000-4000-8000-000000000001/accept HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "acceptsSupportClause": true,
+  "mayReplyOnBehalf": true,
+  "replyDisclosure": "SHOW"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La cuenta no tiene perfil profesional: no tiene equipo de apoyo. | Excepción explícita en src/modules/delegated_access/services/practitioner-support.service.ts |
+| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/practitioner-support.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La delegación no está activa | Excepción explícita en src/modules/delegated_access/services/practitioner-support.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioner-delegates/{id}/accept"
+}
+```
+
+---
+
+## 124. POST /practitioner-delegates/{id}/access-requests
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1354,7 +17769,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
-  "status": "00000000-0000-4000-8000-000000000001"
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1362,8 +17779,10 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Id del recurso creado | `00000000-0000-4000-8000-000000000001` |
-| `status` | Sí | `string` | formato `uuid` | Concept id del estado del recurso | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1374,7 +17793,6 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
-| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
 | 409 | `CONFLICT` | Ya existe una solicitud pendiente equivalente | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La delegación no está activa | Excepción explícita en src/modules/delegated_access/services/access-requests.service.ts |
@@ -1395,7 +17813,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. POST /practitioner-delegates/{id}/grants
+## 125. POST /practitioner-delegates/{id}/grants
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1494,7 +17912,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 {
   "id": "00000000-0000-4000-8000-000000000001",
-  "status": "00000000-0000-4000-8000-000000000001"
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
 }
 ```
 
@@ -1502,8 +17922,10 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Id del recurso creado | `00000000-0000-4000-8000-000000000001` |
-| `status` | Sí | `string` | formato `uuid` | Concept id del estado del recurso | `00000000-0000-4000-8000-000000000001` |
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1533,7 +17955,135 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. POST /practitioner-delegates/{id}/revoke
+## 126. PATCH /practitioner-delegates/{id}/reply-settings
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-practitioner-support`
+- **Nombre:** Permitir o no responder en mi nombre
+- **Operation ID:** `PractitionerSupportController_replySettings`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [PractitionerSupportController.replySettings](../../src/modules/delegated_access/controllers/practitioner-support.controller.ts)
+
+### Descripción de negocio
+
+Permitir o no responder en mi nombre. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Ajustes de respuesta en nombre del doctor.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /practitioner-delegates/{id}/reply-settings` en `PractitionerSupportController_replySettings`. El controlador delega en `PractitionerSupportService.replySettings`. Valida el body como `ReplySettingsDto` y consume `application/json`. El tipo de retorno estático es `Promise<OperationResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ReplySettingsDto`; los campos opcionales se omiten.
+
+```http
+PATCH /practitioner-delegates/00000000-0000-4000-8000-000000000001/reply-settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `PRACTITIONER`, `CLINICIAN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `mayReplyOnBehalf` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `replyDisclosure` | No | `string` | valores: `SHOW`, `HIDE` | Sin descripción específica en el contrato OpenAPI. | `SHOW` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /practitioner-delegates/00000000-0000-4000-8000-000000000001/reply-settings HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "mayReplyOnBehalf": true,
+  "replyDisclosure": "SHOW"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<OperationResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `OperationResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ok": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | La cuenta no tiene perfil profesional: no tiene equipo de apoyo. | Excepción explícita en src/modules/delegated_access/services/practitioner-support.service.ts |
+| 404 | `NOT_FOUND` | Delegación no encontrada | Excepción explícita en src/modules/delegated_access/services/practitioner-support.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | No hay cambios que aplicar | Excepción explícita en src/modules/delegated_access/services/practitioner-support.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/practitioner-delegates/{id}/reply-settings"
+}
+```
+
+---
+
+## 127. POST /practitioner-delegates/{id}/revoke
 
 - **Módulo:** `delegated_access`
 - **Etiqueta OpenAPI:** `delegated-access-practitioner-delegates`
@@ -1573,7 +18123,7 @@ Content-Type: application/json
 ### Restricciones a considerar
 
 - Requiere `Authorization: Bearer <JWT>`.
-- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`, `PRACTITIONER`, `CLINICIAN`.
 - Deben ser UUID válidos: `id`.
 - El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
 - Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
@@ -1618,8 +18168,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
-  "ok": true,
-  "status": "ok"
+  "ok": true
 }
 ```
 
@@ -1627,8 +18176,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Indica éxito | `true` |
-| `status` | No | `string` | Sin restricción adicional declarada | Nuevo estado del recurso (concept id) | `ok` |
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1638,7 +18186,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
-| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN, PRACTITIONER, CLINICIAN. | Roles/tenant/guards de autorización |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -1652,6 +18200,168 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/practitioner-delegates/{id}/revoke"
+}
+```
+
+---
+
+## 128. POST /support-engagement-requests
+
+- **Módulo:** `delegated_access`
+- **Etiqueta OpenAPI:** `delegated-access-support-requests`
+- **Nombre:** Pedir un vínculo de apoyo o su ampliación
+- **Operation ID:** `SupportEngagementRequestsController_create`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SupportEngagementRequestsController.create](../../src/modules/delegated_access/controllers/support-engagement-requests.controller.ts)
+
+### Descripción de negocio
+
+Pedir un vínculo de apoyo o su ampliación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La persona pide un vínculo de apoyo o la ampliación de uno. Sin tenant activo: todavía no es parte de la organización a la que pide.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /support-engagement-requests` en `SupportEngagementRequestsController_create`. El controlador delega en `EngagementRequestsService.create`. Valida el body como `CreateEngagementRequestDto` y consume `application/json`. El tipo de retorno estático es `Promise<ResourceCreatedDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateEngagementRequestDto`; los campos opcionales se omiten.
+
+```http
+POST /support-engagement-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "roleTemplateCode": "SECRETARY",
+  "items": [
+    {
+      "targetKind": "PRACTITIONER"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `roleTemplateCode` | Sí | `string` | valores: `SECRETARY`, `MEDICAL_ASSISTANT`, `NURSING`, `FRONT_DESK`, `BILLING_CASHIER`, `CALL_CENTER`, `ORG_MANAGEMENT` | Sin descripción específica en el contrato OpenAPI. | `SECRETARY` |
+| `parentAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `message` | No | `string` | longitud máxima 1000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `items` | Sí | `array<SupportTargetWithActionsDto>` | mínimo 1 elemento(s); máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"targetKind":"PRACTITIONER","practitionerRoleAssignmentId":"00000000-0000-4000-8000-000000000001","healthcareServiceId":"00000000-0000-4000-8000-000000000001","careSpaceId":"00000000-0000-4000-8000-000000000001","practiceSiteId":"00000000-0000-4000-8000-000000000001","actions":["agenda.appointment.view"],"condition":{}}]` |
+| `items[].targetKind` | Sí | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `items[].practitionerRoleAssignmentId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].healthcareServiceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].careSpaceId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].practiceSiteId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `items[].actions` | No | `array<string>` | mínimo 1 elemento(s); máximo 80 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `["agenda.appointment.view"]` |
+| `items[].condition` | No | `object` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /support-engagement-requests HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "roleTemplateCode": "SECRETARY",
+  "parentAssignmentId": "00000000-0000-4000-8000-000000000001",
+  "message": "valor-ejemplo",
+  "items": [
+    {
+      "targetKind": "PRACTITIONER",
+      "practitionerRoleAssignmentId": "00000000-0000-4000-8000-000000000001",
+      "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+      "careSpaceId": "00000000-0000-4000-8000-000000000001",
+      "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+      "actions": [
+        "agenda.appointment.view"
+      ],
+      "condition": {}
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ResourceCreatedDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ResourceCreatedDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "status": "00000000-0000-4000-8000-000000000001",
+  "createdAt": "2026-07-31T12:00:00.000Z",
+  "tenantId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | formato `uuid` | Concept id del estado | `00000000-0000-4000-8000-000000000001` |
+| `createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `tenantId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Plantilla de rol no encontrada | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Ya tiene solicitudes abiertas en esa organización: espere su decisión | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 422 | `PRECONDITION_FAILED` | Solo se amplía un vínculo propio y activo | Excepción explícita en src/modules/delegated_access/services/engagement-requests.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/support-engagement-requests"
 }
 ```
 

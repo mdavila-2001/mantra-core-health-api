@@ -22,3 +22,8 @@ export * from './upload-registration-document.dto';
 export * from './register-practitioner.dto';
 export * from './resend-verification.dto';
 export * from './account-security.dto';
+export * from './ip-access-rules.dto';
+export * from './my-mfa.dto';
+export * from './access-rescue.dto';
+export * from './session-policies.dto';
+export * from './step-up.dto';

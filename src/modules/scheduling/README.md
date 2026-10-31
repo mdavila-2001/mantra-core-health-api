@@ -59,84 +59,84 @@ antes 2 319 líneas) sigue el mismo patrón con 16 casos de uso.
 Los casos de uso dependen de un token Nest + interfaz propia (`application/ports/`); el adaptador
 (`infrastructure/adapters/`) es lo único que conoce al otro módulo.
 
-| Puerto | Contexto | Adaptador |
-| --- | --- | --- |
-| `BookingHistoryPort` | audit | `AuditBookingHistoryAdapter` |
-| `PatientRepresentationPort` | profiles | `ProfilesPatientRepresentationAdapter` |
-| `ClinicalAppointmentsPort` | clinical | `ClinicalAppointmentsAdapter` |
-| `ClinicalEncountersPort` | clinical | `ClinicalEncountersAdapter` |
-| `InsuranceReadPort` | insurance | `InsuranceReadAdapter` |
-| `FormOriginPort` | forms | `FormsOriginAdapter` |
-| `PractitionerAffiliationsPort` | profiles + practice | `ProfilesAffiliationsAdapter` |
-| `PractitionerDirectoryPort` | profiles + practice | `PracticeProfilesDirectoryAdapter` |
-| `TenantDirectoryPort` | directory + profiles | `DirectoryTenantDirectoryAdapter` |
-| `WalkInPatientRegistryPort` | profiles + common | `ProfilesWalkInPatientAdapter` |
-| `AgendaNoticePort` | messaging | `MessagingAgendaNoticeAdapter` |
-| `BookingChatPort` | community | `CommunityBookingChatAdapter` |
-| `WaitlistReadPort` / `WaitlistWritePort` | persistencia (Postgres) | `PostgresWaitlistAdapter` |
+| Puerto                                   | Contexto                | Adaptador                              |
+| ---------------------------------------- | ----------------------- | -------------------------------------- |
+| `BookingHistoryPort`                     | audit                   | `AuditBookingHistoryAdapter`           |
+| `PatientRepresentationPort`              | profiles                | `ProfilesPatientRepresentationAdapter` |
+| `ClinicalAppointmentsPort`               | clinical                | `ClinicalAppointmentsAdapter`          |
+| `ClinicalEncountersPort`                 | clinical                | `ClinicalEncountersAdapter`            |
+| `InsuranceReadPort`                      | insurance               | `InsuranceReadAdapter`                 |
+| `FormOriginPort`                         | forms                   | `FormsOriginAdapter`                   |
+| `PractitionerAffiliationsPort`           | profiles + practice     | `ProfilesAffiliationsAdapter`          |
+| `PractitionerDirectoryPort`              | profiles + practice     | `PracticeProfilesDirectoryAdapter`     |
+| `TenantDirectoryPort`                    | directory + profiles    | `DirectoryTenantDirectoryAdapter`      |
+| `WalkInPatientRegistryPort`              | profiles + common       | `ProfilesWalkInPatientAdapter`         |
+| `AgendaNoticePort`                       | messaging               | `MessagingAgendaNoticeAdapter`         |
+| `BookingChatPort`                        | community               | `CommunityBookingChatAdapter`          |
+| `WaitlistReadPort` / `WaitlistWritePort` | persistencia (Postgres) | `PostgresWaitlistAdapter`              |
 
 ## Rutas (leídas de los controllers)
 
-| Método | Ruta | Controller | Handler | Roles |
-|---|---|---|---|---|
-| GET | `/scheduling/activity-types` | Scheduling | `listActivityTypes` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| POST | `/scheduling/appointments/direct` | Scheduling | `createDirectAppointment` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| POST | `/scheduling/appointments/walk-in` | Scheduling | `createWalkInAppointment` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| POST | `/scheduling/booking-policies` | Scheduling | `createPolicy` | SCHEDULING_ADMIN, PRACTITIONER |
-| GET | `/scheduling/bookings` | Bookings | `searchBookings` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| GET | `/scheduling/bookings/:id` | Bookings | `getBooking` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| POST | `/scheduling/bookings/:id/accept` | Bookings | `accept` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| POST | `/scheduling/bookings/:id/cancel` | Bookings | `cancel` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| POST | `/scheduling/bookings/:id/check-in` | Bookings | `checkIn` | SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| POST | `/scheduling/bookings/:id/complete` | Bookings | `complete` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| POST | `/scheduling/bookings/:id/delay` | Bookings | `delay` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| GET | `/scheduling/bookings/:id/payment-state` | Bookings | `getPaymentState` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| PUT | `/scheduling/bookings/:id/payment-state` | Bookings | `setPaymentState` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| POST | `/scheduling/bookings/:id/propose-schedule` | Bookings | `proposeSchedule` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| POST | `/scheduling/bookings/:id/reject` | Bookings | `reject` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| POST | `/scheduling/bookings/:id/reminders` | Bookings | `scheduleReminders` | SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| POST | `/scheduling/bookings/:id/request-info` | Bookings | `requestInfo` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| POST | `/scheduling/bookings/:id/reschedule` | Bookings | `reschedule` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| POST | `/scheduling/bookings/:id/start` | Bookings | `start` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| GET | `/scheduling/confirmation-rules` | Confirmation | `list` | SCHEDULING_ADMIN |
-| POST | `/scheduling/confirmation-rules` | Confirmation | `create` | SCHEDULING_ADMIN |
-| POST | `/scheduling/confirmation-rules/:id/activate` | Confirmation | `activate` | SCHEDULING_ADMIN |
-| POST | `/scheduling/confirmation-rules/:id/deactivate` | Confirmation | `deactivate` | SCHEDULING_ADMIN |
-| POST | `/scheduling/confirmation-rules/evaluate` | Confirmation | `evaluate` | SCHEDULING_ADMIN |
-| GET | `/scheduling/exception-types` | Scheduling | `listExceptionTypes` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| DELETE | `/scheduling/exceptions/:id` | Scheduling | `removeException` | SCHEDULING_ADMIN, PRACTITIONER |
-| PATCH | `/scheduling/exceptions/:id` | Scheduling | `updateException` | SCHEDULING_ADMIN, PRACTITIONER |
-| POST | `/scheduling/holds/:holdToken/confirm` | Scheduling | `confirmBooking` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
-| POST | `/scheduling/holds/:holdToken/request` | Scheduling | `requestBooking` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
-| POST | `/scheduling/internal/dispatch-reminders` | Internal | `dispatchReminders` | SYSTEM, SYSTEM_WORKER |
-| POST | `/scheduling/internal/expire-holds` | Internal | `expireHolds` | SYSTEM, SYSTEM_WORKER |
-| POST | `/scheduling/internal/promote-waitlist/:slotId` | Internal | `promoteWaitlist` | SYSTEM, SYSTEM_WORKER |
-| GET | `/scheduling/internal/waitlist-candidates` | Internal | `listWaitlistCandidates` | SYSTEM, SYSTEM_WORKER |
-| GET | `/scheduling/resources` | Agenda | `listResources` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| POST | `/scheduling/resources` | Scheduling | `createResource` | SCHEDULING_ADMIN, PRACTITIONER |
-| POST | `/scheduling/resources/:id/close-slots` | Scheduling | `closeSlots` | SCHEDULING_ADMIN, PRACTITIONER |
-| POST | `/scheduling/resources/:id/delay` | Scheduling | `delayResource` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| GET | `/scheduling/resources/:id/exceptions` | Scheduling | `listExceptions` | SCHEDULING_ADMIN, PRACTITIONER, PATIENT |
-| POST | `/scheduling/resources/:id/exceptions` | Scheduling | `createException` | SCHEDULING_ADMIN, PRACTITIONER |
-| POST | `/scheduling/resources/:id/shift-slots` | Scheduling | `shiftSlots` | SCHEDULING_ADMIN, PRACTITIONER |
-| GET | `/scheduling/resources/:id/slots` | Scheduling | `getResourceAgenda` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| GET | `/scheduling/resources/:id/templates` | Scheduling | `listTemplates` | SCHEDULING_ADMIN, PRACTITIONER |
-| POST | `/scheduling/resources/:id/templates` | Scheduling | `createTemplate` | SCHEDULING_ADMIN, PRACTITIONER |
-| GET | `/scheduling/resources/:resourceId/waitlist` | Scheduling | `listResourceWaitlist` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER |
-| GET | `/scheduling/service-availability` | ServiceOfferings | `availability` | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| GET | `/scheduling/service-offerings` | ServiceOfferings | `list` | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| POST | `/scheduling/service-offerings` | ServiceOfferings | `create` | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN |
-| PATCH | `/scheduling/service-offerings/:id` | ServiceOfferings | `update` | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN |
-| POST | `/scheduling/service-offerings/:id/holds` | ServiceOfferings | `placeHold` | PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT |
-| GET | `/scheduling/slots` | Agenda | `listSlots` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| POST | `/scheduling/slots/:id/holds` | Scheduling | `placeHold` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
-| DELETE | `/scheduling/templates/:id` | Scheduling | `retireTemplate` | SCHEDULING_ADMIN, PRACTITIONER |
-| PATCH | `/scheduling/templates/:id` | Scheduling | `updateTemplate` | SCHEDULING_ADMIN, PRACTITIONER |
-| POST | `/scheduling/templates/:id/generate-slots` | Scheduling | `generateSlots` | SCHEDULING_ADMIN, PRACTITIONER |
-| POST | `/scheduling/templates/:id/reactivate` | Scheduling | `reactivateTemplate` | SCHEDULING_ADMIN, PRACTITIONER |
-| GET | `/scheduling/waitlist` | Scheduling | `listWaitlist` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT |
-| POST | `/scheduling/waitlist` | Scheduling | `enrollWaitlist` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT |
-| GET | `/tenants/:tenantId/agenda` | TenantAgenda | `list` | (guard del servicio) |
+| Método | Ruta                                            | Controller       | Handler                   | Roles                                                                |
+| ------ | ----------------------------------------------- | ---------------- | ------------------------- | -------------------------------------------------------------------- |
+| GET    | `/scheduling/activity-types`                    | Scheduling       | `listActivityTypes`       | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| POST   | `/scheduling/appointments/direct`               | Scheduling       | `createDirectAppointment` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| POST   | `/scheduling/appointments/walk-in`              | Scheduling       | `createWalkInAppointment` | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| POST   | `/scheduling/booking-policies`                  | Scheduling       | `createPolicy`            | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| GET    | `/scheduling/bookings`                          | Bookings         | `searchBookings`          | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT            |
+| GET    | `/scheduling/bookings/:id`                      | Bookings         | `getBooking`              | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT            |
+| POST   | `/scheduling/bookings/:id/accept`               | Bookings         | `accept`                  | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| POST   | `/scheduling/bookings/:id/cancel`               | Bookings         | `cancel`                  | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT            |
+| POST   | `/scheduling/bookings/:id/check-in`             | Bookings         | `checkIn`                 | SCHEDULING_ADMIN, SCHEDULING_AGENT                                   |
+| POST   | `/scheduling/bookings/:id/complete`             | Bookings         | `complete`                | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| POST   | `/scheduling/bookings/:id/delay`                | Bookings         | `delay`                   | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| GET    | `/scheduling/bookings/:id/payment-state`        | Bookings         | `getPaymentState`         | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| PUT    | `/scheduling/bookings/:id/payment-state`        | Bookings         | `setPaymentState`         | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| POST   | `/scheduling/bookings/:id/propose-schedule`     | Bookings         | `proposeSchedule`         | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| POST   | `/scheduling/bookings/:id/reject`               | Bookings         | `reject`                  | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| POST   | `/scheduling/bookings/:id/reminders`            | Bookings         | `scheduleReminders`       | SCHEDULING_ADMIN, SCHEDULING_AGENT                                   |
+| POST   | `/scheduling/bookings/:id/request-info`         | Bookings         | `requestInfo`             | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| POST   | `/scheduling/bookings/:id/reschedule`           | Bookings         | `reschedule`              | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT            |
+| POST   | `/scheduling/bookings/:id/start`                | Bookings         | `start`                   | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| GET    | `/scheduling/confirmation-rules`                | Confirmation     | `list`                    | SCHEDULING_ADMIN                                                     |
+| POST   | `/scheduling/confirmation-rules`                | Confirmation     | `create`                  | SCHEDULING_ADMIN                                                     |
+| POST   | `/scheduling/confirmation-rules/:id/activate`   | Confirmation     | `activate`                | SCHEDULING_ADMIN                                                     |
+| POST   | `/scheduling/confirmation-rules/:id/deactivate` | Confirmation     | `deactivate`              | SCHEDULING_ADMIN                                                     |
+| POST   | `/scheduling/confirmation-rules/evaluate`       | Confirmation     | `evaluate`                | SCHEDULING_ADMIN                                                     |
+| GET    | `/scheduling/exception-types`                   | Scheduling       | `listExceptionTypes`      | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| DELETE | `/scheduling/exceptions/:id`                    | Scheduling       | `removeException`         | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| PATCH  | `/scheduling/exceptions/:id`                    | Scheduling       | `updateException`         | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| POST   | `/scheduling/holds/:holdToken/confirm`          | Scheduling       | `confirmBooking`          | SCHEDULING_ADMIN, SCHEDULING_AGENT, SUPPORT_STAFF, PATIENT           |
+| POST   | `/scheduling/holds/:holdToken/request`          | Scheduling       | `requestBooking`          | SCHEDULING_ADMIN, SCHEDULING_AGENT, PATIENT                          |
+| POST   | `/scheduling/internal/dispatch-reminders`       | Internal         | `dispatchReminders`       | SYSTEM, SYSTEM_WORKER                                                |
+| POST   | `/scheduling/internal/expire-holds`             | Internal         | `expireHolds`             | SYSTEM, SYSTEM_WORKER                                                |
+| POST   | `/scheduling/internal/promote-waitlist/:slotId` | Internal         | `promoteWaitlist`         | SYSTEM, SYSTEM_WORKER                                                |
+| GET    | `/scheduling/internal/waitlist-candidates`      | Internal         | `listWaitlistCandidates`  | SYSTEM, SYSTEM_WORKER                                                |
+| GET    | `/scheduling/resources`                         | Agenda           | `listResources`           | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT            |
+| POST   | `/scheduling/resources`                         | Scheduling       | `createResource`          | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| POST   | `/scheduling/resources/:id/close-slots`         | Scheduling       | `closeSlots`              | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| POST   | `/scheduling/resources/:id/delay`               | Scheduling       | `delayResource`           | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| GET    | `/scheduling/resources/:id/exceptions`          | Scheduling       | `listExceptions`          | SCHEDULING_ADMIN, PRACTITIONER, PATIENT                              |
+| POST   | `/scheduling/resources/:id/exceptions`          | Scheduling       | `createException`         | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| POST   | `/scheduling/resources/:id/shift-slots`         | Scheduling       | `shiftSlots`              | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| GET    | `/scheduling/resources/:id/slots`               | Scheduling       | `getResourceAgenda`       | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT            |
+| GET    | `/scheduling/resources/:id/templates`           | Scheduling       | `listTemplates`           | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| POST   | `/scheduling/resources/:id/templates`           | Scheduling       | `createTemplate`          | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| GET    | `/scheduling/resources/:resourceId/waitlist`    | Scheduling       | `listResourceWaitlist`    | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER                     |
+| GET    | `/scheduling/service-availability`              | ServiceOfferings | `availability`            | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| GET    | `/scheduling/service-offerings`                 | ServiceOfferings | `list`                    | PATIENT, PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN, SCHEDULING_AGENT |
+| POST   | `/scheduling/service-offerings`                 | ServiceOfferings | `create`                  | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN                            |
+| PATCH  | `/scheduling/service-offerings/:id`             | ServiceOfferings | `update`                  | PRACTITIONER, CLINICIAN, SCHEDULING_ADMIN                            |
+| POST   | `/scheduling/service-offerings/:id/holds`       | ServiceOfferings | `placeHold`               | PATIENT, SCHEDULING_ADMIN, SCHEDULING_AGENT                          |
+| GET    | `/scheduling/slots`                             | Agenda           | `listSlots`               | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT            |
+| POST   | `/scheduling/slots/:id/holds`                   | Scheduling       | `placeHold`               | SCHEDULING_ADMIN, SCHEDULING_AGENT, SUPPORT_STAFF, PATIENT           |
+| DELETE | `/scheduling/templates/:id`                     | Scheduling       | `retireTemplate`          | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| PATCH  | `/scheduling/templates/:id`                     | Scheduling       | `updateTemplate`          | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| POST   | `/scheduling/templates/:id/generate-slots`      | Scheduling       | `generateSlots`           | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| POST   | `/scheduling/templates/:id/reactivate`          | Scheduling       | `reactivateTemplate`      | SCHEDULING_ADMIN, PRACTITIONER                                       |
+| GET    | `/scheduling/waitlist`                          | Scheduling       | `listWaitlist`            | SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, PATIENT            |
+| POST   | `/scheduling/waitlist`                          | Scheduling       | `enrollWaitlist`          | SCHEDULING_ADMIN, SCHEDULING_AGENT, SUPPORT_STAFF, PATIENT           |
+| GET    | `/tenants/:tenantId/agenda`                     | TenantAgenda     | `list`                    | (guard del servicio)                                                 |
 
 Los endpoints `internal/*` son de workers (`SYSTEM`, `SYSTEM_WORKER`). `GET /tenants/:tenantId/agenda`
 no lleva `@Roles`: lo decide `TenantDirectoryPort.assertCanRead`.
@@ -225,3 +225,44 @@ pedida: sin ese recorte, una zona al oeste de UTC materializaría cupos del día
 
 `tools/alovida/seed-dev-data.mjs` declara sus franjas en hora local de la sede (`08:00`–`12:00`)
 y crea el recurso con `timeZone: 'America/La_Paz'`; la conversión a UTC la hace `generateSlots`.
+
+## Personal de apoyo en la agenda
+
+- `GET /me/support-agenda?org|tenantId&from&to&doctors&services&locations` (rango de hasta 31 días): citas de los doctores
+  que la persona cubre, cada una con `allowedActions` ya resueltas por la política y `denialReason` cuando no puede verla (sin
+  paciente ni motivo: un bloque ocupado, sin `waitlistCount`, **sin `bookingId` ni `healthcareServiceId`**: son opcionales en el
+  DTO y solo salen con `schedule.view`). Una cita sin ningún permiso `schedule.*` aplicable (`view`, `confirm`, `reschedule`,
+  `cancel`, `check_in`) no sale ni como bloque: tener un vínculo vivo no da la agenda de toda la organización. Las citas que sí ve traen `waitlistCount` (esperas activas de esa
+  agenda cuya ventana incluye el horario; ausente si nadie espera). Las opciones de filtro (`doctors`, `services`,
+  `locations`) se limitan a lo que ve. Sin vínculo vigente (nunca lo tuvo, terminó, venció o está suspendido) responde 403. Cada
+  lectura queda en `audit.data_access_log` (`@AccessLogged`, `SUPPORT_AGENDA`, antes de leer) y se sella una vez por permiso
+  y doctor (`SUPPORT_SCHEDULE_VIEW`) y, además, un asiento en `audit.data_access_log` por cada paciente cuya cita se mostró
+  (`patient_profile_id`, `resource_type = SUPPORT_AGENDA`, sin datos clínicos): así se responde «quién vio al paciente X». Los GET compartidos (`/scheduling/bookings`, `/:id`) no llevan `@AccessLogged`: lo leen
+  también pacientes y doctores; para la persona de apoyo los sella el servicio.
+- Toda acción de la persona de apoyo sobre una cita o un cupo la decide `SupportAccessPolicy` con el doctor, servicio y espacio
+  DE ESA cita o cupo, en la organización activa (`X-Tenant-Id`, o su única membresía): reprogramar (origen **y** destino:
+  el destino tiene que estar libre, ser futuro, del mismo servicio y de la organización de la cita; uno de otra organización
+  responde 404), retener un cupo y confirmar la retención (`schedule.create`; el `tenantId` del cuerpo tiene que ser el de la
+  agenda del cupo y la cita queda con `booked_via_grant_id`), aceptar (`schedule.confirm`), cancelar, registrar la llegada y
+  apuntarse a la lista de espera (`schedule.waitlist`, con `bookableSlotId`). Sin acción permitida: 403 con el mismo mensaje
+  genérico para cualquier causa, que no nombra otra organización.
+- `POST /scheduling/appointments/direct` admite `SUPPORT_STAFF`: autoriza `schedule.create` (o `schedule.walk_in` con
+  `walkIn: true`), deriva el espacio y el servicio de la agenda del doctor (lo declarado solo se acepta si el doctor atiende
+  ahí o presta ese servicio: un doctor sin servicios propios no acepta ningún servicio declarado, 403, porque aceptarlo anularía
+  los permisos por servicio), sella `booked_via_grant_id` y no revela citas de otra organización en el choque de horario.
+  Con `walkIn: true` la cita nace además con la llegada registrada (estado «llegó», `checked_in_at`, canal `WALK_IN`) en la
+  misma transacción, y la respuesta trae `checkedInAt`.
+- `POST …/cancel`, `…/reschedule` y `…/reject` exigen `reasonText`: si falta, está vacío, es corto o de relleno responde **422**
+  (`REASON_REQUIRED` / `REASON_PLACEHOLDER`), no el 400 del validador (que queda para un motivo que no es texto o pasa de 500).
+- `isSupportActor` y `operatesAnyAgenda` deciden por la organización de la cita (roles con ámbito), no por roles globales.
+- **SEG V-1 · quién opera y lista citas.** `attendsIn(actor, tenantId)` lee el oficio de profesional en la organización de la
+  cita (rol `PRACTITIONER`/`CLINICIAN` con ámbito + perfil profesional); el `practitionerProfileId` del token es global y ya no
+  saca a nadie del candado de representación (`isPatientActor`): un médico de A con cuenta de paciente en B es «paciente» en B.
+  `cancel` y `reschedule` pasan por `BookingAccess.assertMayChangeBooking`: mostrador/administración operan cualquiera, la
+  persona de apoyo pasa por su política, la cuenta de paciente debe ser titular o apoderada y un profesional solo opera la cita
+  de SU agenda (o la suya/la de quien representa si él es el paciente); lo demás es 403. `GET /scheduling/bookings?patientProfileId=`
+  de un profesional solo devuelve lo de su propia agenda (salvo que sea el propio paciente o su apoderado). Los `isPatientActor`
+  privados de `flexible/` y `service-offerings/`, la lista de espera (`assertMaySeePatient`, `assertOperatesAgenda`), la demora
+  y la vigencia de afiliación leen el oficio de mostrador en la organización activa, no en cualquiera del token.
+  Pendiente declarado: reservar (`placeHold`/`confirm`) como profesional de la organización a nombre de cualquier paciente
+  sigue permitido (es el flujo de la agenda del médico); acotarlo es una decisión de producto.

@@ -3,9 +3,9 @@
 # Endpoints del módulo `community`
 
 - **Bloque:** Marketing y Crecimiento (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
-- **Operaciones:** 102 (98 en el contrato, 4 sólo en el código)
-- **Riesgo:** ALTO 29 · MEDIO 9 · BAJO 64
-- **Tablas distintas que tocan:** 68
+- **Operaciones:** 111 (107 en el contrato, 4 sólo en el código)
+- **Riesgo:** ALTO 31 · MEDIO 11 · BAJO 69
+- **Tablas distintas que tocan:** 81
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/community.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -24,96 +24,105 @@
 | 10 | POST | `/community/bookmarks` | Guardar un bookmark en una colección | ALTO | 3 | sesión (sin roles) |
 | 11 | POST | `/community/comments` | Comentar (hilo anidado) con contadores | ALTO | 8 | sesión (sin roles) |
 | 12 | GET | `/community/comments/media/{fileId}/content` | Descargar el adjunto de un comentario (imagen, sticker o GIF) | BAJO | 8 | sesión (sin roles) |
-| 13 | GET | `/community/conversations` | Conversaciones activas de un perfil | BAJO | 4 | sesión (sin roles) |
+| 13 | GET | `/community/conversations` | Conversaciones activas de un perfil | BAJO | 5 | sesión (sin roles) |
 | 14 | POST | `/community/conversations` | Crear una conversación con participantes | ALTO | 6 | sesión (sin roles) |
-| 15 | GET | `/community/conversations/{conversationId}/attachments/{fileId}/content` | Descargar el adjunto de una conversación (participante activo) | BAJO | 6 | sesión (sin roles) |
-| 16 | GET | `/community/conversations/{conversationId}/messages` | Mensajes de una conversación | BAJO | 5 | sesión (sin roles) |
-| 17 | POST | `/community/conversations/{conversationId}/messages` | Enviar un mensaje directo en la conversación | ALTO | 23 | sesión (sin roles) |
-| 18 | DELETE | `/community/conversations/{conversationId}/messages/{messageId}` | Eliminar un mensaje propio | ALTO | 6 | sesión (sin roles) |
-| 19 | PATCH | `/community/conversations/{conversationId}/messages/{messageId}` | Editar el texto de un mensaje propio | ALTO | 4 | sesión (sin roles) |
-| 20 | PATCH | `/community/conversations/{conversationId}/participant` | Marcar la conversación como favorita, fijada o archivada | BAJO | 2 | sesión (sin roles) |
-| 21 | DELETE | `/community/conversations/{conversationId}/pin` | Soltar el mensaje fijado de la conversación | ALTO | 4 | sesión (sin roles) |
-| 22 | POST | `/community/conversations/{conversationId}/pin` | Fijar un mensaje de la conversación | ALTO | 5 | sesión (sin roles) |
-| 23 | GET | `/community/conversations/{conversationId}/presence` | Presencia de los demás participantes | BAJO | 2 | sesión (sin roles) |
-| 24 | POST | `/community/conversations/{conversationId}/read` | Marcar mensajes como leídos (recibos) | ALTO | 6 | sesión (sin roles) |
-| 25 | POST | `/community/conversations/contacts/search` | Buscar personas para iniciar una conversación | BAJO | 2 | sesión (sin roles) |
-| 26 | GET | `/community/feed` | Timeline de un perfil | BAJO | 7 | sesión (sin roles) |
-| 27 | DELETE | `/community/follows` | Dejar de seguir un objeto social | ALTO | 3 | sesión (sin roles) |
-| 28 | GET | `/community/follows` | Seguimientos activos de un perfil | BAJO | 2 | sesión (sin roles) |
-| 29 | POST | `/community/follows` | Seguir un objeto social | ALTO | 4 | sesión (sin roles) |
-| 30 | GET | `/community/groups` | Grupos de una organización | BAJO | 5 | sesión (sin roles) |
-| 31 | POST | `/community/groups` | Crear un grupo/comunidad | ALTO | 9 | sesión (sin roles) |
-| 32 | GET | `/community/groups/{groupId}` | Ficha de un grupo | BAJO | 6 | sesión (sin roles) |
-| 33 | GET | `/community/groups/{groupId}/members` | Integrantes de un grupo | BAJO | 6 | sesión (sin roles) |
-| 34 | POST | `/community/groups/{groupId}/members` | Unirse a un grupo / comunidad | ALTO | 9 | sesión (sin roles) |
-| 35 | DELETE | `/community/groups/{groupId}/members/{member}` | Salir del grupo o dar de baja a un integrante | ALTO | 8 | sesión (sin roles) |
-| 36 | PATCH | `/community/groups/{groupId}/members/{member}` | Aprobar/rechazar un alta o cambiar el rol | ALTO | 12 | sesión (sin roles) |
-| 37 | GET | `/community/groups/{groupId}/posts` | Muro de un grupo | BAJO | 7 | sesión (sin roles) |
-| 38 | POST | `/community/groups/{groupId}/posts` | Publicar en el muro del grupo | ALTO | 15 | sesión (sin roles) |
-| 39 | GET | `/community/moderation/appeals` | Apelaciones presentadas, con su decisión | BAJO | 2 | SECURITY_ADMIN |
-| 40 | POST | `/community/moderation/appeals/{appealId}/resolve` | Resolver una apelación de moderación | MEDIO | 5 | SECURITY_ADMIN |
-| 41 | GET | `/community/moderation/decisions` | Decisiones de moderación tomadas | BAJO | 1 | SECURITY_ADMIN |
-| 42 | POST | `/community/moderation/decisions/{decisionId}/appeal` | Apelar una decisión de moderación | ALTO | 7 | sesión (sin roles) |
-| 43 | GET | `/community/moderation/decisions/mine` | Mis propias decisiones de moderación | BAJO | 4 | sesión (sin roles) |
-| 44 | GET | `/community/moderation/queue` | Cola de moderación con filtros y cursor | BAJO | 2 | SECURITY_ADMIN |
-| 45 | POST | `/community/moderation/queue/{queueId}/decision` | Resolver moderación (decisión + strike) | MEDIO | 6 | SECURITY_ADMIN |
-| 46 | GET | `/community/notifications` | Notificaciones sociales de un perfil | BAJO | 2 | sesión (sin roles) |
-| 47 | GET | `/community/polls/{pollId}` | Encuesta con opciones, recuentos y voto propio | BAJO | 7 | sesión (sin roles) |
-| 48 | POST | `/community/polls/{pollId}/votes` | Votar en una encuesta | ALTO | 10 | sesión (sin roles) |
-| 49 | GET | `/community/posts/{postId}` | Publicación con media, hashtags y menciones | BAJO | 10 | sesión (sin roles) |
-| 50 | GET | `/community/posts/{postId}/comments` | Comentarios de una publicación (hilo anidado) | BAJO | 6 | sesión (sin roles) |
-| 51 | POST | `/community/posts/{postId}/polls` | Crear una encuesta con opciones sobre un post | ALTO | 4 | sesión (sin roles) |
-| 52 | GET | `/community/posts/{postId}/reactions` | Reacciones de una publicación, agrupadas por tipo | BAJO | 5 | sesión (sin roles) |
-| 53 | GET | `/community/profiles/{profileId}` | Ficha de un perfil público | BAJO | 4 | sesión (sin roles) |
-| 54 | GET | `/community/profiles/{profileId}/auto-reply` | Respuesta automática por inactividad del perfil | BAJO | 2 | sesión (sin roles) |
-| 55 | PUT | `/community/profiles/{profileId}/auto-reply` | Configurar la respuesta automática del perfil | BAJO | 2 | sesión (sin roles) |
-| 56 | GET | `/community/profiles/{profileId}/posts` | Publicaciones de un perfil | BAJO | 6 | sesión (sin roles) |
-| 57 | POST | `/community/profiles/{profileId}/posts` | Publicar un post con hashtags, media y menciones | ALTO | 10 | sesión (sin roles) |
-| 58 | GET | `/community/profiles/{profileId}/reviews` | Reviews publicadas de un perfil | BAJO | 5 | sesión (sin roles) |
-| 59 | POST | `/community/profiles/{profileId}/reviews` | Publicar una review verificada de servicio | ALTO | 6 | sesión (sin roles) |
-| 60 | POST | `/community/profiles/{profileId}/reviews/{reviewId}/responses` | Responder una reseña de la propia vitrina | ALTO | 4 | sesión (sin roles) |
-| 61 | GET | `/community/profiles/by-slug/{slug}` | Ficha de un perfil público por su slug | BAJO | 4 | sesión (sin roles) |
-| 62 | GET | `/community/profiles/me` | Consultar la vitrina pública propia | BAJO | 1 | sesión (sin roles) |
-| 63 | PUT | `/community/profiles/me` | Crear o actualizar la vitrina pública propia | ALTO | 4 | sesión (sin roles) |
-| 64 | GET | `/community/profiles/me/stats` | Estadísticas de la vitrina pública propia | BAJO | 1 | sesión (sin roles) |
-| 65 | POST | `/community/public-profiles` | Crear un perfil público (bootstrap del grafo social) | MEDIO | 1 | SECURITY_ADMIN |
-| 66 | GET | `/community/ratings` | Calificaciones de un médico, paciente u organización | BAJO | 2 | sesión (sin roles) |
-| 67 | PUT | `/community/ratings` | Calificar con estrellas a un médico, paciente u organización | ALTO | 9 | sesión (sin roles) |
-| 68 | GET | `/community/ratings/mine` | Mis calificaciones | BAJO | 2 | sesión (sin roles) |
-| 69 | GET | `/community/ratings/summary` | Nota media de un médico, paciente u organización | BAJO | 2 | sesión (sin roles) |
-| 70 | PUT | `/community/reactions` | Reaccionar a contenido (upsert una reacción por actor/objeto) | ALTO | 4 | sesión (sin roles) |
-| 71 | POST | `/community/reports` | Reportar contenido y encolar moderación | ALTO | 3 | sesión (sin roles) |
-| 72 | GET | `/community/topics` | Temas de la comunidad | BAJO | 1 | sesión (sin roles) |
-| 73 | GET | `/f/{slug}` | Ficha pública de una farmacia | BAJO | 18 | pública |
-| 74 | GET | `/internal/community/feed/pending` | Publicaciones publicadas sin fan-out | BAJO | 3 | SYSTEM, SECURITY_ADMIN |
-| 75 | POST | `/internal/community/feed/ranking/apply` | Aplicar rank_score recalculado | MEDIO | 1 | SYSTEM, SECURITY_ADMIN |
-| 76 | GET | `/internal/community/feed/ranking/pending` | Items de feed pendientes de puntuar | BAJO | 4 | SYSTEM, SECURITY_ADMIN |
-| 77 | POST | `/internal/community/feed/rebuild` | Generar feed (fan-out y ranking) | MEDIO | 2 | SYSTEM, SECURITY_ADMIN |
-| 78 | GET | `/internal/community/search/health` | Estado del índice del directorio público | BAJO | 1 | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN |
-| 79 | POST | `/internal/community/search/reindex` | Reindexar el directorio público | BAJO | 9 | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN |
-| 80 | POST | `/internal/community/verification/badges` | Emitir un sello a mano (auditado) | MEDIO | 6 | SECURITY_ADMIN |
-| 81 | POST | `/internal/community/verification/badges/{targetId}/revoke` | Bajar los sellos de un sujeto (auditado) | MEDIO | 5 | SECURITY_ADMIN |
-| 82 | POST | `/internal/community/verification/badges/expire-sweep` | Bajar los sellos cuya vigencia ya venció | MEDIO | 5 | SYSTEM, SECURITY_ADMIN |
-| 83 | GET | `/l/{slug}` | Ficha pública de un laboratorio | BAJO | 18 | pública |
-| 84 | GET | `/o/{slug}` | Ficha pública de una organización | BAJO | 18 | pública |
-| 85 | GET | `/p/{slug}` | Ficha pública de un profesional | BAJO | 18 | pública |
-| 86 | POST | `/patients/me/reviews` | Calificar una atención recibida | MEDIO | 6 | PATIENT |
-| 87 | GET | `/public/comments/{commentId}/replies` | Respuestas de un comentario público | BAJO | 4 | pública |
-| 88 | GET | `/public/media/{id}` | Servir una imagen pública (avatar, portada o post) | BAJO | 7 | pública |
-| 89 | GET | `/public/nearby` | Prestadores cercanos, en línea recta | BAJO | 7 | pública |
-| 90 | GET | `/public/posts` | Últimas publicaciones de todos los profesionales | BAJO | 5 | pública |
-| 91 | GET | `/public/posts/{postId}/comments` | Comentarios raíz de una publicación pública | BAJO | 4 | pública |
-| 92 | GET | `/public/posts/{postId}/reactions` | Quiénes reaccionaron a una publicación pública | BAJO | 3 | pública |
-| 93 | GET | `/public/profiles/{prefijo}/{slug}` | Ficha pública por prefijo de vertical | BAJO | 18 | pública |
-| 94 | GET | `/public/profiles/{prefijo}/{slug}/reviews` | Opiniones publicadas de una ficha pública | BAJO | 5 | pública |
-| 95 | GET | `/public/search` | Buscador público unificado | BAJO | 12 | pública |
-| 96 | GET | `/public/search/diagnostic-units` | Laboratorios y centros de diagnóstico | BAJO | 12 | pública |
-| 97 | GET | `/public/search/insurers` | Aseguradoras en el directorio público | BAJO | 12 | pública |
-| 98 | GET | `/public/search/medications` | Medicamentos ofertados públicamente | BAJO | 12 | pública |
-| 99 | GET | `/public/search/organizations` | Organizaciones en el directorio público | BAJO | 12 | pública |
-| 100 | GET | `/public/search/pharmacies` | Farmacias en el directorio público | BAJO | 12 | pública |
-| 101 | GET | `/public/search/practitioners` | Profesionales en el directorio público | BAJO | 12 | pública |
-| 102 | GET | `/s/{slug}` | Ficha pública de una aseguradora | BAJO | 18 | pública |
+| 15 | POST | `/community/conversations/{conversationId}/assignment` | Tomar, asignar o cambiar el estado de una conversación | ALTO | 15 | sesión (sin roles) |
+| 16 | GET | `/community/conversations/{conversationId}/attachments/{fileId}/content` | Descargar el adjunto de una conversación (participante activo) | BAJO | 6 | sesión (sin roles) |
+| 17 | GET | `/community/conversations/{conversationId}/internal-notes` | Notas internas de una conversación | BAJO | 13 | sesión (sin roles) |
+| 18 | POST | `/community/conversations/{conversationId}/internal-notes` | Agregar una nota interna a una conversación | ALTO | 13 | sesión (sin roles) |
+| 19 | GET | `/community/conversations/{conversationId}/messages` | Mensajes de una conversación | BAJO | 6 | sesión (sin roles) |
+| 20 | POST | `/community/conversations/{conversationId}/messages` | Enviar un mensaje directo en la conversación | ALTO | 39 | sesión (sin roles) |
+| 21 | DELETE | `/community/conversations/{conversationId}/messages/{messageId}` | Eliminar un mensaje propio | ALTO | 6 | sesión (sin roles) |
+| 22 | PATCH | `/community/conversations/{conversationId}/messages/{messageId}` | Editar el texto de un mensaje propio | ALTO | 4 | sesión (sin roles) |
+| 23 | PATCH | `/community/conversations/{conversationId}/participant` | Marcar la conversación como favorita, fijada o archivada | BAJO | 2 | sesión (sin roles) |
+| 24 | DELETE | `/community/conversations/{conversationId}/pin` | Soltar el mensaje fijado de la conversación | ALTO | 4 | sesión (sin roles) |
+| 25 | POST | `/community/conversations/{conversationId}/pin` | Fijar un mensaje de la conversación | ALTO | 5 | sesión (sin roles) |
+| 26 | GET | `/community/conversations/{conversationId}/presence` | Presencia de los demás participantes | BAJO | 2 | sesión (sin roles) |
+| 27 | POST | `/community/conversations/{conversationId}/read` | Marcar mensajes como leídos (recibos) | ALTO | 6 | sesión (sin roles) |
+| 28 | POST | `/community/conversations/contacts/search` | Buscar personas para iniciar una conversación | BAJO | 2 | sesión (sin roles) |
+| 29 | GET | `/community/feed` | Timeline de un perfil | BAJO | 7 | sesión (sin roles) |
+| 30 | DELETE | `/community/follows` | Dejar de seguir un objeto social | ALTO | 3 | sesión (sin roles) |
+| 31 | GET | `/community/follows` | Seguimientos activos de un perfil | BAJO | 2 | sesión (sin roles) |
+| 32 | POST | `/community/follows` | Seguir un objeto social | ALTO | 4 | sesión (sin roles) |
+| 33 | GET | `/community/groups` | Grupos de una organización | BAJO | 5 | sesión (sin roles) |
+| 34 | POST | `/community/groups` | Crear un grupo/comunidad | ALTO | 9 | sesión (sin roles) |
+| 35 | GET | `/community/groups/{groupId}` | Ficha de un grupo | BAJO | 6 | sesión (sin roles) |
+| 36 | GET | `/community/groups/{groupId}/members` | Integrantes de un grupo | BAJO | 6 | sesión (sin roles) |
+| 37 | POST | `/community/groups/{groupId}/members` | Unirse a un grupo / comunidad | ALTO | 9 | sesión (sin roles) |
+| 38 | DELETE | `/community/groups/{groupId}/members/{member}` | Salir del grupo o dar de baja a un integrante | ALTO | 8 | sesión (sin roles) |
+| 39 | PATCH | `/community/groups/{groupId}/members/{member}` | Aprobar/rechazar un alta o cambiar el rol | ALTO | 12 | sesión (sin roles) |
+| 40 | GET | `/community/groups/{groupId}/posts` | Muro de un grupo | BAJO | 7 | sesión (sin roles) |
+| 41 | POST | `/community/groups/{groupId}/posts` | Publicar en el muro del grupo | ALTO | 15 | sesión (sin roles) |
+| 42 | GET | `/community/moderation/appeals` | Apelaciones presentadas, con su decisión | BAJO | 2 | SECURITY_ADMIN |
+| 43 | POST | `/community/moderation/appeals/{appealId}/resolve` | Resolver una apelación de moderación | MEDIO | 5 | SECURITY_ADMIN |
+| 44 | GET | `/community/moderation/decisions` | Decisiones de moderación tomadas | BAJO | 1 | SECURITY_ADMIN |
+| 45 | POST | `/community/moderation/decisions/{decisionId}/appeal` | Apelar una decisión de moderación | ALTO | 7 | sesión (sin roles) |
+| 46 | GET | `/community/moderation/decisions/mine` | Mis propias decisiones de moderación | BAJO | 4 | sesión (sin roles) |
+| 47 | GET | `/community/moderation/queue` | Cola de moderación con filtros y cursor | BAJO | 2 | SECURITY_ADMIN |
+| 48 | POST | `/community/moderation/queue/{queueId}/decision` | Resolver moderación (decisión + strike) | MEDIO | 6 | SECURITY_ADMIN |
+| 49 | GET | `/community/notifications` | Notificaciones sociales de un perfil | BAJO | 2 | sesión (sin roles) |
+| 50 | GET | `/community/polls/{pollId}` | Encuesta con opciones, recuentos y voto propio | BAJO | 7 | sesión (sin roles) |
+| 51 | POST | `/community/polls/{pollId}/votes` | Votar en una encuesta | ALTO | 10 | sesión (sin roles) |
+| 52 | GET | `/community/posts/{postId}` | Publicación con media, hashtags y menciones | BAJO | 10 | sesión (sin roles) |
+| 53 | GET | `/community/posts/{postId}/comments` | Comentarios de una publicación (hilo anidado) | BAJO | 6 | sesión (sin roles) |
+| 54 | POST | `/community/posts/{postId}/polls` | Crear una encuesta con opciones sobre un post | ALTO | 4 | sesión (sin roles) |
+| 55 | GET | `/community/posts/{postId}/reactions` | Reacciones de una publicación, agrupadas por tipo | BAJO | 5 | sesión (sin roles) |
+| 56 | GET | `/community/profiles/{profileId}` | Ficha de un perfil público | BAJO | 4 | sesión (sin roles) |
+| 57 | GET | `/community/profiles/{profileId}/auto-reply` | Respuesta automática por inactividad del perfil | BAJO | 2 | sesión (sin roles) |
+| 58 | PUT | `/community/profiles/{profileId}/auto-reply` | Configurar la respuesta automática del perfil | BAJO | 2 | sesión (sin roles) |
+| 59 | GET | `/community/profiles/{profileId}/posts` | Publicaciones de un perfil | BAJO | 6 | sesión (sin roles) |
+| 60 | POST | `/community/profiles/{profileId}/posts` | Publicar un post con hashtags, media y menciones | ALTO | 10 | sesión (sin roles) |
+| 61 | GET | `/community/profiles/{profileId}/reviews` | Reviews publicadas de un perfil | BAJO | 5 | sesión (sin roles) |
+| 62 | POST | `/community/profiles/{profileId}/reviews` | Publicar una review verificada de servicio | ALTO | 6 | sesión (sin roles) |
+| 63 | POST | `/community/profiles/{profileId}/reviews/{reviewId}/responses` | Responder una reseña de la propia vitrina | ALTO | 4 | sesión (sin roles) |
+| 64 | GET | `/community/profiles/by-slug/{slug}` | Ficha de un perfil público por su slug | BAJO | 4 | sesión (sin roles) |
+| 65 | GET | `/community/profiles/me` | Consultar la vitrina pública propia | BAJO | 1 | sesión (sin roles) |
+| 66 | PUT | `/community/profiles/me` | Crear o actualizar la vitrina pública propia | ALTO | 4 | sesión (sin roles) |
+| 67 | GET | `/community/profiles/me/stats` | Estadísticas de la vitrina pública propia | BAJO | 1 | sesión (sin roles) |
+| 68 | POST | `/community/public-profiles` | Crear un perfil público (bootstrap del grafo social) | MEDIO | 1 | SECURITY_ADMIN |
+| 69 | GET | `/community/ratings` | Calificaciones de un médico, paciente u organización | BAJO | 2 | sesión (sin roles) |
+| 70 | PUT | `/community/ratings` | Calificar con estrellas a un médico, paciente u organización | ALTO | 9 | sesión (sin roles) |
+| 71 | GET | `/community/ratings/mine` | Mis calificaciones | BAJO | 2 | sesión (sin roles) |
+| 72 | GET | `/community/ratings/summary` | Nota media de un médico, paciente u organización | BAJO | 2 | sesión (sin roles) |
+| 73 | PUT | `/community/reactions` | Reaccionar a contenido (upsert una reacción por actor/objeto) | ALTO | 4 | sesión (sin roles) |
+| 74 | POST | `/community/reports` | Reportar contenido y encolar moderación | ALTO | 3 | sesión (sin roles) |
+| 75 | GET | `/community/topics` | Temas de la comunidad | BAJO | 1 | sesión (sin roles) |
+| 76 | GET | `/f/{slug}` | Ficha pública de una farmacia | BAJO | 18 | pública |
+| 77 | GET | `/internal/community/feed/pending` | Publicaciones publicadas sin fan-out | BAJO | 3 | SYSTEM, SECURITY_ADMIN |
+| 78 | POST | `/internal/community/feed/ranking/apply` | Aplicar rank_score recalculado | MEDIO | 1 | SYSTEM, SECURITY_ADMIN |
+| 79 | GET | `/internal/community/feed/ranking/pending` | Items de feed pendientes de puntuar | BAJO | 4 | SYSTEM, SECURITY_ADMIN |
+| 80 | POST | `/internal/community/feed/rebuild` | Generar feed (fan-out y ranking) | MEDIO | 2 | SYSTEM, SECURITY_ADMIN |
+| 81 | GET | `/internal/community/search/health` | Estado del índice del directorio público | BAJO | 1 | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN |
+| 82 | POST | `/internal/community/search/reindex` | Reindexar el directorio público | BAJO | 9 | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN |
+| 83 | POST | `/internal/community/verification/badges` | Emitir un sello a mano (auditado) | MEDIO | 6 | SECURITY_ADMIN |
+| 84 | POST | `/internal/community/verification/badges/{targetId}/revoke` | Bajar los sellos de un sujeto (auditado) | MEDIO | 5 | SECURITY_ADMIN |
+| 85 | POST | `/internal/community/verification/badges/expire-sweep` | Bajar los sellos cuya vigencia ya venció | MEDIO | 5 | SYSTEM, SECURITY_ADMIN |
+| 86 | GET | `/l/{slug}` | Ficha pública de un laboratorio | BAJO | 18 | pública |
+| 87 | GET | `/me/support-inbox` | Bandeja de conversaciones del equipo de apoyo | BAJO | 17 | sesión (sin roles) |
+| 88 | GET | `/me/support-inbox/{conversationId}` | Una conversación de la bandeja, con la autora real y las notas | BAJO | 24 | sesión (sin roles) |
+| 89 | GET | `/me/support-reply-templates` | Respuestas preparadas del equipo de apoyo | BAJO | 8 | sesión (sin roles) |
+| 90 | GET | `/o/{slug}` | Ficha pública de una organización | BAJO | 18 | pública |
+| 91 | GET | `/org/reply-templates` | Respuestas preparadas de la organización | BAJO | 1 | SECURITY_ADMIN |
+| 92 | POST | `/org/reply-templates` | Crear una respuesta preparada | MEDIO | 3 | SECURITY_ADMIN |
+| 93 | PATCH | `/org/reply-templates/{id}` | Cambiar, retirar o reactivar una respuesta preparada | MEDIO | 2 | SECURITY_ADMIN |
+| 94 | GET | `/p/{slug}` | Ficha pública de un profesional | BAJO | 18 | pública |
+| 95 | POST | `/patients/me/reviews` | Calificar una atención recibida | MEDIO | 6 | PATIENT |
+| 96 | GET | `/public/comments/{commentId}/replies` | Respuestas de un comentario público | BAJO | 4 | pública |
+| 97 | GET | `/public/media/{id}` | Servir una imagen pública (avatar, portada o post) | BAJO | 7 | pública |
+| 98 | GET | `/public/nearby` | Prestadores cercanos, en línea recta | BAJO | 7 | pública |
+| 99 | GET | `/public/posts` | Últimas publicaciones de todos los profesionales | BAJO | 5 | pública |
+| 100 | GET | `/public/posts/{postId}/comments` | Comentarios raíz de una publicación pública | BAJO | 4 | pública |
+| 101 | GET | `/public/posts/{postId}/reactions` | Quiénes reaccionaron a una publicación pública | BAJO | 3 | pública |
+| 102 | GET | `/public/profiles/{prefijo}/{slug}` | Ficha pública por prefijo de vertical | BAJO | 18 | pública |
+| 103 | GET | `/public/profiles/{prefijo}/{slug}/reviews` | Opiniones publicadas de una ficha pública | BAJO | 5 | pública |
+| 104 | GET | `/public/search` | Buscador público unificado | BAJO | 12 | pública |
+| 105 | GET | `/public/search/diagnostic-units` | Laboratorios y centros de diagnóstico | BAJO | 12 | pública |
+| 106 | GET | `/public/search/insurers` | Aseguradoras en el directorio público | BAJO | 12 | pública |
+| 107 | GET | `/public/search/medications` | Medicamentos ofertados públicamente | BAJO | 12 | pública |
+| 108 | GET | `/public/search/organizations` | Organizaciones en el directorio público | BAJO | 12 | pública |
+| 109 | GET | `/public/search/pharmacies` | Farmacias en el directorio público | BAJO | 12 | pública |
+| 110 | GET | `/public/search/practitioners` | Profesionales en el directorio público | BAJO | 12 | pública |
+| 111 | GET | `/s/{slug}` | Ficha pública de una aseguradora | BAJO | 18 | pública |
 
 ---
 
@@ -1132,7 +1141,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/conversations` la atiende `CommunityMessagingController.listConversations` (src/modules/community/controllers/community-messaging.controller.ts:282). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listConversations`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles.
+`GET /community/conversations` la atiende `CommunityMessagingController.listConversations` (src/modules/community/controllers/community-messaging.controller.ts:282). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listConversations`. Lee community.conversation_assignments, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles.
 
 ### Requerimientos
 
@@ -1151,9 +1160,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → ConversationsRepository.listActiveParticipationsOf | `src/modules/community/repositories/conversations.repository.ts:353` |
-| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → ConversationsRepository.listConversationsByIds | `src/modules/community/repositories/conversations.repository.ts:372` |
-| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → ConversationsRepository.findLastMessage | `src/modules/community/repositories/conversations.repository.ts:495` |
+| `community.conversation_assignments` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → CommunitySupportTeamViewService.awaitingDoctor → SupportInboxRepository.findAssignments | `src/modules/community/repositories/support-inbox.repository.ts:590` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → ConversationsRepository.listActiveParticipationsOf | `src/modules/community/repositories/conversations.repository.ts:361` |
+| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → ConversationsRepository.listConversationsByIds | `src/modules/community/repositories/conversations.repository.ts:380` |
+| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → ConversationsRepository.findLastMessage | `src/modules/community/repositories/conversations.repository.ts:507` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.listConversations → CommunityMessagingReadService.listConversations → PublicProfilesRepository.listByIds | `src/modules/community/repositories/public-profiles.repository.ts:135` |
 
 ### Parámetros
@@ -1173,7 +1183,7 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<ConversationListItemDto>` | Sí | — | — | Conversaciones de la página. | `src/modules/community/dto/read-messaging.dto.ts:250` |
+| `items` | `array<ConversationListItemDto>` | Sí | — | — | Conversaciones de la página. | `src/modules/community/dto/read-messaging.dto.ts:257` |
 | `items[].id` | `string` | Sí | formato uuid | — | Identificador de la conversación. | `src/modules/community/dto/read-messaging.dto.ts:185` |
 | `items[].conversationTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de conversación (directa, grupal). | `src/modules/community/dto/read-messaging.dto.ts:189` |
 | `items[].groupId` | `string` | No | formato uuid; admite null | — | Grupo al que pertenece, si es de grupo. | `src/modules/community/dto/read-messaging.dto.ts:193` |
@@ -1193,13 +1203,14 @@ La operación no recibe cuerpo.
 | `items[].isPinned` | `boolean` | Sí | — | — | Fijada arriba de la bandeja del actor (F4.4). Las fijadas van primero. | `src/modules/community/dto/read-messaging.dto.ts:225` |
 | `items[].archivedAt` | `string` | No | formato date-time; admite null | — | Desde cuándo la archivó el actor; `null` si no está archivada (F4.4). | `src/modules/community/dto/read-messaging.dto.ts:229` |
 | `items[].pinnedMessageId` | `string` | No | formato uuid; admite null | — | El mensaje fijado en la barra superior, si hay uno (F4.6). | `src/modules/community/dto/read-messaging.dto.ts:233` |
-| `items[].peers` | `array<ConversationPeerDto>` | Sí | — | — | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `src/modules/community/dto/read-messaging.dto.ts:243` |
+| `items[].awaitingDoctor` | `boolean` | No | — | — | Su equipo de apoyo le derivó esta conversación y espera su respuesta. Solo lo recibe el doctor; el paciente nunca ve el estado de la bandeja interna. | `src/modules/community/dto/read-messaging.dto.ts:240` |
+| `items[].peers` | `array<ConversationPeerDto>` | Sí | — | — | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `src/modules/community/dto/read-messaging.dto.ts:250` |
 | `items[].peers[].profileId` | `string` | Sí | formato uuid | — | Perfil público del participante. | `src/modules/community/dto/read-messaging.dto.ts:118` |
 | `items[].peers[].displayName` | `string` | No | admite null | — | Cómo se llama, para poder pintar la fila. | `src/modules/community/dto/read-messaging.dto.ts:122` |
 | `items[].peers[].avatarUrl` | `string` | No | admite null | — | Su avatar público, o `null` si no subió ninguno. Misma regla que la ficha pública. | `src/modules/community/dto/read-messaging.dto.ts:126` |
-| `count` | `number` | Sí | — | — | Cuántas trae esta página. | `src/modules/community/dto/read-messaging.dto.ts:254` |
-| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-messaging.dto.ts:258` |
-| `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null` si no hay más (F4.3). Se pagina sobre el orden de la bandeja —fijadas primero, después por último mensaje— y dentro del mismo recorte que aplique `q`. | `src/modules/community/dto/read-messaging.dto.ts:267` |
+| `count` | `number` | Sí | — | — | Cuántas trae esta página. | `src/modules/community/dto/read-messaging.dto.ts:261` |
+| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-messaging.dto.ts:265` |
+| `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null` si no hay más (F4.3). Se pagina sobre el orden de la bandeja —fijadas primero, después por último mensaje— y dentro del mismo recorte que aplique `q`. | `src/modules/community/dto/read-messaging.dto.ts:274` |
 
 ### Respuestas posibles
 
@@ -1259,10 +1270,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createParticipant | `src/modules/community/repositories/conversations.repository.ts:161` |
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:284` |
-| `community.conversations` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:136` |
-| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:304` |
+| `community.conversation_participants` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createParticipant | `src/modules/community/repositories/conversations.repository.ts:169` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:292` |
+| `community.conversations` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.createConversation | `src/modules/community/repositories/conversations.repository.ts:144` |
+| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → ConversationsRepository.findDirectBetween | `src/modules/community/repositories/conversations.repository.ts:312` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | CommunityMessagingController.createConversation → CommunityMessagingService.createConversation → CommunityMessagingService.createDirectConversation → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
 
@@ -1270,8 +1281,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `participantProfileIds` | `array<string>` | Sí | formato uuid; mínimo 2 elemento(s) | `@IsArray()` `@ArrayMinSize(2)` `@IsUUID('4', { each: true })` | Perfiles participantes | `src/modules/community/dto/conversation.dto.ts:26` |
-| `conversationType` | `string` | No | valores: DIRECT | `@IsOptional()` `@IsIn(['DIRECT'])` | Tipo de conversación (los grupos usan su flujo de membresía) | `src/modules/community/dto/conversation.dto.ts:37` |
+| `participantProfileIds` | `array<string>` | Sí | formato uuid; mínimo 2 elemento(s) | `@IsArray()` `@ArrayMinSize(2)` `@IsUUID('4', { each: true })` | Perfiles participantes | `src/modules/community/dto/conversation.dto.ts:27` |
+| `conversationType` | `string` | No | valores: DIRECT | `@IsOptional()` `@IsIn(['DIRECT'])` | Tipo de conversación (los grupos usan su flujo de membresía) | `src/modules/community/dto/conversation.dto.ts:38` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1330,7 +1341,129 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 15. GET /community/conversations/{conversationId}/attachments/{fileId}/content
+## 15. POST /community/conversations/{conversationId}/assignment
+
+- **Origen:** CONTRATO
+- **Nombre:** Tomar, asignar o cambiar el estado de una conversación
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CommunitySupportInboxController.assignment` — `src/modules/community/controllers/community-support-inbox.controller.ts:89`
+
+### Qué es y para qué sirve (negocio)
+
+Tomar, asignar o cambiar el estado de una conversación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`POST /community/conversations/{conversationId}/assignment` la atiende `CommunitySupportInboxController.assignment` (src/modules/community/controllers/community-support-inbox.controller.ts:89). Exige sesión; el controlador no declara roles. Valida el cuerpo como `ConversationAssignmentDto` (5 campos, 0 obligatorios). Delega en `CommunitySupportInboxService.applyAssignment`. Crea filas en community.conversation_assignments. Actualiza community.conversation_assignments. Lee community.conversation_assignments, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments, delegated_access.support_grant_actions y 5 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-support-inbox.controller.ts:89` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/community/controllers/community-support-inbox.controller.ts:89` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-support-inbox.controller.ts:89` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.conversation_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.writeAssignment | `src/modules/community/services/community-support-inbox.service.ts:596` |
+| `community.conversation_assignments` | ESCRIBE | CREA | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.writeAssignment → SupportInboxRepository.createAssignment | `src/modules/community/repositories/support-inbox.repository.ts:632` |
+| `community.conversation_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.writeAssignment → SupportInboxRepository.findAssignmentForUpdate | `src/modules/community/repositories/support-inbox.repository.ts:606` |
+| `community.conversation_participants` | LEE | LEE | POR_SQL | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.conversations` | LEE | LEE | POR_SQL | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.direct_messages` | LEE | LEE | POR_SQL | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:113` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findDelegationsOfEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:199` |
+| `delegated_access.support_grant_actions` | LEE | LEE | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:165` |
+| `delegated_access.support_scope_grants` | LEE | LEE | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:161` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:117` |
+| `iam.users` | LEE | LEE | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.writeAssignment → SupportInboxRepository.userNames | `src/modules/community/repositories/support-inbox.repository.ts:433` |
+| `practice.practices` | LEE | LEE | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:260` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.assignment → CommunitySupportInboxService.applyAssignment → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:266` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `conversationId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `ConversationAssignmentDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `action` | `string` | No | valores: TAKE, ASSIGN, SET_STATUS | `@IsOptional()` `@IsIn(ACTIONS)` | — | `src/modules/community/dto/support-inbox.dto.ts:244` |
+| `practitionerProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/community/dto/support-inbox.dto.ts:250` |
+| `assignedUserId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/community/dto/support-inbox.dto.ts:256` |
+| `status` | `string` | No | valores: NEW, TAKEN, WAITING_DOCTOR, RESOLVED | `@IsOptional()` `@IsIn(STATES)` | — | `src/modules/community/dto/support-inbox.dto.ts:262` |
+| `slaDueAt` | `string` | No | formato date-time | `@IsOptional()` `@IsDateString()` | — | `src/modules/community/dto/support-inbox.dto.ts:268` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "action": "TAKE",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "assignedUserId": "00000000-0000-4000-8000-000000000001",
+  "status": "NEW",
+  "slaDueAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<ConversationAssignmentResultDto>` · DTO `ConversationAssignmentResultDto` · HTTP `HttpStatus.OK`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/support-inbox.dto.ts:274` |
+| `status` | `object` | Sí | — | — | Estado en que quedó. | `src/modules/community/dto/support-inbox.dto.ts:276` |
+| `assignedUserId` | `string` | No | formato uuid | — | Quien la tiene. | `src/modules/community/dto/support-inbox.dto.ts:278` |
+| `assignedToName` | `string` | No | — | — | Nombre de quien la tiene. | `src/modules/community/dto/support-inbox.dto.ts:280` |
+| `slaDueAt` | `string` | No | formato date-time | — | Vencimiento del plazo. | `src/modules/community/dto/support-inbox.dto.ts:282` |
+| `referredToDoctor` | `boolean` | Sí | — | — | `true` si se derivó al doctor por parecer clínica. | `src/modules/community/dto/support-inbox.dto.ts:284` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Esa conversación no es de ese doctor; PreconditionFailedException: Cambiar la asignación exige indicar la acción o el estado; PreconditionFailedException: Esa persona no puede responder por este doctor; PreconditionFailedException: Cambiar el estado exige indicar el estado; PreconditionFailedException: No se puede pasar de {current} a {target} |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Community (19) — etapa `ctrl:CommunitySupportInboxController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 16. GET /community/conversations/{conversationId}/attachments/{fileId}/content
 
 - **Origen:** CONTRATO
 - **Nombre:** Descargar el adjunto de una conversación (participante activo)
@@ -1366,8 +1499,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 |---|---|---|---|---|---|
 | `common.file_versions` | LEE | LEE | DIRECTA | CommunityMessagingController.getAttachmentContent → CommunityMessagingReadService.getAttachmentContent → FileUploadService.downloadForAuthorizedContext → FileUploadService.serveCurrentVersion → AttachableFileService.assertUsableForAuthorizedContext → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | CommunityMessagingController.getAttachmentContent → CommunityMessagingReadService.getAttachmentContent → FileUploadService.downloadForAuthorizedContext → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.getAttachmentContent → CommunityMessagingReadService.getAttachmentContent → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
-| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.getAttachmentContent → CommunityMessagingReadService.getAttachmentContent → ConversationsRepository.findLiveMessagesByAttachmentFileId | `src/modules/community/repositories/conversations.repository.ts:229` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.getAttachmentContent → CommunityMessagingReadService.getAttachmentContent → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
+| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.getAttachmentContent → CommunityMessagingReadService.getAttachmentContent → ConversationsRepository.findLiveMessagesByAttachmentFileId | `src/modules/community/repositories/conversations.repository.ts:237` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.getAttachmentContent → CommunityMessagingReadService.getAttachmentContent → CommunityVisibilityService.assertOwnProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | CommunityMessagingController.getAttachmentContent → CommunityMessagingReadService.getAttachmentContent → CommunityMessagingReadService.assertNoBlockWithPeers → CommunityVisibilityService.isBlockedBetween → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
 
@@ -1413,7 +1546,213 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 16. GET /community/conversations/{conversationId}/messages
+## 17. GET /community/conversations/{conversationId}/internal-notes
+
+- **Origen:** CONTRATO
+- **Nombre:** Notas internas de una conversación
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CommunitySupportInboxController.notes` — `src/modules/community/controllers/community-support-inbox.controller.ts:109`
+
+### Qué es y para qué sirve (negocio)
+
+Notas internas de una conversación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`GET /community/conversations/{conversationId}/internal-notes` la atiende `CommunitySupportInboxController.notes` (src/modules/community/controllers/community-support-inbox.controller.ts:109). Exige sesión; el controlador no declara roles. Delega en `CommunitySupportInboxService.listNotes`. Lee community.conversation_internal_notes, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments, delegated_access.support_grant_actions y 5 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-support-inbox.controller.ts:109` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/community/controllers/community-support-inbox.controller.ts:109` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-support-inbox.controller.ts:109` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.conversation_internal_notes` | LEE | LEE | DIRECTA | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → SupportInboxRepository.findNotes | `src/modules/community/repositories/support-inbox.repository.ts:658` |
+| `community.conversation_participants` | LEE | LEE | POR_SQL | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.conversations` | LEE | LEE | POR_SQL | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.direct_messages` | LEE | LEE | POR_SQL | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:113` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findDelegationsOfEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:199` |
+| `delegated_access.support_grant_actions` | LEE | LEE | DIRECTA | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:165` |
+| `delegated_access.support_scope_grants` | LEE | LEE | DIRECTA | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:161` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:117` |
+| `iam.users` | LEE | LEE | DIRECTA | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → SupportInboxRepository.userNames | `src/modules/community/repositories/support-inbox.repository.ts:433` |
+| `practice.practices` | LEE | LEE | DIRECTA | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:260` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.notes → CommunitySupportInboxService.listNotes → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:266` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `conversationId` | path | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<InternalNotesResponseDto>` · DTO `InternalNotesResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<InternalNoteDto>` | Sí | — | — | Notas, de la más reciente a la más antigua. | `src/modules/community/dto/support-inbox.dto.ts:300` |
+| `items[].id` | `string` | Sí | formato uuid | — | Id de la nota. | `src/modules/community/dto/support-inbox.dto.ts:151` |
+| `items[].conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/support-inbox.dto.ts:153` |
+| `items[].authorUserId` | `string` | Sí | formato uuid | — | Quien la escribió. | `src/modules/community/dto/support-inbox.dto.ts:155` |
+| `items[].authorName` | `string` | Sí | — | — | Nombre de quien la escribió. | `src/modules/community/dto/support-inbox.dto.ts:157` |
+| `items[].bodyText` | `string` | Sí | — | — | Texto. | `src/modules/community/dto/support-inbox.dto.ts:159` |
+| `items[].createdAt` | `string` | Sí | formato date-time | — | Cuándo se escribió. | `src/modules/community/dto/support-inbox.dto.ts:161` |
+| `count` | `number` | Sí | — | — | Cantidad. | `src/modules/community/dto/support-inbox.dto.ts:302` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Community (19) — etapa `ctrl:CommunitySupportInboxController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 18. POST /community/conversations/{conversationId}/internal-notes
+
+- **Origen:** CONTRATO
+- **Nombre:** Agregar una nota interna a una conversación
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CommunitySupportInboxController.addNote` — `src/modules/community/controllers/community-support-inbox.controller.ts:120`
+
+### Qué es y para qué sirve (negocio)
+
+Agregar una nota interna a una conversación. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`POST /community/conversations/{conversationId}/internal-notes` la atiende `CommunitySupportInboxController.addNote` (src/modules/community/controllers/community-support-inbox.controller.ts:120). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateInternalNoteDto` (1 campo, 1 obligatorio). Delega en `CommunitySupportInboxService.addNote`. Crea filas en community.conversation_internal_notes. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments, delegated_access.support_grant_actions, delegated_access.support_scope_grants y 4 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-support-inbox.controller.ts:120` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/community/controllers/community-support-inbox.controller.ts:120` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-support-inbox.controller.ts:120` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.conversation_internal_notes` | ESCRIBE | CREA | DIRECTA | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → SupportInboxRepository.createNote | `src/modules/community/repositories/support-inbox.repository.ts:681` |
+| `community.conversation_participants` | LEE | LEE | POR_SQL | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.conversations` | LEE | LEE | POR_SQL | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.direct_messages` | LEE | LEE | POR_SQL | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:113` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findDelegationsOfEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:199` |
+| `delegated_access.support_grant_actions` | LEE | LEE | DIRECTA | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:165` |
+| `delegated_access.support_scope_grants` | LEE | LEE | DIRECTA | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:161` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:117` |
+| `iam.users` | LEE | LEE | DIRECTA | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → SupportInboxRepository.userNames | `src/modules/community/repositories/support-inbox.repository.ts:433` |
+| `practice.practices` | LEE | LEE | DIRECTA | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:260` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.addNote → CommunitySupportInboxService.addNote → CommunitySupportInboxService.requireAccess → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:266` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `conversationId` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `CreateInternalNoteDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `bodyText` | `string` | Sí | longitud mínima 1; longitud máxima 2000 | `@IsString()` `@MinLength(1)` `@MaxLength(2000)` | — | `src/modules/community/dto/support-inbox.dto.ts:294` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "bodyText": "valor-ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "bodyText": "valor-ejemplo"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<InternalNoteDto>` · DTO `InternalNoteDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Id de la nota. | `src/modules/community/dto/support-inbox.dto.ts:151` |
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/support-inbox.dto.ts:153` |
+| `authorUserId` | `string` | Sí | formato uuid | — | Quien la escribió. | `src/modules/community/dto/support-inbox.dto.ts:155` |
+| `authorName` | `string` | Sí | — | — | Nombre de quien la escribió. | `src/modules/community/dto/support-inbox.dto.ts:157` |
+| `bodyText` | `string` | Sí | — | — | Texto. | `src/modules/community/dto/support-inbox.dto.ts:159` |
+| `createdAt` | `string` | Sí | formato date-time | — | Cuándo se escribió. | `src/modules/community/dto/support-inbox.dto.ts:161` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Community (19) — etapa `ctrl:CommunitySupportInboxController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 19. GET /community/conversations/{conversationId}/messages
 
 - **Origen:** CONTRATO
 - **Nombre:** Mensajes de una conversación
@@ -1430,7 +1769,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.listMessages` (src/modules/community/controllers/community-messaging.controller.ts:299). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listMessages`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, community.user_blocks.
+`GET /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.listMessages` (src/modules/community/controllers/community-messaging.controller.ts:299). Exige sesión; el controlador no declara roles. Delega en `CommunityMessagingReadService.listMessages`. Lee community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, community.user_blocks, iam.users.
 
 ### Requerimientos
 
@@ -1449,11 +1788,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
-| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:122` |
-| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → ConversationsRepository.listMessagesPage | `src/modules/community/repositories/conversations.repository.ts:401` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
+| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:130` |
+| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → ConversationsRepository.listMessagesPage | `src/modules/community/repositories/conversations.repository.ts:409` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → CommunityVisibilityService.assertOwnProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → CommunityMessagingReadService.assertNoBlockWithPeers → CommunityVisibilityService.isBlockedBetween → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
+| `iam.users` | LEE | LEE | DIRECTA | CommunityMessagingController.listMessages → CommunityMessagingReadService.listMessages → CommunitySupportTeamViewService.annotate → SupportInboxRepository.userNames | `src/modules/community/repositories/support-inbox.repository.ts:433` |
 
 ### Parámetros
 
@@ -1472,32 +1812,36 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `items` | `array<DirectMessageDto>` | Sí | — | — | Mensajes de la página, del más reciente al más antiguo. | `src/modules/community/dto/read-messaging.dto.ts:321` |
-| `items[].id` | `string` | Sí | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:274` |
-| `items[].conversationId` | `string` | Sí | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:278` |
-| `items[].senderProfileId` | `string` | Sí | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:282` |
-| `items[].replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:286` |
-| `items[].contentTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:290` |
-| `items[].bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:294` |
-| `items[].attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:298` |
-| `items[].isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:302` |
-| `items[].deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:310` |
-| `items[].sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:314` |
-| `count` | `number` | Sí | — | — | Cuántos trae esta página. | `src/modules/community/dto/read-messaging.dto.ts:325` |
-| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-messaging.dto.ts:329` |
-| `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-messaging.dto.ts:333` |
-| `peerReadUpTo` | `string` | No | formato date-time; admite null | — | Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT. `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios cuyo `sentAt` sea anterior o igual a esta marca. | `src/modules/community/dto/read-messaging.dto.ts:343` |
-| `pinnedMessage` | `DirectMessageDto` | No | — | — | El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja con la primera página para que la barra superior se pinte sin otra llamada, aunque el mensaje sea de hace meses y no esté en la página. | `src/modules/community/dto/read-messaging.dto.ts:351` |
-| `pinnedMessage.id` | `string` | No | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:274` |
-| `pinnedMessage.conversationId` | `string` | No | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:278` |
-| `pinnedMessage.senderProfileId` | `string` | No | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:282` |
-| `pinnedMessage.replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:286` |
-| `pinnedMessage.contentTypeConceptId` | `string` | No | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:290` |
-| `pinnedMessage.bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:294` |
-| `pinnedMessage.attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:298` |
-| `pinnedMessage.isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:302` |
-| `pinnedMessage.deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:310` |
-| `pinnedMessage.sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:314` |
+| `items` | `array<DirectMessageDto>` | Sí | — | — | Mensajes de la página, del más reciente al más antiguo. | `src/modules/community/dto/read-messaging.dto.ts:343` |
+| `items[].id` | `string` | Sí | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:281` |
+| `items[].conversationId` | `string` | Sí | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:285` |
+| `items[].senderProfileId` | `string` | Sí | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:289` |
+| `items[].replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:293` |
+| `items[].contentTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:297` |
+| `items[].bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:301` |
+| `items[].attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:305` |
+| `items[].isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:309` |
+| `items[].deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:317` |
+| `items[].sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:321` |
+| `items[].repliedByTeam` | `boolean` | No | — | — | El equipo del doctor respondió este mensaje en su nombre y el doctor decidió mostrarlo: es lo que ve el paciente («respondido por su equipo»). Sin nombre de quien escribió. Ausente si no aplica. | `src/modules/community/dto/read-messaging.dto.ts:329` |
+| `items[].teamAuthorName` | `string` | No | — | — | Quién del equipo escribió este mensaje. Solo lo recibe el doctor dueño del perfil; nunca el paciente ni un mensaje por websocket. | `src/modules/community/dto/read-messaging.dto.ts:336` |
+| `count` | `number` | Sí | — | — | Cuántos trae esta página. | `src/modules/community/dto/read-messaging.dto.ts:347` |
+| `limit` | `number` | Sí | — | — | Tope pedido. | `src/modules/community/dto/read-messaging.dto.ts:351` |
+| `nextCursor` | `string` | No | admite null | — | Cursor de la página siguiente, o `null`. | `src/modules/community/dto/read-messaging.dto.ts:355` |
+| `peerReadUpTo` | `string` | No | formato date-time; admite null | — | Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT. `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios cuyo `sentAt` sea anterior o igual a esta marca. | `src/modules/community/dto/read-messaging.dto.ts:365` |
+| `pinnedMessage` | `DirectMessageDto` | No | — | — | El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja con la primera página para que la barra superior se pinte sin otra llamada, aunque el mensaje sea de hace meses y no esté en la página. | `src/modules/community/dto/read-messaging.dto.ts:373` |
+| `pinnedMessage.id` | `string` | No | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:281` |
+| `pinnedMessage.conversationId` | `string` | No | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:285` |
+| `pinnedMessage.senderProfileId` | `string` | No | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:289` |
+| `pinnedMessage.replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:293` |
+| `pinnedMessage.contentTypeConceptId` | `string` | No | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:297` |
+| `pinnedMessage.bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:301` |
+| `pinnedMessage.attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:305` |
+| `pinnedMessage.isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:309` |
+| `pinnedMessage.deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:317` |
+| `pinnedMessage.sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:321` |
+| `pinnedMessage.repliedByTeam` | `boolean` | No | — | — | El equipo del doctor respondió este mensaje en su nombre y el doctor decidió mostrarlo: es lo que ve el paciente («respondido por su equipo»). Sin nombre de quien escribió. Ausente si no aplica. | `src/modules/community/dto/read-messaging.dto.ts:329` |
+| `pinnedMessage.teamAuthorName` | `string` | No | — | — | Quién del equipo escribió este mensaje. Solo lo recibe el doctor dueño del perfil; nunca el paciente ni un mensaje por websocket. | `src/modules/community/dto/read-messaging.dto.ts:336` |
 
 ### Respuestas posibles
 
@@ -1522,7 +1866,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 17. POST /community/conversations/{conversationId}/messages
+## 20. POST /community/conversations/{conversationId}/messages
 
 - **Origen:** CONTRATO
 - **Nombre:** Enviar un mensaje directo en la conversación
@@ -1539,7 +1883,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 ### Cómo se atiende (sistema)
 
-`POST /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.sendMessage` (src/modules/community/controllers/community-messaging.controller.ts:85). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SendMessageDto` (5 campos, 1 obligatorio). Delega en `CommunityMessagingService.sendMessage`. Crea filas en community.direct_messages, community.message_receipts, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.conversation_participants, community.conversations, iam.devices. Lee common.file_versions, common.files, community.chat_auto_replies, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, community.user_blocks y 7 más.
+`POST /community/conversations/{conversationId}/messages` la atiende `CommunityMessagingController.sendMessage` (src/modules/community/controllers/community-messaging.controller.ts:85). Exige sesión; el controlador no declara roles. Valida el cuerpo como `SendMessageDto` (7 campos, 1 obligatorio). Delega en `CommunityMessagingService.sendMessage`. Crea filas en community.conversation_assignments, community.direct_messages, community.message_receipts, messaging.in_app_notifications, messaging.notification_deliveries, messaging.notification_requests. Actualiza community.conversation_assignments, community.conversation_participants, community.conversations, iam.devices. Lee common.file_versions, common.files, community.chat_auto_replies, community.conversation_assignments, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles y 21 más.
 
 ### Requerimientos
 
@@ -1560,25 +1904,41 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `common.file_versions` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.assertAttachmentCanBeAssociated → AttachableFileService.assertUsableBy → AttachableFileService.assertVersionUsable → FileVersionsRepository.findById | `src/modules/common/repositories/file-versions.repository.ts:75` |
 | `common.files` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.assertAttachmentCanBeAssociated → AttachableFileService.assertUsableBy → FilesRepository.findById | `src/modules/common/repositories/files.repository.ts:47` |
 | `community.chat_auto_replies` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.responderOnly → CommunityChatAutoReplyService.textForResponder | `src/modules/community/services/community-chat-auto-reply.service.ts:152` |
+| `community.conversation_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyService.recordReply | `src/modules/community/services/community-support-reply.service.ts:197` |
+| `community.conversation_assignments` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyService.recordReply → SupportInboxRepository.createAssignment | `src/modules/community/repositories/support-inbox.repository.ts:632` |
+| `community.conversation_assignments` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyService.guardReply → SupportInboxRepository.findAssignmentForUpdate | `src/modules/community/repositories/support-inbox.repository.ts:606` |
 | `community.conversation_participants` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.responderOnly → CommunityChatAutoReplyService.textForResponder | `src/modules/community/services/community-chat-auto-reply.service.ts:186` |
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
-| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send | `src/modules/community/services/community-messaging.service.ts:383` |
-| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:122` |
-| `community.direct_messages` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.createMessage | `src/modules/community/repositories/conversations.repository.ts:466` |
-| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.assertAttachmentCanBeAssociated → ConversationsRepository.findLiveMessagesByAttachmentFileId | `src/modules/community/repositories/conversations.repository.ts:229` |
-| `community.message_receipts` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.createReceipt | `src/modules/community/repositories/conversations.repository.ts:565` |
-| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityVisibilityService.assertActsAsProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
+| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send | `src/modules/community/services/community-messaging.service.ts:469` |
+| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:130` |
+| `community.direct_messages` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.createMessage | `src/modules/community/repositories/conversations.repository.ts:474` |
+| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.assertAttachmentCanBeAssociated → ConversationsRepository.findLiveMessagesByAttachmentFileId | `src/modules/community/repositories/conversations.repository.ts:237` |
+| `community.message_receipts` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → ConversationsRepository.createReceipt | `src/modules/community/repositories/conversations.repository.ts:577` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.resolveProvenance → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 | `community.user_blocks` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → BlocksRepository.existsBetween | `src/modules/community/repositories/blocks.repository.ts:58` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.resolveProvenance → SupportAccessPolicy.canReplyOnBehalf → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:113` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.resolveProvenance → SupportAccessPolicy.canReplyOnBehalf → SupportAccessRepository.findDelegationsOfEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:199` |
+| `delegated_access.support_grant_actions` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.resolveProvenance → SupportAccessPolicy.canReplyOnBehalf → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:165` |
+| `delegated_access.support_scope_grants` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.resolveProvenance → SupportAccessPolicy.canReplyOnBehalf → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:161` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.resolveProvenance → SupportAccessPolicy.canReplyOnBehalf → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:117` |
+| `directory.tenants` | LEE | LEE | POR_SQL | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyEmailService.enqueue → SupportInboxRepository.tenantNames | `src/modules/community/repositories/support-inbox.repository.ts:487` |
+| `iam.authentication_credentials` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyEmailService.enqueue → SupportInboxRepository.emailOfUser | `src/modules/community/repositories/support-inbox.repository.ts:345` |
 | `iam.devices` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → WebPushService.pushToUser → WebPushService.sendTo → WebPushService.forget | `src/modules/messaging/services/web-push.service.ts:235` |
 | `iam.devices` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → WebPushService.pushToUser | `src/modules/messaging/services/web-push.service.ts:172` |
+| `iam.email_verifications` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyEmailService.enqueue → SupportInboxRepository.emailOfUser | `src/modules/community/repositories/support-inbox.repository.ts:351` |
+| `iam.users` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyService.guardReply → SupportInboxRepository.userNames | `src/modules/community/repositories/support-inbox.repository.ts:433` |
 | `messaging.in_app_notifications` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createInAppNotification | `src/modules/messaging/repositories/notifications.repository.ts:710` |
 | `messaging.in_app_notifications` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findUnreadInAppForResource | `src/modules/messaging/repositories/notifications.repository.ts:845` |
-| `messaging.message_channels` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findActiveChannelByType | `src/modules/messaging/repositories/notifications.repository.ts:189` |
+| `messaging.message_channels` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyEmailService.enqueue → NotificationsService.createRequest → NotificationsRepository.findChannelById | `src/modules/messaging/repositories/notifications.repository.ts:139` |
+| `messaging.message_templates` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyEmailService.enqueue → NotificationsService.createRequest → NotificationsRepository.findTemplateById | `src/modules/messaging/repositories/notifications.repository.ts:153` |
 | `messaging.messaging_providers` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findProviderById | `src/modules/messaging/repositories/notifications.repository.ts:437` |
 | `messaging.notification_deliveries` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createDelivery | `src/modules/messaging/repositories/notifications.repository.ts:514` |
-| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyEmailService.enqueue → NotificationsService.createRequest → NotificationsRepository.createNotificationRequest | `src/modules/messaging/repositories/notifications.repository.ts:270` |
+| `messaging.notification_requests` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyEmailService.enqueue → NotificationsService.createRequest → NotificationsRepository.findLiveRequestByDebounceKey | `src/modules/messaging/repositories/notifications.repository.ts:388` |
 | `messaging.provider_channel_configs` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsRepository.findChannelConfigs | `src/modules/messaging/repositories/notifications.repository.ts:405` |
-| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → NotificationsService.emitInApp → NotificationsService.writeInApp → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `messaging.recipient_preferences` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunitySupportReplyEmailService.enqueue → NotificationsService.createRequest → NotificationsService.evaluateSuppression → NotificationsRepository.findPreferences | `src/modules/messaging/repositories/notifications.repository.ts:212` |
+| `practice.practices` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.resolveProvenance → SupportAccessPolicy.canReplyOnBehalf → SupportAccessRepository.findRoleAssignmentsOfProfile → SupportAccessRepository.findRoleAssignments | `src/modules/delegated_access/repositories/support-access.repository.ts:230` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessagingService.resolveProvenance → SupportAccessPolicy.canReplyOnBehalf → SupportAccessRepository.findRoleAssignmentsOfProfile | `src/modules/delegated_access/repositories/support-access.repository.ts:511` |
 | `profiles.person_account_links` | LEE | LEE | DIRECTA | CommunityMessagingController.sendMessage → CommunityMessagingService.sendMessage → CommunityMessagingService.send → CommunityMessageNotificationsService.newMessage → CommunityMessageNotificationsService.account → PersonAccountLinksRepository.findActiveByPerson | `src/modules/profiles/infrastructure/repositories/person-account-links.repository.ts:101` |
 
 ### Parámetros
@@ -1591,11 +1951,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `senderProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil remitente (participante activo) | `src/modules/community/dto/conversation.dto.ts:50` |
-| `bodyText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(4000)` | Texto del mensaje | `src/modules/community/dto/conversation.dto.ts:60` |
-| `contentType` | `string` | No | valores: TEXT, MEDIA | `@IsOptional()` `@IsIn(['TEXT', 'MEDIA'])` | Tipo de contenido | `src/modules/community/dto/conversation.dto.ts:71` |
-| `replyToMessageId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Mensaje al que responde | `src/modules/community/dto/conversation.dto.ts:82` |
-| `attachmentFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Archivo adjunto (common.files) | `src/modules/community/dto/conversation.dto.ts:93` |
+| `senderProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil remitente (participante activo) | `src/modules/community/dto/conversation.dto.ts:51` |
+| `onBehalfOfProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Perfil del profesional en cuyo nombre responde el personal de apoyo (igual a senderProfileId) | `src/modules/community/dto/conversation.dto.ts:66` |
+| `bodyText` | `string` | No | longitud mínima 1; longitud máxima 4000 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(4000)` | Texto del mensaje | `src/modules/community/dto/conversation.dto.ts:76` |
+| `contentType` | `string` | No | valores: TEXT, MEDIA | `@IsOptional()` `@IsIn(['TEXT', 'MEDIA'])` | Tipo de contenido | `src/modules/community/dto/conversation.dto.ts:87` |
+| `replyToMessageId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Mensaje al que responde | `src/modules/community/dto/conversation.dto.ts:98` |
+| `attachmentFileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Archivo adjunto (common.files) | `src/modules/community/dto/conversation.dto.ts:109` |
+| `channels` | `array<string>` | No | valores: CHAT, EMAIL; mínimo 1 elemento(s) | `@IsOptional()` `@IsArray()` `@ArrayMinSize(1)` `@ArrayUnique()` `@IsIn(['CHAT', 'EMAIL'], { each: true })` | Canales de la respuesta; por defecto solo CHAT | `src/modules/community/dto/conversation.dto.ts:127` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1610,10 +1972,14 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 ```json
 {
   "senderProfileId": "00000000-0000-4000-8000-000000000001",
+  "onBehalfOfProfileId": "00000000-0000-4000-8000-000000000001",
   "bodyText": "valor-ejemplo",
   "contentType": "TEXT",
   "replyToMessageId": "00000000-0000-4000-8000-000000000001",
-  "attachmentFileId": "00000000-0000-4000-8000-000000000001"
+  "attachmentFileId": "00000000-0000-4000-8000-000000000001",
+  "channels": [
+    "CHAT"
+  ]
 }
 ```
 
@@ -1626,6 +1992,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:128` |
 | `conversationId` | `string` | Sí | formato uuid | — | Identificador asociado a conversation. | `src/modules/community/dto/responses.dto.ts:134` |
 | `sentAt` | `string` | Sí | formato date-time | — | Valor de sent at mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:140` |
+| `email` | `object` | No | — | — | Resultado del canal de correo, si se pidió | `src/modules/community/dto/responses.dto.ts:149` |
+| `email.queued` | `boolean` | No | — | — | — | sin fuente |
+| `email.requestId` | `string` | No | — | — | — | sin fuente |
+| `email.skippedReason` | `string` | No | — | — | — | sin fuente |
 
 ### Respuestas posibles
 
@@ -1634,9 +2004,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 | 201 | — | Éxito |
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
-| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno; ForbiddenException: {labels.subject} no le pertenece |
-| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Archivo adjunto no encontrado |
-| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El remitente no es participante activo; PreconditionFailedException: Existe un bloqueo entre los participantes; PreconditionFailedException: No se puede adjuntar un archivo sin un actor que lo autorice; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: No se puede escribir en el grafo social con un perfil ajeno; ForbiddenException: No puede responder en nombre de este profesional; ForbiddenException: {labels.subject} no le pertenece |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada; ResourceNotFoundException: {labels.notFound}; ResourceNotFoundException: Archivo adjunto no encontrado; ResourceNotFoundException: Canal no encontrado; ResourceNotFoundException: Plantilla no encontrada |
+| 409 | `CONFLICT` | ConflictException: La conversación ya la tiene otra persona del equipo |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Se responde en nombre del profesional con su propio perfil como remitente; PreconditionFailedException: El correo solo sirve para responder en nombre del doctor; PreconditionFailedException: El remitente no es participante activo; PreconditionFailedException: Existe un bloqueo entre los participantes; PreconditionFailedException: El mensaje del paciente es clínico: solo el doctor puede responderlo. Derívelo al doctor.; PreconditionFailedException: Un mensaje con contenido clínico lo responde el doctor: derívelo; PreconditionFailedException: No se puede adjuntar un archivo sin un actor que lo autorice; PreconditionFailedException: {labels.subject} está borrado; PreconditionFailedException: {labels.subject} no tiene una versión vigente; PreconditionFailedException: La notificación a una dirección externa también necesita el usuario destinatario / La notificación necesita el usuario destinatario; PreconditionFailedException: El canal no está activo; PreconditionFailedException: La plantilla no está publicada; PreconditionFailedException: La plantilla es de otro canal |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 El árbol de decisión completo está en [flujos](../flujos/community.md).
@@ -1654,7 +2025,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 18. DELETE /community/conversations/{conversationId}/messages/{messageId}
+## 21. DELETE /community/conversations/{conversationId}/messages/{messageId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Eliminar un mensaje propio
@@ -1688,11 +2059,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
-| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage | `src/modules/community/services/community-messaging.service.ts:802` |
-| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:122` |
-| `community.direct_messages` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage | `src/modules/community/services/community-messaging.service.ts:793` |
-| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage → CommunityMessagingService.ownLiveMessage → ConversationsRepository.findMessageInConversation | `src/modules/community/repositories/conversations.repository.ts:530` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
+| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage | `src/modules/community/services/community-messaging.service.ts:1065` |
+| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:130` |
+| `community.direct_messages` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage | `src/modules/community/services/community-messaging.service.ts:1056` |
+| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage → CommunityMessagingService.ownLiveMessage → ConversationsRepository.findMessageInConversation | `src/modules/community/repositories/conversations.repository.ts:542` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.deleteMessage → CommunityMessagingService.deleteMessage → CommunityVisibilityService.assertActsAsProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 
 ### Parámetros
@@ -1711,9 +2082,9 @@ La operación no recibe cuerpo.
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:358` |
-| `messageId` | `string` | Sí | formato uuid | — | El mensaje eliminado. | `src/modules/community/dto/read-messaging.dto.ts:362` |
-| `deletedAt` | `string` | Sí | formato date-time | — | Cuándo. | `src/modules/community/dto/read-messaging.dto.ts:366` |
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/read-messaging.dto.ts:380` |
+| `messageId` | `string` | Sí | formato uuid | — | El mensaje eliminado. | `src/modules/community/dto/read-messaging.dto.ts:384` |
+| `deletedAt` | `string` | Sí | formato date-time | — | Cuándo. | `src/modules/community/dto/read-messaging.dto.ts:388` |
 
 ### Respuestas posibles
 
@@ -1741,7 +2112,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 19. PATCH /community/conversations/{conversationId}/messages/{messageId}
+## 22. PATCH /community/conversations/{conversationId}/messages/{messageId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Editar el texto de un mensaje propio
@@ -1776,9 +2147,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.editMessage → CommunityMessagingService.editMessage → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
-| `community.direct_messages` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.editMessage → CommunityMessagingService.editMessage | `src/modules/community/services/community-messaging.service.ts:752` |
-| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.editMessage → CommunityMessagingService.editMessage → CommunityMessagingService.ownLiveMessage → ConversationsRepository.findMessageInConversation | `src/modules/community/repositories/conversations.repository.ts:530` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.editMessage → CommunityMessagingService.editMessage → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
+| `community.direct_messages` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.editMessage → CommunityMessagingService.editMessage | `src/modules/community/services/community-messaging.service.ts:1015` |
+| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.editMessage → CommunityMessagingService.editMessage → CommunityMessagingService.ownLiveMessage → ConversationsRepository.findMessageInConversation | `src/modules/community/repositories/conversations.repository.ts:542` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.editMessage → CommunityMessagingService.editMessage → CommunityVisibilityService.assertActsAsProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 
 ### Parámetros
@@ -1792,8 +2163,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `senderProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil autor del mensaje | `src/modules/community/dto/conversation.dto.ts:155` |
-| `bodyText` | `string` | Sí | longitud mínima 1; longitud máxima 4000 | `@IsString()` `@MinLength(1)` `@MaxLength(4000)` | Texto nuevo del mensaje | `src/modules/community/dto/conversation.dto.ts:162` |
+| `senderProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil autor del mensaje | `src/modules/community/dto/conversation.dto.ts:189` |
+| `bodyText` | `string` | Sí | longitud mínima 1; longitud máxima 4000 | `@IsString()` `@MinLength(1)` `@MaxLength(4000)` | Texto nuevo del mensaje | `src/modules/community/dto/conversation.dto.ts:196` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1819,16 +2190,18 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:274` |
-| `conversationId` | `string` | Sí | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:278` |
-| `senderProfileId` | `string` | Sí | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:282` |
-| `replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:286` |
-| `contentTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:290` |
-| `bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:294` |
-| `attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:298` |
-| `isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:302` |
-| `deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:310` |
-| `sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:314` |
+| `id` | `string` | Sí | formato uuid | — | Identificador del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:281` |
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación a la que pertenece. | `src/modules/community/dto/read-messaging.dto.ts:285` |
+| `senderProfileId` | `string` | Sí | formato uuid | — | Perfil que lo envió. | `src/modules/community/dto/read-messaging.dto.ts:289` |
+| `replyToMessageId` | `string` | No | formato uuid; admite null | — | Mensaje al que responde, si responde a alguno. | `src/modules/community/dto/read-messaging.dto.ts:293` |
+| `contentTypeConceptId` | `string` | Sí | formato uuid | — | Concept id del tipo de contenido. | `src/modules/community/dto/read-messaging.dto.ts:297` |
+| `bodyText` | `string` | No | admite null | — | Cuerpo del mensaje. | `src/modules/community/dto/read-messaging.dto.ts:301` |
+| `attachmentFileId` | `string` | No | formato uuid; admite null | — | Adjunto en `common.files`. | `src/modules/community/dto/read-messaging.dto.ts:305` |
+| `isEdited` | `boolean` | No | admite null | — | Si fue editado (F4.5). | `src/modules/community/dto/read-messaging.dto.ts:309` |
+| `deletedAt` | `string` | No | formato date-time; admite null | — | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `src/modules/community/dto/read-messaging.dto.ts:317` |
+| `sentAt` | `string` | No | formato date-time; admite null | — | Cuándo se envió. | `src/modules/community/dto/read-messaging.dto.ts:321` |
+| `repliedByTeam` | `boolean` | No | — | — | El equipo del doctor respondió este mensaje en su nombre y el doctor decidió mostrarlo: es lo que ve el paciente («respondido por su equipo»). Sin nombre de quien escribió. Ausente si no aplica. | `src/modules/community/dto/read-messaging.dto.ts:329` |
+| `teamAuthorName` | `string` | No | — | — | Quién del equipo escribió este mensaje. Solo lo recibe el doctor dueño del perfil; nunca el paciente ni un mensaje por websocket. | `src/modules/community/dto/read-messaging.dto.ts:336` |
 
 ### Respuestas posibles
 
@@ -1856,7 +2229,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 20. PATCH /community/conversations/{conversationId}/participant
+## 23. PATCH /community/conversations/{conversationId}/participant
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar la conversación como favorita, fijada o archivada
@@ -1891,7 +2264,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.updateParticipant → CommunityMessagingService.updateParticipant → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.updateParticipant → CommunityMessagingService.updateParticipant → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.updateParticipant → CommunityMessagingService.updateParticipant → CommunityVisibilityService.assertActsAsProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 
 ### Parámetros
@@ -1904,10 +2277,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `profileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil que marca | `src/modules/community/dto/conversation.dto.ts:129` |
-| `isFavorite` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Favorita | `src/modules/community/dto/conversation.dto.ts:135` |
-| `isPinned` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Fijada arriba de la bandeja | `src/modules/community/dto/conversation.dto.ts:141` |
-| `archived` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Archivada | `src/modules/community/dto/conversation.dto.ts:147` |
+| `profileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil que marca | `src/modules/community/dto/conversation.dto.ts:163` |
+| `isFavorite` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Favorita | `src/modules/community/dto/conversation.dto.ts:169` |
+| `isPinned` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Fijada arriba de la bandeja | `src/modules/community/dto/conversation.dto.ts:175` |
+| `archived` | `boolean` | No | — | `@IsOptional()` `@IsBoolean()` | Archivada | `src/modules/community/dto/conversation.dto.ts:181` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -1964,7 +2337,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 21. DELETE /community/conversations/{conversationId}/pin
+## 24. DELETE /community/conversations/{conversationId}/pin
 
 - **Origen:** CONTRATO
 - **Nombre:** Soltar el mensaje fijado de la conversación
@@ -1998,9 +2371,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.unpinMessage → CommunityMessagingService.unpinMessage → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
-| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.unpinMessage → CommunityMessagingService.unpinMessage | `src/modules/community/services/community-messaging.service.ts:896` |
-| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.unpinMessage → CommunityMessagingService.unpinMessage → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:122` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.unpinMessage → CommunityMessagingService.unpinMessage → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
+| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.unpinMessage → CommunityMessagingService.unpinMessage | `src/modules/community/services/community-messaging.service.ts:1159` |
+| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.unpinMessage → CommunityMessagingService.unpinMessage → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:130` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.unpinMessage → CommunityMessagingService.unpinMessage → CommunityVisibilityService.assertActsAsProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 
 ### Parámetros
@@ -2046,7 +2419,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 22. POST /community/conversations/{conversationId}/pin
+## 25. POST /community/conversations/{conversationId}/pin
 
 - **Origen:** CONTRATO
 - **Nombre:** Fijar un mensaje de la conversación
@@ -2081,10 +2454,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.pinMessage → CommunityMessagingService.pinMessage → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
-| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.pinMessage → CommunityMessagingService.pinMessage | `src/modules/community/services/community-messaging.service.ts:866` |
-| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.pinMessage → CommunityMessagingService.pinMessage → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:122` |
-| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.pinMessage → CommunityMessagingService.pinMessage → ConversationsRepository.findMessageInConversation | `src/modules/community/repositories/conversations.repository.ts:530` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.pinMessage → CommunityMessagingService.pinMessage → CommunityMessagingService.activeOrNotFoundParticipant → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
+| `community.conversations` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.pinMessage → CommunityMessagingService.pinMessage | `src/modules/community/services/community-messaging.service.ts:1129` |
+| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.pinMessage → CommunityMessagingService.pinMessage → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:130` |
+| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.pinMessage → CommunityMessagingService.pinMessage → ConversationsRepository.findMessageInConversation | `src/modules/community/repositories/conversations.repository.ts:542` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.pinMessage → CommunityMessagingService.pinMessage → CommunityVisibilityService.assertActsAsProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 
 ### Parámetros
@@ -2097,8 +2470,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `profileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil que fija | `src/modules/community/dto/conversation.dto.ts:170` |
-| `messageId` | `string` | Sí | formato uuid | `@IsUUID()` | Mensaje a fijar | `src/modules/community/dto/conversation.dto.ts:175` |
+| `profileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil que fija | `src/modules/community/dto/conversation.dto.ts:204` |
+| `messageId` | `string` | Sí | formato uuid | `@IsUUID()` | Mensaje a fijar | `src/modules/community/dto/conversation.dto.ts:209` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2152,7 +2525,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 23. GET /community/conversations/{conversationId}/presence
+## 26. GET /community/conversations/{conversationId}/presence
 
 - **Origen:** CONTRATO
 - **Nombre:** Presencia de los demás participantes
@@ -2186,7 +2559,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.conversationPresence → CommunityMessagingReadService.conversationPresence → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.conversationPresence → CommunityMessagingReadService.conversationPresence → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.conversationPresence → CommunityMessagingReadService.conversationPresence → CommunityVisibilityService.assertOwnProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 
 ### Parámetros
@@ -2235,7 +2608,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 24. POST /community/conversations/{conversationId}/read
+## 27. POST /community/conversations/{conversationId}/read
 
 - **Origen:** CONTRATO
 - **Nombre:** Marcar mensajes como leídos (recibos)
@@ -2270,11 +2643,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.conversation_participants` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.markRead → CommunityMessagingService.markRead | `src/modules/community/services/community-messaging.service.ts:663` |
-| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.markRead → CommunityMessagingService.markRead → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:190` |
-| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.markRead → CommunityMessagingService.markRead → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:122` |
-| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.markRead → CommunityMessagingService.markRead → ConversationsRepository.findLastMessage | `src/modules/community/repositories/conversations.repository.ts:495` |
-| `community.message_receipts` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.markRead → CommunityMessagingService.markRead → ConversationsRepository.createReceipt | `src/modules/community/repositories/conversations.repository.ts:565` |
+| `community.conversation_participants` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunityMessagingController.markRead → CommunityMessagingService.markRead | `src/modules/community/services/community-messaging.service.ts:926` |
+| `community.conversation_participants` | LEE | LEE | DIRECTA | CommunityMessagingController.markRead → CommunityMessagingService.markRead → ConversationsRepository.findActiveParticipant | `src/modules/community/repositories/conversations.repository.ts:198` |
+| `community.conversations` | LEE | LEE | DIRECTA | CommunityMessagingController.markRead → CommunityMessagingService.markRead → ConversationsRepository.findConversationById | `src/modules/community/repositories/conversations.repository.ts:130` |
+| `community.direct_messages` | LEE | LEE | DIRECTA | CommunityMessagingController.markRead → CommunityMessagingService.markRead → ConversationsRepository.findLastMessage | `src/modules/community/repositories/conversations.repository.ts:507` |
+| `community.message_receipts` | ESCRIBE | CREA | DIRECTA | CommunityMessagingController.markRead → CommunityMessagingService.markRead → ConversationsRepository.createReceipt | `src/modules/community/repositories/conversations.repository.ts:577` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | CommunityMessagingController.markRead → CommunityMessagingService.markRead → CommunityVisibilityService.assertActsAsProfile → PublicProfilesRepository.findById | `src/modules/community/repositories/public-profiles.repository.ts:123` |
 
 ### Parámetros
@@ -2287,8 +2660,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `recipientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil que marca como leído | `src/modules/community/dto/conversation.dto.ts:103` |
-| `upToMessageId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Último mensaje leído (por defecto el más reciente) | `src/modules/community/dto/conversation.dto.ts:114` |
+| `recipientProfileId` | `string` | Sí | formato uuid | `@IsUUID()` | Perfil que marca como leído | `src/modules/community/dto/conversation.dto.ts:137` |
+| `upToMessageId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | Último mensaje leído (por defecto el más reciente) | `src/modules/community/dto/conversation.dto.ts:148` |
 
 **Payload mínimo** (sólo los obligatorios):
 
@@ -2313,8 +2686,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `receiptsRecorded` | `number` | Sí | — | — | Nº de recibos de lectura registrados | `src/modules/community/dto/responses.dto.ts:149` |
-| `lastReadMessageId` | `string` | Sí | formato uuid; admite null | — | Identificador asociado a last read message. | `src/modules/community/dto/responses.dto.ts:155` |
+| `receiptsRecorded` | `number` | Sí | — | — | Nº de recibos de lectura registrados | `src/modules/community/dto/responses.dto.ts:158` |
+| `lastReadMessageId` | `string` | Sí | formato uuid; admite null | — | Identificador asociado a last read message. | `src/modules/community/dto/responses.dto.ts:164` |
 
 ### Respuestas posibles
 
@@ -2343,7 +2716,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 25. POST /community/conversations/contacts/search
+## 28. POST /community/conversations/contacts/search
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscar personas para iniciar una conversación
@@ -2443,7 +2816,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 26. GET /community/feed
+## 29. GET /community/feed
 
 - **Origen:** CONTRATO
 - **Nombre:** Timeline de un perfil
@@ -2557,7 +2930,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 27. DELETE /community/follows
+## 30. DELETE /community/follows
 
 - **Origen:** CONTRATO
 - **Nombre:** Dejar de seguir un objeto social
@@ -2636,7 +3009,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 28. GET /community/follows
+## 31. GET /community/follows
 
 - **Origen:** CONTRATO
 - **Nombre:** Seguimientos activos de un perfil
@@ -2723,7 +3096,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 29. POST /community/follows
+## 32. POST /community/follows
 
 - **Origen:** CONTRATO
 - **Nombre:** Seguir un objeto social
@@ -2827,7 +3200,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 30. GET /community/groups
+## 33. GET /community/groups
 
 - **Origen:** CONTRATO
 - **Nombre:** Grupos de una organización
@@ -2929,7 +3302,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 31. POST /community/groups
+## 34. POST /community/groups
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un grupo/comunidad
@@ -3043,7 +3416,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 32. GET /community/groups/{groupId}
+## 35. GET /community/groups/{groupId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha de un grupo
@@ -3146,7 +3519,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 33. GET /community/groups/{groupId}/members
+## 36. GET /community/groups/{groupId}/members
 
 - **Origen:** CONTRATO
 - **Nombre:** Integrantes de un grupo
@@ -3244,7 +3617,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 34. POST /community/groups/{groupId}/members
+## 37. POST /community/groups/{groupId}/members
 
 - **Origen:** CONTRATO
 - **Nombre:** Unirse a un grupo / comunidad
@@ -3325,8 +3698,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:258` |
-| `joinStatus` | `string` | Sí | — | — | Estado de la membresía (activa o pendiente) | `src/modules/community/dto/responses.dto.ts:264` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:267` |
+| `joinStatus` | `string` | Sí | — | — | Estado de la membresía (activa o pendiente) | `src/modules/community/dto/responses.dto.ts:273` |
 
 ### Respuestas posibles
 
@@ -3354,7 +3727,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 35. DELETE /community/groups/{groupId}/members/{member}
+## 38. DELETE /community/groups/{groupId}/members/{member}
 
 - **Origen:** CONTRATO
 - **Nombre:** Salir del grupo o dar de baja a un integrante
@@ -3441,7 +3814,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 36. PATCH /community/groups/{groupId}/members/{member}
+## 39. PATCH /community/groups/{groupId}/members/{member}
 
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar/rechazar un alta o cambiar el rol
@@ -3556,7 +3929,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 37. GET /community/groups/{groupId}/posts
+## 40. GET /community/groups/{groupId}/posts
 
 - **Origen:** CONTRATO
 - **Nombre:** Muro de un grupo
@@ -3655,7 +4028,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 38. POST /community/groups/{groupId}/posts
+## 41. POST /community/groups/{groupId}/posts
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar en el muro del grupo
@@ -3780,7 +4153,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 39. GET /community/moderation/appeals
+## 42. GET /community/moderation/appeals
 
 - **Origen:** CONTRATO
 - **Nombre:** Apelaciones presentadas, con su decisión
@@ -3878,7 +4251,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 40. POST /community/moderation/appeals/{appealId}/resolve
+## 43. POST /community/moderation/appeals/{appealId}/resolve
 
 - **Origen:** CONTRATO
 - **Nombre:** Resolver una apelación de moderación
@@ -3981,7 +4354,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 41. GET /community/moderation/decisions
+## 44. GET /community/moderation/decisions
 
 - **Origen:** CONTRATO
 - **Nombre:** Decisiones de moderación tomadas
@@ -4068,7 +4441,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 42. POST /community/moderation/decisions/{decisionId}/appeal
+## 45. POST /community/moderation/decisions/{decisionId}/appeal
 
 - **Origen:** CONTRATO
 - **Nombre:** Apelar una decisión de moderación
@@ -4176,7 +4549,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 43. GET /community/moderation/decisions/mine
+## 46. GET /community/moderation/decisions/mine
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis propias decisiones de moderación
@@ -4265,7 +4638,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 44. GET /community/moderation/queue
+## 47. GET /community/moderation/queue
 
 - **Origen:** CONTRATO
 - **Nombre:** Cola de moderación con filtros y cursor
@@ -4361,7 +4734,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 45. POST /community/moderation/queue/{queueId}/decision
+## 48. POST /community/moderation/queue/{queueId}/decision
 
 - **Origen:** CONTRATO
 - **Nombre:** Resolver moderación (decisión + strike)
@@ -4444,9 +4817,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:182` |
-| `strikeId` | `string` | Sí | formato uuid; admite null | — | Strike emitido, si aplica | `src/modules/community/dto/responses.dto.ts:192` |
-| `decision` | `string` | Sí | — | — | Valor de decision mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:198` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:191` |
+| `strikeId` | `string` | Sí | formato uuid; admite null | — | Strike emitido, si aplica | `src/modules/community/dto/responses.dto.ts:201` |
+| `decision` | `string` | Sí | — | — | Valor de decision mantenido por la instancia. | `src/modules/community/dto/responses.dto.ts:207` |
 
 ### Respuestas posibles
 
@@ -4474,7 +4847,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 46. GET /community/notifications
+## 49. GET /community/notifications
 
 - **Origen:** CONTRATO
 - **Nombre:** Notificaciones sociales de un perfil
@@ -4567,7 +4940,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 47. GET /community/polls/{pollId}
+## 50. GET /community/polls/{pollId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Encuesta con opciones, recuentos y voto propio
@@ -4661,7 +5034,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 48. POST /community/polls/{pollId}/votes
+## 51. POST /community/polls/{pollId}/votes
 
 - **Origen:** CONTRATO
 - **Nombre:** Votar en una encuesta
@@ -4744,7 +5117,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:249` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:258` |
 
 ### Respuestas posibles
 
@@ -4773,7 +5146,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 49. GET /community/posts/{postId}
+## 52. GET /community/posts/{postId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicación con media, hashtags y menciones
@@ -4873,7 +5246,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 50. GET /community/posts/{postId}/comments
+## 53. GET /community/posts/{postId}/comments
 
 - **Origen:** CONTRATO
 - **Nombre:** Comentarios de una publicación (hilo anidado)
@@ -4977,7 +5350,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 51. POST /community/posts/{postId}/polls
+## 54. POST /community/posts/{postId}/polls
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una encuesta con opciones sobre un post
@@ -5064,8 +5437,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:234` |
-| `optionIds` | `array<string>` | Sí | — | — | Ids de las opciones creadas | `src/modules/community/dto/responses.dto.ts:240` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:243` |
+| `optionIds` | `array<string>` | Sí | — | — | Ids de las opciones creadas | `src/modules/community/dto/responses.dto.ts:249` |
 
 ### Respuestas posibles
 
@@ -5092,7 +5465,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 52. GET /community/posts/{postId}/reactions
+## 55. GET /community/posts/{postId}/reactions
 
 - **Origen:** CONTRATO
 - **Nombre:** Reacciones de una publicación, agrupadas por tipo
@@ -5180,7 +5553,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 53. GET /community/profiles/{profileId}
+## 56. GET /community/profiles/{profileId}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha de un perfil público
@@ -5282,7 +5655,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 54. GET /community/profiles/{profileId}/auto-reply
+## 57. GET /community/profiles/{profileId}/auto-reply
 
 - **Origen:** CONTRATO
 - **Nombre:** Respuesta automática por inactividad del perfil
@@ -5365,7 +5738,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 55. PUT /community/profiles/{profileId}/auto-reply
+## 58. PUT /community/profiles/{profileId}/auto-reply
 
 - **Origen:** CONTRATO
 - **Nombre:** Configurar la respuesta automática del perfil
@@ -5486,7 +5859,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 56. GET /community/profiles/{profileId}/posts
+## 59. GET /community/profiles/{profileId}/posts
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicaciones de un perfil
@@ -5592,7 +5965,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 57. POST /community/profiles/{profileId}/posts
+## 60. POST /community/profiles/{profileId}/posts
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar un post con hashtags, media y menciones
@@ -5741,7 +6114,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 58. GET /community/profiles/{profileId}/reviews
+## 61. GET /community/profiles/{profileId}/reviews
 
 - **Origen:** CONTRATO
 - **Nombre:** Reviews publicadas de un perfil
@@ -5845,7 +6218,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 59. POST /community/profiles/{profileId}/reviews
+## 62. POST /community/profiles/{profileId}/reviews
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicar una review verificada de servicio
@@ -5937,7 +6310,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:207` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:216` |
 | `courseId` | `string` | Sí | formato uuid | — | Identificador asociado a course. | sin fuente |
 | `rating` | `number` | Sí | — | — | Valor de rating mantenido por la instancia. | sin fuente |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
@@ -5970,7 +6343,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 60. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
+## 63. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
 
 - **Origen:** CONTRATO
 - **Nombre:** Responder una reseña de la propia vitrina
@@ -6073,7 +6446,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 61. GET /community/profiles/by-slug/{slug}
+## 64. GET /community/profiles/by-slug/{slug}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha de un perfil público por su slug
@@ -6171,7 +6544,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 62. GET /community/profiles/me
+## 65. GET /community/profiles/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Consultar la vitrina pública propia
@@ -6248,7 +6621,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 63. PUT /community/profiles/me
+## 66. PUT /community/profiles/me
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear o actualizar la vitrina pública propia
@@ -6374,7 +6747,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 64. GET /community/profiles/me/stats
+## 67. GET /community/profiles/me/stats
 
 - **Origen:** CONTRATO
 - **Nombre:** Estadísticas de la vitrina pública propia
@@ -6446,7 +6819,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 65. POST /community/public-profiles
+## 68. POST /community/public-profiles
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear un perfil público (bootstrap del grafo social)
@@ -6560,7 +6933,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 66. GET /community/ratings
+## 69. GET /community/ratings
 
 - **Origen:** CONTRATO
 - **Nombre:** Calificaciones de un médico, paciente u organización
@@ -6634,7 +7007,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 67. PUT /community/ratings
+## 70. PUT /community/ratings
 
 - **Origen:** CONTRATO
 - **Nombre:** Calificar con estrellas a un médico, paciente u organización
@@ -6747,7 +7120,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 68. GET /community/ratings/mine
+## 71. GET /community/ratings/mine
 
 - **Origen:** CONTRATO
 - **Nombre:** Mis calificaciones
@@ -6820,7 +7193,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 69. GET /community/ratings/summary
+## 72. GET /community/ratings/summary
 
 - **Origen:** CONTRATO
 - **Nombre:** Nota media de un médico, paciente u organización
@@ -6894,7 +7267,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 70. PUT /community/reactions
+## 73. PUT /community/reactions
 
 - **Origen:** CONTRATO
 - **Nombre:** Reaccionar a contenido (upsert una reacción por actor/objeto)
@@ -6999,7 +7372,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 71. POST /community/reports
+## 74. POST /community/reports
 
 - **Origen:** CONTRATO
 - **Nombre:** Reportar contenido y encolar moderación
@@ -7073,8 +7446,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:164` |
-| `moderationQueueId` | `string` | Sí | formato uuid | — | Entrada de cola de moderación asociada | `src/modules/community/dto/responses.dto.ts:173` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:173` |
+| `moderationQueueId` | `string` | Sí | formato uuid | — | Entrada de cola de moderación asociada | `src/modules/community/dto/responses.dto.ts:182` |
 
 ### Respuestas posibles
 
@@ -7100,7 +7473,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 72. GET /community/topics
+## 75. GET /community/topics
 
 - **Origen:** CONTRATO
 - **Nombre:** Temas de la comunidad
@@ -7172,7 +7545,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 73. GET /f/{slug}
+## 76. GET /f/{slug}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha pública de una farmacia
@@ -7304,7 +7677,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 74. GET /internal/community/feed/pending
+## 77. GET /internal/community/feed/pending
 
 - **Origen:** CONTRATO
 - **Nombre:** Publicaciones publicadas sin fan-out
@@ -7384,7 +7757,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 75. POST /internal/community/feed/ranking/apply
+## 78. POST /internal/community/feed/ranking/apply
 
 - **Origen:** CONTRATO
 - **Nombre:** Aplicar rank_score recalculado
@@ -7484,7 +7857,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 76. GET /internal/community/feed/ranking/pending
+## 79. GET /internal/community/feed/ranking/pending
 
 - **Origen:** CONTRATO
 - **Nombre:** Items de feed pendientes de puntuar
@@ -7568,7 +7941,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 77. POST /internal/community/feed/rebuild
+## 80. POST /internal/community/feed/rebuild
 
 - **Origen:** CONTRATO
 - **Nombre:** Generar feed (fan-out y ranking)
@@ -7642,7 +8015,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/communi
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `itemsCreated` | `number` | Sí | — | — | Nº de items de feed insertados | `src/modules/community/dto/responses.dto.ts:273` |
+| `itemsCreated` | `number` | Sí | — | — | Nº de items de feed insertados | `src/modules/community/dto/responses.dto.ts:282` |
 
 ### Respuestas posibles
 
@@ -7669,7 +8042,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 78. GET /internal/community/search/health
+## 81. GET /internal/community/search/health
 
 - **Origen:** CONTRATO
 - **Nombre:** Estado del índice del directorio público
@@ -7740,7 +8113,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 79. POST /internal/community/search/reindex
+## 82. POST /internal/community/search/reindex
 
 - **Origen:** CONTRATO
 - **Nombre:** Reindexar el directorio público
@@ -7840,7 +8213,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 80. POST /internal/community/verification/badges
+## 83. POST /internal/community/verification/badges
 
 - **Origen:** CONTRATO
 - **Nombre:** Emitir un sello a mano (auditado)
@@ -7939,7 +8312,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 81. POST /internal/community/verification/badges/{targetId}/revoke
+## 84. POST /internal/community/verification/badges/{targetId}/revoke
 
 - **Origen:** CONTRATO
 - **Nombre:** Bajar los sellos de un sujeto (auditado)
@@ -8035,7 +8408,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 82. POST /internal/community/verification/badges/expire-sweep
+## 85. POST /internal/community/verification/badges/expire-sweep
 
 - **Origen:** CONTRATO
 - **Nombre:** Bajar los sellos cuya vigencia ya venció
@@ -8105,7 +8478,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 83. GET /l/{slug}
+## 86. GET /l/{slug}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha pública de un laboratorio
@@ -8237,7 +8610,347 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 84. GET /o/{slug}
+## 87. GET /me/support-inbox
+
+- **Origen:** CONTRATO
+- **Nombre:** Bandeja de conversaciones del equipo de apoyo
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CommunitySupportInboxController.list` — `src/modules/community/controllers/community-support-inbox.controller.ts:59`
+
+### Qué es y para qué sirve (negocio)
+
+Bandeja de conversaciones del equipo de apoyo. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`GET /me/support-inbox` la atiende `CommunitySupportInboxController.list` (src/modules/community/controllers/community-support-inbox.controller.ts:59). Exige sesión; el controlador no declara roles. Delega en `CommunitySupportInboxService.listInbox`. Lee community.conversation_assignments, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments, delegated_access.support_grant_actions y 9 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-support-inbox.controller.ts:59` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/community/controllers/community-support-inbox.controller.ts:59` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.conversation_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → CommunitySupportInboxService.assignmentsOf → SupportInboxRepository.findAssignments | `src/modules/community/repositories/support-inbox.repository.ts:590` |
+| `community.conversation_participants` | LEE | LEE | POR_SQL | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → SupportInboxRepository.findByDoctors | `src/modules/community/repositories/support-inbox.repository.ts:184` |
+| `community.conversations` | LEE | LEE | POR_SQL | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → SupportInboxRepository.findByDoctors | `src/modules/community/repositories/support-inbox.repository.ts:184` |
+| `community.direct_messages` | LEE | LEE | POR_SQL | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → SupportInboxRepository.findByDoctors | `src/modules/community/repositories/support-inbox.repository.ts:184` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → SupportInboxRepository.findByDoctors | `src/modules/community/repositories/support-inbox.repository.ts:184` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:113` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findDelegationsOfEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:199` |
+| `delegated_access.support_grant_actions` | LEE | LEE | DIRECTA | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:165` |
+| `delegated_access.support_scope_grants` | LEE | LEE | DIRECTA | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:161` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:117` |
+| `directory.tenants` | LEE | LEE | POR_SQL | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → SupportInboxRepository.tenantNames | `src/modules/community/repositories/support-inbox.repository.ts:487` |
+| `iam.users` | LEE | LEE | DIRECTA | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → SupportInboxRepository.userNames | `src/modules/community/repositories/support-inbox.repository.ts:433` |
+| `practice.practices` | LEE | LEE | DIRECTA | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:260` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:266` |
+| `profiles.persons` | LEE | LEE | POR_SQL | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → SupportInboxRepository.doctorInfo | `src/modules/community/repositories/support-inbox.repository.ts:453` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → SupportInboxRepository.doctorInfo | `src/modules/community/repositories/support-inbox.repository.ts:453` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunitySupportInboxController.list → CommunitySupportInboxService.listInbox → SupportInboxRepository.doctorInfo | `src/modules/community/repositories/support-inbox.repository.ts:453` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `tenantId` | query | No | `string` | — |
+| `status` | query | No | `string` | — |
+| `doctor` | query | No | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportInboxResponseDto>` · DTO `SupportInboxResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<SupportInboxItemDto>` | Sí | — | — | Conversaciones, las más recientes primero. | `src/modules/community/dto/support-inbox.dto.ts:105` |
+| `items[].conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/support-inbox.dto.ts:61` |
+| `items[].tenantId` | `string` | Sí | formato uuid | — | Organización de la bandeja. | `src/modules/community/dto/support-inbox.dto.ts:63` |
+| `items[].organizationId` | `string` | Sí | formato uuid | — | Organización de la bandeja (mismo valor que `tenantId`). | `src/modules/community/dto/support-inbox.dto.ts:65` |
+| `items[].organizationName` | `string` | Sí | — | — | Nombre de la organización. | `src/modules/community/dto/support-inbox.dto.ts:67` |
+| `items[].practitionerProfileId` | `string` | Sí | formato uuid | — | Doctor a cuyo nombre se atiende (perfil profesional). | `src/modules/community/dto/support-inbox.dto.ts:69` |
+| `items[].practitionerName` | `string` | Sí | — | — | Nombre del doctor. | `src/modules/community/dto/support-inbox.dto.ts:71` |
+| `items[].doctorPublicProfileId` | `string` | Sí | formato uuid | — | Perfil público del doctor: el remitente con el que se responde. | `src/modules/community/dto/support-inbox.dto.ts:73` |
+| `items[].patientLabel` | `string` | Sí | — | — | Cómo se nombra al paciente en la bandeja. | `src/modules/community/dto/support-inbox.dto.ts:75` |
+| `items[].status` | `object` | Sí | — | — | Estado en la bandeja. | `src/modules/community/dto/support-inbox.dto.ts:77` |
+| `items[].assignedUserId` | `string` | No | formato uuid | — | Quien la tiene. | `src/modules/community/dto/support-inbox.dto.ts:79` |
+| `items[].assignedToName` | `string` | No | — | — | Nombre de quien la tiene. | `src/modules/community/dto/support-inbox.dto.ts:81` |
+| `items[].assignedToMe` | `boolean` | Sí | — | — | ¿La tiene quien pide? Lo resuelve la API: el cliente no compara usuarios. | `src/modules/community/dto/support-inbox.dto.ts:83` |
+| `items[].slaDueAt` | `string` | No | formato date-time | — | Vencimiento del plazo de respuesta. | `src/modules/community/dto/support-inbox.dto.ts:85` |
+| `items[].lastMessageAt` | `string` | No | formato date-time | — | Último mensaje de la conversación. | `src/modules/community/dto/support-inbox.dto.ts:88` |
+| `items[].lastPatientMessage` | `string` | No | — | — | Último mensaje del paciente (recortado), lo que hay que contestar. Si parece clínico sale el marcador «Contenido clínico oculto…» en lugar del texto. | `src/modules/community/dto/support-inbox.dto.ts:93` |
+| `items[].lastMessagePreview` | `string` | Sí | — | — | Mismo recorte, con el nombre de campo que usa la pantalla. | `src/modules/community/dto/support-inbox.dto.ts:95` |
+| `items[].isClinical` | `boolean` | Sí | — | — | ¿Hay un mensaje clínico del paciente sin responder? Se deriva al doctor. | `src/modules/community/dto/support-inbox.dto.ts:97` |
+| `items[].clinicalSuspected` | `boolean` | Sí | — | — | Mismo valor que `isClinical`, con el nombre original. | `src/modules/community/dto/support-inbox.dto.ts:99` |
+| `doctors` | `array<SupportInboxDoctorDto>` | Sí | — | — | Doctores cubiertos, en el mismo orden que la agenda combinada. | `src/modules/community/dto/support-inbox.dto.ts:108` |
+| `doctors[].id` | `string` | Sí | formato uuid | — | Asignación de rol del doctor en la organización: el id del doctor en la agenda. | `src/modules/community/dto/support-inbox.dto.ts:47` |
+| `doctors[].practitionerProfileId` | `string` | Sí | formato uuid | — | Perfil profesional del doctor: el de los filtros y el de responder en su nombre. | `src/modules/community/dto/support-inbox.dto.ts:49` |
+| `doctors[].name` | `string` | Sí | — | — | Nombre para mostrar. | `src/modules/community/dto/support-inbox.dto.ts:51` |
+| `doctors[].displayName` | `string` | Sí | — | — | Mismo nombre, con el nombre de campo de la agenda combinada. | `src/modules/community/dto/support-inbox.dto.ts:53` |
+| `doctors[].specialty` | `string` | Sí | — | — | Especialidad principal; vacío si no tiene. | `src/modules/community/dto/support-inbox.dto.ts:55` |
+| `count` | `number` | Sí | — | — | Cantidad. | `src/modules/community/dto/support-inbox.dto.ts:110` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Community (19) — etapa `ctrl:CommunitySupportInboxController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 88. GET /me/support-inbox/{conversationId}
+
+- **Origen:** CONTRATO
+- **Nombre:** Una conversación de la bandeja, con la autora real y las notas
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CommunitySupportInboxController.conversation` — `src/modules/community/controllers/community-support-inbox.controller.ts:71`
+
+### Qué es y para qué sirve (negocio)
+
+Una conversación de la bandeja, con la autora real y las notas. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`GET /me/support-inbox/{conversationId}` la atiende `CommunitySupportInboxController.conversation` (src/modules/community/controllers/community-support-inbox.controller.ts:71). Exige sesión; el controlador no declara roles. Delega en `CommunitySupportInboxService.getConversation`. Lee community.conversation_assignments, community.conversation_internal_notes, community.conversation_participants, community.conversations, community.direct_messages, community.public_profiles, delegated_access.delegated_access_approval_requests, delegated_access.delegated_access_grants y 16 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-support-inbox.controller.ts:71` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/community/controllers/community-support-inbox.controller.ts:71` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: conversationId | `src/modules/community/controllers/community-support-inbox.controller.ts:71` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.conversation_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.findAssignments | `src/modules/community/repositories/support-inbox.repository.ts:590` |
+| `community.conversation_internal_notes` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.findNotes | `src/modules/community/repositories/support-inbox.repository.ts:658` |
+| `community.conversation_participants` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.conversations` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `community.direct_messages` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.findMessages | `src/modules/community/repositories/support-inbox.repository.ts:400` |
+| `community.public_profiles` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → CommunitySupportInboxService.requireAccess → SupportInboxRepository.findConversation | `src/modules/community/repositories/support-inbox.repository.ts:231` |
+| `delegated_access.delegated_access_approval_requests` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.clinicalAccessState | `src/modules/community/repositories/support-inbox.repository.ts:570` |
+| `delegated_access.delegated_access_grants` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.clinicalAccessState | `src/modules/community/repositories/support-inbox.repository.ts:556` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportAccessPolicy.replyersOfDoctor → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:113` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportAccessPolicy.replyersOfDoctor → SupportAccessPolicy.loadFacts → SupportAccessRepository.findDelegationsOfEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:199` |
+| `delegated_access.support_grant_actions` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportAccessPolicy.replyersOfDoctor → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:165` |
+| `delegated_access.support_scope_grants` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportAccessPolicy.replyersOfDoctor → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:161` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportAccessPolicy.replyersOfDoctor → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:117` |
+| `directory.tenants` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.tenantNames | `src/modules/community/repositories/support-inbox.repository.ts:487` |
+| `iam.users` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.userNames | `src/modules/community/repositories/support-inbox.repository.ts:433` |
+| `practice.practices` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportAccessPolicy.replyersOfDoctor → SupportAccessPolicy.loadFacts → SupportAccessRepository.findRoleAssignments | `src/modules/delegated_access/repositories/support-access.repository.ts:230` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportAccessPolicy.replyersOfDoctor → SupportAccessPolicy.loadFacts → SupportAccessRepository.findRoleAssignments | `src/modules/delegated_access/repositories/support-access.repository.ts:227` |
+| `profiles.patient_profiles` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.patientContext | `src/modules/community/repositories/support-inbox.repository.ts:512` |
+| `profiles.person_account_links` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.patientContext | `src/modules/community/repositories/support-inbox.repository.ts:512` |
+| `profiles.persons` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.doctorInfo | `src/modules/community/repositories/support-inbox.repository.ts:453` |
+| `profiles.practitioner_specialties` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.doctorInfo | `src/modules/community/repositories/support-inbox.repository.ts:453` |
+| `scheduling.appointment_bookings` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.patientContext | `src/modules/community/repositories/support-inbox.repository.ts:523` |
+| `scheduling.schedulable_resources` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.patientContext | `src/modules/community/repositories/support-inbox.repository.ts:523` |
+| `terminology.catalog_concepts` | LEE | LEE | POR_SQL | CommunitySupportInboxController.conversation → CommunitySupportInboxService.getConversation → SupportInboxRepository.doctorInfo | `src/modules/community/repositories/support-inbox.repository.ts:453` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `conversationId` | path | Sí | `string` | — |
+| `tenantId` | query | No | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<SupportConversationDto>` · DTO `SupportConversationDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/support-inbox.dto.ts:190` |
+| `organizationId` | `string` | Sí | formato uuid | — | Organización. | `src/modules/community/dto/support-inbox.dto.ts:192` |
+| `organizationName` | `string` | Sí | — | — | Nombre de la organización. | `src/modules/community/dto/support-inbox.dto.ts:194` |
+| `practitionerProfileId` | `string` | Sí | formato uuid | — | Doctor (perfil profesional). | `src/modules/community/dto/support-inbox.dto.ts:196` |
+| `doctorPublicProfileId` | `string` | Sí | formato uuid | — | Perfil público del doctor: el remitente al responder. | `src/modules/community/dto/support-inbox.dto.ts:198` |
+| `practitionerName` | `string` | Sí | — | — | Nombre del doctor. | `src/modules/community/dto/support-inbox.dto.ts:200` |
+| `practitionerSpecialty` | `string` | Sí | — | — | Especialidad del doctor. | `src/modules/community/dto/support-inbox.dto.ts:202` |
+| `patientLabel` | `string` | Sí | — | — | Cómo se nombra al paciente. | `src/modules/community/dto/support-inbox.dto.ts:204` |
+| `status` | `object` | Sí | — | — | Estado en la bandeja. | `src/modules/community/dto/support-inbox.dto.ts:206` |
+| `assignedToName` | `string` | No | — | — | Nombre de quien la tiene. | `src/modules/community/dto/support-inbox.dto.ts:208` |
+| `assignedToMe` | `boolean` | Sí | — | — | ¿La tiene quien pide? | `src/modules/community/dto/support-inbox.dto.ts:210` |
+| `slaDueAt` | `string` | No | formato date-time | — | Vencimiento del plazo. | `src/modules/community/dto/support-inbox.dto.ts:212` |
+| `isClinical` | `boolean` | Sí | — | — | Hay un mensaje clínico del paciente sin responder. | `src/modules/community/dto/support-inbox.dto.ts:214` |
+| `replyDisclosure` | `string` | Sí | valores: SHOW, HIDE | — | ¿El paciente ve «respondido por su equipo»? Lo decide el doctor. | `src/modules/community/dto/support-inbox.dto.ts:216` |
+| `replyAllowed` | `boolean` | Sí | — | — | ¿Puede responder en nombre del doctor? Permiso y aceptación del doctor. | `src/modules/community/dto/support-inbox.dto.ts:218` |
+| `replyBlockedReason` | `string` | No | — | — | Por qué no puede responder. | `src/modules/community/dto/support-inbox.dto.ts:220` |
+| `assignableTo` | `array<SupportAssigneeDto>` | Sí | — | — | A quién se puede asignar: quienes pueden atender a este doctor. | `src/modules/community/dto/support-inbox.dto.ts:223` |
+| `assignableTo[].userId` | `string` | Sí | formato uuid | — | Cuenta. | `src/modules/community/dto/support-inbox.dto.ts:167` |
+| `assignableTo[].name` | `string` | Sí | — | — | Nombre. | `src/modules/community/dto/support-inbox.dto.ts:169` |
+| `messages` | `array<SupportConversationMessageDto>` | Sí | — | — | Mensajes, del más antiguo al más reciente. | `src/modules/community/dto/support-inbox.dto.ts:226` |
+| `messages[].id` | `string` | Sí | formato uuid | — | Mensaje. | `src/modules/community/dto/support-inbox.dto.ts:125` |
+| `messages[].from` | `string` | Sí | valores: PATIENT, DOCTOR_SIDE | — | `PATIENT` escribió el paciente; `DOCTOR_SIDE`, el doctor o su equipo en su nombre. | `src/modules/community/dto/support-inbox.dto.ts:128` |
+| `messages[].bodyText` | `string` | Sí | — | — | Texto. Los mensajes que escribió el propio doctor y los que parecen clínicos salen con un marcador («Contenido clínico oculto…») en lugar del texto mientras no haya un acceso clínico temporal aprobado y vigente (`patientContext.clinicalAccess = APPROVED`); entonces se muestran completos. | `src/modules/community/dto/support-inbox.dto.ts:135` |
+| `messages[].sentAt` | `string` | Sí | formato date-time | — | Cuándo se envió. | `src/modules/community/dto/support-inbox.dto.ts:137` |
+| `messages[].isClinical` | `boolean` | Sí | — | — | Parece clínico (paciente), o su texto está oculto por ser clínico. | `src/modules/community/dto/support-inbox.dto.ts:139` |
+| `messages[].contentHidden` | `boolean` | No | — | — | Presente (`true`) cuando `bodyText` es el marcador y no el texto real. | `src/modules/community/dto/support-inbox.dto.ts:141` |
+| `messages[].authoredByName` | `string` | No | — | — | La autora real, cuando respondió el equipo en nombre del doctor. Solo el equipo la ve. | `src/modules/community/dto/support-inbox.dto.ts:143` |
+| `messages[].disclosureShown` | `boolean` | No | — | — | Si el paciente ve «respondido por su equipo» en este mensaje. | `src/modules/community/dto/support-inbox.dto.ts:145` |
+| `notes` | `array<InternalNoteDto>` | Sí | — | — | Notas internas, de la más antigua a la más reciente. | `src/modules/community/dto/support-inbox.dto.ts:228` |
+| `notes[].id` | `string` | Sí | formato uuid | — | Id de la nota. | `src/modules/community/dto/support-inbox.dto.ts:151` |
+| `notes[].conversationId` | `string` | Sí | formato uuid | — | Conversación. | `src/modules/community/dto/support-inbox.dto.ts:153` |
+| `notes[].authorUserId` | `string` | Sí | formato uuid | — | Quien la escribió. | `src/modules/community/dto/support-inbox.dto.ts:155` |
+| `notes[].authorName` | `string` | Sí | — | — | Nombre de quien la escribió. | `src/modules/community/dto/support-inbox.dto.ts:157` |
+| `notes[].bodyText` | `string` | Sí | — | — | Texto. | `src/modules/community/dto/support-inbox.dto.ts:159` |
+| `notes[].createdAt` | `string` | Sí | formato date-time | — | Cuándo se escribió. | `src/modules/community/dto/support-inbox.dto.ts:161` |
+| `patientContext` | `SupportPatientContextDto` | Sí | — | — | Lo que se sabe del paciente. | `src/modules/community/dto/support-inbox.dto.ts:231` |
+| `patientContext.reasonLabel` | `string` | No | — | — | Motivo de la cita más reciente con este doctor. | `src/modules/community/dto/support-inbox.dto.ts:175` |
+| `patientContext.clinicalAccess` | `string` | Sí | valores: NONE, PENDING, APPROVED | — | Estado del acceso clínico temporal. | `src/modules/community/dto/support-inbox.dto.ts:178` |
+| `patientContext.delegateId` | `string` | No | formato uuid | — | Delegación doctor ↔ persona, con la que se pide el acceso. | `src/modules/community/dto/support-inbox.dto.ts:180` |
+| `patientContext.patientProfileId` | `string` | No | formato uuid | — | Paciente en el registro, si tiene. | `src/modules/community/dto/support-inbox.dto.ts:182` |
+| `patientContext.requestedPermissionId` | `string` | No | formato uuid | — | Permiso que se pide (lectura clínica temporal). | `src/modules/community/dto/support-inbox.dto.ts:184` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Conversación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Community (19) — etapa `ctrl:CommunitySupportInboxController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 89. GET /me/support-reply-templates
+
+- **Origen:** CONTRATO
+- **Nombre:** Respuestas preparadas del equipo de apoyo
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CommunitySupportInboxController.myTemplates` — `src/modules/community/controllers/community-support-inbox.controller.ts:138`
+
+### Qué es y para qué sirve (negocio)
+
+Respuestas preparadas del equipo de apoyo. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`GET /me/support-reply-templates` la atiende `CommunitySupportInboxController.myTemplates` (src/modules/community/controllers/community-support-inbox.controller.ts:138). Exige sesión; el controlador no declara roles. Delega en `CommunitySupportInboxService.templatesForPerson`. Lee community.reply_templates, delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments, delegated_access.support_grant_actions, delegated_access.support_scope_grants, directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Sin @Roles en el controlador (si hay regla de acceso, vive en el servicio) | `src/modules/community/controllers/community-support-inbox.controller.ts:138` |
+| TENANT | Ruta declarada agnóstica de tenant (@TenantAgnostic) | `src/modules/community/controllers/community-support-inbox.controller.ts:138` |
+| PARAMETRO_QUERY | tenantId (obligatorio) | `contrato (parameters)` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.reply_templates` | LEE | LEE | DIRECTA | CommunitySupportInboxController.myTemplates → CommunitySupportInboxService.templatesForPerson → SupportInboxRepository.findTemplates | `src/modules/community/repositories/support-inbox.repository.ts:699` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.myTemplates → CommunitySupportInboxService.templatesForPerson → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:113` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.myTemplates → CommunitySupportInboxService.templatesForPerson → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findDelegationsOfEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:199` |
+| `delegated_access.support_grant_actions` | LEE | LEE | DIRECTA | CommunitySupportInboxController.myTemplates → CommunitySupportInboxService.templatesForPerson → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:165` |
+| `delegated_access.support_scope_grants` | LEE | LEE | DIRECTA | CommunitySupportInboxController.myTemplates → CommunitySupportInboxService.templatesForPerson → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessPolicy.loadFacts → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:161` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | CommunitySupportInboxController.myTemplates → CommunitySupportInboxService.templatesForPerson → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.liveEngagementTenants → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:117` |
+| `practice.practices` | LEE | LEE | DIRECTA | CommunitySupportInboxController.myTemplates → CommunitySupportInboxService.templatesForPerson → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:260` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.myTemplates → CommunitySupportInboxService.templatesForPerson → CommunitySupportInboxService.resolveAccess → SupportAccessPolicy.inboxDoctorsOfTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:266` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `tenantId` | query | Sí | `string` | — |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<ReplyTemplatesResponseDto>` · DTO `ReplyTemplatesResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<ReplyTemplateViewDto>` | Sí | — | — | Respuestas. | `src/modules/community/dto/support-inbox.dto.ts:402` |
+| `items[].id` | `string` | Sí | formato uuid | — | Id. | `src/modules/community/dto/support-inbox.dto.ts:384` |
+| `items[].category` | `object` | Sí | — | — | Categoría. | `src/modules/community/dto/support-inbox.dto.ts:386` |
+| `items[].title` | `string` | Sí | — | — | Título. | `src/modules/community/dto/support-inbox.dto.ts:388` |
+| `items[].bodyText` | `string` | Sí | — | — | Texto. | `src/modules/community/dto/support-inbox.dto.ts:390` |
+| `items[].practitionerProfileId` | `string` | No | formato uuid | — | Doctor dueño, si es suya. | `src/modules/community/dto/support-inbox.dto.ts:392` |
+| `items[].retired` | `boolean` | Sí | — | — | ¿Está retirada? | `src/modules/community/dto/support-inbox.dto.ts:394` |
+| `items[].version` | `number` | Sí | — | — | Versión de la respuesta: sube con cada cambio. | `src/modules/community/dto/support-inbox.dto.ts:396` |
+| `count` | `number` | Sí | — | — | Cantidad. | `src/modules/community/dto/support-inbox.dto.ts:404` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Están los parámetros de consulta obligatorios |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Community (19) — etapa `ctrl:CommunitySupportInboxController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 90. GET /o/{slug}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha pública de una organización
@@ -8369,7 +9082,296 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 85. GET /p/{slug}
+## 91. GET /org/reply-templates
+
+- **Origen:** CONTRATO
+- **Nombre:** Respuestas preparadas de la organización
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** BAJO — Sólo lee
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CommunitySupportInboxController.orgTemplates` — `src/modules/community/controllers/community-support-inbox.controller.ts:149`
+
+### Qué es y para qué sirve (negocio)
+
+Respuestas preparadas de la organización. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`GET /org/reply-templates` la atiende `CommunitySupportInboxController.orgTemplates` (src/modules/community/controllers/community-support-inbox.controller.ts:149). Exige sesión con alguno de los roles SECURITY_ADMIN. Delega en `CommunitySupportInboxService.templatesOfTenant`. Lee community.reply_templates.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-support-inbox.controller.ts:149` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.reply_templates` | LEE | LEE | DIRECTA | CommunitySupportInboxController.orgTemplates → CommunitySupportInboxService.templatesOfTenant → SupportInboxRepository.findTemplates | `src/modules/community/repositories/support-inbox.repository.ts:699` |
+
+### Cuerpo
+
+La operación no recibe cuerpo.
+
+### Respuesta — `Promise<ReplyTemplatesResponseDto>` · DTO `ReplyTemplatesResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `items` | `array<ReplyTemplateViewDto>` | Sí | — | — | Respuestas. | `src/modules/community/dto/support-inbox.dto.ts:402` |
+| `items[].id` | `string` | Sí | formato uuid | — | Id. | `src/modules/community/dto/support-inbox.dto.ts:384` |
+| `items[].category` | `object` | Sí | — | — | Categoría. | `src/modules/community/dto/support-inbox.dto.ts:386` |
+| `items[].title` | `string` | Sí | — | — | Título. | `src/modules/community/dto/support-inbox.dto.ts:388` |
+| `items[].bodyText` | `string` | Sí | — | — | Texto. | `src/modules/community/dto/support-inbox.dto.ts:390` |
+| `items[].practitionerProfileId` | `string` | No | formato uuid | — | Doctor dueño, si es suya. | `src/modules/community/dto/support-inbox.dto.ts:392` |
+| `items[].retired` | `boolean` | Sí | — | — | ¿Está retirada? | `src/modules/community/dto/support-inbox.dto.ts:394` |
+| `items[].version` | `number` | Sí | — | — | Versión de la respuesta: sube con cada cambio. | `src/modules/community/dto/support-inbox.dto.ts:396` |
+| `count` | `number` | Sí | — | — | Cantidad. | `src/modules/community/dto/support-inbox.dto.ts:404` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Community (19) — etapa `ctrl:CommunitySupportInboxController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 92. POST /org/reply-templates
+
+- **Origen:** CONTRATO
+- **Nombre:** Crear una respuesta preparada
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CommunitySupportInboxController.createTemplate` — `src/modules/community/controllers/community-support-inbox.controller.ts:157`
+
+### Qué es y para qué sirve (negocio)
+
+Crear una respuesta preparada. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`POST /org/reply-templates` la atiende `CommunitySupportInboxController.createTemplate` (src/modules/community/controllers/community-support-inbox.controller.ts:157). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateReplyTemplateDto` (4 campos, 3 obligatorios). Delega en `CommunitySupportInboxService.createTemplate`. Crea filas en community.reply_templates. Lee practice.practices, practice.practitioner_role_assignments.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-support-inbox.controller.ts:157` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.reply_templates` | ESCRIBE | CREA | DIRECTA | CommunitySupportInboxController.createTemplate → CommunitySupportInboxService.createTemplate → SupportInboxRepository.createTemplate | `src/modules/community/repositories/support-inbox.repository.ts:735` |
+| `practice.practices` | LEE | LEE | DIRECTA | CommunitySupportInboxController.createTemplate → CommunitySupportInboxService.createTemplate → SupportAccessPolicy.isDoctorOfTenant → SupportAccessRepository.findRoleAssignmentsOfPractitioner → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:260` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | CommunitySupportInboxController.createTemplate → CommunitySupportInboxService.createTemplate → SupportAccessPolicy.isDoctorOfTenant → SupportAccessRepository.findRoleAssignmentsOfPractitioner → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:266` |
+
+### Cuerpo — DTO `CreateReplyTemplateDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `category` | `string` | Sí | valores: GENERAL, SCHEDULING, BILLING, PREPARATION | `@IsIn(CATEGORIES)` | — | `src/modules/community/dto/support-inbox.dto.ts:310` |
+| `title` | `string` | Sí | longitud mínima 1; longitud máxima 120 | `@IsString()` `@MinLength(1)` `@MaxLength(120)` | — | `src/modules/community/dto/support-inbox.dto.ts:317` |
+| `bodyText` | `string` | Sí | longitud mínima 1; longitud máxima 2000 | `@IsString()` `@MinLength(1)` `@MaxLength(2000)` | — | `src/modules/community/dto/support-inbox.dto.ts:324` |
+| `practitionerProfileId` | `string` | No | formato uuid | `@IsOptional()` `@IsUUID()` | — | `src/modules/community/dto/support-inbox.dto.ts:330` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{
+  "category": "GENERAL",
+  "title": "valor-ejemplo",
+  "bodyText": "valor-ejemplo"
+}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "category": "GENERAL",
+  "title": "valor-ejemplo",
+  "bodyText": "valor-ejemplo",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+</details>
+
+### Respuesta — `Promise<ReplyTemplateViewDto>` · DTO `ReplyTemplateViewDto` · HTTP `HttpStatus.CREATED`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Id. | `src/modules/community/dto/support-inbox.dto.ts:384` |
+| `category` | `object` | Sí | — | — | Categoría. | `src/modules/community/dto/support-inbox.dto.ts:386` |
+| `title` | `string` | Sí | — | — | Título. | `src/modules/community/dto/support-inbox.dto.ts:388` |
+| `bodyText` | `string` | Sí | — | — | Texto. | `src/modules/community/dto/support-inbox.dto.ts:390` |
+| `practitionerProfileId` | `string` | No | formato uuid | — | Doctor dueño, si es suya. | `src/modules/community/dto/support-inbox.dto.ts:392` |
+| `retired` | `boolean` | Sí | — | — | ¿Está retirada? | `src/modules/community/dto/support-inbox.dto.ts:394` |
+| `version` | `number` | Sí | — | — | Versión de la respuesta: sube con cada cambio. | `src/modules/community/dto/support-inbox.dto.ts:396` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 201 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una respuesta preparada no puede dar contenido clínico; PreconditionFailedException: El doctor indicado no es de esta organización |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Community (19) — etapa `ctrl:CommunitySupportInboxController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 93. PATCH /org/reply-templates/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Cambiar, retirar o reactivar una respuesta preparada
+- **Bloque:** Marketing y Crecimiento
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `CommunitySupportInboxController.updateTemplate` — `src/modules/community/controllers/community-support-inbox.controller.ts:174`
+
+### Qué es y para qué sirve (negocio)
+
+Cambiar, retirar o reactivar una respuesta preparada. Dentro del módulo (descripción del modelo, en inglés): «A delivery-platform-style discovery and reputation layer for practitioners, practices, hospitals, diagnostic units, pharmacies, clinics and care sites.» Dominio: Marketing y Crecimiento.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_19_community.puml:38`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:34`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /org/reply-templates/{id}` la atiende `CommunitySupportInboxController.updateTemplate` (src/modules/community/controllers/community-support-inbox.controller.ts:174). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `UpdateReplyTemplateDto` (5 campos, 0 obligatorios). Delega en `CommunitySupportInboxService.updateTemplate`. Actualiza community.reply_templates. Lee community.reply_templates.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/community/controllers/community-support-inbox.controller.ts:174` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: id | `src/modules/community/controllers/community-support-inbox.controller.ts:174` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `community.reply_templates` | ESCRIBE | ACTUALIZA | POR_TIPO | CommunitySupportInboxController.updateTemplate → CommunitySupportInboxService.updateTemplate | `src/modules/community/services/community-support-inbox.service.ts:880` |
+| `community.reply_templates` | LEE | LEE | DIRECTA | CommunitySupportInboxController.updateTemplate → CommunitySupportInboxService.updateTemplate → SupportInboxRepository.findTemplate | `src/modules/community/repositories/support-inbox.repository.ts:714` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `UpdateReplyTemplateDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `title` | `string` | No | longitud mínima 1; longitud máxima 120 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(120)` | — | `src/modules/community/dto/support-inbox.dto.ts:341` |
+| `bodyText` | `string` | No | longitud mínima 1; longitud máxima 2000 | `@IsOptional()` `@IsString()` `@MinLength(1)` `@MaxLength(2000)` | — | `src/modules/community/dto/support-inbox.dto.ts:349` |
+| `category` | `string` | No | valores: GENERAL, SCHEDULING, BILLING, PREPARATION | `@IsOptional()` `@IsIn(CATEGORIES)` | — | `src/modules/community/dto/support-inbox.dto.ts:355` |
+| `retired` | `boolean` | No | — | `@IsOptional()` | — | `src/modules/community/dto/support-inbox.dto.ts:360` |
+| `expectedVersion` | `number` | No | mínimo 1 | `@IsOptional()` `@IsInt()` `@Min(1)` | — | `src/modules/community/dto/support-inbox.dto.ts:370` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "title": "valor-ejemplo",
+  "bodyText": "valor-ejemplo",
+  "category": "GENERAL",
+  "retired": true,
+  "expectedVersion": 1
+}
+```
+
+</details>
+
+### Respuesta — `Promise<ReplyTemplateViewDto>` · DTO `ReplyTemplateViewDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | formato uuid | — | Id. | `src/modules/community/dto/support-inbox.dto.ts:384` |
+| `category` | `object` | Sí | — | — | Categoría. | `src/modules/community/dto/support-inbox.dto.ts:386` |
+| `title` | `string` | Sí | — | — | Título. | `src/modules/community/dto/support-inbox.dto.ts:388` |
+| `bodyText` | `string` | Sí | — | — | Texto. | `src/modules/community/dto/support-inbox.dto.ts:390` |
+| `practitionerProfileId` | `string` | No | formato uuid | — | Doctor dueño, si es suya. | `src/modules/community/dto/support-inbox.dto.ts:392` |
+| `retired` | `boolean` | Sí | — | — | ¿Está retirada? | `src/modules/community/dto/support-inbox.dto.ts:394` |
+| `version` | `number` | Sí | — | — | Versión de la respuesta: sube con cada cambio. | `src/modules/community/dto/support-inbox.dto.ts:396` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Respuesta no encontrada |
+| 409 | `CONCURRENCY_CONFLICT` | ConcurrencyConflictException: La respuesta cambió desde que la abrió: vuelva a cargarla |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Una respuesta preparada no puede dar contenido clínico |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/community.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Community (19) — etapa `ctrl:CommunitySupportInboxController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 94. GET /p/{slug}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha pública de un profesional
@@ -8501,7 +9503,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 86. POST /patients/me/reviews
+## 95. POST /patients/me/reviews
 
 - **Origen:** CONTRATO
 - **Nombre:** Calificar una atención recibida
@@ -8586,7 +9588,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
 |---|---|---|---|---|---|---|
-| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:207` |
+| `id` | `string` | Sí | formato uuid | — | Identificador único de la instancia. | `src/modules/community/dto/responses.dto.ts:216` |
 | `courseId` | `string` | Sí | formato uuid | — | Identificador asociado a course. | sin fuente |
 | `rating` | `number` | Sí | — | — | Valor de rating mantenido por la instancia. | sin fuente |
 | `statusConceptId` | `string` | Sí | formato uuid | — | Identificador asociado a status concept. | sin fuente |
@@ -8616,7 +9618,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 87. GET /public/comments/{commentId}/replies
+## 96. GET /public/comments/{commentId}/replies
 
 - **Origen:** CONTRATO
 - **Nombre:** Respuestas de un comentario público
@@ -8694,7 +9696,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 88. GET /public/media/{id}
+## 97. GET /public/media/{id}
 
 - **Origen:** CONTRATO
 - **Nombre:** Servir una imagen pública (avatar, portada o post)
@@ -8773,7 +9775,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 89. GET /public/nearby
+## 98. GET /public/nearby
 
 - **Origen:** CONTRATO
 - **Nombre:** Prestadores cercanos, en línea recta
@@ -8859,7 +9861,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 90. GET /public/posts
+## 99. GET /public/posts
 
 - **Origen:** CONTRATO
 - **Nombre:** Últimas publicaciones de todos los profesionales
@@ -8935,7 +9937,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 91. GET /public/posts/{postId}/comments
+## 100. GET /public/posts/{postId}/comments
 
 - **Origen:** CONTRATO
 - **Nombre:** Comentarios raíz de una publicación pública
@@ -9013,7 +10015,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 92. GET /public/posts/{postId}/reactions
+## 101. GET /public/posts/{postId}/reactions
 
 - **Origen:** CONTRATO
 - **Nombre:** Quiénes reaccionaron a una publicación pública
@@ -9090,7 +10092,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 93. GET /public/profiles/{prefijo}/{slug}
+## 102. GET /public/profiles/{prefijo}/{slug}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha pública por prefijo de vertical
@@ -9223,7 +10225,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 94. GET /public/profiles/{prefijo}/{slug}/reviews
+## 103. GET /public/profiles/{prefijo}/{slug}/reviews
 
 - **Origen:** CONTRATO
 - **Nombre:** Opiniones publicadas de una ficha pública
@@ -9305,7 +10307,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 95. GET /public/search
+## 104. GET /public/search
 
 - **Origen:** CONTRATO
 - **Nombre:** Buscador público unificado
@@ -9390,7 +10392,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 96. GET /public/search/diagnostic-units
+## 105. GET /public/search/diagnostic-units
 
 - **Origen:** CONTRATO
 - **Nombre:** Laboratorios y centros de diagnóstico
@@ -9475,7 +10477,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 97. GET /public/search/insurers
+## 106. GET /public/search/insurers
 
 - **Origen:** CONTRATO
 - **Nombre:** Aseguradoras en el directorio público
@@ -9560,7 +10562,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 98. GET /public/search/medications
+## 107. GET /public/search/medications
 
 - **Origen:** CONTRATO
 - **Nombre:** Medicamentos ofertados públicamente
@@ -9645,7 +10647,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 99. GET /public/search/organizations
+## 108. GET /public/search/organizations
 
 - **Origen:** CONTRATO
 - **Nombre:** Organizaciones en el directorio público
@@ -9735,7 +10737,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 100. GET /public/search/pharmacies
+## 109. GET /public/search/pharmacies
 
 - **Origen:** CONTRATO
 - **Nombre:** Farmacias en el directorio público
@@ -9820,7 +10822,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 101. GET /public/search/practitioners
+## 110. GET /public/search/practitioners
 
 - **Origen:** CONTRATO
 - **Nombre:** Profesionales en el directorio público
@@ -9912,7 +10914,7 @@ El árbol de decisión completo está en [flujos](../flujos/community.md).
 
 ---
 
-## 102. GET /s/{slug}
+## 111. GET /s/{slug}
 
 - **Origen:** CONTRATO
 - **Nombre:** Ficha pública de una aseguradora

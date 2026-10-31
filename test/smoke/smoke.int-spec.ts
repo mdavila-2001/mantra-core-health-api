@@ -11,7 +11,7 @@ import {
 } from '../integration/harness';
 import { CatalogConcepts } from '../../src/modules/terminology/entities';
 import { SEED } from '../../src/common';
-import { ALL_SMOKE } from './registry';
+import { SMOKE_CASES } from './registry';
 import type { SmokeCase, SmokeCtx } from './smoke-kit';
 
 /**
@@ -212,15 +212,26 @@ describe('Smoke test — 30 endpoints', () => {
       if (c.auth !== false) {
         // `c.token` deja que el caso actúe como el titular (paciente, profesional) en vez del
         // admin: los endpoints `/me` resuelven de quién son los datos leyendo el JWT.
-        const token = c.token?.(smokeCtx) ?? smokeCtx.adminToken;
-        req = req.set('Authorization', `Bearer ${token}`);
+        // Un caso de un actor sin token (su login falló antes) NO cae al admin: correría como
+        // otro actor y, p. ej., un `logout` cerraría la sesión del admin y arrastraría a todos
+        // los casos siguientes. Sin token no manda `Authorization` y responde 401.
+        const token = c.token ? c.token(smokeCtx) : smokeCtx.adminToken;
+        if (token) req = req.set('Authorization', `Bearer ${token}`);
         if (c.tenantScoped) req = req.set('X-Tenant-Id', smokeCtx.tenantId);
+      }
+      if (c.headers) {
+        for (const [name, value] of Object.entries(c.headers(smokeCtx))) {
+          req = req.set(name, value);
+        }
       }
       if (c.body) req = req.send(c.body(smokeCtx) as object);
       const res = await req;
       const durationMs = Date.now() - started;
       const codeOk = c.expectedCode ? res.body?.code === c.expectedCode : true;
-      const pass = res.status === c.expectedStatus && codeOk;
+      const reasonOk = c.expectedReason
+        ? res.body?.reason === c.expectedReason
+        : true;
+      const pass = res.status === c.expectedStatus && codeOk && reasonOk;
       if (pass && c.capture && res.body) c.capture(res.body, smokeCtx);
       results.push({
         module: c.module,
@@ -235,7 +246,7 @@ describe('Smoke test — 30 endpoints', () => {
         durationMs,
         note: pass
           ? ''
-          : `esperaba ${c.expectedStatus}${c.expectedCode ? '/' + c.expectedCode : ''}, recibió ${res.status}/${res.body?.code ?? '-'}${responseMessage(res.body)}`,
+          : `esperaba ${c.expectedStatus}${c.expectedCode ? '/' + c.expectedCode : ''}${c.expectedReason ? ' reason ' + c.expectedReason : ''}, recibió ${res.status}/${res.body?.code ?? '-'}${res.body?.reason ? ' reason ' + res.body.reason : ''}${responseMessage(res.body)}`,
       });
     } catch (error) {
       results.push({
@@ -1294,7 +1305,7 @@ describe('Smoke test — 30 endpoints', () => {
       vars: {},
       u,
     };
-    for (const smokeCase of ALL_SMOKE) {
+    for (const smokeCase of SMOKE_CASES) {
       await runRegistryCase(smokeCtx, smokeCase);
     }
 

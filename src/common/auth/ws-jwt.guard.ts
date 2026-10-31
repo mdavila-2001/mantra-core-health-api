@@ -76,6 +76,14 @@ export class WsJwtGuard {
       );
     }
 
+    // El token de alcance limitado (alta del segundo factor) no abre sockets.
+    if (payload.mfaEnrollment) {
+      throw unauthorizedWithReason(
+        'Debe dar de alta su segundo factor antes de usar la aplicación',
+        SystemErrorReason.MFA_ENROLLMENT_REQUIRED,
+      );
+    }
+
     // Mismo criterio que HTTP: un token de una sesión cerrada no abre un socket.
     await this.sessions.assertActive(payload);
     return toAuthenticatedUser(payload);

@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import { CommunityErrorReason } from '../community.error-reasons';
 
 /**
  * Ejecuta la operación mock fn.
@@ -10,6 +11,7 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { CommunityMessagingService } from './community-messaging.service';
 import {
   CONCEPTS,
+  ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
 } from '../../../common';
@@ -22,7 +24,7 @@ const actor = { id: 'admin-1', roles: [] } as any;
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
-function build() {
+function build(supportPolicy?: any, supportReply?: any, supportEmail?: any) {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const conversationsRepo = {
@@ -68,6 +70,7 @@ function build() {
   // F4: que el perfil con el que se escribe sea del actor. Por defecto lo es.
   const visibility = {
     assertActsAsProfile: mockFn().mockResolvedValue(undefined),
+    actsAsProfile: mockFn().mockResolvedValue(true),
   };
   // F4.7 · la respuesta automática, doblada: enviar se prueba acá, contestar
   // solo se prueba en su propio servicio. Por defecto no contesta nadie, que
@@ -90,6 +93,9 @@ function build() {
     visibility as any,
     attachableFiles as any,
     logger as any,
+    supportPolicy,
+    supportReply,
+    supportEmail,
   );
   return {
     autoReply,
@@ -1008,6 +1014,590 @@ describe('CommunityMessagingService', () => {
 
       expect(conversation.pinnedMessageId).toBeUndefined();
       expect(res).toEqual({ conversationId: 'conv1', pinnedMessageId: null });
+    });
+  });
+});
+
+/** Las reglas de la bandeja al escribir, dobladas: por defecto permiten. */
+function replyGate(overrides: Record<string, unknown> = {}): any {
+  return {
+    guardReply: mockFn().mockResolvedValue(undefined),
+    recordReply: mockFn().mockResolvedValue(undefined),
+    reopenIfResolved: mockFn().mockResolvedValue(false),
+    ...overrides,
+  };
+}
+
+describe('CommunityMessagingService: autoría real y «en nombre de»', () => {
+  const ANA = { id: 'user-ana', roles: ['SUPPORT_STAFF'] } as any;
+
+  /** Deja la conversación lista para que `p-doc` (el doctor) y `p-pac` participen. */
+  function conversationReady(d: ReturnType<typeof build>) {
+    d.conversationsRepo.findConversationById.mockResolvedValue({
+      id: 'conv1',
+      messageCount: 0,
+    });
+    d.conversationsRepo.findActiveParticipant.mockResolvedValue({ id: 'part' });
+    d.conversationsRepo.findParticipants.mockResolvedValue([
+      { participantProfileId: 'p-doc' },
+      { participantProfileId: 'p-pac' },
+    ]);
+    d.conversationsRepo.createMessage.mockReturnValue({ id: 'msg1' });
+    d.profilesRepo.findById.mockResolvedValue({
+      id: 'p-doc',
+      targetId: 'prof-perez',
+      tenantId: 'tenant-hospital',
+      displayName: 'Dr. Andrés Pérez',
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+  }
+
+  it('caso 09: la persona de apoyo responde con el perfil del doctor y se guarda la autora real', async () => {
+    const policy = {
+      canReplyOnBehalf: mockFn().mockResolvedValue({
+        allowed: true,
+        reason: 'ALLOWED',
+        delegateAssignmentId: 'del-1',
+        disclosureShown: true,
+      }),
+    };
+    const d = build(policy, replyGate());
+    conversationReady(d);
+    d.visibility.actsAsProfile.mockResolvedValue(false);
+
+    await d.service.sendMessage(
+      'conv1',
+      {
+        senderProfileId: 'p-doc',
+        onBehalfOfProfileId: 'p-doc',
+        bodyText: 'Su cita sigue en pie',
+      } as any,
+      ANA,
+    );
+
+    // El paciente ve al doctor como remitente; la autora real es Ana.
+    expect(d.conversationsRepo.createMessage).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        senderProfileId: 'p-doc',
+        authoredByUserId: 'user-ana',
+        // La columna guarda al doctor (su perfil profesional), no su perfil público.
+        onBehalfOfProfileId: 'prof-perez',
+        delegateAssignmentId: 'del-1',
+        disclosureShown: true,
+      }),
+    );
+    // M2: la política se consulta SOLO para la organización del perfil del doctor
+    // con el que se escribe: un vínculo en otra organización no abre esta conversación.
+    expect(policy.canReplyOnBehalf).toHaveBeenCalledWith(
+      'user-ana',
+      'prof-perez',
+      expect.anything(),
+      'tenant-hospital',
+    );
+    expect(d.visibility.assertActsAsProfile).not.toHaveBeenCalled();
+  });
+
+  it('M2: la persona de apoyo solo responde mensajes administrativos: un texto clínico se rechaza y no se escribe', async () => {
+    const policy = {
+      canReplyOnBehalf: mockFn().mockResolvedValue({
+        allowed: true,
+        reason: 'ALLOWED',
+        delegateAssignmentId: 'del-1',
+        disclosureShown: true,
+      }),
+    };
+    const d = build(policy, replyGate());
+    conversationReady(d);
+    d.visibility.actsAsProfile.mockResolvedValue(false);
+    await expect(
+      d.service.sendMessage(
+        'conv1',
+        {
+          senderProfileId: 'p-doc',
+          onBehalfOfProfileId: 'p-doc',
+          bodyText: 'Puede subir la dosis de insulina a 20 mg',
+        } as any,
+        ANA,
+      ),
+    ).rejects.toMatchObject({
+      reason: CommunityErrorReason.SUPPORT_CLINICAL_CONTENT,
+    });
+    expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
+  });
+
+  it('M2: el doctor escribe lo que quiera: la regla es de la persona de apoyo', async () => {
+    const d = build();
+    conversationReady(d);
+    await d.service.sendMessage(
+      'conv1',
+      {
+        senderProfileId: 'p-doc',
+        bodyText: 'Suba la dosis de insulina',
+      } as any,
+      { id: 'user-perez', roles: [] } as any,
+    );
+    expect(d.conversationsRepo.createMessage).toHaveBeenCalled();
+  });
+
+  it('si la política no lo permite responde 403 y no escribe nada', async () => {
+    const policy = {
+      canReplyOnBehalf: mockFn().mockResolvedValue({
+        allowed: false,
+        reason: 'REPLY_NOT_ALLOWED_BY_DOCTOR',
+      }),
+    };
+    const d = build(policy);
+    conversationReady(d);
+    d.visibility.actsAsProfile.mockResolvedValue(false);
+
+    await expect(
+      d.service.sendMessage(
+        'conv1',
+        {
+          senderProfileId: 'p-doc',
+          onBehalfOfProfileId: 'p-doc',
+          bodyText: 'x',
+        } as any,
+        ANA,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
+  });
+
+  it('sin política cableada, «en nombre de» no se concede', async () => {
+    const d = build(undefined);
+    conversationReady(d);
+    d.visibility.actsAsProfile.mockResolvedValue(false);
+    await expect(
+      d.service.sendMessage(
+        'conv1',
+        {
+          senderProfileId: 'p-doc',
+          onBehalfOfProfileId: 'p-doc',
+          bodyText: 'x',
+        } as any,
+        ANA,
+      ),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('el remitente tiene que ser el perfil del doctor en cuyo nombre se responde', async () => {
+    const d = build({ canReplyOnBehalf: mockFn() });
+    conversationReady(d);
+    d.visibility.actsAsProfile.mockResolvedValue(false);
+    await expect(
+      d.service.sendMessage(
+        'conv1',
+        {
+          senderProfileId: 'p-pac',
+          onBehalfOfProfileId: 'p-doc',
+          bodyText: 'x',
+        } as any,
+        ANA,
+      ),
+    ).rejects.toBeInstanceOf(PreconditionFailedException);
+  });
+
+  describe('responder en nombre del doctor: bandeja, derivación y correo', () => {
+    const allowed = () => ({
+      canReplyOnBehalf: mockFn().mockResolvedValue({
+        allowed: true,
+        reason: 'ALLOWED',
+        delegateAssignmentId: 'del-1',
+        disclosureShown: true,
+      }),
+    });
+    const reply = (over: Record<string, unknown> = {}) =>
+      ({
+        senderProfileId: 'p-doc',
+        onBehalfOfProfileId: 'p-doc',
+        bodyText: 'Le confirmamos el jueves a las 15:30.',
+        ...over,
+      }) as any;
+
+    it('409: si otra persona tiene la conversación no se escribe nada', async () => {
+      const gate = replyGate({
+        guardReply: mockFn().mockRejectedValue(
+          new ConflictException('La tiene otra persona', {
+            assignedToName: 'Bea Soto',
+          }),
+        ),
+      });
+      const d = build(allowed(), gate);
+      conversationReady(d);
+      d.visibility.actsAsProfile.mockResolvedValue(false);
+      await expect(
+        d.service.sendMessage('conv1', reply(), ANA),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
+      expect(gate.recordReply).not.toHaveBeenCalled();
+    });
+
+    it('422 CLINICAL_REQUIRES_DERIVATION: un mensaje clínico sin derivar no se responde', async () => {
+      const gate = replyGate({
+        guardReply: mockFn().mockRejectedValue(
+          new PreconditionFailedException(
+            'Es clínico',
+            { reason: 'CLINICAL_REQUIRES_DERIVATION' },
+            CommunityErrorReason.CLINICAL_REQUIRES_DERIVATION,
+          ),
+        ),
+      });
+      const d = build(allowed(), gate);
+      conversationReady(d);
+      d.visibility.actsAsProfile.mockResolvedValue(false);
+      await expect(
+        d.service.sendMessage('conv1', reply(), ANA),
+      ).rejects.toMatchObject({
+        status: 422,
+        reason: CommunityErrorReason.CLINICAL_REQUIRES_DERIVATION,
+        details: { reason: 'CLINICAL_REQUIRES_DERIVATION' },
+      });
+      expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
+    });
+
+    it('la regla se evalúa con el doctor y la organización del perfil con el que se escribe, y la autora real', async () => {
+      const gate = replyGate();
+      const d = build(allowed(), gate);
+      conversationReady(d);
+      d.visibility.actsAsProfile.mockResolvedValue(false);
+      await d.service.sendMessage('conv1', reply(), ANA);
+      const target = {
+        conversationId: 'conv1',
+        doctorPublicProfileId: 'p-doc',
+        practitionerProfileId: 'prof-perez',
+        tenantId: 'tenant-hospital',
+        actorUserId: 'user-ana',
+      };
+      expect(gate.guardReply).toHaveBeenCalledWith(expect.anything(), target);
+      // Responder es hacerse cargo: queda a nombre de quien respondió.
+      expect(gate.recordReply).toHaveBeenCalledWith(expect.anything(), target);
+      expect(gate.reopenIfResolved).not.toHaveBeenCalled();
+    });
+
+    it('sin las reglas de la bandeja cableadas, «en nombre de» no se concede', async () => {
+      const d = build(allowed(), undefined);
+      conversationReady(d);
+      d.visibility.actsAsProfile.mockResolvedValue(false);
+      await expect(
+        d.service.sendMessage('conv1', reply(), ANA),
+      ).rejects.toBeInstanceOf(ForbiddenException);
+      expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
+    });
+
+    it('si escribe el paciente se evalúa la reapertura de la conversación resuelta', async () => {
+      const gate = replyGate();
+      const d = build(undefined, gate);
+      conversationReady(d);
+      await d.service.sendMessage(
+        'conv1',
+        { senderProfileId: 'p-pac', bodyText: 'Sigo igual' } as any,
+        { id: 'user-paciente', roles: ['PATIENT'] } as any,
+      );
+      expect(gate.reopenIfResolved).toHaveBeenCalledWith(
+        expect.anything(),
+        'conv1',
+        'p-pac',
+      );
+      expect(gate.guardReply).not.toHaveBeenCalled();
+      expect(gate.recordReply).not.toHaveBeenCalled();
+    });
+
+    it('por websocket y en la respuesta no viajan la autora real, la delegación ni la leyenda', async () => {
+      const d = build(allowed(), replyGate());
+      conversationReady(d);
+      d.visibility.actsAsProfile.mockResolvedValue(false);
+      const res = await d.service.sendMessage('conv1', reply(), ANA);
+      const [[payload]] = d.gateway.emitMessage.mock.calls;
+      const everything = JSON.stringify({ payload, res });
+      for (const secret of [
+        'authoredBy',
+        'user-ana',
+        'onBehalf',
+        'delegateAssignment',
+        'del-1',
+        'disclosureShown',
+        'teamAuthorName',
+        'repliedByTeam',
+      ]) {
+        expect(everything).not.toContain(secret);
+      }
+    });
+
+    describe('canal de correo', () => {
+      const emailer = (over: Record<string, unknown> = {}) => ({
+        enqueue: mockFn().mockResolvedValue({
+          queued: true,
+          requestId: 'req-1',
+        }),
+        ...over,
+      });
+
+      it('manda también por correo con el doctor como remitente, la divulgación del doctor y la autora real', async () => {
+        const mail = emailer();
+        const d = build(allowed(), replyGate(), mail);
+        conversationReady(d);
+        d.visibility.actsAsProfile.mockResolvedValue(false);
+        const res = await d.service.sendMessage(
+          'conv1',
+          reply({ channels: ['CHAT', 'EMAIL'] }),
+          ANA,
+        );
+        expect(mail.enqueue).toHaveBeenCalledWith({
+          messageId: 'msg1',
+          conversationId: 'conv1',
+          tenantId: 'tenant-hospital',
+          doctorPublicProfileId: 'p-doc',
+          doctorName: 'Dr. Andrés Pérez',
+          authoredByUserId: 'user-ana',
+          delegateAssignmentId: 'del-1',
+          bodyText: 'Le confirmamos el jueves a las 15:30.',
+          disclosureShown: true,
+        });
+        expect(res.email).toEqual({ queued: true, requestId: 'req-1' });
+        // El chat sigue su camino normal.
+        expect(d.gateway.emitMessage).toHaveBeenCalled();
+        expect(d.messageNotifications.newMessage).toHaveBeenCalled();
+      });
+
+      it('con HIDE del doctor el correo no lleva la leyenda', async () => {
+        const mail = emailer();
+        const hide = {
+          canReplyOnBehalf: mockFn().mockResolvedValue({
+            allowed: true,
+            reason: 'ALLOWED',
+            delegateAssignmentId: 'del-1',
+            disclosureShown: false,
+          }),
+        };
+        const d = build(hide, replyGate(), mail);
+        conversationReady(d);
+        d.visibility.actsAsProfile.mockResolvedValue(false);
+        await d.service.sendMessage(
+          'conv1',
+          reply({ channels: ['EMAIL'] }),
+          ANA,
+        );
+        expect(mail.enqueue.mock.calls[0][0].disclosureShown).toBe(false);
+      });
+
+      it('solo correo: el mensaje queda en la conversación pero no se avisa por chat', async () => {
+        const mail = emailer();
+        const d = build(allowed(), replyGate(), mail);
+        conversationReady(d);
+        d.visibility.actsAsProfile.mockResolvedValue(false);
+        await d.service.sendMessage(
+          'conv1',
+          reply({ channels: ['EMAIL'] }),
+          ANA,
+        );
+        expect(d.conversationsRepo.createMessage).toHaveBeenCalled();
+        expect(mail.enqueue).toHaveBeenCalled();
+        expect(d.gateway.emitMessage).not.toHaveBeenCalled();
+        expect(d.messageNotifications.newMessage).not.toHaveBeenCalled();
+      });
+
+      it('por defecto no hay correo', async () => {
+        const mail = emailer();
+        const d = build(allowed(), replyGate(), mail);
+        conversationReady(d);
+        d.visibility.actsAsProfile.mockResolvedValue(false);
+        const res = await d.service.sendMessage('conv1', reply(), ANA);
+        expect(mail.enqueue).not.toHaveBeenCalled();
+        expect(res.email).toBeUndefined();
+      });
+
+      it('el correo solo existe al responder en nombre del doctor', async () => {
+        const mail = emailer();
+        const d = build(undefined, replyGate(), mail);
+        conversationReady(d);
+        await expect(
+          d.service.sendMessage(
+            'conv1',
+            {
+              senderProfileId: 'p-doc',
+              bodyText: 'Hola',
+              channels: ['EMAIL'],
+            } as any,
+            { id: 'user-perez', roles: [] } as any,
+          ),
+        ).rejects.toMatchObject({
+          reason: CommunityErrorReason.EMAIL_CHANNEL_REQUIRES_ON_BEHALF,
+        });
+        expect(mail.enqueue).not.toHaveBeenCalled();
+        expect(d.conversationsRepo.createMessage).not.toHaveBeenCalled();
+      });
+
+      it('403 y el correo no sale si el doctor no la aceptó o no le permitió responder', async () => {
+        const mail = emailer();
+        const d = build(
+          {
+            canReplyOnBehalf: mockFn().mockResolvedValue({
+              allowed: false,
+              reason: 'DOCTOR_NOT_ACCEPTED',
+            }),
+          },
+          replyGate(),
+          mail,
+        );
+        conversationReady(d);
+        d.visibility.actsAsProfile.mockResolvedValue(false);
+        await expect(
+          d.service.sendMessage('conv1', reply({ channels: ['EMAIL'] }), ANA),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(mail.enqueue).not.toHaveBeenCalled();
+      });
+
+      it('un texto clínico no sale ni por chat ni por correo', async () => {
+        const mail = emailer();
+        const d = build(allowed(), replyGate(), mail);
+        conversationReady(d);
+        d.visibility.actsAsProfile.mockResolvedValue(false);
+        await expect(
+          d.service.sendMessage(
+            'conv1',
+            reply({
+              bodyText: 'Puede subir la dosis de insulina a 20 mg',
+              channels: ['CHAT', 'EMAIL'],
+            }),
+            ANA,
+          ),
+        ).rejects.toMatchObject({
+          reason: CommunityErrorReason.SUPPORT_CLINICAL_CONTENT,
+        });
+        expect(mail.enqueue).not.toHaveBeenCalled();
+      });
+
+      it('si el correo no se puede encolar el mensaje igual queda y se informa', async () => {
+        const mail = emailer({
+          enqueue: mockFn().mockResolvedValue({
+            queued: false,
+            skippedReason: 'La cuenta del paciente no declaró correo',
+          }),
+        });
+        const d = build(allowed(), replyGate(), mail);
+        conversationReady(d);
+        d.visibility.actsAsProfile.mockResolvedValue(false);
+        const res = await d.service.sendMessage(
+          'conv1',
+          reply({ channels: ['CHAT', 'EMAIL'] }),
+          ANA,
+        );
+        expect(res.id).toBe('msg1');
+        expect(res.email).toEqual({
+          queued: false,
+          skippedReason: 'La cuenta del paciente no declaró correo',
+        });
+      });
+    });
+  });
+
+  it('un mensaje propio guarda a su autor y no queda «en nombre de» nadie', async () => {
+    const d = build();
+    conversationReady(d);
+    await d.service.sendMessage(
+      'conv1',
+      { senderProfileId: 'p-doc', bodyText: 'Hola' } as any,
+      { id: 'user-perez', roles: [] } as any,
+    );
+    const [[, data]] = d.conversationsRepo.createMessage.mock.calls;
+    expect(data.authoredByUserId).toBe('user-perez');
+    expect(data.onBehalfOfProfileId).toBeUndefined();
+  });
+
+  describe('sendAgendaMessage (confirmación de cita)', () => {
+    it('quien ejecutó la agenda no es el doctor: el mensaje sale con su perfil, con la autora real y «en nombre de»', async () => {
+      const d = build();
+      conversationReady(d);
+      d.visibility.actsAsProfile.mockResolvedValue(false);
+
+      await d.service.sendAgendaMessage(
+        'conv1',
+        {
+          senderProfileId: 'p-doc',
+          bodyText: 'Su cita quedó confirmada.',
+        } as any,
+        ANA,
+      );
+
+      expect(d.visibility.assertActsAsProfile).not.toHaveBeenCalled();
+      expect(d.conversationsRepo.createMessage).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          senderProfileId: 'p-doc',
+          authoredByUserId: 'user-ana',
+          onBehalfOfProfileId: 'prof-perez',
+          disclosureShown: false,
+        }),
+      );
+    });
+
+    it('B2: el aviso de agenda de una persona de apoyo respeta SHOW del doctor', async () => {
+      const policy = { replyDisclosureOf: mockFn().mockResolvedValue(true) };
+      const d = build(policy);
+      conversationReady(d);
+      d.visibility.actsAsProfile.mockResolvedValue(false);
+      await d.service.sendAgendaMessage(
+        'conv1',
+        {
+          senderProfileId: 'p-doc',
+          bodyText: 'Su cita quedó confirmada.',
+        } as any,
+        ANA,
+      );
+      const [[, data]] = d.conversationsRepo.createMessage.mock.calls;
+      expect(data.disclosureShown).toBe(true);
+      expect(policy.replyDisclosureOf).toHaveBeenCalledWith(
+        'user-ana',
+        'prof-perez',
+        expect.anything(),
+        'tenant-hospital',
+      );
+    });
+
+    it('B2: con HIDE del doctor el aviso no muestra «respondido por su equipo»', async () => {
+      const policy = { replyDisclosureOf: mockFn().mockResolvedValue(false) };
+      const d = build(policy);
+      conversationReady(d);
+      d.visibility.actsAsProfile.mockResolvedValue(false);
+      await d.service.sendAgendaMessage(
+        'conv1',
+        {
+          senderProfileId: 'p-doc',
+          bodyText: 'Su cita quedó confirmada.',
+        } as any,
+        ANA,
+      );
+      const [[, data]] = d.conversationsRepo.createMessage.mock.calls;
+      expect(data.disclosureShown).toBe(false);
+    });
+
+    it('si el actor es el propio doctor no queda «en nombre de»', async () => {
+      const d = build();
+      conversationReady(d);
+      d.visibility.actsAsProfile.mockResolvedValue(true);
+      await d.service.sendAgendaMessage(
+        'conv1',
+        { senderProfileId: 'p-doc', bodyText: 'ok' } as any,
+        { id: 'user-perez', roles: [] } as any,
+      );
+      const [[, data]] = d.conversationsRepo.createMessage.mock.calls;
+      expect(data.authoredByUserId).toBe('user-perez');
+      expect(data.onBehalfOfProfileId).toBeUndefined();
+    });
+
+    it('un error al escribir se propaga: no se traga', async () => {
+      const d = build();
+      conversationReady(d);
+      d.conversationsRepo.findActiveParticipant.mockResolvedValue(null);
+      await expect(
+        d.service.sendAgendaMessage(
+          'conv1',
+          { senderProfileId: 'p-doc', bodyText: 'ok' } as any,
+          ANA,
+        ),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 });

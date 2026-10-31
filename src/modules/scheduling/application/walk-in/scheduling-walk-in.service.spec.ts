@@ -82,7 +82,7 @@ function build() {
     create: mockFn((_tx: any, data: any) => ({ id: 'patient-1', ...data })),
   };
   const identifiersRepo = {
-    findActiveDuplicate: mockFn().mockResolvedValue(null),
+    findActiveNationalIdDuplicate: mockFn().mockResolvedValue(null),
     create: mockFn((_tx: any, data: any) => ({ id: 'ident-1', ...data })),
   };
   const contactPointsRepo = {
@@ -182,8 +182,9 @@ describe('SchedulingWalkInService.createWalkInAppointment', () => {
 
   it('el conflicto del alta sale de la transacción sin llamar a la cita', async () => {
     const { service, bookingsService, identifiersRepo } = build();
-    identifiersRepo.findActiveDuplicate.mockResolvedValue({
+    identifiersRepo.findActiveNationalIdDuplicate.mockResolvedValue({
       id: 'ident-existente',
+      ownerId: 'person-otro',
     });
 
     await expect(

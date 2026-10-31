@@ -6,3 +6,4 @@ export { SchedulingAgendaController } from './scheduling-agenda.controller';
 export * from './tenant-agenda.controller';
 export { SchedulingServiceOfferingsController } from './scheduling-service-offerings.controller';
 export { SchedulingFlexibleController } from './scheduling-flexible.controller';
+export { SupportAgendaController } from './support-agenda.controller';

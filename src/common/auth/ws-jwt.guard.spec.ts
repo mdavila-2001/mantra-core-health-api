@@ -87,4 +87,36 @@ describe('WsJwtGuard', () => {
     expect(sessions.assertActive).toHaveBeenCalledTimes(1);
     expect(user.id).toBe('u1');
   });
+
+  it('N6: el token de alcance limitado (alta del segundo factor) no abre un socket', async () => {
+    const { guard, sessions } = build(() => ({
+      typ: 'access',
+      sub: 'u1',
+      sid: 's1',
+      roles: [],
+      mfaEnrollment: true,
+    }));
+
+    const body = await rejection(
+      guard.authenticate(socket({ token: 'limitado' })),
+    );
+
+    expect(body.reason).toBe('MFA_ENROLLMENT_REQUIRED');
+    expect(sessions.assertActive).not.toHaveBeenCalled();
+  });
+
+  it('N2: el socket reconstruye también las organizaciones que niegan, sin darles acceso', async () => {
+    const { guard } = build(() => ({
+      typ: 'access',
+      sub: 'u1',
+      sid: 's1',
+      roles: ['USER'],
+      tenants: ['y'],
+      deniedTenants: { x: 'OUTSIDE_ALLOWED_HOURS' },
+    }));
+    const user = await guard.authenticate(socket({ token: 'ok' }));
+    expect(user.tenantIds).toEqual(['y']);
+    expect(user.deniedTenants).toEqual({ x: 'OUTSIDE_ALLOWED_HOURS' });
+    expect(user.mfaEnrollment).toBe(false);
+  });
 });

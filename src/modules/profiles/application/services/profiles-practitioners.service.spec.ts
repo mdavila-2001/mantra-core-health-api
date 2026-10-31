@@ -4272,6 +4272,72 @@ describe('ProfilesPractitionersService', () => {
       );
     });
 
+    it('N3: vuelca el cierre de la fila vieja ANTES de insertar la nueva (mismo canónico: «1.234.567» → «1234567»)', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document: Record<string, unknown> = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '1.234.567',
+        validTo: null,
+      };
+      d.tx.find.mockResolvedValue([document]);
+      // Lo que el índice único vería en cada volcado: la vieja ya cerrada
+      // cuando entra la nueva (si no, 23505).
+      const closedAtFlush: boolean[] = [];
+      d.tx.flush.mockImplementation(async () => {
+        closedAtFlush.push(document.validTo instanceof Date);
+      });
+      let flushesBeforeInsert = -1;
+      d.identifiersRepo.create.mockImplementation(() => {
+        flushesBeforeInsert = closedAtFlush.length;
+        return {};
+      });
+
+      await d.service.updateOwnPractitionerProfile(
+        { nationalId: '1234567' },
+        actor,
+      );
+
+      // Al menos un volcado con la vieja cerrada ocurrió antes de crear la nueva.
+      expect(flushesBeforeInsert).toBeGreaterThanOrEqual(1);
+      expect(closedAtFlush[flushesBeforeInsert - 1]).toBe(true);
+      // Y la nueva se vuelca enseguida: el choque se detecta aquí y no en el commit.
+      expect(closedAtFlush.length).toBeGreaterThan(flushesBeforeInsert);
+    });
+
+    it('N3: si el documento ya es de otro paciente (23505 del índice único) responde 409 sin decir de quién', async () => {
+      const d = build();
+      withOwnProfile(d);
+      const document: Record<string, unknown> = {
+        typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
+        value: '765432',
+        validTo: null,
+      };
+      d.tx.find.mockResolvedValue([document]);
+      let inserted = false;
+      d.identifiersRepo.create.mockImplementation(() => {
+        inserted = true;
+        return {};
+      });
+      d.tx.flush.mockImplementation(async () => {
+        if (inserted) {
+          throw Object.assign(new Error('duplicate key'), {
+            code: '23505',
+            constraint: 'uq_identifiers_national_id_normalized',
+          });
+        }
+      });
+
+      const error = await d.service
+        .updateOwnPractitionerProfile({ nationalId: '7654321' }, actor)
+        .catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).message).toBe(
+        'Ese documento ya está registrado en la plataforma',
+      );
+    });
+
     it('con un caso de verificación en curso responde 409 y no escribe', async () => {
       const d = build();
       withOwnProfile(d);

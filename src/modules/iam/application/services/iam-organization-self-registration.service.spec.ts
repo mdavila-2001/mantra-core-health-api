@@ -449,6 +449,8 @@ describe('IamOrganizationSelfRegistrationService', () => {
         tenantRoleConceptId: DIR.ROLE_OWNER,
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
+        // N10c: la creó el dueño de la organización al registrarla.
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_OWNER_CREATED,
       }),
     );
   });

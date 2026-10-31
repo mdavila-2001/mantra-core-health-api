@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `community`
 
-Referencia exhaustiva de 98 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 107 operación(es) del módulo `community`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-timeline`
-- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
+- **Etiquetas OpenAPI:** `community`, `community-feed`, `community-groups`, `community-messaging`, `community-moderation`, `community-polls`, `community-public`, `community-ratings`, `community-reviews`, `community-social`, `community-support-inbox`, `community-timeline`
+- **Controladores:** `CommunityFeedController`, `CommunityGroupsController`, `CommunityMessagingController`, `CommunityModerationController`, `CommunityPollsController`, `CommunityPublicController`, `CommunityReviewsController`, `CommunitySearchIndexController`, `CommunitySocialController`, `CommunitySupportInboxController`, `CommunityTimelineController`, `CommunityTopicsController`, `CommunityVerificationController`, `PartyRatingsController`, `PatientReviewsController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -21,94 +21,103 @@ Referencia exhaustiva de 98 operación(es) del módulo `community`, derivada del
 8. [GET /community/comments/media/{fileId}/content](#8-get-community-comments-media-fileid-content) — Descargar el adjunto de un comentario (imagen, sticker o GIF)
 9. [GET /community/conversations](#9-get-community-conversations) — Conversaciones activas de un perfil
 10. [POST /community/conversations](#10-post-community-conversations) — Crear una conversación con participantes
-11. [GET /community/conversations/{conversationId}/attachments/{fileId}/content](#11-get-community-conversations-conversationid-attachments-fileid-content) — Descargar el adjunto de una conversación (participante activo)
-12. [GET /community/conversations/{conversationId}/messages](#12-get-community-conversations-conversationid-messages) — Mensajes de una conversación
-13. [POST /community/conversations/{conversationId}/messages](#13-post-community-conversations-conversationid-messages) — Enviar un mensaje directo en la conversación
-14. [DELETE /community/conversations/{conversationId}/messages/{messageId}](#14-delete-community-conversations-conversationid-messages-messageid) — Eliminar un mensaje propio
-15. [PATCH /community/conversations/{conversationId}/messages/{messageId}](#15-patch-community-conversations-conversationid-messages-messageid) — Editar el texto de un mensaje propio
-16. [PATCH /community/conversations/{conversationId}/participant](#16-patch-community-conversations-conversationid-participant) — Marcar la conversación como favorita, fijada o archivada
-17. [DELETE /community/conversations/{conversationId}/pin](#17-delete-community-conversations-conversationid-pin) — Soltar el mensaje fijado de la conversación
-18. [POST /community/conversations/{conversationId}/pin](#18-post-community-conversations-conversationid-pin) — Fijar un mensaje de la conversación
-19. [GET /community/conversations/{conversationId}/presence](#19-get-community-conversations-conversationid-presence) — Presencia de los demás participantes
-20. [POST /community/conversations/{conversationId}/read](#20-post-community-conversations-conversationid-read) — Marcar mensajes como leídos (recibos)
-21. [POST /community/conversations/contacts/search](#21-post-community-conversations-contacts-search) — Buscar personas para iniciar una conversación
-22. [GET /community/feed](#22-get-community-feed) — Timeline de un perfil
-23. [DELETE /community/follows](#23-delete-community-follows) — Dejar de seguir un objeto social
-24. [GET /community/follows](#24-get-community-follows) — Seguimientos activos de un perfil
-25. [POST /community/follows](#25-post-community-follows) — Seguir un objeto social
-26. [GET /community/groups](#26-get-community-groups) — Grupos de una organización
-27. [POST /community/groups](#27-post-community-groups) — Crear un grupo/comunidad
-28. [GET /community/groups/{groupId}](#28-get-community-groups-groupid) — Ficha de un grupo
-29. [GET /community/groups/{groupId}/members](#29-get-community-groups-groupid-members) — Integrantes de un grupo
-30. [POST /community/groups/{groupId}/members](#30-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
-31. [DELETE /community/groups/{groupId}/members/{member}](#31-delete-community-groups-groupid-members-member) — Salir del grupo o dar de baja a un integrante
-32. [PATCH /community/groups/{groupId}/members/{member}](#32-patch-community-groups-groupid-members-member) — Aprobar/rechazar un alta o cambiar el rol
-33. [GET /community/groups/{groupId}/posts](#33-get-community-groups-groupid-posts) — Muro de un grupo
-34. [POST /community/groups/{groupId}/posts](#34-post-community-groups-groupid-posts) — Publicar en el muro del grupo
-35. [GET /community/moderation/appeals](#35-get-community-moderation-appeals) — Apelaciones presentadas, con su decisión
-36. [POST /community/moderation/appeals/{appealId}/resolve](#36-post-community-moderation-appeals-appealid-resolve) — Resolver una apelación de moderación
-37. [GET /community/moderation/decisions](#37-get-community-moderation-decisions) — Decisiones de moderación tomadas
-38. [POST /community/moderation/decisions/{decisionId}/appeal](#38-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
-39. [GET /community/moderation/decisions/mine](#39-get-community-moderation-decisions-mine) — Mis propias decisiones de moderación
-40. [GET /community/moderation/queue](#40-get-community-moderation-queue) — Cola de moderación con filtros y cursor
-41. [POST /community/moderation/queue/{queueId}/decision](#41-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
-42. [GET /community/notifications](#42-get-community-notifications) — Notificaciones sociales de un perfil
-43. [GET /community/polls/{pollId}](#43-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
-44. [POST /community/polls/{pollId}/votes](#44-post-community-polls-pollid-votes) — Votar en una encuesta
-45. [GET /community/posts/{postId}](#45-get-community-posts-postid) — Publicación con media, hashtags y menciones
-46. [GET /community/posts/{postId}/comments](#46-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
-47. [POST /community/posts/{postId}/polls](#47-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
-48. [GET /community/posts/{postId}/reactions](#48-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
-49. [GET /community/profiles/{profileId}](#49-get-community-profiles-profileid) — Ficha de un perfil público
-50. [GET /community/profiles/{profileId}/auto-reply](#50-get-community-profiles-profileid-auto-reply) — Respuesta automática por inactividad del perfil
-51. [PUT /community/profiles/{profileId}/auto-reply](#51-put-community-profiles-profileid-auto-reply) — Configurar la respuesta automática del perfil
-52. [GET /community/profiles/{profileId}/posts](#52-get-community-profiles-profileid-posts) — Publicaciones de un perfil
-53. [POST /community/profiles/{profileId}/posts](#53-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
-54. [GET /community/profiles/{profileId}/reviews](#54-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
-55. [POST /community/profiles/{profileId}/reviews](#55-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
-56. [POST /community/profiles/{profileId}/reviews/{reviewId}/responses](#56-post-community-profiles-profileid-reviews-reviewid-responses) — Responder una reseña de la propia vitrina
-57. [GET /community/profiles/by-slug/{slug}](#57-get-community-profiles-by-slug-slug) — Ficha de un perfil público por su slug
-58. [GET /community/profiles/me](#58-get-community-profiles-me) — Consultar la vitrina pública propia
-59. [PUT /community/profiles/me](#59-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
-60. [GET /community/profiles/me/stats](#60-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
-61. [POST /community/public-profiles](#61-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
-62. [GET /community/ratings](#62-get-community-ratings) — Calificaciones de un médico, paciente u organización
-63. [PUT /community/ratings](#63-put-community-ratings) — Calificar con estrellas a un médico, paciente u organización
-64. [GET /community/ratings/mine](#64-get-community-ratings-mine) — Mis calificaciones
-65. [GET /community/ratings/summary](#65-get-community-ratings-summary) — Nota media de un médico, paciente u organización
-66. [PUT /community/reactions](#66-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
-67. [POST /community/reports](#67-post-community-reports) — Reportar contenido y encolar moderación
-68. [GET /community/topics](#68-get-community-topics) — Temas de la comunidad
-69. [GET /f/{slug}](#69-get-f-slug) — Ficha pública de una farmacia
-70. [GET /internal/community/feed/pending](#70-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
-71. [POST /internal/community/feed/ranking/apply](#71-post-internal-community-feed-ranking-apply) — Aplicar rank_score recalculado
-72. [GET /internal/community/feed/ranking/pending](#72-get-internal-community-feed-ranking-pending) — Items de feed pendientes de puntuar
-73. [POST /internal/community/feed/rebuild](#73-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
-74. [GET /internal/community/search/health](#74-get-internal-community-search-health) — Estado del índice del directorio público
-75. [POST /internal/community/search/reindex](#75-post-internal-community-search-reindex) — Reindexar el directorio público
-76. [POST /internal/community/verification/badges](#76-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
-77. [POST /internal/community/verification/badges/{targetId}/revoke](#77-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
-78. [POST /internal/community/verification/badges/expire-sweep](#78-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
-79. [GET /l/{slug}](#79-get-l-slug) — Ficha pública de un laboratorio
-80. [GET /o/{slug}](#80-get-o-slug) — Ficha pública de una organización
-81. [GET /p/{slug}](#81-get-p-slug) — Ficha pública de un profesional
-82. [POST /patients/me/reviews](#82-post-patients-me-reviews) — Calificar una atención recibida
-83. [GET /public/comments/{commentId}/replies](#83-get-public-comments-commentid-replies) — Respuestas de un comentario público
-84. [GET /public/media/{id}](#84-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
-85. [GET /public/nearby](#85-get-public-nearby) — Prestadores cercanos, en línea recta
-86. [GET /public/posts](#86-get-public-posts) — Últimas publicaciones de todos los profesionales
-87. [GET /public/posts/{postId}/comments](#87-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
-88. [GET /public/posts/{postId}/reactions](#88-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
-89. [GET /public/profiles/{prefijo}/{slug}](#89-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
-90. [GET /public/profiles/{prefijo}/{slug}/reviews](#90-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
-91. [GET /public/search](#91-get-public-search) — Buscador público unificado
-92. [GET /public/search/diagnostic-units](#92-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
-93. [GET /public/search/insurers](#93-get-public-search-insurers) — Aseguradoras en el directorio público
-94. [GET /public/search/medications](#94-get-public-search-medications) — Medicamentos ofertados públicamente
-95. [GET /public/search/organizations](#95-get-public-search-organizations) — Organizaciones en el directorio público
-96. [GET /public/search/pharmacies](#96-get-public-search-pharmacies) — Farmacias en el directorio público
-97. [GET /public/search/practitioners](#97-get-public-search-practitioners) — Profesionales en el directorio público
-98. [GET /s/{slug}](#98-get-s-slug) — Ficha pública de una aseguradora
+11. [POST /community/conversations/{conversationId}/assignment](#11-post-community-conversations-conversationid-assignment) — Tomar, asignar o cambiar el estado de una conversación
+12. [GET /community/conversations/{conversationId}/attachments/{fileId}/content](#12-get-community-conversations-conversationid-attachments-fileid-content) — Descargar el adjunto de una conversación (participante activo)
+13. [GET /community/conversations/{conversationId}/internal-notes](#13-get-community-conversations-conversationid-internal-notes) — Notas internas de una conversación
+14. [POST /community/conversations/{conversationId}/internal-notes](#14-post-community-conversations-conversationid-internal-notes) — Agregar una nota interna a una conversación
+15. [GET /community/conversations/{conversationId}/messages](#15-get-community-conversations-conversationid-messages) — Mensajes de una conversación
+16. [POST /community/conversations/{conversationId}/messages](#16-post-community-conversations-conversationid-messages) — Enviar un mensaje directo en la conversación
+17. [DELETE /community/conversations/{conversationId}/messages/{messageId}](#17-delete-community-conversations-conversationid-messages-messageid) — Eliminar un mensaje propio
+18. [PATCH /community/conversations/{conversationId}/messages/{messageId}](#18-patch-community-conversations-conversationid-messages-messageid) — Editar el texto de un mensaje propio
+19. [PATCH /community/conversations/{conversationId}/participant](#19-patch-community-conversations-conversationid-participant) — Marcar la conversación como favorita, fijada o archivada
+20. [DELETE /community/conversations/{conversationId}/pin](#20-delete-community-conversations-conversationid-pin) — Soltar el mensaje fijado de la conversación
+21. [POST /community/conversations/{conversationId}/pin](#21-post-community-conversations-conversationid-pin) — Fijar un mensaje de la conversación
+22. [GET /community/conversations/{conversationId}/presence](#22-get-community-conversations-conversationid-presence) — Presencia de los demás participantes
+23. [POST /community/conversations/{conversationId}/read](#23-post-community-conversations-conversationid-read) — Marcar mensajes como leídos (recibos)
+24. [POST /community/conversations/contacts/search](#24-post-community-conversations-contacts-search) — Buscar personas para iniciar una conversación
+25. [GET /community/feed](#25-get-community-feed) — Timeline de un perfil
+26. [DELETE /community/follows](#26-delete-community-follows) — Dejar de seguir un objeto social
+27. [GET /community/follows](#27-get-community-follows) — Seguimientos activos de un perfil
+28. [POST /community/follows](#28-post-community-follows) — Seguir un objeto social
+29. [GET /community/groups](#29-get-community-groups) — Grupos de una organización
+30. [POST /community/groups](#30-post-community-groups) — Crear un grupo/comunidad
+31. [GET /community/groups/{groupId}](#31-get-community-groups-groupid) — Ficha de un grupo
+32. [GET /community/groups/{groupId}/members](#32-get-community-groups-groupid-members) — Integrantes de un grupo
+33. [POST /community/groups/{groupId}/members](#33-post-community-groups-groupid-members) — Unirse a un grupo / comunidad
+34. [DELETE /community/groups/{groupId}/members/{member}](#34-delete-community-groups-groupid-members-member) — Salir del grupo o dar de baja a un integrante
+35. [PATCH /community/groups/{groupId}/members/{member}](#35-patch-community-groups-groupid-members-member) — Aprobar/rechazar un alta o cambiar el rol
+36. [GET /community/groups/{groupId}/posts](#36-get-community-groups-groupid-posts) — Muro de un grupo
+37. [POST /community/groups/{groupId}/posts](#37-post-community-groups-groupid-posts) — Publicar en el muro del grupo
+38. [GET /community/moderation/appeals](#38-get-community-moderation-appeals) — Apelaciones presentadas, con su decisión
+39. [POST /community/moderation/appeals/{appealId}/resolve](#39-post-community-moderation-appeals-appealid-resolve) — Resolver una apelación de moderación
+40. [GET /community/moderation/decisions](#40-get-community-moderation-decisions) — Decisiones de moderación tomadas
+41. [POST /community/moderation/decisions/{decisionId}/appeal](#41-post-community-moderation-decisions-decisionid-appeal) — Apelar una decisión de moderación
+42. [GET /community/moderation/decisions/mine](#42-get-community-moderation-decisions-mine) — Mis propias decisiones de moderación
+43. [GET /community/moderation/queue](#43-get-community-moderation-queue) — Cola de moderación con filtros y cursor
+44. [POST /community/moderation/queue/{queueId}/decision](#44-post-community-moderation-queue-queueid-decision) — Resolver moderación (decisión + strike)
+45. [GET /community/notifications](#45-get-community-notifications) — Notificaciones sociales de un perfil
+46. [GET /community/polls/{pollId}](#46-get-community-polls-pollid) — Encuesta con opciones, recuentos y voto propio
+47. [POST /community/polls/{pollId}/votes](#47-post-community-polls-pollid-votes) — Votar en una encuesta
+48. [GET /community/posts/{postId}](#48-get-community-posts-postid) — Publicación con media, hashtags y menciones
+49. [GET /community/posts/{postId}/comments](#49-get-community-posts-postid-comments) — Comentarios de una publicación (hilo anidado)
+50. [POST /community/posts/{postId}/polls](#50-post-community-posts-postid-polls) — Crear una encuesta con opciones sobre un post
+51. [GET /community/posts/{postId}/reactions](#51-get-community-posts-postid-reactions) — Reacciones de una publicación, agrupadas por tipo
+52. [GET /community/profiles/{profileId}](#52-get-community-profiles-profileid) — Ficha de un perfil público
+53. [GET /community/profiles/{profileId}/auto-reply](#53-get-community-profiles-profileid-auto-reply) — Respuesta automática por inactividad del perfil
+54. [PUT /community/profiles/{profileId}/auto-reply](#54-put-community-profiles-profileid-auto-reply) — Configurar la respuesta automática del perfil
+55. [GET /community/profiles/{profileId}/posts](#55-get-community-profiles-profileid-posts) — Publicaciones de un perfil
+56. [POST /community/profiles/{profileId}/posts](#56-post-community-profiles-profileid-posts) — Publicar un post con hashtags, media y menciones
+57. [GET /community/profiles/{profileId}/reviews](#57-get-community-profiles-profileid-reviews) — Reviews publicadas de un perfil
+58. [POST /community/profiles/{profileId}/reviews](#58-post-community-profiles-profileid-reviews) — Publicar una review verificada de servicio
+59. [POST /community/profiles/{profileId}/reviews/{reviewId}/responses](#59-post-community-profiles-profileid-reviews-reviewid-responses) — Responder una reseña de la propia vitrina
+60. [GET /community/profiles/by-slug/{slug}](#60-get-community-profiles-by-slug-slug) — Ficha de un perfil público por su slug
+61. [GET /community/profiles/me](#61-get-community-profiles-me) — Consultar la vitrina pública propia
+62. [PUT /community/profiles/me](#62-put-community-profiles-me) — Crear o actualizar la vitrina pública propia
+63. [GET /community/profiles/me/stats](#63-get-community-profiles-me-stats) — Estadísticas de la vitrina pública propia
+64. [POST /community/public-profiles](#64-post-community-public-profiles) — Crear un perfil público (bootstrap del grafo social)
+65. [GET /community/ratings](#65-get-community-ratings) — Calificaciones de un médico, paciente u organización
+66. [PUT /community/ratings](#66-put-community-ratings) — Calificar con estrellas a un médico, paciente u organización
+67. [GET /community/ratings/mine](#67-get-community-ratings-mine) — Mis calificaciones
+68. [GET /community/ratings/summary](#68-get-community-ratings-summary) — Nota media de un médico, paciente u organización
+69. [PUT /community/reactions](#69-put-community-reactions) — Reaccionar a contenido (upsert una reacción por actor/objeto)
+70. [POST /community/reports](#70-post-community-reports) — Reportar contenido y encolar moderación
+71. [GET /community/topics](#71-get-community-topics) — Temas de la comunidad
+72. [GET /f/{slug}](#72-get-f-slug) — Ficha pública de una farmacia
+73. [GET /internal/community/feed/pending](#73-get-internal-community-feed-pending) — Publicaciones publicadas sin fan-out
+74. [POST /internal/community/feed/ranking/apply](#74-post-internal-community-feed-ranking-apply) — Aplicar rank_score recalculado
+75. [GET /internal/community/feed/ranking/pending](#75-get-internal-community-feed-ranking-pending) — Items de feed pendientes de puntuar
+76. [POST /internal/community/feed/rebuild](#76-post-internal-community-feed-rebuild) — Generar feed (fan-out y ranking)
+77. [GET /internal/community/search/health](#77-get-internal-community-search-health) — Estado del índice del directorio público
+78. [POST /internal/community/search/reindex](#78-post-internal-community-search-reindex) — Reindexar el directorio público
+79. [POST /internal/community/verification/badges](#79-post-internal-community-verification-badges) — Emitir un sello a mano (auditado)
+80. [POST /internal/community/verification/badges/{targetId}/revoke](#80-post-internal-community-verification-badges-targetid-revoke) — Bajar los sellos de un sujeto (auditado)
+81. [POST /internal/community/verification/badges/expire-sweep](#81-post-internal-community-verification-badges-expire-sweep) — Bajar los sellos cuya vigencia ya venció
+82. [GET /l/{slug}](#82-get-l-slug) — Ficha pública de un laboratorio
+83. [GET /me/support-inbox](#83-get-me-support-inbox) — Bandeja de conversaciones del equipo de apoyo
+84. [GET /me/support-inbox/{conversationId}](#84-get-me-support-inbox-conversationid) — Una conversación de la bandeja, con la autora real y las notas
+85. [GET /me/support-reply-templates](#85-get-me-support-reply-templates) — Respuestas preparadas del equipo de apoyo
+86. [GET /o/{slug}](#86-get-o-slug) — Ficha pública de una organización
+87. [GET /org/reply-templates](#87-get-org-reply-templates) — Respuestas preparadas de la organización
+88. [POST /org/reply-templates](#88-post-org-reply-templates) — Crear una respuesta preparada
+89. [PATCH /org/reply-templates/{id}](#89-patch-org-reply-templates-id) — Cambiar, retirar o reactivar una respuesta preparada
+90. [GET /p/{slug}](#90-get-p-slug) — Ficha pública de un profesional
+91. [POST /patients/me/reviews](#91-post-patients-me-reviews) — Calificar una atención recibida
+92. [GET /public/comments/{commentId}/replies](#92-get-public-comments-commentid-replies) — Respuestas de un comentario público
+93. [GET /public/media/{id}](#93-get-public-media-id) — Servir una imagen pública (avatar, portada o post)
+94. [GET /public/nearby](#94-get-public-nearby) — Prestadores cercanos, en línea recta
+95. [GET /public/posts](#95-get-public-posts) — Últimas publicaciones de todos los profesionales
+96. [GET /public/posts/{postId}/comments](#96-get-public-posts-postid-comments) — Comentarios raíz de una publicación pública
+97. [GET /public/posts/{postId}/reactions](#97-get-public-posts-postid-reactions) — Quiénes reaccionaron a una publicación pública
+98. [GET /public/profiles/{prefijo}/{slug}](#98-get-public-profiles-prefijo-slug) — Ficha pública por prefijo de vertical
+99. [GET /public/profiles/{prefijo}/{slug}/reviews](#99-get-public-profiles-prefijo-slug-reviews) — Opiniones publicadas de una ficha pública
+100. [GET /public/search](#100-get-public-search) — Buscador público unificado
+101. [GET /public/search/diagnostic-units](#101-get-public-search-diagnostic-units) — Laboratorios y centros de diagnóstico
+102. [GET /public/search/insurers](#102-get-public-search-insurers) — Aseguradoras en el directorio público
+103. [GET /public/search/medications](#103-get-public-search-medications) — Medicamentos ofertados públicamente
+104. [GET /public/search/organizations](#104-get-public-search-organizations) — Organizaciones en el directorio público
+105. [GET /public/search/pharmacies](#105-get-public-search-pharmacies) — Farmacias en el directorio público
+106. [GET /public/search/practitioners](#106-get-public-search-practitioners) — Profesionales en el directorio público
+107. [GET /s/{slug}](#107-get-s-slug) — Ficha pública de una aseguradora
 
 ---
 
@@ -1205,6 +1214,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "isPinned": true,
       "archivedAt": "2026-07-31T12:00:00.000Z",
       "pinnedMessageId": "00000000-0000-4000-8000-000000000001",
+      "awaitingDoctor": true,
       "peers": [
         {
           "profileId": "00000000-0000-4000-8000-000000000001",
@@ -1224,7 +1234,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","attachmentFileId":"00000000-0000-4000-8000-000000000001","deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1,"lastMessageReadByPeer":true,"isFavorite":true,"isPinned":true,"archivedAt":"2026-07-31T12:00:00.000Z","pinnedMessageId":"00000000-0000-4000-8000-000000000001","peers":[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]}]` |
+| `items` | Sí | `array<ConversationListItemDto>` | Sin restricción adicional declarada | Conversaciones de la página. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationTypeConceptId":"00000000-0000-4000-8000-000000000001","groupId":"00000000-0000-4000-8000-000000000001","lastMessageAt":"2026-07-31T12:00:00.000Z","messageCount":1,"lastMessage":{"id":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","attachmentFileId":"00000000-0000-4000-8000-000000000001","deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"},"unreadCount":1,"lastMessageReadByPeer":true,"isFavorite":true,"isPinned":true,"archivedAt":"2026-07-31T12:00:00.000Z","pinnedMessageId":"00000000-0000-4000-8000-000000000001","awaitingDoctor":true,"peers":[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador de la conversación. | `00000000-0000-4000-8000-000000000001` |
 | `items[].conversationTypeConceptId` | Sí | `string` | formato `uuid` | Concept id del tipo de conversación (directa, grupal). | `00000000-0000-4000-8000-000000000001` |
 | `items[].groupId` | No | `string` | formato `uuid`; admite null | Grupo al que pertenece, si es de grupo. | `00000000-0000-4000-8000-000000000001` |
@@ -1244,6 +1254,7 @@ Campos de la respuesta:
 | `items[].isPinned` | Sí | `boolean` | Sin restricción adicional declarada | Fijada arriba de la bandeja del actor (F4.4). Las fijadas van primero. | `true` |
 | `items[].archivedAt` | No | `string` | formato `date-time`; admite null | Desde cuándo la archivó el actor; `null` si no está archivada (F4.4). | `2026-07-31T12:00:00.000Z` |
 | `items[].pinnedMessageId` | No | `string` | formato `uuid`; admite null | El mensaje fijado en la barra superior, si hay uno (F4.6). | `00000000-0000-4000-8000-000000000001` |
+| `items[].awaitingDoctor` | No | `boolean` | Sin restricción adicional declarada | Su equipo de apoyo le derivó esta conversación y espera su respuesta. Solo lo recibe el doctor; el paciente nunca ve el estado de la bandeja interna. | `true` |
 | `items[].peers` | Sí | `array<ConversationPeerDto>` | Sin restricción adicional declarada | Los demás participantes, sin el propio. Sin el propio porque la bandeja se lee desde un lado: incluirse a uno mismo obligaría a cada pantalla a filtrarse, y la que se olvide muestra «Conversación con vos». | `[{"profileId":"00000000-0000-4000-8000-000000000001","displayName":"Nombre de ejemplo","avatarUrl":"valor-ejemplo"}]` |
 | `items[].peers[].profileId` | Sí | `string` | formato `uuid` | Perfil público del participante. | `00000000-0000-4000-8000-000000000001` |
 | `items[].peers[].displayName` | No | `string` | admite null | Cómo se llama, para poder pintar la fila. | `Nombre de ejemplo` |
@@ -1413,7 +1424,153 @@ Ejemplo de error normalizado:
 
 ---
 
-## 11. GET /community/conversations/{conversationId}/attachments/{fileId}/content
+## 11. POST /community/conversations/{conversationId}/assignment
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-support-inbox`
+- **Nombre:** Tomar, asignar o cambiar el estado de una conversación
+- **Operation ID:** `CommunitySupportInboxController_assignment`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySupportInboxController.assignment](../../src/modules/community/controllers/community-support-inbox.controller.ts)
+
+### Descripción de negocio
+
+Tomar, asignar o cambiar el estado de una conversación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Tomar, asignar o cambiar el estado de una conversación.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /community/conversations/{conversationId}/assignment` en `CommunitySupportInboxController_assignment`. El controlador delega en `CommunitySupportInboxService.applyAssignment`. Valida el body como `ConversationAssignmentDto` y consume `application/json`. El tipo de retorno estático es `Promise<ConversationAssignmentResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ConversationAssignmentDto`; los campos opcionales se omiten.
+
+```http
+POST /community/conversations/00000000-0000-4000-8000-000000000001/assignment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `action` | No | `string` | valores: `TAKE`, `ASSIGN`, `SET_STATUS` | Sin descripción específica en el contrato OpenAPI. | `TAKE` |
+| `practitionerProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `assignedUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | No | `string` | valores: `NEW`, `TAKEN`, `WAITING_DOCTOR`, `RESOLVED` | Sin descripción específica en el contrato OpenAPI. | `NEW` |
+| `slaDueAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /community/conversations/00000000-0000-4000-8000-000000000001/assignment HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "action": "TAKE",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "assignedUserId": "00000000-0000-4000-8000-000000000001",
+  "status": "NEW",
+  "slaDueAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConversationAssignmentResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConversationAssignmentResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "status": {},
+  "assignedUserId": "00000000-0000-4000-8000-000000000001",
+  "assignedToName": "Nombre de ejemplo",
+  "slaDueAt": "2026-07-31T12:00:00.000Z",
+  "referredToDoctor": true
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `object` | Sin restricción adicional declarada | Estado en que quedó. | `{}` |
+| `assignedUserId` | No | `string` | formato `uuid` | Quien la tiene. | `00000000-0000-4000-8000-000000000001` |
+| `assignedToName` | No | `string` | Sin restricción adicional declarada | Nombre de quien la tiene. | `Nombre de ejemplo` |
+| `slaDueAt` | No | `string` | formato `date-time` | Vencimiento del plazo. | `2026-07-31T12:00:00.000Z` |
+| `referredToDoctor` | Sí | `boolean` | Sin restricción adicional declarada | `true` si se derivó al doctor por parecer clínica. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Esa conversación no es de ese doctor | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 422 | `PRECONDITION_FAILED` | Cambiar la asignación exige indicar la acción o el estado | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 422 | `PRECONDITION_FAILED` | Cambiar el estado exige indicar el estado | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 422 | `PRECONDITION_FAILED` | No se puede pasar de ${current} a ${target} | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esa persona no puede responder por este doctor | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/assignment"
+}
+```
+
+---
+
+## 12. GET /community/conversations/{conversationId}/attachments/{fileId}/content
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -1518,7 +1675,267 @@ Ejemplo de error normalizado:
 
 ---
 
-## 12. GET /community/conversations/{conversationId}/messages
+## 13. GET /community/conversations/{conversationId}/internal-notes
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-support-inbox`
+- **Nombre:** Notas internas de una conversación
+- **Operation ID:** `CommunitySupportInboxController_notes`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySupportInboxController.notes](../../src/modules/community/controllers/community-support-inbox.controller.ts)
+
+### Descripción de negocio
+
+Notas internas de una conversación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Notas internas de la conversación (nunca las ve el paciente).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /community/conversations/{conversationId}/internal-notes` en `CommunitySupportInboxController_notes`. El controlador delega en `CommunitySupportInboxService.listNotes`. No recibe body. El tipo de retorno estático es `Promise<InternalNotesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /community/conversations/00000000-0000-4000-8000-000000000001/internal-notes HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /community/conversations/00000000-0000-4000-8000-000000000001/internal-notes HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<InternalNotesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<InternalNotesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<InternalNotesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<InternalNotesResponseDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<InternalNotesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<InternalNotesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<InternalNotesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<InternalNotesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InternalNotesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "conversationId": "00000000-0000-4000-8000-000000000001",
+      "authorUserId": "00000000-0000-4000-8000-000000000001",
+      "authorName": "Nombre de ejemplo",
+      "bodyText": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<InternalNoteDto>` | Sin restricción adicional declarada | Notas, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","authorUserId":"00000000-0000-4000-8000-000000000001","authorName":"Nombre de ejemplo","bodyText":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id de la nota. | `00000000-0000-4000-8000-000000000001` |
+| `items[].conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].authorUserId` | Sí | `string` | formato `uuid` | Quien la escribió. | `00000000-0000-4000-8000-000000000001` |
+| `items[].authorName` | Sí | `string` | Sin restricción adicional declarada | Nombre de quien la escribió. | `Nombre de ejemplo` |
+| `items[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Texto. | `valor-ejemplo` |
+| `items[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se escribió. | `2026-07-31T12:00:00.000Z` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/internal-notes"
+}
+```
+
+---
+
+## 14. POST /community/conversations/{conversationId}/internal-notes
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-support-inbox`
+- **Nombre:** Agregar una nota interna a una conversación
+- **Operation ID:** `CommunitySupportInboxController_addNote`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySupportInboxController.addNote](../../src/modules/community/controllers/community-support-inbox.controller.ts)
+
+### Descripción de negocio
+
+Agregar una nota interna a una conversación. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Agrega una nota interna.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /community/conversations/{conversationId}/internal-notes` en `CommunitySupportInboxController_addNote`. El controlador delega en `CommunitySupportInboxService.addNote`. Valida el body como `CreateInternalNoteDto` y consume `application/json`. El tipo de retorno estático es `Promise<InternalNoteDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateInternalNoteDto`; los campos opcionales se omiten.
+
+```http
+POST /community/conversations/00000000-0000-4000-8000-000000000001/internal-notes HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "bodyText": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /community/conversations/00000000-0000-4000-8000-000000000001/internal-notes HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "bodyText": "valor-ejemplo"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<InternalNoteDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<InternalNoteDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `InternalNoteDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "authorUserId": "00000000-0000-4000-8000-000000000001",
+  "authorName": "Nombre de ejemplo",
+  "bodyText": "valor-ejemplo",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Id de la nota. | `00000000-0000-4000-8000-000000000001` |
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `authorUserId` | Sí | `string` | formato `uuid` | Quien la escribió. | `00000000-0000-4000-8000-000000000001` |
+| `authorName` | Sí | `string` | Sin restricción adicional declarada | Nombre de quien la escribió. | `Nombre de ejemplo` |
+| `bodyText` | Sí | `string` | Sin restricción adicional declarada | Texto. | `valor-ejemplo` |
+| `createdAt` | Sí | `string` | formato `date-time` | Cuándo se escribió. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/community/conversations/{conversationId}/internal-notes"
+}
+```
+
+---
+
+## 15. GET /community/conversations/{conversationId}/messages
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -1603,7 +2020,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
       "attachmentFileId": "00000000-0000-4000-8000-000000000001",
       "isEdited": true,
       "deletedAt": "2026-07-31T12:00:00.000Z",
-      "sentAt": "2026-07-31T12:00:00.000Z"
+      "sentAt": "2026-07-31T12:00:00.000Z",
+      "repliedByTeam": true,
+      "teamAuthorName": "Nombre de ejemplo"
     }
   ],
   "count": 1,
@@ -1620,7 +2039,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
     "attachmentFileId": "00000000-0000-4000-8000-000000000001",
     "isEdited": true,
     "deletedAt": "2026-07-31T12:00:00.000Z",
-    "sentAt": "2026-07-31T12:00:00.000Z"
+    "sentAt": "2026-07-31T12:00:00.000Z",
+    "repliedByTeam": true,
+    "teamAuthorName": "Nombre de ejemplo"
   }
 }
 ```
@@ -1629,7 +2050,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `items` | Sí | `array<DirectMessageDto>` | Sin restricción adicional declarada | Mensajes de la página, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items` | Sí | `array<DirectMessageDto>` | Sin restricción adicional declarada | Mensajes de la página, del más reciente al más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z","repliedByTeam":true,"teamAuthorName":"Nombre de ejemplo"}]` |
 | `items[].id` | Sí | `string` | formato `uuid` | Identificador del mensaje. | `00000000-0000-4000-8000-000000000001` |
 | `items[].conversationId` | Sí | `string` | formato `uuid` | Conversación a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `items[].senderProfileId` | Sí | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
@@ -1640,11 +2061,13 @@ Campos de la respuesta:
 | `items[].isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
 | `items[].deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
 | `items[].sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `items[].repliedByTeam` | No | `boolean` | Sin restricción adicional declarada | El equipo del doctor respondió este mensaje en su nombre y el doctor decidió mostrarlo: es lo que ve el paciente («respondido por su equipo»). Sin nombre de quien escribió. Ausente si no aplica. | `true` |
+| `items[].teamAuthorName` | No | `string` | Sin restricción adicional declarada | Quién del equipo escribió este mensaje. Solo lo recibe el doctor dueño del perfil; nunca el paciente ni un mensaje por websocket. | `Nombre de ejemplo` |
 | `count` | Sí | `number` | Sin restricción adicional declarada | Cuántos trae esta página. | `1` |
 | `limit` | Sí | `number` | Sin restricción adicional declarada | Tope pedido. | `1` |
 | `nextCursor` | No | `string` | admite null | Cursor de la página siguiente, o `null`. | `valor-ejemplo` |
 | `peerReadUpTo` | No | `string` | formato `date-time`; admite null | Hasta qué `sentAt` leyó el otro lado, en una conversación DIRECT. `null` si es de grupo (no hay "el otro lado") o si el peer no marcó nada todavía como leído. Con esto el frente pinta ✓✓ en los mensajes propios cuyo `sentAt` sea anterior o igual a esta marca. | `2026-07-31T12:00:00.000Z` |
-| `pinnedMessage` | No | `DirectMessageDto` | Sin restricción adicional declarada | El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja con la primera página para que la barra superior se pinte sin otra llamada, aunque el mensaje sea de hace meses y no esté en la página. | `{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z"}` |
+| `pinnedMessage` | No | `DirectMessageDto` | Sin restricción adicional declarada | El mensaje fijado en la conversación, completo, o `null` (F4.6). Viaja con la primera página para que la barra superior se pinte sin otra llamada, aunque el mensaje sea de hace meses y no esté en la página. | `{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","senderProfileId":"00000000-0000-4000-8000-000000000001","replyToMessageId":"00000000-0000-4000-8000-000000000001","contentTypeConceptId":"00000000-0000-4000-8000-000000000001","bodyText":"valor-ejemplo","attachmentFileId":"00000000-0000-4000-8000-000000000001","isEdited":true,"deletedAt":"2026-07-31T12:00:00.000Z","sentAt":"2026-07-31T12:00:00.000Z","repliedByTeam":true,"teamAuthorName":"Nombre de ejemplo"}` |
 | `pinnedMessage.id` | No | `string` | formato `uuid` | Identificador del mensaje. | `00000000-0000-4000-8000-000000000001` |
 | `pinnedMessage.conversationId` | No | `string` | formato `uuid` | Conversación a la que pertenece. | `00000000-0000-4000-8000-000000000001` |
 | `pinnedMessage.senderProfileId` | No | `string` | formato `uuid` | Perfil que lo envió. | `00000000-0000-4000-8000-000000000001` |
@@ -1655,6 +2078,8 @@ Campos de la respuesta:
 | `pinnedMessage.isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
 | `pinnedMessage.deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
 | `pinnedMessage.sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `pinnedMessage.repliedByTeam` | No | `boolean` | Sin restricción adicional declarada | El equipo del doctor respondió este mensaje en su nombre y el doctor decidió mostrarlo: es lo que ve el paciente («respondido por su equipo»). Sin nombre de quien escribió. Ausente si no aplica. | `true` |
+| `pinnedMessage.teamAuthorName` | No | `string` | Sin restricción adicional declarada | Quién del equipo escribió este mensaje. Solo lo recibe el doctor dueño del perfil; nunca el paciente ni un mensaje por websocket. | `Nombre de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1684,7 +2109,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 13. POST /community/conversations/{conversationId}/messages
+## 16. POST /community/conversations/{conversationId}/messages
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -1734,10 +2159,12 @@ Content-Type: application/json
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
 | `senderProfileId` | Sí | `string` | formato `uuid` | Perfil remitente (participante activo) | `00000000-0000-4000-8000-000000000001` |
+| `onBehalfOfProfileId` | No | `string` | formato `uuid` | Perfil del profesional en cuyo nombre responde el personal de apoyo (igual a senderProfileId) | `00000000-0000-4000-8000-000000000001` |
 | `bodyText` | No | `string` | longitud mínima 1; longitud máxima 4000 | Texto del mensaje | `valor-ejemplo` |
 | `contentType` | No | `string` | valores: `TEXT`, `MEDIA` | Tipo de contenido | `TEXT` |
 | `replyToMessageId` | No | `string` | formato `uuid` | Mensaje al que responde | `00000000-0000-4000-8000-000000000001` |
 | `attachmentFileId` | No | `string` | formato `uuid` | Archivo adjunto (common.files) | `00000000-0000-4000-8000-000000000001` |
+| `channels` | No | `array<string>` | valores: `CHAT`, `EMAIL`; mínimo 1 elemento(s) | Canales de la respuesta; por defecto solo CHAT | `["CHAT"]` |
 
 ### Payload completo de ejemplo
 
@@ -1751,10 +2178,14 @@ Content-Type: application/json
 
 {
   "senderProfileId": "00000000-0000-4000-8000-000000000001",
+  "onBehalfOfProfileId": "00000000-0000-4000-8000-000000000001",
   "bodyText": "valor-ejemplo",
   "contentType": "TEXT",
   "replyToMessageId": "00000000-0000-4000-8000-000000000001",
-  "attachmentFileId": "00000000-0000-4000-8000-000000000001"
+  "attachmentFileId": "00000000-0000-4000-8000-000000000001",
+  "channels": [
+    "CHAT"
+  ]
 }
 ```
 
@@ -1780,7 +2211,12 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "id": "00000000-0000-4000-8000-000000000001",
   "conversationId": "00000000-0000-4000-8000-000000000001",
-  "sentAt": "2026-07-31T12:00:00.000Z"
+  "sentAt": "2026-07-31T12:00:00.000Z",
+  "email": {
+    "queued": true,
+    "requestId": "00000000-0000-4000-8000-000000000001",
+    "skippedReason": "Texto descriptivo de ejemplo"
+  }
 }
 ```
 
@@ -1791,6 +2227,10 @@ Campos de la respuesta:
 | `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
 | `conversationId` | Sí | `string` | formato `uuid` | Identificador asociado a conversation. | `00000000-0000-4000-8000-000000000001` |
 | `sentAt` | Sí | `string` | formato `date-time` | Valor de sent at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `email` | No | `object` | Sin restricción adicional declarada | Resultado del canal de correo, si se pidió | `{"queued":true,"requestId":"00000000-0000-4000-8000-000000000001","skippedReason":"Texto descriptivo de ejemplo"}` |
+| `email.queued` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `email.requestId` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `email.skippedReason` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1801,22 +2241,34 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
-| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 403 | `FORBIDDEN` | No puede responder en nombre de este profesional | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 403 | `FORBIDDEN` | No se puede escribir en el grafo social con un perfil ajeno | Excepción explícita en src/modules/community/services/community-visibility.service.ts |
-| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 403 | `FORBIDDEN` | ${labels.subject} no le pertenece | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-support-reply.service.ts |
 | 404 | `NOT_FOUND` | Archivo adjunto no encontrado | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 404 | `NOT_FOUND` | labels.notFound | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 404 | `NOT_FOUND` | El proveedor configurado para el canal in-app no existe | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Canal no encontrado | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 404 | `NOT_FOUND` | Plantilla no encontrada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 409 | `CONFLICT` | La conversación ya la tiene otra persona del equipo | Excepción explícita en src/modules/community/services/community-support-reply.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El correo solo sirve para responder en nombre del doctor | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | El remitente no es participante activo | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | Existe un bloqueo entre los participantes | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | Un mensaje con contenido clínico lo responde el doctor: derívelo | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | No se puede adjuntar un archivo sin un actor que lo autorice | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
+| 422 | `PRECONDITION_FAILED` | Se responde en nombre del profesional con su propio perfil como remitente | Excepción explícita en src/modules/community/services/community-messaging.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} está borrado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no tiene una versión vigente | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} resultó infectado | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
 | 422 | `PRECONDITION_FAILED` | ${labels.subject} no es de un formato admitido para este uso | Excepción explícita en src/modules/common/services/attachable-file.service.ts |
+| 422 | `PRECONDITION_FAILED` | El mensaje del paciente es clínico: solo el doctor puede responderlo. Derívelo al doctor. | Excepción explícita en src/modules/community/services/community-support-reply.service.ts |
 | 422 | `PRECONDITION_FAILED` | No hay canal in-app activo: falta correr el seed de mensajería | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 422 | `PRECONDITION_FAILED` | El canal in-app no tiene configuración de proveedor activa | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | dto.recipientAddress           ? 'La notificación a una dirección externa también necesita el usuario destinatario'           : 'La notificación necesita el usuario destinatario' | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | El canal no está activo | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla no está publicada | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
+| 422 | `PRECONDITION_FAILED` | La plantilla es de otro canal | Excepción explícita en src/modules/messaging/services/notifications.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -1834,7 +2286,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 14. DELETE /community/conversations/{conversationId}/messages/{messageId}
+## 17. DELETE /community/conversations/{conversationId}/messages/{messageId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -1954,7 +2406,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 15. PATCH /community/conversations/{conversationId}/messages/{messageId}
+## 18. PATCH /community/conversations/{conversationId}/messages/{messageId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2054,7 +2506,9 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
   "attachmentFileId": "00000000-0000-4000-8000-000000000001",
   "isEdited": true,
   "deletedAt": "2026-07-31T12:00:00.000Z",
-  "sentAt": "2026-07-31T12:00:00.000Z"
+  "sentAt": "2026-07-31T12:00:00.000Z",
+  "repliedByTeam": true,
+  "teamAuthorName": "Nombre de ejemplo"
 }
 ```
 
@@ -2072,6 +2526,8 @@ Campos de la respuesta:
 | `isEdited` | No | `boolean` | admite null | Si fue editado (F4.5). | `true` |
 | `deletedAt` | No | `string` | formato `date-time`; admite null | Cuándo se eliminó (F4.5). Un mensaje eliminado **sigue viajando** —con `bodyText` y `attachmentFileId` en `null`— para que el hilo muestre «Se eliminó este mensaje» en su lugar y no un hueco que descoloca las citas. | `2026-07-31T12:00:00.000Z` |
 | `sentAt` | No | `string` | formato `date-time`; admite null | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `repliedByTeam` | No | `boolean` | Sin restricción adicional declarada | El equipo del doctor respondió este mensaje en su nombre y el doctor decidió mostrarlo: es lo que ve el paciente («respondido por su equipo»). Sin nombre de quien escribió. Ausente si no aplica. | `true` |
+| `teamAuthorName` | No | `string` | Sin restricción adicional declarada | Quién del equipo escribió este mensaje. Solo lo recibe el doctor dueño del perfil; nunca el paciente ni un mensaje por websocket. | `Nombre de ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2107,7 +2563,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 16. PATCH /community/conversations/{conversationId}/participant
+## 19. PATCH /community/conversations/{conversationId}/participant
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2245,7 +2701,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 17. DELETE /community/conversations/{conversationId}/pin
+## 20. DELETE /community/conversations/{conversationId}/pin
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2359,7 +2815,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. POST /community/conversations/{conversationId}/pin
+## 21. POST /community/conversations/{conversationId}/pin
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2491,7 +2947,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. GET /community/conversations/{conversationId}/presence
+## 22. GET /community/conversations/{conversationId}/presence
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2612,7 +3068,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. POST /community/conversations/{conversationId}/read
+## 23. POST /community/conversations/{conversationId}/read
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2742,7 +3198,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. POST /community/conversations/contacts/search
+## 24. POST /community/conversations/contacts/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-messaging`
@@ -2879,7 +3335,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. GET /community/feed
+## 25. GET /community/feed
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-timeline`
@@ -3053,7 +3509,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. DELETE /community/follows
+## 26. DELETE /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3163,7 +3619,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. GET /community/follows
+## 27. GET /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3292,7 +3748,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. POST /community/follows
+## 28. POST /community/follows
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -3422,7 +3878,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. GET /community/groups
+## 29. GET /community/groups
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3562,7 +4018,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. POST /community/groups
+## 30. POST /community/groups
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3701,7 +4157,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. GET /community/groups/{groupId}
+## 31. GET /community/groups/{groupId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3852,7 +4308,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. GET /community/groups/{groupId}/members
+## 32. GET /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -3986,7 +4442,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. POST /community/groups/{groupId}/members
+## 33. POST /community/groups/{groupId}/members
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4116,7 +4572,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. DELETE /community/groups/{groupId}/members/{member}
+## 34. DELETE /community/groups/{groupId}/members/{member}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4235,7 +4691,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. PATCH /community/groups/{groupId}/members/{member}
+## 35. PATCH /community/groups/{groupId}/members/{member}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4378,7 +4834,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. GET /community/groups/{groupId}/posts
+## 36. GET /community/groups/{groupId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4518,7 +4974,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /community/groups/{groupId}/posts
+## 37. POST /community/groups/{groupId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -4674,7 +5130,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /community/moderation/appeals
+## 38. GET /community/moderation/appeals
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4829,7 +5285,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /community/moderation/appeals/{appealId}/resolve
+## 39. POST /community/moderation/appeals/{appealId}/resolve
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -4956,7 +5412,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /community/moderation/decisions
+## 40. GET /community/moderation/decisions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5090,7 +5546,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /community/moderation/decisions/{decisionId}/appeal
+## 41. POST /community/moderation/decisions/{decisionId}/appeal
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5220,7 +5676,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. GET /community/moderation/decisions/mine
+## 42. GET /community/moderation/decisions/mine
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5349,7 +5805,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. GET /community/moderation/queue
+## 43. GET /community/moderation/queue
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5498,7 +5954,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 41. POST /community/moderation/queue/{queueId}/decision
+## 44. POST /community/moderation/queue/{queueId}/decision
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -5636,7 +6092,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 42. GET /community/notifications
+## 45. GET /community/notifications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-timeline`
@@ -5773,7 +6229,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 43. GET /community/polls/{pollId}
+## 46. GET /community/polls/{pollId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -5912,7 +6368,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 44. POST /community/polls/{pollId}/votes
+## 47. POST /community/polls/{pollId}/votes
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -6044,7 +6500,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 45. GET /community/posts/{postId}
+## 48. GET /community/posts/{postId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6189,7 +6645,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 46. GET /community/posts/{postId}/comments
+## 49. GET /community/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6343,7 +6799,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 47. POST /community/posts/{postId}/polls
+## 50. POST /community/posts/{postId}/polls
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-polls`
@@ -6486,7 +6942,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 48. GET /community/posts/{postId}/reactions
+## 51. GET /community/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6611,7 +7067,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 49. GET /community/profiles/{profileId}
+## 52. GET /community/profiles/{profileId}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6770,7 +7226,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 50. GET /community/profiles/{profileId}/auto-reply
+## 53. GET /community/profiles/{profileId}/auto-reply
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -6896,7 +7352,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 51. PUT /community/profiles/{profileId}/auto-reply
+## 54. PUT /community/profiles/{profileId}/auto-reply
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7055,7 +7511,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 52. GET /community/profiles/{profileId}/posts
+## 55. GET /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7213,7 +7669,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 53. POST /community/profiles/{profileId}/posts
+## 56. POST /community/profiles/{profileId}/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7388,7 +7844,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 54. GET /community/profiles/{profileId}/reviews
+## 57. GET /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -7547,7 +8003,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 55. POST /community/profiles/{profileId}/reviews
+## 58. POST /community/profiles/{profileId}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -7699,7 +8155,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 56. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
+## 59. POST /community/profiles/{profileId}/reviews/{reviewId}/responses
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -7828,7 +8284,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 57. GET /community/profiles/by-slug/{slug}
+## 60. GET /community/profiles/by-slug/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -7987,7 +8443,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 58. GET /community/profiles/me
+## 61. GET /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8113,7 +8569,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 59. PUT /community/profiles/me
+## 62. PUT /community/profiles/me
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8283,7 +8739,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 60. GET /community/profiles/me/stats
+## 63. GET /community/profiles/me/stats
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8402,7 +8858,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 61. POST /community/public-profiles
+## 64. POST /community/public-profiles
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -8548,7 +9004,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 62. GET /community/ratings
+## 65. GET /community/ratings
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -8668,7 +9124,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 63. PUT /community/ratings
+## 66. PUT /community/ratings
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -8819,7 +9275,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 64. GET /community/ratings/mine
+## 67. GET /community/ratings/mine
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -8936,7 +9392,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 65. GET /community/ratings/summary
+## 68. GET /community/ratings/summary
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-ratings`
@@ -9045,7 +9501,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 66. PUT /community/reactions
+## 69. PUT /community/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-social`
@@ -9178,7 +9634,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 67. POST /community/reports
+## 70. POST /community/reports
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-moderation`
@@ -9308,7 +9764,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 68. GET /community/topics
+## 71. GET /community/topics
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-groups`
@@ -9427,7 +9883,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 69. GET /f/{slug}
+## 72. GET /f/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -9638,7 +10094,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 70. GET /internal/community/feed/pending
+## 73. GET /internal/community/feed/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9755,7 +10211,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 71. POST /internal/community/feed/ranking/apply
+## 74. POST /internal/community/feed/ranking/apply
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -9888,7 +10344,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 72. GET /internal/community/feed/ranking/pending
+## 75. GET /internal/community/feed/ranking/pending
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -10013,7 +10469,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 73. POST /internal/community/feed/rebuild
+## 76. POST /internal/community/feed/rebuild
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-feed`
@@ -10142,7 +10598,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 74. GET /internal/community/search/health
+## 77. GET /internal/community/search/health
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10253,7 +10709,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 75. POST /internal/community/search/reindex
+## 78. POST /internal/community/search/reindex
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10383,7 +10839,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 76. POST /internal/community/verification/badges
+## 79. POST /internal/community/verification/badges
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10508,7 +10964,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 77. POST /internal/community/verification/badges/{targetId}/revoke
+## 80. POST /internal/community/verification/badges/{targetId}/revoke
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10630,7 +11086,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 78. POST /internal/community/verification/badges/expire-sweep
+## 81. POST /internal/community/verification/badges/expire-sweep
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community`
@@ -10737,7 +11193,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 79. GET /l/{slug}
+## 82. GET /l/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -10948,7 +11404,495 @@ Ejemplo de error normalizado:
 
 ---
 
-## 80. GET /o/{slug}
+## 83. GET /me/support-inbox
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-support-inbox`
+- **Nombre:** Bandeja de conversaciones del equipo de apoyo
+- **Operation ID:** `CommunitySupportInboxController_list`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySupportInboxController.list](../../src/modules/community/controllers/community-support-inbox.controller.ts)
+
+### Descripción de negocio
+
+Bandeja de conversaciones del equipo de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Mi bandeja.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/support-inbox` en `CommunitySupportInboxController_list`. El controlador delega en `CommunitySupportInboxService.listInbox`. No recibe body. El tipo de retorno estático es `Promise<SupportInboxResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `status` | query | No | `string` | valores: `NEW`, `TAKEN`, `WAITING_DOCTOR`, `RESOLVED` | Sin descripción específica en OpenAPI. | `NEW` |
+| `doctor` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/support-inbox HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/support-inbox?tenantId=00000000-0000-4000-8000-000000000001&status=NEW&doctor=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportInboxResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SupportInboxResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportInboxResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportInboxResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportInboxResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportInboxResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportInboxResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportInboxResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "conversationId": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "organizationId": "00000000-0000-4000-8000-000000000001",
+      "organizationName": "Nombre de ejemplo",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "practitionerName": "Nombre de ejemplo",
+      "doctorPublicProfileId": "00000000-0000-4000-8000-000000000001",
+      "patientLabel": "valor-ejemplo",
+      "status": {},
+      "assignedUserId": "00000000-0000-4000-8000-000000000001",
+      "assignedToName": "Nombre de ejemplo",
+      "assignedToMe": true,
+      "slaDueAt": "2026-07-31T12:00:00.000Z",
+      "lastMessageAt": "2026-07-31T12:00:00.000Z",
+      "lastPatientMessage": "valor-ejemplo",
+      "lastMessagePreview": "valor-ejemplo",
+      "previewHidden": true,
+      "isClinical": true,
+      "clinicalSuspected": true
+    }
+  ],
+  "doctors": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo",
+      "displayName": "Nombre de ejemplo",
+      "specialty": "valor-ejemplo"
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<SupportInboxItemDto>` | Sin restricción adicional declarada | Conversaciones, las más recientes primero. | `[{"conversationId":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","organizationId":"00000000-0000-4000-8000-000000000001","organizationName":"Nombre de ejemplo","practitionerProfileId":"00000000-0000-4000-8000-000000000001","practitionerName":"Nombre de ejemplo","doctorPublicProfileId":"00000000-0000-4000-8000-000000000001","patientLabel":"valor-ejemplo","status":{},"assignedUserId":"00000000-0000-4000-8000-000000000001","assignedToName":"Nombre de ejemplo","assignedToMe":true,"slaDueAt":"2026-07-31T12:00:00.000Z","lastMessageAt":"2026-07-31T12:00:00.000Z","lastPatientMessage":"valor-ejemplo","lastMessagePreview":"valor-ejemplo","previewHidden":true,"isClinical":true,"clinicalSuspected":true}]` |
+| `items[].conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | Sí | `string` | formato `uuid` | Organización de la bandeja. | `00000000-0000-4000-8000-000000000001` |
+| `items[].organizationId` | Sí | `string` | formato `uuid` | Organización de la bandeja (mismo valor que `tenantId`). | `00000000-0000-4000-8000-000000000001` |
+| `items[].organizationName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la organización. | `Nombre de ejemplo` |
+| `items[].practitionerProfileId` | Sí | `string` | formato `uuid` | Doctor a cuyo nombre se atiende (perfil profesional). | `00000000-0000-4000-8000-000000000001` |
+| `items[].practitionerName` | Sí | `string` | Sin restricción adicional declarada | Nombre del doctor. | `Nombre de ejemplo` |
+| `items[].doctorPublicProfileId` | Sí | `string` | formato `uuid` | Perfil público del doctor: el remitente con el que se responde. | `00000000-0000-4000-8000-000000000001` |
+| `items[].patientLabel` | Sí | `string` | Sin restricción adicional declarada | Cómo se nombra al paciente en la bandeja. | `valor-ejemplo` |
+| `items[].status` | Sí | `object` | Sin restricción adicional declarada | Estado en la bandeja. | `{}` |
+| `items[].assignedUserId` | No | `string` | formato `uuid` | Quien la tiene. | `00000000-0000-4000-8000-000000000001` |
+| `items[].assignedToName` | No | `string` | Sin restricción adicional declarada | Nombre de quien la tiene. | `Nombre de ejemplo` |
+| `items[].assignedToMe` | Sí | `boolean` | Sin restricción adicional declarada | ¿La tiene quien pide? Lo resuelve la API: el cliente no compara usuarios. | `true` |
+| `items[].slaDueAt` | No | `string` | formato `date-time` | Vencimiento del plazo de respuesta. | `2026-07-31T12:00:00.000Z` |
+| `items[].lastMessageAt` | No | `string` | formato `date-time` | Último mensaje de la conversación. | `2026-07-31T12:00:00.000Z` |
+| `items[].lastPatientMessage` | No | `string` | Sin restricción adicional declarada | Último mensaje del paciente (recortado), lo que hay que contestar. Si parece clínico sale el marcador «Contenido clínico oculto…» en lugar del texto. | `valor-ejemplo` |
+| `items[].lastMessagePreview` | Sí | `string` | Sin restricción adicional declarada | Mismo recorte, con el nombre de campo que usa la pantalla. | `valor-ejemplo` |
+| `items[].previewHidden` | No | `boolean` | Sin restricción adicional declarada | `true` si la vista previa del texto del paciente se retuvo y solo se entregan metadatos (SEG A-A4): quien escribe no es paciente de la agenda del doctor y la conversación aún no la tomó el equipo como administrativa. El texto se lee abriendo la conversación. | `true` |
+| `items[].isClinical` | Sí | `boolean` | Sin restricción adicional declarada | ¿Hay un mensaje clínico del paciente sin responder? Se deriva al doctor. | `true` |
+| `items[].clinicalSuspected` | Sí | `boolean` | Sin restricción adicional declarada | Mismo valor que `isClinical`, con el nombre original. | `true` |
+| `doctors` | Sí | `array<SupportInboxDoctorDto>` | Sin restricción adicional declarada | Doctores cubiertos, en el mismo orden que la agenda combinada. | `[{"id":"00000000-0000-4000-8000-000000000001","practitionerProfileId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo","displayName":"Nombre de ejemplo","specialty":"valor-ejemplo"}]` |
+| `doctors[].id` | Sí | `string` | formato `uuid` | Asignación de rol del doctor en la organización: el id del doctor en la agenda. | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].practitionerProfileId` | Sí | `string` | formato `uuid` | Perfil profesional del doctor: el de los filtros y el de responder en su nombre. | `00000000-0000-4000-8000-000000000001` |
+| `doctors[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre para mostrar. | `Nombre de ejemplo` |
+| `doctors[].displayName` | Sí | `string` | Sin restricción adicional declarada | Mismo nombre, con el nombre de campo de la agenda combinada. | `Nombre de ejemplo` |
+| `doctors[].specialty` | Sí | `string` | Sin restricción adicional declarada | Especialidad principal; vacío si no tiene. | `valor-ejemplo` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-inbox"
+}
+```
+
+---
+
+## 84. GET /me/support-inbox/{conversationId}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-support-inbox`
+- **Nombre:** Una conversación de la bandeja, con la autora real y las notas
+- **Operation ID:** `CommunitySupportInboxController_conversation`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySupportInboxController.conversation](../../src/modules/community/controllers/community-support-inbox.controller.ts)
+
+### Descripción de negocio
+
+Una conversación de la bandeja, con la autora real y las notas. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Una conversación abierta para el equipo (404 si no tiene acceso).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/support-inbox/{conversationId}` en `CommunitySupportInboxController_conversation`. El controlador delega en `CommunitySupportInboxService.getConversation`. No recibe body. El tipo de retorno estático es `Promise<SupportConversationDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `conversationId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | query | No | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/support-inbox/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `conversationId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/support-inbox/00000000-0000-4000-8000-000000000001?tenantId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SupportConversationDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SupportConversationDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SupportConversationDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SupportConversationDto>` | No |
+| 404 | Consulta completada correctamente. | `Promise<SupportConversationDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SupportConversationDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SupportConversationDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SupportConversationDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SupportConversationDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "conversationId": "00000000-0000-4000-8000-000000000001",
+  "organizationId": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "Nombre de ejemplo",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "doctorPublicProfileId": "00000000-0000-4000-8000-000000000001",
+  "practitionerName": "Nombre de ejemplo",
+  "practitionerSpecialty": "valor-ejemplo",
+  "patientLabel": "valor-ejemplo",
+  "status": {},
+  "assignedToName": "Nombre de ejemplo",
+  "assignedToMe": true,
+  "slaDueAt": "2026-07-31T12:00:00.000Z",
+  "isClinical": true,
+  "replyDisclosure": "SHOW",
+  "replyAllowed": true,
+  "replyBlockedReason": "Texto descriptivo de ejemplo",
+  "assignableTo": [
+    {
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "name": "Nombre de ejemplo"
+    }
+  ],
+  "messages": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "from": "PATIENT",
+      "bodyText": "valor-ejemplo",
+      "sentAt": "2026-07-31T12:00:00.000Z",
+      "isClinical": true,
+      "contentHidden": true,
+      "authoredByName": "Nombre de ejemplo",
+      "disclosureShown": true
+    }
+  ],
+  "notes": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "conversationId": "00000000-0000-4000-8000-000000000001",
+      "authorUserId": "00000000-0000-4000-8000-000000000001",
+      "authorName": "Nombre de ejemplo",
+      "bodyText": "valor-ejemplo",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ],
+  "patientContext": {
+    "reasonLabel": "Texto descriptivo de ejemplo",
+    "clinicalAccess": "NONE",
+    "delegateId": "00000000-0000-4000-8000-000000000001",
+    "patientProfileId": "00000000-0000-4000-8000-000000000001",
+    "requestedPermissionId": "00000000-0000-4000-8000-000000000001"
+  }
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `organizationId` | Sí | `string` | formato `uuid` | Organización. | `00000000-0000-4000-8000-000000000001` |
+| `organizationName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la organización. | `Nombre de ejemplo` |
+| `practitionerProfileId` | Sí | `string` | formato `uuid` | Doctor (perfil profesional). | `00000000-0000-4000-8000-000000000001` |
+| `doctorPublicProfileId` | Sí | `string` | formato `uuid` | Perfil público del doctor: el remitente al responder. | `00000000-0000-4000-8000-000000000001` |
+| `practitionerName` | Sí | `string` | Sin restricción adicional declarada | Nombre del doctor. | `Nombre de ejemplo` |
+| `practitionerSpecialty` | Sí | `string` | Sin restricción adicional declarada | Especialidad del doctor. | `valor-ejemplo` |
+| `patientLabel` | Sí | `string` | Sin restricción adicional declarada | Cómo se nombra al paciente. | `valor-ejemplo` |
+| `status` | Sí | `object` | Sin restricción adicional declarada | Estado en la bandeja. | `{}` |
+| `assignedToName` | No | `string` | Sin restricción adicional declarada | Nombre de quien la tiene. | `Nombre de ejemplo` |
+| `assignedToMe` | Sí | `boolean` | Sin restricción adicional declarada | ¿La tiene quien pide? | `true` |
+| `slaDueAt` | No | `string` | formato `date-time` | Vencimiento del plazo. | `2026-07-31T12:00:00.000Z` |
+| `isClinical` | Sí | `boolean` | Sin restricción adicional declarada | Hay un mensaje clínico del paciente sin responder. | `true` |
+| `replyDisclosure` | Sí | `string` | valores: `SHOW`, `HIDE` | ¿El paciente ve «respondido por su equipo»? Lo decide el doctor. | `SHOW` |
+| `replyAllowed` | Sí | `boolean` | Sin restricción adicional declarada | ¿Puede responder en nombre del doctor? Permiso y aceptación del doctor. | `true` |
+| `replyBlockedReason` | No | `string` | Sin restricción adicional declarada | Por qué no puede responder. | `Texto descriptivo de ejemplo` |
+| `assignableTo` | Sí | `array<SupportAssigneeDto>` | Sin restricción adicional declarada | A quién se puede asignar: quienes pueden atender a este doctor. | `[{"userId":"00000000-0000-4000-8000-000000000001","name":"Nombre de ejemplo"}]` |
+| `assignableTo[].userId` | Sí | `string` | formato `uuid` | Cuenta. | `00000000-0000-4000-8000-000000000001` |
+| `assignableTo[].name` | Sí | `string` | Sin restricción adicional declarada | Nombre. | `Nombre de ejemplo` |
+| `messages` | Sí | `array<SupportConversationMessageDto>` | Sin restricción adicional declarada | Mensajes, del más antiguo al más reciente. | `[{"id":"00000000-0000-4000-8000-000000000001","from":"PATIENT","bodyText":"valor-ejemplo","sentAt":"2026-07-31T12:00:00.000Z","isClinical":true,"contentHidden":true,"authoredByName":"Nombre de ejemplo","disclosureShown":true}]` |
+| `messages[].id` | Sí | `string` | formato `uuid` | Mensaje. | `00000000-0000-4000-8000-000000000001` |
+| `messages[].from` | Sí | `string` | valores: `PATIENT`, `DOCTOR_SIDE` | `PATIENT` escribió el paciente; `DOCTOR_SIDE`, el doctor o su equipo en su nombre. | `PATIENT` |
+| `messages[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Texto. Los mensajes que escribió el propio doctor y los que parecen clínicos salen con un marcador («Contenido clínico oculto…») en lugar del texto mientras no haya un acceso clínico temporal aprobado y vigente (`patientContext.clinicalAccess = APPROVED`); entonces se muestran completos. | `valor-ejemplo` |
+| `messages[].sentAt` | Sí | `string` | formato `date-time` | Cuándo se envió. | `2026-07-31T12:00:00.000Z` |
+| `messages[].isClinical` | Sí | `boolean` | Sin restricción adicional declarada | Parece clínico (paciente), o su texto está oculto por ser clínico. | `true` |
+| `messages[].contentHidden` | No | `boolean` | Sin restricción adicional declarada | Presente (`true`) cuando `bodyText` es el marcador y no el texto real. | `true` |
+| `messages[].authoredByName` | No | `string` | Sin restricción adicional declarada | La autora real, cuando respondió el equipo en nombre del doctor. Solo el equipo la ve. | `Nombre de ejemplo` |
+| `messages[].disclosureShown` | No | `boolean` | Sin restricción adicional declarada | Si el paciente ve «respondido por su equipo» en este mensaje. | `true` |
+| `notes` | Sí | `array<InternalNoteDto>` | Sin restricción adicional declarada | Notas internas, de la más antigua a la más reciente. | `[{"id":"00000000-0000-4000-8000-000000000001","conversationId":"00000000-0000-4000-8000-000000000001","authorUserId":"00000000-0000-4000-8000-000000000001","authorName":"Nombre de ejemplo","bodyText":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `notes[].id` | Sí | `string` | formato `uuid` | Id de la nota. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].conversationId` | Sí | `string` | formato `uuid` | Conversación. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].authorUserId` | Sí | `string` | formato `uuid` | Quien la escribió. | `00000000-0000-4000-8000-000000000001` |
+| `notes[].authorName` | Sí | `string` | Sin restricción adicional declarada | Nombre de quien la escribió. | `Nombre de ejemplo` |
+| `notes[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Texto. | `valor-ejemplo` |
+| `notes[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se escribió. | `2026-07-31T12:00:00.000Z` |
+| `patientContext` | Sí | `SupportPatientContextDto` | Sin restricción adicional declarada | Lo que se sabe del paciente. | `{"reasonLabel":"Texto descriptivo de ejemplo","clinicalAccess":"NONE","delegateId":"00000000-0000-4000-8000-000000000001","patientProfileId":"00000000-0000-4000-8000-000000000001","requestedPermissionId":"00000000-0000-4000-8000-000000000001"}` |
+| `patientContext.reasonLabel` | No | `string` | Sin restricción adicional declarada | Motivo de la cita más reciente con este doctor. | `Texto descriptivo de ejemplo` |
+| `patientContext.clinicalAccess` | Sí | `string` | valores: `NONE`, `PENDING`, `APPROVED` | Estado del acceso clínico temporal. | `NONE` |
+| `patientContext.delegateId` | No | `string` | formato `uuid` | Delegación doctor ↔ persona, con la que se pide el acceso. | `00000000-0000-4000-8000-000000000001` |
+| `patientContext.patientProfileId` | No | `string` | formato `uuid` | Paciente en el registro, si tiene. | `00000000-0000-4000-8000-000000000001` |
+| `patientContext.requestedPermissionId` | No | `string` | formato `uuid` | Permiso que se pide (lectura clínica temporal). | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Conversación no encontrada | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-inbox/{conversationId}"
+}
+```
+
+---
+
+## 85. GET /me/support-reply-templates
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-support-inbox`
+- **Nombre:** Respuestas preparadas del equipo de apoyo
+- **Operation ID:** `CommunitySupportInboxController_myTemplates`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySupportInboxController.myTemplates](../../src/modules/community/controllers/community-support-inbox.controller.ts)
+
+### Descripción de negocio
+
+Respuestas preparadas del equipo de apoyo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Respuestas preparadas que la persona puede usar en una organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /me/support-reply-templates` en `CommunitySupportInboxController_myTemplates`. El controlador delega en `CommunitySupportInboxService.templatesForPerson`. No recibe body. El tipo de retorno estático es `Promise<ReplyTemplatesResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | query | Sí | `string` | formato `uuid` | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /me/support-reply-templates?tenantId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /me/support-reply-templates?tenantId=00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReplyTemplatesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "category": {},
+      "title": "valor-ejemplo",
+      "bodyText": "valor-ejemplo",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "retired": true,
+      "version": 1
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ReplyTemplateViewDto>` | Sin restricción adicional declarada | Respuestas. | `[{"id":"00000000-0000-4000-8000-000000000001","category":{},"title":"valor-ejemplo","bodyText":"valor-ejemplo","practitionerProfileId":"00000000-0000-4000-8000-000000000001","retired":true,"version":1}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id. | `00000000-0000-4000-8000-000000000001` |
+| `items[].category` | Sí | `object` | Sin restricción adicional declarada | Categoría. | `{}` |
+| `items[].title` | Sí | `string` | Sin restricción adicional declarada | Título. | `valor-ejemplo` |
+| `items[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Texto. | `valor-ejemplo` |
+| `items[].practitionerProfileId` | No | `string` | formato `uuid` | Doctor dueño, si es suya. | `00000000-0000-4000-8000-000000000001` |
+| `items[].retired` | Sí | `boolean` | Sin restricción adicional declarada | ¿Está retirada? | `true` |
+| `items[].version` | Sí | `number` | Sin restricción adicional declarada | Versión de la respuesta: sube con cada cambio. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/me/support-reply-templates"
+}
+```
+
+---
+
+## 86. GET /o/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11159,7 +12103,418 @@ Ejemplo de error normalizado:
 
 ---
 
-## 81. GET /p/{slug}
+## 87. GET /org/reply-templates
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-support-inbox`
+- **Nombre:** Respuestas preparadas de la organización
+- **Operation ID:** `CommunitySupportInboxController_orgTemplates`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySupportInboxController.orgTemplates](../../src/modules/community/controllers/community-support-inbox.controller.ts)
+
+### Descripción de negocio
+
+Respuestas preparadas de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Respuestas preparadas de la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/reply-templates` en `CommunitySupportInboxController_orgTemplates`. El controlador delega en `CommunitySupportInboxService.templatesOfTenant`. No recibe body. El tipo de retorno estático es `Promise<ReplyTemplatesResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/reply-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/reply-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ReplyTemplatesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReplyTemplatesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "category": {},
+      "title": "valor-ejemplo",
+      "bodyText": "valor-ejemplo",
+      "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+      "retired": true,
+      "version": 1
+    }
+  ],
+  "count": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<ReplyTemplateViewDto>` | Sin restricción adicional declarada | Respuestas. | `[{"id":"00000000-0000-4000-8000-000000000001","category":{},"title":"valor-ejemplo","bodyText":"valor-ejemplo","practitionerProfileId":"00000000-0000-4000-8000-000000000001","retired":true,"version":1}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Id. | `00000000-0000-4000-8000-000000000001` |
+| `items[].category` | Sí | `object` | Sin restricción adicional declarada | Categoría. | `{}` |
+| `items[].title` | Sí | `string` | Sin restricción adicional declarada | Título. | `valor-ejemplo` |
+| `items[].bodyText` | Sí | `string` | Sin restricción adicional declarada | Texto. | `valor-ejemplo` |
+| `items[].practitionerProfileId` | No | `string` | formato `uuid` | Doctor dueño, si es suya. | `00000000-0000-4000-8000-000000000001` |
+| `items[].retired` | Sí | `boolean` | Sin restricción adicional declarada | ¿Está retirada? | `true` |
+| `items[].version` | Sí | `number` | Sin restricción adicional declarada | Versión de la respuesta: sube con cada cambio. | `1` |
+| `count` | Sí | `number` | Sin restricción adicional declarada | Cantidad. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/reply-templates"
+}
+```
+
+---
+
+## 88. POST /org/reply-templates
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-support-inbox`
+- **Nombre:** Crear una respuesta preparada
+- **Operation ID:** `CommunitySupportInboxController_createTemplate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySupportInboxController.createTemplate](../../src/modules/community/controllers/community-support-inbox.controller.ts)
+
+### Descripción de negocio
+
+Crear una respuesta preparada. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Crea una respuesta preparada.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /org/reply-templates` en `CommunitySupportInboxController_createTemplate`. El controlador delega en `CommunitySupportInboxService.createTemplate`. Valida el body como `CreateReplyTemplateDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReplyTemplateViewDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `CreateReplyTemplateDto`; los campos opcionales se omiten.
+
+```http
+POST /org/reply-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "category": "GENERAL",
+  "title": "valor-ejemplo",
+  "bodyText": "valor-ejemplo"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `category` | Sí | `string` | valores: `GENERAL`, `SCHEDULING`, `BILLING`, `PREPARATION` | Sin descripción específica en el contrato OpenAPI. | `GENERAL` |
+| `title` | Sí | `string` | longitud mínima 1; longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `bodyText` | Sí | `string` | longitud mínima 1; longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `practitionerProfileId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /org/reply-templates HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "category": "GENERAL",
+  "title": "valor-ejemplo",
+  "bodyText": "valor-ejemplo",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReplyTemplateViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "category": {},
+  "title": "valor-ejemplo",
+  "bodyText": "valor-ejemplo",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "retired": true,
+  "version": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Id. | `00000000-0000-4000-8000-000000000001` |
+| `category` | Sí | `object` | Sin restricción adicional declarada | Categoría. | `{}` |
+| `title` | Sí | `string` | Sin restricción adicional declarada | Título. | `valor-ejemplo` |
+| `bodyText` | Sí | `string` | Sin restricción adicional declarada | Texto. | `valor-ejemplo` |
+| `practitionerProfileId` | No | `string` | formato `uuid` | Doctor dueño, si es suya. | `00000000-0000-4000-8000-000000000001` |
+| `retired` | Sí | `boolean` | Sin restricción adicional declarada | ¿Está retirada? | `true` |
+| `version` | Sí | `number` | Sin restricción adicional declarada | Versión de la respuesta: sube con cada cambio. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El doctor indicado no es de esta organización | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 422 | `PRECONDITION_FAILED` | Una respuesta preparada no puede dar contenido clínico | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/reply-templates"
+}
+```
+
+---
+
+## 89. PATCH /org/reply-templates/{id}
+
+- **Módulo:** `community`
+- **Etiqueta OpenAPI:** `community-support-inbox`
+- **Nombre:** Cambiar, retirar o reactivar una respuesta preparada
+- **Operation ID:** `CommunitySupportInboxController_updateTemplate`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [CommunitySupportInboxController.updateTemplate](../../src/modules/community/controllers/community-support-inbox.controller.ts)
+
+### Descripción de negocio
+
+Cambiar, retirar o reactivar una respuesta preparada. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Cambia, retira o reactiva una respuesta preparada.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /org/reply-templates/{id}` en `CommunitySupportInboxController_updateTemplate`. El controlador delega en `CommunitySupportInboxService.updateTemplate`. Valida el body como `UpdateReplyTemplateDto` y consume `application/json`. El tipo de retorno estático es `Promise<ReplyTemplateViewDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `UpdateReplyTemplateDto`; los campos opcionales se omiten.
+
+```http
+PATCH /org/reply-templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `title` | No | `string` | longitud mínima 1; longitud máxima 120 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `bodyText` | No | `string` | longitud mínima 1; longitud máxima 2000 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `category` | No | `string` | valores: `GENERAL`, `SCHEDULING`, `BILLING`, `PREPARATION` | Sin descripción específica en el contrato OpenAPI. | `GENERAL` |
+| `retired` | No | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `expectedVersion` | No | `number` | mínimo 1 | Sin descripción específica en el contrato OpenAPI. | `1` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /org/reply-templates/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "title": "valor-ejemplo",
+  "bodyText": "valor-ejemplo",
+  "category": "GENERAL",
+  "retired": true,
+  "expectedVersion": 1
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReplyTemplateViewDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReplyTemplateViewDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "category": {},
+  "title": "valor-ejemplo",
+  "bodyText": "valor-ejemplo",
+  "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+  "retired": true,
+  "version": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Id. | `00000000-0000-4000-8000-000000000001` |
+| `category` | Sí | `object` | Sin restricción adicional declarada | Categoría. | `{}` |
+| `title` | Sí | `string` | Sin restricción adicional declarada | Título. | `valor-ejemplo` |
+| `bodyText` | Sí | `string` | Sin restricción adicional declarada | Texto. | `valor-ejemplo` |
+| `practitionerProfileId` | No | `string` | formato `uuid` | Doctor dueño, si es suya. | `00000000-0000-4000-8000-000000000001` |
+| `retired` | Sí | `boolean` | Sin restricción adicional declarada | ¿Está retirada? | `true` |
+| `version` | Sí | `number` | Sin restricción adicional declarada | Versión de la respuesta: sube con cada cambio. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Respuesta no encontrada | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 409 | `CONCURRENCY_CONFLICT` | La respuesta cambió desde que la abrió: vuelva a cargarla | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Una respuesta preparada no puede dar contenido clínico | Excepción explícita en src/modules/community/services/community-support-inbox.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/reply-templates/{id}"
+}
+```
+
+---
+
+## 90. GET /p/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11370,7 +12725,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 82. POST /patients/me/reviews
+## 91. POST /patients/me/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-reviews`
@@ -11520,7 +12875,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 83. GET /public/comments/{commentId}/replies
+## 92. GET /public/comments/{commentId}/replies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11613,7 +12968,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 84. GET /public/media/{id}
+## 93. GET /public/media/{id}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11707,7 +13062,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 85. GET /public/nearby
+## 94. GET /public/nearby
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11802,7 +13157,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 86. GET /public/posts
+## 95. GET /public/posts
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11890,7 +13245,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 87. GET /public/posts/{postId}/comments
+## 96. GET /public/posts/{postId}/comments
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -11982,7 +13337,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 88. GET /public/posts/{postId}/reactions
+## 97. GET /public/posts/{postId}/reactions
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12074,7 +13429,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 89. GET /public/profiles/{prefijo}/{slug}
+## 98. GET /public/profiles/{prefijo}/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12286,7 +13641,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 90. GET /public/profiles/{prefijo}/{slug}/reviews
+## 99. GET /public/profiles/{prefijo}/{slug}/reviews
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12392,7 +13747,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 91. GET /public/search
+## 100. GET /public/search
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12492,7 +13847,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 92. GET /public/search/diagnostic-units
+## 101. GET /public/search/diagnostic-units
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12592,7 +13947,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 93. GET /public/search/insurers
+## 102. GET /public/search/insurers
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12692,7 +14047,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 94. GET /public/search/medications
+## 103. GET /public/search/medications
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12792,7 +14147,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 95. GET /public/search/organizations
+## 104. GET /public/search/organizations
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12895,7 +14250,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 96. GET /public/search/pharmacies
+## 105. GET /public/search/pharmacies
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -12995,7 +14350,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 97. GET /public/search/practitioners
+## 106. GET /public/search/practitioners
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`
@@ -13099,7 +14454,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 98. GET /s/{slug}
+## 107. GET /s/{slug}
 
 - **Módulo:** `community`
 - **Etiqueta OpenAPI:** `community-public`

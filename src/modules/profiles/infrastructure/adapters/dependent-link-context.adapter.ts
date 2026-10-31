@@ -14,11 +14,8 @@ export class DependentLinkContextAdapter
     private readonly notifications: NotificationsService,
   ) {}
 
-  findActiveDuplicate(
-    em: EntityManager,
-    params: { readonly typeConceptId: string; readonly value: string },
-  ) {
-    return this.identifiers.findActiveDuplicate(em, params);
+  findActiveNationalIdDuplicate(em: EntityManager, nationalId: string) {
+    return this.identifiers.findActiveNationalIdDuplicate(em, nationalId);
   }
 
   emitInApp(...args: Parameters<DependentLinkNotificationsPort['emitInApp']>) {

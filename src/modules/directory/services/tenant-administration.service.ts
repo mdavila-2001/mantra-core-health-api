@@ -208,16 +208,23 @@ export class TenantAdministrationService {
   }
 
   /** Membresía activa del actor en el tenant, o `null` si no pertenece. */
-  private activeMembershipOf(
+  private async activeMembershipOf(
     em: EntityManager,
     tenantId: string,
     actor: AuthenticatedUser,
   ) {
-    return this.membershipsRepo.findActiveByUserTenant(
+    const membership = await this.membershipsRepo.findActiveByUserTenant(
       em,
       actor.id,
       tenantId,
       DIR.MEMBERSHIP_ACTIVE,
     );
+    if (!membership) return null;
+    // La membresía que existe solo por un vínculo de apoyo no es de plantilla:
+    // su acceso son los permisos del vínculo, no leer la organización.
+    if (await this.membershipsRepo.isSupportOnly(em, membership.id)) {
+      return null;
+    }
+    return membership;
   }
 }

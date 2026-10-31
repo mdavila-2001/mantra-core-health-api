@@ -111,6 +111,7 @@ export class PractitionerDelegatesService {
       }
 
       const delegate = this.delegatesRepo.create(tx, {
+        tenantId,
         practitionerRoleAssignmentId: dto.practitionerRoleAssignmentId,
         delegateUserAssignmentId: dto.delegateUserAssignmentId,
         delegatedPermissionSetId: dto.delegatedPermissionSetId,
@@ -246,6 +247,8 @@ export class PractitionerDelegatesService {
         delegateId,
         tenantId,
       );
+      // La revoca la administración o el propio doctor: nadie más.
+      await this.scope.assertAdminOrOwningDoctor(tx, delegate, actor, tenantId);
       // Idempotente: si ya está revocada no se hace nada.
       if (delegate.statusConceptId === STATUS.REVOKED) {
         return { ok: true };

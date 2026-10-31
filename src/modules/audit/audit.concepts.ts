@@ -36,6 +36,11 @@ export const { seeds: AUDIT_CONCEPT_SEEDS, ids: AUD } = defineModuleConcepts(
       code: 'AUDIT_LEGAL_BASIS_LEGAL_OBLIGATION',
       display: 'Legal obligation basis',
     },
+    // Gobierno de accesos (v4.2.72, Anexo B): operaciones de atención médica.
+    LEGAL_BASIS_HEALTHCARE_OPERATIONS: {
+      code: 'AUDIT_LEGAL_BASIS_HEALTHCARE_OPERATIONS',
+      display: 'Legal basis: healthcare operations',
+    },
 
     // --- Tipos de recurso accedido ---
     RESOURCE_TYPE_CLINICAL: {

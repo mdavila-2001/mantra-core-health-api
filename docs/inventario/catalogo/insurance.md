@@ -2,7 +2,7 @@
 
 # Catálogo del schema `insurance`
 
-- **Tablas:** 31 · **Columnas:** 432 (99 con descripción: 22.9 %) · **Índices:** 222
+- **Tablas:** 32 · **Columnas:** 463 (101 con descripción: 21.8 %) · **Índices:** 237
 - **Dominio:** Financiero y ERP
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,12 +10,12 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [broker_carrier_agreements](#broker_carrier_agreements) | Documenta acuerdos entre corredores y aseguradoras para definir el marco de distribución o servicio. | 14 | 7 | 4 | COINCIDE |
+| [broker_carrier_agreements](#broker_carrier_agreements) | Documenta acuerdos entre corredores y aseguradoras para definir el marco de distribución o servicio. | 20 | 11 | 4 | DIVERGE |
 | [broker_clients](#broker_clients) | Vincula clientes con corredores para organizar la gestión de cobertura y relación de intermediación. | 14 | 9 | 2 | COINCIDE |
 | [broker_commission_statements](#broker_commission_statements) | Conserva estados de comisiones de corredores relacionadas con productos o coberturas intermediadas. | 14 | 6 | 2 | COINCIDE |
 | [claim_adjudication_versions](#claim_adjudication_versions) | Preserva versiones de adjudicación de reclamos para mantener el historial de decisiones del asegurador. | 11 | 4 | 20 | COINCIDE |
 | [claim_appeal_decisions](#claim_appeal_decisions) | Preserva decisiones emitidas tras apelaciones de reclamos para cerrar el proceso de revisión de cobertura. | 12 | 7 | 2 | COINCIDE |
-| [claim_disputes](#claim_disputes) | Representa disputas sobre reclamos para gestionar revisiones de decisiones de cobertura o pago. | 16 | 9 | 8 | COINCIDE |
+| [claim_disputes](#claim_disputes) | Representa disputas sobre reclamos para gestionar revisiones de decisiones de cobertura o pago. | 16 | 9 | 9 | COINCIDE |
 | [claim_line_adjudications](#claim_line_adjudications) | Registra la resolución de cada línea de reclamo para distinguir servicios aprobados, ajustados o rechazados. | 11 | 5 | 9 | COINCIDE |
 | [claim_reversals](#claim_reversals) | Registra reversiones de adjudicaciones o pagos para mantener consistencia entre el reclamo original y su corrección. | 11 | 8 | 7 | COINCIDE |
 | [coordination_of_benefits](#coordination_of_benefits) | Registra coordinación entre múltiples coberturas para determinar el orden y alcance de pago de beneficios. | 13 | 9 | 3 | COINCIDE |
@@ -26,27 +26,28 @@
 | [insurance_brokers](#insurance_brokers) | Cataloga intermediarios de seguros que gestionan relaciones entre aseguradoras, empleadores, pacientes y productos. | 14 | 10 | 11 | COINCIDE |
 | [insurance_campaign_partners](#insurance_campaign_partners) | Asocia prestadores de la red a campañas preventivas de una aseguradora, identificando los participantes que pueden brindar las acciones de salud de cada campaña. | 12 | 6 | 22 | COINCIDE |
 | [insurance_campaigns](#insurance_campaigns) | Define campañas preventivas de una aseguradora para organizar acciones de promoción y cuidado de la salud destinadas a su población cubierta. | 17 | 6 | 22 | COINCIDE |
-| [insurance_carriers](#insurance_carriers) | Representa aseguradoras que emiten o administran coberturas de salud utilizadas por pacientes y prestadores. | 19 | 10 | 70 | COINCIDE |
-| [insurance_claim_lines](#insurance_claim_lines) | Detalla servicios, códigos y montos incluidos en reclamos para permitir adjudicación por prestación. | 12 | 5 | 19 | COINCIDE |
-| [insurance_claims](#insurance_claims) | Representa reclamos presentados a aseguradoras por servicios prestados a pacientes para gestionar reembolso o adjudicación. | 20 | 12 | 26 | COINCIDE |
-| [insurance_plan_benefits](#insurance_plan_benefits) | Detalla prestaciones o límites incluidos en cada plan para respaldar verificación de cobertura. | 18 | 6 | 14 | COINCIDE |
-| [insurance_plans](#insurance_plans) | Define planes de cobertura y sus condiciones generales para determinar beneficios aplicables a pacientes asegurados. | 16 | 7 | 38 | COINCIDE |
-| [insurance_products](#insurance_products) | Cataloga productos de seguro de salud disponibles para contratación y asociación con planes. | 13 | 7 | 34 | COINCIDE |
+| [insurance_carriers](#insurance_carriers) | Representa aseguradoras que emiten o administran coberturas de salud utilizadas por pacientes y prestadores. | 19 | 10 | 71 | COINCIDE |
+| [insurance_claim_lines](#insurance_claim_lines) | Detalla servicios, códigos y montos incluidos en reclamos para permitir adjudicación por prestación. | 12 | 5 | 20 | COINCIDE |
+| [insurance_claims](#insurance_claims) | Representa reclamos presentados a aseguradoras por servicios prestados a pacientes para gestionar reembolso o adjudicación. | 20 | 12 | 27 | COINCIDE |
+| [insurance_plan_benefits](#insurance_plan_benefits) | Detalla prestaciones o límites incluidos en cada plan para respaldar verificación de cobertura. | 18 | 6 | 15 | COINCIDE |
+| [insurance_plans](#insurance_plans) | Define planes de cobertura y sus condiciones generales para determinar beneficios aplicables a pacientes asegurados. | 16 | 7 | 39 | COINCIDE |
+| [insurance_products](#insurance_products) | Cataloga productos de seguro de salud disponibles para contratación y asociación con planes. | 19 | 7 | 35 | DIVERGE |
 | [insurance_reconciliation_batches](#insurance_reconciliation_batches) | Agrupa conciliaciones con aseguradoras para comparar reclamos, pagos y registros administrativos. | 16 | 6 | 6 | COINCIDE |
 | [insurance_reconciliation_items](#insurance_reconciliation_items) | Detalla discrepancias o coincidencias procesadas en conciliaciones de seguros. | 14 | 7 | 5 | COINCIDE |
+| [insurance_terms_conditions](#insurance_terms_conditions) | sin propósito | 19 | 11 | 0 | SIN_ENTIDAD |
 | [network_provider_memberships](#network_provider_memberships) | Vincula prestadores con redes aseguradoras para resolver participación y vigencia de cobertura dentro de la red. | 20 | 12 | 7 | COINCIDE |
-| [patient_coverages](#patient_coverages) | Registra coberturas de seguro asociadas a pacientes para apoyar elegibilidad, autorización y facturación de atención. | 18 | 10 | 36 | COINCIDE |
+| [patient_coverages](#patient_coverages) | Registra coberturas de seguro asociadas a pacientes para apoyar elegibilidad, autorización y facturación de atención. | 18 | 10 | 37 | COINCIDE |
 | [patient_explanations_of_benefit](#patient_explanations_of_benefit) | Conserva explicaciones de beneficios dirigidas al paciente para describir cómo se procesó una reclamación y qué cobertura aplicó. | 9 | 7 | 9 | COINCIDE |
-| [prior_authorization_determinations](#prior_authorization_determinations) | Registra decisiones del asegurador sobre autorizaciones previas para hacer visible el resultado de cobertura. | 15 | 7 | 7 | COINCIDE |
-| [prior_authorization_items](#prior_authorization_items) | Desglosa servicios o procedimientos incluidos en una solicitud de autorización previa. | 10 | 5 | 7 | COINCIDE |
-| [prior_authorization_requests](#prior_authorization_requests) | Representa solicitudes de autorización previa para servicios que requieren aprobación del asegurador antes de prestarse o facturarse. | 16 | 10 | 8 | COINCIDE |
+| [prior_authorization_determinations](#prior_authorization_determinations) | Registra decisiones del asegurador sobre autorizaciones previas para hacer visible el resultado de cobertura. | 15 | 7 | 8 | COINCIDE |
+| [prior_authorization_items](#prior_authorization_items) | Desglosa servicios o procedimientos incluidos en una solicitud de autorización previa. | 10 | 5 | 8 | COINCIDE |
+| [prior_authorization_requests](#prior_authorization_requests) | Representa solicitudes de autorización previa para servicios que requieren aprobación del asegurador antes de prestarse o facturarse. | 16 | 10 | 9 | COINCIDE |
 | [provider_networks](#provider_networks) | Representa redes de prestadores contratados para determinar qué profesionales e instituciones participan en una cobertura. | 13 | 5 | 9 | COINCIDE |
 
 ## Diagrama entidad-relación
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 1 — 31 tablas
+### Familia 1 de 1 — 32 tablas
 
 ```mermaid
 erDiagram
@@ -146,6 +147,16 @@ erDiagram
     uuid status_concept_id FK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
+  }
+  insurance_insurance_terms_conditions["insurance.insurance_terms_conditions"] {
+    uuid id PK
+    uuid insurance_carrier_id FK
+    uuid document_file_id FK
+    uuid insurance_product_id FK
+    uuid insurance_plan_id FK
+    uuid service_concept_id FK
+    uuid contract_id FK
+    uuid jurisdiction_concept_id FK
   }
   insurance_provider_networks["insurance.provider_networks"] {
     uuid id PK
@@ -344,6 +355,9 @@ erDiagram
   insurance_insurance_claims }o--o| insurance_prior_authorization_requests : "prior_authorization_request_id"
   insurance_insurance_products }o--|| insurance_insurance_carriers : "insurance_carrier_id"
   insurance_insurance_reconciliation_batches }o--|| insurance_insurance_carriers : "insurance_carrier_id"
+  insurance_insurance_terms_conditions }o--|| insurance_insurance_carriers : "insurance_carrier_id"
+  insurance_insurance_terms_conditions }o--o| insurance_insurance_products : "insurance_product_id"
+  insurance_insurance_terms_conditions }o--o| insurance_insurance_plans : "insurance_plan_id"
   insurance_provider_networks }o--|| insurance_insurance_carriers : "insurance_carrier_id"
   insurance_coordination_of_benefits }o--|| insurance_patient_coverages : "primary_patient_coverage_id"
   insurance_coordination_of_benefits }o--o| insurance_patient_coverages : "secondary_patient_coverage_id"
@@ -388,7 +402,7 @@ Documenta acuerdos entre corredores y aseguradoras para definir el marco de dist
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: broker_carrier_agreements`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `BrokerCarrierAgreements` — `src/modules/insurance/entities/broker_carrier_agreements.entity.ts`
-- **Resumen:** 14 columnas · 7 índices · 7 FK salientes · 1 entrantes · 4 operaciones
+- **Resumen:** 20 columnas · 11 índices · 11 FK salientes · 1 entrantes · 4 operaciones
 
 #### Columnas
 
@@ -408,6 +422,12 @@ Documenta acuerdos entre corredores y aseguradoras para definir el marco de dist
 | 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/broker_carrier_agreements.entity.ts:94`)_ | coincide |
+| 15 | `representation_mode_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | + v4.2.49 (INS-BRK-003 / INS-BRK-004 / INS-BRK-009 / INS-BRK-012, issue #60): el vinculo del broker con una aseguradora. representation_mode_concept_id dice si ofrece como independiente o en representacion de la aseguradora; relationship_type_concept_id es el tipo de relacion (dependiente, asociado, externo, comisionista, representante) y ya no se infiere de commission_model_concept_id. sede, area comercial, supervisor y zona describen donde opera. Nullable: los acuerdos existentes no los declaran. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_26_insurance.puml:85`)_ | **AUSENTE_EN_ORM** |
+| 16 | `relationship_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 17 | `branch_id` | `uuid` | Clave foránea → directory.branches.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 18 | `commercial_area` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 19 | `supervisor_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 20 | `assigned_zone` | `varchar` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -420,6 +440,10 @@ Documenta acuerdos entre corredores y aseguradoras para definir el marco de dist
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_broker_carrier_agreements_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_broker_carrier_agreements_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_broker_carrier_agreements_updated_by_user_id |
+| hacia | representation_mode_concept_id | terminology.catalog_concepts (id) | fk_broker_carrier_agreements_representation_mode_concept_id |
+| hacia | relationship_type_concept_id | terminology.catalog_concepts (id) | fk_broker_carrier_agreements_relationship_type_concept_id |
+| hacia | branch_id | directory.branches (id) | fk_broker_carrier_agreements_branch_id |
+| hacia | supervisor_user_id | iam.users (id) | fk_broker_carrier_agreements_supervisor_user_id |
 | desde | id | insurance.broker_commission_statements (broker_carrier_agreement_id) | fk_broker_commission_statements_broker_carrier_agreement_id |
 
 #### Índices
@@ -433,6 +457,10 @@ Documenta acuerdos entre corredores y aseguradoras para definir el marco de dist
 | `ix_broker_carrier_agreements_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_broker_carrier_agreements_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_broker_carrier_agreements_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_broker_carrier_agreements_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_broker_carrier_agreements_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_broker_carrier_agreements_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_broker_carrier_agreements_representation_mode_concept_id` | no | representation_mode_concept_id | Soporta la clave foránea fk_broker_carrier_agreements_representation_mode_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_broker_carrier_agreements_relationship_type_concept_id` | no | relationship_type_concept_id | Soporta la clave foránea fk_broker_carrier_agreements_relationship_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_broker_carrier_agreements_branch_id` | no | branch_id | Soporta la clave foránea fk_broker_carrier_agreements_branch_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_broker_carrier_agreements_supervisor_user_id` | no | supervisor_user_id | Soporta la clave foránea fk_broker_carrier_agreements_supervisor_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 
 #### Operaciones que la tocan
 
@@ -780,7 +808,7 @@ Representa disputas sobre reclamos para gestionar revisiones de decisiones de co
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: claim_disputes`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `ClaimDisputes` — `src/modules/insurance/entities/claim_disputes.entity.ts`
-- **Resumen:** 16 columnas · 9 índices · 9 FK salientes · 1 entrantes · 8 operaciones
+- **Resumen:** 16 columnas · 9 índices · 9 FK salientes · 1 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -822,9 +850,9 @@ Representa disputas sobre reclamos para gestionar revisiones de decisiones de co
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_claim_disputes_insurance_claim_id` | no | insurance_claim_id | Soporta la clave foránea fk_claim_disputes_insurance_claim_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «insurance_claim_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_claim_disputes_insurance_claim_id` | no | insurance_claim_id | Soporta la clave foránea fk_claim_disputes_insurance_claim_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «insurance_claim_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_claim_disputes_claim_adjudication_version_id` | no | claim_adjudication_version_id | Soporta la clave foránea fk_claim_disputes_claim_adjudication_version_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «claim_adjudication_version_id», la primera columna del índice _(CONSULTA)_ |
-| `ix_claim_disputes_dispute_type_concept_id` | no | dispute_type_concept_id | Soporta la clave foránea fk_claim_disputes_dispute_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «dispute_type_concept_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_claim_disputes_dispute_type_concept_id` | no | dispute_type_concept_id | Soporta la clave foránea fk_claim_disputes_dispute_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 2 consulta(s) de repositorio filtran u ordenan por «dispute_type_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_claim_disputes_dispute_reason_concept_id` | no | dispute_reason_concept_id | Soporta la clave foránea fk_claim_disputes_dispute_reason_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_claim_disputes_initiated_by_party_type_concept_id` | no | initiated_by_party_type_concept_id | Soporta la clave foránea fk_claim_disputes_initiated_by_party_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_claim_disputes_supporting_evidence_file_id` | no | supporting_evidence_file_id | Soporta la clave foránea fk_claim_disputes_supporting_evidence_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -844,6 +872,7 @@ Representa disputas sobre reclamos para gestionar revisiones de decisiones de co
 | GET /insurance-claims/{id} | LEE | DIRECTA |
 | POST /insurance-claims/{id}/disputes | CREA | DIRECTA |
 | POST /insurance-claims/{id}/disputes | LEE | DIRECTA |
+| GET /insurance/my-claims | LEE | DIRECTA |
 
 #### Gobierno
 
@@ -1675,7 +1704,7 @@ Representa aseguradoras que emiten o administran coberturas de salud utilizadas 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: insurance_carriers`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `InsuranceCarriers` — `src/modules/insurance/entities/insurance_carriers.entity.ts`
-- **Resumen:** 19 columnas · 10 índices · 7 FK salientes · 7 entrantes · 70 operaciones
+- **Resumen:** 19 columnas · 10 índices · 7 FK salientes · 8 entrantes · 71 operaciones
 
 #### Columnas
 
@@ -1713,6 +1742,7 @@ Representa aseguradoras que emiten o administran coberturas de salud utilizadas 
 | hacia | created_by_user_id | iam.users (id) | fk_insurance_carriers_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_insurance_carriers_updated_by_user_id |
 | desde | id | insurance.broker_carrier_agreements (insurance_carrier_id) | fk_broker_carrier_agreements_insurance_carrier_id |
+| desde | id | insurance.insurance_terms_conditions (insurance_carrier_id) | fk_insurance_terms_conditions_insurance_carrier_id |
 | desde | id | insurance.insurance_products (insurance_carrier_id) | fk_insurance_products_insurance_carrier_id |
 | desde | id | insurance.provider_networks (insurance_carrier_id) | fk_provider_networks_insurance_carrier_id |
 | desde | id | insurance.insurance_campaigns (insurance_carrier_id) | fk_insurance_campaigns_insurance_carrier_id |
@@ -1798,6 +1828,7 @@ Representa aseguradoras que emiten o administran coberturas de salud utilizadas 
 | POST /insurance/portability/export | LEE | DIRECTA |
 | GET /insurance/received-claims | LEE | DIRECTA |
 | POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
+| GET /patient-coverages/by-patient/{patientProfileId} | LEE | POR_SQL |
 | GET /practitioner-settlement-batches | LEE | DIRECTA |
 | POST /practitioner-settlement-batches | LEE | DIRECTA |
 | GET /practitioner-settlement-batches/{id} | LEE | DIRECTA |
@@ -1840,7 +1871,7 @@ Detalla servicios, códigos y montos incluidos en reclamos para permitir adjudic
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: insurance_claim_lines`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `InsuranceClaimLines` — `src/modules/insurance/entities/insurance_claim_lines.entity.ts`
-- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 2 entrantes · 19 operaciones
+- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 4 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -1869,13 +1900,15 @@ Detalla servicios, códigos y montos incluidos en reclamos para permitir adjudic
 | hacia | medication_dispensation_line_id | pharmacy_inventory.medication_dispensation_lines (id) | fk_insurance_claim_lines_medication_dispensation_line_id |
 | hacia | inventory_reservation_line_id | pharmacy_inventory.inventory_reservation_lines (id) | fk_insurance_claim_lines_inventory_reservation_line_id |
 | desde | id | insurance.claim_line_adjudications (insurance_claim_line_id) | fk_claim_line_adjudications_insurance_claim_line_id |
+| desde | id | clinical.received_services (insurance_claim_line_id) | fk_received_services_insurance_claim_line_id |
+| desde | id | billing.invoice_lines (insurance_claim_line_id) | fk_invoice_lines_insurance_claim_line_id |
 | desde | id | procedures_perioperative.procedure_charge_items (billing_claim_line_id) | fk_procedure_charge_items_billing_claim_line_id |
 
 #### Índices
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `ix_insurance_claim_lines_insurance_claim_id` | no | insurance_claim_id | Soporta la clave foránea fk_insurance_claim_lines_insurance_claim_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 7 consulta(s) de repositorio filtran u ordenan por «insurance_claim_id», la primera columna del índice _(CONSULTA)_ |
+| `ix_insurance_claim_lines_insurance_claim_id` | no | insurance_claim_id | Soporta la clave foránea fk_insurance_claim_lines_insurance_claim_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 8 consulta(s) de repositorio filtran u ordenan por «insurance_claim_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_insurance_claim_lines_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_insurance_claim_lines_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_insurance_claim_lines_diagnostic_study_offering_id` | no | diagnostic_study_offering_id | Soporta la clave foránea fk_insurance_claim_lines_diagnostic_study_offering_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_insurance_claim_lines_medication_dispensation_line_id` | no | medication_dispensation_line_id | Soporta la clave foránea fk_insurance_claim_lines_medication_dispensation_line_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1887,6 +1920,7 @@ Detalla servicios, códigos y montos incluidos en reclamos para permitir adjudic
 |---|---|---|
 | POST /billing/payments-received:apply | LEE | DIRECTA |
 | POST /billing/simulated/charges/{chargeId}/payment | LEE | DIRECTA |
+| GET /patient-spending/me | LEE | POR_SQL |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
 | POST /insurance-claims | CREA | DIRECTA |
 | POST /insurance-claims | LEE | DIRECTA |
@@ -1928,7 +1962,7 @@ Representa reclamos presentados a aseguradoras por servicios prestados a pacient
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: insurance_claims`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `InsuranceClaims` — `src/modules/insurance/entities/insurance_claims.entity.ts`
-- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 10 entrantes · 26 operaciones
+- **Resumen:** 20 columnas · 12 índices · 11 FK salientes · 13 entrantes · 27 operaciones
 
 #### Columnas
 
@@ -1979,7 +2013,10 @@ Representa reclamos presentados a aseguradoras por servicios prestados a pacient
 | desde | id | insurance.claim_reversals (replacement_claim_id) | fk_claim_reversals_replacement_claim_id |
 | desde | id | audit.insurance_decision_access_log (claim_id) | fk_insurance_decision_access_log_claim_id |
 | desde | id | audit.insurance_claims_history (insurance_claim_id) | fk_insurance_claims_history_insurance_claim_id |
+| desde | id | billing.reimbursements (claim_id) | fk_reimbursements_claim_id |
+| desde | id | billing.billing_document_links (claim_id) | fk_billing_document_links_claim_id |
 | desde | id | pharmacy_inventory.medication_dispensations (insurance_claim_id) | fk_medication_dispensations_insurance_claim_id |
+| desde | id | crm.crm_cases (insurance_claim_id) | fk_crm_cases_insurance_claim_id |
 
 #### Índices
 
@@ -2010,6 +2047,7 @@ Representa reclamos presentados a aseguradoras por servicios prestados a pacient
 | Operación | Efecto | Confianza |
 |---|---|---|
 | GET /accounting/practitioner/simple/summary | LEE | DIRECTA |
+| GET /patient-spending/me | LEE | POR_SQL |
 | GET /diagnostic-results/me/orders | LEE | DIRECTA |
 | GET /insurance-claims | LEE | DIRECTA |
 | POST /insurance-claims | CREA | DIRECTA |
@@ -2059,7 +2097,7 @@ Detalla prestaciones o límites incluidos en cada plan para respaldar verificaci
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: insurance_plan_benefits`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `InsurancePlanBenefits` — `src/modules/insurance/entities/insurance_plan_benefits.entity.ts`
-- **Resumen:** 18 columnas · 6 índices · 6 FK salientes · 0 entrantes · 14 operaciones
+- **Resumen:** 18 columnas · 6 índices · 6 FK salientes · 0 entrantes · 15 operaciones
 
 #### Columnas
 
@@ -2120,6 +2158,7 @@ Detalla prestaciones o límites incluidos en cada plan para respaldar verificaci
 | PUT /insurance-plans/{planId}/benefits/{benefitId} | LEE | DIRECTA |
 | PUT /insurance-plans/{planId}/benefits/{benefitId}/rules | ACTUALIZA | POR_TIPO |
 | PUT /insurance-plans/{planId}/benefits/{benefitId}/rules | LEE | DIRECTA |
+| GET /insurance/my-claims | LEE | DIRECTA |
 | GET /profiles/patients/me | LEE | POR_SQL |
 | PATCH /profiles/patients/me | LEE | POR_SQL |
 | DELETE /profiles/patients/me/photo | LEE | POR_SQL |
@@ -2148,7 +2187,7 @@ Define planes de cobertura y sus condiciones generales para determinar beneficio
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: insurance_plans`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `InsurancePlans` — `src/modules/insurance/entities/insurance_plans.entity.ts`
-- **Resumen:** 16 columnas · 7 índices · 7 FK salientes · 2 entrantes · 38 operaciones
+- **Resumen:** 16 columnas · 7 índices · 7 FK salientes · 3 entrantes · 39 operaciones
 
 #### Columnas
 
@@ -2160,7 +2199,7 @@ Define planes de cobertura y sus condiciones generales para determinar beneficio
 | 4 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
 | 5 | `plan_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
 | 6 | `currency_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 7 | `monthly_premium_amount` | `numeric` | Opcional | + v4.2.14 — prima de lista mensual del plan, en la moneda del plan (`currency_concept_id`). Es el denominador ESTIMADO del loss ratio del tablero de siniestralidad (registro de procesos, Aseguradora 6.3; T-25): primas devengadas = coberturas vigentes × prima × meses prorrateados. No es la prima de cada póliza. Nullable: la carga la aseguradora por la consola de planes (`POST .../plans`, `PUT /insurance-plans/:id/premium`); nadie la inventa en seeds. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_26_insurance.puml:127`)_ | coincide |
+| 7 | `monthly_premium_amount` | `numeric` | Opcional | + v4.2.14 — prima de lista mensual del plan, en la moneda del plan (`currency_concept_id`). Es el denominador ESTIMADO del loss ratio del tablero de siniestralidad (registro de procesos, Aseguradora 6.3; T-25): primas devengadas = coberturas vigentes × prima × meses prorrateados. No es la prima de cada póliza. Nullable: la carga la aseguradora por la consola de planes (`POST .../plans`, `PUT /insurance-plans/:id/premium`); nadie la inventa en seeds. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_26_insurance.puml:177`)_ | coincide |
 | 8 | `effective_from` | `date` | Opcional | _sin dato_ | coincide |
 | 9 | `effective_to` | `date` | Opcional | _sin dato_ | coincide |
 | 10 | `policy_document_file_id` | `uuid` | Clave foránea → common.files.id; Opcional | _sin dato_ | coincide |
@@ -2182,6 +2221,7 @@ Define planes de cobertura y sus condiciones generales para determinar beneficio
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_insurance_plans_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_insurance_plans_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_insurance_plans_updated_by_user_id |
+| desde | id | insurance.insurance_terms_conditions (insurance_plan_id) | fk_insurance_terms_conditions_insurance_plan_id |
 | desde | id | insurance.insurance_plan_benefits (insurance_plan_id) | fk_insurance_plan_benefits_insurance_plan_id |
 | desde | id | insurance.patient_coverages (insurance_plan_id) | fk_patient_coverages_insurance_plan_id |
 
@@ -2228,6 +2268,7 @@ Define planes de cobertura y sus condiciones generales para determinar beneficio
 | GET /insurance/received-claims | LEE | DIRECTA |
 | POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
 | POST /patient-coverages | LEE | DIRECTA |
+| GET /patient-coverages/by-patient/{patientProfileId} | LEE | POR_SQL |
 | POST /prior-authorization-requests | LEE | DIRECTA |
 | GET /prior-authorization-requests/{id} | LEE | DIRECTA |
 | POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
@@ -2263,7 +2304,7 @@ Cataloga productos de seguro de salud disponibles para contratación y asociaci�
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: insurance_products`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `InsuranceProducts` — `src/modules/insurance/entities/insurance_products.entity.ts`
-- **Resumen:** 13 columnas · 7 índices · 7 FK salientes · 1 entrantes · 34 operaciones
+- **Resumen:** 19 columnas · 7 índices · 7 FK salientes · 3 entrantes · 35 operaciones
 
 #### Columnas
 
@@ -2282,6 +2323,12 @@ Cataloga productos de seguro de salud disponibles para contratación y asociaci�
 | 11 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 12 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 13 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/insurance/entities/insurance_products.entity.ts:92`)_ | coincide |
+| 14 | `version_number` | `integer` | Opcional | + v4.2.49 (INS-SRV-007 / INS-SRV-013 / INS-SRV-014, issues #57 y #60): version y vigencia del producto (los planes ya tenian vigencia) y sus requisitos de contratacion: edad minima, maxima y requisitos de elegibilidad. Todo nullable: el producto existente no los declara. El historial de versiones vive en audit.insurance_products_history. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_26_insurance.puml:157`)_ | **AUSENTE_EN_ORM** |
+| 15 | `effective_from` | `date` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 16 | `effective_to` | `date` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 17 | `min_age_years` | `integer` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 18 | `max_age_years` | `integer` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
+| 19 | `eligibility_requirements` | `jsonb` | Opcional | _sin dato_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -2294,7 +2341,9 @@ Cataloga productos de seguro de salud disponibles para contratación y asociaci�
 | hacia | status_concept_id | terminology.catalog_concepts (id) | fk_insurance_products_status_concept_id |
 | hacia | created_by_user_id | iam.users (id) | fk_insurance_products_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_insurance_products_updated_by_user_id |
+| desde | id | insurance.insurance_terms_conditions (insurance_product_id) | fk_insurance_terms_conditions_insurance_product_id |
 | desde | id | insurance.insurance_plans (insurance_product_id) | fk_insurance_plans_insurance_product_id |
+| desde | id | audit.insurance_products_history (insurance_product_id) | fk_insurance_products_history_insurance_product_id |
 
 #### Índices
 
@@ -2307,6 +2356,13 @@ Cataloga productos de seguro de salud disponibles para contratación y asociaci�
 | `ix_insurance_products_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_insurance_products_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_insurance_products_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_insurance_products_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_insurance_products_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_insurance_products_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ck_insurance_products_age_range` | CHECK | CHECK ((COALESCE("min_age_years", 0) >= 0 AND ("max_age_years" IS NULL OR "max_age_years" >= COALESCE("min_age_years", 0)))) |
+| `ck_insurance_products_valid_period` | CHECK | CHECK (("effective_from" IS NULL OR "effective_to" IS NULL OR "effective_from" <= "effective_to")) |
 
 #### Operaciones que la tocan
 
@@ -2335,6 +2391,7 @@ Cataloga productos de seguro de salud disponibles para contratación y asociaci�
 | GET /insurance/campaigns/patient/{patientProfileId} | LEE | POR_SQL |
 | POST /insurance/patients/search | LEE | POR_SQL |
 | POST /insurance/portability/export | LEE | POR_SQL |
+| GET /patient-coverages/by-patient/{patientProfileId} | LEE | POR_SQL |
 | POST /prior-authorization-requests | LEE | DIRECTA |
 | GET /prior-authorization-requests/{id} | LEE | DIRECTA |
 | POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
@@ -2519,6 +2576,91 @@ Detalla discrepancias o coincidencias procesadas en conciliaciones de seguros.
 
 ---
 
+### insurance_terms_conditions
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
+- **Entidad del ORM:** **sin entidad** (deriva)
+- **Resumen:** 19 columnas · 11 índices · 11 FK salientes · 0 entrantes · 0 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 2 | `insurance_carrier_id` | `uuid` | Clave foránea → insurance.insurance_carriers.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 3 | `title` | `varchar` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 4 | `version_number` | `integer` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 5 | `document_file_id` | `uuid` | Clave foránea → common.files.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 6 | `insurance_product_id` | `uuid` | Clave foránea → insurance.insurance_products.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 7 | `insurance_plan_id` | `uuid` | Clave foránea → insurance.insurance_plans.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 8 | `service_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 9 | `contract_id` | `uuid` | Clave foránea → erp.contracts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 10 | `jurisdiction_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 11 | `client_type_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 12 | `effective_from` | `date` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 13 | `effective_to` | `date` | Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 14 | `status_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 15 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 16 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+| 17 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 18 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | **SIN_ENTIDAD** |
+| 19 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | **SIN_ENTIDAD** |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | insurance_carrier_id | insurance.insurance_carriers (id) | fk_insurance_terms_conditions_insurance_carrier_id |
+| hacia | insurance_product_id | insurance.insurance_products (id) | fk_insurance_terms_conditions_insurance_product_id |
+| hacia | insurance_plan_id | insurance.insurance_plans (id) | fk_insurance_terms_conditions_insurance_plan_id |
+| hacia | document_file_id | common.files (id) | fk_insurance_terms_conditions_document_file_id |
+| hacia | service_concept_id | terminology.catalog_concepts (id) | fk_insurance_terms_conditions_service_concept_id |
+| hacia | contract_id | erp.contracts (id) | fk_insurance_terms_conditions_contract_id |
+| hacia | jurisdiction_concept_id | terminology.catalog_concepts (id) | fk_insurance_terms_conditions_jurisdiction_concept_id |
+| hacia | client_type_concept_id | terminology.catalog_concepts (id) | fk_insurance_terms_conditions_client_type_concept_id |
+| hacia | status_concept_id | terminology.catalog_concepts (id) | fk_insurance_terms_conditions_status_concept_id |
+| hacia | created_by_user_id | iam.users (id) | fk_insurance_terms_conditions_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_insurance_terms_conditions_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_insurance_terms_conditions_insurance_carrier_id` | no | insurance_carrier_id | Soporta la clave foránea fk_insurance_terms_conditions_insurance_carrier_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_document_file_id` | no | document_file_id | Soporta la clave foránea fk_insurance_terms_conditions_document_file_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_insurance_product_id` | no | insurance_product_id | Soporta la clave foránea fk_insurance_terms_conditions_insurance_product_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_insurance_plan_id` | no | insurance_plan_id | Soporta la clave foránea fk_insurance_terms_conditions_insurance_plan_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_service_concept_id` | no | service_concept_id | Soporta la clave foránea fk_insurance_terms_conditions_service_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_contract_id` | no | contract_id | Soporta la clave foránea fk_insurance_terms_conditions_contract_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_jurisdiction_concept_id` | no | jurisdiction_concept_id | Soporta la clave foránea fk_insurance_terms_conditions_jurisdiction_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_client_type_concept_id` | no | client_type_concept_id | Soporta la clave foránea fk_insurance_terms_conditions_client_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_insurance_terms_conditions_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_insurance_terms_conditions_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_insurance_terms_conditions_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_insurance_terms_conditions_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+_Ninguna operación HTTP la toca según el análisis estático (puede usarla un worker, un trigger o una migración)._
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
 ### network_provider_memberships
 
 #### Vista general
@@ -2625,7 +2767,7 @@ Registra coberturas de seguro asociadas a pacientes para apoyar elegibilidad, au
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: patient_coverages`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `PatientCoverages` — `src/modules/insurance/entities/patient_coverages.entity.ts`
-- **Resumen:** 18 columnas · 10 índices · 9 FK salientes · 7 entrantes · 36 operaciones
+- **Resumen:** 18 columnas · 10 índices · 9 FK salientes · 7 entrantes · 37 operaciones
 
 #### Columnas
 
@@ -2714,6 +2856,7 @@ Registra coberturas de seguro asociadas a pacientes para apoyar elegibilidad, au
 | POST /insurance/received-claims/{id}/decision | LEE | DIRECTA |
 | POST /patient-coverages | CREA | DIRECTA |
 | POST /patient-coverages | LEE | DIRECTA |
+| GET /patient-coverages/by-patient/{patientProfileId} | LEE | POR_SQL |
 | GET /patient-coverages/me | LEE | DIRECTA |
 | POST /prior-authorization-requests | LEE | DIRECTA |
 | GET /prior-authorization-requests/{id} | LEE | DIRECTA |
@@ -2826,7 +2969,7 @@ Registra decisiones del asegurador sobre autorizaciones previas para hacer visib
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: prior_authorization_determinations`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `PriorAuthorizationDeterminations` — `src/modules/insurance/entities/prior_authorization_determinations.entity.ts`
-- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 0 entrantes · 7 operaciones
+- **Resumen:** 15 columnas · 7 índices · 6 FK salientes · 0 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -2878,6 +3021,7 @@ Registra decisiones del asegurador sobre autorizaciones previas para hacer visib
 | POST /insurance-claims | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
 | POST /insurance-claims/quote | LEE | DIRECTA |
+| GET /insurance/my-claims | LEE | DIRECTA |
 | GET /prior-authorization-requests/{id} | LEE | DIRECTA |
 | POST /prior-authorization-requests/{id}/determinations | CREA | DIRECTA |
 | POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
@@ -2906,7 +3050,7 @@ Desglosa servicios o procedimientos incluidos en una solicitud de autorización 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: prior_authorization_items`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `PriorAuthorizationItems` — `src/modules/insurance/entities/prior_authorization_items.entity.ts`
-- **Resumen:** 10 columnas · 5 índices · 5 FK salientes · 1 entrantes · 7 operaciones
+- **Resumen:** 10 columnas · 5 índices · 5 FK salientes · 1 entrantes · 8 operaciones
 
 #### Columnas
 
@@ -2951,6 +3095,7 @@ Desglosa servicios o procedimientos incluidos en una solicitud de autorización 
 | POST /insurance-claims | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
 | POST /insurance-claims/quote | LEE | DIRECTA |
+| GET /insurance/my-claims | LEE | DIRECTA |
 | POST /prior-authorization-requests | CREA | DIRECTA |
 | GET /prior-authorization-requests/{id} | LEE | DIRECTA |
 | POST /prior-authorization-requests/{id}/determinations | LEE | DIRECTA |
@@ -2979,7 +3124,7 @@ Representa solicitudes de autorización previa para servicios que requieren apro
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_26_insurance.puml: prior_authorization_requests`
 - **Dominio:** Financiero y ERP · **Diagrama:** `Mantra Core Health Context/modules/diagram_26_insurance.puml` · **DDL:** `SQL/26_insurance/02_tables.sql`
 - **Entidad del ORM:** `PriorAuthorizationRequests` — `src/modules/insurance/entities/prior_authorization_requests.entity.ts`
-- **Resumen:** 16 columnas · 10 índices · 9 FK salientes · 4 entrantes · 8 operaciones
+- **Resumen:** 16 columnas · 10 índices · 9 FK salientes · 4 entrantes · 9 operaciones
 
 #### Columnas
 
@@ -3049,6 +3194,7 @@ Representa solicitudes de autorización previa para servicios que requieren apro
 | POST /insurance-claims | LEE | DIRECTA |
 | POST /insurance-claims/{id}/patient-invoice | LEE | DIRECTA |
 | POST /insurance-claims/quote | LEE | DIRECTA |
+| GET /insurance/my-claims | LEE | DIRECTA |
 | POST /prior-authorization-requests | CREA | DIRECTA |
 | GET /prior-authorization-requests/{id} | LEE | DIRECTA |
 | POST /prior-authorization-requests/{id}/determinations | ACTUALIZA | POR_TIPO |

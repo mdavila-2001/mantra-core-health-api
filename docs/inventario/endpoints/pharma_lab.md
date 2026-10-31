@@ -206,10 +206,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `directory.tenants` | LEE | LEE | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:78` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.create → PharmaLabOrganizationService.createLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → OrganizationRepository.createLab | `src/modules/pharma_lab/repositories/organization.repository.ts:70` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.create → PharmaLabOrganizationService.createLab → OrganizationRepository.findLabByTenant | `src/modules/pharma_lab/repositories/organization.repository.ts:35` |
 
@@ -411,9 +411,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → PharmaLabAccessService.requireAdministeredLab → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
 | `pharma_lab.pharma_labs` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaLabsController.update → PharmaLabOrganizationService.updateLab | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:143` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabsController.update → PharmaLabOrganizationService.updateLab → PharmaLabAccessService.requireAdministeredLab → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
@@ -525,9 +525,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `accounting.journal_transactions` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation | `src/modules/pharma_lab/services/pharma-analytics.service.ts:92` |
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_cost_allocations` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → AnalyticsRepository.createAllocation | `src/modules/pharma_lab/repositories/analytics.repository.ts:24` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | PharmaLabSocialController.allocate → PharmaAnalyticsService.createAllocation → CatalogRepository.findProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:22` |
@@ -913,9 +913,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.informational_materials` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → CatalogRepository.createMaterial | `src/modules/pharma_lab/repositories/catalog.repository.ts:134` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | PharmaCatalogController.createMaterial → PharmaCatalogService.createMaterial → PharmaCatalogService.requireProduct → CatalogRepository.findProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:22` |
@@ -1318,9 +1318,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.informational_materials` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial | `src/modules/pharma_lab/services/pharma-catalog.service.ts:447` |
 | `pharma_lab.informational_materials` | LEE | LEE | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → PharmaCatalogService.requireMaterial → CatalogRepository.findMaterial | `src/modules/pharma_lab/repositories/catalog.repository.ts:87` |
 | `pharma_lab.material_approvals` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.decideMaterial → PharmaCatalogService.decideMaterial → CatalogRepository.createApproval | `src/modules/pharma_lab/repositories/catalog.repository.ts:189` |
@@ -1427,9 +1427,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.informational_materials` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview | `src/modules/pharma_lab/services/pharma-catalog.service.ts:396` |
 | `pharma_lab.informational_materials` | LEE | LEE | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → PharmaCatalogService.requireMaterial → CatalogRepository.findMaterial | `src/modules/pharma_lab/repositories/catalog.repository.ts:87` |
 | `pharma_lab.material_assets` | LEE | LEE | DIRECTA | PharmaCatalogController.submitMaterial → PharmaCatalogService.submitMaterialForReview → CatalogRepository.listAssets | `src/modules/pharma_lab/repositories/catalog.repository.ts:174` |
@@ -1614,12 +1614,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `authz.roles` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
 | `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
-| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.users` | LEE | LEE | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:162` |
 | `pharma_lab.medical_visitor_products` | BORRA | BORRA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:158` |
 | `pharma_lab.medical_visitor_products` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.create → MedicalVisitorsService.createVisitor → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:160` |
@@ -1760,9 +1760,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.medical_visitor_products` | BORRA | BORRA | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:158` |
 | `pharma_lab.medical_visitor_products` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → VisitorsRepository.replaceProducts | `src/modules/pharma_lab/repositories/visitors.repository.ts:160` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | MedicalVisitorsController.setProducts → MedicalVisitorsService.setProducts → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
@@ -1870,12 +1870,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `authz.roles` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → RolesRepository.findById | `src/modules/authz/repositories/roles.repository.ts:61` |
 | `authz.user_role_assignments` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.create | `src/modules/authz/repositories/user-role-assignments.repository.ts:123` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → MedicalVisitorsService.assignVisitorRole → AuthzGrantsService.assignRole → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
-| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `iam.users` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:618` |
 | `iam.users` | LEE | LEE | DIRECTA | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:616` |
 | `pharma_lab.medical_visitors` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.relink → MedicalVisitorsService.relinkVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:605` |
@@ -1984,9 +1984,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.medical_visitor_specialties` | BORRA | BORRA | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → VisitorsRepository.replaceSpecialties | `src/modules/pharma_lab/repositories/visitors.repository.ts:113` |
 | `pharma_lab.medical_visitor_specialties` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → VisitorsRepository.replaceSpecialties | `src/modules/pharma_lab/repositories/visitors.repository.ts:115` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | MedicalVisitorsController.setSpecialties → MedicalVisitorsService.setSpecialties → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
@@ -2092,8 +2092,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `authz.roles` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → MedicalVisitorsService.revokeVisitorRole → RolesRepository.findByCode | `src/modules/authz/repositories/roles.repository.ts:72` |
 | `authz.user_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → MedicalVisitorsService.revokeVisitorRole → UserRoleAssignmentsRepository.revoke | `src/modules/authz/repositories/user-role-assignments.repository.ts:166` |
 | `authz.user_role_assignments` | LEE | LEE | DIRECTA | MedicalVisitorsController.unlink → MedicalVisitorsService.unlinkVisitor → MedicalVisitorsService.revokeVisitorRole → UserRoleAssignmentsRepository.findActive | `src/modules/authz/repositories/user-role-assignments.repository.ts:73` |
@@ -2215,9 +2215,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.medical_visitors` | ESCRIBE | ACTUALIZA | POR_TIPO | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor | `src/modules/pharma_lab/services/medical-visitors.service.ts:291` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | MedicalVisitorsController.verify → MedicalVisitorsService.verifyVisitor → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
@@ -2417,9 +2417,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → PharmaLabNotificationsService.notifyAll → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → PharmaLabOrganizationService.listActiveStaffUserIds → OrganizationRepository.listStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:133` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmacovigilanceController.createReport → PharmacovigilanceService.createReport → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
@@ -2647,9 +2647,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharmacovigilance_actions` | ESCRIBE | CREA | DIRECTA | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction → PharmacovigilanceRepository.appendAction | `src/modules/pharma_lab/repositories/pharmacovigilance.repository.ts:101` |
 | `pharma_lab.pharmacovigilance_reports` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmacovigilanceController.addAction → PharmacovigilanceService.addAction | `src/modules/pharma_lab/services/pharmacovigilance.service.ts:221` |
@@ -2859,9 +2859,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.createProduct → PharmaCatalogService.createProduct → CatalogRepository.createProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:69` |
 
@@ -2992,9 +2992,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct | `src/modules/pharma_lab/services/pharma-catalog.service.ts:165` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | PharmaCatalogController.updateProduct → PharmaCatalogService.updateProduct → PharmaCatalogService.requireProduct → CatalogRepository.findProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:22` |
@@ -3108,9 +3108,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.pharma_products` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus | `src/modules/pharma_lab/services/pharma-catalog.service.ts:230` |
 | `pharma_lab.pharma_products` | LEE | LEE | DIRECTA | PharmaCatalogController.changeProductStatus → PharmaCatalogService.changeProductStatus → PharmaCatalogService.requireProduct → CatalogRepository.findProduct | `src/modules/pharma_lab/repositories/catalog.repository.ts:22` |
@@ -3309,9 +3309,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.regulatory_document_versions` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → RegulatoryRepository.createVersion | `src/modules/pharma_lab/repositories/regulatory.repository.ts:99` |
 | `pharma_lab.regulatory_documents` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.create → RegulatoryDocumentsService.createDocument → RegulatoryRepository.createDocument | `src/modules/pharma_lab/repositories/regulatory.repository.ts:81` |
@@ -3624,9 +3624,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.regulatory_document_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument | `src/modules/pharma_lab/services/regulatory-documents.service.ts:214` |
 | `pharma_lab.regulatory_document_versions` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.invalidate → RegulatoryDocumentsService.invalidateDocument → RegulatoryRepository.findCurrentVersion | `src/modules/pharma_lab/repositories/regulatory.repository.ts:117` |
@@ -3730,9 +3730,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.regulatory_document_versions` | ESCRIBE | ACTUALIZA | POR_TIPO | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion | `src/modules/pharma_lab/services/regulatory-documents.service.ts:149` |
 | `pharma_lab.regulatory_document_versions` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.addVersion → RegulatoryDocumentsService.addVersion → RegulatoryRepository.createVersion | `src/modules/pharma_lab/repositories/regulatory.repository.ts:99` |
@@ -3850,9 +3850,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.regulatory_document_access_log` | ESCRIBE | CREA | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → RegulatoryRepository.appendAccess | `src/modules/pharma_lab/repositories/regulatory.repository.ts:153` |
 | `pharma_lab.regulatory_document_versions` | LEE | LEE | DIRECTA | RegulatoryDocumentsController.download → RegulatoryDocumentsService.registerDownload → RegulatoryRepository.listVersions | `src/modules/pharma_lab/repositories/regulatory.repository.ts:134` |
@@ -4118,9 +4118,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:170` |
 | `pharma_lab.pharma_lab_staff` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → OrganizationRepository.createStaff | `src/modules/pharma_lab/repositories/organization.repository.ts:151` |
 | `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.linkStaff → PharmaLabOrganizationService.linkStaff → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
@@ -4242,9 +4242,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:170` |
 | `pharma_lab.pharma_lab_staff` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:302` |
 | `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.updatePermissions → PharmaLabOrganizationService.updateStaffPermissions → PharmaLabAccessService.requireAdministeredLab → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
@@ -4354,9 +4354,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_lab_link_events` | ESCRIBE | CREA | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → OrganizationRepository.appendLinkEvent | `src/modules/pharma_lab/repositories/organization.repository.ts:170` |
 | `pharma_lab.pharma_lab_staff` | ESCRIBE | ACTUALIZA | POR_TIPO | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff | `src/modules/pharma_lab/services/pharma-lab-organization.service.ts:355` |
 | `pharma_lab.pharma_lab_staff` | LEE | LEE | DIRECTA | PharmaLabsController.unlinkStaff → PharmaLabOrganizationService.unlinkStaff → PharmaLabAccessService.requireAdministeredLab → OrganizationRepository.findStaffByUser | `src/modules/pharma_lab/repositories/organization.repository.ts:101` |
@@ -4550,12 +4550,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `community.public_profiles` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaSocialService.ensurePublicProfile | `src/modules/pharma_lab/services/pharma-social.service.ts:273` |
 | `community.public_profiles` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaSocialService.ensurePublicProfile | `src/modules/pharma_lab/services/pharma-social.service.ts:266` |
 | `community.social_posts` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide | `src/modules/pharma_lab/services/pharma-social.service.ts:186` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabSocialController.decidePost → PharmaSocialService.decide → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaLabAccessService.requireVisitorOfLab → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabSocialController.decidePost → PharmaSocialService.decide → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
@@ -4875,9 +4875,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PharmaLabSocialController.submitPost → PharmaSocialService.submit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.informational_materials` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → CatalogRepository.findMaterial | `src/modules/pharma_lab/repositories/catalog.repository.ts:87` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → PharmaLabAccessService.requireOperatingVisitor → VisitorsRepository.findVisitorByUser | `src/modules/pharma_lab/repositories/visitors.repository.ts:44` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | PharmaLabSocialController.submitPost → PharmaSocialService.submit → PharmaLabAccessService.requireOperatingVisitor → PharmaLabAccessService.requireVisitorOperable → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
@@ -5049,9 +5049,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.doctor_visit_blocks` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.createBlock → VisitAgendaService.createBlock → AgendaRepository.createBlock | `src/modules/pharma_lab/repositories/agenda.repository.ts:103` |
 
 ### Cuerpo — DTO `CreateVisitBlockDto` · `application/json`
@@ -5144,9 +5144,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.doctor_visit_blocks` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock | `src/modules/pharma_lab/services/visit-agenda.service.ts:268` |
 | `pharma_lab.doctor_visit_blocks` | LEE | LEE | DIRECTA | VisitAgendaController.liftBlock → VisitAgendaService.liftBlock → AgendaRepository.findBlock | `src/modules/pharma_lab/repositories/agenda.repository.ts:118` |
 
@@ -5363,9 +5363,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.doctor_visit_policies` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy | `src/modules/pharma_lab/services/visit-agenda.service.ts:129` |
 | `pharma_lab.doctor_visit_policies` | ESCRIBE | CREA | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AgendaRepository.createPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:39` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitAgendaController.putPolicy → VisitAgendaService.putPolicy → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
@@ -5503,9 +5503,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRecordsController.create → VisitRecordsService.createRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.informational_materials` | LEE | LEE | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → VisitRecordsService.resolveApprovedMaterials → CatalogRepository.findMaterialsByIds | `src/modules/pharma_lab/repositories/catalog.repository.ts:102` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → PharmaLabAccessService.requireOperatingVisitor → VisitorsRepository.findVisitorByUser | `src/modules/pharma_lab/repositories/visitors.repository.ts:44` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.create → VisitRecordsService.createRecord → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
@@ -5639,9 +5639,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.visit_records` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitRecordsController.confirm → VisitRecordsService.confirmRecord | `src/modules/pharma_lab/services/visit-records.service.ts:254` |
 | `pharma_lab.visit_records` | LEE | LEE | DIRECTA | VisitRecordsController.confirm → VisitRecordsService.confirmRecord → VisitRecordsService.requireDoctorRecord → VisitsRepository.findRecord | `src/modules/pharma_lab/repositories/visits.repository.ts:220` |
 
@@ -5743,9 +5743,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRecordsController.rate → VisitRecordsService.rateVisit → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.visit_ratings` | ESCRIBE | CREA | DIRECTA | VisitRecordsController.rate → VisitRecordsService.rateVisit → VisitsRepository.createRating | `src/modules/pharma_lab/repositories/visits.repository.ts:348` |
@@ -6120,9 +6120,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.create → VisitRequestsService.createRequest → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.doctor_visit_blocks` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → VisitAgendaService.assertVisitorAccepted → AgendaRepository.findApplicableBlock | `src/modules/pharma_lab/repositories/agenda.repository.ts:154` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → VisitAgendaService.assertVisitorAccepted → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
 | `pharma_lab.doctor_visit_windows` | LEE | LEE | DIRECTA | VisitRequestsController.create → VisitRequestsService.createRequest → VisitAgendaService.assertSlotAvailable → AgendaRepository.listWindows | `src/modules/pharma_lab/repositories/agenda.repository.ts:57` |
@@ -6362,9 +6362,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → VisitRequestsService.notifyVisitor → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → VisitRequestsService.notifyVisitor → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.visit_request_events` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.accept → VisitRequestsService.accept → VisitRequestsService.transitionByDoctor → VisitsRepository.appendRequestEvent | `src/modules/pharma_lab/repositories/visits.repository.ts:187` |
@@ -6465,9 +6465,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.cancel → VisitRequestsService.cancel → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → VisitAgendaService.getPublishedAgenda → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
 | `pharma_lab.doctor_visit_windows` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → VisitAgendaService.getPublishedAgenda → AgendaRepository.listWindows | `src/modules/pharma_lab/repositories/agenda.repository.ts:57` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.cancel → VisitRequestsService.cancel → VisitorsRepository.findVisitorByUser | `src/modules/pharma_lab/repositories/visitors.repository.ts:44` |
@@ -6573,9 +6573,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → VisitAgendaService.assertSlotAvailable → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
 | `pharma_lab.doctor_visit_windows` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → VisitAgendaService.assertSlotAvailable → AgendaRepository.listWindows | `src/modules/pharma_lab/repositories/agenda.repository.ts:57` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.proposeTime → VisitRequestsService.proposeTime → VisitRequestsService.notifyVisitor → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
@@ -6690,9 +6690,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → VisitRequestsService.notifyVisitor → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → VisitRequestsService.notifyVisitor → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.visit_request_events` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reject → VisitRequestsService.reject → VisitRequestsService.transitionByDoctor → VisitsRepository.appendRequestEvent | `src/modules/pharma_lab/repositories/visits.repository.ts:187` |
@@ -6793,9 +6793,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → VisitRequestsService.notifyVisitor → VisitorsRepository.findVisitor | `src/modules/pharma_lab/repositories/visitors.repository.ts:30` |
 | `pharma_lab.pharma_lab_notices` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → VisitRequestsService.notifyVisitor → PharmaLabNotificationsService.notify | `src/modules/pharma_lab/services/pharma-lab-notifications.service.ts:58` |
 | `pharma_lab.visit_request_events` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.requestInfo → VisitRequestsService.requestInfo → VisitsRepository.appendRequestEvent | `src/modules/pharma_lab/repositories/visits.repository.ts:187` |
@@ -6895,9 +6895,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitRequestsController.reschedule → VisitRequestsService.reschedule → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.doctor_visit_policies` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → VisitAgendaService.assertSlotAvailable → AgendaRepository.findPolicy | `src/modules/pharma_lab/repositories/agenda.repository.ts:25` |
 | `pharma_lab.doctor_visit_windows` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → VisitAgendaService.assertSlotAvailable → AgendaRepository.listWindows | `src/modules/pharma_lab/repositories/agenda.repository.ts:57` |
 | `pharma_lab.medical_visitors` | LEE | LEE | DIRECTA | VisitRequestsController.reschedule → VisitRequestsService.reschedule → PharmaLabAccessService.requireOperatingVisitor → VisitorsRepository.findVisitorByUser | `src/modules/pharma_lab/repositories/visitors.repository.ts:44` |
@@ -7281,9 +7281,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitSurveysController.create → VisitSurveysService.createSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → PharmaLabAccessService.requireActiveLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.visit_survey_questions` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → SurveysRepository.createQuestion | `src/modules/pharma_lab/repositories/surveys.repository.ts:100` |
 | `pharma_lab.visit_surveys` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.create → VisitSurveysService.createSurvey → SurveysRepository.createSurvey | `src/modules/pharma_lab/repositories/surveys.repository.ts:82` |
@@ -7419,9 +7419,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitSurveysController.close → VisitSurveysService.closeSurvey → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.pharma_labs` | LEE | LEE | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → PharmaLabAccessService.requireLab → OrganizationRepository.findLab | `src/modules/pharma_lab/repositories/organization.repository.ts:21` |
 | `pharma_lab.visit_surveys` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitSurveysController.close → VisitSurveysService.closeSurvey | `src/modules/pharma_lab/services/visit-surveys.service.ts:158` |
 | `pharma_lab.visit_surveys` | LEE | LEE | DIRECTA | VisitSurveysController.close → VisitSurveysService.closeSurvey → VisitSurveysService.requireSurvey → SurveysRepository.findSurvey | `src/modules/pharma_lab/repositories/surveys.repository.ts:23` |
@@ -7743,9 +7743,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`)
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | VisitSurveysController.submit → VisitSurveysService.submitResponse → AuditTrailService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 | `pharma_lab.visit_survey_answers` | ESCRIBE | CREA | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → SurveysRepository.createAnswer | `src/modules/pharma_lab/repositories/surveys.repository.ts:204` |
 | `pharma_lab.visit_survey_questions` | LEE | LEE | DIRECTA | VisitSurveysController.submit → VisitSurveysService.submitResponse → SurveysRepository.listQuestions | `src/modules/pharma_lab/repositories/surveys.repository.ts:122` |
 | `pharma_lab.visit_survey_responses` | ESCRIBE | ACTUALIZA | POR_TIPO | VisitSurveysController.submit → VisitSurveysService.submitResponse | `src/modules/pharma_lab/services/visit-surveys.service.ts:310` |

@@ -2,10 +2,10 @@
 
 # Endpoints del módulo `iam`
 
-Referencia exhaustiva de 40 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 56 operación(es) del módulo `iam`, derivada del contrato OpenAPI y del código TypeScript.
 
-- **Etiquetas OpenAPI:** `iam-auth`, `iam-onboarding-drafts`, `iam-users`
-- **Controladores:** `IamAccountSecurityController`, `IamAuthController`, `IamOnboardingDraftsController`, `IamUsersController`
+- **Etiquetas OpenAPI:** `iam-auth`, `iam-onboarding-drafts`, `iam-session-policies`, `iam-users`
+- **Controladores:** `IamAccessRescueController`, `IamAccountSecurityController`, `IamAuthController`, `IamOnboardingDraftsController`, `IamStepUpController`, `IamUsersController`, `IpAccessRulesController`, `SessionPoliciesController`
 - **Contrato fuente:** [openapi.json](../openapi.json)
 - **Convenciones transversales:** [README.md](README.md)
 
@@ -28,29 +28,45 @@ Referencia exhaustiva de 40 operación(es) del módulo `iam`, derivada del contr
 15. [POST /iam/auth/upload-registration-logo](#15-post-iam-auth-upload-registration-logo) — Pre-cargar el logo del consultorio propio para el registro
 16. [POST /iam/auth/upload-registration-signature-image](#16-post-iam-auth-upload-registration-signature-image) — Pre-cargar una imagen de firma o sello para el registro
 17. [POST /iam/auth/verify-email](#17-post-iam-auth-verify-email) — Verificar el correo con el token recibido
-18. [GET /iam/me/sessions](#18-get-iam-me-sessions) — Listar mis sesiones abiertas
-19. [POST /iam/me/sessions/{id}/revoke](#19-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
-20. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#20-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
-21. [GET /iam/onboarding-drafts/{formType}/{draftId}](#21-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
-22. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#22-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
-23. [GET /iam/users](#23-get-iam-users) — Listado paginado de usuarios (obsoleto)
-24. [POST /iam/users](#24-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
-25. [GET /iam/users/{id}](#25-get-iam-users-id) — Ficha de un usuario
-26. [POST /iam/users/{id}/anonymize](#26-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
-27. [GET /iam/users/{id}/credentials](#27-get-iam-users-id-credentials) — Credenciales del usuario
-28. [POST /iam/users/{id}/credentials/{cid}/revoke](#28-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
-29. [POST /iam/users/{id}/credentials/federated](#29-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
-30. [GET /iam/users/{id}/devices](#30-get-iam-users-id-devices) — Dispositivos del usuario
-31. [POST /iam/users/{id}/devices](#31-post-iam-users-id-devices) — Registrar un dispositivo del usuario
-32. [GET /iam/users/{id}/global-roles](#32-get-iam-users-id-global-roles) — Roles globales del usuario
-33. [POST /iam/users/{id}/global-roles](#33-post-iam-users-id-global-roles) — Conceder o revocar un rol global
-34. [POST /iam/users/{id}/lock](#34-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
-35. [GET /iam/users/{id}/mfa-factors](#35-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
-36. [POST /iam/users/{id}/mfa-factors](#36-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
-37. [GET /iam/users/{id}/sessions](#37-get-iam-users-id-sessions) — Sesiones del usuario
-38. [POST /iam/users/assisted-practitioner-registration](#38-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
-39. [POST /iam/users/assisted-registration](#39-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
-40. [POST /iam/users/search](#40-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
+18. [POST /iam/me/devices/{id}/confirm](#18-post-iam-me-devices-id-confirm) — Reconocer un dispositivo propio («Fui yo»)
+19. [POST /iam/me/devices/{id}/confirm-code](#19-post-iam-me-devices-id-confirm-code) — Enviar al correo verificado el código para reconocer un dispositivo
+20. [POST /iam/me/devices/{id}/not-me](#20-post-iam-me-devices-id-not-me) — No reconocer un dispositivo («No fui yo») y cerrar las otras sesiones
+21. [GET /iam/me/mfa](#21-get-iam-me-mfa) — Estado de mi verificación en dos pasos
+22. [POST /iam/me/mfa/{factorId}/revoke](#22-post-iam-me-mfa-factorid-revoke) — Quitar uno de mis factores de segundo paso
+23. [POST /iam/me/mfa/totp](#23-post-iam-me-mfa-totp) — Dar de alta mi app autenticadora (devuelve el secreto una vez)
+24. [POST /iam/me/mfa/totp/{factorId}/confirm](#24-post-iam-me-mfa-totp-factorid-confirm) — Confirmar mi app autenticadora con un código
+25. [GET /iam/me/network](#25-get-iam-me-network) — La IP con la que me ve el servidor
+26. [GET /iam/me/sessions](#26-get-iam-me-sessions) — Listar mis sesiones abiertas
+27. [POST /iam/me/sessions/{id}/revoke](#27-post-iam-me-sessions-id-revoke) — Cerrar una de mis sesiones
+28. [GET /iam/me/step-up](#28-get-iam-me-step-up) — Ver si mi sesión tiene un paso extra vigente
+29. [POST /iam/me/step-up](#29-post-iam-me-step-up) — Confirmar mi identidad con el código de mi app autenticadora
+30. [DELETE /iam/onboarding-drafts/{formType}/{draftId}](#30-delete-iam-onboarding-drafts-formtype-draftid) — Elimina el borrador al completar el alta exitosamente o por descarte del usuario
+31. [GET /iam/onboarding-drafts/{formType}/{draftId}](#31-get-iam-onboarding-drafts-formtype-draftid) — Recupera un borrador de alta guardado por identificador y tipo de formulario
+32. [PUT /iam/onboarding-drafts/{formType}/{draftId}](#32-put-iam-onboarding-drafts-formtype-draftid) — Guarda o actualiza el avance del formulario de alta en borrador
+33. [DELETE /iam/rescue/tenants/{tenantId}/ip-access-rules](#33-delete-iam-rescue-tenants-tenantid-ip-access-rules) — Rescate (SYSTEM): retirar las reglas de red de una organización
+34. [DELETE /iam/rescue/tenants/{tenantId}/session-policies](#34-delete-iam-rescue-tenants-tenantid-session-policies) — Rescate (SYSTEM): retirar las políticas de sesión de una organización
+35. [GET /iam/users](#35-get-iam-users) — Listado paginado de usuarios (obsoleto)
+36. [POST /iam/users](#36-post-iam-users) — Crear un usuario con credencial de contraseña y rol inicial
+37. [GET /iam/users/{id}](#37-get-iam-users-id) — Ficha de un usuario
+38. [POST /iam/users/{id}/anonymize](#38-post-iam-users-id-anonymize) — Anonimizar (DSAR) la cuenta
+39. [GET /iam/users/{id}/credentials](#39-get-iam-users-id-credentials) — Credenciales del usuario
+40. [POST /iam/users/{id}/credentials/{cid}/revoke](#40-post-iam-users-id-credentials-cid-revoke) — Revocar una credencial del usuario
+41. [POST /iam/users/{id}/credentials/federated](#41-post-iam-users-id-credentials-federated) — Enlazar una credencial de identidad federada
+42. [GET /iam/users/{id}/devices](#42-get-iam-users-id-devices) — Dispositivos del usuario
+43. [POST /iam/users/{id}/devices](#43-post-iam-users-id-devices) — Registrar un dispositivo del usuario
+44. [GET /iam/users/{id}/global-roles](#44-get-iam-users-id-global-roles) — Roles globales del usuario
+45. [POST /iam/users/{id}/global-roles](#45-post-iam-users-id-global-roles) — Conceder o revocar un rol global
+46. [POST /iam/users/{id}/lock](#46-post-iam-users-id-lock) — Bloquear la cuenta y revocar sus sesiones
+47. [GET /iam/users/{id}/mfa-factors](#47-get-iam-users-id-mfa-factors) — Factores de MFA del usuario
+48. [POST /iam/users/{id}/mfa-factors](#48-post-iam-users-id-mfa-factors) — Enrolar o verificar un factor MFA
+49. [GET /iam/users/{id}/sessions](#49-get-iam-users-id-sessions) — Sesiones del usuario
+50. [POST /iam/users/assisted-practitioner-registration](#50-post-iam-users-assisted-practitioner-registration) — Alta administrativa de un profesional (devuelve token de activación)
+51. [POST /iam/users/assisted-registration](#51-post-iam-users-assisted-registration) — Registro asistido de un paciente (devuelve token de activación)
+52. [POST /iam/users/search](#52-post-iam-users-search) — Listado paginado de usuarios, con los filtros en el cuerpo
+53. [GET /org/ip-access-rules](#53-get-org-ip-access-rules) — Reglas de red de la organización
+54. [PUT /org/ip-access-rules](#54-put-org-ip-access-rules) — Definir las reglas de red de la organización
+55. [GET /org/session-policies](#55-get-org-session-policies) — Políticas de sesión de la organización
+56. [PUT /org/session-policies](#56-put-org-session-policies) — Definir las políticas de sesión de la organización
 
 ---
 
@@ -504,7 +520,21 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "accessToken": "valor-ejemplo",
   "refreshToken": "valor-ejemplo",
-  "expiresAt": "2026-07-31T12:00:00.000Z"
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "newDevice": {
+    "deviceId": "00000000-0000-4000-8000-000000000001",
+    "label": "Chrome en Windows",
+    "ip": "valor-ejemplo",
+    "occurredAt": "2026-07-31T12:00:00.000Z"
+  },
+  "mfaEnrollmentRequired": true,
+  "deniedTenants": [
+    {
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "reason": "OUTSIDE_ALLOWED_HOURS"
+    }
+  ],
+  "deviceCookie": "valor-ejemplo"
 }
 ```
 
@@ -515,6 +545,16 @@ Campos de la respuesta:
 | `accessToken` | Sí | `string` | Sin restricción adicional declarada | JWT de acceso | `valor-ejemplo` |
 | `refreshToken` | Sí | `string` | Sin restricción adicional declarada | Refresh token en crudo; solo se entrega una vez | `valor-ejemplo` |
 | `expiresAt` | Sí | `string` | formato `date-time` | Expiración de la sesión | `2026-07-31T12:00:00.000Z` |
+| `newDevice` | No | `NewDeviceNoticeDto` | Sin restricción adicional declarada | Solo en el login, y solo si el dispositivo es nuevo y alguna política aplicable tiene `newDeviceAlert`. Es un aviso de presentación. | `{"deviceId":"00000000-0000-4000-8000-000000000001","label":"Chrome en Windows","ip":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}` |
+| `newDevice.deviceId` | No | `string` | formato `uuid` | Dispositivo, para confirmarlo con `POST /iam/me/devices/:id/confirm`. | `00000000-0000-4000-8000-000000000001` |
+| `newDevice.label` | No | `string` | Sin restricción adicional declarada | Cómo se lo nombra a la persona: «Chrome en Windows». | `Chrome en Windows` |
+| `newDevice.ip` | No | `string` | Sin restricción adicional declarada | Origen del inicio de sesión, tal como lo vio el servidor. | `valor-ejemplo` |
+| `newDevice.occurredAt` | No | `string` | formato `date-time` | Cuándo se abrió la sesión. | `2026-07-31T12:00:00.000Z` |
+| `mfaEnrollmentRequired` | No | `boolean` | Sin restricción adicional declarada | Solo en el login, y solo si una política exige el segundo paso y la cuenta no tiene un factor confirmado: la persona debe darlo de alta con `POST /iam/me/mfa/totp` y confirmarlo. | `true` |
+| `deniedTenants` | No | `array<DeniedTenantDto>` | Sin restricción adicional declarada | Organizaciones a las que la persona pertenece pero en las que NO puede actuar ahora (franja horaria, red, segundo factor). No están en `tenants` del token: la política de una organización rige solo en ella y no le cierra la sesión en las demás. | `[{"tenantId":"00000000-0000-4000-8000-000000000001","reason":"OUTSIDE_ALLOWED_HOURS"}]` |
+| `deniedTenants[].tenantId` | No | `string` | formato `uuid` | Organización. | `00000000-0000-4000-8000-000000000001` |
+| `deniedTenants[].reason` | No | `string` | valores: `OUTSIDE_ALLOWED_HOURS`, `OUTSIDE_ALLOWED_NETWORK`, `IDLE_TIMEOUT`, `MFA_REQUIRED`, `MFA_ENROLLMENT_REQUIRED` | Por qué: `OUTSIDE_ALLOWED_HOURS`, `OUTSIDE_ALLOWED_NETWORK`, `IDLE_TIMEOUT`, `MFA_REQUIRED` (presentar el código al iniciar sesión) o `MFA_ENROLLMENT_REQUIRED` (dar de alta el segundo factor). Las peticiones con `X-Tenant-Id` de esa organización reciben 403 con el mismo motivo. | `OUTSIDE_ALLOWED_HOURS` |
+| `deviceCookie` | No | `string` | Sin restricción adicional declarada | Solo en el login y solo si la cookie de dispositivo está encendida (`AUTH_DEVICE_COOKIE_ENABLED`): valor firmado que el controlador entrega como cookie HttpOnly y QUITA del cuerpo. El cliente no lo ve. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -524,6 +564,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 |---:|---|---|---|
 | 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
 | 401 | `UNAUTHENTICATED` | Credenciales inválidas | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | {         message:           'La política de sesión de su organización no permite entrar ahora',         details: { reason: violation },       } | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | {       message:         'La política de sesión de su organización solo permite entrar desde sus redes autorizadas',       details: { reason: violation },     } | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
 | 401 | `UNAUTHENTICATED` | {         message: 'Se requiere el código de verificación en dos pasos',         details: { reason: 'MFA_REQUIRED' },       } | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
 | 401 | `UNAUTHENTICATED` | {       message: 'El código de verificación no es válido',       details: { reason: 'MFA_INVALID' },     } | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
@@ -2161,7 +2203,21 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 {
   "accessToken": "valor-ejemplo",
   "refreshToken": "valor-ejemplo",
-  "expiresAt": "2026-07-31T12:00:00.000Z"
+  "expiresAt": "2026-07-31T12:00:00.000Z",
+  "newDevice": {
+    "deviceId": "00000000-0000-4000-8000-000000000001",
+    "label": "Chrome en Windows",
+    "ip": "valor-ejemplo",
+    "occurredAt": "2026-07-31T12:00:00.000Z"
+  },
+  "mfaEnrollmentRequired": true,
+  "deniedTenants": [
+    {
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "reason": "OUTSIDE_ALLOWED_HOURS"
+    }
+  ],
+  "deviceCookie": "valor-ejemplo"
 }
 ```
 
@@ -2172,6 +2228,16 @@ Campos de la respuesta:
 | `accessToken` | Sí | `string` | Sin restricción adicional declarada | JWT de acceso | `valor-ejemplo` |
 | `refreshToken` | Sí | `string` | Sin restricción adicional declarada | Refresh token en crudo; solo se entrega una vez | `valor-ejemplo` |
 | `expiresAt` | Sí | `string` | formato `date-time` | Expiración de la sesión | `2026-07-31T12:00:00.000Z` |
+| `newDevice` | No | `NewDeviceNoticeDto` | Sin restricción adicional declarada | Solo en el login, y solo si el dispositivo es nuevo y alguna política aplicable tiene `newDeviceAlert`. Es un aviso de presentación. | `{"deviceId":"00000000-0000-4000-8000-000000000001","label":"Chrome en Windows","ip":"valor-ejemplo","occurredAt":"2026-07-31T12:00:00.000Z"}` |
+| `newDevice.deviceId` | No | `string` | formato `uuid` | Dispositivo, para confirmarlo con `POST /iam/me/devices/:id/confirm`. | `00000000-0000-4000-8000-000000000001` |
+| `newDevice.label` | No | `string` | Sin restricción adicional declarada | Cómo se lo nombra a la persona: «Chrome en Windows». | `Chrome en Windows` |
+| `newDevice.ip` | No | `string` | Sin restricción adicional declarada | Origen del inicio de sesión, tal como lo vio el servidor. | `valor-ejemplo` |
+| `newDevice.occurredAt` | No | `string` | formato `date-time` | Cuándo se abrió la sesión. | `2026-07-31T12:00:00.000Z` |
+| `mfaEnrollmentRequired` | No | `boolean` | Sin restricción adicional declarada | Solo en el login, y solo si una política exige el segundo paso y la cuenta no tiene un factor confirmado: la persona debe darlo de alta con `POST /iam/me/mfa/totp` y confirmarlo. | `true` |
+| `deniedTenants` | No | `array<DeniedTenantDto>` | Sin restricción adicional declarada | Organizaciones a las que la persona pertenece pero en las que NO puede actuar ahora (franja horaria, red, segundo factor). No están en `tenants` del token: la política de una organización rige solo en ella y no le cierra la sesión en las demás. | `[{"tenantId":"00000000-0000-4000-8000-000000000001","reason":"OUTSIDE_ALLOWED_HOURS"}]` |
+| `deniedTenants[].tenantId` | No | `string` | formato `uuid` | Organización. | `00000000-0000-4000-8000-000000000001` |
+| `deniedTenants[].reason` | No | `string` | valores: `OUTSIDE_ALLOWED_HOURS`, `OUTSIDE_ALLOWED_NETWORK`, `IDLE_TIMEOUT`, `MFA_REQUIRED`, `MFA_ENROLLMENT_REQUIRED` | Por qué: `OUTSIDE_ALLOWED_HOURS`, `OUTSIDE_ALLOWED_NETWORK`, `IDLE_TIMEOUT`, `MFA_REQUIRED` (presentar el código al iniciar sesión) o `MFA_ENROLLMENT_REQUIRED` (dar de alta el segundo factor). Las peticiones con `X-Tenant-Id` de esa organización reciben 403 con el mismo motivo. | `OUTSIDE_ALLOWED_HOURS` |
+| `deviceCookie` | No | `string` | Sin restricción adicional declarada | Solo en el login y solo si la cookie de dispositivo está encendida (`AUTH_DEVICE_COOKIE_ENABLED`): valor firmado que el controlador entrega como cookie HttpOnly y QUITA del cuerpo. El cliente no lo ve. | `valor-ejemplo` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -2183,6 +2249,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 401 | `UNAUTHENTICATED` | Sesión no activa | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
 | 401 | `UNAUTHENTICATED` | Reuso de refresh token detectado | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
 | 401 | `UNAUTHENTICATED` | Refresh token expirado | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
+| 401 | `UNAUTHENTICATED` | {           message: 'La política de sesión de la organización cerró la sesión',           details: { reason: outcome.violation },         } | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
 | 401 | `UNAUTHENTICATED` | Refresh token inválido | Excepción explícita en src/modules/iam/application/services/iam-auth.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 20, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
@@ -2682,7 +2749,995 @@ Ejemplo de error normalizado:
 
 ---
 
-## 18. GET /iam/me/sessions
+## 18. POST /iam/me/devices/{id}/confirm
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Reconocer un dispositivo propio («Fui yo»)
+- **Operation ID:** `IamAccountSecurityController_confirmDevice`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.confirmDevice](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Solo desde una sesión abierta en otro dispositivo de confianza, o con `code`: el código de un solo uso enviado al correo verificado de la cuenta.
+
+Contexto declarado en el controlador: «Fui yo»: reconoce el dispositivo del aviso de dispositivo nuevo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/devices/{id}/confirm` en `IamAccountSecurityController_confirmDevice`. El controlador delega en `IamAccountSecurityService.confirmDevice`. Valida el body como `ConfirmDeviceDto` y consume `application/json`. El tipo de retorno estático es `Promise<ConfirmDeviceResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ConfirmDeviceDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 10, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `code` | No | `string` | longitud mínima 8; longitud máxima 8 | Sin descripción específica en el contrato OpenAPI. | `12345678` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "12345678"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConfirmDeviceResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfirmDeviceResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "confirmed": true,
+  "deviceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `confirmed` | Sí | `boolean` | Sin restricción adicional declarada | Siempre `true`: el dispositivo quedó de confianza (idempotente). | `true` |
+| `deviceId` | Sí | `string` | formato `uuid` | Dispositivo confirmado. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Para confirmar este dispositivo hace falta el código enviado a su correo | Excepción explícita en src/modules/iam/application/services/iam-account-security.service.ts |
+| 422 | `PRECONDITION_FAILED` | El código no es válido o ya se usó | Excepción explícita en src/modules/iam/application/services/iam-account-security.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/devices/{id}/confirm"
+}
+```
+
+---
+
+## 19. POST /iam/me/devices/{id}/confirm-code
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Enviar al correo verificado el código para reconocer un dispositivo
+- **Operation ID:** `IamAccountSecurityController_requestDeviceCode`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.requestDeviceCode](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Enviar al correo verificado el código para reconocer un dispositivo. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Manda al correo verificado el código de un solo uso para «Fui yo». Es auditable: manda un correo a nombre de la cuenta y su cupo (3 por minuto) es lo que frena a quien las agote; el asiento dice qué dispositivo se pidió reconocer, no el código ni el correo.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/devices/{id}/confirm-code` en `IamAccountSecurityController_requestDeviceCode`. El controlador delega en `IamAccountSecurityService.requestDeviceCode`. No recibe body. El tipo de retorno estático es `Promise<RequestDeviceCodeResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/confirm-code HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit particular: `Throttle({ default: { limit: 3, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/confirm-code HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RequestDeviceCodeResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RequestDeviceCodeResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "sent": true,
+  "sentTo": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `sent` | Sí | `boolean` | Sin restricción adicional declarada | `true` si se mandó el correo; `false` si el dispositivo ya era de confianza. | `true` |
+| `sentTo` | No | `string` | Sin restricción adicional declarada | Dirección a la que se mandó, enmascarada («a***@d***.com»). | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 422 | `PRECONDITION_FAILED` | La cuenta no tiene un correo verificado al que enviar el código | Excepción explícita en src/modules/iam/application/services/iam-account-security.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 3, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/devices/{id}/confirm-code"
+}
+```
+
+---
+
+## 20. POST /iam/me/devices/{id}/not-me
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** No reconocer un dispositivo («No fui yo») y cerrar las otras sesiones
+- **Operation ID:** `IamAccountSecurityController_reportDeviceNotMe`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.reportDeviceNotMe](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+No reconocer un dispositivo («No fui yo») y cerrar las otras sesiones. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: «No fui yo»: no reconoce el dispositivo; cierra las demás sesiones.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/devices/{id}/not-me` en `IamAccountSecurityController_reportDeviceNotMe`. El controlador delega en `IamAccountSecurityService.reportDeviceNotMe`. No recibe body. El tipo de retorno estático es `Promise<ReportDeviceNotMeResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/not-me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `id`.
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /iam/me/devices/00000000-0000-4000-8000-000000000001/not-me HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ReportDeviceNotMeResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ReportDeviceNotMeResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "revokedSessions": 1,
+  "deviceId": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `revokedSessions` | Sí | `number` | Sin restricción adicional declarada | Nº de las otras sesiones que se revocaron | `1` |
+| `deviceId` | Sí | `string` | formato `uuid` | Dispositivo reportado. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/devices/{id}/not-me"
+}
+```
+
+---
+
+## 21. GET /iam/me/mfa
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Estado de mi verificación en dos pasos
+- **Operation ID:** `IamAccountSecurityController_mfaStatus`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.mfaStatus](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Estado de mi verificación en dos pasos. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Estado del segundo paso de la propia cuenta.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/me/mfa` en `IamAccountSecurityController_mfaStatus`. El controlador delega en `IamMyMfaService.status`. No recibe body. El tipo de retorno estático es `Promise<MyMfaStatusDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/me/mfa HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/me/mfa HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MyMfaStatusDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<MyMfaStatusDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<MyMfaStatusDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<MyMfaStatusDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<MyMfaStatusDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<MyMfaStatusDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<MyMfaStatusDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyMfaStatusDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "required": true,
+  "enrolled": true,
+  "enrollmentRequired": true,
+  "factors": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "TOTP",
+      "state": "PENDING",
+      "label": "valor-ejemplo",
+      "verifiedAt": "2026-07-31T12:00:00.000Z",
+      "createdAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `required` | Sí | `boolean` | Sin restricción adicional declarada | ¿Alguna política de sus organizaciones le exige el segundo paso? | `true` |
+| `enrolled` | Sí | `boolean` | Sin restricción adicional declarada | ¿Tiene al menos un factor confirmado? | `true` |
+| `enrollmentRequired` | Sí | `boolean` | Sin restricción adicional declarada | `required` sin `enrolled`: debe dar de alta un factor. | `true` |
+| `factors` | Sí | `array<MyMfaFactorDto>` | Sin restricción adicional declarada | Sus factores, de más reciente a más antiguo. | `[{"id":"00000000-0000-4000-8000-000000000001","type":"TOTP","state":"PENDING","label":"valor-ejemplo","verifiedAt":"2026-07-31T12:00:00.000Z","createdAt":"2026-07-31T12:00:00.000Z"}]` |
+| `factors[].id` | Sí | `string` | formato `uuid` | Identificador del factor. | `00000000-0000-4000-8000-000000000001` |
+| `factors[].type` | Sí | `string` | valores: `TOTP`, `WEBAUTHN`, `UNKNOWN` | `TOTP` o `WEBAUTHN`. | `TOTP` |
+| `factors[].state` | Sí | `string` | valores: `PENDING`, `VERIFIED`, `REVOKED`, `UNKNOWN` | `PENDING` (sin confirmar), `VERIFIED` o `REVOKED`. | `PENDING` |
+| `factors[].label` | No | `string` | Sin restricción adicional declarada | Nombre del factor. | `valor-ejemplo` |
+| `factors[].verifiedAt` | No | `string` | formato `date-time` | Cuándo se confirmó. | `2026-07-31T12:00:00.000Z` |
+| `factors[].createdAt` | Sí | `string` | formato `date-time` | Cuándo se dio de alta. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/mfa"
+}
+```
+
+---
+
+## 22. POST /iam/me/mfa/{factorId}/revoke
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Quitar uno de mis factores de segundo paso
+- **Operation ID:** `IamAccountSecurityController_revokeFactor`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.revokeFactor](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Quitar uno de mis factores de segundo paso. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Quita un factor propio (exige contraseña actual o código de un factor verificado).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/mfa/{factorId}/revoke` en `IamAccountSecurityController_revokeFactor`. El controlador delega en `IamMyMfaService.revokeFactor`. Valida el body como `RevokeMyMfaDto` y consume `application/json`. El tipo de retorno estático es `Promise<RevokeMyMfaResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `factorId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `RevokeMyMfaDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/me/mfa/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `factorId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `currentPassword` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
+| `mfaCode` | No | `string` | longitud mínima 6; longitud máxima 8 | Sin descripción específica en el contrato OpenAPI. | `123456` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/me/mfa/00000000-0000-4000-8000-000000000001/revoke HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "currentPassword": "ClaveSegura2026!",
+  "mfaCode": "123456"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<RevokeMyMfaResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `RevokeMyMfaResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "revoked": true,
+  "remainingVerified": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `revoked` | Sí | `boolean` | Sin restricción adicional declarada | Siempre `true`. | `true` |
+| `remainingVerified` | Sí | `number` | Sin restricción adicional declarada | ¿Le quedan factores confirmados? Sin ninguno, el segundo paso queda apagado. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Factor MFA no encontrado | Excepción explícita en src/modules/iam/application/services/iam-my-mfa.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Para añadir o quitar un factor confirme su contraseña actual o un código de su app autenticadora | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña o el código no coinciden | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/mfa/{factorId}/revoke"
+}
+```
+
+---
+
+## 23. POST /iam/me/mfa/totp
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Dar de alta mi app autenticadora (devuelve el secreto una vez)
+- **Operation ID:** `IamAccountSecurityController_startTotp`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.startTotp](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Exige reautenticación: `currentPassword` o `mfaCode` de un factor ya verificado.
+
+Contexto declarado en el controlador: Empieza el alta de la app autenticadora (TOTP).
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/mfa/totp` en `IamAccountSecurityController_startTotp`. El controlador delega en `IamMyMfaService.startTotp`. Valida el body como `StartMyTotpDto` y consume `application/json`. El tipo de retorno estático es `Promise<MfaFactorResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `StartMyTotpDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/me/mfa/totp HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `label` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `currentPassword` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `ClaveSegura2026!` |
+| `mfaCode` | No | `string` | longitud mínima 6; longitud máxima 8 | Sin descripción específica en el contrato OpenAPI. | `123456` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/me/mfa/totp HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "label": "valor-ejemplo",
+  "currentPassword": "ClaveSegura2026!",
+  "mfaCode": "123456"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 201 | Recurso creado o acción registrada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MfaFactorResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MfaFactorResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "state": "00000000-0000-4000-8000-000000000001",
+  "verifiedAt": "2026-07-31T12:00:00.000Z",
+  "secret": "valor-ejemplo",
+  "otpauthUri": "valor-ejemplo"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `userId` | Sí | `string` | formato `uuid` | Identificador asociado a user. | `00000000-0000-4000-8000-000000000001` |
+| `state` | Sí | `string` | formato `uuid` | Concept id del estado del factor | `00000000-0000-4000-8000-000000000001` |
+| `verifiedAt` | No | `string` | formato `date-time` | Valor de verified at mantenido por la instancia. | `2026-07-31T12:00:00.000Z` |
+| `secret` | No | `string` | Sin restricción adicional declarada | Secreto TOTP en base32. Solo se devuelve al enrolar un factor TOTP; | `valor-ejemplo` |
+| `otpauthUri` | No | `string` | Sin restricción adicional declarada | URI otpauth:// para generar el QR. Solo se devuelve al enrolar un factor TOTP. | `valor-ejemplo` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No tiene acceso a los factores MFA de esta cuenta | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 404 | `NOT_FOUND` | Factor MFA no encontrado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Para añadir o quitar un factor confirme su contraseña actual o un código de su app autenticadora | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña o el código no coinciden | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | factorId es obligatorio para verificar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | code es obligatorio para verificar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | El factor no tiene un secreto TOTP asociado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | Código MFA inválido | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | factorType es obligatorio para enrolar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/mfa/totp"
+}
+```
+
+---
+
+## 24. POST /iam/me/mfa/totp/{factorId}/confirm
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Confirmar mi app autenticadora con un código
+- **Operation ID:** `IamAccountSecurityController_confirmTotp`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.confirmTotp](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+Confirmar mi app autenticadora con un código. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Confirma la app autenticadora con un código.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/mfa/totp/{factorId}/confirm` en `IamAccountSecurityController_confirmTotp`. El controlador delega en `IamMyMfaService.confirmTotp`. Valida el body como `ConfirmMyTotpDto` y consume `application/json`. El tipo de retorno estático es `Promise<ConfirmMyTotpResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `factorId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `ConfirmMyTotpDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/me/mfa/totp/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "123456"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `factorId`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 10, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `code` | Sí | `string` | longitud mínima 6; longitud máxima 8 | Sin descripción específica en el contrato OpenAPI. | `123456` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/me/mfa/totp/00000000-0000-4000-8000-000000000001/confirm HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "123456"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<ConfirmMyTotpResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ConfirmMyTotpResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "verified": true,
+  "factorId": "00000000-0000-4000-8000-000000000001",
+  "verifiedAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `verified` | Sí | `boolean` | Sin restricción adicional declarada | Siempre `true`: con un código inválido la respuesta es 422. | `true` |
+| `factorId` | Sí | `string` | formato `uuid` | Factor confirmado. | `00000000-0000-4000-8000-000000000001` |
+| `verifiedAt` | Sí | `string` | formato `date-time` | Cuándo se confirmó. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 403 | `FORBIDDEN` | No tiene acceso a los factores MFA de esta cuenta | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 404 | `NOT_FOUND` | Usuario no encontrado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 404 | `NOT_FOUND` | Factor MFA no encontrado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El factor fue reemplazado por uno más reciente | Excepción explícita en src/modules/iam/application/services/iam-my-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | factorId es obligatorio para verificar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | code es obligatorio para verificar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | El factor no tiene un secreto TOTP asociado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | Código MFA inválido | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | factorType es obligatorio para enrolar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para añadir o quitar un factor confirme su contraseña actual o un código de su app autenticadora | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña o el código no coinciden | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 10, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/mfa/totp/{factorId}/confirm"
+}
+```
+
+---
+
+## 25. GET /iam/me/network
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** La IP con la que me ve el servidor
+- **Operation ID:** `IamAccountSecurityController_myNetwork`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccountSecurityController.myNetwork](../../src/modules/iam/presentation/controllers/iam-account-security.controller.ts)
+
+### Descripción de negocio
+
+La IP con la que me ve el servidor. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La IP que ve el servidor para esta petición: es contra la que se evalúan las reglas de red. Se muestra ANTES de guardar reglas, para no escribirlas con una red que el servidor no ve (típico detrás de un proxy mal configurado).
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/me/network` en `IamAccountSecurityController_myNetwork`. El controlador delega en `IpAccessRulesService.describeOrigin`. No recibe body. El tipo de retorno estático es `MyNetworkDto`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/me/network HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/me/network HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `MyNetworkDto` | No |
+| 400 | Consulta completada correctamente. | `MyNetworkDto` | No |
+| 401 | Consulta completada correctamente. | `MyNetworkDto` | No |
+| 403 | Consulta completada correctamente. | `MyNetworkDto` | No |
+| 429 | Consulta completada correctamente. | `MyNetworkDto` | No |
+| 500 | Consulta completada correctamente. | `MyNetworkDto` | No |
+| 504 | Consulta completada correctamente. | `MyNetworkDto` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MyNetworkDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "ip": "190.129.4.20",
+  "family": "ipv4",
+  "trustProxyHops": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `ip` | Sí | `string` | admite null | IP contra la que se evalúan las reglas de red; `null` si el servidor no pudo leerla. | `190.129.4.20` |
+| `family` | Sí | `string` | valores: `ipv4`, `ipv6`; admite null | Familia de la dirección. | `ipv4` |
+| `trustProxyHops` | Sí | `number` | Sin restricción adicional declarada | Saltos de proxy de confianza con los que corre el servidor (`TRUST_PROXY_HOPS`). Con `0` detrás de un proxy, la IP es la del proxy. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/network"
+}
+```
+
+---
+
+## 26. GET /iam/me/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2788,7 +3843,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 19. POST /iam/me/sessions/{id}/revoke
+## 27. POST /iam/me/sessions/{id}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-auth`
@@ -2898,7 +3953,239 @@ Ejemplo de error normalizado:
 
 ---
 
-## 20. DELETE /iam/onboarding-drafts/{formType}/{draftId}
+## 28. GET /iam/me/step-up
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Ver si mi sesión tiene un paso extra vigente
+- **Operation ID:** `IamStepUpController_status`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamStepUpController.status](../../src/modules/iam/presentation/controllers/iam-step-up.controller.ts)
+
+### Descripción de negocio
+
+`fresh` es verdadero si hay un sello de `maxAgeMinutes` (1-60, por defecto 10) o menos. 503 `STEP_UP_UNAVAILABLE` si no se puede comprobar.
+
+Contexto declarado en el controlador: Estado del paso extra de la sesión en curso.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /iam/me/step-up` en `IamStepUpController_status`. El controlador delega en `IamStepUpService.status`. No recibe body. El tipo de retorno estático es `Promise<StepUpStatusDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `maxAgeMinutes` | query | No | `number` | mínimo 1; máximo 60 | Sin descripción específica en OpenAPI. | `10` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /iam/me/step-up HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /iam/me/step-up?maxAgeMinutes=10 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<StepUpStatusDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<StepUpStatusDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<StepUpStatusDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<StepUpStatusDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<StepUpStatusDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<StepUpStatusDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<StepUpStatusDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StepUpStatusDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "fresh": true,
+  "ageMinutes": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `fresh` | Sí | `boolean` | Sin restricción adicional declarada | ¿Hay un sello con la edad pedida o menos? | `true` |
+| `ageMinutes` | Sí | `number` | admite null | Minutos desde el último paso extra; `null` si la sesión no tiene sello vigente. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/step-up"
+}
+```
+
+---
+
+## 29. POST /iam/me/step-up
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-auth`
+- **Nombre:** Confirmar mi identidad con el código de mi app autenticadora
+- **Operation ID:** `IamStepUpController_verify`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamStepUpController.verify](../../src/modules/iam/presentation/controllers/iam-step-up.controller.ts)
+
+### Descripción de negocio
+
+Sella la sesión en curso con un paso extra de vigencia limitada. Errores: 422 `MFA_NOT_ENROLLED` (sin factor confirmado), 422 `MFA_CODE_INVALID`, 429 (límite de tasa o demasiados códigos incorrectos) y 503 `STEP_UP_UNAVAILABLE` (no se pudo guardar el sello).
+
+Contexto declarado en el controlador: Verifica el código de la app autenticadora y sella la sesión.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /iam/me/step-up` en `IamStepUpController_verify`. El controlador delega en `IamStepUpService.verify`. Valida el body como `StepUpDto` y consume `application/json`. El tipo de retorno estático es `Promise<StepUpResultDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `StepUpDto`; los campos opcionales se omiten.
+
+```http
+POST /iam/me/step-up HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "123456"
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit particular: `Throttle({ default: { limit: 5, ttl: 60_000 } })`.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `code` | Sí | `string` | longitud mínima 6; longitud máxima 8 | Sin descripción específica en el contrato OpenAPI. | `123456` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+POST /iam/me/step-up HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "code": "123456"
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<StepUpResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `StepUpResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "verifiedAt": "2026-07-31T12:00:00.000Z",
+  "validForMinutes": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `verifiedAt` | Sí | `string` | formato `date-time` | Cuándo se verificó. | `2026-07-31T12:00:00.000Z` |
+| `validForMinutes` | Sí | `number` | Sin restricción adicional declarada | Minutos que el sello queda guardado para la sesión. | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | Esta sesión no admite la verificación adicional. Vuelva a iniciar sesión. | Excepción explícita en src/modules/iam/application/services/iam-step-up.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para confirmar su identidad primero active la verificación en dos pasos en su cuenta | Excepción explícita en src/modules/iam/application/services/iam-step-up.service.ts |
+| 422 | `PRECONDITION_FAILED` | El código de verificación no es válido | Excepción explícita en src/modules/iam/application/services/iam-step-up.service.ts |
+| 429 | `RATE_LIMITED` | Se excede el límite particular Throttle({ default: { limit: 5, ttl: 60_000 } }). | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/me/step-up"
+}
+```
+
+---
+
+## 30. DELETE /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3002,7 +4289,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 21. GET /iam/onboarding-drafts/{formType}/{draftId}
+## 31. GET /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3092,7 +4379,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 22. PUT /iam/onboarding-drafts/{formType}/{draftId}
+## 32. PUT /iam/onboarding-drafts/{formType}/{draftId}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-onboarding-drafts`
@@ -3184,7 +4471,227 @@ Ejemplo de error normalizado:
 
 ---
 
-## 23. GET /iam/users
+## 33. DELETE /iam/rescue/tenants/{tenantId}/ip-access-rules
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-session-policies`
+- **Nombre:** Rescate (SYSTEM): retirar las reglas de red de una organización
+- **Operation ID:** `IamAccessRescueController_clearIpAccessRules`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccessRescueController.clearIpAccessRules](../../src/modules/iam/presentation/controllers/iam-access-rescue.controller.ts)
+
+### Descripción de negocio
+
+Rescate (SYSTEM): retirar las reglas de red de una organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Retira las reglas de red de la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /iam/rescue/tenants/{tenantId}/ip-access-rules` en `IamAccessRescueController_clearIpAccessRules`. El controlador delega en `IpAccessRulesService.clearForTenant`. No recibe body. El tipo de retorno estático es `Promise<AccessRescueResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /iam/rescue/tenants/00000000-0000-4000-8000-000000000001/ip-access-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Deben ser UUID válidos: `tenantId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /iam/rescue/tenants/00000000-0000-4000-8000-000000000001/ip-access-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccessRescueResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "retired": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `retired` | Sí | `number` | Sin restricción adicional declarada | Cuántas filas activas se retiraron (quedan como histórico). | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/rescue/tenants/{tenantId}/ip-access-rules"
+}
+```
+
+---
+
+## 34. DELETE /iam/rescue/tenants/{tenantId}/session-policies
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-session-policies`
+- **Nombre:** Rescate (SYSTEM): retirar las políticas de sesión de una organización
+- **Operation ID:** `IamAccessRescueController_clearSessionPolicies`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IamAccessRescueController.clearSessionPolicies](../../src/modules/iam/presentation/controllers/iam-access-rescue.controller.ts)
+
+### Descripción de negocio
+
+Rescate (SYSTEM): retirar las políticas de sesión de una organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Retira las políticas de sesión de la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `DELETE /iam/rescue/tenants/{tenantId}/session-policies` en `IamAccessRescueController_clearSessionPolicies`. El controlador delega en `SessionPoliciesService.clearForTenant`. No recibe body. El tipo de retorno estático es `Promise<AccessRescueResultDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `tenantId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+DELETE /iam/rescue/tenants/00000000-0000-4000-8000-000000000001/session-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SYSTEM`.
+- Deben ser UUID válidos: `tenantId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+DELETE /iam/rescue/tenants/00000000-0000-4000-8000-000000000001/session-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<AccessRescueResultDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `AccessRescueResultDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "retired": 1
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `retired` | Sí | `number` | Sin restricción adicional declarada | Cuántas filas activas se retiraron (quedan como histórico). | `1` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SYSTEM. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/iam/rescue/tenants/{tenantId}/session-policies"
+}
+```
+
+---
+
+## 35. GET /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3318,7 +4825,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 24. POST /iam/users
+## 36. POST /iam/users
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3457,7 +4964,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 25. GET /iam/users/{id}
+## 37. GET /iam/users/{id}
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3584,7 +5091,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 26. POST /iam/users/{id}/anonymize
+## 38. POST /iam/users/{id}/anonymize
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3694,7 +5201,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 27. GET /iam/users/{id}/credentials
+## 39. GET /iam/users/{id}/credentials
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3824,7 +5331,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 28. POST /iam/users/{id}/credentials/{cid}/revoke
+## 40. POST /iam/users/{id}/credentials/{cid}/revoke
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -3935,7 +5442,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 29. POST /iam/users/{id}/credentials/federated
+## 41. POST /iam/users/{id}/credentials/federated
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4070,7 +5577,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 30. GET /iam/users/{id}/devices
+## 42. GET /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4196,7 +5703,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 31. POST /iam/users/{id}/devices
+## 43. POST /iam/users/{id}/devices
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4331,7 +5838,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 32. GET /iam/users/{id}/global-roles
+## 44. GET /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4453,7 +5960,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 33. POST /iam/users/{id}/global-roles
+## 45. POST /iam/users/{id}/global-roles
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4583,7 +6090,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 34. POST /iam/users/{id}/lock
+## 46. POST /iam/users/{id}/lock
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4706,7 +6213,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 35. GET /iam/users/{id}/mfa-factors
+## 47. GET /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4830,7 +6337,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /iam/users/{id}/mfa-factors
+## 48. POST /iam/users/{id}/mfa-factors
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -4882,6 +6389,8 @@ Content-Type: application/json
 | `verify` | No | `boolean` | Sin restricción adicional declarada | Si es true, verifica el factor indicado | `true` |
 | `factorId` | No | `string` | formato `uuid` | Factor a verificar | `00000000-0000-4000-8000-000000000001` |
 | `code` | No | `string` | longitud mínima 6; longitud máxima 8 | Código TOTP de la app autenticadora. Obligatorio cuando verify=true. | `123456` |
+| `currentPassword` | No | `string` | longitud máxima 200 | Contraseña actual (o `mfaCode`): obligatoria para dar de alta un factor propio | `ClaveSegura2026!` |
+| `mfaCode` | No | `string` | longitud mínima 6; longitud máxima 8 | Código de un factor ya verificado (o `currentPassword`): reautentica el alta de un factor propio | `123456` |
 
 ### Payload completo de ejemplo
 
@@ -4898,7 +6407,9 @@ Content-Type: application/json
   "label": "valor-ejemplo",
   "verify": true,
   "factorId": "00000000-0000-4000-8000-000000000001",
-  "code": "123456"
+  "code": "123456",
+  "currentPassword": "ClaveSegura2026!",
+  "mfaCode": "123456"
 }
 ```
 
@@ -4960,6 +6471,8 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 422 | `PRECONDITION_FAILED` | El factor no tiene un secreto TOTP asociado | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
 | 422 | `PRECONDITION_FAILED` | Código MFA inválido | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
 | 422 | `PRECONDITION_FAILED` | factorType es obligatorio para enrolar | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | Para añadir o quitar un factor confirme su contraseña actual o un código de su app autenticadora | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
+| 422 | `PRECONDITION_FAILED` | La contraseña o el código no coinciden | Excepción explícita en src/modules/iam/application/services/iam-mfa.service.ts |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
 
@@ -4977,7 +6490,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. GET /iam/users/{id}/sessions
+## 49. GET /iam/users/{id}/sessions
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5103,7 +6616,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 38. POST /iam/users/assisted-practitioner-registration
+## 50. POST /iam/users/assisted-practitioner-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5411,7 +6924,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 39. POST /iam/users/assisted-registration
+## 51. POST /iam/users/assisted-registration
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5558,7 +7071,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 40. POST /iam/users/search
+## 52. POST /iam/users/search
 
 - **Módulo:** `iam`
 - **Etiqueta OpenAPI:** `iam-users`
@@ -5703,6 +7216,581 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/iam/users/search"
+}
+```
+
+---
+
+## 53. GET /org/ip-access-rules
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-session-policies`
+- **Nombre:** Reglas de red de la organización
+- **Operation ID:** `IpAccessRulesController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IpAccessRulesController.get](../../src/modules/iam/presentation/controllers/ip-access-rules.controller.ts)
+
+### Descripción de negocio
+
+Reglas de red de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reglas de red vigentes de la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/ip-access-rules` en `IpAccessRulesController_get`. El controlador delega en `IpAccessRulesService.list`. No recibe body. El tipo de retorno estático es `Promise<IpAccessRulesResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/ip-access-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/ip-access-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IpAccessRulesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "rules": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `rules` | Sí | `array<IpAccessRuleViewDto>` | Sin restricción adicional declarada | Reglas activas, en el orden en que se guardaron. | `[{"id":"00000000-0000-4000-8000-000000000001"}]` |
+| `rules[].id` | Sí | `string` | formato `uuid` | Identificador de la regla. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/ip-access-rules"
+}
+```
+
+---
+
+## 54. PUT /org/ip-access-rules
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-session-policies`
+- **Nombre:** Definir las reglas de red de la organización
+- **Operation ID:** `IpAccessRulesController_put`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [IpAccessRulesController.put](../../src/modules/iam/presentation/controllers/ip-access-rules.controller.ts)
+
+### Descripción de negocio
+
+Definir las reglas de red de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reemplaza las reglas de red de la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /org/ip-access-rules` en `IpAccessRulesController_put`. El controlador delega en `IpAccessRulesService.put`. Valida el body como `PutIpAccessRulesDto` y consume `application/json`. El tipo de retorno estático es `Promise<IpAccessRulesResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PutIpAccessRulesDto`; los campos opcionales se omiten.
+
+```http
+PUT /org/ip-access-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "rules": [
+    {
+      "type": "ALLOW",
+      "cidr": "190.129.0.0/16"
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `rules` | Sí | `array<IpAccessRuleDto>` | máximo 50 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"type":"ALLOW","cidr":"190.129.0.0/16","description":"Texto descriptivo de ejemplo","validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z"}]` |
+| `rules[].type` | Sí | `string` | valores: `ALLOW`, `DENY` | Sin descripción específica en el contrato OpenAPI. | `ALLOW` |
+| `rules[].cidr` | Sí | `string` | longitud máxima 64 | Sin descripción específica en el contrato OpenAPI. | `190.129.0.0/16` |
+| `rules[].description` | No | `string` | longitud máxima 200 | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `rules[].validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `rules[].validTo` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /org/ip-access-rules HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "rules": [
+    {
+      "type": "ALLOW",
+      "cidr": "190.129.0.0/16",
+      "description": "Texto descriptivo de ejemplo",
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<IpAccessRulesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `IpAccessRulesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "rules": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `rules` | Sí | `array<IpAccessRuleViewDto>` | Sin restricción adicional declarada | Reglas activas, en el orden en que se guardaron. | `[{"id":"00000000-0000-4000-8000-000000000001"}]` |
+| `rules[].id` | Sí | `string` | formato `uuid` | Identificador de la regla. | `00000000-0000-4000-8000-000000000001` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El rango de red no es un CIDR válido (ejemplo: 190.129.0.0/16) | Excepción explícita en src/modules/iam/application/services/ip-access-rules.service.ts |
+| 422 | `PRECONDITION_FAILED` | La regla termina antes de empezar | Excepción explícita en src/modules/iam/application/services/ip-access-rules.service.ts |
+| 422 | `PRECONDITION_FAILED` | Estas reglas dejarían fuera la red desde la que está trabajando | Excepción explícita en src/modules/iam/application/services/ip-access-rules.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/ip-access-rules"
+}
+```
+
+---
+
+## 55. GET /org/session-policies
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-session-policies`
+- **Nombre:** Políticas de sesión de la organización
+- **Operation ID:** `SessionPoliciesController_get`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SessionPoliciesController.get](../../src/modules/iam/presentation/controllers/session-policies.controller.ts)
+
+### Descripción de negocio
+
+Políticas de sesión de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Políticas vigentes de la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /org/session-policies` en `SessionPoliciesController_get`. El controlador delega en `SessionPoliciesService.get`. No recibe body. El tipo de retorno estático es `Promise<SessionPoliciesResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /org/session-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /org/session-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SessionPoliciesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "policies": [
+    {
+      "scope": "ALL_ACCOUNTS",
+      "roleCode": "CODIGO_EJEMPLO",
+      "idleTimeoutMinutes": 5,
+      "newDeviceAlert": true,
+      "allowedHours": {
+        "days": [
+          1
+        ],
+        "from": "07:00",
+        "to": "20:00",
+        "timeZone": "America/La_Paz"
+      },
+      "enforceIpRules": true,
+      "requireMfa": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `policies` | Sí | `array<SessionPolicyDto>` | Sin restricción adicional declarada | Políticas vigentes. | `[{"scope":"ALL_ACCOUNTS","roleCode":"CODIGO_EJEMPLO","idleTimeoutMinutes":5,"newDeviceAlert":true,"allowedHours":{"days":[1],"from":"07:00","to":"20:00","timeZone":"America/La_Paz"},"enforceIpRules":true,"requireMfa":true}]` |
+| `policies[].scope` | Sí | `string` | valores: `ALL_ACCOUNTS`, `ORG_STAFF`, `ROLE` | Sin descripción específica en el contrato OpenAPI. | `ALL_ACCOUNTS` |
+| `policies[].roleCode` | No | `string` | longitud máxima 60 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `policies[].idleTimeoutMinutes` | Sí | `number` | mínimo 5; máximo 1440 | Sin descripción específica en el contrato OpenAPI. | `5` |
+| `policies[].newDeviceAlert` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `policies[].allowedHours` | No | `AllowedHoursDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"days":[1],"from":"07:00","to":"20:00","timeZone":"America/La_Paz"}` |
+| `policies[].allowedHours.days` | No | `array<number>` | mínimo 0; máximo 6; máximo 7 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[1]` |
+| `policies[].allowedHours.from` | No | `string` | patrón runtime `HHMM` | Sin descripción específica en el contrato OpenAPI. | `07:00` |
+| `policies[].allowedHours.to` | No | `string` | patrón runtime `HHMM` | Sin descripción específica en el contrato OpenAPI. | `20:00` |
+| `policies[].allowedHours.timeZone` | No | `string` | longitud máxima 64 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `policies[].enforceIpRules` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `policies[].requireMfa` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/session-policies"
+}
+```
+
+---
+
+## 56. PUT /org/session-policies
+
+- **Módulo:** `iam`
+- **Etiqueta OpenAPI:** `iam-session-policies`
+- **Nombre:** Definir las políticas de sesión de la organización
+- **Operation ID:** `SessionPoliciesController_put`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SessionPoliciesController.put](../../src/modules/iam/presentation/controllers/session-policies.controller.ts)
+
+### Descripción de negocio
+
+Definir las políticas de sesión de la organización. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Reemplaza las políticas de la organización.
+
+### Descripción del sistema
+
+NestJS resuelve `PUT /org/session-policies` en `SessionPoliciesController_put`. El controlador delega en `SessionPoliciesService.put`. Valida el body como `PutSessionPoliciesDto` y consume `application/json`. El tipo de retorno estático es `Promise<SessionPoliciesResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `PutSessionPoliciesDto`; los campos opcionales se omiten.
+
+```http
+PUT /org/session-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "policies": [
+    {
+      "scope": "ALL_ACCOUNTS",
+      "idleTimeoutMinutes": 5,
+      "newDeviceAlert": true,
+      "enforceIpRules": true,
+      "requireMfa": true
+    }
+  ]
+}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `policies` | Sí | `array<SessionPolicyDto>` | máximo 20 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[{"scope":"ALL_ACCOUNTS","roleCode":"CODIGO_EJEMPLO","idleTimeoutMinutes":5,"newDeviceAlert":true,"allowedHours":{"days":[1],"from":"07:00","to":"20:00","timeZone":"America/La_Paz"},"enforceIpRules":true,"requireMfa":true}]` |
+| `policies[].scope` | Sí | `string` | valores: `ALL_ACCOUNTS`, `ORG_STAFF`, `ROLE` | Sin descripción específica en el contrato OpenAPI. | `ALL_ACCOUNTS` |
+| `policies[].roleCode` | No | `string` | longitud máxima 60 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `policies[].idleTimeoutMinutes` | Sí | `number` | mínimo 5; máximo 1440 | Sin descripción específica en el contrato OpenAPI. | `5` |
+| `policies[].newDeviceAlert` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `policies[].allowedHours` | No | `AllowedHoursDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"days":[1],"from":"07:00","to":"20:00","timeZone":"America/La_Paz"}` |
+| `policies[].allowedHours.days` | No | `array<number>` | mínimo 0; máximo 6; máximo 7 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[1]` |
+| `policies[].allowedHours.from` | No | `string` | patrón runtime `HHMM` | Sin descripción específica en el contrato OpenAPI. | `07:00` |
+| `policies[].allowedHours.to` | No | `string` | patrón runtime `HHMM` | Sin descripción específica en el contrato OpenAPI. | `20:00` |
+| `policies[].allowedHours.timeZone` | No | `string` | longitud máxima 64 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `policies[].enforceIpRules` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `policies[].requireMfa` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PUT /org/session-policies HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "policies": [
+    {
+      "scope": "ALL_ACCOUNTS",
+      "roleCode": "CODIGO_EJEMPLO",
+      "idleTimeoutMinutes": 5,
+      "newDeviceAlert": true,
+      "allowedHours": {
+        "days": [
+          1
+        ],
+        "from": "07:00",
+        "to": "20:00",
+        "timeZone": "America/La_Paz"
+      },
+      "enforceIpRules": true,
+      "requireMfa": true
+    }
+  ]
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<SessionPoliciesResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `SessionPoliciesResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "policies": [
+    {
+      "scope": "ALL_ACCOUNTS",
+      "roleCode": "CODIGO_EJEMPLO",
+      "idleTimeoutMinutes": 5,
+      "newDeviceAlert": true,
+      "allowedHours": {
+        "days": [
+          1
+        ],
+        "from": "07:00",
+        "to": "20:00",
+        "timeZone": "America/La_Paz"
+      },
+      "enforceIpRules": true,
+      "requireMfa": true
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `policies` | Sí | `array<SessionPolicyDto>` | Sin restricción adicional declarada | Políticas vigentes. | `[{"scope":"ALL_ACCOUNTS","roleCode":"CODIGO_EJEMPLO","idleTimeoutMinutes":5,"newDeviceAlert":true,"allowedHours":{"days":[1],"from":"07:00","to":"20:00","timeZone":"America/La_Paz"},"enforceIpRules":true,"requireMfa":true}]` |
+| `policies[].scope` | Sí | `string` | valores: `ALL_ACCOUNTS`, `ORG_STAFF`, `ROLE` | Sin descripción específica en el contrato OpenAPI. | `ALL_ACCOUNTS` |
+| `policies[].roleCode` | No | `string` | longitud máxima 60 | Sin descripción específica en el contrato OpenAPI. | `CODIGO_EJEMPLO` |
+| `policies[].idleTimeoutMinutes` | Sí | `number` | mínimo 5; máximo 1440 | Sin descripción específica en el contrato OpenAPI. | `5` |
+| `policies[].newDeviceAlert` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `policies[].allowedHours` | No | `AllowedHoursDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"days":[1],"from":"07:00","to":"20:00","timeZone":"America/La_Paz"}` |
+| `policies[].allowedHours.days` | No | `array<number>` | mínimo 0; máximo 6; máximo 7 elemento(s) | Sin descripción específica en el contrato OpenAPI. | `[1]` |
+| `policies[].allowedHours.from` | No | `string` | patrón runtime `HHMM` | Sin descripción específica en el contrato OpenAPI. | `07:00` |
+| `policies[].allowedHours.to` | No | `string` | patrón runtime `HHMM` | Sin descripción específica en el contrato OpenAPI. | `20:00` |
+| `policies[].allowedHours.timeZone` | No | `string` | longitud máxima 64 | Sin descripción específica en el contrato OpenAPI. | `America/La_Paz` |
+| `policies[].enforceIpRules` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+| `policies[].requireMfa` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | La franja horaria no admite a nadie: la hora de inicio y la de fin son iguales | Excepción explícita en src/modules/iam/application/services/session-policies.service.ts |
+| 422 | `PRECONDITION_FAILED` | La franja horaria debe durar al menos 4 horas | Excepción explícita en src/modules/iam/application/services/session-policies.service.ts |
+| 422 | `PRECONDITION_FAILED` | Esta política dejaría fuera el horario en el que está trabajando | Excepción explícita en src/modules/iam/application/services/session-policies.service.ts |
+| 422 | `PRECONDITION_FAILED` | Las reglas de red de la organización dejarían fuera la red desde la que está trabajando | Excepción explícita en src/modules/iam/application/services/ip-access-rules.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/org/session-policies"
 }
 ```
 

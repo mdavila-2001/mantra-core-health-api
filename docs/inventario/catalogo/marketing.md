@@ -2,7 +2,7 @@
 
 # Catálogo del schema `marketing`
 
-- **Tablas:** 14 · **Columnas:** 276 (53 con descripción: 19.2 %) · **Índices:** 130
+- **Tablas:** 14 · **Columnas:** 277 (54 con descripción: 19.5 %) · **Índices:** 130
 - **Dominio:** Marketing y Crecimiento
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -22,7 +22,7 @@
 | [marketing_campaigns](#marketing_campaigns) | Representa campañas multicanal dirigidas a audiencias permitidas, sin usar PHI clínica para targeting. | 31 | 14 | 8 | COINCIDE |
 | [marketing_touchpoints](#marketing_touchpoints) | Registra interacciones de marketing observadas para conocer contactos entre audiencias y campañas. | 18 | 9 | 4 | COINCIDE |
 | [segment_members](#segment_members) | Asocia miembros a segmentos para medir alcance y preparar campañas sujetas a consentimiento. | 12 | 5 | 3 | COINCIDE |
-| [segments](#segments) | Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comunicación no clínica. | 15 | 9 | 5 | COINCIDE |
+| [segments](#segments) | Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comunicación no clínica. | 16 | 9 | 5 | DIVERGE |
 | [tracked_links](#tracked_links) | Cataloga enlaces con parámetros de seguimiento para medir respuesta a campañas y canales. | 15 | 6 | 6 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -990,7 +990,7 @@ Representa recorridos automatizados que organizan interacciones de marketing por
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_journeys_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_journeys_tenant_id_code` | sí | tenant_id, code | Garantiza que no se repita la combinación (tenant_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_journeys_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_journeys_tenant_id` | no | tenant_id | Soporta la clave foránea fk_journeys_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 4 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_journeys_entry_trigger_concept_id` | no | entry_trigger_concept_id | Soporta la clave foránea fk_journeys_entry_trigger_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_journeys_entry_segment_id` | no | entry_segment_id | Soporta la clave foránea fk_journeys_entry_segment_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1005,7 +1005,7 @@ Representa recorridos automatizados que organizan interacciones de marketing por
 
 | Restricción | Tipo | Definición |
 |---|---|---|
-| `uq_journeys_code` | UNIQUE INDEX | UNIQUE INDEX ("code") |
+| `uq_journeys_tenant_id_code` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "code") |
 
 #### Operaciones que la tocan
 
@@ -1105,7 +1105,7 @@ Representa campañas multicanal dirigidas a audiencias permitidas, sin usar PHI 
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_marketing_campaigns_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_marketing_campaigns_tenant_id_code` | sí | tenant_id, code | Garantiza que no se repita la combinación (tenant_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_marketing_campaigns_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_marketing_campaigns_tenant_id` | no | tenant_id | Soporta la clave foránea fk_marketing_campaigns_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 5 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_marketing_campaigns_campaign_type_concept_id` | no | campaign_type_concept_id | Soporta la clave foránea fk_marketing_campaigns_campaign_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_marketing_campaigns_objective_concept_id` | no | objective_concept_id | Soporta la clave foránea fk_marketing_campaigns_objective_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1124,7 +1124,7 @@ Representa campañas multicanal dirigidas a audiencias permitidas, sin usar PHI 
 
 | Restricción | Tipo | Definición |
 |---|---|---|
-| `uq_marketing_campaigns_code` | UNIQUE INDEX | UNIQUE INDEX ("code") |
+| `uq_marketing_campaigns_tenant_id_code` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "code") |
 
 #### Operaciones que la tocan
 
@@ -1323,7 +1323,7 @@ Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comu
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_50_marketing.puml: segments; BIZ note`
 - **Dominio:** Marketing y Crecimiento · **Diagrama:** `Mantra Core Health Context/modules/diagram_50_marketing.puml` · **DDL:** `SQL/50_marketing/02_tables.sql`
 - **Entidad del ORM:** `MarketingSegments` — `src/modules/marketing/entities/segments.entity.ts`
-- **Resumen:** 15 columnas · 9 índices · 6 FK salientes · 3 entrantes · 5 operaciones
+- **Resumen:** 16 columnas · 9 índices · 6 FK salientes · 3 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -1344,6 +1344,7 @@ Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comu
 | 13 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 14 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
 | 15 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/marketing/entities/segments.entity.ts:105`)_ | coincide |
+| 16 | `version_number` | `integer` | Opcional | + v4.2.49 (CAN-VERSION-001, issue #57): numero de version. Nullable: lo existente no lo tiene. Sus revisiones viven en audit.segments_history. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_50_marketing.puml:38`)_ | **AUSENTE_EN_ORM** |
 
 #### Relaciones
 
@@ -1363,7 +1364,7 @@ Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comu
 
 | Índice | Único | Columnas | Para qué |
 |---|---|---|---|
-| `uq_segments_code` | sí | code | Garantiza que no se repita la combinación (code) _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «code», la primera columna del índice _(CONSULTA)_ |
+| `uq_segments_tenant_id_code` | sí | tenant_id, code | Garantiza que no se repita la combinación (tenant_id, code) _(DOCUMENTO)_; Soporta la clave foránea fk_segments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_segments_tenant_id` | no | tenant_id | Soporta la clave foránea fk_segments_tenant_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 3 consulta(s) de repositorio filtran u ordenan por «tenant_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_segments_segment_type_concept_id` | no | segment_type_concept_id | Soporta la clave foránea fk_segments_segment_type_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_segments_source_read_model_id` | no | source_read_model_id | Soporta la clave foránea fk_segments_source_read_model_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
@@ -1377,7 +1378,7 @@ Define audiencias segmentadas a partir de fuentes y reglas autorizadas para comu
 
 | Restricción | Tipo | Definición |
 |---|---|---|
-| `uq_segments_code` | UNIQUE INDEX | UNIQUE INDEX ("code") |
+| `uq_segments_tenant_id_code` | UNIQUE INDEX | UNIQUE INDEX ("tenant_id", "code") |
 
 #### Operaciones que la tocan
 

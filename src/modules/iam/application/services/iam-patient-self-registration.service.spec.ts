@@ -88,6 +88,7 @@ describe('IamPatientSelfRegistrationService', () => {
       create: fn(),
       findByTokenHash: fn(),
       findLatestByUser: fn(),
+      findLatestVerifiedByUser: fn(),
     };
     const personsRepo = { create: fn(() => ({ id: 'person-1' })) };
     const personProfilesRepo = { create: fn() };
@@ -250,6 +251,8 @@ describe('IamPatientSelfRegistrationService', () => {
         expect.objectContaining({
           userId: 'user-1',
           statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+          // N10c: no la creó nadie de la organización ni un vínculo de apoyo.
+          originConceptId: DIR.MEMBERSHIP_ORIGIN_UNKNOWN,
         }),
       );
     });

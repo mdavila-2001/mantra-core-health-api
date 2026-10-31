@@ -121,4 +121,60 @@ export class Permissions {
    */
   @Property({ fieldName: 'allow_direct_user_grant', type: 'boolean' })
   allowDirectUserGrant!: boolean;
+
+  /** Sensibilidad del permiso (`authz:SENSITIVITY_*`). */
+  @Property({
+    fieldName: 'sensitivity_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  sensitivityConceptId?: string;
+
+  /** El uso exige un motivo escrito (5-500 caracteres). */
+  @Property({ fieldName: 'requires_reason', type: 'boolean', default: false })
+  requiresReason: boolean = false;
+
+  /** El uso exige un paso extra de verificación (MFA fresco). */
+  @Property({ fieldName: 'requires_step_up', type: 'boolean', default: false })
+  requiresStepUp: boolean = false;
+
+  /** Quién debe aprobar el uso (`authz:APPROVAL_*`); nulo = sin aprobación. */
+  @Property({
+    fieldName: 'approval_mode_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  approvalModeConceptId?: string;
+
+  /** Propósito de uso (`authz:PURPOSE_*`; HL7 TREAT/HPAYMT/HOPERAT). */
+  @Property({
+    fieldName: 'purpose_of_use_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  purposeOfUseConceptId?: string;
+
+  /** Base legal del acceso (`audit:LEGAL_BASIS_*`). */
+  @Property({
+    fieldName: 'legal_basis_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  legalBasisConceptId?: string;
+
+  /** El permiso toca datos clínicos. */
+  @Property({
+    fieldName: 'touches_clinical_data',
+    type: 'boolean',
+    default: false,
+  })
+  touchesClinicalData: boolean = false;
+
+  /** `false` = ninguna plantilla ni concesión puede otorgarlo a personal de apoyo. */
+  @Property({
+    fieldName: 'support_assignable',
+    type: 'boolean',
+    default: false,
+  })
+  supportAssignable: boolean = false;
 }

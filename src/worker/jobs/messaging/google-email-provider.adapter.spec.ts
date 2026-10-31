@@ -33,6 +33,32 @@ describe('createGoogleEmailProviderAdapter', () => {
     });
   });
 
+  it('pasa el nombre visible del remitente cuando el payload lo trae', async () => {
+    const client = { sendEmail: mockFn() };
+    client.sendEmail.mockResolvedValue({ messageId: 'gmail-msg-3' });
+    const adapter = createGoogleEmailProviderAdapter(client as any);
+
+    await adapter({
+      id: 'req-3',
+      channelId: 'EMAIL',
+      statusConceptId: 'NOTIF_PENDING',
+      recipientAddress: 'paciente@example.com',
+      payloadJson: {
+        fromName: 'Dr. Andrés Pérez',
+        subject: 'Mensaje de Dr. Andrés Pérez',
+        bodyText: 'Le confirmamos el jueves.',
+      },
+    });
+
+    expect(client.sendEmail).toHaveBeenCalledWith({
+      to: 'paciente@example.com',
+      fromName: 'Dr. Andrés Pérez',
+      subject: 'Mensaje de Dr. Andrés Pérez',
+      bodyText: 'Le confirmamos el jueves.',
+      bodyHtml: undefined,
+    });
+  });
+
   it('usa un asunto genérico y serializa el payload cuando no trae subject/body', async () => {
     const client = { sendEmail: mockFn() };
     client.sendEmail.mockResolvedValue({ messageId: 'gmail-msg-2' });

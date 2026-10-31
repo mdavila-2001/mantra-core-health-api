@@ -9,6 +9,7 @@ Agrupa los componentes relacionados con **http** y mantiene cohesionada esta res
 | Archivo | Responsabilidad |
 | --- | --- |
 | `http-dispatcher.service.ts` | Casos de uso y reglas de negocio. |
+| `no-store-headers.module.ts` | Middleware global: `Cache-Control: no-store` y `Pragma: no-cache` por omisión en toda respuesta (F3); lo pisan las descargas con su propia directiva y la caché pública de `PublicCacheInterceptor`. |
 | `ssrf-guard.ts` | Implementación o recurso de soporte de esta carpeta. |
 
 ## Criterios de mantenimiento

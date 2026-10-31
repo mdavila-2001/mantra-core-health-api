@@ -62,6 +62,12 @@ export function buildScope(doubles: ScopeDoubles) {
       patientProfileId: 'pat-1',
     }),
     patientExists: mockFn().mockResolvedValue(true),
+    // Nodos de alcance (práctica, sede, unidad, espacio, unidad de diagnóstico,
+    // farmacia) y personas: por defecto de la organización activa.
+    scopeNodeTenant: mockFn().mockResolvedValue(ACTIVE_TENANT),
+    userHasMembership: mockFn().mockResolvedValue(true),
+    // Perfil del doctor titular de la asignación de rol de la delegación.
+    roleAssignmentPractitioner: mockFn().mockResolvedValue('prof-perez'),
   };
   const scope = new DelegationScopeService(
     doubles.setsRepo,

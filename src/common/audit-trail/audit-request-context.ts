@@ -18,6 +18,12 @@ export interface AuditRequestContext {
    * tiene dispositivo o no existe; `undefined` = todavía no se consultó).
    */
   deviceId?: string | null;
+  /**
+   * Aprobación de cuatro ojos que la persona presenta para repetir una acción
+   * (`X-Approval-Id`). Solo es lo que llegó: la política verifica que sea suya,
+   * de esa acción y vigente antes de creerla.
+   */
+  readonly approvalId?: string;
   /** Algún eslabón `success: true` se selló durante la petición. */
   sealedSuccess: boolean;
   /** Algún eslabón `success: false` se selló durante la petición. */

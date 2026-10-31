@@ -28,6 +28,7 @@ import {
   practiceOutOfScope,
 } from './practice-scope';
 import { PracticeAdministrationService } from './practice-administration.service';
+import { PractitionerMembershipSyncService } from './practitioner-membership-sync.service';
 import { PRACTICE_ASSIGNMENT_TRANSITIONS } from './role-assignment-transitions';
 import {
   loadRoleAssignmentRowContext,
@@ -73,6 +74,7 @@ export class PracticeWorkforceService {
    * @param supportRepo - Valor de support repo requerido por la operación.
    * @param administration - Regla de administración por organización (A-6).
    * @param logger - Valor de logger requerido por la operación.
+   * @param membershipSync - Membresía pendiente del médico que decide aprobar o rechazar.
    */
   constructor(
     private readonly em: EntityManager,
@@ -84,6 +86,7 @@ export class PracticeWorkforceService {
     private readonly supportRepo: PractitionerSupportAssignmentsRepository,
     private readonly administration: PracticeAdministrationService,
     private readonly logger: PinoLogger,
+    private readonly membershipSync: PractitionerMembershipSyncService,
   ) {
     this.logger.setContext(PracticeWorkforceService.name);
   }
@@ -368,6 +371,7 @@ export class PracticeWorkforceService {
       return {
         ...toRoleAssignmentRow(a, rowContext),
         practiceName: practice?.name ?? '(organización no encontrada)',
+        tenantId: practice?.tenantId ?? null,
         practiceType: practice?.typeConceptId ?? null,
         roleConceptId: a.roleConceptId,
         specialtyConceptId: a.specialtyConceptId ?? null,
@@ -615,6 +619,8 @@ export class PracticeWorkforceService {
         );
       }
 
+      const decidedPending =
+        role.statusConceptId === PRAC.ROLE_ASSIGNMENT_PENDING;
       role.statusConceptId = toStatus;
       role.updatedByUserId = actor.id;
       role.updatedAt = new Date();
@@ -623,6 +629,20 @@ export class PracticeWorkforceService {
         toStatus === PRAC.ROLE_ASSIGNMENT_ENDED
       ) {
         role.validTo = new Date();
+      }
+      // Decidir una solicitud pendiente (aprobar o rechazar) resuelve también la
+      // membresía que dejó el QR multiuso del médico, si la hay.
+      if (
+        decidedPending &&
+        (toStatus === PRAC.ROLE_ASSIGNMENT_ACTIVE ||
+          toStatus === PRAC.ROLE_ASSIGNMENT_REJECTED)
+      ) {
+        await this.membershipSync.settle(
+          tx,
+          role,
+          toStatus === PRAC.ROLE_ASSIGNMENT_ACTIVE,
+          actor.id,
+        );
       }
       this.logger.info(
         {

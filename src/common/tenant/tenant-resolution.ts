@@ -30,6 +30,32 @@ export function hasPrivilegedTenantRole(user: AuthenticatedUser): boolean {
   );
 }
 
+/** Motivos con los que una organización puede negar el acceso a quien sí entró. */
+const DENIAL_REASONS: ReadonlySet<string> = new Set([
+  SystemErrorReason.OUTSIDE_ALLOWED_HOURS,
+  SystemErrorReason.OUTSIDE_ALLOWED_NETWORK,
+  SystemErrorReason.IDLE_TIMEOUT,
+  SystemErrorReason.MFA_REQUIRED,
+  SystemErrorReason.MFA_ENROLLMENT_REQUIRED,
+]);
+
+/**
+ * 403 con el motivo estable por el que la organización no deja actuar a la
+ * persona ahora (`deniedTenants` del token); `undefined` si no la niega.
+ */
+function tenantDenial(
+  user: AuthenticatedUser,
+  tenantId: string,
+): ReturnType<typeof forbiddenWithReason> | undefined {
+  const reason = user.deniedTenants?.[tenantId];
+  if (!reason || !DENIAL_REASONS.has(reason)) return undefined;
+  return forbiddenWithReason(
+    'La política de sesión de la organización no permite actuar en ella ahora',
+    reason as SystemErrorReason,
+    { tenantId, reason },
+  );
+}
+
 /**
  * Resuelve el tenant activo del request para un actor ordinario.
  *
@@ -51,6 +77,10 @@ export function resolveOrdinaryTenantId(
 
   if (declared) {
     if (!memberships.includes(declared)) {
+      // La organización existe y la persona es miembro, pero su política no la
+      // deja actuar ahora: se dice por qué, en vez de tumbarle la sesión entera.
+      const denial = tenantDenial(user, declared);
+      if (denial) throw denial;
       throw forbiddenWithReason(
         'El actor no pertenece al tenant indicado en X-Tenant-Id',
         SystemErrorReason.TENANT_MEMBERSHIP_REQUIRED,
@@ -61,6 +91,14 @@ export function resolveOrdinaryTenantId(
 
   if (memberships.length === 1) {
     return memberships[0];
+  }
+
+  // Sin cabecera y sin organizaciones disponibles, pero con UNA que la política
+  // niega ahora: el motivo es ese y no «no pertenece a ninguna».
+  const denied = Object.keys(user.deniedTenants ?? {});
+  if (memberships.length === 0 && denied.length === 1) {
+    const denial = tenantDenial(user, denied[0]);
+    if (denial) throw denial;
   }
 
   // El status no cambia (403); `reason` le deja al cliente distinguir «falta

@@ -66,6 +66,16 @@ export class PlaceHoldUseCase {
       if (!slot) {
         throw new ResourceNotFoundException('Slot no encontrado', { slotId });
       }
+      // La persona de apoyo retiene solo donde su permiso `schedule.create` cubre
+      // el doctor, servicio y espacio del cupo (no-op para cualquier otro actor).
+      // Va antes de mirar el estado del cupo: al que no tiene permiso no se le
+      // dice si el horario está libre.
+      await this.access.assertSupportMayOnSlot(
+        tx,
+        slot,
+        actor,
+        'schedule.create',
+      );
       // Un cupo retraído lo pisa un servicio que el profesional ya comprometió: se
       // dejó de ofrecer, pero un id leído hace rato todavía puede llegar acá.
       const refusal = slotHoldRefusal(slot);

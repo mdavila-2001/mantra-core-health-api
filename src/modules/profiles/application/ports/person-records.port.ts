@@ -68,6 +68,11 @@ export interface PersonRecordsPort {
     em: EntityManager,
     data: { typeConceptId: string; value: string },
   ): Promise<T | null>;
+  /** Documento nacional activo de un paciente con este número (forma canónica). */
+  findActiveNationalIdDuplicate(
+    em: EntityManager,
+    nationalId: string,
+  ): Promise<{ id: string; ownerId: string } | null>;
   createIdentifier(em: EntityManager, data: object): unknown;
   findCatalogConcept(em: EntityManager, id: string): Promise<unknown>;
 }

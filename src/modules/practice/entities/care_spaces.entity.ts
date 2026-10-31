@@ -99,4 +99,20 @@ export class CareSpaces {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /** Columna `fhir_physical_type`. */
+  @Property({
+    fieldName: 'fhir_physical_type',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  fhirPhysicalType?: string;
+
+  /** Columna `location_path`. */
+  @Property({
+    fieldName: 'location_path',
+    columnType: 'varchar',
+    nullable: true,
+  })
+  locationPath?: string;
 }

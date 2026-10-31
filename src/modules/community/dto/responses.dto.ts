@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /** Respuesta genérica que expone solo el id del recurso creado. */
 export class IdResponseDto {
@@ -138,6 +138,15 @@ export class MessageResponseDto {
    */
   @ApiProperty({ type: String })
   sentAt!: Date;
+
+  /**
+   * Qué pasó con el correo, solo si se pidió el canal `EMAIL` al responder en
+   * nombre del doctor. No incluye la dirección del paciente.
+   */
+  @ApiPropertyOptional({
+    description: 'Resultado del canal de correo, si se pidió',
+  })
+  email?: { queued: boolean; requestId?: string; skippedReason?: string };
 }
 
 /** Respuesta de marcado de leído (UC-19-07). */

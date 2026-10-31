@@ -63,20 +63,140 @@ function resStub() {
 
 /** Petición sin cabecera `Cookie`: el modo por defecto no la mira. */
 function reqStub() {
-  return { headers: {} };
+  return { headers: {}, ip: '203.0.113.5' };
 }
 
 describe('IamAuthController', () => {
-  it('delegates login with the client ip (UC-01-04)', async () => {
+  it('delegates login with the client ip and user agent (UC-01-04)', async () => {
     const d = build();
     const dto = { email: 'a@x.io', password: 'password123' };
     d.authService.login.mockResolvedValue({ accessToken: 'at' });
     await expect(
-      d.controller.login(dto as any, '1.2.3.4', resStub() as any),
+      d.controller.login(
+        dto as any,
+        '1.2.3.4',
+        'UA/1.0',
+        reqStub() as any,
+        resStub() as any,
+      ),
     ).resolves.toEqual({
       accessToken: 'at',
     });
-    expect(d.authService.login).toHaveBeenCalledWith(dto, '1.2.3.4');
+    expect(d.authService.login).toHaveBeenCalledWith(
+      dto,
+      '1.2.3.4',
+      'UA/1.0',
+      undefined,
+    );
+  });
+
+  it('el login conserva newDevice y mfaEnrollmentRequired al entregar los tokens', async () => {
+    const d = build();
+    const notice = { deviceId: 'd1', label: 'Chrome en Windows' };
+    d.authService.login.mockResolvedValue({
+      accessToken: 'at',
+      newDevice: notice,
+      mfaEnrollmentRequired: true,
+    });
+    await expect(
+      d.controller.login(
+        { email: 'a@x.io', password: 'password123' } as any,
+        '1.2.3.4',
+        undefined,
+        reqStub() as any,
+        resStub() as any,
+      ),
+    ).resolves.toEqual({
+      accessToken: 'at',
+      newDevice: notice,
+      mfaEnrollmentRequired: true,
+    });
+  });
+
+  it('el login conserva deniedTenants: las organizaciones que niegan llegan al cliente', async () => {
+    const d = build();
+    const denied = [{ tenantId: 't1', reason: 'OUTSIDE_ALLOWED_HOURS' }];
+    d.authService.login.mockResolvedValue({
+      accessToken: 'at',
+      deniedTenants: denied,
+    });
+    await expect(
+      d.controller.login(
+        { email: 'a@x.io', password: 'password123' } as any,
+        '1.2.3.4',
+        undefined,
+        reqStub() as any,
+        resStub() as any,
+      ),
+    ).resolves.toEqual({ accessToken: 'at', deniedTenants: denied });
+  });
+
+  describe('cookie de dispositivo (N7)', () => {
+    const original = process.env.AUTH_DEVICE_COOKIE_ENABLED;
+    afterEach(() => {
+      if (original === undefined) delete process.env.AUTH_DEVICE_COOKIE_ENABLED;
+      else process.env.AUTH_DEVICE_COOKIE_ENABLED = original;
+    });
+
+    it('apagada (por defecto) no lee ni escribe la cookie, y el valor firmado nunca llega al cuerpo', async () => {
+      delete process.env.AUTH_DEVICE_COOKIE_ENABLED;
+      const d = build();
+      const res = resStub();
+      d.authService.login.mockResolvedValue({
+        accessToken: 'at',
+        deviceCookie: 'firmado',
+      });
+      const out = await d.controller.login(
+        { email: 'a@x.io', password: 'password123' } as any,
+        '1.2.3.4',
+        'UA/1.0',
+        { headers: { cookie: 'redesa_device=abc' } } as any,
+        res as any,
+      );
+      expect(out).toEqual({ accessToken: 'at' });
+      expect(res.cookie).not.toHaveBeenCalled();
+      expect(d.authService.login).toHaveBeenCalledWith(
+        expect.anything(),
+        '1.2.3.4',
+        'UA/1.0',
+        undefined,
+      );
+    });
+
+    it('encendida lee la cookie del navegador, la entrega HttpOnly/SameSite=strict y la quita del cuerpo', async () => {
+      process.env.AUTH_DEVICE_COOKIE_ENABLED = 'true';
+      // El controlador lee la configuración al construirse: se arma después.
+      const d = build();
+      const res = resStub();
+      d.authService.login.mockResolvedValue({
+        accessToken: 'at',
+        deviceCookie: 'dev.firma',
+      });
+      const out = await d.controller.login(
+        { email: 'a@x.io', password: 'password123' } as any,
+        '1.2.3.4',
+        'UA/1.0',
+        { headers: { cookie: 'otra=1; redesa_device=previo.firma' } } as any,
+        res as any,
+      );
+      expect(d.authService.login).toHaveBeenCalledWith(
+        expect.anything(),
+        '1.2.3.4',
+        'UA/1.0',
+        'previo.firma',
+      );
+      expect(res.cookie).toHaveBeenCalledWith(
+        'redesa_device',
+        'dev.firma',
+        expect.objectContaining({
+          httpOnly: true,
+          sameSite: 'strict',
+          path: '/iam/auth/login',
+        }),
+      );
+      expect(out).toEqual({ accessToken: 'at' });
+      expect(out).not.toHaveProperty('deviceCookie');
+    });
   });
 
   it('delegates refresh (UC-01-06)', async () => {
@@ -86,7 +206,9 @@ describe('IamAuthController', () => {
     await d.controller.refresh(dto, reqStub() as any, resStub() as any);
     // Con la cookie apagada -el default- el token sale del cuerpo y llega al
     // dominio en crudo.
-    expect(d.authService.refresh).toHaveBeenCalledWith('r');
+    // El origen es `req.ip` (el que Express calcula con `TRUST_PROXY_HOPS`), nunca
+    // una cabecera del cliente: lo evalúan las reglas de red de la organización.
+    expect(d.authService.refresh).toHaveBeenCalledWith('r', '203.0.113.5');
   });
 
   it('delegates logoutAll for the current user (UC-01-08)', async () => {

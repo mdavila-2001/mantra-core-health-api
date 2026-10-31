@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { DelegatedAccessModule } from '../delegated_access/delegated_access.module';
 import * as entities from './entities';
 import {
   PracticesController,
@@ -28,6 +29,7 @@ import {
   PracticeAdministrationService,
   HealthcareServiceOffersService,
   PracticeAffiliationInvitationsService,
+  PractitionerMembershipSyncService,
 } from './services';
 import {
   PracticesRepository,
@@ -77,6 +79,8 @@ import {
     // `DirectoryModule` entero.
     DirectoryAuthorizationModule,
     CommonModule,
+    // El acceso efectivo del personal de apoyo se recalcula al crear espacios.
+    DelegatedAccessModule,
   ],
   controllers: [
     PracticesController,
@@ -134,6 +138,7 @@ import {
     PracticeAdministrationService,
     HealthcareServiceOffersService,
     PracticeAffiliationInvitationsService,
+    PractitionerMembershipSyncService,
   ],
   // `scheduling` resuelve con esto la sede de cada recurso agendable: el dato
   // vive acá y no se duplica allá. `practice` no importa `scheduling`, así que

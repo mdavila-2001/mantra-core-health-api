@@ -1,13 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import {
   EntityManager,
   UniqueConstraintViolationException,
 } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
+  computeLocationPath,
+  fhirPhysicalTypeOf,
+  relocateSubtree,
+} from '../care-space-location';
+import { EffectiveSupportAccessService } from '../../delegated_access/services/effective-support-access.service';
+import {
   ConflictException,
   PreconditionFailedException,
   requireTenantId,
+  touch,
   type AuthenticatedUser,
 } from '../../../common';
 import { PRAC } from '../practice.concepts';
@@ -27,6 +34,7 @@ import {
 import {
   CreateClinicalUnitDto,
   CreateCareSpaceDto,
+  MoveCareSpaceDto,
   CreateHealthcareServiceDto,
   ClinicalUnitResponseDto,
   CareSpaceResponseDto,
@@ -52,6 +60,8 @@ export class ClinicalStructureService {
    * @param catalogRepo - Catálogo de precios de la práctica.
    * @param procedures - Nomenclador de procedimientos.
    * @param logger - Valor de logger requerido por la operación.
+   * @param supportAccess - Acceso efectivo del personal de apoyo, que se recalcula
+   *   al cambiar la estructura de espacios.
    */
   constructor(
     private readonly em: EntityManager,
@@ -64,8 +74,22 @@ export class ClinicalStructureService {
     private readonly catalogRepo: ServiceCatalogRepository,
     private readonly procedures: ProcedureReferenceReader,
     private readonly logger: PinoLogger,
+    @Optional() private readonly supportAccess?: EffectiveSupportAccessService,
   ) {
     this.logger.setContext(ClinicalStructureService.name);
+  }
+
+  /**
+   * Recalcula el acceso efectivo del personal de apoyo DENTRO de la transacción
+   * del cambio de estructura: si el recálculo falla, el cambio se deshace y el
+   * error llega a quien lo pidió, en vez de quedar un espacio nuevo con la vista
+   * derivada desactualizada y un log que nadie lee.
+   */
+  private async refreshSupportAccess(
+    tx: EntityManager,
+    tenantId: string,
+  ): Promise<void> {
+    await this.supportAccess?.refreshTenant(tenantId, { tx });
   }
 
   /** UC-14-04: crea una unidad clínica (opcionalmente jerárquica) bajo un sitio activo. */
@@ -154,7 +178,7 @@ export class ClinicalStructureService {
       { operation: 'practice.space.create', siteId },
       'Creating care space',
     );
-    return this.em.transactional(async (tx) => {
+    const created = await this.em.transactional(async (tx) => {
       const { site } = await loadSiteInScope(
         this.sitesRepo,
         this.practicesRepo,
@@ -206,19 +230,32 @@ export class ClinicalStructureService {
         );
       }
 
+      const parentSpace = dto.parentSpaceId
+        ? await this.spacesRepo.findById(tx, dto.parentSpaceId)
+        : null;
+      const spaceTypeConceptId = dto.spaceTypeConceptId ?? PRAC.SPACE_TYPE_ROOM;
       const space = this.spacesRepo.create(tx, {
         practiceSiteId: siteId,
         clinicalUnitId: dto.clinicalUnitId,
         parentSpaceId: dto.parentSpaceId,
         code: dto.code,
         name: dto.name,
-        spaceTypeConceptId: dto.spaceTypeConceptId ?? PRAC.SPACE_TYPE_ROOM,
+        spaceTypeConceptId,
         capacity: dto.capacity,
         operationalStatusConceptId: PRAC.SPACE_OP_AVAILABLE,
         statusConceptId: PRAC.SPACE_ACTIVE,
         actorUserId: actor.id,
       });
+      // La ruta materializada se mantiene al crear el espacio: de ella depende
+      // que un permiso por ubicación cubra a sus descendientes.
+      space.locationPath = computeLocationPath(
+        siteId,
+        space.id,
+        parentSpace ?? undefined,
+      );
+      space.fhirPhysicalType = fhirPhysicalTypeOf(spaceTypeConceptId);
       await tx.flush();
+      await this.refreshSupportAccess(tx, tenantId);
       return {
         id: space.id,
         practiceSiteId: space.practiceSiteId,
@@ -228,6 +265,73 @@ export class ClinicalStructureService {
         createdAt: space.createdAt,
       };
     });
+    return created;
+  }
+
+  /**
+   * Mueve un espacio bajo otro padre (o a la raíz de la sede): recalcula la ruta
+   * materializada del espacio y de todos sus descendientes y refresca el acceso
+   * efectivo del personal de apoyo, que depende de esa ruta.
+   *
+   * @throws PreconditionFailedException (422) si el espacio o el padre no son de
+   * la sede, o si el movimiento crearía un ciclo.
+   */
+  async moveCareSpace(
+    siteId: string,
+    spaceId: string,
+    dto: MoveCareSpaceDto,
+    actor: AuthenticatedUser,
+  ): Promise<CareSpaceResponseDto> {
+    const tenantId = requireTenantId();
+    this.logger.info(
+      { operation: 'practice.space.move', siteId, spaceId },
+      'Moving care space',
+    );
+    const moved = await this.em.transactional(async (tx) => {
+      await loadSiteInScope(
+        this.sitesRepo,
+        this.practicesRepo,
+        tx,
+        siteId,
+        tenantId,
+      );
+      const spaces = await this.spacesRepo.findBySite(tx, siteId);
+      const space = spaces.find((s) => s.id === spaceId);
+      if (!space) {
+        throw new PreconditionFailedException(
+          'El espacio no pertenece al sitio',
+          { siteId, spaceId },
+        );
+      }
+      const newParentId = dto.parentSpaceId ?? null;
+      let paths: Map<string, string>;
+      try {
+        paths = relocateSubtree(siteId, spaces, spaceId, newParentId);
+      } catch (error) {
+        throw new PreconditionFailedException(
+          error instanceof Error ? error.message : 'Movimiento inválido',
+          { siteId, spaceId, parentSpaceId: newParentId },
+        );
+      }
+      space.parentSpaceId = newParentId ?? undefined;
+      for (const affected of spaces) {
+        const path = paths.get(affected.id);
+        if (path === undefined) continue;
+        affected.locationPath = path;
+        touch(affected, actor.id);
+      }
+      await tx.flush();
+      await this.refreshSupportAccess(tx, tenantId);
+      return {
+        id: space.id,
+        practiceSiteId: space.practiceSiteId,
+        code: space.code,
+        status: space.statusConceptId,
+        operationalStatus: space.operationalStatusConceptId!,
+        createdAt: space.createdAt,
+      };
+    });
+    return moved;
   }
 
   /**

@@ -22,3 +22,4 @@ export { SchedulingServiceOfferingsService } from './service-offerings/schedulin
 export { SchedulingServiceAgendaService } from './service-offerings/scheduling-service-agenda.service';
 export { SchedulingServiceBookingService } from './service-offerings/scheduling-service-booking.service';
 export { SchedulingFlexibleBookingService } from './flexible/scheduling-flexible-booking.service';
+export { SchedulingSupportAgendaService } from './agenda/scheduling-support-agenda.service';

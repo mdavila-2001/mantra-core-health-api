@@ -61,6 +61,7 @@ x-app-env: &app-env
   MONGO_DB: ${MONGO_DB:-mantra_redesa_health_document_store}
   REDIS_HOST: redis
   REDIS_PORT: "6379"
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-}
   OPENSEARCH_NODE: http://opensearch:9200
   MINIO_ENDPOINT: minio
   MINIO_PORT: "9000"
@@ -140,6 +141,11 @@ x-app-env: &app-env
   # despliegue detrás de balanceador es lo que evita que el limitador de tasa
   # meta a todos los clientes en el mismo cubo. Ver `main.ts`.
   TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-0}
+  # SEG A-B8: con `NODE_ENV=production`, reglas de red activas (o la condición
+  # `network` de un permiso de apoyo) y 0 saltos, la API NO arranca: detrás de un
+  # proxy todos los clientes valen la IP del proxy. Si en producción la API está
+  # expuesta sin proxy, declárelo con `true`; si hay proxy, fije TRUST_PROXY_HOPS.
+  TRUST_PROXY_HOPS_ALLOW_ZERO: ${TRUST_PROXY_HOPS_ALLOW_ZERO:-false}
   # Primer administrador del arranque en frío. Mismo caso que `ORM_SCHEMA_SYNC`
   # más abajo: Compose usa el `.env` para sustituir `${VARIABLE}` en este YAML,
   # pero NO lo inyecta dentro de los contenedores. Mientras estas tres no
@@ -439,13 +445,26 @@ services:
   redis:
     image: redis:8.10-alpine
     restart: always
-    command: redis-server --save 60 1 --loglevel notice
+    # Contraseña OPCIONAL (`REDIS_PASSWORD`; la API la lee igual): vacía = sin
+    # autenticación, solo aceptable en un equipo de desarrollo. Quien alcance
+    # Redis puede publicar en el canal de invalidación de reglas del gobierno de
+    # accesos y escribir el sello del paso extra de una sesión: en producción
+    # Redis debe ser privado (red interna) y autenticado.
+    command:
+      - sh
+      - -c
+      - exec redis-server --save 60 1 --loglevel notice ${REDIS_PASSWORD:+--requirepass "$$REDIS_PASSWORD"}
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     ports:
-      - "${REDIS_PORT:-6380}:6379"
+      # Solo el propio equipo: no se publica a toda la red.
+      - "127.0.0.1:${REDIS_PORT:-6380}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        - CMD-SHELL
+        - 'if [ -n "$$REDIS_PASSWORD" ]; then redis-cli --no-auth-warning -a "$$REDIS_PASSWORD" ping; else redis-cli ping; fi'
       interval: 5s
       timeout: 5s
       retries: 5

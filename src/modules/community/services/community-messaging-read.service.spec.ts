@@ -22,7 +22,7 @@ const actor = { id: 'user-1', roles: ['USER'] } as any;
  * Construye el sistema bajo prueba con dependencias controladas.
  * @returns Resultado de build.
  */
-function build() {
+function build(teamView?: any) {
   const em = { fork: mockFn(() => ({})) };
   const conversationsRepo = {
     listActiveParticipationsOf: mockFn().mockResolvedValue([]),
@@ -77,6 +77,7 @@ function build() {
     presence as any,
     files as any,
     logger as any,
+    teamView,
   );
   return {
     service,
@@ -694,6 +695,143 @@ describe('CommunityMessagingReadService', () => {
 
       expect(res.peerReadUpTo).toBeNull();
       expect(d.conversationsRepo.findMessageById).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('lo que respondió el equipo de apoyo, visto desde cada lado (laguna 3)', () => {
+    const sentAt = new Date('2026-08-01T10:00:00Z');
+    const teamMessage = {
+      id: 'm-team',
+      conversationId: 'c-1',
+      senderProfileId: 'pp-doc',
+      contentTypeConceptId: 'ct',
+      bodyText: 'Le confirmamos el jueves a las 15:30.',
+      sentAt,
+      // Esto es del equipo: nunca debe salir en el DTO tal cual.
+      authoredByUserId: 'user-ana',
+      onBehalfOfProfileId: 'pp-doc',
+      delegateAssignmentId: 'del-1',
+      disclosureShown: true,
+    };
+    const view = (over: Record<string, unknown> = {}) => ({
+      reader: mockFn().mockResolvedValue({ profileId: 'pp-pac' }),
+      annotate: mockFn().mockResolvedValue(new Map()),
+      awaitingDoctor: mockFn().mockResolvedValue(new Set()),
+      ...over,
+    });
+
+    it('el paciente ve repliedByTeam y ningún nombre; el mensaje no filtra la autora real', async () => {
+      const teamView = view({
+        annotate: mockFn().mockResolvedValue(
+          new Map([['m-team', { repliedByTeam: true }]]),
+        ),
+      });
+      const d = build(teamView);
+      d.conversationsRepo.listMessagesPage.mockResolvedValue([teamMessage]);
+      const res = await d.service.listMessages('c-1', 'pp-pac', actor, {
+        limit: 10,
+      });
+      expect(res.items[0].repliedByTeam).toBe(true);
+      expect(res.items[0].teamAuthorName).toBeUndefined();
+      const wire = JSON.stringify(res);
+      for (const secret of [
+        'user-ana',
+        'authoredBy',
+        'delegateAssignment',
+        'del-1',
+      ]) {
+        expect(wire).not.toContain(secret);
+      }
+      expect(teamView.reader).toHaveBeenCalledWith(expect.anything(), 'pp-pac');
+    });
+
+    it('el doctor dueño del perfil ve además teamAuthorName', async () => {
+      const teamView = view({
+        reader: mockFn().mockResolvedValue({
+          profileId: 'pp-doc',
+          practitionerProfileId: 'prof-perez',
+        }),
+        annotate: mockFn().mockResolvedValue(
+          new Map([
+            [
+              'm-team',
+              { repliedByTeam: true, teamAuthorName: 'Ana Gutiérrez' },
+            ],
+          ]),
+        ),
+      });
+      const d = build(teamView);
+      d.conversationsRepo.listMessagesPage.mockResolvedValue([teamMessage]);
+      const res = await d.service.listMessages('c-1', 'pp-doc', actor, {
+        limit: 10,
+      });
+      expect(res.items[0]).toMatchObject({
+        repliedByTeam: true,
+        teamAuthorName: 'Ana Gutiérrez',
+      });
+    });
+
+    it('un mensaje sin marcas viaja como siempre, sin las claves', async () => {
+      const d = build(view());
+      d.conversationsRepo.listMessagesPage.mockResolvedValue([teamMessage]);
+      const res = await d.service.listMessages('c-1', 'pp-pac', actor, {
+        limit: 10,
+      });
+      expect('repliedByTeam' in res.items[0]).toBe(false);
+      expect('teamAuthorName' in res.items[0]).toBe(false);
+    });
+
+    it('también marca el mensaje fijado', async () => {
+      const teamView = view({
+        annotate: mockFn().mockResolvedValue(
+          new Map([['m-team', { repliedByTeam: true }]]),
+        ),
+      });
+      const d = build(teamView);
+      d.conversationsRepo.findConversationById.mockResolvedValue({
+        id: 'c-1',
+        conversationTypeConceptId: COMM.CONVERSATION_DIRECT,
+        pinnedMessageId: 'm-team',
+      });
+      d.conversationsRepo.findMessageById.mockResolvedValue(teamMessage);
+      const res = await d.service.listMessages('c-1', 'pp-pac', actor, {
+        limit: 10,
+      });
+      expect(res.pinnedMessage?.repliedByTeam).toBe(true);
+    });
+
+    it('awaitingDoctor aparece solo en las conversaciones que el equipo derivó al doctor', async () => {
+      const teamView = view({
+        reader: mockFn().mockResolvedValue({
+          profileId: 'pp-doc',
+          practitionerProfileId: 'prof-perez',
+        }),
+        awaitingDoctor: mockFn().mockResolvedValue(new Set(['c-1'])),
+      });
+      const d = build(teamView);
+      d.conversationsRepo.listActiveParticipationsOf.mockResolvedValue([
+        { conversationId: 'c-1', lastReadMessageId: 'm-0' },
+        { conversationId: 'c-2', lastReadMessageId: 'm-0' },
+      ]);
+      d.conversationsRepo.listConversationsByIds.mockResolvedValue([
+        { id: 'c-1', conversationTypeConceptId: 'ct' },
+        { id: 'c-2', conversationTypeConceptId: 'ct' },
+      ]);
+      const res = await d.service.listConversations('pp-doc', actor, {
+        limit: 20,
+      });
+      const byId = new Map(res.items.map((i) => [i.id, i]));
+      expect(byId.get('c-1')?.awaitingDoctor).toBe(true);
+      expect('awaitingDoctor' in (byId.get('c-2') as object)).toBe(false);
+    });
+
+    it('sin el servicio de equipo la lectura es la de siempre', async () => {
+      const d = build(undefined);
+      d.conversationsRepo.listMessagesPage.mockResolvedValue([teamMessage]);
+      const res = await d.service.listMessages('c-1', 'pp-pac', actor, {
+        limit: 10,
+      });
+      expect('repliedByTeam' in res.items[0]).toBe(false);
     });
   });
 });

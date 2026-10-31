@@ -4,6 +4,12 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 export interface TenantDisplay {
   readonly tenantNames: Record<string, string>;
   readonly tenantTypes: Record<string, string>;
+  /**
+   * Tipo de cuenta de cada tenant (`PERSON` u `ORGANIZATION`), decidido por su
+   * interruptor `org_account_mode`. Opcional: un adaptador que no lo resuelve
+   * deja todo como `PERSON`.
+   */
+  readonly tenantAccountKinds?: Record<string, 'PERSON' | 'ORGANIZATION'>;
 }
 
 /**

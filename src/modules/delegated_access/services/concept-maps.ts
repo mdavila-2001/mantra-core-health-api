@@ -13,7 +13,28 @@ export const ASSIGNMENT_ROLE_CONCEPT: Record<string, string> = {
   ASSISTANT: DELEG.ASSIGN_ROLE_ASSISTANT,
   NURSE: DELEG.ASSIGN_ROLE_NURSE,
   BILLING: DELEG.ASSIGN_ROLE_BILLING,
+  FRONT_DESK: DELEG.ASSIGN_ROLE_FRONT_DESK,
+  CALL_CENTER: DELEG.ASSIGN_ROLE_CALL_CENTER,
+  ORG_MANAGEMENT: DELEG.ASSIGN_ROLE_ORG_MANAGEMENT,
 };
+
+/**
+ * Rol de asignación (concepto) de cada plantilla de apoyo. Las plantillas que
+ * reusan un oficio existente apuntan a su concepto; cualquier otra (una
+ * plantilla propia de la organización) queda como personal genérico.
+ */
+export function assignmentRoleOfTemplate(templateCode: string): string {
+  const byTemplate: Record<string, string> = {
+    SECRETARY: 'SECRETARY',
+    MEDICAL_ASSISTANT: 'ASSISTANT',
+    NURSING: 'NURSE',
+    BILLING_CASHIER: 'BILLING',
+    FRONT_DESK: 'FRONT_DESK',
+    CALL_CENTER: 'CALL_CENTER',
+    ORG_MANAGEMENT: 'ORG_MANAGEMENT',
+  };
+  return ASSIGNMENT_ROLE_CONCEPT[byTemplate[templateCode] ?? 'STAFF'];
+}
 
 export const ACCESS_SCOPE_CONCEPT: Record<string, string> = {
   TENANT: DELEG.SCOPE_TENANT,

@@ -5,14 +5,14 @@ y usa `em.transactional` para escrituras (con `flush` padre-antes-de-hijo) y
 `em.fork` para lecturas. Traducen los códigos legibles de los DTO a los
 `*_concept_id` deterministas de `AUTHZ.*` / `CONCEPTS.*`.
 
-| Servicio | UCs | Notas |
-|---|---|---|
-| `AuthzCatalogService` | 06-01 | Catálogo global de categorías y permisos; `code` único (409). |
-| `AuthzPoliciesService` | 06-02 | Política ABAC; prioridad única por (tenant, target); deny gana. |
-| `AuthzRolesService` | 06-03, 06-08 | Rol + herencia; set de permisos (deny prevalece); enmascaramiento de campos (check `canWrite ⇒ canRead`). |
-| `AuthzGrantsService` | 06-04, 06-05, 06-09 | Asignación de rol, excepción de permiso, grant polimórfico. |
-| `AuthzClinicalService` | 06-06, 06-07, 06-10 | Acceso clínico con purpose-of-use, break-the-glass, revocar/expirar. |
-| `AuthzPdpService` | 06-11, 06-12 | Invalidación de cache (clave lógica) y evaluación real deny-overrides con herencia y masking. |
+| Servicio               | UCs                 | Notas                                                                                                     |
+| ---------------------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
+| `AuthzCatalogService`  | 06-01               | Catálogo global de categorías y permisos; `code` único (409).                                             |
+| `AuthzPoliciesService` | 06-02               | Política ABAC; prioridad única por (tenant, target); deny gana.                                           |
+| `AuthzRolesService`    | 06-03, 06-08        | Rol + herencia; set de permisos (deny prevalece); enmascaramiento de campos (check `canWrite ⇒ canRead`). |
+| `AuthzGrantsService`   | 06-04, 06-05, 06-09 | Asignación de rol, excepción de permiso, grant polimórfico.                                               |
+| `AuthzClinicalService` | 06-06, 06-07, 06-10 | Acceso clínico con purpose-of-use, break-the-glass, revocar/expirar.                                      |
+| `AuthzPdpService`      | 06-11, 06-12        | Invalidación de cache (clave lógica) y evaluación real deny-overrides con herencia y masking.             |
 
 ## Evaluación del PDP (UC-06-12)
 

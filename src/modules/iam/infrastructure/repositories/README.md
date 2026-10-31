@@ -18,14 +18,14 @@ mockable in unit tests.
 
 ## Repositories
 
-| Repository | Table | Responsibility |
-| --- | --- | --- |
-| `UsersRepository` | `users` | Find/create users, active count. |
-| `CredentialsRepository` | `authentication_credentials` | Password + federated credentials, uniqueness lookups, bulk revoke. |
-| `SessionsRepository` | `sessions` | Create sessions, list active ids, bulk revoke, expire. |
-| `RefreshTokensRepository` | `refresh_tokens` | Create/rotate, find-by-hash (reuse detection), bulk revoke/expire. |
-| `MfaFactorsRepository` | `mfa_factors` | Enroll factor, find-by-id+user for verification. |
-| `DevicesRepository` | `devices` | Register device (optionally trusted). |
-| `UserGlobalRolesRepository` | `user_global_roles` | Grant/revoke roles, list active roles for token issuance. |
-| `AccountLockoutsRepository` | `account_lockouts` | Create/find active lockout. |
-| `SecurityEventsRepository` | `security_events` | Append-only audit trail; failed-login counter. |
+| Repository                  | Table                        | Responsibility                                                     |
+| --------------------------- | ---------------------------- | ------------------------------------------------------------------ |
+| `UsersRepository`           | `users`                      | Find/create users, active count.                                   |
+| `CredentialsRepository`     | `authentication_credentials` | Password + federated credentials, uniqueness lookups, bulk revoke. |
+| `SessionsRepository`        | `sessions`                   | Create sessions, list active ids, bulk revoke, expire.             |
+| `RefreshTokensRepository`   | `refresh_tokens`             | Create/rotate, find-by-hash (reuse detection), bulk revoke/expire. |
+| `MfaFactorsRepository`      | `mfa_factors`                | Enroll factor, find-by-id+user for verification.                   |
+| `DevicesRepository`         | `devices`                    | Register device (optionally trusted).                              |
+| `UserGlobalRolesRepository` | `user_global_roles`          | Grant/revoke roles, list active roles for token issuance.          |
+| `AccountLockoutsRepository` | `account_lockouts`           | Create/find active lockout.                                        |
+| `SecurityEventsRepository`  | `security_events`            | Append-only audit trail; failed-login counter.                     |

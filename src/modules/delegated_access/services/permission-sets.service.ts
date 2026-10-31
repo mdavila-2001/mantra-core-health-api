@@ -61,7 +61,7 @@ export class PermissionSetsService {
     tenantId: string,
     options: { cursor?: string; limit?: number },
   ): Promise<ListPermissionSetsResponseDto> {
-    const em = this.em.fork();
+    const em = this.em.fork({ keepTransactionContext: true });
     const limit = options.limit ?? DEFAULT_SETS_PAGE_SIZE;
     const after = options.cursor
       ? decodeKeysetCursor(options.cursor)

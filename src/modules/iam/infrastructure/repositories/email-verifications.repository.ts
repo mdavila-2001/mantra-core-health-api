@@ -88,4 +88,30 @@ export class EmailVerificationsRepository {
       { orderBy: { createdAt: 'DESC' } },
     );
   }
+
+  /**
+   * Última dirección de correo VERIFICADA del usuario (su enlace se consumió), o
+   * `null`. A diferencia de {@link EmailVerificationsRepository.findLatestByUser},
+   * solo devuelve una dirección que la persona demostró alcanzar: es el destino
+   * de los avisos de seguridad y de los códigos de un solo uso, que no pueden ir
+   * a una dirección escrita sin comprobar.
+   *
+   * @param em - Contexto de persistencia.
+   * @param userId - Usuario cuyo correo se busca.
+   * @returns La verificación consumida más reciente; `null` si no hay.
+   */
+  findLatestVerifiedByUser(
+    em: EntityManager,
+    userId: string,
+  ): Promise<EmailVerifications | null> {
+    return em.findOne(
+      EmailVerifications,
+      {
+        userId,
+        stateConceptId: CONCEPTS.STATE_VERIFIED,
+        consumedAt: { $ne: null },
+      },
+      { orderBy: { consumedAt: 'DESC' } },
+    );
+  }
 }

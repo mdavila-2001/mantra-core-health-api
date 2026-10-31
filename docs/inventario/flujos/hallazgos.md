@@ -7,15 +7,15 @@ Cada hallazgo sale de cruzar los datos del inventario. Ninguno corrige código: 
 | ID | Severidad | Hallazgo | Cuenta |
 |---|---|---|---|
 | [FLU-01](#flu-01) | ALTA | Operaciones sin proceso asignado | 0 |
-| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 152 |
+| [FLU-02](#flu-02) | ALTA | Escritura autenticada sin @Roles en el controlador | 167 |
 | [FLU-03](#flu-03) | ALTA | Ruta pública que escribe en la base | 18 |
-| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 133 |
+| [FLU-04](#flu-04) | MEDIA | Operación de riesgo ALTO sin ninguna prueba de integración | 156 |
 | [FLU-05](#flu-05) | MEDIA | Proceso con operaciones de riesgo ALTO y ninguna prueba de integración | 13 |
-| [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 10 |
-| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1223 |
+| [FLU-06](#flu-06) | ALTA | Operaciones que el frontend llama y la API no tiene | 4 |
+| [FLU-07](#flu-07) | INFO | Operaciones de la API que ningún cliente del frontend llama | 1189 |
 | [FLU-08](#flu-08) | MEDIA | Operaciones que existen en el código y el contrato OpenAPI no publica | 9 |
 | [FLU-09](#flu-09) | BAJA | Máquinas de estado sin ninguna operación que las ejerza | 0 |
-| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 112 |
+| [FLU-10](#flu-10) | BAJA | Operaciones que pueden terminar en un 500 por una excepción sin tipar | 140 |
 
 ## FLU-01
 
@@ -27,7 +27,7 @@ _Ninguno._
 
 ## FLU-02
 
-**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 152 caso(s).
+**Escritura autenticada sin @Roles en el controlador** — severidad ALTA — 167 caso(s).
 
 **Qué hacer:** Confirmar que la regla de acceso vive en el servicio o declarar los roles en el controlador. Hoy la API no las distingue de una sesión cualquiera.
 
@@ -58,6 +58,8 @@ _Ninguno._
 | POST /community/bookmarks | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:216` |
 | POST /community/comments | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:183` |
 | POST /community/conversations | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:69` |
+| POST /community/conversations/{conversationId}/assignment | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-support-inbox.controller.ts:89` |
+| POST /community/conversations/{conversationId}/internal-notes | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-support-inbox.controller.ts:120` |
 | POST /community/conversations/{conversationId}/messages | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:85` |
 | DELETE /community/conversations/{conversationId}/messages/{messageId} | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:120` |
 | PATCH /community/conversations/{conversationId}/messages/{messageId} | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-messaging.controller.ts:102` |
@@ -81,6 +83,11 @@ _Ninguno._
 | PUT /community/ratings | community | escribe y el controlador no declara roles | `src/modules/community/controllers/party-ratings.controller.ts:45` |
 | PUT /community/reactions | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-social.controller.ts:199` |
 | POST /community/reports | community | escribe y el controlador no declara roles | `src/modules/community/controllers/community-moderation.controller.ts:61` |
+| POST /affiliation-invitations/redeem | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/affiliation-invitations.controller.ts:87` |
+| POST /me/support-access-requests | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/support-engagement-requests.controller.ts:143` |
+| POST /me/support-patient-search | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:153` |
+| POST /me/support-patients | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/support-patients.controller.ts:41` |
+| POST /support-engagement-requests | delegated_access | escribe y el controlador no declara roles | `src/modules/delegated_access/controllers/support-engagement-requests.controller.ts:121` |
 | POST /diagnostics/accessions | diagnostics | escribe y el controlador no declara roles | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:104` |
 | POST /diagnostics/analyzer-runs | diagnostics | escribe y el controlador no declara roles | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:91` |
 | POST /diagnostics/analyzer-runs/{id}/messages | diagnostics | escribe y el controlador no declara roles | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:109` |
@@ -90,20 +97,26 @@ _Ninguno._
 | POST /diagnostics/specimens/{id}/containers | diagnostics | escribe y el controlador no declara roles | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:137` |
 | POST /diagnostics/specimens/{id}/rejection | diagnostics | escribe y el controlador no declara roles | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:120` |
 | POST /diagnostics/work-orders | diagnostics | escribe y el controlador no declara roles | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:75` |
-| PATCH /tenants/{tenantId} | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:129` |
-| POST /tenants/{tenantId}/affiliation-documents | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:151` |
-| POST /tenants/{tenantId}/branches | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:300` |
-| PATCH /tenants/{tenantId}/branches/{branchId} | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:319` |
+| PATCH /tenants/{tenantId} | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:188` |
+| POST /tenants/{tenantId}/affiliation-documents | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:210` |
+| POST /tenants/{tenantId}/branches | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:359` |
+| PATCH /tenants/{tenantId}/branches/{branchId} | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:378` |
 | PUT /tenants/{tenantId}/logo | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/organization-logo.controller.ts:32` |
-| POST /tenants/{tenantId}/memberships | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:336` |
-| POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:353` |
-| POST /tenants/{tenantId}/memberships/{membershipId}/offboard | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:417` |
-| PATCH /tenants/{tenantId}/memberships/{membershipId}/role | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:394` |
-| POST /tenants/{tenantId}/memberships/{membershipId}/transfer | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:376` |
-| POST /iam/auth/change-password | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
-| POST /iam/auth/logout | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:477` |
-| POST /iam/auth/logout-all | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:501` |
-| POST /iam/me/sessions/{id}/revoke | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:71` |
+| POST /tenants/{tenantId}/memberships | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:395` |
+| POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:412` |
+| POST /tenants/{tenantId}/memberships/{membershipId}/offboard | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:476` |
+| PATCH /tenants/{tenantId}/memberships/{membershipId}/role | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:453` |
+| POST /tenants/{tenantId}/memberships/{membershipId}/transfer | directory | escribe y el controlador no declara roles | `src/modules/directory/controllers/tenants.controller.ts:435` |
+| POST /iam/auth/change-password | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:81` |
+| POST /iam/auth/logout | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:508` |
+| POST /iam/auth/logout-all | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:532` |
+| POST /iam/me/devices/{id}/confirm | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:123` |
+| POST /iam/me/devices/{id}/confirm-code | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:153` |
+| POST /iam/me/devices/{id}/not-me | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:173` |
+| POST /iam/me/mfa/{factorId}/revoke | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:223` |
+| POST /iam/me/mfa/totp | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:201` |
+| POST /iam/me/mfa/totp/{factorId}/confirm | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:244` |
+| POST /iam/me/sessions/{id}/revoke | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:107` |
 | POST /iam/users/{id}/devices | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-users.controller.ts:402` |
 | POST /iam/users/{id}/mfa-factors | iam | escribe y el controlador no declara roles | `src/modules/iam/presentation/controllers/iam-users.controller.ts:385` |
 | POST /identity/me/identity-verification | identity_assurance | escribe y el controlador no declara roles | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:42` |
@@ -143,6 +156,8 @@ _Ninguno._
 | POST /practices/{practiceId}/healthcare-services | practice | escribe y el controlador no declara roles | `src/modules/practice/controllers/practices.controller.ts:287` |
 | PATCH /practices/{practiceId}/healthcare-services/{id} | practice | escribe y el controlador no declara roles | `src/modules/practice/controllers/practices.controller.ts:332` |
 | POST /practices/{practiceId}/role-assignments/invitations | practice | escribe y el controlador no declara roles | `src/modules/practice/controllers/practice-invitations.controller.ts:39` |
+| POST /role-assignments/{roleId}/approve | practice | escribe y el controlador no declara roles | `src/modules/practice/controllers/role-assignments.controller.ts:68` |
+| POST /role-assignments/{roleId}/reject | practice | escribe y el controlador no declara roles | `src/modules/practice/controllers/role-assignments.controller.ts:85` |
 | POST /tenants/{tenantId}/practices | practice | escribe y el controlador no declara roles | `src/modules/practice/controllers/organization-practices.controller.ts:41` |
 | POST /profiles/patients/{profileId}/related-persons | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:532` |
 | PATCH /profiles/patients/me | profiles | escribe y el controlador no declara roles | `src/modules/profiles/presentation/controllers/profiles-patients.controller.ts:147` |
@@ -194,19 +209,19 @@ _Ninguno._
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
-| POST /iam/auth/activate | iam | ACTUALIZA iam.account_activations, ACTUALIZA iam.authentication_credentials, CREA iam.security_events, ACTUALIZA iam.users | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:332` |
-| POST /iam/auth/forgot-password | iam | ACTUALIZA iam.password_resets, CREA iam.password_resets, CREA iam.security_events, CREA messaging.notification_requests | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:384` |
-| POST /iam/auth/login | iam | ACTUALIZA iam.account_lockouts, CREA iam.account_lockouts, ACTUALIZA iam.refresh_tokens, CREA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions, CREA iam.sessions, ACTUALIZA iam.users | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:351` |
-| POST /iam/auth/register-organization | iam | CREA common.addresses, ACTUALIZA common.files, CREA diagnostic_units.diagnostic_study_offerings, CREA diagnostic_units.diagnostic_unit_sites, CREA diagnostic_units.diagnostic_units, CREA directory.branches, CREA directory.tenant_affiliation_documents, CREA directory.tenant_legal_representatives, CREA directory.tenant_memberships, CREA directory.tenants, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA insurance.insurance_brokers, CREA insurance.insurance_carriers, CREA messaging.notification_requests, CREA pharmacy.pharmacies, CREA pharmacy.pharmacy_product_categories, CREA pharmacy.pharmacy_sites, CREA practice.practice_sites, CREA practice.practices | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:134` |
-| POST /iam/auth/register-patient | iam | CREA common.contact_points, CREA common.identifiers, CREA directory.tenant_memberships, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA messaging.notification_requests, CREA profiles.patient_profiles, CREA profiles.person_account_links, CREA profiles.person_profiles, CREA profiles.persons | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:110` |
-| POST /iam/auth/register-practitioner | iam | CREA authz.user_role_assignments, CREA common.addresses, CREA common.contact_points, CREA common.file_versions, CREA common.files, ACTUALIZA common.files, CREA common.identifiers, CREA directory.tenant_memberships, CREA iam.account_activations, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA messaging.notification_requests, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs, CREA practice.practice_sites, CREA practice.practices, CREA practice.practitioner_role_assignments, CREA profiles.health_practitioner_profiles, CREA profiles.jurisdiction_authorizations, CREA profiles.person_account_links, CREA profiles.person_profiles, CREA profiles.persons, CREA profiles.practitioner_languages, CREA profiles.practitioner_specialties, CREA profiles.professional_credentials | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:266` |
-| POST /iam/auth/resend-verification | iam | CREA iam.email_verifications, CREA messaging.notification_requests | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:299` |
-| POST /iam/auth/reset-password | iam | ACTUALIZA iam.authentication_credentials, ACTUALIZA iam.password_resets, ACTUALIZA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:405` |
-| POST /iam/auth/token/refresh | iam | ACTUALIZA iam.refresh_tokens, CREA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:421` |
-| POST /iam/auth/upload-registration-document | iam | CREA common.file_versions, CREA common.files, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:231` |
-| POST /iam/auth/upload-registration-logo | iam | CREA common.file_versions, CREA common.files, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:184` |
-| POST /iam/auth/upload-registration-signature-image | iam | CREA common.file_versions, CREA common.files, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:154` |
-| POST /iam/auth/verify-email | iam | ACTUALIZA iam.email_verifications, ACTUALIZA iam.users | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:316` |
+| POST /iam/auth/activate | iam | ACTUALIZA iam.account_activations, ACTUALIZA iam.authentication_credentials, CREA iam.security_events, ACTUALIZA iam.users | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:342` |
+| POST /iam/auth/forgot-password | iam | ACTUALIZA iam.password_resets, CREA iam.password_resets, CREA iam.security_events, CREA messaging.notification_requests | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:410` |
+| POST /iam/auth/login | iam | ACTUALIZA iam.account_lockouts, CREA iam.account_lockouts, ACTUALIZA iam.devices, CREA iam.devices, ACTUALIZA iam.refresh_tokens, CREA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions, CREA iam.sessions, ACTUALIZA iam.users, CREA messaging.notification_requests | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:361` |
+| POST /iam/auth/register-organization | iam | CREA common.addresses, ACTUALIZA common.files, CREA diagnostic_units.diagnostic_study_offerings, CREA diagnostic_units.diagnostic_unit_sites, CREA diagnostic_units.diagnostic_units, CREA directory.branches, CREA directory.tenant_affiliation_documents, CREA directory.tenant_legal_representatives, CREA directory.tenant_memberships, CREA directory.tenants, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA insurance.insurance_brokers, CREA insurance.insurance_carriers, CREA messaging.notification_requests, CREA pharmacy.pharmacies, CREA pharmacy.pharmacy_product_categories, CREA pharmacy.pharmacy_sites, CREA practice.practice_sites, CREA practice.practices | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:144` |
+| POST /iam/auth/register-patient | iam | CREA common.contact_points, CREA common.identifiers, CREA directory.tenant_memberships, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA messaging.notification_requests, CREA profiles.patient_profiles, CREA profiles.person_account_links, CREA profiles.person_profiles, CREA profiles.persons | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:120` |
+| POST /iam/auth/register-practitioner | iam | CREA authz.user_role_assignments, CREA common.addresses, CREA common.contact_points, CREA common.file_versions, CREA common.files, ACTUALIZA common.files, CREA common.identifiers, CREA directory.tenant_memberships, CREA iam.account_activations, CREA iam.authentication_credentials, CREA iam.email_verifications, CREA iam.security_events, CREA iam.user_global_roles, CREA iam.users, CREA messaging.notification_requests, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs, CREA practice.practice_sites, CREA practice.practices, CREA practice.practitioner_role_assignments, CREA profiles.health_practitioner_profiles, CREA profiles.jurisdiction_authorizations, CREA profiles.person_account_links, CREA profiles.person_profiles, CREA profiles.persons, CREA profiles.practitioner_languages, CREA profiles.practitioner_specialties, CREA profiles.professional_credentials | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:276` |
+| POST /iam/auth/resend-verification | iam | CREA iam.email_verifications, CREA messaging.notification_requests | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:309` |
+| POST /iam/auth/reset-password | iam | ACTUALIZA iam.authentication_credentials, ACTUALIZA iam.password_resets, ACTUALIZA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:431` |
+| POST /iam/auth/token/refresh | iam | ACTUALIZA iam.refresh_tokens, CREA iam.refresh_tokens, CREA iam.security_events, ACTUALIZA iam.sessions | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:447` |
+| POST /iam/auth/upload-registration-document | iam | CREA common.file_versions, CREA common.files, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:241` |
+| POST /iam/auth/upload-registration-logo | iam | CREA common.file_versions, CREA common.files, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:194` |
+| POST /iam/auth/upload-registration-signature-image | iam | CREA common.file_versions, CREA common.files, CREA messaging.queued_jobs, ACTUALIZA messaging.queued_jobs | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:164` |
+| POST /iam/auth/verify-email | iam | ACTUALIZA iam.email_verifications, ACTUALIZA iam.users | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:326` |
 | POST /integrations/webhooks/inbound | integrations | CREA integrations.inbound_messages | `src/modules/integrations/controllers/integrations-webhooks.controller.ts:23` |
 | GET /r/{code} | marketing | CREA marketing.marketing_touchpoints, ACTUALIZA marketing.tracked_links | `src/modules/marketing/controllers/tracked-link-redirect.controller.ts:36` |
 | POST /webhooks/providers/{providerCode}/receipts | messaging | CREA messaging.delivery_receipts, ACTUALIZA messaging.notification_deliveries, ACTUALIZA messaging.notification_requests | `src/modules/messaging/controllers/provider-webhooks.controller.ts:33` |
@@ -215,7 +230,7 @@ _Ninguno._
 
 ## FLU-04
 
-**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 133 caso(s).
+**Operación de riesgo ALTO sin ninguna prueba de integración** — severidad MEDIA — 156 caso(s).
 
 **Qué hacer:** Escribir la prueba de integración contra PostgreSQL real (regla 80.2.4). Las sin prueba alguna van primero.
 
@@ -242,6 +257,8 @@ _Ninguno._
 | DELETE /community/blocks | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:301` |
 | DELETE /community/bookmarks | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:286` |
 | POST /community/bookmarks | community | sólo prueba de controlador | `src/modules/community/controllers/community-social.controller.ts:216` |
+| POST /community/conversations/{conversationId}/assignment | community | ninguna prueba la menciona | `src/modules/community/controllers/community-support-inbox.controller.ts:89` |
+| POST /community/conversations/{conversationId}/internal-notes | community | ninguna prueba la menciona | `src/modules/community/controllers/community-support-inbox.controller.ts:120` |
 | DELETE /community/conversations/{conversationId}/messages/{messageId} | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:120` |
 | PATCH /community/conversations/{conversationId}/messages/{messageId} | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:102` |
 | DELETE /community/conversations/{conversationId}/pin | community | sólo prueba de controlador | `src/modules/community/controllers/community-messaging.controller.ts:196` |
@@ -259,34 +276,53 @@ _Ninguno._
 | PUT /community/ratings | community | ninguna prueba la menciona | `src/modules/community/controllers/party-ratings.controller.ts:45` |
 | POST /community/reports | community | sólo prueba de controlador | `src/modules/community/controllers/community-moderation.controller.ts:61` |
 | POST /admin/content-packs/{code}/apply | content_packs | ninguna prueba la menciona | `src/modules/content_packs/content-packs.controller.ts:69` |
+| POST /affiliation-invitations/redeem | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/affiliation-invitations.controller.ts:87` |
+| POST /delegated-access/support/recertification-sweep | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:196` |
+| POST /delegated-access/support/refresh-effective-access | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:209` |
 | POST /delegated-permission-sets/{id}/versions | delegated_access | sólo prueba de controlador | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
+| POST /me/support-access-requests | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-engagement-requests.controller.ts:143` |
+| POST /me/support-patient-search | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:153` |
+| POST /me/support-patients | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-patients.controller.ts:41` |
+| POST /org/support-engagement-requests/{id}/decision | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-engagement-requests.controller.ts:176` |
+| POST /org/support-engagements/{id}/end | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-engagements.controller.ts:148` |
+| PATCH /org/support-engagements/{id}/grants | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-engagements.controller.ts:112` |
+| POST /org/support-engagements/{id}/grants | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-engagements.controller.ts:94` |
+| POST /org/support-engagements/{id}/recertify | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-engagements.controller.ts:130` |
+| POST /practitioner-delegates/{id}/accept | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:113` |
+| POST /support-engagement-requests | delegated_access | ninguna prueba la menciona | `src/modules/delegated_access/controllers/support-engagement-requests.controller.ts:121` |
 | POST /diagnostics/analyzer-runs | diagnostics | sólo prueba de controlador | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:91` |
 | POST /diagnostics/analyzer-runs/{id}/messages | diagnostics | sólo prueba de controlador | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:109` |
 | POST /diagnostics/containers/{id}/custody-events | diagnostics | sólo prueba de controlador | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:156` |
 | POST /diagnostics/results/{observationId}/verifications | diagnostics | sólo prueba de controlador | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:128` |
 | POST /diagnostics/specimens/{id}/rejection | diagnostics | sólo prueba de controlador | `src/modules/diagnostics/controllers/diagnostics-specimens.controller.ts:120` |
 | POST /diagnostics/work-orders | diagnostics | sólo prueba de controlador | `src/modules/diagnostics/controllers/diagnostics-lab.controller.ts:75` |
-| PATCH /tenants/{tenantId} | directory | ninguna prueba la menciona | `src/modules/directory/controllers/tenants.controller.ts:129` |
-| POST /tenants/{tenantId}/branches | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:300` |
-| PATCH /tenants/{tenantId}/branches/{branchId} | directory | ninguna prueba la menciona | `src/modules/directory/controllers/tenants.controller.ts:319` |
+| PATCH /tenants/{tenantId} | directory | ninguna prueba la menciona | `src/modules/directory/controllers/tenants.controller.ts:188` |
+| POST /tenants/{tenantId}/branches | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:359` |
+| PATCH /tenants/{tenantId}/branches/{branchId} | directory | ninguna prueba la menciona | `src/modules/directory/controllers/tenants.controller.ts:378` |
 | PUT /tenants/{tenantId}/logo | directory | ninguna prueba la menciona | `src/modules/directory/controllers/organization-logo.controller.ts:32` |
-| POST /tenants/{tenantId}/memberships | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:336` |
-| POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:353` |
-| POST /tenants/{tenantId}/memberships/{membershipId}/offboard | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:417` |
-| PATCH /tenants/{tenantId}/memberships/{membershipId}/role | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:394` |
-| POST /tenants/{tenantId}/memberships/{membershipId}/transfer | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:376` |
+| POST /tenants/{tenantId}/memberships | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:395` |
+| POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:412` |
+| POST /tenants/{tenantId}/memberships/{membershipId}/offboard | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:476` |
+| PATCH /tenants/{tenantId}/memberships/{membershipId}/role | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:453` |
+| POST /tenants/{tenantId}/memberships/{membershipId}/transfer | directory | sólo prueba de controlador | `src/modules/directory/controllers/tenants.controller.ts:435` |
 | POST /graph/analytics/community-detection | graph_intelligence | ninguna prueba la menciona | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:151` |
 | POST /graph/deletion-jobs | graph_intelligence | ninguna prueba la menciona | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:240` |
 | POST /graph/edges/{id}/expire | graph_intelligence | ninguna prueba la menciona | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:155` |
 | POST /graph/projections/reconcile | graph_intelligence | ninguna prueba la menciona | `src/modules/graph_intelligence/controllers/graph-projection.controller.ts:92` |
-| POST /iam/auth/activate | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:332` |
-| POST /iam/auth/change-password | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:45` |
-| POST /iam/auth/forgot-password | iam | sólo prueba de controlador | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:384` |
-| POST /iam/auth/resend-verification | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:299` |
-| POST /iam/auth/reset-password | iam | sólo prueba de controlador | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:405` |
-| POST /iam/auth/upload-registration-logo | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:184` |
-| POST /iam/auth/verify-email | iam | sólo prueba de controlador | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:316` |
-| POST /iam/me/sessions/{id}/revoke | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:71` |
+| POST /iam/auth/activate | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:342` |
+| POST /iam/auth/change-password | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:81` |
+| POST /iam/auth/forgot-password | iam | sólo prueba de controlador | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:410` |
+| POST /iam/auth/resend-verification | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:309` |
+| POST /iam/auth/reset-password | iam | sólo prueba de controlador | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:431` |
+| POST /iam/auth/upload-registration-logo | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:194` |
+| POST /iam/auth/verify-email | iam | sólo prueba de controlador | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:326` |
+| POST /iam/me/devices/{id}/confirm | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:123` |
+| POST /iam/me/devices/{id}/confirm-code | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:153` |
+| POST /iam/me/devices/{id}/not-me | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:173` |
+| POST /iam/me/mfa/{factorId}/revoke | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:223` |
+| POST /iam/me/mfa/totp | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:201` |
+| POST /iam/me/mfa/totp/{factorId}/confirm | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:244` |
+| POST /iam/me/sessions/{id}/revoke | iam | ninguna prueba la menciona | `src/modules/iam/presentation/controllers/iam-account-security.controller.ts:107` |
 | POST /identity/me/practitioner/license-verification | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
 | POST /identity/me/tenants/{tenantId}/verification | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:94` |
 | POST /internal/identity/evidence/lifecycle-scan | identity_assurance | ninguna prueba la menciona | `src/modules/identity_assurance/controllers/identity-worker.controller.ts:79` |
@@ -318,6 +354,8 @@ _Ninguno._
 | DELETE /pharmacies/{pharmacyId}/categories/{categoryId} | pharmacy | ninguna prueba la menciona | `src/modules/pharmacy/controllers/pharmacy.controller.ts:162` |
 | POST /pharmacies/{pharmacyId}/products | pharmacy | sólo prueba de controlador | `src/modules/pharmacy/controllers/pharmacy.controller.ts:342` |
 | PATCH /pharmacies/{pharmacyId}/products/{productId} | pharmacy | sólo prueba de controlador | `src/modules/pharmacy/controllers/pharmacy.controller.ts:361` |
+| POST /sites/{siteId}/care-spaces | practice | ninguna prueba la menciona | `src/modules/practice/controllers/sites.controller.ts:89` |
+| PATCH /sites/{siteId}/care-spaces/{id} | practice | ninguna prueba la menciona | `src/modules/practice/controllers/sites.controller.ts:109` |
 | DELETE /profiles/patients/me/addresses/{id} | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:86` |
 | PATCH /profiles/patients/me/addresses/{id} | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
 | DELETE /profiles/patients/me/primary-practitioner | profiles | ninguna prueba la menciona | `src/modules/profiles/presentation/controllers/primary-practitioner.controller.ts:67` |
@@ -379,64 +417,40 @@ _Ninguno._
 
 ## FLU-06
 
-**Operaciones que el frontend llama y la API no tiene** — severidad ALTA — 10 caso(s).
+**Operaciones que el frontend llama y la API no tiene** — severidad ALTA — 4 caso(s).
 
 **Qué hacer:** Cada fila es una pantalla que hoy falla (404) o depende de un mock. Decidir: implementar en la API, o retirar del cliente. No se corrige aquí.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
-| POST /quotations/simulate | — | cliente QuotationsClient | `src/app/core/data-access/quotations/quotations.client.ts` |
+| POST /accounting/journal-transactions/:transactionId/:action | — | cliente AccountingClient | `src/app/core/data-access/accounting/accounting.client.ts` |
+| GET /community/conversations/:conversationId | — | cliente CommunityClient | `src/app/core/data-access/community/community.client.ts` |
+| GET /public/profiles/f/:slug/branch-availability | — | cliente PublicCatalogClient | `src/app/core/data-access/public-catalog/public-catalog.client.ts` |
 | POST /scheduling/bookings/:bookingId/:accion | — | cliente SchedulingClient | `src/app/core/data-access/scheduling/scheduling.client.ts` |
-| GET assets | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| POST assets | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| PATCH assets/:assetId/automation | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| POST assets/:assetId/progress | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| GET liabilities | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| POST liabilities | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| PATCH liabilities/:liabilityId/automation | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
-| POST liabilities/:liabilityId/progress | — | cliente AssetsLiabilitiesClient | `src/app/core/data-access/assets-liabilities/assets-liabilities.client.ts` |
 
 ## FLU-07
 
-**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1223 caso(s).
+**Operaciones de la API que ningún cliente del frontend llama** — severidad INFO — 1189 caso(s).
 
 **Qué hacer:** Informativo: pueden ser internas (workers), de otros consumidores (móvil, integraciones) o deuda. Confirmar con el responsable antes de retirar nada.
 
 | Dónde | Módulo | Detalle | Fuente |
 |---|---|---|---|
 | POST /accounting/accounts | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/accrual-objects | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/accrual-objects | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/accruals/run | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/assets | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/assets/capitalize | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/clearing-documents | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/depreciation/run | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/dimensions | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/exchange-rates | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/fiscal-periods/{id}/lock | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/fiscal-years | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/fiscal-years | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/approve | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/classify | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/journal-transactions/{id}/document-flow | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/files | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/post | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/reverse | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/journal-transactions/{id}/submit-review | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/liabilities/{id}/payments | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/open-items | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/open-items | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/postings/determine-accounts | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/practitioner/assets | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/practitioner/assets | accounting | ningún cliente del frontend la declara | — |
-| PATCH /accounting/practitioner/assets/{id}/automation | accounting | ningún cliente del frontend la declara | — |
 | GET /accounting/practitioner/assets/{id}/depreciations | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/practitioner/assets/{id}/progress | accounting | ningún cliente del frontend la declara | — |
-| GET /accounting/practitioner/liabilities | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/practitioner/liabilities | accounting | ningún cliente del frontend la declara | — |
-| PATCH /accounting/practitioner/liabilities/{id}/automation | accounting | ningún cliente del frontend la declara | — |
-| POST /accounting/practitioner/liabilities/{id}/progress | accounting | ningún cliente del frontend la declara | — |
 | GET /accounting/practitioner/liabilities/{id}/schedule | accounting | ningún cliente del frontend la declara | — |
 | GET /accounting/practitioner/simple/accounts | accounting | ningún cliente del frontend la declara | — |
 | POST /accounting/practitioner/simple/accounts | accounting | ningún cliente del frontend la declara | — |
@@ -560,6 +574,8 @@ _Ninguno._
 | POST /billing/reconciliation:clear | billing | ningún cliente del frontend la declara | — |
 | POST /billing/reimbursements:link | billing | ningún cliente del frontend la declara | — |
 | GET /billing/service-catalog/{id}/image | billing | ningún cliente del frontend la declara | — |
+| POST /billing/service-catalog/import-procedures | billing | ningún cliente del frontend la declara | — |
+| GET /billing/service-catalog/procedure-specialties/mine | billing | ningún cliente del frontend la declara | — |
 | GET /billing/simulated/catalogs | billing | ningún cliente del frontend la declara | — |
 | GET /billing/simulated/charges | billing | ningún cliente del frontend la declara | — |
 | POST /billing/simulated/charges/{chargeId}/instances/{instanceId}/payments | billing | ningún cliente del frontend la declara | — |
@@ -597,15 +613,31 @@ _Ninguno._
 | GET /clinical/me/procedure-centers | clinical | ningún cliente del frontend la declara | — |
 | POST /clinical/medication-records | clinical | ningún cliente del frontend la declara | — |
 | GET /clinical/medication-requests/{id}/attachments | clinical | ningún cliente del frontend la declara | — |
-| POST /clinical/medication-requests/{id}/edit | clinical | ningún cliente del frontend la declara | — |
 | POST /clinical/medication-requests/{id}/invalidate | clinical | ningún cliente del frontend la declara | — |
 | POST /clinical/medication-requests/{id}/renew | clinical | ningún cliente del frontend la declara | — |
 | POST /clinical/medication-requests/{id}/replace | clinical | ningún cliente del frontend la declara | — |
 | PATCH /clinical/observations/{id}/amend | clinical | ningún cliente del frontend la declara | — |
 | GET /clinical/patients/{patientProfileId}/received-services | clinical | ningún cliente del frontend la declara | — |
 | GET /clinical/prescription-signature-policies | clinical | ningún cliente del frontend la declara | — |
+| POST /clinical/prescription-signature-policies | clinical | ningún cliente del frontend la declara | — |
+| POST /clinical/prescription-signature-policies/{id}/deactivate | clinical | ningún cliente del frontend la declara | — |
+| POST /clinical/procedures | clinical | ningún cliente del frontend la declara | — |
+| GET /public/prescriptions/{id}/verify | clinical | ningún cliente del frontend la declara | — |
+| PATCH /care-gaps/{id}/close | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /care-gaps/recompute | clinical_ext | ningún cliente del frontend la declara | — |
+| GET /care-teams | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /care-teams | clinical_ext | ningún cliente del frontend la declara | — |
+| PATCH /care-teams/{id}/members/{memberId}/set-responsible | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /cds-rules | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /cds-rules/{id}/versions/publish | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /cds-rules/{id}/versions/rollback | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /cds/evaluate | clinical_ext | ningún cliente del frontend la declara | — |
+| PATCH /clinical-alerts/{id}/acknowledge | clinical_ext | ningún cliente del frontend la declara | — |
+| PATCH /clinical-alerts/{id}/override | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /drug-interactions | clinical_ext | ningún cliente del frontend la declara | — |
+| POST /immunization-schedules | clinical_ext | ningún cliente del frontend la declara | — |
 
-_Se muestran 200 de 1223; la lista completa está en `inventario/flujos/hallazgos.json`._
+_Se muestran 200 de 1189; la lista completa está en `inventario/flujos/hallazgos.json`._
 
 ## FLU-08
 
@@ -619,7 +651,7 @@ _Se muestran 200 de 1223; la lista completa está en `inventario/flujos/hallazgo
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:589` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:602` |
 | DESCONOCIDO / | community | handler sin operación en openapi.json | `src/modules/community/controllers/community-public.controller.ts:607` |
-| DESCONOCIDO /iam/auth | iam | handler sin operación en openapi.json | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:460` |
+| DESCONOCIDO /iam/auth | iam | handler sin operación en openapi.json | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:491` |
 | DESCONOCIDO /notifications/web-push | messaging | handler sin operación en openapi.json | `src/modules/messaging/controllers/web-push.controller.ts:78` |
 | DESCONOCIDO / | promotions | handler sin operación en openapi.json | `src/modules/promotions/controllers/loyalty.controller.ts:185` |
 | DESCONOCIDO /redis-runtime | redis_runtime | handler sin operación en openapi.json | `src/modules/redis_runtime/controllers/redis-runtime.controller.ts:44` |
@@ -635,7 +667,7 @@ _Ninguno._
 
 ## FLU-10
 
-**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 112 caso(s).
+**Operaciones que pueden terminar en un 500 por una excepción sin tipar** — severidad BAJA — 140 caso(s).
 
 **Qué hacer:** Cambiar el `new Error(...)` por una excepción del proyecto con estado y código estables (regla 96.4.4). El cliente hoy recibe INTERNAL sin poder distinguir la causa.
 
@@ -657,7 +689,7 @@ _Ninguno._
 | POST /authz/patients/{patientProfileId}/break-the-glass | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:61` |
 | POST /authz/patients/{patientProfileId}/clinical-access-grants | authz | DomainException: {HttpStatus.FORBIDDEN} (src/modules/authz/services/authz-clinical-scope.service.ts:72) | `src/modules/authz/controllers/authz-clinical.controller.ts:40` |
 | POST /automation/agent-runs/{id}/record-automations/{recordAutomationId}/execute | automation | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/automation/services/record-automation.service.ts:276) | `src/modules/automation/controllers/automation-orchestration.controller.ts:235` |
-| GET /billing/service-catalog/{id}/image | billing | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:131` |
+| GET /billing/service-catalog/{id}/image | billing | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/billing/controllers/billing-service-catalog.controller.ts:136` |
 | GET /charts/documents/{documentId}/files/{fileId}/content | chart | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/chart/controllers/chart-documents.controller.ts:79` |
 | GET /charts/me/documents/{documentId}/files/{fileId}/content | chart | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/chart/controllers/chart-me.controller.ts:87` |
 | POST /clinical/allergy-intolerances/{id}/attachments | clinical | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/files.service.ts:609) \| StorageLifecycleDenied: {identity.reasonCode} (src/common/storage/storage-publication.service.ts:142) \| StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) | `src/modules/clinical/controllers/clinical-records.controller.ts:192` |
@@ -702,23 +734,51 @@ _Ninguno._
 | PUT /admin/catalog/objects/{id}/annotation | data_catalog | DomainException: {422} (src/modules/data_catalog/services/catalog-governance.service.ts:120) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:224` |
 | POST /admin/catalog/scans | data_catalog | ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) \| ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) | `src/modules/data_catalog/controllers/admin-catalog.controller.ts:375` |
 | POST /internal/catalog/scans/run-next | data_catalog | ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) \| ScanFenced (src/modules/data_catalog/services/catalog-scan.service.ts:234) | `src/modules/data_catalog/controllers/internal-catalog.controller.ts:30` |
-| POST /authz/effective-actor/evaluate | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:48` |
-| POST /delegated-permission-sets | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:64` |
-| POST /delegated-permission-sets/{id}/versions | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
-| POST /practitioner-delegates | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:51` |
-| POST /practitioner-delegates/{id}/grants | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:86` |
-| POST /practitioner-delegates/{id}/revoke | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:91) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:104` |
+| POST /access-requests/{id}/decision | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/access-requests.controller.ts:33` |
+| POST /authz/effective-actor/evaluate | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/delegated-access-authz.controller.ts:48` |
+| POST /delegated-permission-sets | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:64` |
+| POST /delegated-permission-sets/{id}/versions | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/delegated-permission-sets.controller.ts:81` |
+| GET /me/practitioner/support-access-requests | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:76` |
+| GET /me/practitioner/support-activity | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:88` |
+| GET /me/practitioner/support-team | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:66` |
+| POST /me/support-patient-search | delegated_access | Error: MULTI sin respuesta completa (src/modules/delegated_access/services/support-patient-probe-counter.ts:185) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/support-patient-search.service.ts:202) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:153` |
+| POST /me/support-patients | delegated_access | Error: MULTI sin respuesta completa (src/modules/delegated_access/services/support-patient-probe-counter.ts:185) \| DomainException: {HttpStatus.BAD_REQUEST} (src/modules/delegated_access/services/support-patient-registration.service.ts:218) \| DomainException: {HttpStatus.BAD_REQUEST} (src/modules/delegated_access/services/support-patient-registration.service.ts:226) | `src/modules/delegated_access/controllers/support-patients.controller.ts:41` |
+| GET /org/access-lookup | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:178` |
+| GET /org/affiliation-invitations | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/affiliation-invitations.controller.ts:76` |
+| POST /org/affiliation-invitations | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/affiliation-invitations.controller.ts:42` |
+| POST /org/affiliation-invitations/{id}/revoke | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/affiliation-invitations.controller.ts:59` |
+| GET /org/role-templates | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:200` |
+| POST /org/role-templates | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:208` |
+| PATCH /org/role-templates/{id} | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:225` |
+| GET /org/support-activity | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:190` |
+| GET /org/support-catalog | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:168` |
+| GET /org/support-engagement-requests | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagement-requests.controller.ts:164` |
+| POST /org/support-engagement-requests/{id}/decision | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/engagement-requests.service.ts:326) \| DomainException: {HttpStatus.BAD_REQUEST} (src/modules/delegated_access/services/engagement-requests.service.ts:462) | `src/modules/delegated_access/controllers/support-engagement-requests.controller.ts:176` |
+| GET /org/support-engagements | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:76` |
+| POST /org/support-engagements/{id}/end | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:148` |
+| GET /org/support-engagements/{id}/grants | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:84` |
+| PATCH /org/support-engagements/{id}/grants | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) \| Error: No hay doctores, servicios ni espacios que congelar: use un permiso dinámico (src/modules/delegated_access/services/support-targets.service.ts:161) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:112` |
+| POST /org/support-engagements/{id}/grants | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) \| DomainException: {HttpStatus.BAD_REQUEST} (src/modules/delegated_access/services/support-targets.service.ts:61) \| Error: No hay doctores, servicios ni espacios que congelar: use un permiso dinámico (src/modules/delegated_access/services/support-targets.service.ts:161) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:94` |
+| POST /org/support-engagements/{id}/recertify | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/support-engagements.controller.ts:130` |
+| POST /practitioner-delegates | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:51` |
+| POST /practitioner-delegates/{id}/accept | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:113` |
+| POST /practitioner-delegates/{id}/access-requests | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:68` |
+| POST /practitioner-delegates/{id}/grants | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:86` |
+| PATCH /practitioner-delegates/{id}/reply-settings | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/practitioner-support.controller.ts:131` |
+| POST /practitioner-delegates/{id}/revoke | delegated_access | DomainException: {HttpStatus.FORBIDDEN} (src/modules/delegated_access/services/delegation-scope.service.ts:93) | `src/modules/delegated_access/controllers/practitioner-delegates.controller.ts:104` |
+| POST /support-engagement-requests | delegated_access | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/delegated_access/services/support-targets.service.ts:61) | `src/modules/delegated_access/controllers/support-engagement-requests.controller.ts:121` |
 | GET /diagnostic-results/me/{reportId}/files/{fileId}/content | diagnostics | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/diagnostics/controllers/diagnostics-patient-results.controller.ts:173` |
-| POST /tenants/{tenantId}/affiliation-documents | directory | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | `src/modules/directory/controllers/tenants.controller.ts:151` |
+| POST /tenants/{tenantId}/affiliation-documents | directory | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | `src/modules/directory/controllers/tenants.controller.ts:210` |
 | GET /tenants/{tenantId}/logo/content | directory | Error: S3 object body is empty (src/common/storage/s3-file-storage.adapter.ts:229) | `src/modules/directory/controllers/organization-logo.controller.ts:49` |
 | POST /graph/paths | graph_intelligence | DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:126` |
 | POST /graph/traverse | graph_intelligence | DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) \| DomainException: {HttpStatus.FORBIDDEN} (src/modules/graph_intelligence/services/graph-consent-gate.service.ts:99) | `src/modules/graph_intelligence/controllers/graph-query.controller.ts:101` |
-| POST /iam/auth/register-practitioner | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:266` |
-| POST /iam/auth/upload-registration-document | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:231` |
-| POST /iam/auth/upload-registration-logo | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:184` |
-| POST /iam/auth/upload-registration-signature-image | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:154` |
+| POST /iam/auth/register-practitioner | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:276` |
+| POST /iam/auth/upload-registration-document | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:241` |
+| POST /iam/auth/upload-registration-logo | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:194` |
+| POST /iam/auth/upload-registration-signature-image | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:450) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/file-upload.service.ts:408) \| StorageLifecycleDenied: WRITE_RESERVATION_REQUIRED (src/common/storage/local-disk-file-storage.adapter.ts:149) | `src/modules/iam/presentation/controllers/iam-auth.controller.ts:164` |
 | PUT /iam/onboarding-drafts/{formType}/{draftId} | iam | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:372) \| DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:379) \| DomainException: {HttpStatus.TOO_MANY_REQUESTS} (src/modules/iam/application/services/iam-onboarding-drafts.service.ts:333) | `src/modules/iam/presentation/controllers/iam-onboarding-drafts.controller.ts:66` |
 | POST /iam/users/assisted-practitioner-registration | iam | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) \| StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/common/services/attachable-file.service.ts:226) | `src/modules/iam/presentation/controllers/iam-users.controller.ts:307` |
+| PUT /org/session-policies | iam | DomainException: {HttpStatus.BAD_REQUEST} (src/modules/iam/application/services/session-policies.service.ts:299) \| DomainException: {HttpStatus.BAD_REQUEST} (src/modules/iam/application/services/session-policies.service.ts:313) | `src/modules/iam/presentation/controllers/session-policies.controller.ts:44` |
 | POST /identity/me/identity-verification | identity_assurance | StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) \| StorageLifecycleDenied: VERSION_UNKNOWN (src/common/storage/storage-publication.service.ts:192) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:199) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:42` |
 | POST /identity/me/practitioner/identity-verification | identity_assurance | StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) \| StorageLifecycleDenied: VERSION_UNKNOWN (src/common/storage/storage-publication.service.ts:192) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:199) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:60` |
 | POST /identity/me/practitioner/license-verification | identity_assurance | StorageLifecycleDenied: FILE_NOT_LIVE (src/common/storage/storage-publication.service.ts:189) \| StorageLifecycleDenied: VERSION_UNKNOWN (src/common/storage/storage-publication.service.ts:192) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/common/storage/storage-publication.service.ts:199) | `src/modules/identity_assurance/controllers/identity-self-service.controller.ts:78` |
@@ -736,9 +796,9 @@ _Ninguno._
 | POST /profiles/patients/me/addresses | profiles | Error: createSavedAddress no creó fila con municipio declarado (src/modules/profiles/infrastructure/adapters/patient-address-book.adapter.ts:54) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:57` |
 | PATCH /profiles/patients/me/addresses/{id} | profiles | Error: createSavedAddress no creó fila con municipio declarado (src/modules/profiles/infrastructure/adapters/patient-address-book.adapter.ts:54) | `src/modules/profiles/presentation/controllers/patient-address-book.controller.ts:68` |
 | POST /admin/qa/plans/{planId}/approvals | qa_execution | DomainException: {HttpStatus.FORBIDDEN} (src/modules/qa_execution/services/qa-execution.service.ts:432) | `src/modules/qa_execution/controllers/qa-execution.controller.ts:148` |
-| POST /scheduling/bookings/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:545` |
-| POST /scheduling/bookings/{id}/reschedule | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:479` |
-| POST /scheduling/resources/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:841` |
+| POST /scheduling/bookings/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:574` |
+| POST /scheduling/bookings/{id}/reschedule | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling-bookings.controller.ts:496` |
+| POST /scheduling/resources/{id}/delay | scheduling | Error: Entidad de historial no registrada: {entity} (src/modules/audit/repositories/history.repository.ts:161) | `src/modules/scheduling/presentation/controllers/scheduling.controller.ts:853` |
 | POST /system-context/contexts | system_context | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/system_context/services/system-contexts.service.ts:633) | `src/modules/system_context/controllers/system-context.controller.ts:289` |
 | POST /system-context/contexts/{id}/refresh | system_context | DomainException: {HttpStatus.PAYLOAD_TOO_LARGE} (src/modules/system_context/services/system-contexts.service.ts:633) \| DomainException: {HttpStatus.BAD_REQUEST} (src/modules/system_context/services/system-contexts.service.ts:668) | `src/modules/system_context/controllers/system-context.controller.ts:310` |
 | POST /internal/governance/retention-executions/run | system_ops | StorageLifecycleDenied: LIFECYCLE_WIRING_MISSING (src/modules/system_ops/services/retention-execution.service.ts:186) \| StorageLifecycleDenied: EXTERNAL_REFERENCE_UNKNOWN (src/modules/identity_assurance/services/identity-evidence-lifecycle.service.ts:80) \| StorageLifecycleDenied: PHYSICAL_IDENTITY_UNKNOWN (src/modules/identity_assurance/services/identity-evidence-lifecycle.service.ts:89) | `src/modules/system_ops/controllers/retention-execution.controller.ts:28` |

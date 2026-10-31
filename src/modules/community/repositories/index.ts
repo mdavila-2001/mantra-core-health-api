@@ -17,3 +17,4 @@ export * from './community-prestige.repository';
 export * from './public-search.repository';
 export * from './verified-badges.repository';
 export * from './party-ratings.repository';
+export * from './support-inbox.repository';

@@ -24,12 +24,25 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  */
 function build() {
   const tx = { flush: mockFn().mockResolvedValue(undefined) };
-  const em = { transactional: mockFn((cb: any) => cb(tx)) };
+  const em = {
+    transactional: mockFn((cb: any) => cb(tx)),
+    fork: mockFn(() => tx),
+  };
   const membershipsRepo = {
     findActiveByUserTenant: mockFn(),
+    findActiveByUser: mockFn().mockResolvedValue([]),
     findByIdInTenant: mockFn(),
+    findByIdAndUser: mockFn(),
     countActiveByTenantRole: mockFn(),
     create: mockFn(),
+  };
+  const tenantsRepo = {
+    findById: mockFn().mockResolvedValue({
+      id: 't1',
+      tradeName: 'Clínica Sur',
+      legalName: 'Clínica Sur S.R.L.',
+      code: 'CSUR',
+    }),
   };
   const branchMembershipsRepo = {
     findByMembership: mockFn(() => Promise.resolve([])),
@@ -53,10 +66,12 @@ function build() {
     branchesRepo as any,
     tenantAdmin as never,
     logger as any,
+    tenantsRepo as any,
   );
   return {
     service,
     tx,
+    tenantsRepo,
     membershipsRepo,
     branchMembershipsRepo,
     branchesRepo,
@@ -92,22 +107,174 @@ describe('DirectoryMembershipsService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
-    it('creates an active membership with defaults', async () => {
+    it('N2: crea la membresía PENDIENTE de aceptación (no activa) con los valores por defecto', async () => {
       const d = build();
       d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
-      d.membershipsRepo.create.mockReturnValue(activeMembership());
+      d.membershipsRepo.create.mockReturnValue(
+        activeMembership({
+          statusConceptId: DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
+        }),
+      );
 
       const res = await d.service.invite('t1', { userId: 'u1' }, actor);
 
       expect(res.id).toBe('m1');
+      expect(res.status).toBe(DIR.MEMBERSHIP_PENDING_ACCEPTANCE);
       expect(d.membershipsRepo.create).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
           tenantRoleConceptId: DIR.ROLE_STAFF,
           accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
-          statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+          statusConceptId: DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
+          invitedByUserId: 'admin-1',
+          // N10c: la añadió un administrador.
+          originConceptId: DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED,
         }),
       );
+      // Nunca activa por orden de un administrador.
+      expect(d.membershipsRepo.create).not.toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({ statusConceptId: DIR.MEMBERSHIP_ACTIVE }),
+      );
+    });
+
+    it('N2: una segunda invitación mientras hay una pendiente es 409', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUserTenant
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({ id: 'm0' });
+      await expect(
+        d.service.invite('t1', { userId: 'u1' } as any, actor),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(d.membershipsRepo.create).not.toHaveBeenCalled();
+      expect(d.membershipsRepo.findActiveByUserTenant).toHaveBeenLastCalledWith(
+        d.tx,
+        'u1',
+        't1',
+        DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
+      );
+    });
+  });
+
+  describe('N2: aceptar o rechazar una membresía pendiente propia', () => {
+    const me = { id: 'u1', roles: ['USER'] } as any;
+    const pending = (over: any = {}) =>
+      activeMembership({
+        statusConceptId: DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
+        createdAt: new Date('2026-10-30T10:00:00Z'),
+        ...over,
+      });
+
+    it('lista solo las pendientes de la propia persona, con el nombre de la organización', async () => {
+      const d = build();
+      d.membershipsRepo.findActiveByUser.mockResolvedValue([pending()]);
+      const res = await d.service.listMyInvitations(me);
+      expect(d.membershipsRepo.findActiveByUser).toHaveBeenCalledWith(
+        expect.anything(),
+        'u1',
+        DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
+      );
+      expect(res.items).toEqual([
+        {
+          id: 'm1',
+          tenantId: 't1',
+          tenantName: 'Clínica Sur',
+          role: 'STAFF',
+          invitedAt: new Date('2026-10-30T10:00:00Z'),
+        },
+      ]);
+    });
+
+    it('aceptar la deja ACTIVA y el acceso empieza ahora', async () => {
+      const d = build();
+      const membership = pending({ startDate: new Date('2020-01-01') });
+      d.membershipsRepo.findByIdAndUser.mockResolvedValue(membership);
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(null);
+      const res = await d.service.acceptMine(me, 'm1');
+      expect(res).toEqual({ id: 'm1', tenantId: 't1', status: 'ACTIVE' });
+      expect(membership.statusConceptId).toBe(DIR.MEMBERSHIP_ACTIVE);
+      expect(membership.startDate.getFullYear()).toBeGreaterThan(2020);
+      expect(membership.updatedByUserId).toBe('u1');
+      // Se vuelca dentro del contexto de la organización (RLS).
+      expect(d.tx.flush).toHaveBeenCalled();
+    });
+
+    it('rechazarla la termina y nunca llegó a contar', async () => {
+      const d = build();
+      const membership = pending();
+      d.membershipsRepo.findByIdAndUser.mockResolvedValue(membership);
+      const res = await d.service.declineMine(me, 'm1');
+      expect(res.status).toBe('DECLINED');
+      expect(membership.statusConceptId).toBe(DIR.MEMBERSHIP_ENDED);
+      expect(membership.endDate).toBeInstanceOf(Date);
+    });
+
+    it('si ya es miembro activo por otro camino, la pendiente se cierra sin crear una segunda activa', async () => {
+      const d = build();
+      const membership = pending();
+      d.membershipsRepo.findByIdAndUser.mockResolvedValue(membership);
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue({ id: 'm9' });
+      await d.service.acceptMine(me, 'm1');
+      expect(membership.statusConceptId).toBe(DIR.MEMBERSHIP_ENDED);
+    });
+
+    it('404 uniforme: ajena, inexistente, ya decidida o pendiente de aprobación de la organización', async () => {
+      const d = build();
+      // Inexistente o ajena: el repositorio busca por id Y persona.
+      d.membershipsRepo.findByIdAndUser.mockResolvedValue(null);
+      await expect(d.service.acceptMine(me, 'm1')).rejects.toBeInstanceOf(
+        ResourceNotFoundException,
+      );
+      expect(d.membershipsRepo.findByIdAndUser).toHaveBeenCalledWith(
+        d.tx,
+        'm1',
+        'u1',
+      );
+      // Ya activa, terminada...
+      for (const status of [
+        DIR.MEMBERSHIP_ACTIVE,
+        DIR.MEMBERSHIP_ENDED,
+        DIR.MEMBERSHIP_SUSPENDED,
+        // ...o la que el personal de apoyo deja para que la ORGANIZACIÓN apruebe:
+        // la persona no puede aprobarse a sí misma.
+        DIR.MEMBERSHIP_INVITED,
+      ]) {
+        d.membershipsRepo.findByIdAndUser.mockResolvedValue(
+          pending({ statusConceptId: status }),
+        );
+        await expect(d.service.acceptMine(me, 'm1')).rejects.toBeInstanceOf(
+          ResourceNotFoundException,
+        );
+        await expect(d.service.declineMine(me, 'm1')).rejects.toBeInstanceOf(
+          ResourceNotFoundException,
+        );
+      }
+    });
+  });
+
+  describe('N2: la organización puede preparar o retirar la invitación pendiente', () => {
+    it('offboard de una invitación pendiente de OWNER no choca con «último OWNER»', async () => {
+      const d = build();
+      const membership = activeMembership({
+        tenantRoleConceptId: DIR.ROLE_OWNER,
+        statusConceptId: DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
+      });
+      d.membershipsRepo.findByIdInTenant.mockResolvedValue(membership);
+      d.membershipsRepo.countActiveByTenantRole.mockResolvedValue(1);
+      await expect(d.service.offboard('t1', 'm1', actor)).resolves.toEqual({
+        ok: true,
+      });
+      expect(membership.statusConceptId).toBe(DIR.MEMBERSHIP_ENDED);
+    });
+
+    it('asignar sede a una pendiente es posible; a una terminada no', async () => {
+      const d = build();
+      d.membershipsRepo.findByIdInTenant.mockResolvedValue(
+        activeMembership({ statusConceptId: DIR.MEMBERSHIP_ENDED }),
+      );
+      await expect(
+        d.service.assignBranch('t1', 'm1', { branchId: 'b1' } as any, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
     });
   });
 
@@ -435,7 +602,41 @@ describe('DirectoryMembershipsService', () => {
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         invitedByUserId: 'admin-1',
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED,
       });
+    });
+
+    /**
+     * Una membresía que existía solo por un vínculo de apoyo deja de depender
+     * de él cuando se aprueba al profesional: terminar el vínculo no puede
+     * cerrarle la membresía al doctor.
+     */
+    it('N10c: la membresía de solo-apoyo que recibe al profesional deja de ser solo-apoyo', async () => {
+      const d = build();
+      const existing = {
+        id: 'm-apoyo',
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_SUPPORT_ENGAGEMENT,
+      };
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(existing);
+
+      await d.service.ensureCareMembership(d.tx as any, params);
+
+      expect(existing.originConceptId).toBe(DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED);
+    });
+
+    it('N10c: no toca el origen de una membresía existente que no era de apoyo', async () => {
+      const d = build();
+      const existing = {
+        id: 'm-vieja',
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_OWNER_CREATED,
+      };
+      d.membershipsRepo.findActiveByUserTenant.mockResolvedValue(existing);
+
+      await d.service.ensureCareMembership(d.tx as any, params);
+
+      expect(existing.originConceptId).toBe(
+        DIR.MEMBERSHIP_ORIGIN_OWNER_CREATED,
+      );
     });
 
     /**

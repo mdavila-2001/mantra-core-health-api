@@ -95,7 +95,13 @@ export class SchedulingBookingsController {
    * @returns Citas que casan con los filtros.
    */
   @Get()
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @Roles(
+    'SCHEDULING_ADMIN',
+    'SCHEDULING_AGENT',
+    'SUPPORT_STAFF',
+    'PRACTITIONER',
+    'PATIENT',
+  )
   @ApiOperation({
     summary: 'UC-41-15: lista citas por paciente, recurso y/o ventana',
   })
@@ -138,7 +144,13 @@ export class SchedulingBookingsController {
    * @returns La cita con su instante resuelto desde el slot.
    */
   @Get(':id')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @Roles(
+    'SCHEDULING_ADMIN',
+    'SCHEDULING_AGENT',
+    'SUPPORT_STAFF',
+    'PRACTITIONER',
+    'PATIENT',
+  )
   @ApiOperation({ summary: 'UC-41-15: consulta una cita' })
   getBooking(
     @Param('id', ParseUUIDPipe) id: string,
@@ -159,7 +171,12 @@ export class SchedulingBookingsController {
     entityId: 'param:id',
   })
   @Post(':id/accept')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  @Roles(
+    'SCHEDULING_ADMIN',
+    'SCHEDULING_AGENT',
+    'SUPPORT_STAFF',
+    'PRACTITIONER',
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Aceptar la solicitud de cita',
@@ -485,7 +502,13 @@ export class SchedulingBookingsController {
   // `PRACTITIONER` desde la corrección #14: mover un turno es un acto del
   // profesional tanto como del mostrador, y ahora exige motivo en las dos
   // direcciones.
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @Roles(
+    'SCHEDULING_ADMIN',
+    'SCHEDULING_AGENT',
+    'SUPPORT_STAFF',
+    'PRACTITIONER',
+    'PATIENT',
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reprogramar la cita a otro slot' })
   reschedule(
@@ -503,7 +526,13 @@ export class SchedulingBookingsController {
     entityId: 'param:id',
   })
   @Post(':id/cancel')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER', 'PATIENT')
+  @Roles(
+    'SCHEDULING_ADMIN',
+    'SCHEDULING_AGENT',
+    'SUPPORT_STAFF',
+    'PRACTITIONER',
+    'PATIENT',
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Cancelar la cita y liberar el cupo',
@@ -525,7 +554,7 @@ export class SchedulingBookingsController {
     entityId: 'param:id',
   })
   @Post(':id/check-in')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT')
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'SUPPORT_STAFF')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Registrar la llegada del paciente' })
   checkIn(

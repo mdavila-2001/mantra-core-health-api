@@ -8,6 +8,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../common';
+import { withPersonScope } from '../../delegated_access/services/tenant-context';
 import {
   ACCESS_SCOPE_CONCEPT_BY_CODE,
   DIR,
@@ -17,6 +18,7 @@ import {
   BranchMembershipsRepository,
   BranchesRepository,
   TenantMembershipsRepository,
+  TenantsRepository,
 } from '../repositories';
 import type { TenantMemberships } from '../entities';
 import {
@@ -24,6 +26,8 @@ import {
   BranchMembershipResponseDto,
   ChangeMembershipRoleDto,
   CreateMembershipDto,
+  ListMembershipInvitationsResponseDto,
+  MembershipInvitationDecisionDto,
   MembershipResponseDto,
   StatusResultDto,
   TransferMembershipDto,
@@ -45,6 +49,7 @@ export class DirectoryMembershipsService {
    * @param branchMembershipsRepo - Valor de branch memberships repo requerido por la operación.
    * @param branchesRepo - Valor de branches repo requerido por la operación.
    * @param logger - Valor de logger requerido por la operación.
+   * @param tenantsRepo - Organizaciones, para nombrarlas en las invitaciones pendientes.
    */
   constructor(
     private readonly em: EntityManager,
@@ -53,11 +58,20 @@ export class DirectoryMembershipsService {
     private readonly branchesRepo: BranchesRepository,
     private readonly tenantAdmin: TenantAdministrationService,
     private readonly logger: PinoLogger,
+    private readonly tenantsRepo: TenantsRepository,
   ) {
     this.logger.setContext(DirectoryMembershipsService.name);
   }
 
-  /** UC-04-05: incorpora un usuario al tenant (evita membresía activa duplicada). */
+  /**
+   * UC-04-05: incorpora un usuario al tenant. La membresía nace PENDIENTE de
+   * aceptación (`MEMBERSHIP_PENDING_ACCEPTANCE`): hasta que la persona la acepte
+   * no cuenta para su token, sus políticas, la lectura de la organización ni los
+   * vínculos de apoyo. Sin esto, un administrador podía añadir a cualquier cuenta
+   * como miembro y, con una política de sesión, cerrarle el acceso en todas sus
+   * organizaciones. Canjear un código QR o una invitación sigue siendo
+   * consentimiento y activa al instante.
+   */
   async invite(
     tenantId: string,
     dto: CreateMembershipDto,
@@ -92,17 +106,30 @@ export class DirectoryMembershipsService {
           },
         );
       }
+      const pending = await this.membershipsRepo.findActiveByUserTenant(
+        tx,
+        dto.userId,
+        tenantId,
+        DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
+      );
+      if (pending) {
+        throw new ConflictException(
+          'El usuario ya tiene una invitación pendiente de aceptar en el tenant',
+          { tenantId, userId: dto.userId },
+        );
+      }
 
       const membership = this.membershipsRepo.create(tx, {
         userId: dto.userId,
         tenantId,
         tenantRoleConceptId: TENANT_ROLE_CONCEPT_BY_CODE[dto.role ?? 'STAFF'],
-        statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+        statusConceptId: DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
         accessScopeConceptId:
           ACCESS_SCOPE_CONCEPT_BY_CODE[dto.accessScope ?? 'ALL_TENANT'],
         primaryBranchId: dto.primaryBranchId,
         startDate: new Date(),
         invitedByUserId: actor.id,
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED,
         actorUserId: actor.id,
       });
       await tx.flush();
@@ -116,6 +143,140 @@ export class DirectoryMembershipsService {
       );
       return this.toResponse(membership);
     });
+  }
+
+  /**
+   * Las membresías que organizaciones crearon para la propia persona y que ella
+   * aún no aceptó. Solo las suyas: el sujeto sale de la sesión y no hay
+   * parámetro que apunte a otra cuenta.
+   *
+   * @param actor - Persona que pregunta por lo suyo.
+   * @returns Sus invitaciones pendientes.
+   */
+  async listMyInvitations(
+    actor: AuthenticatedUser,
+  ): Promise<ListMembershipInvitationsResponseDto> {
+    return withPersonScope(this.em, async (tx, scope) => {
+      const pending = await scope.ownRows(() =>
+        this.membershipsRepo.findActiveByUser(
+          tx,
+          actor.id,
+          DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
+        ),
+      );
+      const items: ListMembershipInvitationsResponseDto['items'] = [];
+      for (const membership of pending) {
+        const tenant = await this.tenantsRepo.findById(tx, membership.tenantId);
+        if (!tenant) continue;
+        items.push({
+          id: membership.id,
+          tenantId: membership.tenantId,
+          tenantName: tenant.tradeName || tenant.legalName || tenant.code,
+          role: roleCodeOf(membership.tenantRoleConceptId),
+          invitedAt: membership.createdAt,
+        });
+      }
+      return { items };
+    });
+  }
+
+  /**
+   * La persona acepta una membresía pendiente: pasa a ACTIVA y empieza a contar
+   * (token, políticas, lectura de la organización). Solo se acepta una membresía
+   * PROPIA y pendiente de aceptación; cualquier otra —ajena, inexistente, ya
+   * decidida o que la organización aún debe aprobar— responde 404 igual.
+   *
+   * @param actor - Persona que acepta.
+   * @param membershipId - Membresía pendiente.
+   * @returns La decisión.
+   * @throws ResourceNotFoundException (404 uniforme).
+   */
+  async acceptMine(
+    actor: AuthenticatedUser,
+    membershipId: string,
+  ): Promise<MembershipInvitationDecisionDto> {
+    return this.decideMine(actor, membershipId, 'ACTIVE');
+  }
+
+  /**
+   * La persona rechaza una membresía pendiente: queda terminada y nunca llegó a
+   * contar. Mismo alcance y mismo 404 uniforme que {@link acceptMine}.
+   *
+   * @param actor - Persona que rechaza.
+   * @param membershipId - Membresía pendiente.
+   * @returns La decisión.
+   * @throws ResourceNotFoundException (404 uniforme).
+   */
+  async declineMine(
+    actor: AuthenticatedUser,
+    membershipId: string,
+  ): Promise<MembershipInvitationDecisionDto> {
+    return this.decideMine(actor, membershipId, 'DECLINED');
+  }
+
+  private async decideMine(
+    actor: AuthenticatedUser,
+    membershipId: string,
+    decision: 'ACTIVE' | 'DECLINED',
+  ): Promise<MembershipInvitationDecisionDto> {
+    return withPersonScope(
+      this.em,
+      async (tx, scope) => {
+        const membership = await scope.ownRows(() =>
+          this.membershipsRepo.findByIdAndUser(tx, membershipId, actor.id),
+        );
+        if (
+          !membership ||
+          membership.statusConceptId !== DIR.MEMBERSHIP_PENDING_ACCEPTANCE
+        ) {
+          throw new ResourceNotFoundException('Invitación no encontrada', {
+            membershipId,
+          });
+        }
+        await scope.inTenant(membership.tenantId, async () => {
+          const now = new Date();
+          if (decision === 'ACTIVE') {
+            // Hay una sola membresía activa por persona y organización: si ya
+            // llegó a serlo por otro camino (un código canjeado), esta sobra.
+            const active = await this.membershipsRepo.findActiveByUserTenant(
+              tx,
+              actor.id,
+              membership.tenantId,
+              DIR.MEMBERSHIP_ACTIVE,
+            );
+            if (active) {
+              membership.statusConceptId = DIR.MEMBERSHIP_ENDED;
+              membership.endDate = now;
+            } else {
+              membership.statusConceptId = DIR.MEMBERSHIP_ACTIVE;
+              // El acceso empieza cuando la persona acepta, no cuando la crearon.
+              membership.startDate = now;
+            }
+          } else {
+            membership.statusConceptId = DIR.MEMBERSHIP_ENDED;
+            membership.endDate = now;
+          }
+          touch(membership, actor.id, now);
+          // Se vuelca dentro del contexto de la organización: con RLS, el UPDATE
+          // solo es visible mientras ese contexto sigue abierto.
+          await tx.flush();
+        });
+        this.logger.info(
+          {
+            operation: 'directory.membership.decide',
+            membershipId,
+            decision,
+          },
+          'Membership invitation decided by the person',
+        );
+        return {
+          id: membership.id,
+          tenantId: membership.tenantId,
+          status: decision,
+        };
+      },
+      { transactional: true },
+    );
   }
 
   /**
@@ -152,6 +313,16 @@ export class DirectoryMembershipsService {
       DIR.MEMBERSHIP_ACTIVE,
     );
     if (existing) {
+      // Si la membresía existía solo por un vínculo de apoyo, ahora tiene otra
+      // razón de ser: aprobar al profesional no puede dejarla en manos del fin
+      // de ese vínculo.
+      if (
+        existing.originConceptId === DIR.MEMBERSHIP_ORIGIN_SUPPORT_ENGAGEMENT
+      ) {
+        existing.originConceptId = DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED;
+        existing.updatedAt = new Date();
+        existing.updatedByUserId = params.actorUserId;
+      }
       return { membership: existing, creada: false };
     }
 
@@ -169,6 +340,8 @@ export class DirectoryMembershipsService {
       // dice que empezó la relación laboral.
       startDate: new Date(),
       invitedByUserId: params.actorUserId,
+      // Quien aprueba el vínculo es quien incorpora al profesional.
+      originConceptId: DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED,
       actorUserId: params.actorUserId,
     });
 
@@ -200,6 +373,7 @@ export class DirectoryMembershipsService {
         tx,
         tenantId,
         membershipId,
+        true,
       );
       await this.requireBranchInTenant(tx, tenantId, dto.branchId);
 
@@ -277,6 +451,7 @@ export class DirectoryMembershipsService {
         tx,
         tenantId,
         membershipId,
+        true,
       );
       await this.requireBranchInTenant(tx, tenantId, dto.fromBranchId);
       await this.requireBranchInTenant(tx, tenantId, dto.toBranchId);
@@ -352,6 +527,7 @@ export class DirectoryMembershipsService {
         tx,
         tenantId,
         membershipId,
+        true,
       );
 
       // Tocar la propiedad —conceder OWNER o tocar la membresía de un OWNER— es el
@@ -361,7 +537,12 @@ export class DirectoryMembershipsService {
       if (grantsOwner || targetIsOwner) {
         await this.tenantAdmin.assertCanChangeOwnership(tx, tenantId, actor);
       }
-      if (targetIsOwner && dto.role && !grantsOwner) {
+      if (
+        targetIsOwner &&
+        dto.role &&
+        !grantsOwner &&
+        membership.statusConceptId === DIR.MEMBERSHIP_ACTIVE
+      ) {
         await this.assertNotLastOwner(tx, membership);
       }
 
@@ -405,13 +586,18 @@ export class DirectoryMembershipsService {
         tx,
         tenantId,
         membershipId,
+        true,
       );
 
       // Dar de baja a un OWNER es cambiar quién es dueño, y además no puede dejar a
       // la organización sin ninguno.
       if (membership.tenantRoleConceptId === DIR.ROLE_OWNER) {
         await this.tenantAdmin.assertCanChangeOwnership(tx, tenantId, actor);
-        await this.assertNotLastOwner(tx, membership);
+        // Retirar una invitación pendiente de OWNER no deja a la organización sin
+        // dueño: esa persona todavía no lo era.
+        if (membership.statusConceptId === DIR.MEMBERSHIP_ACTIVE) {
+          await this.assertNotLastOwner(tx, membership);
+        }
       }
 
       membership.statusConceptId = DIR.MEMBERSHIP_ENDED;
@@ -465,11 +651,16 @@ export class DirectoryMembershipsService {
     }
   }
 
-  /** Carga una membresía del tenant y exige que esté activa. */
+  /**
+   * Carga una membresía del tenant y exige que esté activa o, con
+   * `allowPending`, pendiente de que la persona la acepte: la organización puede
+   * preparar (sede, rol) o retirar la invitación antes de que se acepte.
+   */
   private async requireActiveMembership(
     em: EntityManager,
     tenantId: string,
     membershipId: string,
+    allowPending = false,
   ): Promise<TenantMemberships> {
     const membership = await this.membershipsRepo.findByIdInTenant(
       em,
@@ -482,7 +673,10 @@ export class DirectoryMembershipsService {
         membershipId,
       });
     }
-    if (membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE) {
+    const pending =
+      allowPending &&
+      membership.statusConceptId === DIR.MEMBERSHIP_PENDING_ACCEPTANCE;
+    if (membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE && !pending) {
       throw new PreconditionFailedException('La membresía no está activa', {
         membershipId,
       });
@@ -523,4 +717,12 @@ export class DirectoryMembershipsService {
       startDate: membership.startDate,
     };
   }
+}
+
+/** Código del rol de una membresía para las invitaciones (`OTHER` si no es uno asignable). */
+function roleCodeOf(conceptId: string): string {
+  const entry = Object.entries(TENANT_ROLE_CONCEPT_BY_CODE).find(
+    ([, id]) => id === conceptId,
+  );
+  return entry ? entry[0] : 'OTHER';
 }

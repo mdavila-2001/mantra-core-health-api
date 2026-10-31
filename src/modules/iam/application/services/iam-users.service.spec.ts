@@ -43,7 +43,7 @@ function build() {
   const refreshRepo = {
     revokeActiveBySessionIds: mockFn().mockResolvedValue(0),
   };
-  const lockoutsRepo = { create: mockFn() };
+  const lockoutsRepo = { lockManually: mockFn() };
   const eventsRepo = { record: mockFn() };
   const contactPointsRepo = { create: mockFn() };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
@@ -149,7 +149,14 @@ describe('IamUsersService', () => {
 
       expect(res).toEqual({ ok: true });
       expect(user.statusConceptId).toBe(CONCEPTS.USER_LOCKED);
-      expect(d.lockoutsRepo.create).toHaveBeenCalled();
+      expect(d.lockoutsRepo.lockManually).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          userId: 'u1',
+          reasonConceptId: CONCEPTS.LOCK_REASON_MANUAL,
+          actorUserId: actor.id,
+        }),
+      );
       expect(d.sessionsRepo.revokeAllActiveForUser).toHaveBeenCalledWith(
         d.tx,
         'u1',

@@ -218,12 +218,33 @@ const SERVICE_SUBJECTS: readonly ClinicalRoleSeed[] = [
   ),
 ];
 
+/**
+ * Rol de EJECUCIÓN del personal de apoyo. El login lo deriva de un vínculo de
+ * apoyo vivo (`withSupportStaffRole` en `iam-auth.service.ts`) y acota el claim a
+ * la organización del vínculo: **sembrarlo no cambia el token ni los claims**.
+ * Existe como fila de sistema solo para que `@Roles('SECURITY_ADMIN',
+ * 'SUPPORT_STAFF')` nombre un rol que existe (cierra la deriva `usedNotSeeded`
+ * del gate `permission-drift`) y para colgarle el piso de campos de plataforma.
+ *
+ * NO es asignable: nadie lo recibe por `POST /authz/users/:id/role-assignments`.
+ * Lo que la persona de apoyo puede hacer lo dicen sus concesiones
+ * (`support_scope_grants`), no este rol. No es asistencial: no queda sujeto al
+ * PDP clínico.
+ */
+const SUPPORT_EXECUTION: readonly ClinicalRoleSeed[] = [
+  {
+    ...role('SUPPORT_STAFF', 'Personal de apoyo', 'STAFF', 'TENANT'),
+    assignable: false,
+  },
+];
+
 export const AUTHZ_PLATFORM_ROLE_SEED: readonly ClinicalRoleSeed[] = [
   ...BUSINESS_OPERATIONS,
   ...BUSINESS_ENGAGEMENT,
   ...PLATFORM_OPERATIONS,
   ...DATA_AND_GOVERNANCE,
   ...SERVICE_SUBJECTS,
+  ...SUPPORT_EXECUTION,
 ];
 
 /** Códigos sembrados por este archivo. */

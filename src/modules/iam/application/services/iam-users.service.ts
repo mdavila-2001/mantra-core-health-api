@@ -182,7 +182,7 @@ export class IamUsersService {
       user.statusConceptId = CONCEPTS.USER_LOCKED;
       touch(user, actor.id);
 
-      this.lockoutsRepo.create(tx, {
+      await this.lockoutsRepo.lockManually(tx, {
         userId,
         reasonConceptId: CONCEPTS.LOCK_REASON_MANUAL,
         sourceIp: undefined,

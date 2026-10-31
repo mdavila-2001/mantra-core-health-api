@@ -38,16 +38,26 @@ import {
   FORM_ORIGIN_PORT,
   type FormOriginPort,
 } from '../../ports/form-origin.port';
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Optional,
+} from '@nestjs/common';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PinoLogger } from 'nestjs-pino';
 import { SCHED } from '../../../domain/scheduling.concepts';
+import { resolveBookingPlace } from '../../../domain/booking/booking-place';
 import {
   SchedulingBookingsRepository,
   SchedulingCatalogRepository,
+  SchedulingPlaceRepository,
 } from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
-import { operatesAnyAgenda } from '../../../domain/booking/agenda-actors';
+import {
+  isSupportActor,
+  operatesAnyAgenda,
+} from '../../../domain/booking/agenda-actors';
 import { startsInTelemedicineBand } from '../../../domain/catalog/telemedicine-band';
 import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
@@ -68,6 +78,7 @@ export class CreateDirectAppointmentUseCase {
     @Inject(FORM_ORIGIN_PORT)
     private readonly formOrigin: FormOriginPort,
     private readonly logger: PinoLogger,
+    @Optional() private readonly places?: SchedulingPlaceRepository,
   ) {
     this.logger.setContext(CreateDirectAppointmentUseCase.name);
   }
@@ -125,8 +136,14 @@ export class CreateDirectAppointmentUseCase {
     const result: DirectAppointmentResponseDto = {
       bookingId: booking.id,
       bookableSlotId: slot.id,
-      statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
+      // Confirmada, o «llegó» si es una cita de mostrador (`walkIn`).
+      statusConceptId: booking.checkedInAt
+        ? CONCEPTS.BOOKING_CHECKED_IN
+        : CONCEPTS.BOOKING_CONFIRMED,
       retractedSlots,
+      ...(booking.checkedInAt
+        ? { checkedInAt: booking.checkedInAt.toISOString() }
+        : {}),
     };
 
     // Fuera de la transacción, como todos los avisos: que no salga la campana
@@ -165,7 +182,10 @@ export class CreateDirectAppointmentUseCase {
     tx: EntityManager,
     dto: CreateDirectAppointmentDto,
     actor: AuthenticatedUser,
-    options?: { bookingChannel?: 'DESK' | 'WALK_IN' },
+    options?: {
+      bookingChannel?: 'DESK' | 'WALK_IN';
+      supportAction?: 'schedule.create' | 'schedule.walk_in';
+    },
   ): Promise<{
     booking: AppointmentBookings;
     slot: BookableSlots;
@@ -193,11 +213,30 @@ export class CreateDirectAppointmentUseCase {
       actor.practitionerProfileId !== undefined &&
       resource.resourceRefId === actor.practitionerProfileId &&
       PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType);
-    if (!operatesAnyAgenda(actor) && !isOwnAgenda) {
+    if (
+      !isSupportActor(actor, resource.tenantId) &&
+      !operatesAnyAgenda(actor, resource.tenantId) &&
+      !isOwnAgenda
+    ) {
       throw new ForbiddenException(
         'Un profesional solo puede asignar citas en su propia agenda.',
       );
     }
+    // La persona de apoyo no agenda por su rol: la política decide por doctor,
+    // servicio y espacio —derivados de la agenda del doctor, no declarados— y
+    // deja dicho con qué permiso (`booked_via_grant_id`).
+    const supportPlace = await this.resolvePlace(tx, resource, dto, actor);
+    const bookedViaGrantId = await this.access.assertSupportMayCreate(
+      resource,
+      supportPlace,
+      actor,
+      options?.supportAction ??
+        (dto.walkIn ? 'schedule.walk_in' : 'schedule.create'),
+      {
+        patientProfileId: dto.patientProfileId,
+        newAppointmentStartAt: startAt,
+      },
+    );
 
     // v4.2.61 · La telemedicina se habilita POR FRANJA del horario de
     // atención y por defecto está apagada: una cita por TELECONSULTA sólo se
@@ -251,12 +290,12 @@ export class CreateDirectAppointmentUseCase {
         ACTIVE_BOOKING_STATES,
       );
     if (alreadyCommitted.length > 0) {
-      const clash = alreadyCommitted[0];
+      // SEG A-M4: el paciente no puede estar en dos lugares, pero cuál cita,
+      // en qué agenda y a qué hora no es de quien agenda (su permiso puede no
+      // cubrir esa agenda): mensaje genérico, sin nombre de recurso ni
+      // `bookingId`/`startAt`, igual que en el caso de otra organización.
       throw new PreconditionFailedException(
-        `El paciente ya tiene una cita confirmada en ese rato${
-          clash.resourceName ? ` en «${clash.resourceName}»` : ''
-        }.`,
-        { bookingId: clash.id, startAt: clash.startAt },
+        'El paciente no está disponible en ese horario.',
       );
     }
 
@@ -290,6 +329,8 @@ export class CreateDirectAppointmentUseCase {
       endAt,
       capacity: 1,
       remainingCapacity: 0,
+      careSpaceId: supportPlace.careSpaceId,
+      healthcareServiceId: supportPlace.healthcareServiceId,
       statusConceptId: CONCEPTS.SLOT_BOOKED,
       actorUserId: actor.id,
     });
@@ -325,7 +366,9 @@ export class CreateDirectAppointmentUseCase {
       bookableSlotId: slot.id,
       resourceId: resource.id,
       bookingChannelConceptId:
-        CHANNEL_CONCEPT[options?.bookingChannel ?? 'DESK'],
+        CHANNEL_CONCEPT[
+          options?.bookingChannel ?? (dto.walkIn === true ? 'WALK_IN' : 'DESK')
+        ],
       bookedByUserId: actor.id,
       statusConceptId: CONCEPTS.BOOKING_CONFIRMED,
       confirmedAt,
@@ -337,6 +380,9 @@ export class CreateDirectAppointmentUseCase {
         capturedAt: new Date().toISOString(),
       },
       reasonText: dto.reasonText,
+      careSpaceId: slot.careSpaceId,
+      healthcareServiceId: slot.healthcareServiceId,
+      bookedViaGrantId,
       ...(followUp === undefined
         ? {}
         : {
@@ -367,7 +413,80 @@ export class CreateDirectAppointmentUseCase {
       actorKind: 'PROVIDER',
     });
 
+    // La cita de mostrador (`walkIn`) es de quien YA está en la puerta: nace con
+    // la llegada registrada, en la misma transacción, con el mismo asiento que
+    // dejaría `POST …/check-in` (CONFIRMED → CHECKED_IN). Quien la agenda no
+    // necesita además `schedule.check_in`: su permiso es `schedule.walk_in`.
+    if (dto.walkIn === true) {
+      booking.statusConceptId = CONCEPTS.BOOKING_CHECKED_IN;
+      booking.checkedInAt = new Date();
+      touch(booking, actor.id);
+      await this.transitions.recordTransition(tx, booking, actor, {
+        bookingId: booking.id,
+        fromStateConceptId: CONCEPTS.BOOKING_CONFIRMED,
+        toStateConceptId: CONCEPTS.BOOKING_CHECKED_IN,
+        actorKind: 'PROVIDER',
+      });
+    }
+
     return { booking, slot, appointment, retractedSlots };
+  }
+
+  /**
+   * Espacio y servicio con los que nace la cita, DERIVADOS de la agenda del
+   * doctor: lo que declara la persona de apoyo se acepta solo si el doctor
+   * atiende en ese espacio y presta ese servicio (si no, 403), y sin declarar se
+   * toma el único que tiene. Para los demás actores se toma el único espacio donde
+   * el doctor atiende, si lo hay; con ambigüedad no se elige.
+   */
+  private async resolvePlace(
+    tx: EntityManager,
+    resource: {
+      tenantId: string;
+      resourceRefType: string;
+      resourceRefId: string;
+      practiceId?: string | null;
+    },
+    dto: CreateDirectAppointmentDto,
+    actor: AuthenticatedUser,
+  ): Promise<{ careSpaceId?: string; healthcareServiceId?: string }> {
+    const supportDeclares = isSupportActor(actor, resource.tenantId);
+    const declared = supportDeclares
+      ? {
+          careSpaceId: dto.careSpaceId,
+          healthcareServiceId: dto.healthcareServiceId,
+        }
+      : {};
+    if (
+      !this.places ||
+      !PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)
+    ) {
+      // Sin agenda de doctor que contrastar no se acepta lo declarado.
+      if (supportDeclares && (dto.careSpaceId || dto.healthcareServiceId)) {
+        throw new ForbiddenException(
+          'No se puede declarar espacio ni servicio para esta agenda.',
+        );
+      }
+      return {};
+    }
+    const placements = await this.places.placementsOf(
+      tx,
+      resource.resourceRefId,
+      resource.practiceId ?? undefined,
+      new Date(),
+    );
+    const place = resolveBookingPlace(declared, placements);
+    if (place.rejected) {
+      throw new ForbiddenException(
+        place.rejected === 'CARE_SPACE_NOT_OF_PRACTITIONER'
+          ? 'El doctor no atiende en ese espacio.'
+          : 'El doctor no presta ese servicio.',
+      );
+    }
+    return {
+      careSpaceId: place.careSpaceId,
+      healthcareServiceId: place.healthcareServiceId,
+    };
   }
 
   /**

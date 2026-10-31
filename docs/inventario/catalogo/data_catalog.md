@@ -2,7 +2,7 @@
 
 # Catálogo del schema `data_catalog`
 
-- **Tablas:** 8 · **Columnas:** 148 (0 con descripción: 0.0 %) · **Índices:** 15
+- **Tablas:** 13 · **Columnas:** 214 (0 con descripción: 0.0 %) · **Índices:** 24
 - **Dominio:** sin dato
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -16,6 +16,11 @@
 | [catalog_columns](#catalog_columns) | Describe las columnas encontradas en los objetos de datos de salud durante un escaneo, con metadatos para su búsqueda, interpretación y gobernanza. | 24 | 1 | 13 | COINCIDE |
 | [catalog_evidence_items](#catalog_evidence_items) | Asocia evidencia a objetos y columnas del catálogo para respaldar la revisión de su significado, procedencia y uso en datos de salud. | 9 | 2 | 6 | COINCIDE |
 | [catalog_objects](#catalog_objects) | Identifica objetos de datos relevados por el catálogo y el escaneo que los observó, facilitando localizar y gobernar los activos que sostienen la plataforma de salud. | 22 | 2 | 20 | COINCIDE |
+| [catalog_operation_impacts](#catalog_operation_impacts) | sin propósito | 14 | 3 | 2 | COINCIDE |
+| [catalog_operations](#catalog_operations) | sin propósito | 21 | 1 | 3 | COINCIDE |
+| [catalog_process_step_operations](#catalog_process_step_operations) | sin propósito | 9 | 3 | 3 | COINCIDE |
+| [catalog_process_steps](#catalog_process_steps) | sin propósito | 10 | 1 | 3 | COINCIDE |
+| [catalog_processes](#catalog_processes) | sin propósito | 12 | 1 | 3 | COINCIDE |
 | [catalog_review_decisions](#catalog_review_decisions) | Mantiene decisiones de revisión sobre anotaciones del catálogo, dejando trazabilidad de la validación de definiciones de activos de datos de salud. | 7 | 1 | 2 | COINCIDE |
 | [catalog_scan_runs](#catalog_scan_runs) | Registra cada ejecución de relevamiento del catálogo para identificar cuándo se descubrieron objetos y columnas de datos de salud y comparar cambios entre escaneos. | 34 | 3 | 19 | COINCIDE |
 
@@ -23,7 +28,7 @@
 
 Las tablas se agrupan en familias por sus claves foráneas dentro del schema (máximo 40 por diagrama). Las FK hacia otros schemas se listan en la ficha de cada tabla.
 
-### Familia 1 de 1 — 8 tablas
+### Familia 1 de 1 — 13 tablas
 
 ```mermaid
 erDiagram
@@ -72,9 +77,40 @@ erDiagram
     uuid column_id FK
     uuid added_by_user_id FK
   }
+  data_catalog_catalog_operation_impacts["data_catalog.catalog_operation_impacts"] {
+    uuid id PK
+    uuid operation_id FK
+    uuid object_id FK
+    uuid column_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
   data_catalog_catalog_scan_runs["data_catalog.catalog_scan_runs"] {
     uuid id PK
     uuid requested_by_user_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  data_catalog_catalog_operations["data_catalog.catalog_operations"] {
+    uuid id PK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  data_catalog_catalog_process_step_operations["data_catalog.catalog_process_step_operations"] {
+    uuid id PK
+    uuid step_id FK
+    uuid operation_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  data_catalog_catalog_process_steps["data_catalog.catalog_process_steps"] {
+    uuid id PK
+    uuid process_id FK
+    uuid created_by_user_id FK
+    uuid updated_by_user_id FK
+  }
+  data_catalog_catalog_processes["data_catalog.catalog_processes"] {
+    uuid id PK
     uuid created_by_user_id FK
     uuid updated_by_user_id FK
   }
@@ -92,6 +128,12 @@ erDiagram
   data_catalog_catalog_change_events }o--o| data_catalog_catalog_columns : "column_id"
   data_catalog_catalog_evidence_items }o--|| data_catalog_catalog_objects : "object_id"
   data_catalog_catalog_evidence_items }o--o| data_catalog_catalog_columns : "column_id"
+  data_catalog_catalog_operation_impacts }o--|| data_catalog_catalog_operations : "operation_id"
+  data_catalog_catalog_operation_impacts }o--|| data_catalog_catalog_objects : "object_id"
+  data_catalog_catalog_operation_impacts }o--o| data_catalog_catalog_columns : "column_id"
+  data_catalog_catalog_process_step_operations }o--|| data_catalog_catalog_process_steps : "step_id"
+  data_catalog_catalog_process_step_operations }o--|| data_catalog_catalog_operations : "operation_id"
+  data_catalog_catalog_process_steps }o--|| data_catalog_catalog_processes : "process_id"
 ```
 
 ## Fichas
@@ -361,7 +403,7 @@ Describe las columnas encontradas en los objetos de datos de salud durante un es
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_67_data_catalog.puml:92: entity catalog_columns {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
 - **Entidad del ORM:** `CatalogColumns` — `src/modules/data_catalog/entities/catalog_columns.entity.ts`
-- **Resumen:** 24 columnas · 1 índices · 5 FK salientes · 3 entrantes · 13 operaciones
+- **Resumen:** 24 columnas · 1 índices · 5 FK salientes · 4 entrantes · 13 operaciones
 
 #### Columnas
 
@@ -404,6 +446,7 @@ Describe las columnas encontradas en los objetos de datos de salud durante un es
 | desde | id | data_catalog.catalog_change_events (column_id) | fk_catalog_change_events_column_id |
 | desde | id | data_catalog.catalog_annotations (column_id) | fk_catalog_annotations_column_id |
 | desde | id | data_catalog.catalog_evidence_items (column_id) | fk_catalog_evidence_items_column_id |
+| desde | id | data_catalog.catalog_operation_impacts (column_id) | fk_catalog_operation_impacts_column_id |
 
 #### Índices
 
@@ -523,7 +566,7 @@ Identifica objetos de datos relevados por el catálogo y el escaneo que los obse
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_67_data_catalog.puml:60: entity catalog_objects {`
 - **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
 - **Entidad del ORM:** `CatalogObjects` — `src/modules/data_catalog/entities/catalog_objects.entity.ts`
-- **Resumen:** 22 columnas · 2 índices · 4 FK salientes · 4 entrantes · 20 operaciones
+- **Resumen:** 22 columnas · 2 índices · 4 FK salientes · 5 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -564,6 +607,7 @@ Identifica objetos de datos relevados por el catálogo y el escaneo que los obse
 | desde | id | data_catalog.catalog_change_events (object_id) | fk_catalog_change_events_object_id |
 | desde | id | data_catalog.catalog_annotations (object_id) | fk_catalog_annotations_object_id |
 | desde | id | data_catalog.catalog_evidence_items (object_id) | fk_catalog_evidence_items_object_id |
+| desde | id | data_catalog.catalog_operation_impacts (object_id) | fk_catalog_operation_impacts_object_id |
 
 #### Índices
 
@@ -602,6 +646,364 @@ Identifica objetos de datos relevados por el catálogo y el escaneo que los obse
 | POST /internal/catalog/scans/run-next | ACTUALIZA | POR_SQL |
 | POST /internal/catalog/scans/run-next | LEE | POR_SQL |
 | GET /admin/ops/readiness | LEE | POR_SQL |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### catalog_operation_impacts
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
+- **Entidad del ORM:** `CatalogOperationImpacts` — `src/modules/data_catalog/entities/catalog_operation_impacts.entity.ts`
+- **Resumen:** 14 columnas · 3 índices · 5 FK salientes · 0 entrantes · 2 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `operation_id` | `uuid` | Clave foránea → data_catalog.catalog_operations.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `object_id` | `uuid` | Clave foránea → data_catalog.catalog_objects.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `column_id` | `uuid` | Clave foránea → data_catalog.catalog_columns.id; Opcional | _sin dato_ | coincide |
+| 5 | `access_kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `access_detail` | `varchar` | Opcional | _sin dato_ | coincide |
+| 7 | `confidence` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `call_path` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 9 | `source_ref` | `varchar` | Opcional | _sin dato_ | coincide |
+| 10 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 11 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 12 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 13 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 14 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | operation_id | data_catalog.catalog_operations (id) | fk_catalog_operation_impacts_operation_id |
+| hacia | object_id | data_catalog.catalog_objects (id) | fk_catalog_operation_impacts_object_id |
+| hacia | column_id | data_catalog.catalog_columns (id) | fk_catalog_operation_impacts_column_id |
+| hacia | created_by_user_id | iam.users (id) | fk_catalog_operation_impacts_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_catalog_operation_impacts_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ix_data_catalog_operation_impacts_operation_id` | no | operation_id | Soporta la clave foránea fk_catalog_operation_impacts_operation_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_data_catalog_operation_impacts_object_id` | no | object_id | Soporta la clave foránea fk_catalog_operation_impacts_object_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_data_catalog_operation_impacts_column_id` | no | column_id | Soporta la clave foránea fk_catalog_operation_impacts_column_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /internal/catalog/inventory/import | BORRA | POR_SQL |
+| POST /internal/catalog/inventory/import | CREA | POR_SQL |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### catalog_operations
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
+- **Entidad del ORM:** `CatalogOperations` — `src/modules/data_catalog/entities/catalog_operations.entity.ts`
+- **Resumen:** 21 columnas · 1 índices · 2 FK salientes · 2 entrantes · 3 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `source_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `operation_key` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `http_method` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `route_template` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `module_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 7 | `controller_name` | `varchar` | Opcional | _sin dato_ | coincide |
+| 8 | `handler_name` | `varchar` | Opcional | _sin dato_ | coincide |
+| 9 | `source_ref` | `varchar` | Opcional | _sin dato_ | coincide |
+| 10 | `is_public` | `boolean` | Obligatoria | _sin dato_ | coincide |
+| 11 | `required_roles` | `jsonb` | Opcional | _sin dato_ | coincide |
+| 12 | `risk_level` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 13 | `observation_status` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 14 | `technical_hash` | `varchar` | Opcional | _sin dato_ | coincide |
+| 15 | `first_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 16 | `last_seen_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 17 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 18 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 19 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 20 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 21 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | created_by_user_id | iam.users (id) | fk_catalog_operations_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_catalog_operations_updated_by_user_id |
+| desde | id | data_catalog.catalog_operation_impacts (operation_id) | fk_catalog_operation_impacts_operation_id |
+| desde | id | data_catalog.catalog_process_step_operations (operation_id) | fk_catalog_process_step_operations_operation_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ux_data_catalog_operations_key` | sí | operation_key | Garantiza que no se repita la combinación (operation_key) _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_data_catalog_operations_key` | UNIQUE INDEX | UNIQUE INDEX ("operation_key") |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /internal/catalog/inventory/import | CREA | POR_SQL |
+| POST /internal/catalog/inventory/import | ACTUALIZA | POR_SQL |
+| POST /internal/catalog/inventory/import | LEE | POR_SQL |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### catalog_process_step_operations
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
+- **Entidad del ORM:** `CatalogProcessStepOperations` — `src/modules/data_catalog/entities/catalog_process_step_operations.entity.ts`
+- **Resumen:** 9 columnas · 3 índices · 4 FK salientes · 0 entrantes · 3 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `step_id` | `uuid` | Clave foránea → data_catalog.catalog_process_steps.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `operation_id` | `uuid` | Clave foránea → data_catalog.catalog_operations.id; Obligatoria | _sin dato_ | coincide |
+| 4 | `ordinal` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 5 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 6 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 7 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 8 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | step_id | data_catalog.catalog_process_steps (id) | fk_catalog_process_step_operations_step_id |
+| hacia | operation_id | data_catalog.catalog_operations (id) | fk_catalog_process_step_operations_operation_id |
+| hacia | created_by_user_id | iam.users (id) | fk_catalog_process_step_operations_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_catalog_process_step_operations_updated_by_user_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ux_data_catalog_process_step_operations_pair` | sí | step_id, operation_id | Garantiza que no se repita la combinación (step_id, operation_id) _(DOCUMENTO)_; Soporta la clave foránea fk_catalog_process_step_operations_step_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_data_catalog_process_step_operations_step_id` | no | step_id | Soporta la clave foránea fk_catalog_process_step_operations_step_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `ix_data_catalog_process_step_operations_operation_id` | no | operation_id | Soporta la clave foránea fk_catalog_process_step_operations_operation_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_data_catalog_process_step_operations_pair` | UNIQUE INDEX | UNIQUE INDEX ("step_id", "operation_id") |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /internal/catalog/inventory/import | BORRA | POR_SQL |
+| POST /internal/catalog/inventory/import | CREA | POR_SQL |
+| POST /internal/catalog/inventory/import | LEE | POR_SQL |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### catalog_process_steps
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
+- **Entidad del ORM:** `CatalogProcessSteps` — `src/modules/data_catalog/entities/catalog_process_steps.entity.ts`
+- **Resumen:** 10 columnas · 1 índices · 3 FK salientes · 1 entrantes · 3 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `process_id` | `uuid` | Clave foránea → data_catalog.catalog_processes.id; Obligatoria | _sin dato_ | coincide |
+| 3 | `ordinal` | `integer` | Obligatoria | _sin dato_ | coincide |
+| 4 | `step_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 6 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 7 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 8 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 9 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 10 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | process_id | data_catalog.catalog_processes (id) | fk_catalog_process_steps_process_id |
+| hacia | created_by_user_id | iam.users (id) | fk_catalog_process_steps_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_catalog_process_steps_updated_by_user_id |
+| desde | id | data_catalog.catalog_process_step_operations (step_id) | fk_catalog_process_step_operations_step_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ux_data_catalog_process_steps_ordinal` | sí | process_id, ordinal | Garantiza que no se repita la combinación (process_id, ordinal) _(DOCUMENTO)_; Soporta la clave foránea fk_catalog_process_steps_process_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_data_catalog_process_steps_ordinal` | UNIQUE INDEX | UNIQUE INDEX ("process_id", "ordinal") |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /internal/catalog/inventory/import | BORRA | POR_SQL |
+| POST /internal/catalog/inventory/import | CREA | POR_SQL |
+| POST /internal/catalog/inventory/import | LEE | POR_SQL |
+
+#### Gobierno
+
+| Atributo | Valor | Fuente |
+|---|---|---|
+| Append-only | no declarado | — |
+| Datos personales | sin fuente | — |
+| Financiera | sin fuente | — |
+| Crítica para auditoría | sin fuente | — |
+| Retención | sin fuente | — |
+| Responsable | sin fuente | — |
+| Revisión | AUTO_DETECTADA | — |
+
+---
+
+### catalog_processes
+
+#### Vista general
+
+_Sin propósito registrado._
+
+- **Estado del propósito:** PENDING_REVIEW
+- **Dominio:** sin dato · **Diagrama:** `Mantra Core Health Context/modules/diagram_67_data_catalog.puml` · **DDL:** `SQL/67_data_catalog/02_tables.sql`
+- **Entidad del ORM:** `CatalogProcesses` — `src/modules/data_catalog/entities/catalog_processes.entity.ts`
+- **Resumen:** 12 columnas · 1 índices · 2 FK salientes · 1 entrantes · 3 operaciones
+
+#### Columnas
+
+| # | Columna | Tipo | Rol estructural | Descripción | ORM |
+|---|---|---|---|---|---|
+| 1 | `id` | `uuid` | Clave primaria; Obligatoria | _sin dato_ | coincide |
+| 2 | `process_code` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 3 | `kind` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 4 | `name` | `varchar` | Obligatoria | _sin dato_ | coincide |
+| 5 | `module_code` | `varchar` | Opcional | _sin dato_ | coincide |
+| 6 | `purpose` | `text` | Opcional | _sin dato_ | coincide |
+| 7 | `source_ref` | `text` | Opcional | _sin dato_ | coincide |
+| 8 | `created_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 9 | `updated_at` | `timestamptz` | Obligatoria | _sin dato_ | coincide |
+| 10 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 11 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 12 | `row_version` | `integer = 1` | Obligatoria | _sin dato_ | coincide |
+
+#### Relaciones
+
+| Sentido | Columnas | Tabla | Restricción |
+|---|---|---|---|
+| hacia | created_by_user_id | iam.users (id) | fk_catalog_processes_created_by_user_id |
+| hacia | updated_by_user_id | iam.users (id) | fk_catalog_processes_updated_by_user_id |
+| desde | id | data_catalog.catalog_process_steps (process_id) | fk_catalog_process_steps_process_id |
+
+#### Índices
+
+| Índice | Único | Columnas | Para qué |
+|---|---|---|---|
+| `ux_data_catalog_processes_code` | sí | process_code | Garantiza que no se repita la combinación (process_code) _(DOCUMENTO)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `ux_data_catalog_processes_code` | UNIQUE INDEX | UNIQUE INDEX ("process_code") |
+
+#### Operaciones que la tocan
+
+| Operación | Efecto | Confianza |
+|---|---|---|
+| POST /internal/catalog/inventory/import | CREA | POR_SQL |
+| POST /internal/catalog/inventory/import | ACTUALIZA | POR_SQL |
+| POST /internal/catalog/inventory/import | LEE | POR_SQL |
 
 #### Gobierno
 

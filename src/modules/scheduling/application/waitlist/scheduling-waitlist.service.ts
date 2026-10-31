@@ -2,9 +2,15 @@ import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
+  PreconditionFailedException,
   ResourceNotFoundException,
+  getCurrentTenantId,
   type AuthenticatedUser,
 } from '../../../../common';
+import {
+  BookingAccess,
+  SUPPORT_DENIED_MESSAGE,
+} from '../bookings/support/booking-access';
 import { SchedulingErrorReason } from '../../scheduling.error-reasons';
 import {
   persistenceSessionToken,
@@ -33,7 +39,11 @@ import {
   WorkerBatchResultDto,
   WaitlistCandidateSlotsResponseDto,
 } from '../../presentation/dto';
-import { AGENDA_OPERATOR_ROLES } from '../../domain/booking/agenda-actors';
+import {
+  SUPPORT_STAFF_ROLE,
+  isSupportActor,
+  operatesAnyAgenda,
+} from '../../domain/booking/agenda-actors';
 
 const DEFAULT_WORKER_BATCH = 100;
 const DEFAULT_PRIORITY = 0;
@@ -71,6 +81,9 @@ export class SchedulingWaitlistService {
     // acá sólo se consulta, igual que en el servicio de reservas.
     @Inject(PATIENT_REPRESENTATION_PORT)
     private readonly representation: PatientRepresentationPort,
+    // La persona de apoyo se apunta a una espera con su permiso
+    // `schedule.waitlist`; la decisión la toma la política de apoyo.
+    private readonly access: BookingAccess,
   ) {
     this.logger.setContext(SchedulingWaitlistService.name);
   }
@@ -88,20 +101,75 @@ export class SchedulingWaitlistService {
       'Enrolling patient in waitlist',
     );
 
-    // Anotarse en la lista de espera de otro no tenía ninguna comprobación: con
-    // el uuid de un perfil ajeno, cualquiera lo metía en la cola de una agenda y
-    // le disparaba avisos. Va antes de abrir la transacción.
-    await this.assertMaySeePatient(dto.patientProfileId, actor);
+    // Con `bookableSlotId` la espera es por UN horario: de él salen la agenda y,
+    // si no se declaran, la ventana deseada.
+    const slot = dto.bookableSlotId
+      ? await this.reader.findSlotPlacement(dto.bookableSlotId)
+      : null;
+    if (dto.bookableSlotId && !slot) {
+      throw new ResourceNotFoundException(
+        'Slot no encontrado',
+        { slotId: dto.bookableSlotId },
+        SchedulingErrorReason.SLOT_NOT_FOUND,
+      );
+    }
+    if (slot && dto.resourceId && dto.resourceId !== slot.resourceId) {
+      throw new PreconditionFailedException(
+        'El cupo indicado no es de la agenda indicada',
+        { slotId: slot.id },
+      );
+    }
+    const resourceId = slot?.resourceId ?? dto.resourceId;
+    // Solo quien trae el rol de apoyo necesita saber de quién es la agenda.
+    const mayBeSupport = actor.roles.includes(SUPPORT_STAFF_ROLE);
+    const owner =
+      mayBeSupport && resourceId
+        ? await this.reader.findResourceOwner(resourceId)
+        : null;
+
+    if (
+      mayBeSupport &&
+      isSupportActor(actor, owner?.tenantId ?? dto.tenantId)
+    ) {
+      // La persona de apoyo se apunta donde su permiso `schedule.waitlist` cubre
+      // el doctor, servicio y espacio DEL CUPO, y en la organización de la agenda:
+      // el `tenantId` del cuerpo tiene que ser el de la agenda.
+      if (owner && owner.tenantId !== dto.tenantId) {
+        throw new ForbiddenException(SUPPORT_DENIED_MESSAGE);
+      }
+      await this.access.assertSupportMayCreate(
+        owner ?? {
+          tenantId: dto.tenantId,
+          resourceRefType: '',
+          resourceRefId: '',
+        },
+        {
+          careSpaceId: slot?.careSpaceId,
+          healthcareServiceId: slot?.healthcareServiceId,
+        },
+        actor,
+        'schedule.waitlist',
+      );
+    } else {
+      // Anotarse en la lista de espera de otro no tenía ninguna comprobación: con
+      // el uuid de un perfil ajeno, cualquiera lo metía en la cola de una agenda y
+      // le disparaba avisos. Va antes de abrir la transacción.
+      await this.assertMaySeePatient(dto.patientProfileId, actor);
+    }
 
     const priority = dto.priority ?? DEFAULT_PRIORITY;
+    const desiredFrom = dto.desiredFrom
+      ? new Date(dto.desiredFrom)
+      : slot?.startAt;
+    const desiredTo = dto.desiredTo ? new Date(dto.desiredTo) : slot?.endAt;
     return this.session.transaction('enroll', async (_em, transaction) => {
       const { id } = await this.writer.enroll(
         {
           tenantId: dto.tenantId,
           patientProfileId: dto.patientProfileId,
-          resourceId: dto.resourceId,
-          desiredFrom: dto.desiredFrom ? new Date(dto.desiredFrom) : undefined,
-          desiredTo: dto.desiredTo ? new Date(dto.desiredTo) : undefined,
+          resourceId,
+          desiredFrom,
+          desiredTo,
           priority,
           statusConceptId: CONCEPTS.WAITLIST_ACTIVE,
           actorUserId: actor.id,
@@ -226,8 +294,9 @@ export class SchedulingWaitlistService {
     patientProfileId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return;
+    // SEG V-1/A-A1: el oficio de agenda se lee en la organización activa; un
+    // rol de mostrador de OTRA organización no exime de ser titular o tutor.
+    if (operatesAnyAgenda(actor, getCurrentTenantId())) return;
     if (actor.patientProfileId === patientProfileId) return;
     // Quien lo representa (B.1): la madre que anota a su hijo en la cola tiene
     // que poder verla. Se pregunta al final y sólo si hizo falta, para no pagar
@@ -252,8 +321,7 @@ export class SchedulingWaitlistService {
     resourceId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return;
+    if (operatesAnyAgenda(actor, getCurrentTenantId())) return;
 
     const practitioner = await this.reader.findResourcePractitioner(resourceId);
     if (

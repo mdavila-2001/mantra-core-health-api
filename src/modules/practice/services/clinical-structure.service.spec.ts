@@ -210,6 +210,72 @@ describe('ClinicalStructureService', () => {
     });
   });
 
+  describe('moveCareSpace', () => {
+    const spaces = () => [
+      { id: 'a', practiceSiteId: 's1', code: 'A', parentSpaceId: undefined },
+      { id: 'b', practiceSiteId: 's1', code: 'B', parentSpaceId: 'a' },
+      { id: 'c', practiceSiteId: 's1', code: 'C', parentSpaceId: 'b' },
+      { id: 'e', practiceSiteId: 's1', code: 'E', parentSpaceId: undefined },
+    ];
+
+    it('recalcula la ruta del espacio y sus descendientes y refresca el acceso del apoyo', async () => {
+      const d = build();
+      const refreshTenant = mockFn().mockResolvedValue(undefined);
+      (d.raw as any).supportAccess = { refreshTenant };
+      d.sitesRepo.findById.mockResolvedValue(activeSite);
+      const rows = spaces();
+      d.spacesRepo.findBySite.mockResolvedValue(rows);
+      await d.service.moveCareSpace('s1', 'b', { parentSpaceId: 'e' }, actor);
+      const byId = Object.fromEntries(rows.map((r: any) => [r.id, r]));
+      expect(byId.b.parentSpaceId).toBe('e');
+      expect(byId.b.locationPath).toBe('/s1/e/b/');
+      expect(byId.c.locationPath).toBe('/s1/e/b/c/');
+      expect(byId.a.locationPath).toBeUndefined();
+      expect(refreshTenant).toHaveBeenCalledWith(TENANT_A, { tx: d.tx });
+    });
+
+    it('B5: si el recálculo del acceso falla, el error se propaga y el cambio no se confirma', async () => {
+      const d = build();
+      (d.raw as any).supportAccess = {
+        refreshTenant: mockFn().mockRejectedValue(new Error('refresh falló')),
+      };
+      d.sitesRepo.findById.mockResolvedValue(activeSite);
+      d.spacesRepo.findBySite.mockResolvedValue(spaces());
+      await expect(
+        d.service.moveCareSpace('s1', 'b', { parentSpaceId: 'e' }, actor),
+      ).rejects.toThrow('refresh falló');
+    });
+
+    it('sin padre deja el espacio en la raíz de la sede', async () => {
+      const d = build();
+      d.sitesRepo.findById.mockResolvedValue(activeSite);
+      const rows = spaces();
+      d.spacesRepo.findBySite.mockResolvedValue(rows);
+      await d.service.moveCareSpace('s1', 'b', { parentSpaceId: null }, actor);
+      expect((rows[1] as any).parentSpaceId).toBeUndefined();
+      expect((rows[1] as any).locationPath).toBe('/s1/b/');
+    });
+
+    it('rechaza un ciclo y no escribe nada', async () => {
+      const d = build();
+      d.sitesRepo.findById.mockResolvedValue(activeSite);
+      d.spacesRepo.findBySite.mockResolvedValue(spaces());
+      await expect(
+        d.service.moveCareSpace('s1', 'a', { parentSpaceId: 'c' }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('rechaza un espacio de otra sede', async () => {
+      const d = build();
+      d.sitesRepo.findById.mockResolvedValue(activeSite);
+      d.spacesRepo.findBySite.mockResolvedValue(spaces());
+      await expect(
+        d.service.moveCareSpace('s1', 'zz', { parentSpaceId: null }, actor),
+      ).rejects.toBeInstanceOf(PreconditionFailedException);
+    });
+  });
+
   describe('publishHealthcareService (UC-14-06, A-6, A-13)', () => {
     const PROCEDURE = 'proc-endoscopia';
     const dto = (overrides: Record<string, unknown> = {}): any => ({

@@ -71,6 +71,13 @@ export class TenantMemberships {
   invitedByUserId?: string;
 
   /**
+   * Por qué existe la membresía (`DIR.MEMBERSHIP_ORIGIN_*`). `NULL` en las filas
+   * anteriores a v4.2.71 y se trata como desconocido.
+   */
+  @Property({ fieldName: 'origin_concept_id', type: 'uuid', nullable: true }) // FK → terminology.catalog_concepts
+  originConceptId?: string;
+
+  /**
    * Fecha y hora en que se creó el registro.
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })

@@ -73,6 +73,7 @@ import {
   ATTACHABLE_FILES_PORT,
   type AttachableFilesPort,
 } from '../ports/attachable-files.port';
+import { isNationalIdUniqueViolation } from '../../domain/national-id';
 import { composeAccountDisplayName } from '../../domain/person-name';
 import { applyOccupation, applyCompany } from '../../domain/person-work-fields';
 import { ProfileOwnershipService } from './profile-ownership.service';
@@ -1572,9 +1573,10 @@ export class ProfilesPractitionersService {
    * declaró— y se abre otra con el número corregido, el departamento del mismo
    * cuerpo (o el que tenía) y el mismo uso. Mismo patrón que el NIT.
    *
-   * No se comprueba que el número esté libre, igual que en el alta del
-   * profesional: la misma cédula de dos departamentos distintos son dos
-   * documentos, y por valor solo no se distinguen.
+   * No se comprueba antes que el número esté libre: lo garantiza el índice
+   * único del modelo (`uq_identifiers_national_id_normalized`), que compara en la
+   * forma canónica solo el documento activo de paciente sin cierre. Si otro
+   * paciente ya lo tiene, el choque (`23505`) se contesta 409 sin decir de quién.
    *
    * @returns `true` si abrió una fila nueva (el departamento ya viajó en ella).
    */
@@ -1616,6 +1618,13 @@ export class ProfilesPractitionersService {
     if (document) {
       document.validTo = now;
       touch(document, actorUserId);
+      // El cierre se vuelca ANTES de insertar la fila nueva: el índice único
+      // del modelo (`uq_identifiers_national_id_normalized`) solo mira las filas
+      // sin cierre y compara en la forma canónica, así que «1.234.567» →
+      // «1234567» es el mismo documento. El ORM ordena los INSERT antes de los
+      // UPDATE de un mismo flush y, sin este volcado, la fila nueva chocaría con
+      // la vieja todavía abierta (23505).
+      await tx.flush();
     }
     this.personRecords.createIdentifier(tx, {
       ownerTypeConceptId: CONCEPTS.OWNER_PATIENT,
@@ -1629,6 +1638,18 @@ export class ProfilesPractitionersService {
         document?.issuerAdministrativeAreaConceptId,
       actorUserId,
     });
+    try {
+      await tx.flush();
+    } catch (error) {
+      // El documento ya es de otro paciente: mismo 409 opaco que el alta, sin
+      // decir de quién.
+      if (isNationalIdUniqueViolation(error)) {
+        throw new ConflictException(
+          'Ese documento ya está registrado en la plataforma',
+        );
+      }
+      throw error;
+    }
     return true;
   }
 

@@ -138,6 +138,7 @@ x-app-env: &app-env
   MONGO_DB: ${MONGO_DB:-alovida_document_store}
   REDIS_HOST: redis
   REDIS_PORT: "6379"
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-}
   OPENSEARCH_NODE: http://opensearch:9200
   MINIO_ENDPOINT: minio
   MINIO_PORT: "9000"
@@ -187,6 +188,9 @@ x-app-env: &app-env
   # qué. Es un número y no `true` a propósito: confiar en toda la cadena deja
   # que cualquiera falsifique su IP con una cabecera `X-Forwarded-For`.
   TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-2}
+  # SEG A-B8: en producción, con reglas de red activas y 0 saltos la API no arranca
+  # (ver `docker-compose.yml`). Aquí hay dos proxies, así que no debe ser `true`.
+  TRUST_PROXY_HOPS_ALLOW_ZERO: ${TRUST_PROXY_HOPS_ALLOW_ZERO:-false}
 
   # Orígenes del frontend si vive en otro dominio (Hostinger). Vacío = CORS
   # denegado, que es lo correcto con el nginx del frontend delante.
@@ -513,11 +517,21 @@ services:
     # `--save 60 1` conserva el snapshot: Redis guarda el estado del limitador
     # de tasa y de las colas, y perderlo en cada reinicio del contenedor no es
     # gratis.
-    command: redis-server --save 60 1 --loglevel notice
+    # Contraseña OPCIONAL (`REDIS_PASSWORD`): este Redis solo está en la red
+    # interna, pero el canal de invalidación de reglas y el sello del paso extra
+    # viven aquí; con la contraseña quien llegue a la red tampoco los toca.
+    command:
+      - sh
+      - -c
+      - exec redis-server --save 60 1 --loglevel notice ${REDIS_PASSWORD:+--requirepass "$$REDIS_PASSWORD"}
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        - CMD-SHELL
+        - 'if [ -n "$$REDIS_PASSWORD" ]; then redis-cli --no-auth-warning -a "$$REDIS_PASSWORD" ping; else redis-cli ping; fi'
       interval: 10s
       timeout: 5s
       retries: 5

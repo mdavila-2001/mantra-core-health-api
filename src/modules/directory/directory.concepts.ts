@@ -53,6 +53,15 @@ export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
       code: 'DIR_MEMBERSHIP_INVITED',
       display: 'Membership invited',
     },
+    // Membresía que un administrador creó para una persona y que esta todavía no
+    // aceptó. Es distinta de `MEMBERSHIP_INVITED`, que el personal de apoyo usa
+    // para lo contrario (la persona pidió entrar y la organización aún no
+    // aprueba): con un solo estado, la persona podría «aceptar» una membresía
+    // que la organización todavía tiene que aprobar.
+    MEMBERSHIP_PENDING_ACCEPTANCE: {
+      code: 'DIR_MEMBERSHIP_PENDING_ACCEPTANCE',
+      display: 'Membership pending acceptance by the person',
+    },
     MEMBERSHIP_ACTIVE: {
       code: 'DIR_MEMBERSHIP_ACTIVE',
       display: 'Membership active',
@@ -64,6 +73,88 @@ export const { seeds: DIRECTORY_CONCEPT_SEEDS, ids: DIR } =
     MEMBERSHIP_SUSPENDED: {
       code: 'DIR_MEMBERSHIP_SUSPENDED',
       display: 'Membership suspended',
+    },
+
+    // --- Origen de la membresía (tenant_memberships.origin_concept_id) ---
+    // Por qué existe la fila. El modelo no la deduce: la escribe quien la crea
+    // y solo la API la cambia después. Las filas anteriores a v4.2.71 quedan en
+    // NULL, que se trata igual que `MEMBERSHIP_ORIGIN_UNKNOWN`. Los ids los fija
+    // el modelo (CONCEPTOS.md, «Cambios v4.2.71»): la clave completa
+    // `directory:<NOMBRE>` es la que se guarda como código.
+    /** La creó el dueño de la organización (alta de la organización). */
+    MEMBERSHIP_ORIGIN_OWNER_CREATED: {
+      code: 'DIR_MEMBERSHIP_ORIGIN_OWNER_CREATED',
+      display: 'Membership origin: created by the organization owner',
+    },
+    /** La añadió un administrador de la organización. */
+    MEMBERSHIP_ORIGIN_ADMIN_ADDED: {
+      code: 'DIR_MEMBERSHIP_ORIGIN_ADMIN_ADDED',
+      display: 'Membership origin: added by an organization administrator',
+    },
+    /** La persona canjeó una invitación o un QR (de doctor). */
+    MEMBERSHIP_ORIGIN_INVITATION_REDEEMED: {
+      code: 'DIR_MEMBERSHIP_ORIGIN_INVITATION_REDEEMED',
+      display: 'Membership origin: invitation redeemed',
+    },
+    /**
+     * Existe solo porque la persona tiene un vínculo de apoyo: la abrió el flujo
+     * de apoyo (solicitud aprobada, invitación o QR de apoyo). Es la única
+     * membresía que el fin del último vínculo cierra.
+     */
+    MEMBERSHIP_ORIGIN_SUPPORT_ENGAGEMENT: {
+      code: 'DIR_MEMBERSHIP_ORIGIN_SUPPORT_ENGAGEMENT',
+      display: 'Membership origin: exists only through a support engagement',
+    },
+    /** Desconocido, declarado así de forma explícita. */
+    MEMBERSHIP_ORIGIN_UNKNOWN: {
+      code: 'DIR_MEMBERSHIP_ORIGIN_UNKNOWN',
+      display: 'Membership origin: unknown',
+    },
+
+    // --- Invitaciones de afiliación (código o QR) ---
+    AFFILIATION_INVITE_KIND_PRACTITIONER: {
+      code: 'AFFILIATION_INVITE_KIND_PRACTITIONER',
+      display: 'Affiliation invitation for a practitioner',
+    },
+    AFFILIATION_INVITE_KIND_SUPPORT_STAFF: {
+      code: 'AFFILIATION_INVITE_KIND_SUPPORT_STAFF',
+      display: 'Affiliation invitation for support staff',
+    },
+    AFFILIATION_INVITE_ACTIVE: {
+      code: 'AFFILIATION_INVITE_ACTIVE',
+      display: 'Affiliation invitation active',
+    },
+    AFFILIATION_INVITE_REVOKED: {
+      code: 'AFFILIATION_INVITE_REVOKED',
+      display: 'Affiliation invitation revoked',
+    },
+    AFFILIATION_INVITE_EXPIRED: {
+      code: 'AFFILIATION_INVITE_EXPIRED',
+      display: 'Affiliation invitation expired',
+    },
+    AFFILIATION_INVITE_EXHAUSTED: {
+      code: 'AFFILIATION_INVITE_EXHAUSTED',
+      display: 'Affiliation invitation exhausted',
+    },
+    AFFILIATION_USE_ACCEPTED: {
+      code: 'AFFILIATION_USE_ACCEPTED',
+      display: 'Invitation use accepted',
+    },
+    AFFILIATION_USE_REJECTED_EXPIRED: {
+      code: 'AFFILIATION_USE_REJECTED_EXPIRED',
+      display: 'Invitation use rejected: expired',
+    },
+    AFFILIATION_USE_REJECTED_EXHAUSTED: {
+      code: 'AFFILIATION_USE_REJECTED_EXHAUSTED',
+      display: 'Invitation use rejected: exhausted',
+    },
+    AFFILIATION_USE_REJECTED_REVOKED: {
+      code: 'AFFILIATION_USE_REJECTED_REVOKED',
+      display: 'Invitation use rejected: revoked',
+    },
+    AFFILIATION_USE_ALREADY_MEMBER: {
+      code: 'AFFILIATION_USE_ALREADY_MEMBER',
+      display: 'Invitation use rejected: already a member',
     },
 
     // --- Roles de tenant (tenant_memberships.tenant_role_concept_id) ---

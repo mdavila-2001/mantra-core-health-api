@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  clinicalKeywordsFromEnv,
+  looksClinical,
+} from '../../delegated_access/domain';
+import { ForbiddenException, Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -24,6 +28,17 @@ import { CommunityMessagingGateway } from '../gateways/community-messaging.gatew
 // Directo y no por el barrel, por el mismo ciclo que el gateway.
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityChatAutoReplyService } from './community-chat-auto-reply.service';
+// Directos y no por el barrel, por el mismo ciclo que el gateway.
+import { CommunitySupportReplyService } from './community-support-reply.service';
+import {
+  CommunitySupportReplyEmailService,
+  type SupportReplyEmailResult,
+} from './community-support-reply-email.service';
+import {
+  SupportAccessPolicy,
+  type SupportReplyDecision,
+} from '../../delegated_access/services/support-access.policy';
+import { supportDecisionToException } from '../../delegated_access/services/support-decision-http';
 import { COMM } from '../community.concepts';
 import { CommunityErrorReason } from '../community.error-reasons';
 import {
@@ -72,6 +87,9 @@ export class CommunityMessagingService {
    * @param autoReply - La respuesta automática por inactividad (F4.7).
    * @param visibility - Que el perfil con el que se escribe sea del actor.
    * @param logger - Valor de logger requerido por la operación.
+   * @param supportPolicy - Política del personal de apoyo, para responder en nombre de un doctor.
+   * @param supportReply - Reglas de la bandeja al escribir (dueña, derivación clínica, reapertura).
+   * @param supportEmail - Canal de correo para responder en nombre del doctor.
    */
   constructor(
     private readonly em: EntityManager,
@@ -84,6 +102,12 @@ export class CommunityMessagingService {
     private readonly visibility: CommunityVisibilityService,
     private readonly attachableFiles: AttachableFileService,
     private readonly logger: PinoLogger,
+    @Optional() private readonly supportPolicy?: SupportAccessPolicy,
+    // Reglas de responder en nombre del doctor y de reabrir la bandeja. Sin él,
+    // «en nombre de» no se concede: falla cerrado, como sin política.
+    @Optional() private readonly supportReply?: CommunitySupportReplyService,
+    @Optional()
+    private readonly supportEmail?: CommunitySupportReplyEmailService,
   ) {
     this.logger.setContext(CommunityMessagingService.name);
   }
@@ -134,17 +158,27 @@ export class CommunityMessagingService {
     if (!roleAuthorizesInTenant(actor, 'SYSTEM', undefined)) {
       throw new ForbiddenException('Canal reservado al sistema');
     }
-    return this.createDirectConversation(dto, actor, false);
+    // Es un aviso transaccional de la plataforma: lo autoriza la operación que
+    // lo origina (por ejemplo, aceptar una cita), no la titularidad del perfil
+    // del profesional. El actor real queda en la fila del mensaje.
+    return this.createDirectConversation(dto, actor, false, true);
   }
 
   private async createDirectConversation(
     dto: CreateConversationDto,
     actor: AuthenticatedUser,
     requirePublicRecipient: boolean,
+    trustedSystemChannel = false,
   ): Promise<IdResponseDto> {
     const result = await this.em.transactional(async (tx) => {
       const [initiatorProfileId] = dto.participantProfileIds;
-      await this.visibility.assertActsAsProfile(tx, initiatorProfileId, actor);
+      if (!trustedSystemChannel) {
+        await this.visibility.assertActsAsProfile(
+          tx,
+          initiatorProfileId,
+          actor,
+        );
+      }
 
       const participantIds = new Set(dto.participantProfileIds);
       if (participantIds.size !== dto.participantProfileIds.length) {
@@ -239,6 +273,25 @@ export class CommunityMessagingService {
   }
 
   /**
+   * Mensaje transaccional de la agenda (confirmación de cita) con el perfil del
+   * profesional como remitente. No lo autoriza la titularidad del perfil sino la
+   * operación de agenda que lo origina —ya autorizada por quien la hizo—; la
+   * autora real queda en `authored_by_user_id` y, si no es el propio profesional,
+   * el mensaje queda `on_behalf_of_profile_id` suyo. Nunca lleva adjuntos.
+   *
+   * @param conversationId - Hilo profesional ↔ paciente.
+   * @param dto - Remitente (perfil del profesional) y texto.
+   * @param actor - Quien ejecutó la operación de agenda.
+   */
+  async sendAgendaMessage(
+    conversationId: string,
+    dto: SendMessageDto,
+    actor: AuthenticatedUser,
+  ): Promise<MessageResponseDto> {
+    return this.send(conversationId, dto, actor.id, true, undefined, actor);
+  }
+
+  /**
    * El envío de verdad.
    *
    * Separado de `sendMessage` por dos cosas que la API pública no tiene por qué
@@ -259,17 +312,25 @@ export class CommunityMessagingService {
     actorUserId: string | undefined,
     evaluateAutomaticResponse: boolean,
     authorizingActor?: AuthenticatedUser,
+    agendaActor?: AuthenticatedUser,
   ): Promise<MessageResponseDto> {
     this.logger.info(
       { operation: 'community.message.send', conversationId },
       'Sending direct message',
     );
     const sent = await this.em.transactional(async (tx) => {
-      if (authorizingActor) {
-        await this.visibility.assertActsAsProfile(
-          tx,
-          dto.senderProfileId,
-          authorizingActor,
+      const { provenance, supportReply } = await this.resolveProvenance(
+        tx,
+        dto,
+        actorUserId,
+        authorizingActor,
+        agendaActor,
+      );
+      if (dto.channels?.includes('EMAIL') && !supportReply) {
+        throw new PreconditionFailedException(
+          'El correo solo sirve para responder en nombre del doctor',
+          { conversationId },
+          CommunityErrorReason.EMAIL_CHANNEL_REQUIRES_ON_BEHALF,
         );
       }
       const conversation = await this.conversationsRepo.findConversationById(
@@ -326,6 +387,34 @@ export class CommunityMessagingService {
         }
       }
 
+      // Responder en nombre del doctor: si otra persona tiene la conversación,
+      // 409; si hay un mensaje clínico del paciente sin derivar, 422; y la
+      // persona de apoyo solo contesta lo administrativo.
+      if (supportReply && authorizingActor) {
+        if (!this.supportReply) {
+          throw new ForbiddenException(
+            'No puede responder en nombre de este profesional',
+          );
+        }
+        await this.supportReply.guardReply(tx, {
+          conversationId,
+          doctorPublicProfileId: dto.senderProfileId,
+          practitionerProfileId: supportReply.practitionerProfileId,
+          tenantId: supportReply.tenantId,
+          actorUserId: authorizingActor.id,
+        });
+        if (
+          looksClinical(dto.bodyText, clinicalKeywordsFromEnv(process.env))
+            .clinical
+        ) {
+          throw new PreconditionFailedException(
+            'Un mensaje con contenido clínico lo responde el doctor: derívelo',
+            { conversationId },
+            CommunityErrorReason.SUPPORT_CLINICAL_CONTENT,
+          );
+        }
+      }
+
       // FT-32-R12 · sin actor que lo autorice, no se adjunta. Falla cerrado.
       //
       // La condición natural era `if (attachmentFileId && authorizingActor)`, y
@@ -378,12 +467,33 @@ export class CommunityMessagingService {
         statusConceptId: COMM.MESSAGE_SENT,
         sentAt: now,
         actorUserId: actorUserId,
+        ...provenance,
       });
 
       conversation.messageCount = (conversation.messageCount ?? 0) + 1;
       conversation.lastMessageAt = now;
       touch(conversation, actorUserId);
       await tx.flush();
+
+      // La bandeja del equipo: quien responde se hace cargo; si escribe el
+      // paciente, una conversación resuelta se reabre sola.
+      if (this.supportReply) {
+        if (supportReply && authorizingActor) {
+          await this.supportReply.recordReply(tx, {
+            conversationId,
+            doctorPublicProfileId: dto.senderProfileId,
+            practitionerProfileId: supportReply.practitionerProfileId,
+            tenantId: supportReply.tenantId,
+            actorUserId: authorizingActor.id,
+          });
+        } else if (!provenance.onBehalfOfProfileId) {
+          await this.supportReply.reopenIfResolved(
+            tx,
+            conversationId,
+            dto.senderProfileId,
+          );
+        }
+      }
 
       // Recibos de entregado para el resto de participantes (append-only).
       for (const p of participants) {
@@ -411,39 +521,74 @@ export class CommunityMessagingService {
         destinatarios: participants
           .map((p) => p.participantProfileId)
           .filter((profileId) => profileId !== dto.senderProfileId),
+        supportReply,
+        disclosureShown: provenance.disclosureShown,
+        delegateAssignmentId: provenance.delegateAssignmentId,
       };
     });
+
+    // Por el chat salvo que se haya pedido solo el correo.
+    const viaChat = !dto.channels || dto.channels.includes('CHAT');
 
     // Carril P2 → P1 · «tenés un mensaje nuevo».
     //
     // Después del commit y no dentro: el mensaje ya está guardado cuando esto
     // corre, así que ningún problema de la campana puede hacerlo desaparecer.
     // `mensajeNuevo` no lanza.
-    await this.messageNotifications.newMessage(
-      conversationId,
-      dto.senderProfileId,
-      sent.destinatarios,
-      actorUserId,
-    );
+    if (viaChat) {
+      await this.messageNotifications.newMessage(
+        conversationId,
+        dto.senderProfileId,
+        sent.destinatarios,
+        actorUserId,
+      );
 
-    // Empuje en vivo por WS — mismo criterio que la notificación: después del
-    // commit, y `emitMessage` no lanza. Se arma el payload explícito (sin
-    // `destinatarios`, que es un detalle interno de este método) para no
-    // filtrar por WS un campo que el contrato REST tampoco expone.
-    this.gateway.emitMessage(
-      {
-        id: sent.id,
-        conversationId: sent.conversationId,
-        senderProfileId: sent.senderProfileId,
-        replyToMessageId: sent.replyToMessageId,
-        contentTypeConceptId: sent.contentTypeConceptId,
-        bodyText: sent.bodyText,
-        attachmentFileId: sent.attachmentFileId,
-        isEdited: sent.isEdited,
-        sentAt: sent.sentAt,
-      },
-      sent.destinatarios,
-    );
+      // Empuje en vivo por WS — mismo criterio que la notificación: después del
+      // commit, y `emitMessage` no lanza. Se arma el payload explícito (sin
+      // `destinatarios`, que es un detalle interno de este método) para no
+      // filtrar por WS un campo que el contrato REST tampoco expone. Tampoco
+      // lleva autora real, delegación ni leyenda: eso es solo del equipo.
+      this.gateway.emitMessage(
+        {
+          id: sent.id,
+          conversationId: sent.conversationId,
+          senderProfileId: sent.senderProfileId,
+          replyToMessageId: sent.replyToMessageId,
+          contentTypeConceptId: sent.contentTypeConceptId,
+          bodyText: sent.bodyText,
+          attachmentFileId: sent.attachmentFileId,
+          isEdited: sent.isEdited,
+          sentAt: sent.sentAt,
+        },
+        sent.destinatarios,
+      );
+    }
+
+    // Canal de correo: la misma respuesta, con el doctor como remitente visible.
+    // Después del commit y sin lanzar: el mensaje ya está en la conversación.
+    let email: SupportReplyEmailResult | undefined;
+    if (
+      dto.channels?.includes('EMAIL') &&
+      sent.supportReply &&
+      authorizingActor
+    ) {
+      email = this.supportEmail
+        ? await this.supportEmail.enqueue({
+            messageId: sent.id,
+            conversationId,
+            tenantId: sent.supportReply.tenantId,
+            doctorPublicProfileId: dto.senderProfileId,
+            doctorName: sent.supportReply.doctorName,
+            authoredByUserId: authorizingActor.id,
+            delegateAssignmentId: sent.delegateAssignmentId,
+            bodyText: dto.bodyText ?? '',
+            disclosureShown: sent.disclosureShown ?? true,
+          })
+        : {
+            queued: false,
+            skippedReason: 'El canal de correo no está disponible',
+          };
+    }
 
     // F4.7 · La respuesta automática de quien recibió, si corresponde.
     //
@@ -463,7 +608,164 @@ export class CommunityMessagingService {
       id: sent.id,
       conversationId: sent.conversationId,
       sentAt: sent.sentAt,
+      ...(email ? { email } : {}),
     };
+  }
+
+  /**
+   * De quién es el mensaje y en nombre de quién sale.
+   *
+   * - Escribe como sí misma: se exige titularidad del perfil, como siempre.
+   * - Responde una persona de apoyo (`onBehalfOfProfileId`): la política decide
+   *   —vínculo vigente, aceptación del doctor, permiso `messages.reply_on_behalf`
+   *   y que el doctor le haya permitido responder—; el paciente ve al doctor y la
+   *   fila guarda a la autora real, la delegación y si se muestra «respondido por
+   *   su equipo».
+   * - Aviso de agenda: lo autoriza la operación de agenda; si quien la hizo no es
+   *   el profesional, queda `on_behalf_of_profile_id` suyo.
+   */
+  private async resolveProvenance(
+    tx: EntityManager,
+    dto: Pick<
+      SendMessageDto,
+      'senderProfileId' | 'onBehalfOfProfileId' | 'channels'
+    >,
+    actorUserId: string | undefined,
+    authorizingActor: AuthenticatedUser | undefined,
+    agendaActor: AuthenticatedUser | undefined,
+  ): Promise<{
+    provenance: {
+      authoredByUserId?: string;
+      onBehalfOfProfileId?: string;
+      delegateAssignmentId?: string;
+      disclosureShown?: boolean;
+    };
+    /** Solo si responde una persona de apoyo: el doctor y la organización en cuyo nombre sale. */
+    supportReply?: {
+      practitionerProfileId: string;
+      tenantId: string;
+      doctorName: string;
+    };
+  }> {
+    if (authorizingActor) {
+      if (
+        !dto.onBehalfOfProfileId ||
+        (await this.visibility.actsAsProfile(
+          tx,
+          dto.senderProfileId,
+          authorizingActor,
+        ))
+      ) {
+        await this.visibility.assertActsAsProfile(
+          tx,
+          dto.senderProfileId,
+          authorizingActor,
+        );
+        return { provenance: { authoredByUserId: actorUserId } };
+      }
+      if (dto.onBehalfOfProfileId !== dto.senderProfileId) {
+        throw new PreconditionFailedException(
+          'Se responde en nombre del profesional con su propio perfil como remitente',
+          { senderProfileId: dto.senderProfileId },
+        );
+      }
+      const profile = await this.profilesRepo.findById(
+        tx,
+        dto.onBehalfOfProfileId,
+      );
+      const verdict = await this.askReply(
+        profile,
+        authorizingActor.id,
+        dto,
+        tx,
+      );
+      if (!profile || !verdict?.allowed) {
+        // Un desafío (motivo, paso extra, aprobación) se traduce a su 422/403
+        // estable; todo lo demás es el rechazo de siempre.
+        throw (
+          (verdict &&
+            verdict.effect === 'CHALLENGE' &&
+            supportDecisionToException(
+              verdict,
+              'No puede responder en nombre de este profesional',
+            )) ||
+          new ForbiddenException(
+            'No puede responder en nombre de este profesional',
+          )
+        );
+      }
+      return {
+        provenance: {
+          authoredByUserId: authorizingActor.id,
+          // La columna apunta al perfil PROFESIONAL del doctor, no a su perfil público.
+          onBehalfOfProfileId: profile.targetId,
+          delegateAssignmentId: verdict.delegateAssignmentId,
+          disclosureShown: verdict.disclosureShown ?? true,
+        },
+        supportReply: {
+          practitionerProfileId: profile.targetId,
+          tenantId: profile.tenantId,
+          doctorName: profile.displayName,
+        },
+      };
+    }
+    if (agendaActor) {
+      const isOwn = await this.visibility.actsAsProfile(
+        tx,
+        dto.senderProfileId,
+        agendaActor,
+      );
+      if (isOwn) return { provenance: { authoredByUserId: agendaActor.id } };
+      // Lo manda quien opera la agenda en nombre del doctor: si es persona de
+      // apoyo se respeta lo que el doctor eligió (mostrar u ocultar «respondido
+      // por su equipo»); quien no tiene delegación con él no lo rotula.
+      const profile = await this.profilesRepo.findById(tx, dto.senderProfileId);
+      const disclosure =
+        profile && this.supportPolicy?.replyDisclosureOf
+          ? await this.supportPolicy.replyDisclosureOf(
+              agendaActor.id,
+              profile.targetId,
+              tx,
+              profile.tenantId,
+            )
+          : false;
+      return {
+        provenance: {
+          authoredByUserId: agendaActor.id,
+          // La columna apunta al perfil PROFESIONAL del doctor, no a su perfil público.
+          onBehalfOfProfileId: profile?.targetId,
+          disclosureShown: disclosure,
+        },
+      };
+    }
+    return { provenance: { authoredByUserId: actorUserId } };
+  }
+
+  /**
+   * Pregunta a la política si la persona puede responder en nombre del doctor.
+   * Con la política de gobierno (`canReplyOnBehalfActing`) es la respuesta REAL:
+   * cuenta contra los topes, pide motivo o aprobación si el permiso los exige y
+   * queda en la bitácora; los canales salen del cuerpo (sin declarar: solo chat).
+   * Solo se consulta la organización del perfil con el que se escribe: un vínculo
+   * con otra organización del mismo doctor no abre esta conversación.
+   */
+  private async askReply(
+    profile: { targetId: string; tenantId: string } | null | undefined,
+    userId: string,
+    dto: Pick<SendMessageDto, 'channels'>,
+    tx: EntityManager,
+  ): Promise<SupportReplyDecision | undefined> {
+    const policy = this.supportPolicy;
+    if (!profile || !policy) return undefined;
+    return typeof policy.canReplyOnBehalfActing === 'function'
+      ? policy.canReplyOnBehalfActing(
+          userId,
+          profile.targetId,
+          tx,
+          profile.tenantId,
+          { channels: dto.channels ?? ['CHAT'] },
+        )
+      : policy.canReplyOnBehalf(userId, profile.targetId, tx, profile.tenantId);
   }
 
   /** Autoriza archivo propio o reenvío desde un contexto ya visible. */

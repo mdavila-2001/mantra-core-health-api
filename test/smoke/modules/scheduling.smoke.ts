@@ -395,7 +395,10 @@ export const SCHEDULING_SMOKE: SmokeCase[] = [
     name: 'límite: cupo destino inexistente',
     method: 'post',
     path: (c) => `/scheduling/bookings/${c.vars.schedBookingId}/reschedule`,
-    body: () => ({ toSlotId: UUID_ABSENT }),
+    body: () => ({
+      toSlotId: UUID_ABSENT,
+      reasonText: 'El paciente pidió otro horario',
+    }),
     expectedStatus: 404,
   },
 
@@ -431,7 +434,10 @@ export const SCHEDULING_SMOKE: SmokeCase[] = [
     name: 'límite: reprogramar una cita cancelada',
     method: 'post',
     path: (c) => `/scheduling/bookings/${c.vars.schedBookingId}/reschedule`,
-    body: (c) => ({ toSlotId: c.vars.schedSlotId }),
+    body: (c) => ({
+      toSlotId: c.vars.schedSlotId,
+      reasonText: 'El paciente pidió otro horario',
+    }),
     expectedStatus: 422,
     expectedCode: 'PRECONDITION_FAILED',
   },

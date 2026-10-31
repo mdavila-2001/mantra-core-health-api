@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `practice`
 
-Referencia exhaustiva de 37 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 38 operación(es) del módulo `practice`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `practice`
 - **Controladores:** `AccreditationsController`, `InventoryItemsController`, `OrganizationPracticesController`, `PracticeInvitationsController`, `PracticesController`, `PractitionerInvitationsController`, `PractitionerSitesController`, `RoleAssignmentsController`, `SitesController`
@@ -46,8 +46,9 @@ Referencia exhaustiva de 37 operación(es) del módulo `practice`, derivada del 
 33. [POST /role-assignments/{roleId}/suspend](#33-post-role-assignments-roleid-suspend) — Suspender una vinculación activa
 34. [GET /sites/{siteId}/care-spaces](#34-get-sites-siteid-care-spaces) — Listar los espacios de atención de la sede
 35. [POST /sites/{siteId}/care-spaces](#35-post-sites-siteid-care-spaces) — Crear un espacio de atención bajo una unidad/sitio
-36. [POST /sites/{siteId}/clinical-units](#36-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
-37. [POST /tenants/{tenantId}/practices](#37-post-tenants-tenantid-practices) — Crear la práctica y la primera sede de una organización
+36. [PATCH /sites/{siteId}/care-spaces/{id}](#36-patch-sites-siteid-care-spaces-id) — Mover un espacio de atención bajo otro padre de la sede
+37. [POST /sites/{siteId}/clinical-units](#37-post-sites-siteid-clinical-units) — Crear una unidad clínica jerárquica
+38. [POST /tenants/{tenantId}/practices](#38-post-tenants-tenantid-practices) — Crear la práctica y la primera sede de una organización
 
 ---
 
@@ -3001,7 +3002,7 @@ Authorization: Bearer <access_token_jwt>
 
 | HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
 |---:|---|---|---|
-| 200 | Operación completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
+| 200 | Operación completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | Sí |
 | 400 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
 | 401 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
 | 403 | Consulta completada correctamente. | `Promise<MyRoleAssignmentResponseDto[]>` | No |
@@ -3014,16 +3015,28 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 ```json
 [
   {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "practitionerProfileId": "00000000-0000-4000-8000-000000000001",
+    "practitionerName": "Nombre de ejemplo",
+    "practiceId": "00000000-0000-4000-8000-000000000001",
+    "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+    "healthcareServiceId": "00000000-0000-4000-8000-000000000001",
+    "serviceConceptId": "00000000-0000-4000-8000-000000000001",
+    "serviceDisplay": "valor-ejemplo",
+    "statusConceptId": "00000000-0000-4000-8000-000000000001",
+    "statusCode": "CODIGO_EJEMPLO",
+    "initiatedBy": "PRACTICE",
     "practiceName": "Nombre de ejemplo",
-    "practiceType": "00000000-0000-4000-8000-000000000001",
+    "tenantId": "00000000-0000-4000-8000-000000000001",
+    "practiceType": {},
     "roleConceptId": "00000000-0000-4000-8000-000000000001",
-    "specialtyConceptId": "00000000-0000-4000-8000-000000000001",
+    "specialtyConceptId": {},
     "status": "00000000-0000-4000-8000-000000000001",
     "isPrimary": true,
-    "validFrom": "2026-07-31T12:00:00.000Z",
-    "validTo": "2026-07-31T12:00:00.000Z",
+    "validFrom": {},
+    "validTo": {},
     "createdAt": "2026-07-31T12:00:00.000Z",
-    "avatarUrl": "valor-ejemplo"
+    "avatarUrl": {}
   }
 ]
 ```
@@ -5166,7 +5179,143 @@ Ejemplo de error normalizado:
 
 ---
 
-## 36. POST /sites/{siteId}/clinical-units
+## 36. PATCH /sites/{siteId}/care-spaces/{id}
+
+- **Módulo:** `practice`
+- **Etiqueta OpenAPI:** `practice`
+- **Nombre:** Mover un espacio de atención bajo otro padre de la sede
+- **Operation ID:** `SitesController_moveCareSpace`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [SitesController.moveCareSpace](../../src/modules/practice/controllers/sites.controller.ts)
+
+### Descripción de negocio
+
+Mover un espacio de atención bajo otro padre de la sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: Mueve un espacio bajo otro padre y recalcula la ruta de su subárbol.
+
+### Descripción del sistema
+
+NestJS resuelve `PATCH /sites/{siteId}/care-spaces/{id}` en `SitesController_moveCareSpace`. El controlador delega en `ClinicalStructureService.moveCareSpace`. Valida el body como `MoveCareSpaceDto` y consume `application/json`. El tipo de retorno estático es `Promise<CareSpaceResponseDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `siteId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `id` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+Incluye únicamente los campos obligatorios del DTO `MoveCareSpaceDto`; los campos opcionales se omiten.
+
+```http
+PATCH /sites/00000000-0000-4000-8000-000000000001/care-spaces/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{}
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Roles admitidos por `@Roles`: `SECURITY_ADMIN`.
+- Deben ser UUID válidos: `siteId`, `id`.
+- El body no puede superar 1 MB; propiedades no declaradas se rechazan (`whitelist` + `forbidNonWhitelisted`).
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `parentSpaceId` | No | `object` | formato `uuid`; admite null | Nuevo espacio padre (misma sede); null lo deja en la raíz de la sede | `{}` |
+
+### Payload completo de ejemplo
+
+Incluye todos los campos documentados, tanto obligatorios como opcionales. Los identificadores y valores son ilustrativos y deben sustituirse por datos existentes del tenant.
+
+```http
+PATCH /sites/00000000-0000-4000-8000-000000000001/care-spaces/00000000-0000-4000-8000-000000000001 HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+Content-Type: application/json
+
+{
+  "parentSpaceId": {}
+}
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 413 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<CareSpaceResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `CareSpaceResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "practiceSiteId": "00000000-0000-4000-8000-000000000001",
+  "code": "CODIGO_EJEMPLO",
+  "status": "ok",
+  "operationalStatus": "valor-ejemplo",
+  "createdAt": "2026-07-31T12:00:00.000Z"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | Sin restricción adicional declarada | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
+| `practiceSiteId` | Sí | `string` | Sin restricción adicional declarada | Identificador asociado a practice site. | `00000000-0000-4000-8000-000000000001` |
+| `code` | Sí | `string` | Sin restricción adicional declarada | Valor de code mantenido por la instancia. | `CODIGO_EJEMPLO` |
+| `status` | Sí | `string` | Sin restricción adicional declarada | Valor de status mantenido por la instancia. | `ok` |
+| `operationalStatus` | Sí | `string` | Sin restricción adicional declarada | Valor de operational status mantenido por la instancia. | `valor-ejemplo` |
+| `createdAt` | Sí | `string` | formato `date-time` | Fecha y hora en que se creó el registro. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no posee alguno de los roles admitidos: SECURITY_ADMIN. | Roles/tenant/guards de autorización |
+| 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
+| 422 | `PRECONDITION_FAILED` | El espacio no pertenece al sitio | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
+| 422 | `PRECONDITION_FAILED` | error instanceof Error ? error.message : 'Movimiento inválido' | Excepción explícita en src/modules/practice/services/clinical-structure.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/sites/{siteId}/care-spaces/{id}"
+}
+```
+
+---
+
+## 37. POST /sites/{siteId}/clinical-units
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`
@@ -5312,7 +5461,7 @@ Ejemplo de error normalizado:
 
 ---
 
-## 37. POST /tenants/{tenantId}/practices
+## 38. POST /tenants/{tenantId}/practices
 
 - **Módulo:** `practice`
 - **Etiqueta OpenAPI:** `practice`

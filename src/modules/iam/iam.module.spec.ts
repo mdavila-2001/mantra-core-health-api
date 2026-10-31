@@ -1,9 +1,16 @@
 import { IamModule } from './iam.module';
 import {
+  IamAccessRescueController,
   IamAccountSecurityController,
   IamAuthController,
+  IamStepUpController,
   IamUsersController,
 } from './presentation/controllers';
+import { STEP_UP_PORT } from './application/ports/step-up.port';
+import {
+  IamTotpService,
+  NetworkProxyCheckService,
+} from './application/services';
 
 /**
  * Los controladores que el módulo declara, leídos de su metadata.
@@ -25,5 +32,23 @@ describe('IamModule', () => {
     expect(declaredControllers).toContain(IamAuthController);
     expect(declaredControllers).toContain(IamUsersController);
     expect(declaredControllers).toContain(IamAccountSecurityController);
+  });
+
+  it('N2: publica la ruta de rescate de plataforma', () => {
+    expect(controllers(IamModule)).toContain(IamAccessRescueController);
+  });
+
+  it('N6/N8: registra el TOTP de un solo uso y la comprobación de TRUST_PROXY_HOPS', () => {
+    const providers = (Reflect.getMetadata('providers', IamModule) ??
+      []) as readonly unknown[];
+    expect(providers).toContain(IamTotpService);
+    expect(providers).toContain(NetworkProxyCheckService);
+  });
+
+  it('B5: publica /iam/me/step-up y exporta el puerto STEP_UP_PORT para delegated_access', () => {
+    expect(controllers(IamModule)).toContain(IamStepUpController);
+    const exported = (Reflect.getMetadata('exports', IamModule) ??
+      []) as readonly unknown[];
+    expect(exported).toContain(STEP_UP_PORT);
   });
 });

@@ -5,6 +5,8 @@ import {
   ErrorCode,
   ResourceNotFoundException,
   requireTenantId,
+  roleAuthorizesInTenant,
+  type AuthenticatedUser,
 } from '../../../common';
 import {
   assertResourceInTenant,
@@ -21,6 +23,7 @@ import {
   OrganizationUserAssignmentsRepository,
   PractitionerDelegateAssignmentsRepository,
   type MembershipScope,
+  type ScopeNodeKind,
 } from '../repositories';
 import { DelegatedAccessErrorReason } from '../delegated_access.error-reasons';
 
@@ -41,6 +44,45 @@ export const ORG_ASSIGNMENT_NOT_FOUND: ResourceScopeFailure = {
   message: 'Asignación de usuario de organización no encontrada',
   reason: DelegatedAccessErrorReason.DELEGATED_ORG_ASSIGNMENT_NOT_FOUND,
 };
+
+/** Cómo se informa una membresía o persona inexistente o ajena. */
+export const MEMBERSHIP_NOT_FOUND: ResourceScopeFailure = {
+  message: 'Persona de la organización no encontrada',
+  reason: DelegatedAccessErrorReason.DELEGATED_MEMBERSHIP_NOT_FOUND,
+};
+
+/** Cómo se informa un nodo de alcance inexistente o ajeno. */
+export const SCOPE_NODE_NOT_FOUND: ResourceScopeFailure = {
+  message: 'Nodo de alcance no encontrado',
+  reason: DelegatedAccessErrorReason.DELEGATED_SCOPE_NODE_NOT_FOUND,
+};
+
+/** Nodos de alcance que puede traer una asignación de usuario de organización, por campo del cuerpo. */
+export interface ScopeNodeRefs {
+  /** Práctica. */
+  practiceId?: string;
+  /** Sede de práctica. */
+  practiceSiteId?: string;
+  /** Unidad clínica. */
+  clinicalUnitId?: string;
+  /** Espacio de atención. */
+  careSpaceId?: string;
+  /** Unidad de diagnóstico. */
+  diagnosticUnitId?: string;
+  /** Farmacia. */
+  pharmacyId?: string;
+}
+
+const NODE_FIELDS: ReadonlyArray<
+  readonly [keyof ScopeNodeRefs, ScopeNodeKind]
+> = [
+  ['practiceId', 'practice'],
+  ['practiceSiteId', 'practice_site'],
+  ['clinicalUnitId', 'clinical_unit'],
+  ['careSpaceId', 'care_space'],
+  ['diagnosticUnitId', 'diagnostic_unit'],
+  ['pharmacyId', 'pharmacy'],
+];
 
 /** Una delegación cargada con el set que la ancla a su tenant. */
 export interface ScopedDelegation {
@@ -195,6 +237,80 @@ export class DelegationScopeService {
   }
 
   /**
+   * Exige que la membresía sea del tenant activo (la membresía es la que ancla
+   * a la persona a la organización; una ajena responde como una inexistente).
+   *
+   * @param tx - Transacción activa.
+   * @param membershipId - Identificador de la membresía.
+   * @param tenantId - Tenant activo.
+   * @returns La pertenencia (tenant y usuario).
+   * @throws ResourceNotFoundException 404 uniforme si no existe o es de otro tenant.
+   */
+  async loadMembershipInTenant(
+    tx: EntityManager,
+    membershipId: string,
+    tenantId: string,
+  ): Promise<MembershipScope> {
+    const membership = await this.scopeRepo.membershipOf(tx, membershipId);
+    return assertResourceInTenant(
+      membership,
+      membership?.tenantId,
+      tenantId,
+      MEMBERSHIP_NOT_FOUND,
+    );
+  }
+
+  /**
+   * Exige que cada nodo de alcance que trae el cuerpo (práctica, sede, unidad,
+   * espacio, unidad de diagnóstico, farmacia) sea de la organización activa.
+   *
+   * @param tx - Transacción activa.
+   * @param tenantId - Tenant activo.
+   * @param nodes - Nodos indicados (los ausentes no se comprueban).
+   * @throws ResourceNotFoundException 404 uniforme (mismo mensaje para inexistente y ajeno).
+   */
+  async assertScopeNodesInTenant(
+    tx: EntityManager,
+    tenantId: string,
+    nodes: ScopeNodeRefs,
+  ): Promise<void> {
+    for (const [field, kind] of NODE_FIELDS) {
+      const id = nodes[field];
+      if (!id) continue;
+      const nodeTenant = await this.scopeRepo.scopeNodeTenant(tx, kind, id);
+      assertResourceInTenant(
+        nodeTenant,
+        nodeTenant,
+        tenantId,
+        SCOPE_NODE_NOT_FOUND,
+      );
+    }
+  }
+
+  /**
+   * Exige que la persona (p. ej. el responsable de la cuenta) tenga membresía en
+   * la organización activa.
+   *
+   * @param tx - Transacción activa.
+   * @param userId - Persona.
+   * @param tenantId - Tenant activo.
+   * @throws ResourceNotFoundException 404 uniforme si no es de la organización.
+   */
+  async assertUserInTenant(
+    tx: EntityManager,
+    userId: string,
+    tenantId: string,
+  ): Promise<void> {
+    const member = await this.scopeRepo.userHasMembership(tx, userId, tenantId);
+    assertResourceInTenant(
+      member ? userId : null,
+      member ? tenantId : null,
+      tenantId,
+      MEMBERSHIP_NOT_FOUND,
+    );
+  }
+
+  /**
    * Exige que la asignación de rol del profesional sea del tenant activo.
    *
    * @param tx - Transacción activa.
@@ -256,6 +372,62 @@ export class DelegationScopeService {
           reason: DelegatedAccessErrorReason.DELEGATED_PATIENT_NOT_FOUND,
         });
       }
+    }
+  }
+
+  /**
+   * Quien revoca una delegación: la administración **de esa organización** o el
+   * propio doctor de la delegación. Un doctor ajeno recibe el mismo 404
+   * uniforme que una delegación inexistente. El rol de administración se
+   * contrasta con el tenant de la delegación (`scopedRoles`): ser administrador
+   * de otra organización no sirve aquí.
+   *
+   * @param tx - Transacción activa.
+   * @param delegate - Delegación ya cargada en el tenant.
+   * @param actor - Quien revoca.
+   * @param tenantId - Organización de la delegación.
+   * @throws ResourceNotFoundException 404 uniforme si no es administración ni el doctor titular.
+   */
+  async assertAdminOrOwningDoctor(
+    tx: EntityManager,
+    delegate: PractitionerDelegateAssignments,
+    actor: AuthenticatedUser,
+    tenantId: string,
+  ): Promise<void> {
+    if (
+      roleAuthorizesInTenant(actor, 'SECURITY_ADMIN', tenantId) ||
+      roleAuthorizesInTenant(actor, 'SUPERADMIN', undefined)
+    ) {
+      return;
+    }
+    await this.assertOwningDoctor(tx, delegate, actor);
+  }
+
+  /**
+   * Quien decide un acceso clínico temporal: solo el doctor titular de la
+   * delegación. La administración no se auto-aprueba lo que pide ni lo que pide
+   * su personal: es el doctor quien responde por la historia de sus pacientes.
+   *
+   * @param tx - Transacción activa.
+   * @param delegate - Delegación ya cargada en el tenant.
+   * @param actor - Quien decide.
+   * @throws ResourceNotFoundException 404 uniforme si no es el doctor titular.
+   */
+  async assertOwningDoctor(
+    tx: EntityManager,
+    delegate: PractitionerDelegateAssignments,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const profileId = await this.scopeRepo.roleAssignmentPractitioner(
+      tx,
+      delegate.practitionerRoleAssignmentId,
+    );
+    if (
+      !profileId ||
+      !actor.practitionerProfileId ||
+      profileId !== actor.practitionerProfileId
+    ) {
+      throw this.notFound(DELEGATION_NOT_FOUND);
     }
   }
 

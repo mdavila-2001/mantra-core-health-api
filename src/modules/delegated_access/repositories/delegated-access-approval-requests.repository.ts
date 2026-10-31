@@ -51,6 +51,30 @@ export class DelegatedAccessApprovalRequestsRepository {
     return em.findOne(DelegatedAccessApprovalRequests, { id });
   }
 
+  /**
+   * Solicitudes abiertas de un conjunto de delegaciones, las más recientes primero.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param delegateIds - Delegaciones.
+   * @param openStatusConceptId - Estado «abierta».
+   * @returns Las solicitudes abiertas.
+   */
+  findOpenByDelegates(
+    em: EntityManager,
+    delegateIds: readonly string[],
+    openStatusConceptId: string,
+  ): Promise<DelegatedAccessApprovalRequests[]> {
+    if (delegateIds.length === 0) return Promise.resolve([]);
+    return em.find(
+      DelegatedAccessApprovalRequests,
+      {
+        practitionerDelegateAssignmentId: { $in: [...delegateIds] },
+        statusConceptId: openStatusConceptId,
+      },
+      { orderBy: { createdAt: 'desc', id: 'asc' }, limit: 200 },
+    );
+  }
+
   /** Solicitud OPEN duplicada por (asignación, permiso, paciente/encuentro). */
   findOpenDuplicate(
     em: EntityManager,

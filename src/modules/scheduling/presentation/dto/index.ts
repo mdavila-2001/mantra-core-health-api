@@ -145,3 +145,4 @@ export {
 export * from './scheduling-service-offerings.dto';
 
 export * from './scheduling-flexible.dto';
+export * from './support-agenda.dto';

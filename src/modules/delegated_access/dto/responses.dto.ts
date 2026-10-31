@@ -19,6 +19,43 @@ export class ResourceCreatedDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+
+  /**
+   * Organización dueña del recurso, cuando la ruta no tiene tenant activo
+   * (la persona de apoyo pide a una organización de la que aún no es parte).
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  tenantId?: string;
+}
+
+/**
+ * Respuesta `202` cuando agregar o ampliar (alcance, modo `DYNAMIC` o vigencia) un permiso
+ * con átomos CRÍTICA queda a la espera de la aprobación de otra persona (`GRANT_CHANGE`,
+ * cuatro ojos): no se escribió nada.
+ */
+export class GrantChangePendingDto {
+  @ApiProperty({ enum: ['PENDING_APPROVAL'] })
+  status!: 'PENDING_APPROVAL';
+
+  /** Solicitud de cuatro ojos que decide otra persona (`POST /approvals/:id/decision`). */
+  @ApiProperty({ format: 'uuid' })
+  approvalId!: string;
+
+  /** Hasta cuándo se puede aprobar. */
+  @ApiProperty({ type: String, format: 'date-time' })
+  expiresAt!: Date;
+
+  /**
+   * Por qué pide aprobación: `NEW_CRITICAL_ATOMS` (átomo crítico nuevo),
+   * `SCOPE_WIDENED` (sobre un objetivo que lo ya concedido no cubre) o
+   * `VALIDITY_EXTENDED` (vigencia mayor que la ya aprobada).
+   */
+  @ApiProperty({ type: [String] })
+  reasons!: string[];
+
+  /** Átomos críticos que se otorgan o se amplían (nuevos, o con más alcance o vigencia). */
+  @ApiProperty({ type: [String] })
+  criticalAtoms!: string[];
 }
 
 /** Un set de permisos delegados, para el listado del hub (CV-13). */

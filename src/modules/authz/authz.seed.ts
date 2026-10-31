@@ -1,5 +1,22 @@
 import { deterministicId } from '../../common/constants/concepts';
+import {
+  SUPPORT_ACTIONS,
+  SUPPORT_PERMISSION_CATALOG,
+} from '../delegated_access/domain/support-actions';
 import type { BaseRole, RoleScope } from './dto';
+import {
+  SUPPORT_ATOM_SEED,
+  legacyGovernance,
+  type PermissionGovernanceSeed,
+} from './authz.support-atoms.seed';
+
+export {
+  PERMISSION_CATEGORY_SEED,
+  SUPPORT_STAFF_FIELD_FLOOR,
+  type PermissionCategorySeed,
+  type PermissionGovernanceSeed,
+  type SupportFieldFloorSeed,
+} from './authz.support-atoms.seed';
 
 /**
  * Roles asistenciales de sistema materializados en `authz.roles`.
@@ -30,6 +47,12 @@ export interface ClinicalRoleSeed {
   baseRole: BaseRole;
   /** Ámbito por defecto de la asignación. */
   scope: RoleScope;
+  /**
+   * ¿Puede asignarse con `POST /authz/users/:id/role-assignments`? Por omisión
+   * sí. `false` marca un rol de ejecución que solo el login deriva (p. ej.
+   * `SUPPORT_STAFF`): existe como fila de sistema pero nadie lo recibe a mano.
+   */
+  assignable?: boolean;
 }
 
 /** Deriva el id determinista de un rol de sistema por su código. */
@@ -145,6 +168,18 @@ export interface PlatformPermissionSeed {
   action: 'READ' | 'WRITE' | 'CREATE' | 'DELETE' | 'EXECUTE' | 'APPROVE';
   /** Ámbito por defecto de la concesión. */
   scope: RoleScope;
+  /** Código de la categoría de la pantalla de permisos; ausente en lo heredado. */
+  categoryCode?: string;
+  /** Permiso de campo (`is_field_level`). */
+  fieldLevel?: boolean;
+  /** `is_dangerous` (sensibilidad ALTA o CRÍTICA en los átomos). */
+  dangerous?: boolean;
+  /**
+   * Metadatos de gobierno (sensibilidad, obligaciones, propósito, base legal,
+   * asignabilidad a apoyo). Ausente en los permisos de sistema que no son del
+   * catálogo de apoyo: la semilla no los toca.
+   */
+  governance?: PermissionGovernanceSeed;
 }
 
 /** Deriva el id determinista de un permiso de sistema por su código. */
@@ -162,6 +197,15 @@ export function platformPermissionId(code: string): string {
  */
 export const DIAGNOSTIC_RESULT_READ_PERMISSION_CODE = 'DIAGNOSTIC_RESULT_READ';
 
+/**
+ * Permiso con el que el personal de apoyo pide ver la historia clínica de un
+ * paciente por un rato. Lo decide el doctor titular de la delegación; el permiso
+ * concedido lleva `valid_to` y se acota a un paciente (y, si se indica, a un
+ * encuentro).
+ */
+export const CLINICAL_RECORD_TEMPORARY_VIEW_PERMISSION_CODE =
+  'CLINICAL_RECORD_TEMPORARY_VIEW';
+
 /** Los permisos de sistema, en el orden en que se siembran. */
 export const PLATFORM_PERMISSION_SEED: readonly PlatformPermissionSeed[] = [
   {
@@ -172,4 +216,27 @@ export const PLATFORM_PERMISSION_SEED: readonly PlatformPermissionSeed[] = [
     action: 'READ',
     scope: 'SELF',
   },
+  {
+    id: platformPermissionId(CLINICAL_RECORD_TEMPORARY_VIEW_PERMISSION_CODE),
+    code: CLINICAL_RECORD_TEMPORARY_VIEW_PERMISSION_CODE,
+    name: 'Ver la historia clínica de un paciente con acceso temporal',
+    resource: 'clinical.patient_record',
+    action: 'READ',
+    scope: 'TENANT',
+  },
+  // Acciones del personal de apoyo (secretaria y otros roles): el vínculo las
+  // reparte permiso por permiso en `delegated_access.support_grant_actions`.
+  ...SUPPORT_ACTIONS.map((code): PlatformPermissionSeed => ({
+    id: platformPermissionId(code),
+    code,
+    name: SUPPORT_PERMISSION_CATALOG[code].name,
+    resource: SUPPORT_PERMISSION_CATALOG[code].resource,
+    action: SUPPORT_PERMISSION_CATALOG[code].action,
+    scope: 'TENANT',
+    // Alias heredado: asignable a apoyo con la sensibilidad de su átomo
+    // primario y SIN obligaciones nuevas (regla de no regresión, §2.3).
+    governance: legacyGovernance(code),
+  })),
+  // Los 73 permisos atómicos del catálogo de apoyo (§2.2).
+  ...SUPPORT_ATOM_SEED,
 ] as const;

@@ -25,11 +25,11 @@ Su `*.module.ts` no declara `imports` de otros módulos.
 
 Entidades (`tableName`, 11 de 11 archivos `*.entity.ts`): `care_spaces`, `clinical_units`, `healthcare_services`, `inventory_items`, `inventory_movements`, `practice_accreditations`, `practice_settings`, `practice_sites`, `practices`, `practitioner_role_assignments`, `practitioner_support_assignments`.
 
-| Método y ruta                             | Acceso          | Controller        |
-| ----------------------------------------- | --------------- | ----------------- |
-| `POST /accreditations/:id/verify`         | SECURITY_ADMIN  | `accreditations`  |
-| `POST /inventory-items/:itemId/movements` | SECURITY_ADMIN  | `inventory-items` |
-| `GET /practices` | sesión (el servicio exige un rol clínico o de programación, o ser OWNER/ADMIN de la organización) | `practices` |
+| Método y ruta                             | Acceso                                                                                            | Controller        |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------- |
+| `POST /accreditations/:id/verify`         | SECURITY_ADMIN                                                                                    | `accreditations`  |
+| `POST /inventory-items/:itemId/movements` | SECURITY_ADMIN                                                                                    | `inventory-items` |
+| `GET /practices`                          | sesión (el servicio exige un rol clínico o de programación, o ser OWNER/ADMIN de la organización) | `practices`       |
 
 | `GET /practices/:practiceId/organization` | SECURITY_ADMIN,
 PERIOP_ADMIN,
@@ -117,6 +117,18 @@ SCHEDULING_ADMIN, | `sites` |
 ## Permisos
 
 Guard global de auth; todos los endpoints exigen `@Roles('SECURITY_ADMIN')`.
+
+## Afiliación de médicos con aprobación
+
+`POST /role-assignments/:roleId/approve` y `.../reject` resuelven las solicitudes `PENDING` (la del médico que pide por su
+cuenta y la que deja el canje de un QR de doctor multiuso, ver `delegated_access`). Al decidir una solicitud pendiente,
+`PractitionerMembershipSyncService` resuelve en la misma transacción la membresía `MEMBERSHIP_INVITED` que el QR dejó al
+médico en la organización de la práctica: aprobar la activa, rechazar la termina (salvo otra solicitud pendiente del médico
+en la práctica). Suspender, finalizar o reactivar no tocan membresías. Esa membresía nace con origen `INVITATION_REDEEMED`
+(`directory.tenant_memberships.origin_concept_id`, v4.2.71): activarla no cambia su origen, y como no es de apoyo el fin de un
+vínculo de apoyo nunca la cierra. Si la aprobación llega a una persona cuya membresía existía solo por un vínculo de apoyo
+(`SUPPORT_ENGAGEMENT`), `DirectoryMembershipsService.ensureCareMembership` la pasa a `ADMIN_ADDED`; una membresía nueva por
+esa vía nace `ADMIN_ADDED`.
 
 ## Conceptos
 

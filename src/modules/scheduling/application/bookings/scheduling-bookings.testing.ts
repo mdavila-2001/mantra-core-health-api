@@ -201,7 +201,13 @@ export function createBookingsService(d: BookingsServiceDoubles) {
       clinicalSync,
       d.logger,
     ),
-    new CheckInBookingUseCase(d.em, d.bookingsRepo, transitions, d.logger),
+    new CheckInBookingUseCase(
+      d.em,
+      d.bookingsRepo,
+      transitions,
+      access,
+      d.logger,
+    ),
     new SearchBookingsUseCase(
       d.em,
       d.bookingsRepo,

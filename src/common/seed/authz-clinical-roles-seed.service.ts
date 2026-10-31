@@ -102,7 +102,8 @@ export class AuthzClinicalRolesSeedService {
           baseRoleConceptId: BASE_ROLE_CONCEPT[seed.baseRole],
           scopeConceptId: SCOPE_CONCEPT[seed.scope],
           isSystem: true,
-          isAssignable: true,
+          // Un rol de ejecución (`SUPPORT_STAFF`) existe pero nadie lo recibe a mano.
+          isAssignable: seed.assignable ?? true,
           stateConceptId: CONCEPTS.STATE_ACTIVE,
           createdAt: now,
           updatedAt: now,

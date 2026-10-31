@@ -1039,6 +1039,7 @@ describe('IamPractitionerSelfRegistrationService', () => {
         userId: 'user-1',
         tenantId: SEED.tenantId,
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_UNKNOWN,
       }),
     );
   });

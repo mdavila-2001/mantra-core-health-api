@@ -6,7 +6,12 @@ import {
   type WriteContext,
 } from '../../../../persistence';
 import { touch } from '../../../../common';
-import { AppointmentReminders, WaitlistEntries } from '../../entities';
+import {
+  AppointmentReminders,
+  BookableSlots,
+  SchedulableResources,
+  WaitlistEntries,
+} from '../../entities';
 import { SchedulingBookingsRepository } from '../repositories';
 import { SchedulingNoticeRepository } from '../repositories/scheduling-notice.repository';
 import { SCHEDULING_MODULE } from '../../scheduling.tokens';
@@ -19,6 +24,8 @@ import type {
   WaitlistCandidateSnapshot,
   WaitlistEntryView,
   WaitlistReadPort,
+  WaitlistResourceOwner,
+  WaitlistSlotView,
   WaitlistWritePort,
 } from '../../application/ports/waitlist.port';
 
@@ -87,6 +94,52 @@ export class PostgresWaitlistAdapter
           statusConceptIds,
           limit,
         ),
+      context,
+    );
+  }
+
+  findSlotPlacement(
+    slotId: string,
+    context: ReadContext = {},
+  ): Promise<WaitlistSlotView | null> {
+    return this.session.read(
+      'waitlist.findSlotPlacement',
+      async (em) => {
+        const slot = await em.findOne(BookableSlots, { id: slotId });
+        return slot
+          ? {
+              id: slot.id,
+              resourceId: slot.resourceId,
+              startAt: slot.startAt,
+              endAt: slot.endAt ?? undefined,
+              careSpaceId: slot.careSpaceId ?? undefined,
+              healthcareServiceId: slot.healthcareServiceId ?? undefined,
+            }
+          : null;
+      },
+      context,
+    );
+  }
+
+  findResourceOwner(
+    resourceId: string,
+    context: ReadContext = {},
+  ): Promise<WaitlistResourceOwner | null> {
+    return this.session.read(
+      'waitlist.findResourceOwner',
+      async (em) => {
+        const resource = await em.findOne(SchedulableResources, {
+          id: resourceId,
+        });
+        return resource
+          ? {
+              id: resource.id,
+              tenantId: resource.tenantId,
+              resourceRefType: resource.resourceRefType,
+              resourceRefId: resource.resourceRefId,
+            }
+          : null;
+      },
       context,
     );
   }

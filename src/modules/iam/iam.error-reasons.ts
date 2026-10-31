@@ -91,4 +91,42 @@ export enum IamErrorReason {
 
   /** La credencial referida no existe para el usuario. */
   CREDENTIAL_NOT_FOUND = 'CREDENTIAL_NOT_FOUND',
+
+  /** Un rango de red de la organización no es un CIDR válido. */
+  IP_RULE_CIDR_INVALID = 'IP_RULE_CIDR_INVALID',
+  /** Las reglas de red nuevas dejarían fuera el origen de quien las guarda. */
+  IP_RULES_WOULD_LOCK_OUT_ACTOR = 'IP_RULES_WOULD_LOCK_OUT_ACTOR',
+  /** La vigencia de una regla de red termina antes de empezar. */
+  IP_RULE_VALIDITY_INVALID = 'IP_RULE_VALIDITY_INVALID',
+
+  /** El dispositivo referido no existe o no es de quien lo consulta. */
+  DEVICE_NOT_FOUND = 'DEVICE_NOT_FOUND',
+
+  /** Una franja horaria con inicio igual al fin: no admite a nadie. */
+  SESSION_POLICY_HOURS_EMPTY = 'SESSION_POLICY_HOURS_EMPTY',
+  /** Una franja horaria de menos de 4 horas: equivale a cerrar la organización. */
+  SESSION_POLICY_HOURS_TOO_SHORT = 'SESSION_POLICY_HOURS_TOO_SHORT',
+  /** Las políticas nuevas dejarían a quien las guarda fuera de la organización. */
+  SESSION_POLICY_WOULD_LOCK_OUT_ACTOR = 'SESSION_POLICY_WOULD_LOCK_OUT_ACTOR',
+
+  /** Añadir o quitar un factor exige contraseña actual o el código de un factor ya verificado. */
+  MFA_REAUTH_REQUIRED = 'MFA_REAUTH_REQUIRED',
+  /** La contraseña o el código presentados para reautenticar no valen. */
+  MFA_REAUTH_FAILED = 'MFA_REAUTH_FAILED',
+
+  /** «Fui yo» desde un dispositivo que no es de confianza exige el código enviado al correo. */
+  DEVICE_CONFIRM_CODE_REQUIRED = 'DEVICE_CONFIRM_CODE_REQUIRED',
+  /** El código de «Fui yo» no es válido, venció o ya se usó. */
+  DEVICE_CONFIRM_CODE_INVALID = 'DEVICE_CONFIRM_CODE_INVALID',
+  /** La cuenta no tiene un correo verificado al que enviar el código de «Fui yo». */
+  DEVICE_CONFIRM_NO_VERIFIED_EMAIL = 'DEVICE_CONFIRM_NO_VERIFIED_EMAIL',
+
+  /** El paso extra exige un segundo factor confirmado y la cuenta no tiene ninguno. */
+  MFA_NOT_ENROLLED = 'MFA_NOT_ENROLLED',
+  /** El token no ancla ninguna sesión: no hay a qué atar el sello del paso extra. */
+  STEP_UP_SESSION_REQUIRED = 'STEP_UP_SESSION_REQUIRED',
+  /** Demasiados códigos de segundo factor fallidos desde el último inicio de sesión. */
+  STEP_UP_ATTEMPTS_EXCEEDED = 'STEP_UP_ATTEMPTS_EXCEEDED',
+  /** No se pudo comprobar ni escribir el paso extra (Redis caído): falla cerrado. */
+  STEP_UP_UNAVAILABLE = 'STEP_UP_UNAVAILABLE',
 }

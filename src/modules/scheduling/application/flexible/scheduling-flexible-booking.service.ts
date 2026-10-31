@@ -40,7 +40,10 @@ import type {
 import { DEFAULT_SLOT_MINUTES } from '../../domain/catalog/catalog-concepts';
 import { DEFAULT_HOLD_TTL_SECONDS } from '../../domain/booking/booking-defaults';
 import { ACTIVE_BOOKING_STATES } from '../../domain/booking/booking-states';
-import { AGENDA_OPERATOR_ROLES } from '../../domain/booking/agenda-actors';
+import {
+  attendsIn,
+  operatesAnyAgenda,
+} from '../../domain/booking/agenda-actors';
 import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
 import { SCHED } from '../../domain/scheduling.concepts';
 import { PractitionerAffiliationGateService } from '../affiliation/practitioner-affiliation-gate.service';
@@ -462,9 +465,15 @@ export class SchedulingFlexibleBookingService {
 
   /** ¿Es una cuenta de paciente sin más oficio? Mismo criterio que las reservas. */
   private isPatientActor(actor: AuthenticatedUser): boolean {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return false;
-    return actor.practitionerProfileId === undefined;
+    // SEG A-A1: el oficio de agenda se lee en la organización activa; un rol de
+    // mostrador de OTRA organización no exime del candado de representación.
+    // Quien tiene vínculo de apoyo NO se excluye aquí (falla cerrado: no hay
+    // política de apoyo en esta ruta, así que debe representar al paciente).
+    // SEG V-1: «atiende» también se lee en la organización activa; el perfil
+    // profesional del token es global y no exime de nada en otra clínica.
+    const tenantId = getCurrentTenantId();
+    if (operatesAnyAgenda(actor, tenantId)) return false;
+    return !attendsIn(actor, tenantId);
   }
 
   /** Quien atiende no puede comprometer turnos de una organización que lo desvinculó. */
@@ -472,8 +481,7 @@ export class SchedulingFlexibleBookingService {
     tenantId: string,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return;
+    if (operatesAnyAgenda(actor, tenantId)) return;
     if (actor.practitionerProfileId === undefined) return;
     const verdict = await this.affiliations.evaluate(tenantId, actor);
     if (verdict === 'sin-vinculos' || verdict === 'aprobado') return;

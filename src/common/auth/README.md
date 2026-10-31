@@ -15,6 +15,7 @@ Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta res
 | `current-user.decorator.ts` | `@CurrentUser()`: inyecta `request.user`. |
 | `jwt-auth.guard.ts` | Guard global de autenticación; deja pasar `@Public()` sin verificar token. |
 | `jwt-payload.interface.ts` | Claims firmados dentro del access token (`JwtPayload`). |
+| `mfa-enrollment-scope.guard.ts` | Impone el token de alcance limitado (`mfaEnrollment`): solo `/iam/me/mfa*`, logout, refresco y `GET /iam/me`; el resto, 403 `MFA_ENROLLMENT_REQUIRED`. |
 | `jwt.strategy.ts` | Verifica firma, expiración y tipo del access token, exige sesión viva y reconstruye `AuthenticatedUser`. |
 | `public.decorator.ts` | `@Public()`: exime un handler de `JwtAuthGuard`. |
 | `refresh-cookie.ts` | Entrega del refresh token como cookie httpOnly (ver abajo). |
@@ -29,9 +30,20 @@ Agrupa los componentes relacionados con **auth** y mantiene cohesionada esta res
 
 ## Orden de los guards globales
 
-`auth.module.ts` registra, en este orden, `JwtAuthGuard` → `TenantScopeGuard` →
-`RolesGuard` → `VerifiedIdentityGuard`. Cada uno asume que el anterior ya pobló
+`auth.module.ts` registra, en este orden, `JwtAuthGuard` → `MfaEnrollmentScopeGuard` →
+`TenantScopeGuard` → `RolesGuard` → `VerifiedIdentityGuard`. Cada uno asume que el anterior ya pobló
 `request.user` (y el tenant resuelto) o dejó pasar la petición.
+
+### Claims de las políticas de sesión
+
+- `deniedTenants` (`{ tenantId: motivo }`): organizaciones de la persona que NO la dejan actuar ahora (franja, red,
+  inactividad, segundo factor). No figuran en `tenants` ni en `scopedRoles`; una petición con su `X-Tenant-Id` recibe 403 con
+  `reason` = el motivo (`OUTSIDE_ALLOWED_HOURS`, `OUTSIDE_ALLOWED_NETWORK`, `IDLE_TIMEOUT`, `MFA_REQUIRED`,
+  `MFA_ENROLLMENT_REQUIRED`) y `details.tenantId` (`tenant-resolution.ts`). La política de una organización rige solo en ella.
+- `mfaEnrollment: true`: token de alcance limitado hasta confirmar un segundo factor (sin roles ni organizaciones); lo impone
+  `MfaEnrollmentScopeGuard` y el socket lo rechaza.
+- El refresh token de una sesión que presentó el segundo factor lleva el prefijo `mfa.` dentro del secreto hasheado
+  (`TokenService.isMfaVerifiedRefreshToken`); el refresco lo usa para devolver o no las organizaciones que lo exigen.
 
 ## Revocación: qué corta `logout`
 

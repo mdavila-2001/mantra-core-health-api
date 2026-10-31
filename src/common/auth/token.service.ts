@@ -4,6 +4,9 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { JWT_ALGORITHM, loadAuthEnv } from './auth.env';
 import type { JwtPayload } from './jwt-payload.interface';
 
+/** Prefijo del refresh token de una sesión que superó el segundo factor. */
+const MFA_VERIFIED_REFRESH_PREFIX = 'mfa.';
+
 /** Par de tokens emitido al abrir o rotar una sesión. */
 export interface IssuedTokens {
   /**
@@ -40,8 +43,16 @@ export interface TokenDisplayData {
   tenantNames?: Record<string, string>;
   /** Código de tipo de cada tenant, indexado por su id; ver `JwtPayload.tenantTypes`. */
   tenantTypes?: Record<string, string>;
+  /** Tipo de cuenta de cada tenant; ver `JwtPayload.accountKind`. */
+  tenantAccountKinds?: Record<string, 'PERSON' | 'ORGANIZATION'>;
+  /** Inactividad en minutos (5-480); ver `JwtPayload.idleTimeoutMinutes`. */
+  idleTimeoutMinutes?: number;
   /** Roles de negocio con ámbito de tenant; ver `JwtPayload.scopedRoles`. */
   scopedRoles?: Record<string, string[]>;
+  /** Organizaciones que no dejan actuar ahora, con su motivo; ver `JwtPayload.deniedTenants`. */
+  deniedTenants?: Record<string, string>;
+  /** Token de alcance limitado hasta dar de alta el segundo factor; ver `JwtPayload.mfaEnrollment`. */
+  mfaEnrollment?: boolean;
   /**
    * Perfil de paciente del titular, si tiene uno. Viaja como claim `pid`; ver
    * `JwtPayload.pid` para por qué no basta con la lectura de `profiles`.
@@ -102,9 +113,29 @@ export class TokenService {
       ...(display.scopedRoles && Object.keys(display.scopedRoles).length > 0
         ? { scopedRoles: display.scopedRoles }
         : {}),
+      ...(display.tenantAccountKinds &&
+      Object.keys(display.tenantAccountKinds).length > 0
+        ? {
+            accountKind: Object.values(display.tenantAccountKinds).includes(
+              'ORGANIZATION',
+            )
+              ? 'ORGANIZATION'
+              : 'PERSON',
+            tenantAccountKinds: display.tenantAccountKinds,
+          }
+        : {}),
+      ...(display.deniedTenants && Object.keys(display.deniedTenants).length > 0
+        ? { deniedTenants: display.deniedTenants }
+        : {}),
+      ...(display.mfaEnrollment ? { mfaEnrollment: true as const } : {}),
       ...(display.patientProfileId ? { pid: display.patientProfileId } : {}),
       ...(display.practitionerProfileId
         ? { hpid: display.practitionerProfileId }
+        : {}),
+      ...(Number.isInteger(display.idleTimeoutMinutes) &&
+      (display.idleTimeoutMinutes as number) >= 5 &&
+      (display.idleTimeoutMinutes as number) <= 480
+        ? { idleTimeoutMinutes: display.idleTimeoutMinutes }
         : {}),
       typ: 'access',
     };
@@ -123,7 +154,7 @@ export class TokenService {
    * una filtración de la tabla no basta para suplantar sesiones, y la
    * comparación en el refresh se hace por hash del valor presentado.
    */
-  issueRefreshToken(): {
+  issueRefreshToken(mfaVerified = false): {
     /**
      * Valor de raw mantenido por la instancia.
      */
@@ -132,8 +163,26 @@ export class TokenService {
      */
     hash: string;
   } {
-    const raw = randomBytes(48).toString('base64url');
+    const random = randomBytes(48).toString('base64url');
+    const raw = mfaVerified
+      ? `${MFA_VERIFIED_REFRESH_PREFIX}${random}`
+      : random;
     return { raw, hash: this.hashRefreshToken(raw) };
+  }
+
+  /**
+   * ¿Lleva el refresh token la marca de que su sesión superó el segundo factor?
+   * La marca es parte del secreto que se hashea: quien presenta el token no puede
+   * agregarla ni quitarla sin que el hash deje de coincidir, así que solo debe
+   * leerse DESPUÉS de haber encontrado el token por su hash. El refresco la usa
+   * para no devolverle a la persona las organizaciones que exigen el segundo
+   * factor si la sesión no lo presentó.
+   *
+   * @param raw - Refresh token en crudo ya validado contra su hash.
+   * @returns `true` si la sesión superó el segundo factor.
+   */
+  isMfaVerifiedRefreshToken(raw: string): boolean {
+    return raw.startsWith(MFA_VERIFIED_REFRESH_PREFIX);
   }
 
   /** Hash determinista del refresh token para búsqueda y comparación. */
@@ -151,9 +200,10 @@ export class TokenService {
     roles: string[],
     tenants: string[] = [],
     display: TokenDisplayData = {},
+    mfaVerified = false,
   ): IssuedTokens {
     const sessionTokenId = randomUUID();
-    const { raw, hash } = this.issueRefreshToken();
+    const { raw, hash } = this.issueRefreshToken(mfaVerified);
     const expiresAt = new Date(
       Date.now() + this.env.refreshTtlDays * 24 * 60 * 60 * 1000,
     );

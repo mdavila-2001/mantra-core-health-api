@@ -208,7 +208,7 @@ Lanzar una campaña multicanal desde un segmento. Requiere JWT y los roles o alc
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /marketing/campaigns` en `MarketingController_createCampaign`. El controlador delega en `MarketingCampaignsService.createCampaign`. Valida el body como `CreateCampaignDto` y consume `application/json`. El tipo de retorno estático es `Promise<CampaignResponseDto>`.
+NestJS resuelve `POST /marketing/campaigns` en `MarketingController_createCampaign`. El controlador delega en `MarketingCampaignsService.createCampaign`. Valida el body como `MarketingCreateCampaignDto` y consume `application/json`. El tipo de retorno estático es `Promise<CampaignResponseDto>`.
 
 ### Parámetros
 
@@ -216,7 +216,7 @@ No hay parámetros de ruta, query ni cabeceras específicos de la operación.
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `CreateCampaignDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `MarketingCreateCampaignDto`; los campos opcionales se omiten.
 
 ```http
 POST /marketing/campaigns HTTP/1.1

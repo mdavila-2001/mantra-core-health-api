@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, Optional } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -16,6 +16,10 @@ import {
 import { FileUploadService } from '../../common/services';
 import { CommunityVisibilityService } from './community-visibility.service';
 import { CommunityPresenceService } from './community-presence.service';
+import type {
+  CommunitySupportTeamViewService,
+  TeamMessageView,
+} from './community-support-team-view.service';
 import { COMM } from '../community.concepts';
 import type { FileContentDto } from '../../common/dto';
 import { CommunityErrorReason } from '../community.error-reasons';
@@ -64,6 +68,7 @@ export class CommunityMessagingReadService {
    * @param visibility - Reglas transversales de propiedad y bloqueo.
    * @param presence - Quién está en línea (F4.2).
    * @param logger - Logger estructurado.
+   * @param teamView - Respuestas del equipo de apoyo vistas desde cada lado.
    */
   constructor(
     private readonly em: EntityManager,
@@ -73,6 +78,10 @@ export class CommunityMessagingReadService {
     private readonly presence: CommunityPresenceService,
     private readonly files: FileUploadService,
     private readonly logger: PinoLogger,
+    // Lo que el equipo de apoyo respondió, visto desde cada lado. Sin él la
+    // lectura es la de siempre.
+    @Optional()
+    private readonly teamView?: CommunitySupportTeamViewService,
   ) {
     this.logger.setContext(CommunityMessagingReadService.name);
   }
@@ -373,6 +382,18 @@ export class CommunityMessagingReadService {
       }),
     );
 
+    // Solo el doctor ve que su equipo le derivó una conversación.
+    if (this.teamView) {
+      const awaiting = await this.teamView.awaitingDoctor(
+        em,
+        await this.teamView.reader(em, profileId),
+        todas.map((item) => item.id),
+      );
+      for (const item of todas) {
+        if (awaiting.has(item.id)) item.awaitingDoctor = true;
+      }
+    }
+
     // Fijadas primero; dentro de cada grupo se conserva el orden por último
     // mensaje que ya trae `listConversationsByIds`.
     const sorted = [
@@ -479,6 +500,11 @@ export class CommunityMessagingReadService {
     const hasMore = rows.length > options.limit;
     const page = hasMore ? rows.slice(0, options.limit) : rows;
     const last = page.at(-1);
+    // Lo que el equipo respondió, según quién lee: el paciente ve la leyenda que
+    // el doctor decidió; la autora real solo la ve el doctor dueño del perfil.
+    const reader = this.teamView
+      ? await this.teamView.reader(em, profileId)
+      : undefined;
 
     // El fijado viaja completo sólo en la primera página: es lo que la barra
     // de arriba necesita al abrir, y repetirlo en cada página de historia
@@ -490,9 +516,19 @@ export class CommunityMessagingReadService {
             conversation.pinnedMessageId,
           )
         : null;
+    const team =
+      this.teamView && reader
+        ? await this.teamView.annotate(
+            em,
+            reader,
+            pinnedMessage && !pinnedMessage.deletedAt
+              ? [...page, pinnedMessage]
+              : page,
+          )
+        : new Map<string, TeamMessageView>();
 
     return {
-      items: page.map((message) => this.toDto(message)),
+      items: page.map((message) => this.toDto(message, team.get(message.id))),
       count: page.length,
       limit: options.limit,
       nextCursor:
@@ -508,7 +544,7 @@ export class CommunityMessagingReadService {
         : {
             pinnedMessage:
               pinnedMessage && !pinnedMessage.deletedAt
-                ? this.toDto(pinnedMessage)
+                ? this.toDto(pinnedMessage, team.get(pinnedMessage.id))
                 : null,
           }),
     };
@@ -562,10 +598,15 @@ export class CommunityMessagingReadService {
    * adjunto pero con su lugar: el hilo pinta «Se eliminó este mensaje» y las
    * citas que apuntaban a él siguen sabiendo a qué apuntaban.
    */
-  private toDto(message: DirectMessages): DirectMessageDto {
+  private toDto(
+    message: DirectMessages,
+    team?: TeamMessageView,
+  ): DirectMessageDto {
     const deleted =
       message.deletedAt !== undefined && message.deletedAt !== null;
     return {
+      ...(team?.repliedByTeam ? { repliedByTeam: true } : {}),
+      ...(team?.teamAuthorName ? { teamAuthorName: team.teamAuthorName } : {}),
       id: message.id,
       conversationId: message.conversationId,
       senderProfileId: message.senderProfileId,

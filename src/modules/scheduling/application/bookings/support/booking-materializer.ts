@@ -1,4 +1,5 @@
 import { ACTIVE_BOOKING_STATES } from '../../../domain/booking/booking-states';
+import { isSupportActor } from '../../../domain/booking/agenda-actors';
 import {
   CONCEPTS,
   ConflictException,
@@ -85,7 +86,12 @@ export class BookingMaterializer {
     // puede haberse tomado sin declarar paciente —el cuerpo lo trae recién
     // acá—, así que comprobarlo sólo al retener dejaría la puerta abierta.
     // Cubre a la vez confirmar y solicitar, que es por lo que vive acá.
-    await this.access.assertMayActForPatient(plan.patientProfileId, actor);
+    await this.access.assertMayActForPatient(
+      plan.patientProfileId,
+      actor,
+      undefined,
+      plan.tenantId,
+    );
 
     return this.em.transactional(async (tx) => {
       const hold = await this.bookingsRepo.findHoldByTokenForUpdate(
@@ -121,6 +127,17 @@ export class BookingMaterializer {
           slotId: hold.bookableSlotId,
         });
       }
+      // La persona de apoyo confirma solo donde su permiso `schedule.create` cubre
+      // el doctor, servicio y espacio del cupo, y la cita nace en la organización
+      // DEL CUPO: el `tenantId` del cuerpo tiene que ser el de su agenda. Sin esto
+      // el cuerpo elegía la organización dueña de la cita (no-op para otros actores).
+      const bookedViaGrantId = await this.access.assertSupportMayOnSlot(
+        tx,
+        slot,
+        actor,
+        'schedule.create',
+        plan.tenantId,
+      );
       // Segundo cinturón de A-02: el hold ya no se puede tomar sobre un turno
       // vencido, pero uno tomado hace rato puede llegar acá con el horario
       // recién pasado. Cubre a la vez confirmar y solicitar, que es por lo que
@@ -149,6 +166,16 @@ export class BookingMaterializer {
         );
       if (alreadyCommitted.length > 0) {
         const clash = alreadyCommitted[0];
+        // SEG A-M4: la materialización también la dispara la persona de apoyo,
+        // cuyo permiso puede no cubrir la otra agenda: a ella solo se le dice
+        // que no está disponible (sin agenda, hora ni id). A la cuenta de
+        // paciente (titular o apoderado, ya comprobado arriba) sí se le nombra
+        // dónde tiene el otro turno: son sus propios datos.
+        if (isSupportActor(actor, plan.tenantId)) {
+          throw new PreconditionFailedException(
+            'El paciente no está disponible en ese horario.',
+          );
+        }
         throw new PreconditionFailedException(
           `Ya tiene una cita confirmada ese día a esa hora${
             clash.resourceName ? ` en «${clash.resourceName}»` : ''
@@ -264,6 +291,9 @@ export class BookingMaterializer {
             }
           : {}),
         reasonText: plan.reasonText,
+        careSpaceId: slot.careSpaceId,
+        healthcareServiceId: slot.healthcareServiceId,
+        bookedViaGrantId,
         actorUserId: actor.id,
       });
       // Mismo caso que la plantilla y sus franjas: `booking_id` es una columna

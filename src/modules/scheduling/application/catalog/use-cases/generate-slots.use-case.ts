@@ -15,11 +15,14 @@ import {
   GenerateSlotsDto,
   GenerateSlotsResponseDto,
 } from '../../../presentation/dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PinoLogger } from 'nestjs-pino';
 import { SCHED } from '../../../domain/scheduling.concepts';
-import { SchedulingCatalogRepository } from '../../../infrastructure/repositories';
+import {
+  SchedulingCatalogRepository,
+  SchedulingPlaceRepository,
+} from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
 import {
   localTimeToUtc,
@@ -36,6 +39,7 @@ export class GenerateSlotsUseCase {
     private readonly professionalTime: SchedulingProfessionalTimeService,
     private readonly access: CatalogAccess,
     private readonly logger: PinoLogger,
+    @Optional() private readonly places?: SchedulingPlaceRepository,
   ) {
     this.logger.setContext(GenerateSlotsUseCase.name);
   }
@@ -108,6 +112,21 @@ export class GenerateSlotsUseCase {
               to,
             )
           : [];
+
+      // Espacio y servicio del cupo, para que la cita los guarde y la política del
+      // personal de apoyo decida por ubicación y servicio.
+      const place =
+        resource &&
+        this.places &&
+        PRACTITIONER_PROFILE_TABLES.includes(resource.resourceRefType)
+          ? await this.places.resolve(
+              tx,
+              resource.resourceRefId,
+              resource.practiceId ?? undefined,
+              template.serviceConceptId ?? undefined,
+              new Date(),
+            )
+          : undefined;
 
       const rules = await this.catalogRepo.findRulesByTemplate(tx, templateId);
       const existing = await this.catalogRepo.findSlotsByTemplateInRange(
@@ -201,6 +220,8 @@ export class GenerateSlotsUseCase {
               endAt: end,
               capacity,
               remainingCapacity: capacity,
+              careSpaceId: place?.careSpaceId,
+              healthcareServiceId: place?.healthcareServiceId,
               statusConceptId: CONCEPTS.SLOT_OPEN,
               actorUserId: actor.id,
             });

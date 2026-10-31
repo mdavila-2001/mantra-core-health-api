@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ArrayMinSize,
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsIn,
@@ -50,6 +51,21 @@ export class SendMessageDto {
   senderProfileId!: string;
 
   /**
+   * Perfil profesional en cuyo nombre responde una persona de apoyo. Debe ser
+   * el mismo `senderProfileId`: el paciente ve al doctor, y el mensaje guarda a
+   * la autora real. Exige que el doctor la haya aceptado y le haya permitido
+   * responder en su nombre.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Perfil del profesional en cuyo nombre responde el personal de apoyo (igual a senderProfileId)',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  onBehalfOfProfileId?: string;
+
+  /**
    * Valor de body text mantenido por la instancia.
    */
   @ApiPropertyOptional({ description: 'Texto del mensaje', maxLength: 4000 })
@@ -91,6 +107,24 @@ export class SendMessageDto {
   @IsOptional()
   @IsUUID()
   attachmentFileId?: string;
+
+  /**
+   * Canales de la respuesta. Por defecto solo el chat. `EMAIL` manda además la
+   * misma respuesta por correo al paciente, con el doctor como remitente visible,
+   * y solo existe al responder en nombre del doctor (`onBehalfOfProfileId`).
+   * Con solo `EMAIL` el mensaje queda en la conversación pero no se avisa por chat.
+   */
+  @ApiPropertyOptional({
+    description: 'Canales de la respuesta; por defecto solo CHAT',
+    enum: ['CHAT', 'EMAIL'],
+    isArray: true,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayUnique()
+  @IsIn(['CHAT', 'EMAIL'], { each: true })
+  channels?: ('CHAT' | 'EMAIL')[];
 }
 
 /** Cuerpo de `POST /community/conversations/{conversationId}/read` (UC-19-07). */

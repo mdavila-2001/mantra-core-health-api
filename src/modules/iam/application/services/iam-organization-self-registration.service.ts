@@ -405,6 +405,7 @@ export class IamOrganizationSelfRegistrationService {
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_OWNER_CREATED,
         actorUserId: user.id,
       });
 

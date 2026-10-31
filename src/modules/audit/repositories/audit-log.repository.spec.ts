@@ -95,6 +95,66 @@ describe('AuditLogRepository (serialización del hash-chain WORM)', () => {
     expect(typeof row.recordHash).toBe('string');
   });
 
+  describe('B-e: eslabones sin empate de instante (la cadena no se bifurca en el mismo milisegundo)', () => {
+    it('dos asientos de la misma partición en el mismo milisegundo salen con instantes distintos y el segundo cuelga del primero', async () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-10-30T10:00:00.000Z'));
+      try {
+        const repo = new AuditLogRepository();
+        const em = buildEm();
+        // Como con el flush automático: el tip que ve el segundo es el primero.
+        em.create = mockFn((_entity: any, payload: any) => {
+          em.tip = { ...payload };
+          return { id: 'row', ...payload };
+        });
+        const first: any = await repo.append(em, baseData);
+        const second: any = await repo.append(em, baseData);
+        const third: any = await repo.append(em, baseData);
+
+        expect(second.previousHash).toBe(first.recordHash);
+        expect(third.previousHash).toBe(second.recordHash);
+        expect(first.recordedAt.toISOString()).toBe('2026-10-30T10:00:00.000Z');
+        expect(second.recordedAt.getTime()).toBe(
+          first.recordedAt.getTime() + 1,
+        );
+        expect(third.recordedAt.getTime()).toBe(
+          second.recordedAt.getTime() + 1,
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('si el reloj va por detrás del tip (otro nodo, reloj retrasado) el eslabón sigue siendo posterior', () => {
+      const tip = new Date('2026-10-30T10:00:05.000Z');
+      expect(
+        AuditLogRepository.nextRecordedAt(
+          tip,
+          new Date('2026-10-30T10:00:00.000Z'),
+        ).getTime(),
+      ).toBe(tip.getTime() + 1);
+    });
+
+    it('con el reloj por delante del tip (o sin tip) usa la hora real', () => {
+      const now = new Date('2026-10-30T10:00:10.000Z');
+      expect(
+        AuditLogRepository.nextRecordedAt(
+          new Date('2026-10-30T10:00:00.000Z'),
+          now,
+        ),
+      ).toBe(now);
+      expect(AuditLogRepository.nextRecordedAt(undefined, now)).toBe(now);
+    });
+
+    it('el tip se toma en el mismo orden (recorded_at, id) con el que la verificación recorre la cadena', async () => {
+      const repo = new AuditLogRepository();
+      const em = buildEm();
+      await repo.findChainTip(em, 't1');
+      const [, , options] = em.findOne.mock.calls[0];
+      expect(options).toEqual({ orderBy: { recordedAt: 'desc', id: 'desc' } });
+    });
+  });
+
   describe('origen de la petición (informe C §1.4.1)', () => {
     const DEVICE = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
     const context = (): AuditRequestContext => ({

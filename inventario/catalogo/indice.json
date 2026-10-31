@@ -1,82 +1,40 @@
 {
   "resumen": {
     "esquemas": 61,
-    "tablas": 1230,
-    "columnas": 16851,
-    "indices": 8267,
-    "relaciones": 7069,
-    "columnasConDescripcion": 3989,
+    "tablas": 1274,
+    "columnas": 17583,
+    "indices": 8615,
+    "relaciones": 7371,
+    "columnasConDescripcion": 4297,
     "descripcionPorFuente": {
-      "JSDOC_ESTANDAR": 2727,
-      "JSDOC_ENTIDAD": 1208,
-      "MODELO_PUML": 54
+      "JSDOC_ESTANDAR": 2762,
+      "JSDOC_ENTIDAD": 1425,
+      "MODELO_PUML": 110
     },
-    "indicesConParaQue": 7804,
+    "indicesConParaQue": 8139,
     "paraQuePorTipo": {
-      "DOCUMENTO": 8014,
-      "CONSULTA": 1482,
-      "ESTRUCTURAL": 17
+      "DOCUMENTO": 8390,
+      "CONSULTA": 1554,
+      "ESTRUCTURAL": 46
     },
-    "tablasConEntidad": 1230,
+    "tablasConEntidad": 1261,
     "tablasAppendOnlyDeclaradas": 140,
-    "tablasConOperaciones": 947,
+    "tablasConOperaciones": 979,
     "orm": {
-      "COINCIDE": 1205,
-      "DIVERGE": 25
+      "COINCIDE": 1232,
+      "DIVERGE": 29,
+      "SIN_ENTIDAD": 13
     },
     "columnasOrm": {
-      "COINCIDE": 16826,
-      "AUSENTE_EN_ORM": 1,
-      "NULABILIDAD_DIVERGE": 24
+      "COINCIDE": 17337,
+      "AUSENTE_EN_ORM": 45,
+      "SIN_ENTIDAD": 190,
+      "NULABILIDAD_DIVERGE": 9,
+      "TIPO_DIVERGE": 2
     }
   },
   "deriva": {
     "entidadesSinTabla": [
-      {
-        "tabla": "accounting.practitioner_simple_accounts",
-        "clase": "PractitionerSimpleAccounts",
-        "archivo": "src/modules/accounting/entities/practitioner_simple_accounts.entity.ts",
-        "ddl": {
-          "tipo": "SIN_DDL",
-          "fuente": null
-        }
-      },
-      {
-        "tabla": "accounting.practitioner_simple_records",
-        "clase": "PractitionerSimpleRecords",
-        "archivo": "src/modules/accounting/entities/practitioner_simple_records.entity.ts",
-        "ddl": {
-          "tipo": "SIN_DDL",
-          "fuente": null
-        }
-      },
-      {
-        "tabla": "accounting.practitioner_simple_transactions",
-        "clase": "PractitionerSimpleTransactions",
-        "archivo": "src/modules/accounting/entities/practitioner_simple_transactions.entity.ts",
-        "ddl": {
-          "tipo": "SIN_DDL",
-          "fuente": null
-        }
-      },
-      {
-        "tabla": "billing.siat_simulated_invoices",
-        "clase": "SiatSimulatedInvoices",
-        "archivo": "src/modules/billing/entities/siat_simulated_invoices.entity.ts",
-        "ddl": {
-          "tipo": "SIN_DDL",
-          "fuente": null
-        }
-      },
-      {
-        "tabla": "billing.siat_simulated_outbox",
-        "clase": "SiatSimulatedOutbox",
-        "archivo": "src/modules/billing/entities/siat_simulated_outbox.entity.ts",
-        "ddl": {
-          "tipo": "SIN_DDL",
-          "fuente": null
-        }
-      },
       {
         "tabla": "clinical.patient_reported_health_statements",
         "clase": "PatientReportedHealthStatements",
@@ -84,60 +42,6 @@
         "ddl": {
           "tipo": "SIN_DDL",
           "fuente": null
-        }
-      },
-      {
-        "tabla": "clinical.received_services",
-        "clase": "ReceivedServices",
-        "archivo": "src/modules/clinical/entities/received_services.entity.ts",
-        "ddl": {
-          "tipo": "SIN_DDL",
-          "fuente": null
-        }
-      },
-      {
-        "tabla": "data_catalog.catalog_operation_impacts",
-        "clase": "CatalogOperationImpacts",
-        "archivo": "src/modules/data_catalog/entities/catalog_operation_impacts.entity.ts",
-        "ddl": {
-          "tipo": "PARCHE",
-          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
-        }
-      },
-      {
-        "tabla": "data_catalog.catalog_operations",
-        "clase": "CatalogOperations",
-        "archivo": "src/modules/data_catalog/entities/catalog_operations.entity.ts",
-        "ddl": {
-          "tipo": "PARCHE",
-          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
-        }
-      },
-      {
-        "tabla": "data_catalog.catalog_process_step_operations",
-        "clase": "CatalogProcessStepOperations",
-        "archivo": "src/modules/data_catalog/entities/catalog_process_step_operations.entity.ts",
-        "ddl": {
-          "tipo": "PARCHE",
-          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
-        }
-      },
-      {
-        "tabla": "data_catalog.catalog_process_steps",
-        "clase": "CatalogProcessSteps",
-        "archivo": "src/modules/data_catalog/entities/catalog_process_steps.entity.ts",
-        "ddl": {
-          "tipo": "PARCHE",
-          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
-        }
-      },
-      {
-        "tabla": "data_catalog.catalog_processes",
-        "clase": "CatalogProcesses",
-        "archivo": "src/modules/data_catalog/entities/catalog_processes.entity.ts",
-        "ddl": {
-          "tipo": "PARCHE",
-          "fuente": "SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql"
         }
       },
       {
@@ -429,11 +333,25 @@
         }
       }
     ],
-    "tablasSinEntidad": [],
-    "columnasAusentesEnOrm": 1,
-    "columnasDeMasEnOrm": 21,
-    "nulabilidad": 24,
-    "tipos": 0,
+    "tablasSinEntidad": [
+      "audit.insurance_products_history",
+      "audit.procedure_cases_history",
+      "clinical_ext.cds_rule_versions",
+      "crm.crm_case_owner_history",
+      "delegated_access.shared_access_link_uses",
+      "delegated_access.shared_access_links",
+      "diagnostic_units.unit_medical_visitors",
+      "diagnostic_units.unit_visit_ratings",
+      "diagnostic_units.unit_visit_records",
+      "diagnostic_units.unit_visit_request_events",
+      "diagnostic_units.unit_visit_requests",
+      "insurance.insurance_terms_conditions",
+      "surveys.survey_invitation_reminders"
+    ],
+    "columnasAusentesEnOrm": 45,
+    "columnasDeMasEnOrm": 0,
+    "nulabilidad": 9,
+    "tipos": 2,
     "esquemasSinCatalogoDeApi": [],
     "esquemasSinDominio": [
       "audio_assets",
@@ -842,6 +760,39 @@
       "appendOnly": false
     },
     {
+      "id": "accounting.practitioner_simple_accounts",
+      "schema": "accounting",
+      "tabla": "practitioner_simple_accounts",
+      "dominio": "Financiero y ERP",
+      "columnas": 11,
+      "indices": 4,
+      "operaciones": 12,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "accounting.practitioner_simple_records",
+      "schema": "accounting",
+      "tabla": "practitioner_simple_records",
+      "dominio": "Financiero y ERP",
+      "columnas": 12,
+      "indices": 4,
+      "operaciones": 8,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "accounting.practitioner_simple_transactions",
+      "schema": "accounting",
+      "tabla": "practitioner_simple_transactions",
+      "dominio": "Financiero y ERP",
+      "columnas": 12,
+      "indices": 5,
+      "operaciones": 8,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
       "id": "accounting.profit_centers",
       "schema": "accounting",
       "tabla": "profit_centers",
@@ -1220,10 +1171,10 @@
       "schema": "ads",
       "tabla": "campaigns",
       "dominio": "Marketing y Crecimiento",
-      "columnas": 20,
+      "columnas": 21,
       "indices": 9,
       "operaciones": 7,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -1341,10 +1292,10 @@
       "schema": "ads",
       "tabla": "custom_audiences",
       "dominio": "Marketing y Crecimiento",
-      "columnas": 18,
+      "columnas": 19,
       "indices": 10,
       "operaciones": 1,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -1671,10 +1622,10 @@
       "schema": "ads",
       "tabla": "saved_audiences",
       "dominio": "Marketing y Crecimiento",
-      "columnas": 11,
+      "columnas": 12,
       "indices": 5,
       "operaciones": 0,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -1871,7 +1822,7 @@
       "dominio": "Auditoría y Reporting",
       "columnas": 10,
       "indices": 6,
-      "operaciones": 53,
+      "operaciones": 50,
       "orm": "COINCIDE",
       "appendOnly": true
     },
@@ -1891,10 +1842,10 @@
       "schema": "audit",
       "tabla": "audit_log",
       "dominio": "Auditoría y Reporting",
-      "columnas": 14,
-      "indices": 8,
-      "operaciones": 201,
-      "orm": "COINCIDE",
+      "columnas": 17,
+      "indices": 10,
+      "operaciones": 215,
+      "orm": "DIVERGE",
       "appendOnly": true
     },
     {
@@ -2415,6 +2366,17 @@
       "appendOnly": true
     },
     {
+      "id": "audit.insurance_products_history",
+      "schema": "audit",
+      "tabla": "insurance_products_history",
+      "dominio": "Auditoría y Reporting",
+      "columnas": 10,
+      "indices": 5,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
+    },
+    {
       "id": "audit.integration_endpoints_history",
       "schema": "audit",
       "tabla": "integration_endpoints_history",
@@ -2842,6 +2804,17 @@
       "operaciones": 0,
       "orm": "COINCIDE",
       "appendOnly": true
+    },
+    {
+      "id": "audit.procedure_cases_history",
+      "schema": "audit",
+      "tabla": "procedure_cases_history",
+      "dominio": "Auditoría y Reporting",
+      "columnas": 10,
+      "indices": 5,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
     },
     {
       "id": "audit.product_catalogs_history",
@@ -3301,7 +3274,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 6,
-      "operaciones": 52,
+      "operaciones": 61,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3323,7 +3296,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 15,
       "indices": 3,
-      "operaciones": 63,
+      "operaciones": 77,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3334,7 +3307,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 17,
       "indices": 13,
-      "operaciones": 64,
+      "operaciones": 73,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3345,7 +3318,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 4,
-      "operaciones": 53,
+      "operaciones": 62,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3356,7 +3329,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 17,
       "indices": 3,
-      "operaciones": 0,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3367,7 +3340,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 14,
       "indices": 2,
-      "operaciones": 54,
+      "operaciones": 65,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3389,7 +3362,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 18,
       "indices": 7,
-      "operaciones": 57,
+      "operaciones": 66,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3400,7 +3373,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 58,
+      "operaciones": 67,
       "orm": "DIVERGE",
       "appendOnly": false
     },
@@ -3411,7 +3384,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 53,
+      "operaciones": 62,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3422,7 +3395,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 69,
+      "operaciones": 78,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3444,7 +3417,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 9,
-      "operaciones": 52,
+      "operaciones": 61,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3455,7 +3428,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 15,
       "indices": 11,
-      "operaciones": 72,
+      "operaciones": 81,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3728,10 +3701,10 @@
       "schema": "billing",
       "tabla": "invoice_lines",
       "dominio": "Financiero y ERP",
-      "columnas": 19,
-      "indices": 9,
-      "operaciones": 16,
-      "orm": "DIVERGE",
+      "columnas": 20,
+      "indices": 11,
+      "operaciones": 17,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -3741,7 +3714,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 25,
       "indices": 14,
-      "operaciones": 29,
+      "operaciones": 30,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3838,10 +3811,32 @@
       "schema": "billing",
       "tabla": "service_catalog",
       "dominio": "Financiero y ERP",
-      "columnas": 17,
+      "columnas": 18,
       "indices": 8,
-      "operaciones": 38,
-      "orm": "DIVERGE",
+      "operaciones": 44,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "billing.siat_simulated_invoices",
+      "schema": "billing",
+      "tabla": "siat_simulated_invoices",
+      "dominio": "Financiero y ERP",
+      "columnas": 26,
+      "indices": 4,
+      "operaciones": 15,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "billing.siat_simulated_outbox",
+      "schema": "billing",
+      "tabla": "siat_simulated_outbox",
+      "dominio": "Financiero y ERP",
+      "columnas": 8,
+      "indices": 1,
+      "operaciones": 2,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -3893,10 +3888,10 @@
       "schema": "chart",
       "tabla": "care_plans",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 15,
-      "indices": 9,
+      "columnas": 16,
+      "indices": 10,
       "operaciones": 7,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -3917,7 +3912,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 14,
       "indices": 11,
-      "operaciones": 25,
+      "operaciones": 28,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -3937,7 +3932,7 @@
       "schema": "chart",
       "tabla": "clinical_note_versions",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 19,
+      "columnas": 20,
       "indices": 10,
       "operaciones": 17,
       "orm": "COINCIDE",
@@ -3961,7 +3956,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 18,
       "indices": 12,
-      "operaciones": 13,
+      "operaciones": 14,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4004,7 +3999,7 @@
       "tabla": "care_gaps",
       "dominio": "Clínico y Diagnóstico",
       "columnas": 14,
-      "indices": 7,
+      "indices": 8,
       "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
@@ -4029,6 +4024,17 @@
       "indices": 9,
       "operaciones": 3,
       "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "clinical_ext.cds_rule_versions",
+      "schema": "clinical_ext",
+      "tabla": "cds_rule_versions",
+      "dominio": "Clínico y Diagnóstico",
+      "columnas": 10,
+      "indices": 4,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
       "appendOnly": false
     },
     {
@@ -4124,9 +4130,9 @@
       "schema": "clinical_ext",
       "tabla": "referrals",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 19,
-      "indices": 13,
-      "operaciones": 6,
+      "columnas": 33,
+      "indices": 19,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4146,10 +4152,10 @@
       "schema": "clinical",
       "tabla": "allergy_intolerances",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 15,
-      "indices": 14,
+      "columnas": 16,
+      "indices": 15,
       "operaciones": 5,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -4236,7 +4242,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 20,
       "indices": 13,
-      "operaciones": 80,
+      "operaciones": 85,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4278,10 +4284,10 @@
       "schema": "clinical",
       "tabla": "medication_requests",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 31,
-      "indices": 16,
-      "operaciones": 45,
-      "orm": "DIVERGE",
+      "columnas": 33,
+      "indices": 17,
+      "operaciones": 46,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -4362,14 +4368,36 @@
       "appendOnly": false
     },
     {
+      "id": "clinical.received_services",
+      "schema": "clinical",
+      "tabla": "received_services",
+      "dominio": "Clínico y Diagnóstico",
+      "columnas": 23,
+      "indices": 18,
+      "operaciones": 11,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "clinical.service_request_notes",
+      "schema": "clinical",
+      "tabla": "service_request_notes",
+      "dominio": "Clínico y Diagnóstico",
+      "columnas": 6,
+      "indices": 4,
+      "operaciones": 3,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
       "id": "clinical.service_requests",
       "schema": "clinical",
       "tabla": "service_requests",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 18,
-      "indices": 15,
+      "columnas": 22,
+      "indices": 18,
       "operaciones": 34,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -4388,9 +4416,9 @@
       "schema": "common",
       "tabla": "addresses",
       "dominio": "Núcleo y Terminología",
-      "columnas": 20,
-      "indices": 8,
-      "operaciones": 63,
+      "columnas": 24,
+      "indices": 11,
+      "operaciones": 81,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4401,7 +4429,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 15,
       "indices": 5,
-      "operaciones": 26,
+      "operaciones": 31,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4434,7 +4462,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 22,
       "indices": 10,
-      "operaciones": 65,
+      "operaciones": 76,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4445,7 +4473,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 15,
       "indices": 9,
-      "operaciones": 74,
+      "operaciones": 86,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4455,8 +4483,8 @@
       "tabla": "identifiers",
       "dominio": "Núcleo y Terminología",
       "columnas": 19,
-      "indices": 10,
-      "operaciones": 36,
+      "indices": 11,
+      "operaciones": 40,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4527,13 +4555,35 @@
       "appendOnly": false
     },
     {
+      "id": "community.conversation_assignments",
+      "schema": "community",
+      "tabla": "conversation_assignments",
+      "dominio": "Marketing y Crecimiento",
+      "columnas": 12,
+      "indices": 8,
+      "operaciones": 12,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "community.conversation_internal_notes",
+      "schema": "community",
+      "tabla": "conversation_internal_notes",
+      "dominio": "Marketing y Crecimiento",
+      "columnas": 6,
+      "indices": 3,
+      "operaciones": 3,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
       "id": "community.conversation_participants",
       "schema": "community",
       "tabla": "conversation_participants",
       "dominio": "Marketing y Crecimiento",
       "columnas": 17,
       "indices": 8,
-      "operaciones": 38,
+      "operaciones": 49,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4544,7 +4594,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 36,
+      "operaciones": 47,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4553,9 +4603,9 @@
       "schema": "community",
       "tabla": "direct_messages",
       "dominio": "Marketing y Crecimiento",
-      "columnas": 16,
-      "indices": 9,
-      "operaciones": 13,
+      "columnas": 20,
+      "indices": 12,
+      "operaciones": 18,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4797,7 +4847,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 150,
+      "operaciones": 167,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4809,6 +4859,17 @@
       "columnas": 10,
       "indices": 6,
       "operaciones": 16,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "community.reply_templates",
+      "schema": "community",
+      "tabla": "reply_templates",
+      "dominio": "Marketing y Crecimiento",
+      "columnas": 12,
+      "indices": 6,
+      "operaciones": 5,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4839,10 +4900,10 @@
       "schema": "community",
       "tabla": "service_reviews",
       "dominio": "Marketing y Crecimiento",
-      "columnas": 17,
-      "indices": 11,
+      "columnas": 18,
+      "indices": 13,
       "operaciones": 23,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -4896,7 +4957,7 @@
       "dominio": "Marketing y Crecimiento",
       "columnas": 10,
       "indices": 6,
-      "operaciones": 32,
+      "operaciones": 35,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4918,7 +4979,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 10,
       "indices": 7,
-      "operaciones": 14,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -4929,7 +4990,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 11,
       "indices": 7,
-      "operaciones": 1,
+      "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5015,9 +5076,9 @@
       "schema": "consent",
       "tabla": "treatment_informed_consents",
       "dominio": "Identidad y Seguridad",
-      "columnas": 17,
-      "indices": 12,
-      "operaciones": 4,
+      "columnas": 45,
+      "indices": 14,
+      "operaciones": 13,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5176,6 +5237,17 @@
       "appendOnly": false
     },
     {
+      "id": "crm.crm_case_owner_history",
+      "schema": "crm",
+      "tabla": "crm_case_owner_history",
+      "dominio": "Marketing y Crecimiento",
+      "columnas": 8,
+      "indices": 6,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
+    },
+    {
       "id": "crm.crm_case_status_history",
       "schema": "crm",
       "tabla": "crm_case_status_history",
@@ -5191,10 +5263,10 @@
       "schema": "crm",
       "tabla": "crm_cases",
       "dominio": "Marketing y Crecimiento",
-      "columnas": 23,
-      "indices": 18,
+      "columnas": 24,
+      "indices": 19,
       "operaciones": 7,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -5660,6 +5732,61 @@
       "appendOnly": false
     },
     {
+      "id": "data_catalog.catalog_operation_impacts",
+      "schema": "data_catalog",
+      "tabla": "catalog_operation_impacts",
+      "dominio": null,
+      "columnas": 14,
+      "indices": 3,
+      "operaciones": 2,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "data_catalog.catalog_operations",
+      "schema": "data_catalog",
+      "tabla": "catalog_operations",
+      "dominio": null,
+      "columnas": 21,
+      "indices": 1,
+      "operaciones": 3,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "data_catalog.catalog_process_step_operations",
+      "schema": "data_catalog",
+      "tabla": "catalog_process_step_operations",
+      "dominio": null,
+      "columnas": 9,
+      "indices": 3,
+      "operaciones": 3,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "data_catalog.catalog_process_steps",
+      "schema": "data_catalog",
+      "tabla": "catalog_process_steps",
+      "dominio": null,
+      "columnas": 10,
+      "indices": 1,
+      "operaciones": 3,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "data_catalog.catalog_processes",
+      "schema": "data_catalog",
+      "tabla": "catalog_processes",
+      "dominio": null,
+      "columnas": 12,
+      "indices": 1,
+      "operaciones": 3,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
       "id": "data_catalog.catalog_review_decisions",
       "schema": "data_catalog",
       "tabla": "catalog_review_decisions",
@@ -5688,7 +5815,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 12,
       "indices": 8,
-      "operaciones": 5,
+      "operaciones": 10,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5699,7 +5826,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 11,
-      "operaciones": 6,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5721,7 +5848,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 6,
-      "operaciones": 9,
+      "operaciones": 11,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5732,7 +5859,40 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 10,
       "indices": 6,
-      "operaciones": 7,
+      "operaciones": 9,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "delegated_access.effective_support_access",
+      "schema": "delegated_access",
+      "tabla": "effective_support_access",
+      "dominio": "Identidad y Seguridad",
+      "columnas": 9,
+      "indices": 6,
+      "operaciones": 21,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "delegated_access.engagement_request_items",
+      "schema": "delegated_access",
+      "tabla": "engagement_request_items",
+      "dominio": "Identidad y Seguridad",
+      "columnas": 13,
+      "indices": 9,
+      "operaciones": 5,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "delegated_access.engagement_requests",
+      "schema": "delegated_access",
+      "tabla": "engagement_requests",
+      "dominio": "Identidad y Seguridad",
+      "columnas": 17,
+      "indices": 9,
+      "operaciones": 12,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5741,9 +5901,9 @@
       "schema": "delegated_access",
       "tabla": "organization_user_assignments",
       "dominio": "Identidad y Seguridad",
-      "columnas": 19,
-      "indices": 14,
-      "operaciones": 8,
+      "columnas": 25,
+      "indices": 19,
+      "operaciones": 142,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5752,9 +5912,64 @@
       "schema": "delegated_access",
       "tabla": "practitioner_delegate_assignments",
       "dominio": "Identidad y Seguridad",
-      "columnas": 18,
-      "indices": 10,
-      "operaciones": 8,
+      "columnas": 21,
+      "indices": 11,
+      "operaciones": 70,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "delegated_access.role_templates",
+      "schema": "delegated_access",
+      "tabla": "role_templates",
+      "dominio": "Identidad y Seguridad",
+      "columnas": 12,
+      "indices": 6,
+      "operaciones": 16,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "delegated_access.shared_access_link_uses",
+      "schema": "delegated_access",
+      "tabla": "shared_access_link_uses",
+      "dominio": "Identidad y Seguridad",
+      "columnas": 8,
+      "indices": 4,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
+    },
+    {
+      "id": "delegated_access.shared_access_links",
+      "schema": "delegated_access",
+      "tabla": "shared_access_links",
+      "dominio": "Identidad y Seguridad",
+      "columnas": 20,
+      "indices": 13,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
+    },
+    {
+      "id": "delegated_access.support_grant_actions",
+      "schema": "delegated_access",
+      "tabla": "support_grant_actions",
+      "dominio": "Identidad y Seguridad",
+      "columnas": 5,
+      "indices": 3,
+      "operaciones": 48,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "delegated_access.support_scope_grants",
+      "schema": "delegated_access",
+      "tabla": "support_scope_grants",
+      "dominio": "Identidad y Seguridad",
+      "columnas": 19,
+      "indices": 13,
+      "operaciones": 51,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5798,7 +6013,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 22,
       "indices": 10,
-      "operaciones": 26,
+      "operaciones": 27,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -5864,8 +6079,63 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 19,
       "indices": 13,
-      "operaciones": 43,
+      "operaciones": 49,
       "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "diagnostic_units.unit_medical_visitors",
+      "schema": "diagnostic_units",
+      "tabla": "unit_medical_visitors",
+      "dominio": "Clínico y Diagnóstico",
+      "columnas": 26,
+      "indices": 10,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
+    },
+    {
+      "id": "diagnostic_units.unit_visit_ratings",
+      "schema": "diagnostic_units",
+      "tabla": "unit_visit_ratings",
+      "dominio": "Clínico y Diagnóstico",
+      "columnas": 16,
+      "indices": 5,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
+    },
+    {
+      "id": "diagnostic_units.unit_visit_records",
+      "schema": "diagnostic_units",
+      "tabla": "unit_visit_records",
+      "dominio": "Clínico y Diagnóstico",
+      "columnas": 22,
+      "indices": 10,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
+    },
+    {
+      "id": "diagnostic_units.unit_visit_request_events",
+      "schema": "diagnostic_units",
+      "tabla": "unit_visit_request_events",
+      "dominio": "Clínico y Diagnóstico",
+      "columnas": 11,
+      "indices": 6,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
+    },
+    {
+      "id": "diagnostic_units.unit_visit_requests",
+      "schema": "diagnostic_units",
+      "tabla": "unit_visit_requests",
+      "dominio": "Clínico y Diagnóstico",
+      "columnas": 23,
+      "indices": 9,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
       "appendOnly": false
     },
     {
@@ -6265,14 +6535,36 @@
       "appendOnly": false
     },
     {
+      "id": "directory.affiliation_invitation_uses",
+      "schema": "directory",
+      "tabla": "affiliation_invitation_uses",
+      "dominio": "Núcleo y Terminología",
+      "columnas": 6,
+      "indices": 6,
+      "operaciones": 2,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "directory.affiliation_invitations",
+      "schema": "directory",
+      "tabla": "affiliation_invitations",
+      "dominio": "Núcleo y Terminología",
+      "columnas": 15,
+      "indices": 8,
+      "operaciones": 6,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
       "id": "directory.branch_memberships",
       "schema": "directory",
       "tabla": "branch_memberships",
       "dominio": "Núcleo y Terminología",
-      "columnas": 10,
-      "indices": 6,
-      "operaciones": 8,
-      "orm": "COINCIDE",
+      "columnas": 12,
+      "indices": 8,
+      "operaciones": 11,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -6280,10 +6572,10 @@
       "schema": "directory",
       "tabla": "branches",
       "dominio": "Núcleo y Terminología",
-      "columnas": 14,
+      "columnas": 16,
       "indices": 7,
-      "operaciones": 11,
-      "orm": "DIVERGE",
+      "operaciones": 22,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -6293,7 +6585,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 23,
       "indices": 8,
-      "operaciones": 3,
+      "operaciones": 13,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6304,7 +6596,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 16,
       "indices": 4,
-      "operaciones": 3,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -6313,10 +6605,10 @@
       "schema": "directory",
       "tabla": "tenant_memberships",
       "dominio": "Núcleo y Terminología",
-      "columnas": 15,
-      "indices": 10,
-      "operaciones": 129,
-      "orm": "COINCIDE",
+      "columnas": 18,
+      "indices": 14,
+      "operaciones": 206,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -6337,7 +6629,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 19,
       "indices": 13,
-      "operaciones": 51,
+      "operaciones": 75,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -7072,10 +7364,10 @@
       "schema": "forms",
       "tabla": "dynamic_field_definitions",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 31,
+      "columnas": 35,
       "indices": 9,
       "operaciones": 20,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -7085,7 +7377,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 11,
       "indices": 5,
-      "operaciones": 5,
+      "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -7226,10 +7518,10 @@
       "schema": "forms",
       "tabla": "field_values",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 34,
+      "columnas": 35,
       "indices": 12,
       "operaciones": 10,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -7987,7 +8279,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 16,
       "indices": 7,
-      "operaciones": 45,
+      "operaciones": 54,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -7998,7 +8290,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 5,
-      "operaciones": 94,
+      "operaciones": 110,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8009,7 +8301,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 12,
       "indices": 2,
-      "operaciones": 24,
+      "operaciones": 30,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8020,7 +8312,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 12,
       "indices": 5,
-      "operaciones": 5,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8042,7 +8334,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 11,
       "indices": 7,
-      "operaciones": 15,
+      "operaciones": 16,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8053,7 +8345,18 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 8,
       "indices": 5,
-      "operaciones": 25,
+      "operaciones": 35,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "iam.session_policies",
+      "schema": "iam",
+      "tabla": "session_policies",
+      "dominio": "Identidad y Seguridad",
+      "columnas": 15,
+      "indices": 7,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8064,7 +8367,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 13,
       "indices": 7,
-      "operaciones": 131,
+      "operaciones": 137,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8086,7 +8389,7 @@
       "dominio": "Identidad y Seguridad",
       "columnas": 21,
       "indices": 8,
-      "operaciones": 54,
+      "operaciones": 82,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8194,10 +8497,10 @@
       "schema": "identity_assurance",
       "tabla": "identity_verification_cases",
       "dominio": "Identidad y Seguridad",
-      "columnas": 16,
-      "indices": 6,
+      "columnas": 17,
+      "indices": 7,
       "operaciones": 39,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -8216,10 +8519,10 @@
       "schema": "insurance",
       "tabla": "broker_carrier_agreements",
       "dominio": "Financiero y ERP",
-      "columnas": 14,
-      "indices": 7,
+      "columnas": 20,
+      "indices": 11,
       "operaciones": 4,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -8273,7 +8576,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 16,
       "indices": 9,
-      "operaciones": 8,
+      "operaciones": 9,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8394,7 +8697,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 19,
       "indices": 10,
-      "operaciones": 70,
+      "operaciones": 71,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8405,7 +8708,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 12,
       "indices": 5,
-      "operaciones": 19,
+      "operaciones": 20,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8416,7 +8719,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 26,
+      "operaciones": 27,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8427,7 +8730,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 18,
       "indices": 6,
-      "operaciones": 14,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8438,7 +8741,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 16,
       "indices": 7,
-      "operaciones": 38,
+      "operaciones": 39,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8447,10 +8750,10 @@
       "schema": "insurance",
       "tabla": "insurance_products",
       "dominio": "Financiero y ERP",
-      "columnas": 13,
+      "columnas": 19,
       "indices": 7,
-      "operaciones": 34,
-      "orm": "COINCIDE",
+      "operaciones": 35,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -8476,6 +8779,17 @@
       "appendOnly": false
     },
     {
+      "id": "insurance.insurance_terms_conditions",
+      "schema": "insurance",
+      "tabla": "insurance_terms_conditions",
+      "dominio": "Financiero y ERP",
+      "columnas": 19,
+      "indices": 11,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
+      "appendOnly": false
+    },
+    {
       "id": "insurance.network_provider_memberships",
       "schema": "insurance",
       "tabla": "network_provider_memberships",
@@ -8493,7 +8807,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 18,
       "indices": 10,
-      "operaciones": 36,
+      "operaciones": 37,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8515,7 +8829,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 7,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8526,7 +8840,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 10,
       "indices": 5,
-      "operaciones": 7,
+      "operaciones": 8,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8537,7 +8851,7 @@
       "dominio": "Financiero y ERP",
       "columnas": 16,
       "indices": 10,
-      "operaciones": 8,
+      "operaciones": 9,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -8590,10 +8904,10 @@
       "schema": "integration_contracts",
       "tabla": "integration_contracts",
       "dominio": "Integraciones y Contratos",
-      "columnas": 14,
-      "indices": 9,
+      "columnas": 15,
+      "indices": 11,
       "operaciones": 13,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -8668,7 +8982,7 @@
       "tabla": "inbound_messages",
       "dominio": "Integraciones y Contratos",
       "columnas": 14,
-      "indices": 5,
+      "indices": 6,
       "operaciones": 5,
       "orm": "COINCIDE",
       "appendOnly": false
@@ -9096,10 +9410,10 @@
       "schema": "marketing",
       "tabla": "segments",
       "dominio": "Marketing y Crecimiento",
-      "columnas": 15,
+      "columnas": 16,
       "indices": 9,
       "operaciones": 5,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -9230,7 +9544,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 13,
       "indices": 5,
-      "operaciones": 103,
+      "operaciones": 104,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9263,7 +9577,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 31,
       "indices": 8,
-      "operaciones": 69,
+      "operaciones": 74,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9274,7 +9588,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 11,
       "indices": 5,
-      "operaciones": 61,
+      "operaciones": 67,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9285,7 +9599,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 13,
       "indices": 5,
-      "operaciones": 15,
+      "operaciones": 16,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9296,7 +9610,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 37,
+      "operaciones": 43,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9307,7 +9621,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 22,
       "indices": 6,
-      "operaciones": 44,
+      "operaciones": 48,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9318,7 +9632,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 36,
       "indices": 8,
-      "operaciones": 68,
+      "operaciones": 75,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9329,7 +9643,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 35,
       "indices": 11,
-      "operaciones": 123,
+      "operaciones": 138,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9340,7 +9654,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 20,
       "indices": 7,
-      "operaciones": 207,
+      "operaciones": 209,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9351,7 +9665,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 26,
       "indices": 8,
-      "operaciones": 43,
+      "operaciones": 47,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9362,7 +9676,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 22,
       "indices": 7,
-      "operaciones": 62,
+      "operaciones": 66,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9373,7 +9687,7 @@
       "dominio": "Integraciones y Contratos",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 60,
+      "operaciones": 66,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -9385,7 +9699,7 @@
       "columnas": 9,
       "indices": 2,
       "operaciones": 2,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9396,7 +9710,7 @@
       "columnas": 9,
       "indices": 3,
       "operaciones": 5,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9418,7 +9732,7 @@
       "columnas": 11,
       "indices": 3,
       "operaciones": 6,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9462,7 +9776,7 @@
       "columnas": 7,
       "indices": 2,
       "operaciones": 6,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9506,7 +9820,7 @@
       "columnas": 7,
       "indices": 2,
       "operaciones": 9,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9517,7 +9831,7 @@
       "columnas": 8,
       "indices": 2,
       "operaciones": 10,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9528,7 +9842,7 @@
       "columnas": 11,
       "indices": 3,
       "operaciones": 23,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -9550,7 +9864,7 @@
       "columnas": 7,
       "indices": 2,
       "operaciones": 7,
-      "orm": "DIVERGE",
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -10572,7 +10886,7 @@
       "dominio": "Farmacia",
       "columnas": 14,
       "indices": 7,
-      "operaciones": 18,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10638,7 +10952,7 @@
       "dominio": "Farmacia",
       "columnas": 11,
       "indices": 3,
-      "operaciones": 43,
+      "operaciones": 40,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10757,9 +11071,9 @@
       "schema": "pharmacy",
       "tabla": "pharmacies",
       "dominio": "Farmacia",
-      "columnas": 16,
-      "indices": 13,
-      "operaciones": 57,
+      "columnas": 17,
+      "indices": 14,
+      "operaciones": 66,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10770,7 +11084,7 @@
       "dominio": "Farmacia",
       "columnas": 12,
       "indices": 5,
-      "operaciones": 4,
+      "operaciones": 6,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10797,13 +11111,35 @@
       "appendOnly": false
     },
     {
+      "id": "pharmacy.pharmacy_on_call_shifts",
+      "schema": "pharmacy",
+      "tabla": "pharmacy_on_call_shifts",
+      "dominio": "Farmacia",
+      "columnas": 11,
+      "indices": 7,
+      "operaciones": 7,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
       "id": "pharmacy.pharmacy_price_lists",
       "schema": "pharmacy",
       "tabla": "pharmacy_price_lists",
       "dominio": "Farmacia",
       "columnas": 16,
       "indices": 10,
-      "operaciones": 12,
+      "operaciones": 19,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "pharmacy.pharmacy_product_categories",
+      "schema": "pharmacy",
+      "tabla": "pharmacy_product_categories",
+      "dominio": "Farmacia",
+      "columnas": 9,
+      "indices": 5,
+      "operaciones": 13,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10819,13 +11155,24 @@
       "appendOnly": false
     },
     {
+      "id": "pharmacy.pharmacy_product_images",
+      "schema": "pharmacy",
+      "tabla": "pharmacy_product_images",
+      "dominio": "Farmacia",
+      "columnas": 6,
+      "indices": 5,
+      "operaciones": 7,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
       "id": "pharmacy.pharmacy_product_prices",
       "schema": "pharmacy",
       "tabla": "pharmacy_product_prices",
       "dominio": "Farmacia",
       "columnas": 14,
       "indices": 5,
-      "operaciones": 15,
+      "operaciones": 24,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10834,9 +11181,9 @@
       "schema": "pharmacy",
       "tabla": "pharmacy_products",
       "dominio": "Farmacia",
-      "columnas": 21,
-      "indices": 11,
-      "operaciones": 53,
+      "columnas": 26,
+      "indices": 12,
+      "operaciones": 60,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -10845,9 +11192,9 @@
       "schema": "pharmacy",
       "tabla": "pharmacy_sites",
       "dominio": "Farmacia",
-      "columnas": 16,
+      "columnas": 17,
       "indices": 9,
-      "operaciones": 37,
+      "operaciones": 45,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11494,10 +11841,10 @@
       "schema": "practice",
       "tabla": "care_spaces",
       "dominio": "Práctica y Agenda",
-      "columnas": 15,
-      "indices": 8,
-      "operaciones": 7,
-      "orm": "COINCIDE",
+      "columnas": 19,
+      "indices": 9,
+      "operaciones": 46,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -11505,10 +11852,10 @@
       "schema": "practice",
       "tabla": "clinical_units",
       "dominio": "Práctica y Agenda",
-      "columnas": 14,
-      "indices": 8,
+      "columnas": 15,
+      "indices": 9,
       "operaciones": 9,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -11516,10 +11863,10 @@
       "schema": "practice",
       "tabla": "healthcare_services",
       "dominio": "Práctica y Agenda",
-      "columnas": 15,
-      "indices": 8,
-      "operaciones": 18,
-      "orm": "DIVERGE",
+      "columnas": 16,
+      "indices": 10,
+      "operaciones": 49,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -11562,7 +11909,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 10,
       "indices": 4,
-      "operaciones": 3,
+      "operaciones": 5,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11571,9 +11918,9 @@
       "schema": "practice",
       "tabla": "practice_sites",
       "dominio": "Práctica y Agenda",
-      "columnas": 18,
-      "indices": 11,
-      "operaciones": 68,
+      "columnas": 19,
+      "indices": 12,
+      "operaciones": 115,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11584,8 +11931,19 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 8,
-      "operaciones": 165,
+      "operaciones": 220,
       "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "practice.practitioner_location_assignments",
+      "schema": "practice",
+      "tabla": "practitioner_location_assignments",
+      "dominio": "Práctica y Agenda",
+      "columnas": 12,
+      "indices": 7,
+      "operaciones": 16,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -11595,7 +11953,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 20,
       "indices": 12,
-      "operaciones": 95,
+      "operaciones": 155,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -11846,10 +12204,10 @@
       "schema": "procedures_perioperative",
       "tabla": "procedure_case_team_members",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 14,
+      "columnas": 15,
       "indices": 7,
       "operaciones": 13,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -11857,10 +12215,10 @@
       "schema": "procedures_perioperative",
       "tabla": "procedure_cases",
       "dominio": "Clínico y Diagnóstico",
-      "columnas": 27,
+      "columnas": 30,
       "indices": 20,
       "operaciones": 15,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -11870,7 +12228,7 @@
       "dominio": "Clínico y Diagnóstico",
       "columnas": 16,
       "indices": 9,
-      "operaciones": 3,
+      "operaciones": 4,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12024,7 +12382,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 17,
       "indices": 9,
-      "operaciones": 112,
+      "operaciones": 130,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12046,7 +12404,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 15,
       "indices": 8,
-      "operaciones": 43,
+      "operaciones": 44,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12079,7 +12437,18 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 14,
       "indices": 9,
-      "operaciones": 49,
+      "operaciones": 56,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "profiles.patient_primary_practitioners",
+      "schema": "profiles",
+      "tabla": "patient_primary_practitioners",
+      "dominio": "Núcleo y Terminología",
+      "columnas": 10,
+      "indices": 6,
+      "operaciones": 7,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12090,7 +12459,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 13,
       "indices": 9,
-      "operaciones": 133,
+      "operaciones": 156,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12101,7 +12470,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 216,
+      "operaciones": 249,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12112,7 +12481,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 9,
       "indices": 6,
-      "operaciones": 49,
+      "operaciones": 52,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12123,7 +12492,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 27,
       "indices": 14,
-      "operaciones": 118,
+      "operaciones": 138,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12134,7 +12503,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 17,
       "indices": 9,
-      "operaciones": 34,
+      "operaciones": 36,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12145,7 +12514,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 10,
       "indices": 5,
-      "operaciones": 11,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12156,7 +12525,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 51,
+      "operaciones": 55,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12167,7 +12536,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 23,
       "indices": 10,
-      "operaciones": 19,
+      "operaciones": 20,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12189,7 +12558,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 12,
       "indices": 7,
-      "operaciones": 13,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12792,10 +13161,21 @@
       "schema": "scheduling",
       "tabla": "appointment_bookings",
       "dominio": "Práctica y Agenda",
-      "columnas": 22,
-      "indices": 15,
-      "operaciones": 105,
+      "columnas": 28,
+      "indices": 20,
+      "operaciones": 129,
       "orm": "DIVERGE",
+      "appendOnly": false
+    },
+    {
+      "id": "scheduling.appointment_payment_receipts",
+      "schema": "scheduling",
+      "tabla": "appointment_payment_receipts",
+      "dominio": "Práctica y Agenda",
+      "columnas": 18,
+      "indices": 9,
+      "operaciones": 8,
+      "orm": "COINCIDE",
       "appendOnly": false
     },
     {
@@ -12803,10 +13183,10 @@
       "schema": "scheduling",
       "tabla": "appointment_payment_states",
       "dominio": "Práctica y Agenda",
-      "columnas": 12,
-      "indices": 4,
-      "operaciones": 6,
-      "orm": "COINCIDE",
+      "columnas": 13,
+      "indices": 5,
+      "operaciones": 4,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -12827,7 +13207,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 12,
       "indices": 5,
-      "operaciones": 19,
+      "operaciones": 21,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12847,9 +13227,9 @@
       "schema": "scheduling",
       "tabla": "bookable_slots",
       "dominio": "Práctica y Agenda",
-      "columnas": 15,
-      "indices": 7,
-      "operaciones": 124,
+      "columnas": 17,
+      "indices": 9,
+      "operaciones": 141,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12880,10 +13260,10 @@
       "schema": "scheduling",
       "tabla": "booking_policies",
       "dominio": "Práctica y Agenda",
-      "columnas": 19,
+      "columnas": 21,
       "indices": 7,
-      "operaciones": 12,
-      "orm": "COINCIDE",
+      "operaciones": 14,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -12924,10 +13304,10 @@
       "schema": "scheduling",
       "tabla": "practitioner_service_offerings",
       "dominio": "Práctica y Agenda",
-      "columnas": 16,
+      "columnas": 17,
       "indices": 6,
-      "operaciones": 12,
-      "orm": "COINCIDE",
+      "operaciones": 16,
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -12937,7 +13317,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 7,
-      "operaciones": 111,
+      "operaciones": 135,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12946,9 +13326,9 @@
       "schema": "scheduling",
       "tabla": "schedule_rules",
       "dominio": "Práctica y Agenda",
-      "columnas": 16,
+      "columnas": 18,
       "indices": 5,
-      "operaciones": 9,
+      "operaciones": 22,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12957,9 +13337,9 @@
       "schema": "scheduling",
       "tabla": "schedule_templates",
       "dominio": "Práctica y Agenda",
-      "columnas": 15,
+      "columnas": 16,
       "indices": 8,
-      "operaciones": 16,
+      "operaciones": 29,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12970,7 +13350,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 13,
       "indices": 8,
-      "operaciones": 13,
+      "operaciones": 16,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12981,7 +13361,7 @@
       "dominio": "Práctica y Agenda",
       "columnas": 15,
       "indices": 10,
-      "operaciones": 10,
+      "operaciones": 11,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -12991,7 +13371,7 @@
       "tabla": "survey_answers",
       "dominio": null,
       "columnas": 12,
-      "indices": 2,
+      "indices": 3,
       "operaciones": 2,
       "orm": "COINCIDE",
       "appendOnly": false
@@ -13002,9 +13382,20 @@
       "tabla": "survey_assignments",
       "dominio": null,
       "columnas": 11,
-      "indices": 2,
-      "operaciones": 4,
+      "indices": 3,
+      "operaciones": 5,
       "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "surveys.survey_invitation_reminders",
+      "schema": "surveys",
+      "tabla": "survey_invitation_reminders",
+      "dominio": null,
+      "columnas": 7,
+      "indices": 3,
+      "operaciones": 0,
+      "orm": "SIN_ENTIDAD",
       "appendOnly": false
     },
     {
@@ -13012,10 +13403,10 @@
       "schema": "surveys",
       "tabla": "survey_invitations",
       "dominio": null,
-      "columnas": 15,
-      "indices": 5,
+      "columnas": 18,
+      "indices": 8,
       "operaciones": 7,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -13025,7 +13416,7 @@
       "dominio": null,
       "columnas": 14,
       "indices": 1,
-      "operaciones": 14,
+      "operaciones": 15,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13045,10 +13436,10 @@
       "schema": "surveys",
       "tabla": "survey_templates",
       "dominio": null,
-      "columnas": 11,
-      "indices": 2,
+      "columnas": 13,
+      "indices": 3,
       "operaciones": 21,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -13056,10 +13447,10 @@
       "schema": "surveys",
       "tabla": "survey_versions",
       "dominio": null,
-      "columnas": 13,
+      "columnas": 14,
       "indices": 1,
       "operaciones": 20,
-      "orm": "COINCIDE",
+      "orm": "DIVERGE",
       "appendOnly": false
     },
     {
@@ -13641,7 +14032,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 16,
       "indices": 8,
-      "operaciones": 141,
+      "operaciones": 162,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13707,7 +14098,18 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 10,
       "indices": 3,
-      "operaciones": 25,
+      "operaciones": 27,
+      "orm": "COINCIDE",
+      "appendOnly": false
+    },
+    {
+      "id": "terminology.concept_relationship_evidence",
+      "schema": "terminology",
+      "tabla": "concept_relationship_evidence",
+      "dominio": "Núcleo y Terminología",
+      "columnas": 23,
+      "indices": 10,
+      "operaciones": 1,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13716,8 +14118,8 @@
       "schema": "terminology",
       "tabla": "concept_relationships",
       "dominio": "Núcleo y Terminología",
-      "columnas": 10,
-      "indices": 5,
+      "columnas": 14,
+      "indices": 10,
       "operaciones": 10,
       "orm": "COINCIDE",
       "appendOnly": false
@@ -13762,7 +14164,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 10,
       "indices": 5,
-      "operaciones": 40,
+      "operaciones": 48,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13784,7 +14186,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 12,
       "indices": 6,
-      "operaciones": 37,
+      "operaciones": 45,
       "orm": "COINCIDE",
       "appendOnly": false
     },
@@ -13795,7 +14197,7 @@
       "dominio": "Núcleo y Terminología",
       "columnas": 12,
       "indices": 7,
-      "operaciones": 36,
+      "operaciones": 44,
       "orm": "COINCIDE",
       "appendOnly": false
     },

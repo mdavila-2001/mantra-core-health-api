@@ -4,6 +4,7 @@ import * as entities from './entities';
 import {
   SchedulingController,
   SchedulingBookingsController,
+  SupportAgendaController,
   SchedulingInternalController,
   SchedulingConfirmationController,
   SchedulingAgendaController,
@@ -17,6 +18,7 @@ import {
   SchedulingWaitlistService,
   SchedulingConfirmationService,
   SchedulingAgendaService,
+  SchedulingSupportAgendaService,
   SchedulingDelayService,
   SchedulingAgendaNoticesService,
   SchedulingTenantAgendaService,
@@ -38,6 +40,8 @@ import {
   SchedulingNoticeRepository,
   SchedulingOfferingsRepository,
   SchedulingPaymentReceiptsRepository,
+  SchedulingPlaceRepository,
+  SchedulingSupportAgendaRepository,
 } from './infrastructure/repositories';
 import { AuditModule } from '../audit/audit.module';
 import { DirectoryModule } from '../directory/directory.module';
@@ -110,6 +114,11 @@ import { WALK_IN_PATIENT_REGISTRY_PORT } from './application/ports/walk-in-patie
 import { ClinicalEncountersAdapter } from './infrastructure/adapters/clinical-encounters.adapter';
 import { ProfilesWalkInPatientAdapter } from './infrastructure/adapters/profiles-walk-in-patient.adapter';
 import { PATIENT_REPRESENTATION_PORT } from './application/ports/patient-representation.port';
+import { SUPPORT_AGENDA_POLICY_PORT } from './application/ports/support-agenda-policy.port';
+import { DelegatedAccessSupportAgendaAdapter } from './infrastructure/adapters/delegated-access-support-agenda.adapter';
+import { SUPPORT_AUDIT_PORT } from './application/ports/support-audit.port';
+import { AuditSupportAuditAdapter } from './infrastructure/adapters/audit-support-audit.adapter';
+import { DelegatedAccessModule } from '../delegated_access/delegated_access.module';
 import { AuditBookingHistoryAdapter } from './infrastructure/adapters/audit-booking-history.adapter';
 import { ClinicalAppointmentsAdapter } from './infrastructure/adapters/clinical-appointments.adapter';
 import { FormsOriginAdapter } from './infrastructure/adapters/forms-origin.adapter';
@@ -152,10 +161,13 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     InsuranceModule,
     ProfilesModule,
     CommonModule,
+    // La política del personal de apoyo decide qué puede hacer cada persona de apoyo en la agenda.
+    DelegatedAccessModule,
   ],
   controllers: [
     SchedulingController,
     SchedulingBookingsController,
+    SupportAgendaController,
     SchedulingInternalController,
     SchedulingConfirmationController,
     SchedulingAgendaController,
@@ -182,6 +194,8 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SchedulingNoticeRepository,
     SchedulingOfferingsRepository,
     SchedulingPaymentReceiptsRepository,
+    SchedulingPlaceRepository,
+    SchedulingSupportAgendaRepository,
     AppointmentsRepository,
     // AC-3.3: mismo patrón que `AppointmentsRepository` — clase sin estado,
     // provista acá para no importar `ClinicalModule` entero sólo para abrir
@@ -192,6 +206,7 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     SchedulingWaitlistService,
     SchedulingConfirmationService,
     SchedulingAgendaService,
+    SchedulingSupportAgendaService,
     SchedulingTenantAgendaService,
     SchedulingWalkInService,
     // v4.2.40 · servicios con duración dinámica: la oferta del profesional, el
@@ -216,6 +231,13 @@ import { FormInstanceOriginValidator } from '../forms/services/form-instance-ori
     // conoce al otro módulo.
     AuditBookingHistoryAdapter,
     ProfilesPatientRepresentationAdapter,
+    DelegatedAccessSupportAgendaAdapter,
+    AuditSupportAuditAdapter,
+    { provide: SUPPORT_AUDIT_PORT, useExisting: AuditSupportAuditAdapter },
+    {
+      provide: SUPPORT_AGENDA_POLICY_PORT,
+      useExisting: DelegatedAccessSupportAgendaAdapter,
+    },
     ClinicalAppointmentsAdapter,
     InsuranceReadAdapter,
     FormsOriginAdapter,

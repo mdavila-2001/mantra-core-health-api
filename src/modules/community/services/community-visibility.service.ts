@@ -149,6 +149,26 @@ export class CommunityVisibilityService {
   }
 
   /**
+   * ¿El actor es el titular de ese perfil? Misma prueba que
+   * {@link assertActsAsProfile}, pero devuelve el resultado en lugar de lanzar:
+   * la usa quien necesita distinguir «escribe como sí mismo» de «escribe en
+   * nombre de otro».
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param profileId - Perfil público.
+   * @param actor - Sesión que escribe.
+   * @returns `true` si el perfil es de la sesión.
+   */
+  async actsAsProfile(
+    em: EntityManager,
+    profileId: string,
+    actor: AuthenticatedUser,
+  ): Promise<boolean> {
+    const profile = await this.profilesRepo.findById(em, profileId);
+    return this.isHolder(profile, actor);
+  }
+
+  /**
    * Resuelve, contra la sesión, con qué perfil está leyendo el actor.
    *
    * **Por qué existe.** Las lecturas del módulo recibían el perfil del lector en

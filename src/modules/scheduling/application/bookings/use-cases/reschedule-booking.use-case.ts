@@ -16,6 +16,11 @@ import { BookingChangeNotifier } from '../support/booking-change-notifier';
 import type { BookingTransitionSnapshot } from '../../../domain/booking/booking-transition';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Inject, Injectable } from '@nestjs/common';
+import type {
+  AppointmentBookings,
+  BookableSlots,
+  SchedulableResources,
+} from '../../../entities';
 import { PRACTITIONER_PROFILE_TABLES } from '../../../domain/resource/practitioner-profile-tables';
 import { PinoLogger } from 'nestjs-pino';
 import {
@@ -29,8 +34,13 @@ import {
 } from '../../../infrastructure/repositories';
 import { SchedulingProfessionalTimeService } from '../../professional-time/scheduling-professional-time.service';
 import { ServiceSlotLifecycle } from '../support/service-slot-lifecycle';
-import { actorKindOf } from '../../../domain/booking/agenda-actors';
+import {
+  actorKindOf,
+  isSupportActor,
+} from '../../../domain/booking/agenda-actors';
+import { slotHoldRefusal } from '../../../domain/booking/hold-admission';
 import { requireReason } from '../support/require-reason';
+import { SchedulingErrorReason } from '../../../scheduling.error-reasons';
 
 /** UC-41-08: mueve la cita a otro slot, liberando el cupo del original. */
 @Injectable()
@@ -87,10 +97,15 @@ export class RescheduleBookingUseCase {
 
       // H3.S1.M2 (BOLA/IDOR de escritura): mismo hueco que `cancelAndNotify` —
       // reprogramar no comprobaba que el actor fuera el paciente titular.
-      await this.access.assertMayActForPatient(
-        booking.patientProfileId,
-        actor,
+      // SEG V-1: quien atiende solo reprograma lo de su propia agenda.
+      await this.access.assertMayChangeBooking(tx, booking, actor);
+      await this.access.assertSupportMayAct(
         tx,
+        booking,
+        actor,
+        'schedule.reschedule',
+        // El motivo ya validado cumple la obligación «motivo» del permiso.
+        { reasonText: reason },
       );
 
       if (!ACTIVE_BOOKING_STATES.includes(booking.statusConceptId)) {
@@ -122,6 +137,23 @@ export class RescheduleBookingUseCase {
           slotId: dto.toSlotId,
         });
       }
+      // La persona de apoyo mueve la cita solo si su permiso cubre TAMBIÉN el
+      // cupo destino (su doctor, servicio y espacio), y solo a un horario libre,
+      // futuro, del mismo servicio y de la misma organización de la cita.
+      const targetResource = await this.catalogRepo.findResourceById(
+        tx,
+        target.resourceId,
+      );
+      if (isSupportActor(actor, booking.tenantId)) {
+        await this.assertSupportTarget(
+          tx,
+          booking,
+          target,
+          targetResource,
+          actor,
+        );
+      }
+
       if (target.remainingCapacity <= 0) {
         throw new ConflictException('El slot destino no tiene cupos', {
           slotId: dto.toSlotId,
@@ -144,21 +176,12 @@ export class RescheduleBookingUseCase {
           booking.id,
         );
       if (patientClash.length > 0) {
-        const clash = patientClash[0];
+        // SEG A-M4: sin agenda, hora ni id de la otra cita (puede ser fuera del
+        // alcance de quien reprograma).
         throw new PreconditionFailedException(
-          `El paciente ya tiene una cita confirmada a esa hora${
-            clash.resourceName ? ` en «${clash.resourceName}»` : ''
-          }.`,
-          {
-            bookingId: clash.id,
-            startAt: clash.startAt,
-          },
+          'El paciente no está disponible en ese horario.',
         );
       }
-      const targetResource = await this.catalogRepo.findResourceById(
-        tx,
-        target.resourceId,
-      );
       if (
         targetResource &&
         PRACTITIONER_PROFILE_TABLES.includes(targetResource.resourceRefType)
@@ -226,5 +249,59 @@ export class RescheduleBookingUseCase {
       actorKindOf(actor),
     );
     return result;
+  }
+
+  /**
+   * Lo que se le exige al cupo destino cuando mueve la cita una persona de apoyo.
+   *
+   * - Es de la misma organización que la cita: si no, se responde como si no
+   *   existiera (404), sin decir que es de otra.
+   * - Su permiso `schedule.reschedule` lo cubre (doctor, servicio y espacio del
+   *   DESTINO, además de los de la cita que ya cubrió el origen): 403 si no.
+   * - Está libre (con cupo, sin bloqueo ni retiro), es futuro y es del mismo
+   *   servicio que la cita: 422 si no.
+   */
+  private async assertSupportTarget(
+    tx: EntityManager,
+    booking: AppointmentBookings,
+    target: BookableSlots,
+    targetResource: SchedulableResources | null,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    if (!targetResource || targetResource.tenantId !== booking.tenantId) {
+      throw new ResourceNotFoundException('Slot destino no encontrado', {
+        slotId: target.id,
+      });
+    }
+    await this.access.assertSupportMayOnSlot(
+      tx,
+      target,
+      actor,
+      'schedule.reschedule',
+    );
+    if (slotHoldRefusal(target) !== null) {
+      throw new PreconditionFailedException(
+        'El horario destino no está libre.',
+        { slotId: target.id },
+        SchedulingErrorReason.RESCHEDULE_TARGET_NOT_FREE,
+      );
+    }
+    if (target.startAt.getTime() <= Date.now()) {
+      throw new PreconditionFailedException(
+        'El horario destino ya pasó: elija uno futuro.',
+        { slotId: target.id },
+        SchedulingErrorReason.RESCHEDULE_TARGET_NOT_FUTURE,
+      );
+    }
+    if (
+      (target.healthcareServiceId ?? null) !==
+      (booking.healthcareServiceId ?? null)
+    ) {
+      throw new PreconditionFailedException(
+        'El horario destino es de otro servicio: la cita se mueve dentro del mismo servicio.',
+        { slotId: target.id },
+        SchedulingErrorReason.RESCHEDULE_TARGET_OTHER_SERVICE,
+      );
+    }
   }
 }

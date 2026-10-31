@@ -42,8 +42,23 @@ const DEFAULT_ACCESS_PURPOSE = 'TREATMENT';
 /** Propósito del titular leyendo lo suyo (mismo valor que `ChartMeReadService`). */
 const SELF_ACCESS_PURPOSE = 'PATIENT_ACCESS';
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** `X-Approval-Id` si es un uuid (lo demás se ignora: la política no lo recibiría). */
+function approvalIdOf(request: {
+  readonly headers?: Readonly<Record<string, string | string[] | undefined>>;
+}): { approvalId?: string } {
+  const raw = request.headers?.['x-approval-id'];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value && UUID_PATTERN.test(value.trim())
+    ? { approvalId: value.trim().toLowerCase() }
+    : {};
+}
+
 /** Lo que la petición aporta a la bitácora además del actor. */
 type AuditableRequest = AuthenticatedRequest & {
+  readonly headers?: Readonly<Record<string, string | string[] | undefined>>;
   readonly ip?: string;
   readonly method: string;
   readonly params: Record<string, unknown>;
@@ -118,6 +133,7 @@ export class AuditTrailInterceptor implements NestInterceptor {
       ip: toInetAddress(request.ip),
       sessionId: user.sessionId,
       actorUserId: user.id,
+      ...approvalIdOf(request),
       sealedSuccess: false,
       sealedFailure: false,
     };
@@ -231,8 +247,12 @@ export class AuditTrailInterceptor implements NestInterceptor {
   }
 
   /** Tenant del sello: el del contexto de la petición (no el custodio, §8.3). */
-  private tenantOf(request: AuditableRequest): string | undefined {
-    const tenantId = getCurrentTenantId() ?? request.resolvedTenantId;
+  private tenantOf(
+    request: AuditableRequest,
+    identity?: RouteAuditIdentity,
+  ): string | undefined {
+    const tenantId =
+      getCurrentTenantId() ?? request.resolvedTenantId ?? identity?.tenantId;
     return isUuid(tenantId) ? tenantId : undefined;
   }
 
@@ -246,7 +266,7 @@ export class AuditTrailInterceptor implements NestInterceptor {
     request: AuditableRequest,
     user: AuthenticatedUser,
   ): Promise<void> {
-    const tenantId = this.tenantOf(request);
+    const tenantId = this.tenantOf(request, identity);
     const fork = this.em.fork({ clear: true, keepTransactionContext: true });
     const joinsRequestTransaction = fork.isInTransaction();
     try {

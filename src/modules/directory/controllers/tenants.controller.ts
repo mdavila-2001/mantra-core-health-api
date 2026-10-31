@@ -21,6 +21,7 @@ import {
   CurrentUser,
   ParseOptionalLimitPipe,
   Roles,
+  TenantAgnostic,
   type AuthenticatedUser,
 } from '../../../common';
 import {
@@ -45,6 +46,8 @@ import {
   TransferMembershipDto,
   ListBranchAssignmentsResponseDto,
   ListBranchesResponseDto,
+  ListMembershipInvitationsResponseDto,
+  MembershipInvitationDecisionDto,
   SearchMembershipsResponseDto,
   SearchTenantsResponseDto,
   TenantDetailResponseDto,
@@ -118,6 +121,62 @@ export class TenantsController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MyOrganizationsResponseDto> {
     return this.readService.listMyTenants(actor);
+  }
+
+  /**
+   * Las membresías que una organización creó para el propio actor y que aún no
+   * aceptó. `@TenantAgnostic`: quien solo tiene invitaciones pendientes no
+   * pertenece todavía a ninguna organización. Va antes que `:tenantId` por lo
+   * mismo que `me`.
+   */
+  @Get('me/membership-invitations')
+  @TenantAgnostic()
+  @ApiOperation({
+    summary: 'Mis membresías pendientes de aceptar',
+    description:
+      'Una organización que incorpora a una persona la deja PENDIENTE: no cuenta ' +
+      'para su sesión hasta que ella la acepta aquí.',
+  })
+  listMyInvitations(
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<ListMembershipInvitationsResponseDto> {
+    return this.membershipsService.listMyInvitations(actor);
+  }
+
+  /** La persona acepta una membresía pendiente propia. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_ACCEPTED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+    tenantId: 'result.tenantId',
+  })
+  @Post('me/membership-invitations/:membershipId/accept')
+  @TenantAgnostic()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Aceptar una membresía pendiente propia' })
+  acceptMyInvitation(
+    @Param('membershipId', ParseUUIDPipe) membershipId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MembershipInvitationDecisionDto> {
+    return this.membershipsService.acceptMine(actor, membershipId);
+  }
+
+  /** La persona rechaza una membresía pendiente propia. */
+  @Audited({
+    action: 'TENANT_MEMBERSHIP_DECLINED',
+    entity: 'tenant_membership',
+    entityId: 'param:membershipId',
+    tenantId: 'result.tenantId',
+  })
+  @Post('me/membership-invitations/:membershipId/decline')
+  @TenantAgnostic()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Rechazar una membresía pendiente propia' })
+  declineMyInvitation(
+    @Param('membershipId', ParseUUIDPipe) membershipId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<MembershipInvitationDecisionDto> {
+    return this.membershipsService.declineMine(actor, membershipId);
   }
 
   /**

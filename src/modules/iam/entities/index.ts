@@ -12,3 +12,4 @@ export * from './security_events.entity';
 export * from './sessions.entity';
 export * from './user_global_roles.entity';
 export * from './users.entity';
+export * from './session_policies.entity';

@@ -637,8 +637,14 @@ export class SchedulingController {
   })
   @Post('appointments/direct')
   // El profesional sólo en SU agenda (el servicio lo verifica); quien
-  // administra agendas, en cualquiera.
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PRACTITIONER')
+  // administra agendas, en cualquiera; la persona de apoyo, donde su permiso
+  // `schedule.create` cubre doctor, servicio y espacio.
+  @Roles(
+    'SCHEDULING_ADMIN',
+    'SCHEDULING_AGENT',
+    'PRACTITIONER',
+    'SUPPORT_STAFF',
+  )
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Asignar una cita puntual a un paciente (nace confirmada)',
@@ -691,7 +697,9 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('slots/:id/holds')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
+  // La persona de apoyo retiene donde su permiso `schedule.create` cubre el
+  // doctor, servicio y espacio del cupo (lo decide la política, no el rol).
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'SUPPORT_STAFF', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Reservar temporalmente un cupo del slot',
@@ -713,7 +721,9 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('holds/:holdToken/confirm')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
+  // La persona de apoyo confirma con `schedule.create` sobre el cupo retenido;
+  // actúa en la organización de `X-Tenant-Id` y su `tenantId` es la del cupo.
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'SUPPORT_STAFF', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Confirmar la cita a partir de la reserva temporal',
@@ -764,7 +774,9 @@ export class SchedulingController {
     entityId: 'result.id',
   })
   @Post('waitlist')
-  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'PATIENT')
+  // La persona de apoyo se apunta con `schedule.waitlist` sobre el doctor,
+  // servicio y espacio del cupo (`bookableSlotId`).
+  @Roles('SCHEDULING_ADMIN', 'SCHEDULING_AGENT', 'SUPPORT_STAFF', 'PATIENT')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Inscribir a un paciente en la lista de espera' })
   enrollWaitlist(

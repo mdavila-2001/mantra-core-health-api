@@ -2,7 +2,7 @@
 
 # Catálogo del schema `forms`
 
-- **Tablas:** 16 · **Columnas:** 247 (53 con descripción: 21.5 %) · **Índices:** 113
+- **Tablas:** 16 · **Columnas:** 252 (58 con descripción: 23.0 %) · **Índices:** 113
 - **Dominio:** Clínico y Diagnóstico
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -10,8 +10,8 @@
 
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
-| [dynamic_field_definitions](#dynamic_field_definitions) | Define campos configurables con tipo y semántica para extender formularios sin alterar cada tabla de negocio. | 31 | 9 | 20 | DIVERGE |
-| [dynamic_field_sections](#dynamic_field_sections) | Agrupa campos dinámicos en secciones para configurar formularios usados por módulos del sistema médico. | 11 | 5 | 5 | COINCIDE |
+| [dynamic_field_definitions](#dynamic_field_definitions) | Define campos configurables con tipo y semántica para extender formularios sin alterar cada tabla de negocio. | 35 | 9 | 20 | COINCIDE |
+| [dynamic_field_sections](#dynamic_field_sections) | Agrupa campos dinámicos en secciones para configurar formularios usados por módulos del sistema médico. | 11 | 5 | 6 | COINCIDE |
 | [extension_target_policies](#extension_target_policies) | Restringe qué entidades pueden extenderse con campos dinámicos para mantener control sobre el modelo de datos. | 15 | 8 | 4 | COINCIDE |
 | [field_assignments](#field_assignments) | Asigna definiciones de campo a formularios, entidades o contextos donde deben capturarse. | 21 | 13 | 16 | COINCIDE |
 | [field_definition_localizations](#field_definition_localizations) | Conserva etiquetas y textos localizados de campos para presentar formularios en idiomas y regiones distintos. | 12 | 4 | 4 | COINCIDE |
@@ -24,7 +24,7 @@
 | [field_value_access_rules](#field_value_access_rules) | Define reglas de acceso a valores de campos para proteger información según usuario, rol o finalidad. | 15 | 10 | 3 | COINCIDE |
 | [field_value_audit](#field_value_audit) | Preserva cambios de valores dinámicos para atribuir quién los modificó y reconstruir respuestas previas. | 9 | 6 | 3 | COINCIDE |
 | [field_value_provenance](#field_value_provenance) | Registra procedencia de valores dinámicos para conocer origen, actor o proceso de captura. | 14 | 7 | 1 | COINCIDE |
-| [field_values](#field_values) | Conserva valores capturados en campos dinámicos para mantener respuestas estructuradas fuera de los esquemas fijos. | 34 | 12 | 10 | DIVERGE |
+| [field_values](#field_values) | Conserva valores capturados en campos dinámicos para mantener respuestas estructuradas fuera de los esquemas fijos. | 35 | 12 | 10 | COINCIDE |
 | [form_instances](#form_instances) | Representa instancias concretas de formularios completadas o en curso por pacientes y usuarios. | 12 | 5 | 16 | COINCIDE |
 
 ## Diagrama entidad-relación
@@ -207,7 +207,7 @@ Define campos configurables con tipo y semántica para extender formularios sin 
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: dynamic_field_definitions`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `DynamicFieldDefinitions` — `src/modules/forms/entities/dynamic_field_definitions.entity.ts`
-- **Resumen:** 31 columnas · 9 índices · 8 FK salientes · 8 entrantes · 20 operaciones
+- **Resumen:** 35 columnas · 9 índices · 8 FK salientes · 8 entrantes · 20 operaciones
 
 #### Columnas
 
@@ -239,11 +239,15 @@ Define campos configurables con tipo y semántica para extender formularios sin 
 | 24 | `fhir_extension_url` | `text` | Opcional | _sin dato_ | coincide |
 | 25 | `schema_version` | `integer` | Opcional | _sin dato_ | coincide |
 | 26 | `state_concept_id` | `uuid` | Clave foránea → terminology.catalog_concepts.id; Opcional | _sin dato_ | coincide |
-| 27 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:238`)_ | coincide |
-| 28 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:244`)_ | coincide |
-| 29 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 30 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 31 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:262`)_ | coincide |
+| 27 | `options` | `jsonb` | Opcional | + v4.2.38 — opciones PROPIAS de un campo de elección (`data_type = 'code'` sin `value_set_id`), escritas por quien arma el formulario: `options` (lista ordenada), `multiple` (admite varias respuestas), `allow_other` (ofrece «Otro» con texto libre) y `description` (ayuda bajo la pregunta). Todas nullable y sin backfill: los campos existentes siguen viviendo de su `value_set_id`. Estaban sólo en el parche 2026-10-05_v4238_forms_choice_field_options y en la copia de la API. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_09_forms.puml:60`)_ | coincide |
+| 28 | `multiple` | `boolean` | Opcional | Si el campo de elección admite marcar varias opciones («casillas de verificación») en vez de una sola («opción múltiple»). Sólo con `dataType: 'code'`; es cardinalidad, no tipo, y por eso no es otro `dataType` — `cardinalityMin`/`cardinalityMax` sólo aplican cuando esto es `true`. _(JSDOC_ENTIDAD, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:215`)_ | coincide |
+| 29 | `allow_other` | `boolean` | Opcional | Si un campo de elección ofrece además «Otro», con un texto libre que no está entre . Sólo con `dataType: 'code'` y con opciones propias — no tiene sentido sobre un `valueSetId`, que es un catálogo cerrado administrado aparte. _(JSDOC_ENTIDAD, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:224`)_ | coincide |
+| 30 | `description` | `text` | Opcional | La ayuda que se lee bajo la pregunta cuando el nombre no alcanza — la «Descripción» de una pregunta de Google Forms. Se sirve como `hint` del campo y por lo tanto entra en el `aria-describedby` de su control. _(JSDOC_ENTIDAD, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:232`)_ | coincide |
+| 31 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:238`)_ | coincide |
+| 32 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:244`)_ | coincide |
+| 33 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 34 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 35 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/forms/entities/dynamic_field_definitions.entity.ts:262`)_ | coincide |
 
 #### Relaciones
 
@@ -334,7 +338,7 @@ Agrupa campos dinámicos en secciones para configurar formularios usados por mó
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: dynamic_field_sections`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `DynamicFieldSections` — `src/modules/forms/entities/dynamic_field_sections.entity.ts`
-- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 4 entrantes · 5 operaciones
+- **Resumen:** 11 columnas · 5 índices · 4 FK salientes · 4 entrantes · 6 operaciones
 
 #### Columnas
 
@@ -387,6 +391,7 @@ Agrupa campos dinámicos en secciones para configurar formularios usados por mó
 |---|---|---|
 | POST /charts/templates | CREA | DIRECTA |
 | POST /admin/content-packs/{code}/apply | CREA | DIRECTA |
+| POST /admin/content-packs/{code}/apply | LEE | DIRECTA |
 | GET /forms/assignments | LEE | DIRECTA |
 | POST /forms/assignments | CREA | DIRECTA |
 | GET /forms/definition-sets/{id} | LEE | DIRECTA |
@@ -1337,7 +1342,7 @@ Conserva valores capturados en campos dinámicos para mantener respuestas estruc
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: field_values`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `FieldValues` — `src/modules/forms/entities/field_values.entity.ts`
-- **Resumen:** 34 columnas · 12 índices · 12 FK salientes · 3 entrantes · 10 operaciones
+- **Resumen:** 35 columnas · 12 índices · 12 FK salientes · 3 entrantes · 10 operaciones
 
 #### Columnas
 
@@ -1372,11 +1377,12 @@ Conserva valores capturados en campos dinámicos para mantener respuestas estruc
 | 27 | `effective_to` | `timestamptz` | Opcional | _sin dato_ | coincide |
 | 28 | `value_version` | `integer` | Opcional | _sin dato_ | coincide |
 | 29 | `supersedes_value_id` | `uuid` | Clave foránea → forms.field_values.id; Opcional | _sin dato_ | coincide |
-| 30 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/forms/entities/field_values.entity.ts:241`)_ | coincide |
-| 31 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/forms/entities/field_values.entity.ts:247`)_ | coincide |
-| 32 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 33 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
-| 34 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/forms/entities/field_values.entity.ts:265`)_ | coincide |
+| 30 | `value_code` | `text` | Opcional | + v4.2.38 — la opción elegida cuando el campo no tiene `value_set_id`. Va aparte de `value_concept_id` porque éste es uuid con FK a terminology y no puede guardar una opción tecleada a mano («Ex fumador»). Nullable y sin backfill. _(MODELO_PUML, `Mantra Core Health Context/modules/diagram_09_forms.puml:179`)_ | coincide |
+| 31 | `created_at` | `timestamptz` | Obligatoria | Fecha y hora en que se creó el registro. _(JSDOC_ESTANDAR, `src/modules/forms/entities/field_values.entity.ts:241`)_ | coincide |
+| 32 | `updated_at` | `timestamptz` | Obligatoria | Fecha y hora de la última actualización. _(JSDOC_ESTANDAR, `src/modules/forms/entities/field_values.entity.ts:247`)_ | coincide |
+| 33 | `created_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 34 | `updated_by_user_id` | `uuid` | Clave foránea → iam.users.id; Opcional | _sin dato_ | coincide |
+| 35 | `row_version` | `integer = 1` | Obligatoria | Versión usada para controlar actualizaciones concurrentes. _(JSDOC_ENTIDAD, `src/modules/forms/entities/field_values.entity.ts:265`)_ | coincide |
 
 #### Relaciones
 
@@ -1453,7 +1459,7 @@ Representa instancias concretas de formularios completadas o en curso por pacien
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_09_forms.puml: form_instances`
 - **Dominio:** Clínico y Diagnóstico · **Diagrama:** `Mantra Core Health Context/modules/diagram_09_forms.puml` · **DDL:** `SQL/09_forms/02_tables.sql`
 - **Entidad del ORM:** `FormInstances` — `src/modules/forms/entities/form_instances.entity.ts`
-- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 1 entrantes · 16 operaciones
+- **Resumen:** 12 columnas · 5 índices · 5 FK salientes · 5 entrantes · 16 operaciones
 
 #### Columnas
 
@@ -1482,6 +1488,10 @@ Representa instancias concretas de formularios completadas o en curso por pacien
 | hacia | created_by_user_id | iam.users (id) | fk_form_instances_created_by_user_id |
 | hacia | updated_by_user_id | iam.users (id) | fk_form_instances_updated_by_user_id |
 | desde | id | forms.field_values (form_instance_id) | fk_field_values_form_instance_id |
+| desde | id | clinical.service_requests (form_instance_id) | fk_service_requests_form_instance_id |
+| desde | id | clinical.medication_requests (form_instance_id) | fk_medication_requests_form_instance_id |
+| desde | id | chart.care_plans (form_instance_id) | fk_care_plans_form_instance_id |
+| desde | id | scheduling.appointment_bookings (form_instance_id) | fk_appointment_bookings_form_instance_id |
 
 #### Índices
 

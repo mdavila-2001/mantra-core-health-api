@@ -9,7 +9,7 @@
 # Módulo `community`
 
 **Fuente:** [`src/modules/community/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/community/README.md)
-· 14 controllers · 34 services · 19 repositories · 41 entidades · 33 DTO
+· 15 controllers · 38 services · 20 repositories · 44 entidades · 34 DTO
 
 ---
 
@@ -29,106 +29,106 @@ padre que ningún UC crea (perfil público, conversación, encuesta, grupo).
   find src/modules/community -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **13 controllers, 92 rutas HTTP, 40 entidades y 29 servicios** (incluye los ya documentados más abajo). La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **13 controllers, 92 rutas HTTP, 40 entidades y 29 servicios** (incluye los ya documentados más abajo). La columna _Acceso_ sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso (propiedad, tenant, vínculo) puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
 Importa (`community.module.ts`): `CommonModule`, `ClinicalModule`, `SearchPlatformModule`, `RedisRuntimeModule`, `MessagingModule`, `TerminologyModule`.
 
-| Método y ruta | Acceso | Controller |
-| --- | --- | --- |
-| `POST /internal/community/feed/rebuild` | SYSTEM, SECURITY_ADMIN | `community-feed` |
-| `GET /internal/community/feed/pending` | SYSTEM, SECURITY_ADMIN | `community-feed` |
-| `POST /community/groups` | sesión | `community-groups` |
-| `POST /community/groups/:groupId/members` | sesión | `community-groups` |
-| `PATCH /community/groups/:groupId/members/:member` | sesión | `community-groups` |
-| `DELETE /community/groups/:groupId/members/:member` | sesión | `community-groups` |
-| `POST /community/groups/:groupId/posts` | sesión | `community-groups` |
-| `GET /community/groups` | sesión | `community-groups` |
-| `GET /community/groups/:groupId` | sesión | `community-groups` |
-| `GET /community/groups/:groupId/members` | sesión | `community-groups` |
-| `GET /community/groups/:groupId/posts` | sesión | `community-groups` |
-| `POST /community/conversations` | sesión | `community-messaging` |
-| `POST /community/conversations/:conversationId/messages` | sesión | `community-messaging` |
-| `PATCH /community/conversations/:conversationId/messages/:messageId` | sesión | `community-messaging` |
-| `DELETE /community/conversations/:conversationId/messages/:messageId` | sesión | `community-messaging` |
-| `POST /community/conversations/:conversationId/read` | sesión | `community-messaging` |
-| `PATCH /community/conversations/:conversationId/participant` | sesión | `community-messaging` |
-| `POST /community/conversations/:conversationId/pin` | sesión | `community-messaging` |
-| `DELETE /community/conversations/:conversationId/pin` | sesión | `community-messaging` |
-| `POST /community/conversations/contacts/search` | sesión | `community-messaging` |
-| `GET /community/conversations/:conversationId/attachments/:fileId/content` | sesión | `community-messaging` |
-| `GET /community/conversations` | sesión | `community-messaging` |
-| `GET /community/conversations/:conversationId/messages` | sesión | `community-messaging` |
-| `GET /community/conversations/:conversationId/presence` | sesión | `community-messaging` |
-| `POST /community/reports` | sesión | `community-moderation` |
-| `POST /community/moderation/queue/:queueId/decision` | SECURITY_ADMIN | `community-moderation` |
-| `POST /community/moderation/decisions/:decisionId/appeal` | sesión | `community-moderation` |
-| `POST /community/moderation/appeals/:appealId/resolve` | SECURITY_ADMIN | `community-moderation` |
-| `GET /community/moderation/queue` | SECURITY_ADMIN | `community-moderation` |
-| `GET /community/moderation/decisions/mine` | sesión | `community-moderation` |
-| `GET /community/moderation/decisions` | SECURITY_ADMIN | `community-moderation` |
-| `GET /community/moderation/appeals` | SECURITY_ADMIN | `community-moderation` |
-| `POST /community/posts/:postId/polls` | sesión | `community-polls` |
-| `POST /community/polls/:pollId/votes` | sesión | `community-polls` |
-| `GET /community/polls/:pollId` | sesión | `community-polls` |
-| `GET /public/posts` | pública | `community-public` |
-| `GET /public/posts/:postId/reactions` | pública | `community-public` |
-| `GET /public/posts/:postId/comments` | pública | `community-public` |
-| `GET /public/comments/:commentId/replies` | pública | `community-public` |
-| `GET /public/search` | pública | `community-public` |
-| `GET /public/search/practitioners` | pública | `community-public` |
-| `GET /public/search/organizations` | pública | `community-public` |
-| `GET /public/search/diagnostic-units` | pública | `community-public` |
-| `GET /public/search/insurers` | pública | `community-public` |
-| `GET /public/search/pharmacies` | pública | `community-public` |
-| `GET /public/search/medications` | pública | `community-public` |
-| `GET /public/nearby` | pública | `community-public` |
-| `GET /public/profiles/:prefijo/:slug` | pública | `community-public` |
-| `GET /public/profiles/:prefijo/:slug/reviews` | pública | `community-public` |
-| `GET /public/media/:id` | pública | `community-public` |
-| `GET /p/:slug` | pública | `community-public` |
-| `GET /o/:slug` | pública | `community-public` |
-| `GET /f/:slug` | pública | `community-public` |
-| `GET /l/:slug` | pública | `community-public` |
-| `GET /s/:slug` | pública | `community-public` |
-| `POST /community/profiles/:profileId/reviews` | sesión | `community-reviews` |
-| `GET /community/profiles/:profileId/reviews` | sesión | `community-reviews` |
-| `POST /community/profiles/:profileId/reviews/:reviewId/responses` | sesión | `community-reviews` |
-| `POST /internal/community/search/reindex` | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN | `community-search-index` |
-| `GET /internal/community/search/health` | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN | `community-search-index` |
-| `POST /community/public-profiles` | SECURITY_ADMIN | `community-social` |
-| `GET /community/profiles/me` | sesión | `community-social` |
-| `PUT /community/profiles/me` | sesión | `community-social` |
-| `GET /community/profiles/me/stats` | sesión | `community-social` |
-| `POST /community/profiles/:profileId/posts` | sesión | `community-social` |
-| `POST /community/comments` | sesión | `community-social` |
-| `PUT /community/reactions` | sesión | `community-social` |
-| `POST /community/bookmarks` | sesión | `community-social` |
-| `POST /community/follows` | sesión | `community-social` |
-| `POST /community/blocks` | sesión | `community-social` |
-| `DELETE /community/follows` | sesión | `community-social` |
-| `DELETE /community/bookmarks` | sesión | `community-social` |
-| `DELETE /community/blocks` | sesión | `community-social` |
-| `GET /community/profiles/by-slug/:slug` | sesión | `community-social` |
-| `GET /community/profiles/:profileId/auto-reply` | sesión | `community-social` |
-| `PUT /community/profiles/:profileId/auto-reply` | sesión | `community-social` |
-| `GET /community/profiles/:profileId` | sesión | `community-social` |
-| `GET /community/profiles/:profileId/posts` | sesión | `community-social` |
-| `GET /community/posts/:postId` | sesión | `community-social` |
-| `GET /community/posts/:postId/comments` | sesión | `community-social` |
-| `GET /community/comments/media/:fileId/content` | sesión | `community-social` |
-| `GET /community/posts/:postId/reactions` | sesión | `community-social` |
-| `GET /community/follows` | sesión | `community-social` |
-| `GET /community/bookmarks` | sesión | `community-social` |
-| `GET /community/blocks` | sesión | `community-social` |
-| `GET /community/feed` | sesión | `community-timeline` |
-| `GET /community/notifications` | sesión | `community-timeline` |
-| `GET /community/topics` | sesión | `community-topics` |
-| `POST /internal/community/verification/badges` | SECURITY_ADMIN | `community-verification` |
-| `POST /internal/community/verification/badges/:targetId/revoke` | SECURITY_ADMIN | `community-verification` |
-| `POST /internal/community/verification/badges/expire-sweep` | SYSTEM, SECURITY_ADMIN | `community-verification` |
-| `POST /patients/me/reviews` | PATIENT | `patient-reviews` |
+| Método y ruta                                                              | Acceso                               | Controller               |
+| -------------------------------------------------------------------------- | ------------------------------------ | ------------------------ |
+| `POST /internal/community/feed/rebuild`                                    | SYSTEM, SECURITY_ADMIN               | `community-feed`         |
+| `GET /internal/community/feed/pending`                                     | SYSTEM, SECURITY_ADMIN               | `community-feed`         |
+| `POST /community/groups`                                                   | sesión                               | `community-groups`       |
+| `POST /community/groups/:groupId/members`                                  | sesión                               | `community-groups`       |
+| `PATCH /community/groups/:groupId/members/:member`                         | sesión                               | `community-groups`       |
+| `DELETE /community/groups/:groupId/members/:member`                        | sesión                               | `community-groups`       |
+| `POST /community/groups/:groupId/posts`                                    | sesión                               | `community-groups`       |
+| `GET /community/groups`                                                    | sesión                               | `community-groups`       |
+| `GET /community/groups/:groupId`                                           | sesión                               | `community-groups`       |
+| `GET /community/groups/:groupId/members`                                   | sesión                               | `community-groups`       |
+| `GET /community/groups/:groupId/posts`                                     | sesión                               | `community-groups`       |
+| `POST /community/conversations`                                            | sesión                               | `community-messaging`    |
+| `POST /community/conversations/:conversationId/messages`                   | sesión                               | `community-messaging`    |
+| `PATCH /community/conversations/:conversationId/messages/:messageId`       | sesión                               | `community-messaging`    |
+| `DELETE /community/conversations/:conversationId/messages/:messageId`      | sesión                               | `community-messaging`    |
+| `POST /community/conversations/:conversationId/read`                       | sesión                               | `community-messaging`    |
+| `PATCH /community/conversations/:conversationId/participant`               | sesión                               | `community-messaging`    |
+| `POST /community/conversations/:conversationId/pin`                        | sesión                               | `community-messaging`    |
+| `DELETE /community/conversations/:conversationId/pin`                      | sesión                               | `community-messaging`    |
+| `POST /community/conversations/contacts/search`                            | sesión                               | `community-messaging`    |
+| `GET /community/conversations/:conversationId/attachments/:fileId/content` | sesión                               | `community-messaging`    |
+| `GET /community/conversations`                                             | sesión                               | `community-messaging`    |
+| `GET /community/conversations/:conversationId/messages`                    | sesión                               | `community-messaging`    |
+| `GET /community/conversations/:conversationId/presence`                    | sesión                               | `community-messaging`    |
+| `POST /community/reports`                                                  | sesión                               | `community-moderation`   |
+| `POST /community/moderation/queue/:queueId/decision`                       | SECURITY_ADMIN                       | `community-moderation`   |
+| `POST /community/moderation/decisions/:decisionId/appeal`                  | sesión                               | `community-moderation`   |
+| `POST /community/moderation/appeals/:appealId/resolve`                     | SECURITY_ADMIN                       | `community-moderation`   |
+| `GET /community/moderation/queue`                                          | SECURITY_ADMIN                       | `community-moderation`   |
+| `GET /community/moderation/decisions/mine`                                 | sesión                               | `community-moderation`   |
+| `GET /community/moderation/decisions`                                      | SECURITY_ADMIN                       | `community-moderation`   |
+| `GET /community/moderation/appeals`                                        | SECURITY_ADMIN                       | `community-moderation`   |
+| `POST /community/posts/:postId/polls`                                      | sesión                               | `community-polls`        |
+| `POST /community/polls/:pollId/votes`                                      | sesión                               | `community-polls`        |
+| `GET /community/polls/:pollId`                                             | sesión                               | `community-polls`        |
+| `GET /public/posts`                                                        | pública                              | `community-public`       |
+| `GET /public/posts/:postId/reactions`                                      | pública                              | `community-public`       |
+| `GET /public/posts/:postId/comments`                                       | pública                              | `community-public`       |
+| `GET /public/comments/:commentId/replies`                                  | pública                              | `community-public`       |
+| `GET /public/search`                                                       | pública                              | `community-public`       |
+| `GET /public/search/practitioners`                                         | pública                              | `community-public`       |
+| `GET /public/search/organizations`                                         | pública                              | `community-public`       |
+| `GET /public/search/diagnostic-units`                                      | pública                              | `community-public`       |
+| `GET /public/search/insurers`                                              | pública                              | `community-public`       |
+| `GET /public/search/pharmacies`                                            | pública                              | `community-public`       |
+| `GET /public/search/medications`                                           | pública                              | `community-public`       |
+| `GET /public/nearby`                                                       | pública                              | `community-public`       |
+| `GET /public/profiles/:prefijo/:slug`                                      | pública                              | `community-public`       |
+| `GET /public/profiles/:prefijo/:slug/reviews`                              | pública                              | `community-public`       |
+| `GET /public/media/:id`                                                    | pública                              | `community-public`       |
+| `GET /p/:slug`                                                             | pública                              | `community-public`       |
+| `GET /o/:slug`                                                             | pública                              | `community-public`       |
+| `GET /f/:slug`                                                             | pública                              | `community-public`       |
+| `GET /l/:slug`                                                             | pública                              | `community-public`       |
+| `GET /s/:slug`                                                             | pública                              | `community-public`       |
+| `POST /community/profiles/:profileId/reviews`                              | sesión                               | `community-reviews`      |
+| `GET /community/profiles/:profileId/reviews`                               | sesión                               | `community-reviews`      |
+| `POST /community/profiles/:profileId/reviews/:reviewId/responses`          | sesión                               | `community-reviews`      |
+| `POST /internal/community/search/reindex`                                  | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN | `community-search-index` |
+| `GET /internal/community/search/health`                                    | SYSTEM, SECURITY_ADMIN, SEARCH_ADMIN | `community-search-index` |
+| `POST /community/public-profiles`                                          | SECURITY_ADMIN                       | `community-social`       |
+| `GET /community/profiles/me`                                               | sesión                               | `community-social`       |
+| `PUT /community/profiles/me`                                               | sesión                               | `community-social`       |
+| `GET /community/profiles/me/stats`                                         | sesión                               | `community-social`       |
+| `POST /community/profiles/:profileId/posts`                                | sesión                               | `community-social`       |
+| `POST /community/comments`                                                 | sesión                               | `community-social`       |
+| `PUT /community/reactions`                                                 | sesión                               | `community-social`       |
+| `POST /community/bookmarks`                                                | sesión                               | `community-social`       |
+| `POST /community/follows`                                                  | sesión                               | `community-social`       |
+| `POST /community/blocks`                                                   | sesión                               | `community-social`       |
+| `DELETE /community/follows`                                                | sesión                               | `community-social`       |
+| `DELETE /community/bookmarks`                                              | sesión                               | `community-social`       |
+| `DELETE /community/blocks`                                                 | sesión                               | `community-social`       |
+| `GET /community/profiles/by-slug/:slug`                                    | sesión                               | `community-social`       |
+| `GET /community/profiles/:profileId/auto-reply`                            | sesión                               | `community-social`       |
+| `PUT /community/profiles/:profileId/auto-reply`                            | sesión                               | `community-social`       |
+| `GET /community/profiles/:profileId`                                       | sesión                               | `community-social`       |
+| `GET /community/profiles/:profileId/posts`                                 | sesión                               | `community-social`       |
+| `GET /community/posts/:postId`                                             | sesión                               | `community-social`       |
+| `GET /community/posts/:postId/comments`                                    | sesión                               | `community-social`       |
+| `GET /community/comments/media/:fileId/content`                            | sesión                               | `community-social`       |
+| `GET /community/posts/:postId/reactions`                                   | sesión                               | `community-social`       |
+| `GET /community/follows`                                                   | sesión                               | `community-social`       |
+| `GET /community/bookmarks`                                                 | sesión                               | `community-social`       |
+| `GET /community/blocks`                                                    | sesión                               | `community-social`       |
+| `GET /community/feed`                                                      | sesión                               | `community-timeline`     |
+| `GET /community/notifications`                                             | sesión                               | `community-timeline`     |
+| `GET /community/topics`                                                    | sesión                               | `community-topics`       |
+| `POST /internal/community/verification/badges`                             | SECURITY_ADMIN                       | `community-verification` |
+| `POST /internal/community/verification/badges/:targetId/revoke`            | SECURITY_ADMIN                       | `community-verification` |
+| `POST /internal/community/verification/badges/expire-sweep`                | SYSTEM, SECURITY_ADMIN               | `community-verification` |
+| `POST /patients/me/reviews`                                                | PATIENT                              | `patient-reviews`        |
 
 ## Endpoints por caso de uso (subconjunto)
 
@@ -214,7 +214,7 @@ El módulo mapea **40 entidades** (`find src/modules/community -name '*.entity.t
   a ese público. La plataforma (`SECURITY_ADMIN`, `SUPERADMIN`, `SYSTEM`) los alcanza para moderar.
 - Una aseguradora (organización activa de tipo `PAYER`, leída de `directory.tenants` y no del
   claim `tenantTypes`) no crea foros ni inicia debates (ORG-FOR-001, DOC-SOC-010): `POST
-  /community/groups` y una publicación raíz en el muro responden 403
+/community/groups` y una publicación raíz en el muro responden 403
   (`INSURER_CANNOT_CREATE_GROUP`, `INSURER_CANNOT_START_DEBATE`). Responder en un debate
   existente no se restringe; la organización médica sí puede.
 - Toda FK `*_profile_id` referencia `community.public_profiles`; el bootstrap de
@@ -305,3 +305,80 @@ muchísimos seguidores; el tope de seguidores por pasada acota el costo.
   sentidos y que la review no arrastre el encuentro clínico.
 
 La revisión ejecutó `corepack yarn test src/modules/community --runInBand --silent`: 41 suites y 616 pruebas aprobadas, con dos advertencias JSON preexistentes.
+
+## Bandeja del equipo de apoyo
+
+Rutas (sin tenant activo; la organización sale de la conversación o del vínculo, nunca del cuerpo):
+`GET /me/support-inbox?tenantId&status&doctor`, `GET /me/support-inbox/:conversationId?tenantId`,
+`POST /community/conversations/:id/assignment`, `GET|POST /community/conversations/:id/internal-notes`,
+`GET /me/support-reply-templates?tenantId` y, para la administración, `GET|POST|PATCH /org/reply-templates`.
+
+**Formas**
+
+- Lista: `{ items, doctors, count }`. Cada ítem trae `conversationId`, `organizationId`/`tenantId`, `organizationName`,
+  `practitionerProfileId`, `practitionerName`, `patientLabel`, `status`, `assignedUserId`, `assignedToName`, `assignedToMe`,
+  `slaDueAt`, `lastMessageAt`, `lastPatientMessage`, `lastMessagePreview`, `isClinical` (y `clinicalSuspected`, el mismo valor).
+  `isClinical` es «hay un mensaje clínico del paciente sin responder por el doctor o su equipo»; si el último mensaje del
+  paciente parece clínico, `lastPatientMessage` y `lastMessagePreview` salen con el marcador «Contenido clínico oculto…»
+  (`CLINICAL_CONTENT_HIDDEN_TEXT`) en lugar del texto. `doctors[]` va en el orden estable de
+  `orderSupportDoctors` (nombre sin acentos, luego perfil), con `id` = asignación de rol del doctor (el de la agenda),
+  `practitionerProfileId`, `name`/`displayName` y `specialty`. Con `tenantId`: 403 sin vínculo vivo en esa organización y 403
+  con el motivo si no hay doctores a quienes atender; sin `tenantId` reúne las organizaciones con vínculo vivo.
+- Detalle: `messages[]` con `from`, `bodyText`, `isClinical`, `contentHidden?`, `authoredByName`, `disclosureShown`.
+  **El texto clínico solo se lee con acceso clínico temporal aprobado**: mientras `patientContext.clinicalAccess` no sea
+  `APPROVED` (vigente), los mensajes que escribió el propio doctor (no su equipo en su nombre) y los del paciente que parecen
+  clínicos salen con `bodyText = «Contenido clínico oculto: requiere acceso clínico temporal aprobado.»`, `isClinical: true` y
+  `contentHidden: true`, sin el texto; con `APPROVED` salen completos. Lo administrativo y lo que escribió el equipo se
+  lee siempre. Además: `notes[]`; `replyAllowed` y `replyBlockedReason`; `replyDisclosure` (`SHOW`/`HIDE`); `assignableTo[]` (quienes pueden responder por ese doctor);
+  `patientContext` (`reasonLabel`, `clinicalAccess` `NONE|PENDING|APPROVED`, `delegateId`, `patientProfileId`,
+  `requestedPermissionId`). Sin acceso, 404 igual que una inexistente.
+- Asignación: dos formas válidas. Con `action` (`TAKE`, `ASSIGN`, `SET_STATUS`; `TAKE` deriva al doctor si hay un mensaje
+  clínico pendiente) o con el estado final `{ practitionerProfileId?, assignedUserId?, status }` (sin `assignedUserId` asigna a
+  quien pide; no deriva por su cuenta). 409 con `details.assignedToName` si otra persona la tiene; 422 si se asigna a quien no
+  puede atender a ese doctor. Responde `{ conversationId, status, assignedUserId, assignedToName, slaDueAt, referredToDoctor }`.
+
+**Reglas**
+
+- La organización de una conversación es la del **perfil público del doctor**. Ve la conversación quien tiene vínculo vivo, la
+  aceptación del doctor **con** `may_reply_on_behalf` y un `messages.reply_on_behalf` que cubre al doctor
+  (`SupportAccessPolicy.inboxDoctorsOfTenant`, la misma regla que `canReplyOnBehalf` y `replyersOfDoctor`): una aceptación solo
+  para la agenda no abre la bandeja del doctor. Por eso `replyAllowed` es siempre `true` en lo que se ve y `assignableTo` es
+  la misma lista de quienes ven la conversación.
+- Estados `NEW → TAKEN → WAITING_DOCTOR → RESOLVED` (`domain/support-inbox.rules.ts`); plazo `SUPPORT_INBOX_SLA_HOURS`
+  (24 h). **Una resuelta se reabre sola (`NEW`, sin dueña) cuando escribe el paciente** (`CommunitySupportReplyService`).
+- **Qué id guarda cada campo.** `direct_messages.on_behalf_of_profile_id` (entidad `onBehalfOfProfileId`, y lo que devuelven
+  los DTO de lectura) guarda el **perfil profesional** del doctor (`profiles.health_practitioner_profiles.profile_id`). El
+  cuerpo del `POST` lleva en `onBehalfOfProfileId` el **perfil público** (igual a `senderProfileId`) y el servicio lo resuelve
+  al profesional antes de escribir. El `payload_json` del correo de respuesta conserva el público y por eso se llama
+  `onBehalfOfPublicProfileId`.
+- **Responder en nombre del doctor** (`POST /community/conversations/:id/messages` con `onBehalfOfProfileId`): 403 sin permiso
+  o sin aceptación; 404 `CONVERSATION_NOT_FOUND` si la conversación no está en la bandeja de ese doctor y organización (que el
+  perfil del doctor participe no basta: `guardReply` repite la lectura de la bandeja); 409 si otra persona tiene la conversación; 422 `CLINICAL_REQUIRES_DERIVATION` (también en
+  `details.reason`) si hay un mensaje clínico del paciente sin derivar; 422 `SUPPORT_CLINICAL_CONTENT` para el texto saliente
+  clínico. Responder es hacerse cargo de la conversación.
+- **Canal de correo**: `channels: ['CHAT','EMAIL']` en ese mismo POST. Crea una solicitud contra el canal `EMAIL` de
+  mensajería (`notification_requests`; la entrega es del worker, sin proveedor queda pendiente) con el doctor como remitente
+  visible (`fromName`; la dirección es la de la plataforma), «Respondido por su equipo» solo si el doctor lo dejó en `SHOW`,
+  pie administrativo, organización del doctor, respeto de las preferencias del paciente y la autora real en
+  `authorized_by_user_id` y `payload_json`. El correo no nombra a la autora. El `payload_json` lleva el doctor como
+  `onBehalfOfPublicProfileId`: el id de su **perfil público** (`community.public_profiles`), no el de la columna
+  `direct_messages.on_behalf_of_profile_id`. Respuesta: `email: { queued, requestId?,
+skippedReason? }`. Solo con `onBehalfOfProfileId`. El destino es solo una dirección **verificada** (verificación de correo
+  consumida, `SupportInboxRepository.emailOfUser`) de una cuenta con credencial activa: una credencial revocada o un correo
+  escrito y nunca confirmado no cuentan; sin dirección verificada no se encola, `skippedReason` dice «La cuenta del paciente no
+  tiene un correo verificado con credencial activa» y queda un registro solo con ids. Un fallo al encolar se registra con tipo,
+  código y un mensaje saneado, nunca con el error completo del driver.
+- **Lo que ven el paciente y el doctor en el chat de siempre**: `GET /community/conversations/:id/messages` agrega
+  `repliedByTeam` (lo que el doctor decidió mostrar, sin nombre) y `teamAuthorName` (solo el doctor dueño del perfil);
+  `GET /community/conversations` agrega `awaitingDoctor` solo para el doctor (`CommunitySupportTeamViewService`). La autora
+  real, la delegación y las notas internas no salen en el DTO del paciente ni en el payload del socket.
+- **Solo mensajes administrativos**: heurística de palabras (`delegated_access/domain/clinical-content.ts`), configurable con
+  `SUPPORT_CLINICAL_KEYWORDS` (reemplaza) y `SUPPORT_CLINICAL_KEYWORDS_EXTRA` (suma). Las respuestas preparadas tampoco pueden
+  ser clínicas (título ni texto), su doctor dueño debe ser de la organización y la respuesta expone `version`
+  (`row_version`); `PATCH` con `expectedVersion` desactualizada responde 409. No hay historial de versiones de una respuesta.
+- **RLS**: las rutas `me/*` no tienen organización activa. Con `RLS_ENFORCE=true` cada lectura corre en una transacción y
+  entra a UNA organización con vínculo vivo a la vez (`withPersonScope`, en `delegated_access/services/tenant-context.ts`);
+  las conversaciones y mensajes, que no llevan organización anclada, se leen acotados por los doctores ya autorizados.
+  Probado contra Postgres como `mantra_app` en `test/integration/support-me-rls.int-spec.ts` (`SUPPORT_RLS_TEST=1`).
+- Las notas internas se anclan a la organización de la conversación. `effective_support_access` usa el mismo criterio; un
+  doctor dado de baja o vencido deja de ser «doctor de la organización».

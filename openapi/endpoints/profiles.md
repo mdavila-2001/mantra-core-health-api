@@ -5983,6 +5983,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Sólo el titular del perfil profesional o la plataforma pueden modificarlo | Excepción explícita en src/modules/profiles/application/services/profile-ownership.service.ts |
 | 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 409 | `CONFLICT` | El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | Ese documento ya está registrado en la plataforma | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | Un idioma no puede declararse dos veces | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | El departamento no pertenece al catálogo de departamentos de Bolivia | Excepción explícita en src/modules/profiles/application/services/administrative-area-catalog.service.ts |
@@ -7946,6 +7947,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
 | 404 | `NOT_FOUND` | Perfil profesional no encontrado | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 409 | `CONFLICT` | El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
+| 409 | `CONFLICT` | Ese documento ya está registrado en la plataforma | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 422 | `PRECONDITION_FAILED` | La cuenta no tiene una persona vinculada | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |
 | 422 | `PRECONDITION_FAILED` | Un idioma no puede declararse dos veces | Excepción explícita en src/modules/profiles/application/services/profiles-practitioners.service.ts |

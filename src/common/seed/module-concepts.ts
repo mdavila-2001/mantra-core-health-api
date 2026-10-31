@@ -2,6 +2,7 @@ import type { ConceptSeed } from './concept-seed';
 import { DIRECTORY_CONCEPT_SEEDS } from '../../modules/directory/directory.concepts';
 import { PROFILES_CONCEPT_SEEDS } from '../../modules/profiles/profiles.concepts';
 import { SURVEYS_CONCEPT_SEEDS } from '../../modules/surveys/surveys.concepts';
+import { IAM_CONCEPT_SEEDS } from '../../modules/iam/iam.concepts';
 import { AUTHZ_CONCEPT_SEEDS } from '../../modules/authz/authz.concepts';
 import { CONSENT_CONCEPT_SEEDS } from '../../modules/consent/consent.concepts';
 import { FORMS_CONCEPT_SEEDS } from '../../modules/forms/forms.concepts';
@@ -45,6 +46,7 @@ import { ALLERGY_CONCEPT_SEEDS } from './data/allergies/allergy.concepts';
 
 export const MODULE_CONCEPT_SEEDS: ConceptSeed[] = [
   ...DIRECTORY_CONCEPT_SEEDS,
+  ...IAM_CONCEPT_SEEDS,
   ...PROFILES_CONCEPT_SEEDS,
   ...AUTHZ_CONCEPT_SEEDS,
   ...CONSENT_CONCEPT_SEEDS,

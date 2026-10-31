@@ -4,6 +4,7 @@ import {
   touch,
   type AuthenticatedUser,
 } from '../../../../../common';
+import { BookingAccess } from '../support/booking-access';
 import { BookingTransitionRecorder } from '../support/booking-transition-recorder';
 import { CheckInResponseDto } from '../../../presentation/dto';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -18,6 +19,7 @@ export class CheckInBookingUseCase {
     private readonly em: EntityManager,
     private readonly bookingsRepo: SchedulingBookingsRepository,
     private readonly transitions: BookingTransitionRecorder,
+    private readonly access: BookingAccess,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(CheckInBookingUseCase.name);
@@ -43,6 +45,13 @@ export class CheckInBookingUseCase {
           bookingId,
         });
       }
+      // La persona de apoyo registra llegadas solo donde su permiso cubre la cita.
+      await this.access.assertSupportMayAct(
+        tx,
+        booking,
+        actor,
+        'schedule.check_in',
+      );
       // C-10: la máquina de estados sólo admite check-in desde CONFIRMED.
       const fromState = booking.statusConceptId;
       this.transitions.assertTransition(fromState, CONCEPTS.BOOKING_CHECKED_IN);

@@ -218,10 +218,16 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
   },
 
   // --- UC-29-05: decidir solicitud (emite grant) ---
+  // La decide únicamente el doctor titular de la delegación. El administrador de
+  // la organización —el actor de este recorrido— no se auto-aprueba lo que pide
+  // su personal: responde como si la solicitud no existiera. El camino feliz
+  // (decide el doctor, se emite el permiso acotado) lo cubre
+  // `access-requests.service.spec.ts`: el doctor del smoke inicia sesión más
+  // adelante en el registro.
   {
     module: 'DelegatedAccess',
     endpoint: 'POST /access-requests/{id}/decision',
-    name: 'happy: aprueba y emite grant',
+    name: 'límite: la administración no decide en lugar del doctor -> 404',
     method: 'post',
     path: (c) => `/access-requests/${c.vars.daRequestId}/decision`,
     body: () => ({
@@ -230,16 +236,7 @@ export const DELEGATED_ACCESS_SMOKE: SmokeCase[] = [
       resourceType: 'CLINICAL_NOTE',
       validTo: FAR_FUTURE,
     }),
-    expectedStatus: 200,
-  },
-  {
-    module: 'DelegatedAccess',
-    endpoint: 'POST /access-requests/{id}/decision',
-    name: 'límite: re-decidir solicitud cerrada -> 422',
-    method: 'post',
-    path: (c) => `/access-requests/${c.vars.daRequestId}/decision`,
-    body: () => ({ decision: 'DENIED' }),
-    expectedStatus: 422,
+    expectedStatus: 404,
   },
   {
     module: 'DelegatedAccess',

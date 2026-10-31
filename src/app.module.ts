@@ -106,6 +106,7 @@ import { AuthThrottlerGuard } from './common/security/auth-throttler.guard';
 import { RedisThrottlerStorage } from './common/security/redis-throttler.storage';
 import { PublicCacheInterceptor } from './common/http/public-cache.interceptor';
 import { PublicCacheStore } from './common/http/public-cache.store';
+import { NoStoreHeadersModule } from './common/http/no-store-headers.module';
 import { SearchPlatformModule } from './modules/search_platform/search_platform.module';
 
 /**
@@ -113,6 +114,11 @@ import { SearchPlatformModule } from './modules/search_platform/search_platform.
  */
 @Module({
   imports: [
+    // F3 (revisión de seguridad del front): `Cache-Control: no-store` por omisión
+    // en toda respuesta, para que lo autenticado (con datos de personas) no
+    // quede en la caché de disco del navegador. Las fichas públicas conservan su
+    // caché pública (`PublicCacheInterceptor` escribe después).
+    NoStoreHeadersModule,
     // Validación del entorno antes que nada: si falta una credencial de base de
     // datos o `LOG_LEVEL` trae un valor inválido, el proceso debe morir aquí y no
     // en la primera consulta ni en la primera línea de log. Se concatenan los dos

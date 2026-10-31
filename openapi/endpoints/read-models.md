@@ -1554,8 +1554,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
-  "ok": true,
-  "status": "ok"
+  "ok": true
 }
 ```
 
@@ -1563,8 +1562,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Indica éxito | `true` |
-| `status` | No | `string` | Sin restricción adicional declarada | Nuevo estado del recurso (concept id) | `ok` |
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 
@@ -1667,8 +1665,7 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
-  "ok": true,
-  "status": "ok"
+  "ok": true
 }
 ```
 
@@ -1676,8 +1673,7 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Indica éxito | `true` |
-| `status` | No | `string` | Sin restricción adicional declarada | Nuevo estado del recurso (concept id) | `ok` |
+| `ok` | Sí | `boolean` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `true` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

@@ -123,6 +123,12 @@ export interface CreateBookingData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Espacio de la cita, copiado del cupo. */
+  careSpaceId?: string;
+  /** Servicio de la cita, copiado del cupo. */
+  healthcareServiceId?: string;
+  /** Permiso del personal de apoyo con el que se agendó la cita, si fue así. */
+  bookedViaGrantId?: string;
 }
 
 /**
@@ -309,6 +315,9 @@ export class SchedulingBookingsRepository {
         reasonText: data.reasonText,
         followUpOfBookingId: data.followUpOfBookingId,
         formInstanceId: data.formInstanceId,
+        careSpaceId: data.careSpaceId,
+        healthcareServiceId: data.healthcareServiceId,
+        bookedViaGrantId: data.bookedViaGrantId,
         ...createdBy(data.actorUserId),
       },
       { partial: true },
@@ -811,12 +820,14 @@ export class SchedulingBookingsRepository {
       endAt: Date;
       statusConceptId: string;
       resourceName: string | null;
+      tenantId: string;
     }[]
   > {
     if (states.length === 0) return [];
 
     return em.getConnection().execute(
       `SELECT b.id,
+              b.tenant_id       AS "tenantId",
               s.start_at        AS "startAt",
               s.end_at          AS "endAt",
               b.status_concept_id AS "statusConceptId",

@@ -29,7 +29,7 @@ function build() {
   const service = new IamDevicesService(
     em as any,
     usersRepo as any,
-    devicesRepo,
+    devicesRepo as any,
     eventsRepo as any,
     logger as any,
   );

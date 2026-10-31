@@ -359,6 +359,10 @@ export class IamPatientSelfRegistrationService {
         statusConceptId: DIR.MEMBERSHIP_ACTIVE,
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
+        // Membresía por defecto del autorregistro: no la creó el dueño, ni un
+        // administrador, ni una invitación, ni un vínculo de apoyo. Se declara
+        // desconocida para que ninguna regla de apoyo la trate como suya.
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_UNKNOWN,
         actorUserId: user.id,
       });
 

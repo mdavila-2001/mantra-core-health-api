@@ -6,6 +6,11 @@ import { createdBy } from '../../../common';
 /** Datos para crear una delegación de practitioner. */
 export interface CreateDelegateData {
   /**
+   * Organización de la delegación (la del contexto verificado). El modelo exige
+   * que sea la de su set, la de su vínculo y la de su doctor.
+   */
+  tenantId: string;
+  /**
    * Identificador asociado a practitioner role assignment.
    */
   practitionerRoleAssignmentId: string;
@@ -33,6 +38,8 @@ export interface CreateDelegateData {
    * Valor de may view clinical content mantenido por la instancia.
    */
   mayViewClinicalContent?: boolean;
+  /** Si el doctor autoriza a la persona a responder mensajes en su nombre. */
+  mayReplyOnBehalf?: boolean;
   /**
    * Valor de may edit drafts mantenido por la instancia.
    */
@@ -90,6 +97,7 @@ export class PractitionerDelegateAssignmentsRepository {
     return em.create(
       PractitionerDelegateAssignments,
       {
+        tenantId: data.tenantId,
         practitionerRoleAssignmentId: data.practitionerRoleAssignmentId,
         delegateUserAssignmentId: data.delegateUserAssignmentId,
         delegatedPermissionSetId: data.delegatedPermissionSetId,
@@ -99,6 +107,8 @@ export class PractitionerDelegateAssignmentsRepository {
         mayViewClinicalContent: data.mayViewClinicalContent ?? false,
         mayEditDrafts: data.mayEditDrafts ?? false,
         maySignClinicalContent: data.maySignClinicalContent ?? false,
+        // El doctor la concede al aceptar; mientras no, el modelo la deja en falso.
+        mayReplyOnBehalf: data.mayReplyOnBehalf ?? false,
         validFrom: data.validFrom,
         validTo: data.validTo,
         statusConceptId: data.statusConceptId,

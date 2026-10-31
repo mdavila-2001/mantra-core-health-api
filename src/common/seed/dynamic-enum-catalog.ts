@@ -661,12 +661,28 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     description: 'Situación de una persona dentro de la organización.',
     concepts: [
       DIR.MEMBERSHIP_INVITED,
+      DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
       DIR.MEMBERSHIP_ACTIVE,
       DIR.MEMBERSHIP_SUSPENDED,
       DIR.MEMBERSHIP_ENDED,
     ],
     defaultConceptId: DIR.MEMBERSHIP_INVITED,
     targets: ['directory.tenant_memberships.status_concept_id'],
+  },
+  {
+    code: 'membership-origin',
+    name: 'Origen de la membresía',
+    description:
+      'Por qué existe la membresía: la creó el dueño, la añadió un administrador, la persona canjeó una invitación, existe solo por un vínculo de apoyo, o se desconoce. Lo escribe la API al crearla.',
+    concepts: [
+      DIR.MEMBERSHIP_ORIGIN_OWNER_CREATED,
+      DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED,
+      DIR.MEMBERSHIP_ORIGIN_INVITATION_REDEEMED,
+      DIR.MEMBERSHIP_ORIGIN_SUPPORT_ENGAGEMENT,
+      DIR.MEMBERSHIP_ORIGIN_UNKNOWN,
+    ],
+    defaultConceptId: DIR.MEMBERSHIP_ORIGIN_UNKNOWN,
+    targets: ['directory.tenant_memberships.origin_concept_id'],
   },
   {
     code: 'tenant-role',

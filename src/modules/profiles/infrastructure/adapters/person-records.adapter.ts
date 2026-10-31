@@ -139,6 +139,10 @@ export class PersonRecordsAdapter implements PersonRecordsPort {
     return this.identifiers.findActiveDuplicate(em, data) as Promise<T | null>;
   }
 
+  findActiveNationalIdDuplicate(em: EntityManager, nationalId: string) {
+    return this.identifiers.findActiveNationalIdDuplicate(em, nationalId);
+  }
+
   createIdentifier(em: EntityManager, data: object) {
     return this.identifiers.create(
       em,

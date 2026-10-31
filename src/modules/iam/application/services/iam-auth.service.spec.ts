@@ -36,6 +36,7 @@ function build() {
   };
   const tokenService = {
     hashRefreshToken: mockFn((raw: string) => `h:${raw}`),
+    isMfaVerifiedRefreshToken: mockFn(() => false),
     issueSessionTokens: mockFn(() => ({
       accessToken: 'at',
       refreshToken: 'rt',
@@ -69,10 +70,22 @@ function build() {
     purgeExpired: mockFn().mockResolvedValue(0),
   };
   const rolesRepo = { findActiveForUser: mockFn().mockResolvedValue([]) };
-  const lockoutsRepo = { create: mockFn(), findActiveForUser: mockFn() };
+  const lockoutsRepo = {
+    create: mockFn(),
+    findActiveForUser: mockFn(),
+    lockForFailedAttempts: mockFn(),
+    lockManually: mockFn(),
+  };
   const eventsRepo = {
     record: mockFn(),
+    countFailedMfaSince: mockFn().mockResolvedValue(0),
+    lastMfaTimeStep: mockFn().mockResolvedValue(undefined),
+    deviceCodeUsed: mockFn().mockResolvedValue(false),
     countFailedLoginsSince: mockFn().mockResolvedValue(0),
+    // B-B10: cerrojo por persona del paso extra (no lo usa el login; el doble solo completa el tipo).
+    withMfaAttemptLock: mockFn(
+      async (_em: any, _userId: string, work: () => Promise<unknown>) => work(),
+    ),
   };
   // Por defecto, una cuenta sin persona vinculada: los claims `pid` y `hpid` se
   // omiten y el token queda igual que antes de que existieran. Los casos que los
@@ -583,7 +596,6 @@ describe('IamAuthService', () => {
       });
       d.usersRepo.findById.mockResolvedValue(user);
       d.eventsRepo.countFailedLoginsSince.mockResolvedValue(5);
-      d.lockoutsRepo.findActiveForUser.mockResolvedValue(null);
       d.sessionsRepo.activeSessionIdsForUser.mockResolvedValue(['s1']);
 
       await expect(
@@ -591,7 +603,14 @@ describe('IamAuthService', () => {
       ).rejects.toBeInstanceOf(UnauthorizedException);
 
       expect(user.statusConceptId).toBe(CONCEPTS.USER_LOCKED);
-      expect(d.lockoutsRepo.create).toHaveBeenCalled();
+      expect(d.lockoutsRepo.lockForFailedAttempts).toHaveBeenCalledWith(
+        d.tx,
+        expect.objectContaining({
+          userId: 'u1',
+          reasonConceptId: CONCEPTS.LOCK_REASON_FAILED_ATTEMPTS,
+          failedAttempts: 5,
+        }),
+      );
       expect(d.eventsRepo.record).toHaveBeenCalledWith(
         d.tx,
         expect.objectContaining({
@@ -814,6 +833,20 @@ describe('IamAuthService', () => {
       expect(d.sessionsRepo.revokeById).toHaveBeenCalledWith(d.tx, 's1');
       // El refresh token es lo que sobrevive al cierre si no se revoca.
       expect(d.refreshRepo.revokeBySessionId).toHaveBeenCalledWith(d.tx, 's1');
+    });
+
+    it('al cerrar sesión borra el sello del paso extra de ESA sesión', async () => {
+      const d = build();
+      const stepUp = { clear: mockFn().mockResolvedValue(undefined) };
+      (d.service as any).stepUp = stepUp;
+      d.sessionsRepo.findActiveByTokenId.mockResolvedValue({
+        id: 's1',
+        userId: 'u1',
+      });
+
+      await d.service.logout({ id: 'u1', sessionId: 'sid-1', roles: [] });
+
+      expect(stepUp.clear).toHaveBeenCalledWith('sid-1');
     });
 
     it('no revoca la sesión de otro usuario aunque nombre su sid', async () => {

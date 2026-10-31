@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -20,6 +21,7 @@ import { ClinicalStructureService, PracticeSitesService } from '../services';
 import {
   CreateClinicalUnitDto,
   CreateCareSpaceDto,
+  MoveCareSpaceDto,
   ClinicalUnitResponseDto,
   CareSpaceResponseDto,
   CareSpaceSummaryDto,
@@ -101,5 +103,25 @@ export class SitesController {
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<CareSpaceResponseDto> {
     return this.structureService.createCareSpace(siteId, dto, actor);
+  }
+
+  /** Mueve un espacio bajo otro padre y recalcula la ruta de su subárbol. */
+  @Audited({
+    action: 'CARE_SPACE_MOVED',
+    entity: 'care_space',
+    entityId: 'result.id',
+  })
+  @Patch(':siteId/care-spaces/:id')
+  @Roles('SECURITY_ADMIN')
+  @ApiOperation({
+    summary: 'Mover un espacio de atención bajo otro padre de la sede',
+  })
+  moveCareSpace(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: MoveCareSpaceDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ): Promise<CareSpaceResponseDto> {
+    return this.structureService.moveCareSpace(siteId, id, dto, actor);
   }
 }

@@ -33,7 +33,7 @@ function build() {
     })),
   };
   const identifiers = {
-    findActiveDuplicate: mockFn().mockResolvedValue(null),
+    findActiveNationalIdDuplicate: mockFn().mockResolvedValue(null),
     create: mockFn((_tx: any, data: any) => ({ id: 'ident-1', ...data })),
   };
   const contactPoints = {
@@ -94,9 +94,11 @@ describe('createWalkInPatient', () => {
       ...identifiers.create.mock.invocationCallOrder,
       ...contactPoints.create.mock.invocationCallOrder,
     ];
-    // `flush` se llama dos veces: una tras la persona (antes de su perfil e
-    // hijo), otra tras el paciente (antes de identificador y contacto).
-    expect(tx.flush.mock.calls).toHaveLength(2);
+    // `flush` se llama tres veces: una tras la persona (antes de su perfil e
+    // hijo), otra tras el paciente (antes de identificador y contacto) y otra
+    // tras el identificador, para que el choque con el índice único del
+    // documento (23505) salga ahí y se conteste como 409.
+    expect(tx.flush.mock.calls).toHaveLength(3);
     expect(persons.create.mock.invocationCallOrder[0]).toBeLessThan(
       tx.flush.mock.invocationCallOrder[0],
     );
@@ -108,6 +110,12 @@ describe('createWalkInPatient', () => {
     );
     expect(tx.flush.mock.invocationCallOrder[1]).toBeLessThan(
       identifiers.create.mock.invocationCallOrder[0],
+    );
+    expect(identifiers.create.mock.invocationCallOrder[0]).toBeLessThan(
+      tx.flush.mock.invocationCallOrder[2],
+    );
+    expect(tx.flush.mock.invocationCallOrder[2]).toBeLessThan(
+      contactPoints.create.mock.invocationCallOrder[0],
     );
     expect(writeOrder.length).toBeGreaterThan(0);
 
@@ -160,8 +168,9 @@ describe('createWalkInPatient', () => {
       patientProfiles,
       contactPoints,
     } = build();
-    identifiers.findActiveDuplicate.mockResolvedValue({
+    identifiers.findActiveNationalIdDuplicate.mockResolvedValue({
       id: 'ident-existente',
+      ownerId: 'person-otro',
     });
 
     await expect(
@@ -172,6 +181,26 @@ describe('createWalkInPatient', () => {
     expect(personProfiles.create).not.toHaveBeenCalled();
     expect(patientProfiles.create).not.toHaveBeenCalled();
     expect(identifiers.create).not.toHaveBeenCalled();
+    expect(contactPoints.create).not.toHaveBeenCalled();
+  });
+
+  it('N3: si el índice único del documento rechaza el alta (23505) responde el mismo 409 y no escribe el teléfono', async () => {
+    const { tx, repos, contactPoints } = build();
+    let flushes = 0;
+    tx.flush = mockFn(async () => {
+      flushes += 1;
+      if (flushes === 3) {
+        throw Object.assign(new Error('duplicate key'), {
+          code: '23505',
+          constraint: 'uq_identifiers_national_id_normalized',
+        });
+      }
+    });
+
+    await expect(
+      createWalkInPatient(repos, tx, DATA_BASE),
+    ).rejects.toBeInstanceOf(ConflictException);
+
     expect(contactPoints.create).not.toHaveBeenCalled();
   });
 

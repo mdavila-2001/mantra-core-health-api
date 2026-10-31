@@ -1213,7 +1213,7 @@ Una sola decisión vale; quien decide queda registrado.
 
 ### Descripción del sistema
 
-NestJS resuelve `POST /automation/approvals/{id}/decide` en `AutomationOrchestrationController_decideApproval`. El controlador delega en `AutomationExecutionService.decideApproval`. Valida el body como `DecideApprovalDto` y consume `application/json`. El tipo de retorno estático es `Promise<DecideApprovalResponseDto>`.
+NestJS resuelve `POST /automation/approvals/{id}/decide` en `AutomationOrchestrationController_decideApproval`. El controlador delega en `AutomationExecutionService.decideApproval`. Valida el body como `AutomationDecideApprovalDto` y consume `application/json`. El tipo de retorno estático es `Promise<DecideApprovalResponseDto>`.
 
 ### Parámetros
 
@@ -1223,7 +1223,7 @@ NestJS resuelve `POST /automation/approvals/{id}/decide` en `AutomationOrchestra
 
 ### Payload mínimo aceptable
 
-Incluye únicamente los campos obligatorios del DTO `DecideApprovalDto`; los campos opcionales se omiten.
+Incluye únicamente los campos obligatorios del DTO `AutomationDecideApprovalDto`; los campos opcionales se omiten.
 
 ```http
 POST /automation/approvals/00000000-0000-4000-8000-000000000001/decide HTTP/1.1
@@ -1286,11 +1286,62 @@ Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el contro
 
 ```json
 {
-  "id": "00000000-0000-4000-8000-000000000001",
-  "statusConceptId": "00000000-0000-4000-8000-000000000001",
-  "agentRunId": "00000000-0000-4000-8000-000000000001",
-  "agentRunStatusConceptId": "00000000-0000-4000-8000-000000000001",
-  "resolutionStepId": "00000000-0000-4000-8000-000000000001"
+  "approval": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "tenantId": "00000000-0000-4000-8000-000000000001",
+    "kind": "ACTION",
+    "status": "PENDING",
+    "approverKind": "DOCTOR",
+    "atom": "valor-ejemplo",
+    "requesterUserId": "00000000-0000-4000-8000-000000000001",
+    "subjectUserId": "00000000-0000-4000-8000-000000000001",
+    "reasonText": "Texto descriptivo de ejemplo",
+    "decisionComment": "valor-ejemplo",
+    "createdAt": "2026-07-31T12:00:00.000Z",
+    "expiresAt": "2026-07-31T12:00:00.000Z",
+    "approvedUntil": "2026-07-31T12:00:00.000Z",
+    "decidedAt": "2026-07-31T12:00:00.000Z",
+    "consumedAt": "2026-07-31T12:00:00.000Z",
+    "summary": "valor-ejemplo",
+    "details": {
+      "op": "ADD",
+      "reasons": [
+        "Texto descriptivo de ejemplo"
+      ],
+      "atoms": [
+        {
+          "code": "billing.receipt.void",
+          "name": "Anular comprobantes",
+          "critical": true
+        }
+      ],
+      "criticalAtoms": [
+        {
+          "code": "billing.receipt.void",
+          "name": "Anular comprobantes",
+          "critical": true
+        }
+      ],
+      "target": {
+        "kind": "PRACTITIONER",
+        "expansionMode": "DYNAMIC",
+        "practitionerName": "Nombre de ejemplo",
+        "serviceName": "Nombre de ejemplo",
+        "locationName": "Nombre de ejemplo"
+      },
+      "validFrom": "2026-07-31T12:00:00.000Z",
+      "validTo": "2026-07-31T12:00:00.000Z",
+      "conditions": [
+        "valor-ejemplo"
+      ],
+      "changes": [
+        "valor-ejemplo"
+      ]
+    }
+  },
+  "execution": {
+    "clave": "valor"
+  }
 }
 ```
 
@@ -1298,11 +1349,45 @@ Campos de la respuesta:
 
 | Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
 |---|:---:|---|---|---|---|
-| `id` | Sí | `string` | formato `uuid` | Identificador único de la instancia. | `00000000-0000-4000-8000-000000000001` |
-| `statusConceptId` | Sí | `string` | formato `uuid` | Identificador asociado a status concept. | `00000000-0000-4000-8000-000000000001` |
-| `agentRunId` | Sí | `string` | formato `uuid` | Identificador asociado a agent run. | `00000000-0000-4000-8000-000000000001` |
-| `agentRunStatusConceptId` | Sí | `string` | formato `uuid` | Estado en el que queda el agent_run | `00000000-0000-4000-8000-000000000001` |
-| `resolutionStepId` | Sí | `string` | formato `uuid` | Paso de resolución añadido a la traza | `00000000-0000-4000-8000-000000000001` |
+| `approval` | Sí | `SupportApprovalViewDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","kind":"ACTION","status":"PENDING","approverKind":"DOCTOR","atom":"valor-ejemplo","requesterUserId":"00000000-0000-4000-8000-000000000001","subjectUserId":"00000000-0000-4000-8000-000000000001","reasonText":"Texto descriptivo de ejemplo","decisionComment":"valor-ejemplo","createdAt":"2026-07-31T12:00:00.000Z","expiresAt":"2026-07-31T12:00:00.000Z","approvedUntil":"2026-07-31T12:00:00.000Z","decidedAt":"2026-07-31T12:00:00.000Z","consumedAt":"2026-07-31T12:00:00.000Z","summary":"valor-ejemplo","details":{"op":"ADD","reasons":["Texto descriptivo de ejemplo"],"atoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"criticalAtoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"target":{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","conditions":["valor-ejemplo"],"changes":["valor-ejemplo"]}}` |
+| `approval.id` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `approval.tenantId` | Sí | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `approval.kind` | Sí | `string` | valores: `ACTION`, `GRANT_CHANGE`, `SOD_EXCEPTION`, `REACTIVATION`, `ENGAGEMENT_MOVE` | Sin descripción específica en el contrato OpenAPI. | `ACTION` |
+| `approval.status` | Sí | `string` | valores: `PENDING`, `APPROVED`, `REJECTED`, `EXPIRED`, `CANCELLED`, `EXECUTED` | Sin descripción específica en el contrato OpenAPI. | `PENDING` |
+| `approval.approverKind` | Sí | `string` | valores: `DOCTOR`, `SERVICE_HEAD`, `SECOND_APPROVER` | Sin descripción específica en el contrato OpenAPI. | `DOCTOR` |
+| `approval.atom` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `approval.requesterUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `approval.subjectUserId` | No | `string` | formato `uuid` | Sin descripción específica en el contrato OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+| `approval.reasonText` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Texto descriptivo de ejemplo` |
+| `approval.decisionComment` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `valor-ejemplo` |
+| `approval.createdAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.expiresAt` | Sí | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.approvedUntil` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.decidedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.consumedAt` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.summary` | Sí | `string` | Sin restricción adicional declarada | Resumen en lenguaje simple de lo que se aprueba. | `valor-ejemplo` |
+| `approval.details` | No | `GrantChangeDetailsDto` | Sin restricción adicional declarada | Solo en `GET /approvals/pending` y solo para `GRANT_CHANGE`: el permiso completo que se otorgaría al aprobar. | `{"op":"ADD","reasons":["Texto descriptivo de ejemplo"],"atoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"criticalAtoms":[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}],"target":{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"},"validFrom":"2026-07-31T12:00:00.000Z","validTo":"2026-07-31T12:00:00.000Z","conditions":["valor-ejemplo"],"changes":["valor-ejemplo"]}` |
+| `approval.details.op` | No | `string` | valores: `ADD`, `UPDATE` | Sin descripción específica en el contrato OpenAPI. | `ADD` |
+| `approval.details.reasons` | No | `array<string>` | Sin restricción adicional declarada | Por qué pide aprobación: NEW_CRITICAL_ATOMS, SCOPE_WIDENED o VALIDITY_EXTENDED. | `["Texto descriptivo de ejemplo"]` |
+| `approval.details.atoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `approval.details.atoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `approval.details.atoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `approval.details.atoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `approval.details.criticalAtoms` | No | `array<GrantChangeAtomViewDto>` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `[{"code":"billing.receipt.void","name":"Anular comprobantes","critical":true}]` |
+| `approval.details.criticalAtoms[].code` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `billing.receipt.void` |
+| `approval.details.criticalAtoms[].name` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Anular comprobantes` |
+| `approval.details.criticalAtoms[].critical` | No | `boolean` | Sin restricción adicional declarada | Sensibilidad CRÍTICA (cuatro ojos). | `true` |
+| `approval.details.target` | No | `GrantChangeTargetViewDto` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `{"kind":"PRACTITIONER","expansionMode":"DYNAMIC","practitionerName":"Nombre de ejemplo","serviceName":"Nombre de ejemplo","locationName":"Nombre de ejemplo"}` |
+| `approval.details.target.kind` | No | `string` | valores: `PRACTITIONER`, `SERVICE`, `LOCATION`, `PRACTITIONER_SERVICE`, `PRACTITIONER_LOCATION`, `SERVICE_LOCATION`, `ALL_PRACTITIONERS`, `ALL_SERVICES`, `ALL_LOCATIONS`, `ALL` | Sin descripción específica en el contrato OpenAPI. | `PRACTITIONER` |
+| `approval.details.target.expansionMode` | No | `string` | valores: `DYNAMIC`, `FIXED` | Sin descripción específica en el contrato OpenAPI. | `DYNAMIC` |
+| `approval.details.target.practitionerName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `approval.details.target.serviceName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `approval.details.target.locationName` | No | `string` | Sin restricción adicional declarada | Sin descripción específica en el contrato OpenAPI. | `Nombre de ejemplo` |
+| `approval.details.validFrom` | No | `string` | formato `date-time` | Sin descripción específica en el contrato OpenAPI. | `2026-07-31T12:00:00.000Z` |
+| `approval.details.validTo` | No | `string` | formato `date-time` | Ausente = sin fin de vigencia. | `2026-07-31T12:00:00.000Z` |
+| `approval.details.conditions` | No | `array<string>` | Sin restricción adicional declarada | Condiciones en lenguaje simple; vacío = sin condiciones. | `["valor-ejemplo"]` |
+| `approval.details.changes` | No | `array<string>` | Sin restricción adicional declarada | Solo en `UPDATE`: qué campos cambia (actions, validTo, expansionMode, condition, actionConditions). | `["valor-ejemplo"]` |
+| `execution` | No | `object` | Sin restricción adicional declarada | Lo que ejecutó la aprobación (solo cambios administrativos), con identificadores. | `{"clave":"valor"}` |
 
 En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
 

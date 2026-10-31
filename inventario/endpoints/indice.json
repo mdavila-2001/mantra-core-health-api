@@ -1,20 +1,20 @@
 {
   "resumen": {
-    "total": 1621,
+    "total": 1685,
     "porOrigen": {
-      "CONTRATO": 1612,
+      "CONTRATO": 1676,
       "CONTRATO_AUSENTE": 9
     },
     "porRiesgo": {
-      "BAJO": 524,
-      "MEDIO": 898,
-      "ALTO": 199
+      "BAJO": 549,
+      "MEDIO": 912,
+      "ALTO": 224
     },
-    "conTablas": 1559,
-    "sinTablasSinDeterminar": 1,
+    "conTablas": 1622,
+    "sinTablasSinDeterminar": 2,
     "sinExplicacionDeNegocio": 0,
-    "conPruebas": 935,
-    "conRequerimientos": 1621
+    "conPruebas": 942,
+    "conRequerimientos": 1685
   },
   "endpoints": [
     {
@@ -3443,7 +3443,7 @@
         "PRACTITIONER",
         "CLINICIAN"
       ],
-      "tablas": 12,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -3485,6 +3485,26 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "BillingServiceCatalogController_importProcedures",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/billing/service-catalog/import-procedures",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Importar en lote procedimientos del arancel al catálogo",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN",
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "BillingServiceCatalogController_listProcedureSpecialties",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -3496,6 +3516,22 @@
       "publica": false,
       "roles": [],
       "tablas": 1,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "BillingServiceCatalogController_listMyProcedureSpecialties",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/billing/service-catalog/procedure-specialties/mine",
+      "modulo": "billing",
+      "bloque": "Financiero y ERP",
+      "nombre": "Listar las especialidades del arancel que corresponden al médico",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6085,7 +6121,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -6107,6 +6143,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "CommunitySupportInboxController_assignment",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/community/conversations/{conversationId}/assignment",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Tomar, asignar o cambiar el estado de una conversación",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "CommunityMessagingController_getAttachmentContent",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -6123,6 +6175,38 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "CommunitySupportInboxController_notes",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/community/conversations/{conversationId}/internal-notes",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Notas internas de una conversación",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CommunitySupportInboxController_addNote",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/community/conversations/{conversationId}/internal-notes",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Agregar una nota interna a una conversación",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "CommunityMessagingController_listMessages",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -6133,7 +6217,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -6149,7 +6233,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 23,
+      "tablas": 39,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -7250,6 +7334,54 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "CommunitySupportInboxController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-inbox",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Bandeja de conversaciones del equipo de apoyo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CommunitySupportInboxController_conversation",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-inbox/{conversationId}",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Una conversación de la bandeja, con la autora real y las notas",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 24,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CommunitySupportInboxController_myTemplates",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-reply-templates",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Respuestas preparadas del equipo de apoyo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "CommunityPublicController_getOrganization",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -7261,6 +7393,60 @@
       "publica": true,
       "roles": [],
       "tablas": 18,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CommunitySupportInboxController_orgTemplates",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/reply-templates",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Respuestas preparadas de la organización",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CommunitySupportInboxController_createTemplate",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/reply-templates",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Crear una respuesta preparada",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "CommunitySupportInboxController_updateTemplate",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/org/reply-templates/{id}",
+      "modulo": "community",
+      "bloque": "Marketing y Crecimiento",
+      "nombre": "Cambiar, retirar o reactivar una respuesta preparada",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -9591,11 +9777,28 @@
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN"
+        "PRACTITIONER",
+        "CLINICIAN"
       ],
-      "tablas": 4,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AffiliationInvitationsController_redeem",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/affiliation-invitations/redeem",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Canjear un código o QR de afiliación",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 19,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -9633,6 +9836,60 @@
       "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportMaintenanceController_expireRequests",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/delegated-access/support/expire-requests",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Vencer solicitudes de apoyo sin decidir (15 días)",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SYSTEM"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportMaintenanceController_recertificationSweep",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/delegated-access/support/recertification-sweep",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Suspender vínculos sin recertificar (15 días)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SYSTEM"
+      ],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportMaintenanceController_refresh",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/delegated-access/support/refresh-effective-access",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Recalcular el acceso efectivo del personal de apoyo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SYSTEM"
+      ],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -9690,6 +9947,175 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PractitionerSupportController_accessRequests",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/practitioner/support-access-requests",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Solicitudes de acceso clínico temporal de mi equipo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerSupportController_teamActivity",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/practitioner/support-activity",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Actividad de mi equipo de apoyo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerSupportController_team",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/practitioner/support-team",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Mi equipo de apoyo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementRequestsController_requestClinicalAccess",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/me/support-access-requests",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Pedir acceso clínico temporal a un paciente (lo decide el doctor)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerSupportController_myActivity",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-activity",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Mi actividad como personal de apoyo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementRequestsController_catalog",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-catalog",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Catálogo de una organización para pedir permisos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementRequestsController_mine",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-engagements",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Mis vínculos de apoyo y mis solicitudes",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementRequestsController_confirmMine",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/me/support-engagements/{id}/confirm",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Confirmar mi propio vínculo de apoyo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "PractitionerSupportController_patientSearch",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/me/support-patient-search",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Buscar un paciente (búsqueda exacta, auditada)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportPatientsController_register",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/me/support-patients",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Registrar un paciente nuevo (con aviso de posibles duplicados)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 1,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "OrgUserAssignmentsController_create",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -9705,6 +10131,312 @@
       "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_lookup",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/access-lookup",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Quién tiene acceso a un doctor, servicio o ubicación",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AffiliationInvitationsController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/affiliation-invitations",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Listar las invitaciones de afiliación",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AffiliationInvitationsController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/affiliation-invitations",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Crear un código o QR de afiliación",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "AffiliationInvitationsController_revoke",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/affiliation-invitations/{id}/revoke",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Revocar un código o QR de afiliación",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_listTemplates",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/role-templates",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Plantillas de rol de apoyo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_createTemplate",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/role-templates",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Crear una plantilla de rol propia",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_updateTemplate",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/org/role-templates/{id}",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Versionar una plantilla de rol propia",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_activityOfTenant",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/support-activity",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Actividad del personal de apoyo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 10,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_catalog",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/support-catalog",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Catálogo de doctores, servicios y ubicaciones para los permisos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementRequestsController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/support-engagement-requests",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Solicitudes de vínculo de apoyo de la organización",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 11,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementRequestsController_decide",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/support-engagement-requests/{id}/decision",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Decidir una solicitud de apoyo ítem por ítem",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 24,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/support-engagements",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Vínculos de apoyo de la organización",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_end",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/support-engagements/{id}/end",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Terminar un vínculo de apoyo (revocación inmediata)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 19,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_listGrants",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/support-engagements/{id}/grants",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Permisos de un vínculo de apoyo",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_updateGrant",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/org/support-engagements/{id}/grants",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Editar o dar de baja un permiso de apoyo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 17,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_addGrant",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/support-engagements/{id}/grants",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Otorgar un permiso de apoyo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementsController_recertify",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/org/support-engagements/{id}/recertify",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Recertificar un vínculo de apoyo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 15,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -9744,6 +10476,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PractitionerSupportController_accept",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/practitioner-delegates/{id}/accept",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Aceptar a una persona de apoyo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 13,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PractitionerDelegatesController_requestAccess",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -9756,7 +10507,7 @@
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 4,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -9780,6 +10531,25 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "PractitionerSupportController_replySettings",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/practitioner-delegates/{id}/reply-settings",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Permitir o no responder en mi nombre",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "PRACTITIONER",
+        "CLINICIAN"
+      ],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "PractitionerDelegatesController_revoke",
       "origen": "CONTRATO",
       "metodo": "POST",
@@ -9790,11 +10560,29 @@
       "riesgo": "MEDIO",
       "publica": false,
       "roles": [
-        "SECURITY_ADMIN"
+        "SECURITY_ADMIN",
+        "PRACTITIONER",
+        "CLINICIAN"
       ],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SupportEngagementRequestsController_create",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/support-engagement-requests",
+      "modulo": "delegated_access",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Pedir un vínculo de apoyo o su ampliación",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 12,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -10815,7 +11603,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10831,7 +11619,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10847,7 +11635,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -10863,7 +11651,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10879,7 +11667,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10895,7 +11683,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10911,7 +11699,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10945,7 +11733,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 11,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -10961,7 +11749,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10977,7 +11765,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -10993,7 +11781,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -11009,7 +11797,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -11025,7 +11813,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -11041,7 +11829,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -11057,7 +11845,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -11073,7 +11861,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -11089,7 +11877,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -11105,7 +11893,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -11121,7 +11909,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 11,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -11140,6 +11928,54 @@
       "tablas": 13,
       "eventos": 0,
       "pruebas": 2,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TenantsController_listMyInvitations",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/tenants/me/membership-invitations",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Mis membresías pendientes de aceptar",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TenantsController_acceptMyInvitation",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/tenants/me/membership-invitations/{membershipId}/accept",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Aceptar una membresía pendiente propia",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "TenantsController_declineMyInvitation",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/tenants/me/membership-invitations/{membershipId}/decline",
+      "modulo": "directory",
+      "bloque": "Núcleo y Terminología",
+      "nombre": "Rechazar una membresía pendiente propia",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 1,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13436,7 +14272,7 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 23,
+      "tablas": 35,
       "eventos": 0,
       "pruebas": 61,
       "revision": "AUTO_DETECTADA"
@@ -13582,7 +14418,7 @@
       "riesgo": "ALTO",
       "publica": true,
       "roles": [],
-      "tablas": 15,
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -13649,6 +14485,134 @@
       "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccountSecurityController_confirmDevice",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/me/devices/{id}/confirm",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Reconocer un dispositivo propio («Fui yo»)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 5,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccountSecurityController_requestDeviceCode",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/me/devices/{id}/confirm-code",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Enviar al correo verificado el código para reconocer un dispositivo",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccountSecurityController_reportDeviceNotMe",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/me/devices/{id}/not-me",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "No reconocer un dispositivo («No fui yo») y cerrar las otras sesiones",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 6,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccountSecurityController_mfaStatus",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/iam/me/mfa",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Estado de mi verificación en dos pasos",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 2,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccountSecurityController_revokeFactor",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/me/mfa/{factorId}/revoke",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Quitar uno de mis factores de segundo paso",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 7,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccountSecurityController_startTotp",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/me/mfa/totp",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Dar de alta mi app autenticadora (devuelve el secreto una vez)",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccountSecurityController_confirmTotp",
+      "origen": "CONTRATO",
+      "metodo": "POST",
+      "ruta": "/iam/me/mfa/totp/{factorId}/confirm",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Confirmar mi app autenticadora con un código",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [],
+      "tablas": 8,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccountSecurityController_myNetwork",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/iam/me/network",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "La IP con la que me ve el servidor",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 0,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -13727,6 +14691,42 @@
       "publica": true,
       "roles": [],
       "tablas": 0,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccessRescueController_clearIpAccessRules",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/iam/rescue/tenants/{tenantId}/ip-access-rules",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Rescate (SYSTEM): retirar las reglas de red de una organización",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SYSTEM"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IamAccessRescueController_clearSessionPolicies",
+      "origen": "CONTRATO",
+      "metodo": "DELETE",
+      "ruta": "/iam/rescue/tenants/{tenantId}/session-policies",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Rescate (SYSTEM): retirar las políticas de sesión de una organización",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SYSTEM"
+      ],
+      "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -13974,7 +14974,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -14050,6 +15050,78 @@
       "tablas": 2,
       "eventos": 0,
       "pruebas": 1,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IpAccessRulesController_get",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/ip-access-rules",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Reglas de red de la organización",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "IpAccessRulesController_put",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/org/ip-access-rules",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Definir las reglas de red de la organización",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 3,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SessionPoliciesController_get",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/org/session-policies",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Políticas de sesión de la organización",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 1,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SessionPoliciesController_put",
+      "origen": "CONTRATO",
+      "metodo": "PUT",
+      "ruta": "/org/session-policies",
+      "modulo": "iam",
+      "bloque": "Identidad y Seguridad",
+      "nombre": "Definir las políticas de sesión de la organización",
+      "riesgo": "MEDIO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 4,
+      "eventos": 0,
+      "pruebas": 0,
       "revision": "AUTO_DETECTADA"
     },
     {
@@ -14735,7 +15807,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -14751,7 +15823,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 14,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -14767,7 +15839,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -14783,7 +15855,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -14799,7 +15871,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 9,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -14879,7 +15951,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -14913,7 +15985,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -14929,7 +16001,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -14985,7 +16057,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 22,
+      "tablas": 23,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15023,7 +16095,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 19,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15064,7 +16136,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 21,
+      "tablas": 22,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15102,7 +16174,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 15,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15137,7 +16209,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15153,7 +16225,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15169,7 +16241,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15185,7 +16257,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15201,7 +16273,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 4,
+      "tablas": 5,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -15217,7 +16289,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15233,7 +16305,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15249,7 +16321,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 14,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15265,7 +16337,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15281,7 +16353,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15297,7 +16369,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 9,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15377,7 +16449,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15393,7 +16465,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 2,
+      "tablas": 3,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15409,7 +16481,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15473,7 +16545,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 15,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15489,7 +16561,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 28,
+      "tablas": 29,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -15579,7 +16651,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15595,7 +16667,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 11,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15637,7 +16709,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 14,
+      "tablas": 15,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15656,7 +16728,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15675,7 +16747,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 18,
+      "tablas": 19,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -15694,7 +16766,7 @@
         "BILLING",
         "FINANCE"
       ],
-      "tablas": 13,
+      "tablas": 14,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20247,7 +21319,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 10,
+      "tablas": 11,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20263,7 +21335,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20279,7 +21351,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -20295,7 +21367,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 8,
+      "tablas": 9,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -20695,7 +21767,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 47,
+      "tablas": 48,
       "eventos": 1,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21528,7 +22600,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21580,7 +22652,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 6,
+      "tablas": 7,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21596,7 +22668,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21612,7 +22684,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21670,7 +22742,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -21704,7 +22776,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21756,7 +22828,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 4,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -21996,10 +23068,10 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Aprobar una vinculación pendiente",
-      "riesgo": "BAJO",
+      "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -22012,12 +23084,12 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Finalizar una vinculación",
-      "riesgo": "BAJO",
+      "riesgo": "MEDIO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22030,10 +23102,10 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Rechazar una vinculación pendiente",
-      "riesgo": "BAJO",
+      "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -22064,12 +23136,12 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Suspender una vinculación activa",
-      "riesgo": "BAJO",
+      "riesgo": "MEDIO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 3,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22106,12 +23178,30 @@
       "modulo": "practice",
       "bloque": "Práctica y Agenda",
       "nombre": "Crear un espacio de atención bajo una unidad/sitio",
-      "riesgo": "MEDIO",
+      "riesgo": "ALTO",
       "publica": false,
       "roles": [
         "SECURITY_ADMIN"
       ],
-      "tablas": 3,
+      "tablas": 14,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
+      "id": "SitesController_moveCareSpace",
+      "origen": "CONTRATO",
+      "metodo": "PATCH",
+      "ruta": "/sites/{siteId}/care-spaces/{id}",
+      "modulo": "practice",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Mover un espacio de atención bajo otro padre de la sede",
+      "riesgo": "ALTO",
+      "publica": false,
+      "roles": [
+        "SECURITY_ADMIN"
+      ],
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -22145,7 +23235,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 7,
+      "tablas": 8,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -23847,7 +24937,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -23863,7 +24953,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 21,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -23879,7 +24969,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 21,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -23895,7 +24985,7 @@
       "riesgo": "ALTO",
       "publica": false,
       "roles": [],
-      "tablas": 19,
+      "tablas": 21,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25575,6 +26665,22 @@
       "revision": "AUTO_DETECTADA"
     },
     {
+      "id": "SupportAgendaController_list",
+      "origen": "CONTRATO",
+      "metodo": "GET",
+      "ruta": "/me/support-agenda",
+      "modulo": "scheduling",
+      "bloque": "Práctica y Agenda",
+      "nombre": "Agenda combinada del personal de apoyo, con la política resuelta",
+      "riesgo": "BAJO",
+      "publica": false,
+      "roles": [],
+      "tablas": 16,
+      "eventos": 0,
+      "pruebas": 0,
+      "revision": "AUTO_DETECTADA"
+    },
+    {
       "id": "SchedulingController_listActivityTypes",
       "origen": "CONTRATO",
       "metodo": "GET",
@@ -25607,9 +26713,10 @@
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
-        "PRACTITIONER"
+        "PRACTITIONER",
+        "SUPPORT_STAFF"
       ],
-      "tablas": 47,
+      "tablas": 57,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -25629,7 +26736,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 26,
+      "tablas": 35,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -25666,10 +26773,11 @@
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
+        "SUPPORT_STAFF",
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 18,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 5,
       "revision": "AUTO_DETECTADA"
@@ -25687,10 +26795,11 @@
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
+        "SUPPORT_STAFF",
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 10,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -25708,9 +26817,10 @@
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
+        "SUPPORT_STAFF",
         "PRACTITIONER"
       ],
-      "tablas": 55,
+      "tablas": 67,
       "eventos": 0,
       "pruebas": 4,
       "revision": "AUTO_DETECTADA"
@@ -25728,10 +26838,11 @@
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
+        "SUPPORT_STAFF",
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 47,
+      "tablas": 56,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -25748,9 +26859,10 @@
       "publica": false,
       "roles": [
         "SCHEDULING_ADMIN",
-        "SCHEDULING_AGENT"
+        "SCHEDULING_AGENT",
+        "SUPPORT_STAFF"
       ],
-      "tablas": 5,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 1,
       "revision": "AUTO_DETECTADA"
@@ -25770,7 +26882,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 14,
+      "tablas": 24,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25849,7 +26961,7 @@
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT"
       ],
-      "tablas": 36,
+      "tablas": 45,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25890,7 +27002,7 @@
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT"
       ],
-      "tablas": 35,
+      "tablas": 44,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25910,7 +27022,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 3,
+      "tablas": 13,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25930,7 +27042,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 2,
+      "tablas": 12,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25950,7 +27062,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 11,
+      "tablas": 21,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -25970,7 +27082,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 35,
+      "tablas": 44,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -26009,7 +27121,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 6,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -26027,10 +27139,11 @@
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
+        "SUPPORT_STAFF",
         "PRACTITIONER",
         "PATIENT"
       ],
-      "tablas": 42,
+      "tablas": 51,
       "eventos": 0,
       "pruebas": 2,
       "revision": "AUTO_DETECTADA"
@@ -26050,7 +27163,7 @@
         "SCHEDULING_AGENT",
         "PRACTITIONER"
       ],
-      "tablas": 8,
+      "tablas": 18,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"
@@ -26216,9 +27329,10 @@
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
+        "SUPPORT_STAFF",
         "PATIENT"
       ],
-      "tablas": 18,
+      "tablas": 28,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -26238,7 +27352,7 @@
         "SCHEDULING_AGENT",
         "PATIENT"
       ],
-      "tablas": 44,
+      "tablas": 53,
       "eventos": 0,
       "pruebas": 6,
       "revision": "AUTO_DETECTADA"
@@ -26715,9 +27829,10 @@
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
+        "SUPPORT_STAFF",
         "PATIENT"
       ],
-      "tablas": 9,
+      "tablas": 20,
       "eventos": 0,
       "pruebas": 11,
       "revision": "AUTO_DETECTADA"
@@ -26774,7 +27889,7 @@
         "SCHEDULING_ADMIN",
         "PRACTITIONER"
       ],
-      "tablas": 7,
+      "tablas": 10,
       "eventos": 0,
       "pruebas": 14,
       "revision": "AUTO_DETECTADA"
@@ -26851,9 +27966,10 @@
       "roles": [
         "SCHEDULING_ADMIN",
         "SCHEDULING_AGENT",
+        "SUPPORT_STAFF",
         "PATIENT"
       ],
-      "tablas": 4,
+      "tablas": 16,
       "eventos": 0,
       "pruebas": 3,
       "revision": "AUTO_DETECTADA"
@@ -26869,7 +27985,7 @@
       "riesgo": "BAJO",
       "publica": false,
       "roles": [],
-      "tablas": 5,
+      "tablas": 6,
       "eventos": 0,
       "pruebas": 0,
       "revision": "AUTO_DETECTADA"

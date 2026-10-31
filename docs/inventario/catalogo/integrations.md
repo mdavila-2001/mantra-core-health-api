@@ -2,7 +2,7 @@
 
 # Catálogo del schema `integrations`
 
-- **Tablas:** 10 · **Columnas:** 138 (40 con descripción: 29.0 %) · **Índices:** 55
+- **Tablas:** 10 · **Columnas:** 138 (40 con descripción: 29.0 %) · **Índices:** 56
 - **Dominio:** Integraciones y Contratos
 - Método y límites del catálogo: [README del inventario](../README.md)
 
@@ -11,7 +11,7 @@
 | Tabla | Propósito | Columnas | Índices | Operaciones | ORM |
 |---|---|---|---|---|---|
 | [external_providers](#external_providers) | Cataloga proveedores externos que intercambian datos o servicios con la plataforma médica. | 13 | 6 | 6 | COINCIDE |
-| [inbound_messages](#inbound_messages) | Registra mensajes recibidos desde integraciones externas para procesarlos y conservar su procedencia. | 14 | 5 | 5 | COINCIDE |
+| [inbound_messages](#inbound_messages) | Registra mensajes recibidos desde integraciones externas para procesarlos y conservar su procedencia. | 14 | 6 | 5 | COINCIDE |
 | [integration_endpoints](#integration_endpoints) | Registra endpoints externos disponibles para intercambios de datos y operaciones de integración. | 16 | 6 | 4 | COINCIDE |
 | [integration_field_mappings](#integration_field_mappings) | Mapea campos entre contratos externos y estructuras internas para intercambiar datos con significado consistente. | 12 | 5 | 1 | COINCIDE |
 | [message_responses](#message_responses) | Conserva respuestas asociadas a mensajes intercambiados para conocer el resultado informado por sistemas externos. | 12 | 3 | 2 | COINCIDE |
@@ -222,7 +222,7 @@ Registra mensajes recibidos desde integraciones externas para procesarlos y cons
 - **Estado del propósito:** DOMAIN_CURATED_DRAFT · fuente: `Mantra Core Health Context/modules/diagram_12_integrations.puml: inbound_messages`
 - **Dominio:** Integraciones y Contratos · **Diagrama:** `Mantra Core Health Context/modules/diagram_12_integrations.puml` · **DDL:** `SQL/12_integrations/02_tables.sql`
 - **Entidad del ORM:** `InboundMessages` — `src/modules/integrations/entities/inbound_messages.entity.ts`
-- **Resumen:** 14 columnas · 5 índices · 5 FK salientes · 2 entrantes · 5 operaciones
+- **Resumen:** 14 columnas · 6 índices · 5 FK salientes · 2 entrantes · 5 operaciones
 
 #### Columnas
 
@@ -264,6 +264,13 @@ Registra mensajes recibidos desde integraciones externas para procesarlos y cons
 | `ix_inbound_messages_status_concept_id` | no | status_concept_id | Soporta la clave foránea fk_inbound_messages_status_concept_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; 1 consulta(s) de repositorio filtran u ordenan por «status_concept_id», la primera columna del índice _(CONSULTA)_ |
 | `ix_inbound_messages_created_by_user_id` | no | created_by_user_id | Soporta la clave foránea fk_inbound_messages_created_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
 | `ix_inbound_messages_updated_by_user_id` | no | updated_by_user_id | Soporta la clave foránea fk_inbound_messages_updated_by_user_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_ |
+| `uq_inbound_messages_connection_id_signature` | sí | connection_id, signature donde WHERE signature IS NOT NULL | Garantiza que no se repita la combinación (connection_id, signature) _(DOCUMENTO)_; Soporta la clave foránea fk_inbound_messages_connection_id: PostgreSQL no indexa las FK por sí mismo _(DOCUMENTO)_; Índice parcial: sólo indexa las filas donde WHERE signature IS NOT NULL _(ESTRUCTURAL)_; 1 consulta(s) de repositorio filtran u ordenan por «connection_id», la primera columna del índice _(CONSULTA)_ |
+
+#### Restricciones
+
+| Restricción | Tipo | Definición |
+|---|---|---|
+| `uq_inbound_messages_connection_id_signature` | UNIQUE INDEX | UNIQUE INDEX ("connection_id", "signature") WHERE signature IS NOT NULL |
 
 #### Operaciones que la tocan
 

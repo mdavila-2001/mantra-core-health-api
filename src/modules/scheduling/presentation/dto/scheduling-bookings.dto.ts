@@ -256,12 +256,14 @@ export class RejectBookingDto {
    */
   @ApiProperty({
     description:
-      'Motivo del rechazo. Obligatorio: el paciente lo ve en el detalle de su turno.',
+      'Motivo del rechazo. Obligatorio: el paciente lo ve en el detalle de su turno. ' +
+      'Si falta, está vacío o es relleno responde 422 (`REASON_REQUIRED` / `REASON_PLACEHOLDER`).',
     minLength: MIN_REASON_LENGTH,
     maxLength: MAX_REASON_LENGTH,
   })
+  // Ver `RescheduleBookingDto.reasonText`: el rechazo es 422 de `requireReason`.
+  @IsOptional()
   @IsString()
-  @MinLength(MIN_REASON_LENGTH)
   @MaxLength(MAX_REASON_LENGTH)
   reasonText!: string;
 }
@@ -331,12 +333,16 @@ export class RescheduleBookingDto {
    */
   @ApiProperty({
     description:
-      'Motivo del cambio. Obligatorio: se le muestra a la otra parte en el detalle de la cita.',
+      'Motivo del cambio. Obligatorio: se le muestra a la otra parte en el detalle de la cita. ' +
+      'Si falta, está vacío o es relleno responde 422 (`REASON_REQUIRED` / `REASON_PLACEHOLDER`).',
     minLength: MIN_REASON_LENGTH,
     maxLength: MAX_REASON_LENGTH,
   })
+  // Que falte o sea corto NO lo rechaza el validador del DTO (400): lo rechaza
+  // `requireReason` con 422 y un código claro, la misma respuesta para todo motivo
+  // inválido. Aquí solo se exige que, si viene, sea texto y no pase del tope.
+  @IsOptional()
   @IsString()
-  @MinLength(MIN_REASON_LENGTH)
   @MaxLength(MAX_REASON_LENGTH)
   reasonText!: string;
 }
@@ -397,12 +403,14 @@ export class CancelBookingDto {
    */
   @ApiProperty({
     description:
-      'Motivo de la cancelación. Obligatorio: se le muestra a la otra parte en el detalle de la cita.',
+      'Motivo de la cancelación. Obligatorio: se le muestra a la otra parte en el detalle de la cita. ' +
+      'Si falta, está vacío o es relleno responde 422 (`REASON_REQUIRED` / `REASON_PLACEHOLDER`).',
     minLength: MIN_REASON_LENGTH,
     maxLength: MAX_REASON_LENGTH,
   })
+  // Ver `RescheduleBookingDto.reasonText`: el rechazo es 422 de `requireReason`.
+  @IsOptional()
   @IsString()
-  @MinLength(MIN_REASON_LENGTH)
   @MaxLength(MAX_REASON_LENGTH)
   reasonText!: string;
 }
@@ -473,6 +481,22 @@ export class CreateWaitlistEntryDto {
   @IsOptional()
   @IsUUID()
   resourceId?: string;
+
+  /**
+   * Cupo concreto por el que se espera (la agenda combinada del personal de
+   * apoyo apunta a un horario, no a una agenda). De él salen el recurso y, si
+   * no se declaran, la ventana deseada. La persona de apoyo se apunta con su
+   * permiso `schedule.waitlist`, que se decide con el doctor, servicio y espacio
+   * de ESE cupo.
+   */
+  @ApiPropertyOptional({
+    description:
+      'Cupo concreto por el que se espera; de él salen el recurso y la ventana',
+    format: 'uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  bookableSlotId?: string;
 
   /**
    * Valor de desired from mantenido por la instancia.
@@ -1048,6 +1072,36 @@ export class CreateDirectAppointmentDto {
   @ValidateNested()
   @Type(() => FollowUpOriginDto)
   followUpOf?: FollowUpOriginDto;
+
+  /**
+   * Cita de quien llegó sin turno (mostrador). La persona de apoyo la agenda con
+   * su permiso `schedule.walk_in` y no con `schedule.create`, y la cita nace con
+   * la llegada registrada (`checked_in_at`, estado «llegó») en la misma
+   * transacción, por el canal `WALK_IN`.
+   */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  walkIn?: boolean;
+
+  /**
+   * Espacio donde se atiende. Solo lo toma en cuenta quien agenda como personal
+   * de apoyo, cuyo permiso puede estar acotado por ubicación; para el resto, la
+   * cita lo hereda del único espacio donde el doctor atiende, si lo hay.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  careSpaceId?: string;
+
+  /**
+   * Servicio de la cita. Mismo criterio que `careSpaceId`: lo evalúa la
+   * política del personal de apoyo contra sus permisos por servicio.
+   */
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  healthcareServiceId?: string;
 }
 
 /** Respuesta de la cita puntual. */
@@ -1074,6 +1128,13 @@ export class DirectAppointmentResponseDto {
    */
   @ApiProperty()
   retractedSlots!: number;
+
+  /**
+   * Cuándo llegó el paciente, solo en la cita de mostrador (`walkIn: true`): la
+   * cita nace con la llegada registrada, igual que tras `POST …/check-in`.
+   */
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  checkedInAt?: string;
 }
 
 /* -- El estado de pago de una cita (TAREA-13 punto 5) ------------------------ */

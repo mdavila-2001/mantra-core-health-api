@@ -47,6 +47,9 @@ function build() {
     // Por omisión la agenda es de otro: así, una prueba que olvide declarar de
     // quién es falla con el 403 en vez de pasar por accidente.
     findResourcePractitioner: mockFn().mockResolvedValue('otro-profesional'),
+    // Solo los consulta quien se apunta con `bookableSlotId` o es persona de apoyo.
+    findSlotPlacement: mockFn().mockResolvedValue(null),
+    findResourceOwner: mockFn().mockResolvedValue(null),
   };
   const writer = {
     enroll: mockFn(),
@@ -76,6 +79,11 @@ function build() {
     findActiveProxiedPatientIds: mockFn().mockResolvedValue(new Set<string>()),
   };
 
+  // La política de apoyo (vía `BookingAccess`): por omisión permite.
+  const access = {
+    assertSupportMayCreate: mockFn().mockResolvedValue('grant-1'),
+  };
+
   const service = new SchedulingWaitlistService(
     session as any,
     reader as any,
@@ -83,9 +91,11 @@ function build() {
     notices as any,
     logger as any,
     representation as any,
+    access as any,
   );
   return {
     service,
+    access,
     session,
     transaction,
     reader,
@@ -650,5 +660,155 @@ describe('SchedulingWaitlistService', () => {
         ),
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
+  });
+});
+
+describe('SchedulingWaitlistService.enroll: cupo concreto y personal de apoyo', () => {
+  const TENANT = 'tenant-1';
+  const PACIENTE = 'pat-1';
+  const ANA = {
+    id: 'user-ana',
+    roles: ['SUPPORT_STAFF'],
+    tenantIds: [TENANT],
+  } as any;
+  const AGENTE = { id: 'user-ag', roles: ['SCHEDULING_AGENT'] } as any;
+  const INICIO = new Date('2030-09-10T14:00:00.000Z');
+  const FIN = new Date('2030-09-10T14:30:00.000Z');
+
+  /** Cupo de Pérez en la sala 103, consulta; la agenda es del hospital. */
+  function armar() {
+    const d = build();
+    d.reader.findSlotPlacement.mockResolvedValue({
+      id: SLOT_ID,
+      resourceId: 'res-perez',
+      startAt: INICIO,
+      endAt: FIN,
+      careSpaceId: 'sala-103',
+      healthcareServiceId: 'svc-consulta',
+    });
+    d.reader.findResourceOwner.mockResolvedValue({
+      id: 'res-perez',
+      tenantId: TENANT,
+      resourceRefType: 'health_practitioner_profiles',
+      resourceRefId: 'prof-perez',
+    });
+    d.writer.enroll.mockResolvedValue({ id: 'wl-1' });
+    return d;
+  }
+
+  const body = (extra: Record<string, unknown> = {}): any => ({
+    tenantId: TENANT,
+    patientProfileId: PACIENTE,
+    bookableSlotId: SLOT_ID,
+    ...extra,
+  });
+
+  it('la persona de apoyo se apunta con schedule.waitlist sobre doctor, servicio y espacio del cupo', async () => {
+    const d = armar();
+    const res = await d.service.enroll(body(), ANA);
+    expect(res.id).toBe('wl-1');
+    expect(d.access.assertSupportMayCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: TENANT,
+        resourceRefId: 'prof-perez',
+      }),
+      { careSpaceId: 'sala-103', healthcareServiceId: 'svc-consulta' },
+      ANA,
+      'schedule.waitlist',
+    );
+    // No pasa por «¿puede ver a este paciente?»: su permiso es el de apoyo.
+    expect(d.representation.representsPatient).not.toHaveBeenCalled();
+  });
+
+  it('de el cupo salen la agenda y, si no se declaran, la ventana deseada', async () => {
+    const d = armar();
+    await d.service.enroll(body(), ANA);
+    expect(d.writer.enroll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resourceId: 'res-perez',
+        desiredFrom: INICIO,
+        desiredTo: FIN,
+      }),
+      expect.anything(),
+    );
+  });
+
+  it('una ventana declarada manda sobre la del cupo', async () => {
+    const d = armar();
+    await d.service.enroll(
+      body({
+        desiredFrom: '2030-09-10T00:00:00.000Z',
+        desiredTo: '2030-09-12T00:00:00.000Z',
+      }),
+      ANA,
+    );
+    expect(d.writer.enroll).toHaveBeenCalledWith(
+      expect.objectContaining({
+        desiredFrom: new Date('2030-09-10T00:00:00.000Z'),
+        desiredTo: new Date('2030-09-12T00:00:00.000Z'),
+      }),
+      expect.anything(),
+    );
+  });
+
+  it('si la política niega, 403 y no se anota a nadie', async () => {
+    const d = armar();
+    d.access.assertSupportMayCreate.mockRejectedValue(
+      new ForbiddenException('no'),
+    );
+    await expect(d.service.enroll(body(), ANA)).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+    expect(d.writer.enroll).not.toHaveBeenCalled();
+  });
+
+  it('el tenantId del cuerpo tiene que ser el de la agenda del cupo', async () => {
+    const d = armar();
+    await expect(
+      d.service.enroll(body({ tenantId: 'tenant-2' }), {
+        ...ANA,
+        tenantIds: ['tenant-2'],
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(d.access.assertSupportMayCreate).not.toHaveBeenCalled();
+    expect(d.writer.enroll).not.toHaveBeenCalled();
+  });
+
+  it('un cupo inexistente responde 404', async () => {
+    const d = armar();
+    d.reader.findSlotPlacement.mockResolvedValue(null);
+    await expect(d.service.enroll(body(), ANA)).rejects.toMatchObject({
+      status: 404,
+    });
+  });
+
+  it('una agenda que no es la del cupo responde 422', async () => {
+    const d = armar();
+    await expect(
+      d.service.enroll(body({ resourceId: 'res-otra' }), AGENTE),
+    ).rejects.toMatchObject({ status: 422 });
+  });
+
+  it('quien opera la agenda por oficio se apunta sin política de apoyo', async () => {
+    const d = armar();
+    await d.service.enroll(body(), AGENTE);
+    expect(d.access.assertSupportMayCreate).not.toHaveBeenCalled();
+    expect(d.reader.findResourceOwner).not.toHaveBeenCalled();
+    expect(d.writer.enroll).toHaveBeenCalled();
+  });
+
+  it('sin cupo (solo agenda) la persona de apoyo también pasa por la política', async () => {
+    const d = armar();
+    d.reader.findSlotPlacement.mockResolvedValue(null);
+    await d.service.enroll(
+      { tenantId: TENANT, patientProfileId: PACIENTE, resourceId: 'res-perez' },
+      ANA,
+    );
+    expect(d.access.assertSupportMayCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ resourceRefId: 'prof-perez' }),
+      { careSpaceId: undefined, healthcareServiceId: undefined },
+      ANA,
+      'schedule.waitlist',
+    );
   });
 });

@@ -63,10 +63,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `audit.data_access_log` | LEE | LEE | DIRECTA | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → DataAccessLogRepository.countByUserSince | `src/modules/audit/repositories/data-access-log.repository.ts:146` |
-| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.scanAnomaly → AuditEventsService.scanAnomaly → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `AnomalyScanDto` · `application/json`
 
@@ -237,11 +237,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `audit.data_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → DataAccessLogRepository.record | `src/modules/audit/repositories/data-access-log.repository.ts:98` |
 | `audit.patient_content_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → DataAccessLogRepository.recordPatientContent | `src/modules/audit/repositories/data-access-log.repository.ts:121` |
-| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.recordDataAccess → AuditEventsService.recordDataAccess → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `RecordDataAccessDto` · `application/json`
 
@@ -350,9 +350,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.recordEvent → AuditEventsService.recordEvent → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `RecordAuditEventDto` · `application/json`
 
@@ -460,10 +460,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `audit.data_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.getHistory → AuditHistoryService.getTimeline → DataAccessLogRepository.record | `src/modules/audit/repositories/data-access-log.repository.ts:98` |
-| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.getHistory → AuditHistoryService.getTimeline → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 **No se pudo seguir** (el destino depende de un dato en tiempo de ejecución):
 
@@ -556,9 +556,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.findChain | `src/modules/audit/repositories/audit-log.repository.ts:257` |
-| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.findChain | `src/modules/audit/repositories/audit-log.repository.ts:276` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.verifyIntegrity → AuditEventsService.verifyIntegrity → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `AuditVerifyIntegrityDto` · `application/json`
 
@@ -824,10 +824,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `audit.data_access_log` | BORRA | BORRA | DIRECTA | AuditController.applyRetention → AuditEventsService.applyRetention → DataAccessLogRepository.purgeOlderThan | `src/modules/audit/repositories/data-access-log.repository.ts:163` |
-| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.applyRetention → AuditEventsService.applyRetention → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `RetentionApplyDto` · `application/json`
 
@@ -922,13 +922,13 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `audit.delegated_access_audit_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → ThirdPartyAccessRepository.recordDelegated | `src/modules/audit/repositories/third-party-access.repository.ts:168` |
 | `audit.identity_verification_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → ThirdPartyAccessRepository.recordIdentity | `src/modules/audit/repositories/third-party-access.repository.ts:224` |
 | `audit.insurance_decision_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → ThirdPartyAccessRepository.recordInsurance | `src/modules/audit/repositories/third-party-access.repository.ts:196` |
 | `audit.pharmacy_inventory_access_log` | ESCRIBE | CREA | DIRECTA | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → ThirdPartyAccessRepository.recordPharmacy | `src/modules/audit/repositories/third-party-access.repository.ts:251` |
-| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | AuditController.recordThirdPartyAccess → ThirdPartyAccessService.record → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `RecordThirdPartyAccessDto` · `application/json`
 
@@ -1048,9 +1048,9 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 |---|---|---|---|---|---|
 | `audit.analytics_governance_log` | ESCRIBE | CREA | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AnalyticsGovernanceLogRepository.record | `src/modules/audit/repositories/analytics-governance-log.repository.ts:54` |
 | `audit.analytics_governance_log` | LEE | LEE | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AnalyticsGovernanceLogRepository.existsByQueryHash | `src/modules/audit/repositories/analytics-governance-log.repository.ts:46` |
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ComplianceController.exportEvidence → ComplianceService.exportEvidence → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `CreateAuditExportDto` · `application/json`
 
@@ -1153,11 +1153,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.analytics_governance_log` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AnalyticsGovernanceLogRepository.record | `src/modules/audit/repositories/analytics-governance-log.repository.ts:54` |
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `audit.moderation_decisions_history` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → ModerationRepository.recordHistory | `src/modules/audit/repositories/moderation.repository.ts:102` |
 | `audit.moderation_events` | ESCRIBE | CREA | DIRECTA | ModerationController.recordDecision → ModerationService.recordDecision → ModerationRepository.record | `src/modules/audit/repositories/moderation.repository.ts:77` |
-| `iam.sessions` | LEE | LEE | POR_SQL | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | ModerationController.recordDecision → ModerationService.recordDecision → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `CreateModerationDecisionDto` · `application/json`
 
@@ -1267,10 +1267,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.analytics_governance_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AnalyticsGovernanceLogRepository.record | `src/modules/audit/repositories/analytics-governance-log.repository.ts:54` |
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `audit.dsar_requests` | ESCRIBE | CREA | DIRECTA | PrivacyController.createDsar → ComplianceService.createDsar → DsarRequestsRepository.create | `src/modules/audit/repositories/dsar-requests.repository.ts:44` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PrivacyController.createDsar → ComplianceService.createDsar → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Cuerpo — DTO `CreateDsarDto` · `application/json`
 
@@ -1371,11 +1371,11 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/audit/R
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:186` |
-| `audit.audit_log` | LEE | LEE | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:157` |
+| `audit.audit_log` | ESCRIBE | CREA | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append | `src/modules/audit/repositories/audit-log.repository.ts:205` |
+| `audit.audit_log` | LEE | LEE | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append → AuditLogRepository.findChainTip | `src/modules/audit/repositories/audit-log.repository.ts:160` |
 | `audit.dsar_requests` | ESCRIBE | ACTUALIZA | POR_TIPO | PrivacyController.updateDsar → ComplianceService.updateDsar | `src/modules/audit/services/compliance.service.ts:198` |
 | `audit.dsar_requests` | LEE | LEE | DIRECTA | PrivacyController.updateDsar → ComplianceService.updateDsar → DsarRequestsRepository.findById | `src/modules/audit/repositories/dsar-requests.repository.ts:39` |
-| `iam.sessions` | LEE | LEE | POR_SQL | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:235` |
+| `iam.sessions` | LEE | LEE | POR_SQL | PrivacyController.updateDsar → ComplianceService.updateDsar → AuditLogRepository.append → AuditLogRepository.withRequestOrigin → AuditLogRepository.sessionDeviceId | `src/modules/audit/repositories/audit-log.repository.ts:254` |
 
 ### Parámetros
 

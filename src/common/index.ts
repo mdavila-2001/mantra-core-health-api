@@ -38,6 +38,7 @@ export {
   marketplaceTenantScope,
 } from './tenant/tenant-context';
 export type { TenantContext } from './tenant/tenant-context';
+export { withSystemRead, withSystemWrite } from './tenant/system-read-scope';
 export { TenantContextInterceptor } from './tenant/tenant-context.interceptor';
 
 // Bitácora transversal (informe C §8.4): decoradores y contexto por request.

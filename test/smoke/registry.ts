@@ -22,6 +22,11 @@ import { PHARMACY_SMOKE } from './modules/pharmacy.smoke';
 import { DIAGNOSTICS_SMOKE } from './modules/diagnostics.smoke';
 import { IDENTITY_ASSURANCE_SMOKE } from './modules/identity_assurance.smoke';
 import { DELEGATED_ACCESS_SMOKE } from './modules/delegated_access.smoke';
+import { SUPPORT_STAFF_SMOKE } from './modules/support_staff.smoke';
+import {
+  SUPPORT_STAFF_GOVERNANCE_PREAMBLE,
+  SUPPORT_STAFF_GOVERNANCE_SMOKE,
+} from './modules/support_staff_governance.smoke';
 import { READ_MODELS_SMOKE } from './modules/read_models.smoke';
 import { INTEGRATION_CONTRACTS_SMOKE } from './modules/integration_contracts.smoke';
 // Agrupado por actor, no por módulo: el recorrido completo de un paciente con su propio token.
@@ -81,6 +86,10 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...enTenantSemilla(DIAGNOSTICS_SMOKE),
   ...enTenantSemilla(IDENTITY_ASSURANCE_SMOKE),
   ...enTenantSemilla(DELEGATED_ACCESS_SMOKE),
+  // La compuerta de ingreso (D-03) no rige en la organización de la prueba (ver el preámbulo).
+  ...SUPPORT_STAFF_GOVERNANCE_PREAMBLE,
+  // Personal de apoyo: cada caso declara su actor (token propio) o su tenant.
+  ...SUPPORT_STAFF_SMOKE,
   ...READ_MODELS_SMOKE,
   ...enTenantSemilla(INTEGRATION_CONTRACTS_SMOKE),
   ...enTenantSemilla(PHARMACY_INVENTORY_SMOKE),
@@ -92,4 +101,16 @@ export const ALL_SMOKE: SmokeCase[] = [
   ...MEDICO_SMOKE,
   ...ORGANIZACION_SMOKE,
   ...ADMINISTRADOR_SMOKE,
+  // Gobierno de accesos sobre el Hospital Piloto: se siembra por SQL dentro de la corrida y mueve
+  // el reloj del escenario, así que va al final (necesita `GOVERNANCE_DEMO_DIR`).
+  ...SUPPORT_STAFF_GOVERNANCE_SMOKE,
 ];
+
+/**
+ * `SMOKE_ONLY=governance` corre solo el Hospital Piloto (sin los demás módulos): arranque rápido
+ * para iterar sobre los casos de gobierno. La corrida completa es la de siempre.
+ */
+export const SMOKE_CASES: SmokeCase[] =
+  process.env.SMOKE_ONLY === 'governance'
+    ? [...SUPPORT_STAFF_GOVERNANCE_SMOKE]
+    : ALL_SMOKE;

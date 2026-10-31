@@ -34,6 +34,7 @@ describe('IdentifiersService', () => {
     const { em, tx } = createEmMock();
     const repo = {
       findActiveDuplicate: fn(),
+      findActiveNationalIdDuplicate: fn(),
       findByIds: fn(),
       findCurrentByOwner: fn(),
       create: fn(),

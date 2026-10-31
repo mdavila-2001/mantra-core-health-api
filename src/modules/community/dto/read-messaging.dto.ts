@@ -233,6 +233,13 @@ export class ConversationListItemDto {
   pinnedMessageId?: string | null;
 
   /**
+   * Su equipo de apoyo le derivó esta conversación y espera su respuesta. Solo
+   * lo recibe el doctor; el paciente nunca ve el estado de la bandeja interna.
+   */
+  @ApiPropertyOptional({ type: Boolean })
+  awaitingDoctor?: boolean;
+
+  /**
    * Los demás participantes, sin el propio.
    *
    * Sin el propio porque la bandeja se lee desde un lado: incluirse a uno
@@ -312,6 +319,21 @@ export class DirectMessageDto {
   /** Cuándo se envió. */
   @ApiPropertyOptional({ type: String, format: 'date-time' })
   sentAt?: Date | null;
+
+  /**
+   * El equipo del doctor respondió este mensaje en su nombre y el doctor decidió
+   * mostrarlo: es lo que ve el paciente («respondido por su equipo»). Sin nombre
+   * de quien escribió. Ausente si no aplica.
+   */
+  @ApiPropertyOptional({ type: Boolean })
+  repliedByTeam?: boolean;
+
+  /**
+   * Quién del equipo escribió este mensaje. Solo lo recibe el doctor dueño del
+   * perfil; nunca el paciente ni un mensaje por websocket.
+   */
+  @ApiPropertyOptional()
+  teamAuthorName?: string;
 }
 
 /** Página de mensajes de una conversación. */

@@ -10,9 +10,10 @@ describe('TenantAdministrationService', () => {
    * Construye el sistema bajo prueba con dependencias controladas.
    * @returns Resultado de build.
    */
-  function build(membership: unknown = null) {
+  function build(membership: unknown = null, supportOnly = false) {
     const membershipsRepo = {
       findActiveByUserTenant: fn().mockResolvedValue(membership),
+      isSupportOnly: fn().mockResolvedValue(supportOnly),
     };
     const service = new TenantAdministrationService(membershipsRepo as never);
     return { service, membershipsRepo, tx: {} as never };
@@ -220,6 +221,40 @@ describe('TenantAdministrationService', () => {
         'tenant-1',
         expect.anything(),
       );
+    });
+  });
+
+  describe('personal de apoyo (A2)', () => {
+    it('una membresía que existe solo por un vínculo de apoyo no lee la organización', async () => {
+      // Quien fotografió un QR o terminó su contrato no debe leer plantilla,
+      // sedes ni organizaciones hijas: su acceso son los permisos del vínculo.
+      const { service, tx } = build(
+        { id: 'm1', tenantRoleConceptId: DIR.ROLE_STAFF },
+        true,
+      );
+      await expect(
+        service.assertCanRead(tx, 'tenant-1', { id: 'u1', roles: [] }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('un STAFF que además tiene un vínculo de apoyo sigue leyendo (su membresía no nace del vínculo)', async () => {
+      const { service, tx } = build({
+        id: 'm1',
+        tenantRoleConceptId: DIR.ROLE_STAFF,
+      });
+      await expect(
+        service.assertCanRead(tx, 'tenant-1', { id: 'u1', roles: [] }),
+      ).resolves.toBeUndefined();
+    });
+
+    it('belongsByMembership tampoco cuenta la membresía solo-de-apoyo', async () => {
+      const { service, tx } = build(
+        { id: 'm1', tenantRoleConceptId: DIR.ROLE_STAFF },
+        true,
+      );
+      await expect(
+        service.belongsByMembership(tx, 'tenant-1', { id: 'u1', roles: [] }),
+      ).resolves.toBe(false);
     });
   });
 });

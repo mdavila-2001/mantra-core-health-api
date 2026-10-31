@@ -107,7 +107,7 @@ export class PractitionerDelegatesController {
     entityId: 'param:id',
   })
   @Post(':id/revoke')
-  @Roles('SECURITY_ADMIN')
+  @Roles('SECURITY_ADMIN', 'PRACTITIONER', 'CLINICIAN')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Revocar delegación de forma inmediata (cascada authz)',

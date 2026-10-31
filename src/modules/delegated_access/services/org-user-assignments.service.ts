@@ -5,7 +5,6 @@ import {
   ConcurrencyConflictException,
   ConflictException,
   PreconditionFailedException,
-  ResourceNotFoundException,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -24,12 +23,19 @@ import {
   ASSIGNMENT_ROLE_CONCEPT,
   STATUS,
 } from './concept-maps';
+import { DelegationScopeService } from './delegation-scope.service';
 
 /**
  * UC-29-01 (asignar usuario de organización con alcance/vigencia) y UC-29-10
  * (reasignar supervisor / suspender). El servicio posee la unidad de trabajo:
  * `em.transactional` + `flush` del padre antes de los hijos (las FK son columnas
  * uuid planas, MikroORM no ordena inserts entre entidades no relacionadas).
+ *
+ * Aislamiento entre organizaciones (A-M1): el tenant sale del contexto verificado
+ * (`DelegationScopeService`), nunca del cuerpo ni de la ruta. La membresía de la
+ * ruta, cada nodo de alcance del cuerpo y el supervisor se prueban dentro de la
+ * organización ANTES de escribir, y la asignación que se modifica debe ser de
+ * su membresía; un id ajeno responde igual que uno inexistente (404 uniforme).
  */
 @Injectable()
 export class OrgUserAssignmentsService {
@@ -39,12 +45,14 @@ export class OrgUserAssignmentsService {
    * @param em - Contexto de persistencia o transacción activa.
    * @param assignmentsRepo - Valor de assignments repo requerido por la operación.
    * @param delegatesRepo - Valor de delegates repo requerido por la operación.
+   * @param scope - Política común de tenant y alcance de la delegación.
    * @param logger - Valor de logger requerido por la operación.
    */
   constructor(
     private readonly em: EntityManager,
     private readonly assignmentsRepo: OrganizationUserAssignmentsRepository,
     private readonly delegatesRepo: PractitionerDelegateAssignmentsRepository,
+    private readonly scope: DelegationScopeService,
     private readonly logger: PinoLogger,
   ) {
     this.logger.setContext(OrgUserAssignmentsService.name);
@@ -66,8 +74,16 @@ export class OrgUserAssignmentsService {
     );
     const roleConceptId = ASSIGNMENT_ROLE_CONCEPT[dto.role ?? 'STAFF'];
     const scopeConceptId = ACCESS_SCOPE_CONCEPT[dto.accessScope ?? 'TENANT'];
+    const tenantId = this.scope.resolveTenant();
 
     return this.em.transactional(async (tx) => {
+      // Todo lo que el cuerpo y la ruta referencian se prueba en la organización
+      // activa antes de escribir: un eslabón ajeno responde como uno inexistente.
+      await this.scope.loadMembershipInTenant(tx, tenantMembershipId, tenantId);
+      await this.scope.assertScopeNodesInTenant(tx, tenantId, dto);
+      if (dto.supervisorUserId) {
+        await this.scope.assertUserInTenant(tx, dto.supervisorUserId, tenantId);
+      }
       const overlap = await this.assignmentsRepo.findActiveOverlap(
         tx,
         tenantMembershipId,
@@ -92,6 +108,7 @@ export class OrgUserAssignmentsService {
       }
 
       const assignment = this.assignmentsRepo.create(tx, {
+        tenantId,
         tenantMembershipId,
         practiceId: dto.practiceId,
         practiceSiteId: dto.practiceSiteId,
@@ -148,12 +165,18 @@ export class OrgUserAssignmentsService {
       });
     }
 
+    const tenantId = this.scope.resolveTenant();
+
     return this.em.transactional(async (tx) => {
-      const assignment = await this.assignmentsRepo.findById(tx, id);
-      if (!assignment) {
-        throw new ResourceNotFoundException('Asignación no encontrada', {
-          assignmentId: id,
-        });
+      // La asignación debe ser de la organización activa (su membresía lo dice):
+      // inexistente y ajena responden igual (404 uniforme, sin `details`).
+      const assignment = await this.scope.loadOrgAssignmentInTenant(
+        tx,
+        id,
+        tenantId,
+      );
+      if (dto.supervisorUserId) {
+        await this.scope.assertUserInTenant(tx, dto.supervisorUserId, tenantId);
       }
       if (assignment.statusConceptId !== STATUS.ACTIVE) {
         throw new PreconditionFailedException('La asignación no está activa', {

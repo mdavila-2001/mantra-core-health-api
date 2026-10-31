@@ -7,6 +7,8 @@ import { jest } from '@jest/globals';
  * @returns Resultado de mock fn conforme al contrato `any`.
  */
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
+import 'reflect-metadata';
+import { IS_TENANT_AGNOSTIC_KEY } from '../../../common/tenant/tenant-agnostic.decorator';
 import { TenantsController } from './tenants.controller';
 
 const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
@@ -19,6 +21,9 @@ function build() {
   const tenantsService = { createChild: mockFn() };
   const branchesService = { create: mockFn() };
   const membershipsService = {
+    listMyInvitations: mockFn(),
+    acceptMine: mockFn(),
+    declineMine: mockFn(),
     invite: mockFn(),
     assignBranch: mockFn(),
     transfer: mockFn(),
@@ -210,5 +215,38 @@ describe('TenantsController — lecturas con alcance de organización', () => {
       'm1',
       actor,
     );
+  });
+});
+
+describe('TenantsController: membresías pendientes de aceptar (N2)', () => {
+  const me = { id: 'u1', roles: ['USER'] } as any;
+
+  it('lista, acepta y rechaza SOLO a nombre de la propia persona (el sujeto es el del token)', async () => {
+    const d = build();
+    d.membershipsService.listMyInvitations.mockResolvedValue({ items: [] });
+    d.membershipsService.acceptMine.mockResolvedValue({ status: 'ACTIVE' });
+    d.membershipsService.declineMine.mockResolvedValue({ status: 'DECLINED' });
+
+    await d.controller.listMyInvitations(me);
+    await d.controller.acceptMyInvitation('m1', me);
+    await d.controller.declineMyInvitation('m2', me);
+
+    expect(d.membershipsService.listMyInvitations).toHaveBeenCalledWith(me);
+    expect(d.membershipsService.acceptMine).toHaveBeenCalledWith(me, 'm1');
+    expect(d.membershipsService.declineMine).toHaveBeenCalledWith(me, 'm2');
+  });
+
+  it('las tres rutas son @TenantAgnostic: quien solo tiene invitaciones pendientes no pertenece aún a ninguna organización', () => {
+    for (const method of [
+      'listMyInvitations',
+      'acceptMyInvitation',
+      'declineMyInvitation',
+    ] as const) {
+      const handler = Object.getOwnPropertyDescriptor(
+        TenantsController.prototype,
+        method,
+      )?.value as object;
+      expect(Reflect.getMetadata(IS_TENANT_AGNOSTIC_KEY, handler)).toBe(true);
+    }
   });
 });

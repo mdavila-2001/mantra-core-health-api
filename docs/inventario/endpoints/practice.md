@@ -3,9 +3,9 @@
 # Endpoints del módulo `practice`
 
 - **Bloque:** Práctica y Agenda (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
-- **Operaciones:** 37 (37 en el contrato, 0 sólo en el código)
-- **Riesgo:** ALTO 4 · MEDIO 19 · BAJO 14
-- **Tablas distintas que tocan:** 23
+- **Operaciones:** 38 (38 en el contrato, 0 sólo en el código)
+- **Riesgo:** ALTO 8 · MEDIO 20 · BAJO 10
+- **Tablas distintas que tocan:** 29
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/practice.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -14,20 +14,20 @@
 |---|---|---|---|---|---|---|
 | 1 | POST | `/accreditations/{id}/verify` | Verificar o caducar una acreditación (transición de estado) | BAJO | 2 | SECURITY_ADMIN |
 | 2 | POST | `/inventory-items/{itemId}/movements` | Registrar un movimiento de inventario (ajuste de stock) | MEDIO | 3 | SECURITY_ADMIN |
-| 3 | GET | `/practices` | Listar las prácticas activas del tenant | BAJO | 3 | sesión (sin roles) |
+| 3 | GET | `/practices` | Listar las prácticas activas del tenant | BAJO | 4 | sesión (sin roles) |
 | 4 | POST | `/practices` | Dar de alta una práctica (organización raíz) | MEDIO | 2 | SECURITY_ADMIN |
 | 5 | POST | `/practices/{practiceId}/accreditations` | Registrar una acreditación con evidencia | MEDIO | 2 | SECURITY_ADMIN |
-| 6 | GET | `/practices/{practiceId}/healthcare-services` | Listar los procedimientos que ofrecen las sedes de la práctica | BAJO | 6 | sesión (sin roles) |
-| 7 | POST | `/practices/{practiceId}/healthcare-services` | Publicar un procedimiento del nomenclador en una sede | ALTO | 7 | sesión (sin roles) |
-| 8 | PATCH | `/practices/{practiceId}/healthcare-services/{id}` | Actualizar el precio o el estado de un procedimiento de la sede | ALTO | 7 | sesión (sin roles) |
+| 6 | GET | `/practices/{practiceId}/healthcare-services` | Listar los procedimientos que ofrecen las sedes de la práctica | BAJO | 7 | sesión (sin roles) |
+| 7 | POST | `/practices/{practiceId}/healthcare-services` | Publicar un procedimiento del nomenclador en una sede | ALTO | 8 | sesión (sin roles) |
+| 8 | PATCH | `/practices/{practiceId}/healthcare-services/{id}` | Actualizar el precio o el estado de un procedimiento de la sede | ALTO | 8 | sesión (sin roles) |
 | 9 | POST | `/practices/{practiceId}/inventory-items` | Dar de alta un insumo de inventario de práctica | MEDIO | 1 | SECURITY_ADMIN |
 | 10 | GET | `/practices/{practiceId}/organization` | Consola de organización médica: estructura, plantilla y legajo | BAJO | 9 | SECURITY_ADMIN, PERIOP_ADMIN, SURGERY_SCHEDULER, SCHEDULING_ADMIN, PRACTITIONER, CLINICIAN, ACCOUNTING_APPROVER |
-| 11 | GET | `/practices/{practiceId}/role-assignments` | Listar las vinculaciones profesional-organización de la práctica | BAJO | 3 | sesión (sin roles) |
+| 11 | GET | `/practices/{practiceId}/role-assignments` | Listar las vinculaciones profesional-organización de la práctica | BAJO | 4 | sesión (sin roles) |
 | 12 | POST | `/practices/{practiceId}/role-assignments` | Asignar un rol de profesional a sitio/unidad/servicio | MEDIO | 4 | SECURITY_ADMIN |
-| 13 | POST | `/practices/{practiceId}/role-assignments/invitations` | Invitar a un profesional a procedimientos de una sede | ALTO | 7 | sesión (sin roles) |
+| 13 | POST | `/practices/{practiceId}/role-assignments/invitations` | Invitar a un profesional a procedimientos de una sede | ALTO | 8 | sesión (sin roles) |
 | 14 | POST | `/practices/{practiceId}/role-assignments/self-request` | Solicitar la propia vinculación a una organización | MEDIO | 5 | PRACTITIONER |
 | 15 | PUT | `/practices/{practiceId}/settings/{settingKey}` | Configurar un ajuste de práctica (upsert) | MEDIO | 3 | SECURITY_ADMIN |
-| 16 | GET | `/practices/{practiceId}/sites` | Listar las sedes de una práctica | BAJO | 3 | sesión (sin roles) |
+| 16 | GET | `/practices/{practiceId}/sites` | Listar las sedes de una práctica | BAJO | 4 | sesión (sin roles) |
 | 17 | POST | `/practices/{practiceId}/sites` | Dar de alta un sitio de práctica | MEDIO | 2 | SECURITY_ADMIN |
 | 18 | DELETE | `/practices/{practiceId}/sites/{siteId}` | Desmantelar un sitio en cascada (soft-delete) | MEDIO | 10 | SECURITY_ADMIN |
 | 19 | GET | `/practitioners/{profileId}/sites` | Consultorios donde atiende el profesional | BAJO | 5 | SECURITY_ADMIN, SCHEDULING_ADMIN, SCHEDULING_AGENT, PRACTITIONER, CLINICIAN, PATIENT |
@@ -40,15 +40,16 @@
 | 26 | PUT | `/practitioners/me/sites/{siteId}/bank-qr` | Fijar o quitar el QR bancario de una sede | BAJO | 6 | PRACTITIONER, CLINICIAN |
 | 27 | PUT | `/practitioners/me/sites/{siteId}/contact-phone` | Guardar o quitar mi teléfono en una sede | MEDIO | 7 | PRACTITIONER, CLINICIAN |
 | 28 | PUT | `/practitioners/me/sites/{siteId}/logo` | Fijar o quitar el logo del consultorio propio | MEDIO | 9 | PRACTITIONER, CLINICIAN |
-| 29 | POST | `/role-assignments/{roleId}/approve` | Aprobar una vinculación pendiente | BAJO | 3 | sesión (sin roles) |
-| 30 | POST | `/role-assignments/{roleId}/end` | Finalizar una vinculación | BAJO | 3 | SECURITY_ADMIN |
-| 31 | POST | `/role-assignments/{roleId}/reject` | Rechazar una vinculación pendiente | BAJO | 3 | sesión (sin roles) |
+| 29 | POST | `/role-assignments/{roleId}/approve` | Aprobar una vinculación pendiente | ALTO | 6 | sesión (sin roles) |
+| 30 | POST | `/role-assignments/{roleId}/end` | Finalizar una vinculación | MEDIO | 6 | SECURITY_ADMIN |
+| 31 | POST | `/role-assignments/{roleId}/reject` | Rechazar una vinculación pendiente | ALTO | 6 | sesión (sin roles) |
 | 32 | POST | `/role-assignments/{roleId}/support-assignments` | Adjuntar personal de apoyo a un rol de profesional | MEDIO | 3 | SECURITY_ADMIN |
-| 33 | POST | `/role-assignments/{roleId}/suspend` | Suspender una vinculación activa | BAJO | 3 | SECURITY_ADMIN |
+| 33 | POST | `/role-assignments/{roleId}/suspend` | Suspender una vinculación activa | MEDIO | 6 | SECURITY_ADMIN |
 | 34 | GET | `/sites/{siteId}/care-spaces` | Listar los espacios de atención de la sede | BAJO | 3 | SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN |
-| 35 | POST | `/sites/{siteId}/care-spaces` | Crear un espacio de atención bajo una unidad/sitio | MEDIO | 3 | SECURITY_ADMIN |
-| 36 | POST | `/sites/{siteId}/clinical-units` | Crear una unidad clínica jerárquica | MEDIO | 2 | SECURITY_ADMIN |
-| 37 | POST | `/tenants/{tenantId}/practices` | Crear la práctica y la primera sede de una organización | ALTO | 7 | sesión (sin roles) |
+| 35 | POST | `/sites/{siteId}/care-spaces` | Crear un espacio de atención bajo una unidad/sitio | ALTO | 14 | SECURITY_ADMIN |
+| 36 | PATCH | `/sites/{siteId}/care-spaces/{id}` | Mover un espacio de atención bajo otro padre de la sede | ALTO | 13 | SECURITY_ADMIN |
+| 37 | POST | `/sites/{siteId}/clinical-units` | Crear una unidad clínica jerárquica | MEDIO | 2 | SECURITY_ADMIN |
+| 38 | POST | `/tenants/{tenantId}/practices` | Crear la práctica y la primera sede de una organización | ALTO | 8 | sesión (sin roles) |
 
 ---
 
@@ -277,7 +278,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practices` la atiende `PracticesController.listPractices` (src/modules/practice/controllers/practices.controller.ts:108). Exige sesión; el controlador no declara roles. Delega en `PracticeSitesService.listPractices`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
+`GET /practices` la atiende `PracticesController.listPractices` (src/modules/practice/controllers/practices.controller.ts:108). Exige sesión; el controlador no declara roles. Delega en `PracticeSitesService.listPractices`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -292,7 +293,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listPractices → PracticeSitesService.listPractices → PracticeSitesService.assertCanReadPractices → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PracticesController.listPractices → PracticeSitesService.listPractices → PracticeSitesService.assertCanReadPractices → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listPractices → PracticeSitesService.listPractices → PracticeSitesService.assertCanReadPractices → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `practice.practices` | LEE | LEE | DIRECTA | PracticesController.listPractices → PracticeSitesService.listPractices → PracticesRepository.findByTenant | `src/modules/practice/repositories/practices.repository.ts:69` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PracticesController.listPractices → PracticeSitesService.listPractices → PracticeAccessService.allowedPracticeIds → PracticeTenantLookupService.findActivePracticeIdsForPractitioner → PractitionerRoleAssignmentsRepository.findActiveByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:177` |
 
@@ -366,7 +368,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | PracticesController.createPractice → PracticeSitesService.createPractice → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:169` |
+| `billing.service_catalog` | ESCRIBE | CREA | DIRECTA | PracticesController.createPractice → PracticeSitesService.createPractice → ServiceCatalogRepository.create | `src/modules/billing/repositories/service-catalog.repository.ts:195` |
 | `practice.practices` | ESCRIBE | CREA | DIRECTA | PracticesController.createPractice → PracticeSitesService.createPractice → PracticesRepository.create | `src/modules/practice/repositories/practices.repository.ts:150` |
 
 ### Cuerpo — DTO `CreatePracticeDto` · `application/json`
@@ -574,7 +576,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practices/{practiceId}/healthcare-services` la atiende `PracticesController.listHealthcareServices` (src/modules/practice/controllers/practices.controller.ts:312). Exige sesión; el controlador no declara roles. Delega en `HealthcareServiceOffersService.listOffers`. Lee billing.service_catalog, directory.tenant_memberships, practice.healthcare_services, practice.practices, terminology.catalog_concepts, terminology.concept_properties.
+`GET /practices/{practiceId}/healthcare-services` la atiende `PracticesController.listHealthcareServices` (src/modules/practice/controllers/practices.controller.ts:312). Exige sesión; el controlador no declara roles. Delega en `HealthcareServiceOffersService.listOffers`. Lee billing.service_catalog, delegated_access.organization_user_assignments, directory.tenant_memberships, practice.healthcare_services, practice.practices, terminology.catalog_concepts, terminology.concept_properties.
 
 ### Requerimientos
 
@@ -591,7 +593,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → HealthcareServiceOffersService.toOffers → ServiceCatalogRepository.findByIds | `src/modules/billing/repositories/service-catalog.repository.ts:104` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → HealthcareServicesRepository.listByPractice | `src/modules/practice/repositories/healthcare-services.repository.ts:111` |
 | `practice.practices` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → PracticeAdministrationService.assertCanAdministerPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PracticesController.listHealthcareServices → HealthcareServiceOffersService.listOffers → HealthcareServiceOffersService.toOffers | `src/modules/practice/services/healthcare-service-offers.service.ts:158` |
@@ -667,7 +670,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 ### Cómo se atiende (sistema)
 
-`POST /practices/{practiceId}/healthcare-services` la atiende `PracticesController.publishHealthcareService` (src/modules/practice/controllers/practices.controller.ts:287). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateHealthcareServiceDto` (8 campos, 3 obligatorios). Delega en `ClinicalStructureService.publishHealthcareService`. Crea filas en practice.healthcare_services. Lee directory.tenant_memberships, practice.clinical_units, practice.healthcare_services, practice.practice_sites, practice.practices, terminology.value_set_members.
+`POST /practices/{practiceId}/healthcare-services` la atiende `PracticesController.publishHealthcareService` (src/modules/practice/controllers/practices.controller.ts:287). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateHealthcareServiceDto` (8 campos, 3 obligatorios). Delega en `ClinicalStructureService.publishHealthcareService`. Crea filas en practice.healthcare_services. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, practice.clinical_units, practice.healthcare_services, practice.practice_sites, practice.practices, terminology.value_set_members.
 
 ### Requerimientos
 
@@ -685,7 +688,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:57` |
 | `practice.healthcare_services` | ESCRIBE | CREA | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → HealthcareServicesRepository.create | `src/modules/practice/repositories/healthcare-services.repository.ts:131` |
 | `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.publishHealthcareService → ClinicalStructureService.publishHealthcareService → HealthcareServicesRepository.findBySiteAndConcept | `src/modules/practice/repositories/healthcare-services.repository.ts:95` |
@@ -790,7 +794,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`PATCH /practices/{practiceId}/healthcare-services/{id}` la atiende `PracticesController.updateHealthcareService` (src/modules/practice/controllers/practices.controller.ts:332). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateHealthcareServiceDto` (2 campos, 0 obligatorios). Delega en `HealthcareServiceOffersService.updateOffer`. Actualiza practice.healthcare_services. Lee billing.service_catalog, directory.tenant_memberships, practice.healthcare_services, practice.practices, terminology.catalog_concepts, terminology.concept_properties.
+`PATCH /practices/{practiceId}/healthcare-services/{id}` la atiende `PracticesController.updateHealthcareService` (src/modules/practice/controllers/practices.controller.ts:332). Exige sesión; el controlador no declara roles. Valida el cuerpo como `UpdateHealthcareServiceDto` (2 campos, 0 obligatorios). Delega en `HealthcareServiceOffersService.updateOffer`. Actualiza practice.healthcare_services. Lee billing.service_catalog, delegated_access.organization_user_assignments, directory.tenant_memberships, practice.healthcare_services, practice.practices, terminology.catalog_concepts, terminology.concept_properties.
 
 ### Requerimientos
 
@@ -809,7 +813,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `billing.service_catalog` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → HealthcareServiceOffersService.toOffers → ServiceCatalogRepository.findByIds | `src/modules/billing/repositories/service-catalog.repository.ts:104` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `practice.healthcare_services` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer | `src/modules/practice/services/healthcare-service-offers.service.ts:120` |
 | `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → HealthcareServicesRepository.findById | `src/modules/practice/repositories/healthcare-services.repository.ts:65` |
 | `practice.practices` | LEE | LEE | DIRECTA | PracticesController.updateHealthcareService → HealthcareServiceOffersService.updateOffer → PracticeAdministrationService.assertCanAdministerPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
@@ -1231,7 +1236,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practices/{practiceId}/role-assignments` la atiende `PracticesController.listRoleAssignments` (src/modules/practice/controllers/practices.controller.ts:180). Exige sesión; el controlador no declara roles. Delega en `PracticeWorkforceService.listPracticeAssignments`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
+`GET /practices/{practiceId}/role-assignments` la atiende `PracticesController.listRoleAssignments` (src/modules/practice/controllers/practices.controller.ts:180). Exige sesión; el controlador no declara roles. Delega en `PracticeWorkforceService.listPracticeAssignments`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
 
 ### Requerimientos
 
@@ -1247,7 +1252,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listRoleAssignments → PracticeWorkforceService.listPracticeAssignments → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PracticesController.listRoleAssignments → PracticeWorkforceService.listPracticeAssignments → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listRoleAssignments → PracticeWorkforceService.listPracticeAssignments → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `practice.practices` | LEE | LEE | DIRECTA | PracticesController.listRoleAssignments → PracticeWorkforceService.listPracticeAssignments → PracticeAdministrationService.assertCanAdministerPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PracticesController.listRoleAssignments → PracticeWorkforceService.listPracticeAssignments → PractitionerRoleAssignmentsRepository.findByPracticePage | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:242` |
 
@@ -1440,7 +1446,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /practices/{practiceId}/role-assignments/invitations` la atiende `PracticeInvitationsController.invite` (src/modules/practice/controllers/practice-invitations.controller.ts:39). Exige sesión; el controlador no declara roles. Valida el cuerpo como `InvitePractitionerDto` (3 campos, 3 obligatorios). Delega en `PracticeAffiliationInvitationsService.invite`. Crea filas en practice.practitioner_role_assignments. Lee directory.tenant_memberships, practice.healthcare_services, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles.
+`POST /practices/{practiceId}/role-assignments/invitations` la atiende `PracticeInvitationsController.invite` (src/modules/practice/controllers/practice-invitations.controller.ts:39). Exige sesión; el controlador no declara roles. Valida el cuerpo como `InvitePractitionerDto` (3 campos, 3 obligatorios). Delega en `PracticeAffiliationInvitationsService.invite`. Crea filas en practice.practitioner_role_assignments. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, practice.healthcare_services, practice.practice_sites, practice.practices, practice.practitioner_role_assignments, profiles.health_practitioner_profiles.
 
 ### Requerimientos
 
@@ -1458,7 +1464,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → HealthcareServicesRepository.findById | `src/modules/practice/repositories/healthcare-services.repository.ts:65` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
 | `practice.practices` | LEE | LEE | DIRECTA | PracticeInvitationsController.invite → PracticeAffiliationInvitationsService.invite → PracticeAdministrationService.assertCanAdministerPractice → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
@@ -1785,7 +1792,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /practices/{practiceId}/sites` la atiende `PracticesController.listSites` (src/modules/practice/controllers/practices.controller.ts:164). Exige sesión; el controlador no declara roles. Delega en `PracticeSitesService.listSites`. Lee directory.tenant_memberships, practice.practice_sites, practice.practices.
+`GET /practices/{practiceId}/sites` la atiende `PracticesController.listSites` (src/modules/practice/controllers/practices.controller.ts:164). Exige sesión; el controlador no declara roles. Delega en `PracticeSitesService.listSites`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practice_sites, practice.practices.
 
 ### Requerimientos
 
@@ -1801,7 +1808,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listSites → PracticeSitesService.listSites → PracticeSitesService.assertCanReadPractices → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PracticesController.listSites → PracticeSitesService.listSites → PracticeSitesService.assertCanReadPractices → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PracticesController.listSites → PracticeSitesService.listSites → PracticeSitesService.assertCanReadPractices → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticesController.listSites → PracticeSitesService.listSites → PracticeSitesRepository.findByPractice | `src/modules/practice/repositories/practice-sites.repository.ts:99` |
 | `practice.practices` | LEE | LEE | DIRECTA | PracticesController.listSites → PracticeSitesService.listSites → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 
@@ -2003,15 +2011,15 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `practice.care_spaces` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:383` |
+| `practice.care_spaces` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:394` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → CareSpacesRepository.findBySite | `src/modules/practice/repositories/care-spaces.repository.ts:72` |
-| `practice.clinical_units` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:377` |
+| `practice.clinical_units` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:388` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → ClinicalUnitsRepository.findBySite | `src/modules/practice/repositories/clinical-units.repository.ts:71` |
-| `practice.healthcare_services` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:390` |
+| `practice.healthcare_services` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:401` |
 | `practice.healthcare_services` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → HealthcareServicesRepository.findBySite | `src/modules/practice/repositories/healthcare-services.repository.ts:79` |
-| `practice.practice_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:369` |
+| `practice.practice_sites` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:380` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → PracticeSitesRepository.findById | `src/modules/practice/repositories/practice-sites.repository.ts:69` |
-| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:396` |
+| `practice.practitioner_role_assignments` | ESCRIBE | ACTUALIZA | POR_TIPO | PracticesController.decommissionSite → PracticeSitesService.decommissionSite | `src/modules/practice/services/practice-sites.service.ts:407` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PracticesController.decommissionSite → PracticeSitesService.decommissionSite → PractitionerRoleAssignmentsRepository.findBySite | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:96` |
 
 ### Parámetros
@@ -2180,7 +2188,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `community.public_profiles` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments | `src/modules/practice/services/practice-workforce.service.ts:357` |
+| `community.public_profiles` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments | `src/modules/practice/services/practice-workforce.service.ts:360` |
 | `practice.practices` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | PractitionerSitesController.listMyAssignments → PracticeWorkforceService.listMyAssignments → PractitionerRoleAssignmentsRepository.findByPractitioner | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:151` |
 
@@ -3096,7 +3104,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Aprobar una vinculación pendiente
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `RoleAssignmentsController.approve` — `src/modules/practice/controllers/role-assignments.controller.ts:68`
 
@@ -3108,7 +3116,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /role-assignments/{roleId}/approve` la atiende `RoleAssignmentsController.approve` (src/modules/practice/controllers/role-assignments.controller.ts:68). Exige sesión; el controlador no declara roles. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.approveAssignment`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
+`POST /role-assignments/{roleId}/approve` la atiende `RoleAssignmentsController.approve` (src/modules/practice/controllers/role-assignments.controller.ts:68). Exige sesión; el controlador no declara roles. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.approveAssignment`. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments, profiles.person_account_links.
 
 ### Requerimientos
 
@@ -3126,9 +3134,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:76` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:67` |
 | `practice.practices` | LEE | LEE | DIRECTA | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleInScope → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | RoleAssignmentsController.approve → PracticeWorkforceService.approveAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:59` |
 
 ### Parámetros
 
@@ -3198,7 +3209,7 @@ El árbol de decisión completo está en [flujos](../flujos/practice.md).
 - **Origen:** CONTRATO
 - **Nombre:** Finalizar una vinculación
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `RoleAssignmentsController.end` — `src/modules/practice/controllers/role-assignments.controller.ts:120`
 
@@ -3210,7 +3221,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /role-assignments/{roleId}/end` la atiende `RoleAssignmentsController.end` (src/modules/practice/controllers/role-assignments.controller.ts:120). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.endAssignment`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
+`POST /role-assignments/{roleId}/end` la atiende `RoleAssignmentsController.end` (src/modules/practice/controllers/role-assignments.controller.ts:120). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.endAssignment`. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments, profiles.person_account_links.
 
 ### Requerimientos
 
@@ -3228,9 +3239,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:76` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:67` |
 | `practice.practices` | LEE | LEE | DIRECTA | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleInScope → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | RoleAssignmentsController.end → PracticeWorkforceService.endAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:59` |
 
 ### Parámetros
 
@@ -3298,7 +3312,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Rechazar una vinculación pendiente
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** ALTO — Escribe y el controlador no declara roles
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `RoleAssignmentsController.reject` — `src/modules/practice/controllers/role-assignments.controller.ts:85`
 
@@ -3310,7 +3324,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /role-assignments/{roleId}/reject` la atiende `RoleAssignmentsController.reject` (src/modules/practice/controllers/role-assignments.controller.ts:85). Exige sesión; el controlador no declara roles. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.rejectAssignment`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
+`POST /role-assignments/{roleId}/reject` la atiende `RoleAssignmentsController.reject` (src/modules/practice/controllers/role-assignments.controller.ts:85). Exige sesión; el controlador no declara roles. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.rejectAssignment`. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments, profiles.person_account_links.
 
 ### Requerimientos
 
@@ -3328,9 +3342,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:76` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:67` |
 | `practice.practices` | LEE | LEE | DIRECTA | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleInScope → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | RoleAssignmentsController.reject → PracticeWorkforceService.rejectAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:59` |
 
 ### Parámetros
 
@@ -3509,7 +3526,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Suspender una vinculación activa
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** BAJO — Sólo lee
+- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
 - **Implementación:** `RoleAssignmentsController.suspend` — `src/modules/practice/controllers/role-assignments.controller.ts:102`
 
@@ -3521,7 +3538,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /role-assignments/{roleId}/suspend` la atiende `RoleAssignmentsController.suspend` (src/modules/practice/controllers/role-assignments.controller.ts:102). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.suspendAssignment`. Lee directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments.
+`POST /role-assignments/{roleId}/suspend` la atiende `RoleAssignmentsController.suspend` (src/modules/practice/controllers/role-assignments.controller.ts:102). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `PracticeRoleAssignmentTransitionDto` (1 campo, 0 obligatorios). Delega en `PracticeWorkforceService.suspendAssignment`. Actualiza directory.tenant_memberships. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, practice.practices, practice.practitioner_role_assignments, profiles.person_account_links.
 
 ### Requerimientos
 
@@ -3539,9 +3556,12 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PracticeAdministrationService.assertCanAdministerPractice → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | ESCRIBE | ACTUALIZA | POR_TIPO | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:76` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:67` |
 | `practice.practices` | LEE | LEE | DIRECTA | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleInScope → PracticesRepository.findById | `src/modules/practice/repositories/practices.repository.ts:92` |
 | `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PracticeWorkforceService.loadRoleForAdministrator → PractitionerRoleAssignmentsRepository.findById | `src/modules/practice/repositories/practitioner-role-assignments.repository.ts:82` |
+| `profiles.person_account_links` | LEE | LEE | DIRECTA | RoleAssignmentsController.suspend → PracticeWorkforceService.suspendAssignment → PracticeWorkforceService.transitionAssignment → PractitionerMembershipSyncService.settle | `src/modules/practice/services/practitioner-membership-sync.service.ts:59` |
 
 ### Parámetros
 
@@ -3611,7 +3631,7 @@ _Ninguna prueba existente menciona esta operación._
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** BAJO — Sólo lee
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SitesController.listCareSpaces` — `src/modules/practice/controllers/sites.controller.ts:69`
+- **Implementación:** `SitesController.listCareSpaces` — `src/modules/practice/controllers/sites.controller.ts:71`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3621,16 +3641,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /sites/{siteId}/care-spaces` la atiende `SitesController.listCareSpaces` (src/modules/practice/controllers/sites.controller.ts:69). Exige sesión con alguno de los roles SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN. Delega en `PracticeSitesService.listCareSpaces`. Lee practice.care_spaces, practice.practice_sites, practice.practices.
+`GET /sites/{siteId}/care-spaces` la atiende `SitesController.listCareSpaces` (src/modules/practice/controllers/sites.controller.ts:71). Exige sesión con alguno de los roles SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN. Delega en `PracticeSitesService.listCareSpaces`. Lee practice.care_spaces, practice.practice_sites, practice.practices.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN | `src/modules/practice/controllers/sites.controller.ts:69` |
+| ROL | Alguno de: SECURITY_ADMIN, SURGERY_SCHEDULER, PERIOP_ADMIN, SURGEON, ANESTHESIOLOGIST, PERIOP_NURSE, SCHEDULING_ADMIN | `src/modules/practice/controllers/sites.controller.ts:71` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:69` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:71` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
 
 ### Tablas que afecta
@@ -3690,9 +3710,9 @@ _Ninguna prueba existente menciona esta operación._
 - **Origen:** CONTRATO
 - **Nombre:** Crear un espacio de atención bajo una unidad/sitio
 - **Bloque:** Práctica y Agenda
-- **Riesgo:** MEDIO — Escribe en la base, con roles declarados
+- **Riesgo:** ALTO — Borra filas
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SitesController.createCareSpace` — `src/modules/practice/controllers/sites.controller.ts:87`
+- **Implementación:** `SitesController.createCareSpace` — `src/modules/practice/controllers/sites.controller.ts:89`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3702,16 +3722,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 ### Cómo se atiende (sistema)
 
-`POST /sites/{siteId}/care-spaces` la atiende `SitesController.createCareSpace` (src/modules/practice/controllers/sites.controller.ts:87). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCareSpaceDto` (6 campos, 2 obligatorios). Delega en `ClinicalStructureService.createCareSpace`. Crea filas en practice.care_spaces. Lee practice.care_spaces, practice.clinical_units.
+`POST /sites/{siteId}/care-spaces` la atiende `SitesController.createCareSpace` (src/modules/practice/controllers/sites.controller.ts:89). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateCareSpaceDto` (6 campos, 2 obligatorios). Delega en `ClinicalStructureService.createCareSpace`. Crea filas en delegated_access.effective_support_access, delegated_access.practitioner_delegate_assignments, practice.care_spaces. Borra de delegated_access.effective_support_access. Lee delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments, delegated_access.support_grant_actions, delegated_access.support_scope_grants, directory.tenant_memberships, practice.care_spaces, practice.clinical_units, practice.practices y 2 más.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/sites.controller.ts:87` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/sites.controller.ts:89` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:87` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:89` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
@@ -3720,9 +3740,20 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
+| `delegated_access.effective_support_access` | BORRA | BORRA | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → EffectiveSupportAccessRepository.replace | `src/modules/delegated_access/repositories/effective-support-access.repository.ts:56` |
+| `delegated_access.effective_support_access` | ESCRIBE | CREA | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → EffectiveSupportAccessRepository.replace | `src/modules/delegated_access/repositories/effective-support-access.repository.ts:61` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:113` |
+| `delegated_access.practitioner_delegate_assignments` | ESCRIBE | CREA | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → PractitionerDelegateAssignmentsRepository.create | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:92` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findDelegationsOfEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:199` |
+| `delegated_access.support_grant_actions` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:165` |
+| `delegated_access.support_scope_grants` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:161` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:117` |
 | `practice.care_spaces` | ESCRIBE | CREA | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → CareSpacesRepository.create | `src/modules/practice/repositories/care-spaces.repository.ts:83` |
 | `practice.care_spaces` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → CareSpacesRepository.findById | `src/modules/practice/repositories/care-spaces.repository.ts:61` |
 | `practice.clinical_units` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalUnitsRepository.findById | `src/modules/practice/repositories/clinical-units.repository.ts:57` |
+| `practice.practices` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:260` |
+| `practice.practitioner_location_assignments` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findLocationPairs | `src/modules/delegated_access/repositories/support-access.repository.ts:467` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | SitesController.createCareSpace → ClinicalStructureService.createCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:266` |
 
 ### Parámetros
 
@@ -3800,14 +3831,126 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 36. POST /sites/{siteId}/clinical-units
+## 36. PATCH /sites/{siteId}/care-spaces/{id}
+
+- **Origen:** CONTRATO
+- **Nombre:** Mover un espacio de atención bajo otro padre de la sede
+- **Bloque:** Práctica y Agenda
+- **Riesgo:** ALTO — Borra filas
+- **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
+- **Implementación:** `SitesController.moveCareSpace` — `src/modules/practice/controllers/sites.controller.ts:109`
+
+### Qué es y para qué sirve (negocio)
+
+Mover un espacio de atención bajo otro padre de la sede. Dentro del módulo (descripción del modelo, en inglés): «General physical and care-delivery infrastructure for a private office, clinic, medical center, hospital, nursing station, laboratory, imaging site, pharmacy counter, mobile unit or virtual service.» Dominio: Práctica y Agenda.
+
+_Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health Context/modules/diagram_14_practice.puml:44`) · MODELO (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:35`)
+
+### Cómo se atiende (sistema)
+
+`PATCH /sites/{siteId}/care-spaces/{id}` la atiende `SitesController.moveCareSpace` (src/modules/practice/controllers/sites.controller.ts:109). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `MoveCareSpaceDto` (1 campo, 0 obligatorios). Delega en `ClinicalStructureService.moveCareSpace`. Crea filas en delegated_access.effective_support_access, delegated_access.practitioner_delegate_assignments. Actualiza practice.care_spaces. Borra de delegated_access.effective_support_access. Lee delegated_access.organization_user_assignments, delegated_access.practitioner_delegate_assignments, delegated_access.support_grant_actions, delegated_access.support_scope_grants, directory.tenant_memberships, practice.care_spaces, practice.practices, practice.practitioner_location_assignments y 1 más.
+
+### Requerimientos
+
+| Tipo | Detalle | Fuente |
+|---|---|---|
+| AUTENTICACION | JWT Bearer | `contrato (security)` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/sites.controller.ts:109` |
+| TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId, id | `src/modules/practice/controllers/sites.controller.ts:109` |
+| CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
+| VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
+| RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
+
+### Tablas que afecta
+
+| Tabla | Operación | Detalle | Confianza | Camino | Fuente |
+|---|---|---|---|---|---|
+| `delegated_access.effective_support_access` | BORRA | BORRA | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → EffectiveSupportAccessRepository.replace | `src/modules/delegated_access/repositories/effective-support-access.repository.ts:56` |
+| `delegated_access.effective_support_access` | ESCRIBE | CREA | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → EffectiveSupportAccessRepository.replace | `src/modules/delegated_access/repositories/effective-support-access.repository.ts:61` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:113` |
+| `delegated_access.practitioner_delegate_assignments` | ESCRIBE | CREA | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → PractitionerDelegateAssignmentsRepository.create | `src/modules/delegated_access/repositories/practitioner-delegate-assignments.repository.ts:92` |
+| `delegated_access.practitioner_delegate_assignments` | LEE | LEE | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findDelegationsOfEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:199` |
+| `delegated_access.support_grant_actions` | LEE | LEE | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:165` |
+| `delegated_access.support_scope_grants` | LEE | LEE | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findGrantsWithActions | `src/modules/delegated_access/repositories/support-access.repository.ts:161` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findEngagements | `src/modules/delegated_access/repositories/support-access.repository.ts:117` |
+| `practice.care_spaces` | ESCRIBE | ACTUALIZA | POR_TIPO | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace | `src/modules/practice/services/clinical-structure.service.ts:320` |
+| `practice.care_spaces` | LEE | LEE | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → CareSpacesRepository.findBySite | `src/modules/practice/repositories/care-spaces.repository.ts:72` |
+| `practice.practices` | LEE | LEE | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:260` |
+| `practice.practitioner_location_assignments` | LEE | LEE | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findLocationPairs | `src/modules/delegated_access/repositories/support-access.repository.ts:467` |
+| `practice.practitioner_role_assignments` | LEE | LEE | DIRECTA | SitesController.moveCareSpace → ClinicalStructureService.moveCareSpace → ClinicalStructureService.refreshSupportAccess → EffectiveSupportAccessService.refreshTenant → SupportAccessRepository.findRoleAssignmentsOfTenant | `src/modules/delegated_access/repositories/support-access.repository.ts:266` |
+
+### Parámetros
+
+| Nombre | En | Obligatorio | Tipo | Descripción |
+|---|---|---|---|---|
+| `siteId` | path | Sí | `string` | — |
+| `id` | path | Sí | `string` | — |
+
+### Cuerpo — DTO `MoveCareSpaceDto` · `application/json`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `parentSpaceId` | `object` | No | formato uuid; admite null | `@IsOptional()` `@IsUUID()` | Nuevo espacio padre (misma sede); null lo deja en la raíz de la sede | `src/modules/practice/dto/move-care-space.dto.ts:17` |
+
+**Payload mínimo** (sólo los obligatorios):
+
+```json
+{}
+```
+
+<details><summary>Payload completo de ejemplo</summary>
+
+```json
+{
+  "parentSpaceId": {}
+}
+```
+
+</details>
+
+### Respuesta — `Promise<CareSpaceResponseDto>` · DTO `CareSpaceResponseDto`
+
+| Campo | Tipo | Obligatorio | Restricciones | Decoradores | Descripción | Fuente |
+|---|---|---|---|---|---|---|
+| `id` | `string` | Sí | — | — | Identificador único de la instancia. | `src/modules/practice/dto/responses.dto.ts:101` |
+| `practiceSiteId` | `string` | Sí | — | — | Identificador asociado a practice site. | `src/modules/practice/dto/responses.dto.ts:105` |
+| `code` | `string` | Sí | — | — | Valor de code mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:109` |
+| `status` | `string` | Sí | — | — | Valor de status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:113` |
+| `operationalStatus` | `string` | Sí | — | — | Valor de operational status mantenido por la instancia. | `src/modules/practice/dto/responses.dto.ts:117` |
+| `createdAt` | `string` | Sí | formato date-time | — | Fecha y hora en que se creó el registro. | `src/modules/practice/dto/responses.dto.ts:121` |
+
+### Respuestas posibles
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 422 | `PRECONDITION_FAILED` | PreconditionFailedException: El espacio no pertenece al sitio; PreconditionFailedException: {error.message} / Movimiento inválido |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+El árbol de decisión completo está en [flujos](../flujos/practice.md).
+
+### Pruebas que la mencionan
+
+_Ninguna prueba existente menciona esta operación._
+
+### Flujos
+
+- Módulo Practice (14) — etapa `ctrl:SitesController` _(agrupada por controlador: el README no la asigna a un caso de uso)_
+
+---
+
+## 37. POST /sites/{siteId}/clinical-units
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear una unidad clínica jerárquica
 - **Bloque:** Práctica y Agenda
 - **Riesgo:** MEDIO — Escribe en la base, con roles declarados
 - **Revisión:** AUTO_DETECTADA · **Datos personales:** SIN_FUENTE
-- **Implementación:** `SitesController.createClinicalUnit` — `src/modules/practice/controllers/sites.controller.ts:45`
+- **Implementación:** `SitesController.createClinicalUnit` — `src/modules/practice/controllers/sites.controller.ts:47`
 
 ### Qué es y para qué sirve (negocio)
 
@@ -3817,16 +3960,16 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · README (`src/modules/practic
 
 ### Cómo se atiende (sistema)
 
-`POST /sites/{siteId}/clinical-units` la atiende `SitesController.createClinicalUnit` (src/modules/practice/controllers/sites.controller.ts:45). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateClinicalUnitDto` (6 campos, 2 obligatorios). Delega en `ClinicalStructureService.createClinicalUnit`. Crea filas en practice.clinical_units. Lee practice.clinical_units.
+`POST /sites/{siteId}/clinical-units` la atiende `SitesController.createClinicalUnit` (src/modules/practice/controllers/sites.controller.ts:47). Exige sesión con alguno de los roles SECURITY_ADMIN. Valida el cuerpo como `CreateClinicalUnitDto` (6 campos, 2 obligatorios). Delega en `ClinicalStructureService.createClinicalUnit`. Crea filas en practice.clinical_units. Lee practice.clinical_units.
 
 ### Requerimientos
 
 | Tipo | Detalle | Fuente |
 |---|---|---|
 | AUTENTICACION | JWT Bearer | `contrato (security)` |
-| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/sites.controller.ts:45` |
+| ROL | Alguno de: SECURITY_ADMIN | `src/modules/practice/controllers/sites.controller.ts:47` |
 | TENANT | Tenant por cabecera X-Tenant-Id o por la membresía única del actor; 403 si es ambiguo o no le pertenece | `src/app.module.ts:276` |
-| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:45` |
+| PARAMETRO_RUTA | Deben ser UUID válidos: siteId | `src/modules/practice/controllers/sites.controller.ts:47` |
 | CUERPO | application/json (obligatorio); máximo 1mb | `src/main.ts:176` |
 | VALIDACION | Se rechazan las propiedades no declaradas en el DTO (whitelist + forbidNonWhitelisted) | `src/common/http/validation-pipe.ts:115` |
 | RATE_LIMIT | 300 solicitudes cada 60 s (límite global) | `src/app.module.ts:143` |
@@ -3913,7 +4056,7 @@ _Ninguna prueba existente menciona esta operación._
 
 ---
 
-## 37. POST /tenants/{tenantId}/practices
+## 38. POST /tenants/{tenantId}/practices
 
 - **Origen:** CONTRATO
 - **Nombre:** Crear la práctica y la primera sede de una organización
@@ -3930,7 +4073,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`POST /tenants/{tenantId}/practices` la atiende `OrganizationPracticesController.create` (src/modules/practice/controllers/organization-practices.controller.ts:41). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateOrganizationPracticeDto` (7 campos, 6 obligatorios). Delega en `OrganizationPracticeProvisioningService.provision`. Crea filas en common.addresses, practice.practice_sites, practice.practices. Lee directory.tenant_memberships, directory.tenants, practice.practice_sites, practice.practices.
+`POST /tenants/{tenantId}/practices` la atiende `OrganizationPracticesController.create` (src/modules/practice/controllers/organization-practices.controller.ts:41). Exige sesión; el controlador no declara roles. Valida el cuerpo como `CreateOrganizationPracticeDto` (7 campos, 6 obligatorios). Delega en `OrganizationPracticeProvisioningService.provision`. Crea filas en common.addresses, practice.practice_sites, practice.practices. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, directory.tenants, practice.practice_sites, practice.practices.
 
 ### Requerimientos
 
@@ -3949,7 +4092,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.addresses` | ESCRIBE | CREA | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → AddressesRepository.create | `src/modules/common/repositories/addresses.repository.ts:154` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → TenantAdministrationService.assertCanAdminister → TenantAdministrationService.canAdminister → TenantAdministrationService.administersByMembership → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `directory.tenants` | LEE | LEE | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → TenantsRepository.findById | `src/modules/directory/repositories/tenants.repository.ts:71` |
 | `practice.practice_sites` | ESCRIBE | CREA | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → PracticeSitesRepository.create | `src/modules/practice/repositories/practice-sites.repository.ts:111` |
 | `practice.practice_sites` | LEE | LEE | DIRECTA | OrganizationPracticesController.create → OrganizationPracticeProvisioningService.provision → PracticeSitesRepository.findByPracticeAndCode | `src/modules/practice/repositories/practice-sites.repository.ts:85` |

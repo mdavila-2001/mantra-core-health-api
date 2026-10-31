@@ -30,6 +30,7 @@ import {
 } from '../../../domain/booking/booking-history-reading';
 import {
   isPatientActor,
+  isSupportActor,
   operatesAnyAgenda,
 } from '../../../domain/booking/agenda-actors';
 
@@ -97,13 +98,21 @@ export class GetBookingUseCase {
     // su representante, quien opera cualquier agenda (`SCHEDULING_ADMIN`,
     // `SCHEDULING_AGENT`, `SUPERADMIN`), o quien atiende exactamente en ese
     // recurso. Reusa el `recurso` de arriba: no agrega una consulta nueva.
-    if (isPatientActor(actor)) {
+    if (isPatientActor(actor, booking.tenantId)) {
       await this.access.assertMayActForPatient(
         booking.patientProfileId,
         actor!,
         em,
+        booking.tenantId,
       );
-    } else if (actor && !operatesAnyAgenda(actor)) {
+    } else if (actor && isSupportActor(actor, booking.tenantId)) {
+      await this.access.assertSupportMayAct(
+        em,
+        booking,
+        actor,
+        'schedule.view',
+      );
+    } else if (actor && !operatesAnyAgenda(actor, booking.tenantId)) {
       const isOwnAgenda =
         actor.practitionerProfileId !== undefined &&
         resource !== null &&
@@ -134,7 +143,7 @@ export class GetBookingUseCase {
 
     // El detalle dice lo mismo que el listado también en esto: quien representa
     // al paciente ve el motivo que él mismo escribió al pedir el turno.
-    const representedPatients = isPatientActor(actor)
+    const representedPatients = isPatientActor(actor, booking.tenantId)
       ? await this.representation.findActiveProxiedPatientIds(actor!.id, em)
       : undefined;
 

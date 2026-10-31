@@ -153,6 +153,8 @@ describe('DirectoryTenantsService', () => {
         expect.objectContaining({
           tenantId: 't1',
           tenantRoleConceptId: DIR.ROLE_OWNER,
+          // N10c: el dueño la creó al dar de alta la organización.
+          originConceptId: DIR.MEMBERSHIP_ORIGIN_OWNER_CREATED,
         }),
       );
     });
@@ -310,7 +312,10 @@ describe('DirectoryTenantsService', () => {
       expect(d.tx.flush).toHaveBeenCalledTimes(1);
       expect(d.membershipsRepo.create).toHaveBeenCalledWith(
         d.tx,
-        expect.objectContaining({ tenantRoleConceptId: DIR.ROLE_ADMIN }),
+        expect.objectContaining({
+          tenantRoleConceptId: DIR.ROLE_ADMIN,
+          originConceptId: DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED,
+        }),
       );
     });
   });

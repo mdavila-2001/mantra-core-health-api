@@ -2,7 +2,7 @@
 
 # Endpoints del módulo `directory`
 
-Referencia exhaustiva de 26 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
+Referencia exhaustiva de 29 operación(es) del módulo `directory`, derivada del contrato OpenAPI y del código TypeScript.
 
 - **Etiquetas OpenAPI:** `directory-admin-tenants`, `directory-tenants`
 - **Controladores:** `AdminTenantsController`, `OrganizationLogoController`, `TenantsController`
@@ -37,6 +37,9 @@ Referencia exhaustiva de 26 operación(es) del módulo `directory`, derivada del
 24. [POST /tenants/{tenantId}/memberships/{membershipId}/transfer](#24-post-tenants-tenantid-memberships-membershipid-transfer) — Transferir la membresía entre branches
 25. [GET /tenants/{tenantId}/pharmacy-readiness](#25-get-tenants-tenantid-pharmacy-readiness) — Requisitos pendientes para que la farmacia opere
 26. [GET /tenants/me](#26-get-tenants-me) — Las organizaciones del actor, con su rol en cada una
+27. [GET /tenants/me/membership-invitations](#27-get-tenants-me-membership-invitations) — Mis membresías pendientes de aceptar
+28. [POST /tenants/me/membership-invitations/{membershipId}/accept](#28-post-tenants-me-membership-invitations-membershipid-accept) — Aceptar una membresía pendiente propia
+29. [POST /tenants/me/membership-invitations/{membershipId}/decline](#29-post-tenants-me-membership-invitations-membershipid-decline) — Rechazar una membresía pendiente propia
 
 ---
 
@@ -2827,6 +2830,7 @@ En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar 
 | 403 | `FORBIDDEN` | Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 403 | `FORBIDDEN` | Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee | Excepción explícita en src/modules/directory/services/tenant-administration.service.ts |
 | 409 | `CONFLICT` | El usuario ya tiene una membresía activa en el tenant | Excepción explícita en src/modules/directory/services/directory-memberships.service.ts |
+| 409 | `CONFLICT` | El usuario ya tiene una invitación pendiente de aceptar en el tenant | Excepción explícita en src/modules/directory/services/directory-memberships.service.ts |
 | 413 | `PAYLOAD_TOO_LARGE` | El body supera el límite global de 1 MB. | Parser JSON/urlencoded global y filtro global de excepciones |
 | 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
 | 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
@@ -3814,6 +3818,349 @@ Ejemplo de error normalizado:
   "correlationId": "req-01J00000000000000000000000",
   "timestamp": "2026-07-31T12:00:00.000Z",
   "path": "/tenants/me"
+}
+```
+
+---
+
+## 27. GET /tenants/me/membership-invitations
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Mis membresías pendientes de aceptar
+- **Operation ID:** `TenantsController_listMyInvitations`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TenantsController.listMyInvitations](../../src/modules/directory/controllers/tenants.controller.ts)
+
+### Descripción de negocio
+
+Una organización que incorpora a una persona la deja PENDIENTE: no cuenta para su sesión hasta que ella la acepta aquí.
+
+Contexto declarado en el controlador: Las membresías que una organización creó para el propio actor y que aún no aceptó. `@TenantAgnostic`: quien solo tiene invitaciones pendientes no pertenece todavía a ninguna organización. Va antes que `:tenantId` por lo mismo que `me`.
+
+### Descripción del sistema
+
+NestJS resuelve `GET /tenants/me/membership-invitations` en `TenantsController_listMyInvitations`. El controlador delega en `DirectoryMembershipsService.listMyInvitations`. No recibe body. El tipo de retorno estático es `Promise<ListMembershipInvitationsResponseDto>`.
+
+### Parámetros
+
+No hay parámetros de ruta, query ni cabeceras específicos de la operación.
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+GET /tenants/me/membership-invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+GET /tenants/me/membership-invitations HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<ListMembershipInvitationsResponseDto>` | No |
+| 400 | Consulta completada correctamente. | `Promise<ListMembershipInvitationsResponseDto>` | No |
+| 401 | Consulta completada correctamente. | `Promise<ListMembershipInvitationsResponseDto>` | No |
+| 403 | Consulta completada correctamente. | `Promise<ListMembershipInvitationsResponseDto>` | No |
+| 429 | Consulta completada correctamente. | `Promise<ListMembershipInvitationsResponseDto>` | No |
+| 500 | Consulta completada correctamente. | `Promise<ListMembershipInvitationsResponseDto>` | No |
+| 504 | Consulta completada correctamente. | `Promise<ListMembershipInvitationsResponseDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `ListMembershipInvitationsResponseDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "items": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "tenantId": "00000000-0000-4000-8000-000000000001",
+      "tenantName": "Nombre de ejemplo",
+      "role": "OWNER",
+      "invitedAt": "2026-07-31T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `items` | Sí | `array<MembershipInvitationDto>` | Sin restricción adicional declarada | Pendientes, de la más reciente a la más antigua. | `[{"id":"00000000-0000-4000-8000-000000000001","tenantId":"00000000-0000-4000-8000-000000000001","tenantName":"Nombre de ejemplo","role":"OWNER","invitedAt":"2026-07-31T12:00:00.000Z"}]` |
+| `items[].id` | Sí | `string` | formato `uuid` | Identificador de la membresía pendiente (el que se pasa a aceptar o rechazar). | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantId` | Sí | `string` | formato `uuid` | Organización que incorporó a la persona. | `00000000-0000-4000-8000-000000000001` |
+| `items[].tenantName` | Sí | `string` | Sin restricción adicional declarada | Nombre de la organización (comercial, legal o código). | `Nombre de ejemplo` |
+| `items[].role` | Sí | `string` | valores: `OWNER`, `ADMIN`, `STAFF`, `OTHER` | Rol con el que la incorporan: `OWNER`, `ADMIN` o `STAFF`. | `OWNER` |
+| `items[].invitedAt` | Sí | `string` | formato `date-time` | Cuándo la organización la creó. | `2026-07-31T12:00:00.000Z` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "UNAUTHENTICATED",
+  "message": "JWT Bearer ausente, vencido o inválido.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/me/membership-invitations"
+}
+```
+
+---
+
+## 28. POST /tenants/me/membership-invitations/{membershipId}/accept
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Aceptar una membresía pendiente propia
+- **Operation ID:** `TenantsController_acceptMyInvitation`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TenantsController.acceptMyInvitation](../../src/modules/directory/controllers/tenants.controller.ts)
+
+### Descripción de negocio
+
+Aceptar una membresía pendiente propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La persona acepta una membresía pendiente propia.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /tenants/me/membership-invitations/{membershipId}/accept` en `TenantsController_acceptMyInvitation`. El controlador delega en `DirectoryMembershipsService.acceptMine`. No recibe body. El tipo de retorno estático es `Promise<MembershipInvitationDecisionDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `membershipId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /tenants/me/membership-invitations/00000000-0000-4000-8000-000000000001/accept HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `membershipId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /tenants/me/membership-invitations/00000000-0000-4000-8000-000000000001/accept HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MembershipInvitationDecisionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "status": "ACTIVE"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Membresía decidida. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | Sí | `string` | formato `uuid` | Organización de la membresía. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `DECLINED` | `ACTIVE` si aceptó; `DECLINED` si rechazó. | `ACTIVE` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Invitación no encontrada | Excepción explícita en src/modules/directory/services/directory-memberships.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/me/membership-invitations/{membershipId}/accept"
+}
+```
+
+---
+
+## 29. POST /tenants/me/membership-invitations/{membershipId}/decline
+
+- **Módulo:** `directory`
+- **Etiqueta OpenAPI:** `directory-tenants`
+- **Nombre:** Rechazar una membresía pendiente propia
+- **Operation ID:** `TenantsController_declineMyInvitation`
+- **Autenticación:** JWT Bearer obligatoria
+- **Implementación:** [TenantsController.declineMyInvitation](../../src/modules/directory/controllers/tenants.controller.ts)
+
+### Descripción de negocio
+
+Rechazar una membresía pendiente propia. Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse.
+
+Contexto declarado en el controlador: La persona rechaza una membresía pendiente propia.
+
+### Descripción del sistema
+
+NestJS resuelve `POST /tenants/me/membership-invitations/{membershipId}/decline` en `TenantsController_declineMyInvitation`. El controlador delega en `DirectoryMembershipsService.declineMine`. No recibe body. El tipo de retorno estático es `Promise<MembershipInvitationDecisionDto>`.
+
+### Parámetros
+
+| Parámetro | Ubicación | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|---|:---:|---|---|---|---|
+| `membershipId` | path | Sí | `string` | Sin restricción adicional declarada | Sin descripción específica en OpenAPI. | `00000000-0000-4000-8000-000000000001` |
+
+### Payload mínimo aceptable
+
+La operación no define body. La solicitud mínima solo incluye la ruta, los parámetros obligatorios y la autenticación cuando corresponda.
+
+```http
+POST /tenants/me/membership-invitations/00000000-0000-4000-8000-000000000001/decline HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Restricciones a considerar
+
+- Requiere `Authorization: Bearer <JWT>`.
+- Deben ser UUID válidos: `membershipId`.
+- Rate limit global: 300 solicitudes por cada 60 segundos por instancia.
+- CORS está denegado por defecto; llamadas desde navegador requieren una allowlist configurada en el despliegue.
+
+
+
+### Payload completo de ejemplo
+
+No existe body para completar; se muestran todos los parámetros opcionales documentados, si los hubiera.
+
+```http
+POST /tenants/me/membership-invitations/00000000-0000-4000-8000-000000000001/decline HTTP/1.1
+Host: localhost:3000
+Authorization: Bearer <access_token_jwt>
+```
+
+### Respuestas generales esperadas
+
+| HTTP | Significado | Tipo devuelto por el controlador | Cuerpo formal en OpenAPI |
+|---:|---|---|---|
+| 200 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 400 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 401 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 403 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 404 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 409 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 422 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 429 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 500 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+| 504 | Operación completada correctamente. | `Promise<MembershipInvitationDecisionDto>` | No |
+
+Aunque el OpenAPI generado todavía no enlaza este DTO a la respuesta, el controlador declara `MembershipInvitationDecisionDto`. Ejemplo completo derivado de ese DTO:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "tenantId": "00000000-0000-4000-8000-000000000001",
+  "status": "ACTIVE"
+}
+```
+
+Campos de la respuesta:
+
+| Campo | Obligatorio | Tipo | Restricciones | Descripción | Ejemplo |
+|---|:---:|---|---|---|---|
+| `id` | Sí | `string` | formato `uuid` | Membresía decidida. | `00000000-0000-4000-8000-000000000001` |
+| `tenantId` | Sí | `string` | formato `uuid` | Organización de la membresía. | `00000000-0000-4000-8000-000000000001` |
+| `status` | Sí | `string` | valores: `ACTIVE`, `DECLINED` | `ACTIVE` si aceptó; `DECLINED` si rechazó. | `ACTIVE` |
+
+En todas las respuestas se puede recibir `x-trace-id`, útil para correlacionar la operación con la traza de observabilidad.
+
+### Respuestas de error posibles
+
+| HTTP | `code` estable | Cuándo puede ocurrir | Evidencia/origen |
+|---:|---|---|---|
+| 400 | `VALIDATION_FAILED` | Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas. | Pipeline global de validación |
+| 401 | `UNAUTHENTICATED` | JWT Bearer ausente, vencido o inválido. | Guard global de autenticación |
+| 403 | `FORBIDDEN` | El actor no tiene acceso al tenant o alcance exigido por la operación. | Roles/tenant/guards de autorización |
+| 404 | `NOT_FOUND` | Invitación no encontrada | Excepción explícita en src/modules/directory/services/directory-memberships.service.ts |
+| 429 | `RATE_LIMITED` | Se exceden 300 solicitudes por 60 segundos para la instancia. | Throttler y filtro global de excepciones |
+| 500 | `INTERNAL` | Fallo no anticipado; el cliente recibe un mensaje genérico sin stack, SQL ni detalle interno. | Filtro global de excepciones |
+
+Ejemplo de error normalizado:
+
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Body, query o parámetro de ruta inválido; también se rechazan propiedades no declaradas.",
+  "correlationId": "req-01J00000000000000000000000",
+  "timestamp": "2026-07-31T12:00:00.000Z",
+  "path": "/tenants/me/membership-invitations/{membershipId}/decline"
 }
 ```
 

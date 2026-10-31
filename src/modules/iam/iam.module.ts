@@ -20,11 +20,18 @@ import { PracticeModule } from '../practice/practice.module';
 // El alta pública de farmacia (P50) provisiona la farmacia, su central y sus
 // sucursales con `PharmacyProvisioningService`; `pharmacy` no importa `iam`.
 import { PharmacyModule } from '../pharmacy/pharmacy.module';
+// El sello del «paso extra» (`POST /iam/me/step-up`) vive en Redis, atado a la
+// sesión; se comparte la conexión de `redis_runtime`, que no importa `iam`.
+import { RedisRuntimeModule } from '../redis_runtime/redis_runtime.module';
 import {
   IamUsersController,
   IamAuthController,
   IamAccountSecurityController,
   IamOnboardingDraftsController,
+  SessionPoliciesController,
+  IpAccessRulesController,
+  IamAccessRescueController,
+  IamStepUpController,
 } from './presentation/controllers';
 import {
   IamUsersService,
@@ -43,11 +50,19 @@ import {
   IamEmailVerificationService,
   IamAccountSecurityService,
   IamOnboardingDraftsService,
+  SessionPoliciesService,
+  IpAccessRulesService,
+  IamDeviceRecognitionService,
+  IamMyMfaService,
+  IamTotpService,
+  NetworkProxyCheckService,
+  IamStepUpService,
 } from './application/services';
 import {
   UsersRepository,
   CredentialsRepository,
   SessionsRepository,
+  SessionPoliciesRepository,
   RefreshTokensRepository,
   MfaFactorsRepository,
   DevicesRepository,
@@ -81,6 +96,13 @@ import { PHARMACY_REGISTRATION_PORT } from './application/ports/pharmacy-registr
 import { PROFILE_REGISTRATION_PORT } from './application/ports/profile-registration.port';
 import { REGISTRATION_FILES_PORT } from './application/ports/registration-files.port';
 import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
+import { SUPPORT_CLAIMS_PORT } from './application/ports/support-claims.port';
+import { DelegatedAccessSupportClaimsAdapter } from './infrastructure/adapters/delegated-access-support-claims.adapter';
+import { AuthzIpAccessRulesAdapter } from './infrastructure/adapters/authz-ip-access-rules.adapter';
+import { IP_ACCESS_RULES_PORT } from './application/ports/ip-access-rules.port';
+import { STEP_UP_PORT } from './application/ports/step-up.port';
+import { StepUpStorePort } from './application/ports/step-up-store.port';
+import { StepUpStore } from './infrastructure/adapters/redis-step-up.store';
 
 /**
  * Módulo IAM: identidad, credenciales, sesiones, MFA, dispositivos, roles
@@ -107,18 +129,24 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     TerminologyModule,
     PracticeModule,
     PharmacyModule,
+    RedisRuntimeModule,
   ],
   controllers: [
     IamUsersController,
     IamAuthController,
     IamAccountSecurityController,
     IamOnboardingDraftsController,
+    SessionPoliciesController,
+    IpAccessRulesController,
+    IamAccessRescueController,
+    IamStepUpController,
   ],
   providers: [
     // Repositorios
     UsersRepository,
     CredentialsRepository,
     SessionsRepository,
+    SessionPoliciesRepository,
     RefreshTokensRepository,
     MfaFactorsRepository,
     DevicesRepository,
@@ -152,6 +180,18 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
       useExisting: DirectoryRegistrationAdapter,
     },
     { provide: TENANT_CLAIMS_PORT, useExisting: DirectoryTenantClaimsAdapter },
+    AuthzIpAccessRulesAdapter,
+    { provide: IP_ACCESS_RULES_PORT, useExisting: AuthzIpAccessRulesAdapter },
+    // Paso extra (verificación en dos pasos fresca) por sesión: el puerto lo
+    // consume `delegated_access`; el sello lo escribe `IamStepUpService`.
+    StepUpStore,
+    { provide: STEP_UP_PORT, useExisting: StepUpStore },
+    { provide: StepUpStorePort, useExisting: StepUpStore },
+    DelegatedAccessSupportClaimsAdapter,
+    {
+      provide: SUPPORT_CLAIMS_PORT,
+      useExisting: DelegatedAccessSupportClaimsAdapter,
+    },
     {
       provide: DECLARED_COVERAGE_PORT,
       useExisting: InsuranceDeclaredCoverageAdapter,
@@ -190,6 +230,13 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamEmailVerificationService,
     IamAccountSecurityService,
     IamOnboardingDraftsService,
+    SessionPoliciesService,
+    IpAccessRulesService,
+    IamDeviceRecognitionService,
+    IamMyMfaService,
+    IamTotpService,
+    NetworkProxyCheckService,
+    IamStepUpService,
   ],
   // `IamUsersService` se exporta para el seed de arranque (`SeedModule`), que
   // necesita crear el primer `SECURITY_ADMIN` con el mismo hasheo que la API.
@@ -201,6 +248,8 @@ import { TENANT_CLAIMS_PORT } from './application/ports/tenant-claims.port';
     IamPractitionerSelfRegistrationService,
     IamPatientSelfRegistrationService,
     IamOnboardingDraftsService,
+    // Puerto del paso extra por sesión (token de inyección `STEP_UP_PORT`).
+    STEP_UP_PORT,
   ],
 })
 export class IamModule {}

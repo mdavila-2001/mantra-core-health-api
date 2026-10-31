@@ -163,13 +163,19 @@ export class CancelBookingUseCase {
 
       // H3.S1.M2 (BOLA/IDOR de escritura): cancelar/rechazar no comprobaba de
       // quién era la cita — el único control era `@Roles(...,'PATIENT')`, que
-      // autoriza a cualquier cuenta de paciente, no sólo a la titular. Mismo
-      // método que ya usan `placeHold`, la confirmación del hold y `enroll` de
-      // la lista de espera: es un no-op para quien opera la agenda.
-      await this.access.assertMayActForPatient(
-        booking.patientProfileId,
-        actor,
+      // autoriza a cualquier cuenta de paciente, no sólo a la titular.
+      // SEG V-1: y tampoco a cualquier profesional: quien atiende solo cancela
+      // lo de su propia agenda (o lo suyo, si él es el paciente). Es un no-op
+      // para quien opera la agenda y la persona de apoyo pasa por su política.
+      await this.access.assertMayChangeBooking(tx, booking, actor);
+      // La persona de apoyo cancela solo lo que su permiso cubre (no-op para el resto).
+      await this.access.assertSupportMayAct(
         tx,
+        booking,
+        actor,
+        'schedule.cancel',
+        // El motivo ya validado cumple la obligación «motivo» del permiso.
+        { reasonText: reason },
       );
 
       if (booking.statusConceptId === CONCEPTS.BOOKING_CANCELLED) {
@@ -238,7 +244,7 @@ export class CancelBookingUseCase {
       const isHolderPatient =
         (actor.patientProfileId !== undefined &&
           actor.patientProfileId === booking.patientProfileId) ||
-        (isPatientActor(actor) &&
+        (isPatientActor(actor, booking.tenantId) &&
           (await this.representation.representsPatient(
             booking.patientProfileId,
             actor,

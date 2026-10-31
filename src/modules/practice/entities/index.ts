@@ -9,3 +9,4 @@ export * from './practice_sites.entity';
 export * from './practices.entity';
 export * from './practitioner_role_assignments.entity';
 export * from './practitioner_support_assignments.entity';
+export * from './practitioner_location_assignments.entity';

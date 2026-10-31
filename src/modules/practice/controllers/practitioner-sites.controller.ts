@@ -11,7 +11,12 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   Audited,
   CurrentUser,
@@ -77,6 +82,7 @@ export class PractitionerSitesController {
     description:
       'Incluye pendientes, activas, suspendidas, rechazadas y finalizadas. No implica acceso a pacientes de esas organizaciones.',
   })
+  @ApiOkResponse({ type: MyRoleAssignmentResponseDto, isArray: true })
   listMyAssignments(
     @CurrentUser() actor: AuthenticatedUser,
   ): Promise<MyRoleAssignmentResponseDto[]> {

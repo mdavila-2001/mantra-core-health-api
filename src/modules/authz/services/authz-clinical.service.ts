@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
   CONCEPTS,
   ConflictException,
+  DomainException,
+  ErrorCode,
   PreconditionFailedException,
+  roleAuthorizesInTenant,
   touch,
   type AuthenticatedUser,
 } from '../../../common';
@@ -47,6 +50,12 @@ const ACCESS_LEVEL_CONCEPT: Record<AccessLevel, string> = {
 };
 
 const DEFAULT_BTG_WINDOW_MINUTES = 60;
+
+/** Rol de ejecución del personal de apoyo (lo lleva el token mientras su vínculo esté activo). */
+const SUPPORT_STAFF_ROLE = 'SUPPORT_STAFF';
+
+/** Roles que habilitan el acceso de emergencia (los de la ruta, más el comodín de plataforma). */
+const BREAK_GLASS_ROLES = ['CLINICAL_APPROVER', 'SECURITY_ADMIN', 'SUPERADMIN'];
 
 /**
  * UC-06-06 — Acceso clínico con propósito de uso.
@@ -195,6 +204,7 @@ export class AuthzClinicalService {
       },
       'Break-the-glass emergency access invoked',
     );
+    await this.assertNotSupportStaff(patientProfileId, dto, actor);
     return this.em.transactional(async (tx) => {
       // Misma política que la concesión: ni el grant elevado, ni la sesión, ni el
       // evento de auditoría se crean sobre un paciente o encuentro ajeno al tenant.
@@ -289,6 +299,44 @@ export class AuthzClinicalService {
 
       return { id: grant.id, status: 'ACTIVE', createdAt: grant.createdAt };
     });
+  }
+
+  /**
+   * GP-4 (defensa en profundidad): el personal de apoyo NO tiene break-glass. Si
+   * el actor solo trae el rol de ejecución `SUPPORT_STAFF` en la organización
+   * —sin ningún rol que habilite el acceso de emergencia— se rechaza con 403
+   * `BREAK_GLASS_NOT_FOR_SUPPORT` y el intento queda sellado en la cadena
+   * (`BREAK_GLASS_REJECTED_FOR_SUPPORT`). Lo que hace el apoyo en una emergencia
+   * es avisar al clínico de turno, que usa el suyo. Quien tiene apoyo Y un rol
+   * clínico o de administración no se toca.
+   */
+  private async assertNotSupportStaff(
+    patientProfileId: string,
+    dto: BreakTheGlassDto,
+    actor: AuthenticatedUser,
+  ): Promise<void> {
+    const tenantId = this.scope.resolveTenant(dto.tenantId);
+    if (!roleAuthorizesInTenant(actor, SUPPORT_STAFF_ROLE, tenantId)) return;
+    const mayBreakGlass = BREAK_GLASS_ROLES.some((role) =>
+      roleAuthorizesInTenant(actor, role, tenantId),
+    );
+    if (mayBreakGlass) return;
+    await this.em.transactional((tx) =>
+      this.auditTrail.record(tx, actor, {
+        action: 'BREAK_GLASS_REJECTED_FOR_SUPPORT',
+        entity: 'patient_profile',
+        entityId: patientProfileId,
+        tenantId,
+        success: false,
+      }),
+    );
+    throw new DomainException(
+      HttpStatus.FORBIDDEN,
+      ErrorCode.FORBIDDEN,
+      'El acceso de emergencia no está disponible para el personal de apoyo: avise al clínico de turno.',
+      undefined,
+      AuthzErrorReason.BREAK_GLASS_NOT_FOR_SUPPORT,
+    );
   }
 
   /** UC-06-10: revoca (o expira) un acceso clínico activo. */

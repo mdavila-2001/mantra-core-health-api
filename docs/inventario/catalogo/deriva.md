@@ -6,32 +6,21 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 
 | Concepto | Cantidad |
 |---|---|
-| Tablas en el DDL del modelo | 1230 |
-| Entidades del ORM | 1274 |
-| Tablas del DDL con entidad | 1230 |
-| Tablas del DDL **sin** entidad | 0 |
-| Entidades del ORM **sin** tabla en el DDL | 44 |
-| Columnas del DDL ausentes en su entidad | 1 |
-| Columnas con nulabilidad divergente | 24 |
-| Columnas con tipo divergente | 0 |
-| Columnas de la entidad que el DDL no tiene | 21 |
+| Tablas en el DDL del modelo | 1274 |
+| Entidades del ORM | 1294 |
+| Tablas del DDL con entidad | 1261 |
+| Tablas del DDL **sin** entidad | 13 |
+| Entidades del ORM **sin** tabla en el DDL | 33 |
+| Columnas del DDL ausentes en su entidad | 45 |
+| Columnas con nulabilidad divergente | 9 |
+| Columnas con tipo divergente | 2 |
+| Columnas de la entidad que el DDL no tiene | 0 |
 
 ## Entidades del ORM sin tabla en el DDL
 
 | Tabla que declara | Clase | Dónde la declara el modelo |
 |---|---|---|
-| `accounting.practitioner_simple_accounts` | PractitionerSimpleAccounts | **en ninguna fuente de DDL del modelo** |
-| `accounting.practitioner_simple_records` | PractitionerSimpleRecords | **en ninguna fuente de DDL del modelo** |
-| `accounting.practitioner_simple_transactions` | PractitionerSimpleTransactions | **en ninguna fuente de DDL del modelo** |
-| `billing.siat_simulated_invoices` | SiatSimulatedInvoices | **en ninguna fuente de DDL del modelo** |
-| `billing.siat_simulated_outbox` | SiatSimulatedOutbox | **en ninguna fuente de DDL del modelo** |
 | `clinical.patient_reported_health_statements` | PatientReportedHealthStatements | **en ninguna fuente de DDL del modelo** |
-| `clinical.received_services` | ReceivedServices | **en ninguna fuente de DDL del modelo** |
-| `data_catalog.catalog_operation_impacts` | CatalogOperationImpacts | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
-| `data_catalog.catalog_operations` | CatalogOperations | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
-| `data_catalog.catalog_process_step_operations` | CatalogProcessStepOperations | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
-| `data_catalog.catalog_process_steps` | CatalogProcessSteps | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
-| `data_catalog.catalog_processes` | CatalogProcesses | sólo en un parche: `SQL/patches/2026-10-24_v4248_data_catalog_operaciones_y_worm.sql` |
 | `organization_extensions.data_use_agreements` | DataUseAgreements | **en ninguna fuente de DDL del modelo** |
 | `payments.cash_registers` | CashRegisters | **en ninguna fuente de DDL del modelo** |
 | `pharmacy_inventory.purchase_quotations` | PurchaseQuotations | sólo en un parche: `SQL/patches/2026-09-08_v428_billing_quotations.sql` |
@@ -67,42 +56,85 @@ Tres vistas del mismo esquema: el **DDL canónico del modelo** (fuente de verdad
 
 ## Tablas del DDL sin entidad en el ORM
 
-_Ninguna._
+| Tabla | Diagrama |
+|---|---|
+| `audit.insurance_products_history` | `Mantra Core Health Context/modules/diagram_10_audit.puml` |
+| `audit.procedure_cases_history` | `Mantra Core Health Context/modules/diagram_10_audit.puml` |
+| `clinical_ext.cds_rule_versions` | `Mantra Core Health Context/modules/diagram_18_clinical_ext.puml` |
+| `crm.crm_case_owner_history` | `Mantra Core Health Context/modules/diagram_49_crm.puml` |
+| `delegated_access.shared_access_link_uses` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
+| `delegated_access.shared_access_links` | `Mantra Core Health Context/modules/diagram_29_delegated_access.puml` |
+| `diagnostic_units.unit_medical_visitors` | `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` |
+| `diagnostic_units.unit_visit_ratings` | `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` |
+| `diagnostic_units.unit_visit_records` | `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` |
+| `diagnostic_units.unit_visit_request_events` | `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` |
+| `diagnostic_units.unit_visit_requests` | `Mantra Core Health Context/modules/diagram_23_diagnostic_units.puml` |
+| `insurance.insurance_terms_conditions` | `Mantra Core Health Context/modules/diagram_26_insurance.puml` |
+| `surveys.survey_invitation_reminders` | `Mantra Core Health Context/modules/diagram_65_surveys.puml` |
 
 ## Columnas del DDL ausentes en la entidad
 
 | Columna | Tipo | En el modelo |
 |---|---|---|
+| ads.campaigns.version_number | integer | opcional |
+| ads.custom_audiences.version_number | integer | opcional |
+| ads.saved_audiences.version_number | integer | opcional |
+| audit.audit_log.session_id | uuid | opcional |
+| audit.audit_log.correlation_id | uuid | opcional |
+| audit.audit_log.actor_role_snapshot | varchar | opcional |
 | authz.resource_scope_grants.reason_text | text | opcional |
+| community.service_reviews.verified_crm_case_id | uuid | opcional |
+| crm.crm_cases.insurance_claim_id | uuid | opcional |
+| directory.branch_memberships.workday_concept_id | uuid | opcional |
+| directory.branch_memberships.responsible_user_id | uuid | opcional |
+| directory.tenant_memberships.workday_concept_id | uuid | opcional |
+| directory.tenant_memberships.responsible_user_id | uuid | opcional |
+| identity_assurance.identity_verification_cases.tenant_id | uuid | opcional |
+| insurance.broker_carrier_agreements.representation_mode_concept_id | uuid | opcional |
+| insurance.broker_carrier_agreements.relationship_type_concept_id | uuid | opcional |
+| insurance.broker_carrier_agreements.branch_id | uuid | opcional |
+| insurance.broker_carrier_agreements.commercial_area | varchar | opcional |
+| insurance.broker_carrier_agreements.supervisor_user_id | uuid | opcional |
+| insurance.broker_carrier_agreements.assigned_zone | varchar | opcional |
+| insurance.insurance_products.version_number | integer | opcional |
+| insurance.insurance_products.effective_from | date | opcional |
+| insurance.insurance_products.effective_to | date | opcional |
+| insurance.insurance_products.min_age_years | integer | opcional |
+| insurance.insurance_products.max_age_years | integer | opcional |
+| insurance.insurance_products.eligibility_requirements | jsonb | opcional |
+| marketing.segments.version_number | integer | opcional |
+| practice.care_spaces.prep_minutes | integer | opcional |
+| practice.care_spaces.cleanup_minutes | integer | opcional |
+| practice.clinical_units.responsible_user_id | uuid | opcional |
+| procedures_perioperative.procedure_case_team_members.accepted_version_number | integer | opcional |
+| procedures_perioperative.procedure_cases.prep_minutes | integer | opcional |
+| procedures_perioperative.procedure_cases.cleanup_minutes | integer | opcional |
+| procedures_perioperative.procedure_cases.version_number | integer | opcional |
+| scheduling.appointment_bookings.pre_visit_instructions_snapshot | text | opcional |
+| scheduling.appointment_payment_states.invoice_id | uuid | opcional |
+| scheduling.booking_policies.no_show_fee_percentage | numeric | opcional |
+| scheduling.booking_policies.no_show_retains_deposit | boolean | opcional |
+| scheduling.practitioner_service_offerings.pre_visit_instructions | text | opcional |
+| surveys.survey_invitations.extension_survey_version_id | uuid | opcional |
+| surveys.survey_invitations.subject_type_concept_id | uuid | opcional |
+| surveys.survey_invitations.subject_id | uuid | opcional |
+| surveys.survey_templates.owner_type_concept_id | uuid | opcional |
+| surveys.survey_templates.owner_id | uuid | opcional |
+| surveys.survey_versions.max_reminders | integer | opcional |
 
 ## Nulabilidad divergente
 
 | Columna | Diferencia |
 |---|---|
-| object_storage.archive_manifests.verified_at | el modelo dice obligatoria y la entidad opcional |
-| object_storage.dicom_instance_manifests.sop_class_uid | el modelo dice obligatoria y la entidad opcional |
-| object_storage.dicom_instance_manifests.instance_number | el modelo dice obligatoria y la entidad opcional |
-| object_storage.dicom_instance_manifests.transfer_syntax_uid | el modelo dice obligatoria y la entidad opcional |
-| object_storage.dicom_instance_manifests.frame_count | el modelo dice obligatoria y la entidad opcional |
-| object_storage.dicom_instance_manifests.metadata_json | el modelo dice obligatoria y la entidad opcional |
 | object_storage.dicom_series_manifests.modality | el modelo dice obligatoria y la entidad opcional |
-| object_storage.dicom_series_manifests.body_part_examined | el modelo dice obligatoria y la entidad opcional |
-| object_storage.dicom_series_manifests.thumbnail_object_manifest_id | el modelo dice obligatoria y la entidad opcional |
-| object_storage.dicom_study_manifests.study_date | el modelo dice obligatoria y la entidad opcional |
-| object_storage.dicom_study_manifests.modality_codes | el modelo dice obligatoria y la entidad opcional |
-| object_storage.object_checksums.verified_at | el modelo dice obligatoria y la entidad opcional |
-| object_storage.object_legal_holds.released_at | el modelo dice obligatoria y la entidad opcional |
-| object_storage.object_locations.verified_at | el modelo dice obligatoria y la entidad opcional |
-| object_storage.object_manifests.patient_profile_id | el modelo dice obligatoria y la entidad opcional |
-| object_storage.object_manifests.current_version_id | el modelo dice obligatoria y la entidad opcional |
-| object_storage.object_manifests.retention_policy_code | el modelo dice obligatoria y la entidad opcional |
-| object_storage.object_retention_locks.released_at | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.collection_definitions.routing_key_expression | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.collection_definitions.shard_key_expression | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.residency_policies.forbidden_country_codes | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.residency_policies.allowed_region_codes | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.residency_policies.cross_border_transfer_basis | el modelo dice obligatoria y la entidad opcional |
 | polyglot_storage.storage_capabilities.verified_at | el modelo dice obligatoria y la entidad opcional |
+| surveys.survey_invitations.appointment_booking_id | el modelo dice opcional y la entidad obligatoria |
+| surveys.survey_templates.owner_practitioner_id | el modelo dice opcional y la entidad obligatoria |
 
 ## Base desplegada
 

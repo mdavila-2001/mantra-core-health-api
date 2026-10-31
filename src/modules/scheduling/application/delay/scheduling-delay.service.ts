@@ -5,6 +5,7 @@ import {
   CONCEPTS,
   PreconditionFailedException,
   ResourceNotFoundException,
+  getCurrentTenantId,
   type AuthenticatedUser,
 } from '../../../../common';
 import { SchedulingCatalogRepository } from '../../infrastructure/repositories';
@@ -27,7 +28,7 @@ import {
   type DelayResourceDto,
 } from '../../presentation/dto';
 import { PRACTITIONER_PROFILE_TABLES } from '../../domain/resource/practitioner-profile-tables';
-import { AGENDA_OPERATOR_ROLES } from '../../domain/booking/agenda-actors';
+import { operatesAnyAgenda } from '../../domain/booking/agenda-actors';
 import {
   BOOKING_HISTORY_PORT,
   type BookingHistoryPort,
@@ -268,8 +269,7 @@ export class SchedulingDelayService {
     resourceId: string | undefined,
     actor: AuthenticatedUser,
   ): Promise<void> {
-    if (actor.roles.some((role) => AGENDA_OPERATOR_ROLES.includes(role)))
-      return;
+    if (operatesAnyAgenda(actor, getCurrentTenantId())) return;
 
     const resource =
       resourceId === undefined

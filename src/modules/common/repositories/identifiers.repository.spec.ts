@@ -1,3 +1,4 @@
+import { CONCEPTS } from '../../../common';
 import { IdentifiersRepository } from './identifiers.repository';
 
 /**
@@ -73,5 +74,67 @@ describe('IdentifiersRepository', () => {
     expect(row.typeConceptId).toBe('id-type-tax');
     expect(row.value).toBe('1234567');
     expect(row.issuerAdministrativeAreaConceptId).toBe('depto-sc');
+  });
+});
+
+describe('IdentifiersRepository.findActiveNationalIdDuplicate (N3)', () => {
+  function emWithRows(rows: unknown[]) {
+    const calls: { sql: string; params: unknown[] }[] = [];
+    return {
+      calls,
+      em: {
+        getConnection: () => ({
+          execute: async (sql: string, params: unknown[]) => {
+            calls.push({ sql, params });
+            return rows;
+          },
+        }),
+      } as never,
+    };
+  }
+
+  it('repite la expresión Y los cuatro predicados del índice único para poder usarlo', async () => {
+    const { em, calls } = emWithRows([]);
+    await new IdentifiersRepository().findActiveNationalIdDuplicate(
+      em,
+      '1.234.567',
+    );
+    const sql = calls[0].sql;
+    expect(sql).toContain(
+      `coalesce(nullif(regexp_replace(upper(regexp_replace(i.value, '[\\s.-]+', '', 'g')), '^0+', ''), ''), '0') = ?`,
+    );
+    expect(sql).toContain(`i.type_concept_id = '${CONCEPTS.ID_TYPE_NATIONAL}'`);
+    expect(sql).toContain(`i.state_concept_id = '${CONCEPTS.STATE_ACTIVE}'`);
+    expect(sql).toContain(
+      `i.owner_type_concept_id = '${CONCEPTS.OWNER_PATIENT}'`,
+    );
+    expect(sql).toContain('i.valid_to is null');
+  });
+
+  it('el único parámetro es el documento canónico, no lo escrito', async () => {
+    const { em, calls } = emWithRows([]);
+    await new IdentifiersRepository().findActiveNationalIdDuplicate(
+      em,
+      ' 01.234-567 ',
+    );
+    expect(calls[0].params).toEqual(['1234567']);
+    expect((calls[0].sql.match(/\?/g) ?? []).length).toBe(1);
+  });
+
+  it('devuelve el identificador y su dueño, o null si el documento está libre', async () => {
+    const found = emWithRows([{ id: 'ident-1', owner_id: 'person-1' }]);
+    expect(
+      await new IdentifiersRepository().findActiveNationalIdDuplicate(
+        found.em,
+        '1234567',
+      ),
+    ).toEqual({ id: 'ident-1', ownerId: 'person-1' });
+    const free = emWithRows([]);
+    expect(
+      await new IdentifiersRepository().findActiveNationalIdDuplicate(
+        free.em,
+        '1234567',
+      ),
+    ).toBeNull();
   });
 });

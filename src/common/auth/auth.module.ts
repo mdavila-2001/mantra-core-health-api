@@ -5,6 +5,7 @@ import { AuthTokenModule } from './auth-token.module';
 import { JwtStrategy } from './jwt.strategy';
 import { SessionValidator } from './session-validator';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { MfaEnrollmentScopeGuard } from './mfa-enrollment-scope.guard';
 import { TenantScopeGuard } from './tenant-scope.guard';
 import { RolesGuard } from './roles.guard';
 import { VerifiedIdentityGuard } from './verified-identity.guard';
@@ -12,8 +13,8 @@ import { VerifiedIdentityGuard } from './verified-identity.guard';
 /**
  * Módulo transversal de autenticación/autorización de la API HTTP.
  *
- * Registra los tres guards como `APP_GUARD` en orden: primero `JwtAuthGuard`
- * (autenticación), después `RolesGuard` (autorización por rol) y por último
+ * Registra los guards como `APP_GUARD` en orden: primero `JwtAuthGuard`
+ * (autenticación), `MfaEnrollmentScopeGuard` (alcance del token), después `RolesGuard` (autorización por rol) y por último
  * `VerifiedIdentityGuard` (identidad probada). El orden importa -cada uno asume
  * que el anterior ya pobló `request.user` o dejó pasar- y Nest respeta el orden
  * de declaración de los proveedores `APP_GUARD`. Los dos últimos no imponen
@@ -37,6 +38,9 @@ import { VerifiedIdentityGuard } from './verified-identity.guard';
     SessionValidator,
     JwtStrategy,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    // Justo tras autenticar y antes de todo lo demás: el token de alcance limitado
+    // (alta del segundo factor) no debe llegar ni a resolver tenant.
+    { provide: APP_GUARD, useClass: MfaEnrollmentScopeGuard },
     // Entre autenticación y autorización a propósito (MCH-001): resuelve el
     // tenant antes de que RolesGuard compare roles con ámbito.
     { provide: APP_GUARD, useClass: TenantScopeGuard },

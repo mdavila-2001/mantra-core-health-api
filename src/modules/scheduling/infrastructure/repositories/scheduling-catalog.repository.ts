@@ -286,6 +286,10 @@ export interface CreateSlotData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Espacio de atención del cupo, si se pudo determinar. */
+  careSpaceId?: string;
+  /** Servicio del cupo, si se pudo determinar. */
+  healthcareServiceId?: string;
 }
 
 /** Acceso a datos de la configuración de agenda: recursos, políticas, plantillas y slots. */
@@ -760,6 +764,8 @@ export class SchedulingCatalogRepository {
         endAt: data.endAt,
         capacity: data.capacity,
         remainingCapacity: data.remainingCapacity,
+        careSpaceId: data.careSpaceId,
+        healthcareServiceId: data.healthcareServiceId,
         statusConceptId: data.statusConceptId,
         ...createdBy(data.actorUserId),
       },

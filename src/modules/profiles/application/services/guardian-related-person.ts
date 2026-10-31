@@ -73,33 +73,55 @@ export interface GuardianData {
  *   sin dueño, imposible de mostrar y de corregir.
  */
 export async function createGuardianRelatedPerson(
-  repos: {
-    readonly persons: PersonsRepository;
-    readonly relatedPersons: RelatedPersonsRepository;
-    readonly contactPoints: {
-      create(
-        tx: EntityManager,
-        data: {
-          ownerTypeConceptId: string;
-          ownerId: string;
-          systemConceptId: string;
-          value: string;
-          useConceptId: string;
-          actorUserId: string;
-        },
-      ): unknown;
-    };
-  },
+  repos: GuardianRepos,
   tx: EntityManager,
   data: GuardianData,
 ): Promise<boolean> {
+  return (await createGuardianRelatedPersonRecord(repos, tx, data)) !== null;
+}
+
+/** Repositorios que necesita el registro del tutor declarado en el alta. */
+export interface GuardianRepos {
+  readonly persons: PersonsRepository;
+  readonly relatedPersons: RelatedPersonsRepository;
+  readonly contactPoints: {
+    create(
+      tx: EntityManager,
+      data: {
+        ownerTypeConceptId: string;
+        ownerId: string;
+        systemConceptId: string;
+        value: string;
+        useConceptId: string;
+        actorUserId: string;
+      },
+    ): unknown;
+  };
+}
+
+/**
+ * Lo mismo que {@link createGuardianRelatedPerson}, pero devuelve a quién creó:
+ * quien necesita enlazar al tutor con algo más (una representación legal, por
+ * ejemplo) tiene su persona y el id de la fila de persona relacionada.
+ *
+ * @param repos - Repositorios de personas, personas relacionadas y contactos.
+ * @param tx - Contexto transaccional del alta.
+ * @param data - Perfil del paciente, nombre, teléfono y parentesco del tutor, y actor.
+ * @returns Persona y fila creadas, o `null` si no se declaró tutor.
+ * @throws BadRequestException si llega un teléfono sin nombre.
+ */
+export async function createGuardianRelatedPersonRecord(
+  repos: GuardianRepos,
+  tx: EntityManager,
+  data: GuardianData,
+): Promise<{ personId: string; relatedPersonId: string } | null> {
   if (!data.name) {
     if (data.phone) {
       throw new BadRequestException(
         'Para guardar el teléfono del tutor hace falta también su nombre',
       );
     }
-    return false;
+    return null;
   }
 
   const guardian = repos.persons.create(tx, {
@@ -112,7 +134,7 @@ export async function createGuardianRelatedPerson(
   // existir en la base antes de nombrarla.
   await tx.flush();
 
-  repos.relatedPersons.create(tx, {
+  const related = repos.relatedPersons.create(tx, {
     patientProfileId: data.patientProfileId,
     personId: guardian.id,
     relationshipConceptId:
@@ -134,5 +156,7 @@ export async function createGuardianRelatedPerson(
     });
   }
 
-  return true;
+  // `related?.`: los dobles de las pruebas de quien llama devuelven `undefined`
+  // desde `create`; la entidad real siempre trae su `id`.
+  return { personId: guardian.id, relatedPersonId: related?.id };
 }

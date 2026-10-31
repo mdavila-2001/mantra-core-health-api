@@ -100,6 +100,14 @@ export interface CreateMessageData {
    * Identificador asociado a actor user.
    */
   actorUserId?: string;
+  /** Autora real del mensaje (la persona que lo escribió). */
+  authoredByUserId?: string;
+  /** Perfil público en cuyo nombre se escribe, si no es el de la autora. */
+  onBehalfOfProfileId?: string;
+  /** Delegación doctor ↔ persona de apoyo que respaldó el envío. */
+  delegateAssignmentId?: string;
+  /** ¿El paciente ve «respondido por su equipo»? */
+  disclosureShown?: boolean;
 }
 
 /**
@@ -475,6 +483,10 @@ export class ConversationsRepository {
         isEdited: false,
         statusConceptId: data.statusConceptId,
         sentAt: data.sentAt,
+        authoredByUserId: data.authoredByUserId,
+        onBehalfOfProfileId: data.onBehalfOfProfileId,
+        delegateAssignmentId: data.delegateAssignmentId,
+        disclosureShown: data.disclosureShown ?? false,
         ...createdBy(data.actorUserId),
       },
       { partial: true },

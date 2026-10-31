@@ -2003,12 +2003,36 @@ describe('SchedulingBookingsService', () => {
             id: 'bk-otra',
             resourceName: 'Otro consultorio',
             startAt: new Date(),
+            tenantId: 'ten-1',
           },
         ]);
 
         await expect(
           d.service.createDirectAppointment(dto as never, practitioner),
-        ).rejects.toThrow(/paciente ya tiene una cita/);
+        ).rejects.toThrow(/paciente no está disponible en ese horario/);
+      });
+
+      it('SEG A-M4: el conflicto del paciente no revela agenda, hora ni id de la cita ajena', async () => {
+        const d = readyToAssign(build());
+        d.bookingsRepo.findPatientBookingsOverlapping.mockResolvedValue([
+          {
+            id: 'bk-ginecologia',
+            resourceName: 'Dra. Rojas — Ginecología',
+            startAt: new Date('2026-11-03T15:00:00Z'),
+            tenantId: 'ten-1',
+          },
+        ]);
+
+        const err: any = await d.service
+          .createDirectAppointment(dto as never, practitioner)
+          .catch((e) => e);
+
+        expect(err).toBeInstanceOf(PreconditionFailedException);
+        expect(err.message).toMatch(/no está disponible en ese horario/i);
+        expect(err.message).not.toMatch(/Rojas|Ginecolog/i);
+        expect(JSON.stringify(err.details ?? {})).not.toMatch(
+          /bk-ginecologia|2026-11-03/,
+        );
       });
 
       it('retira los cupos libres que pisa y lo INFORMA', async () => {
@@ -5078,6 +5102,249 @@ describe('SchedulingBookingsService · por quién se puede pedir turno (B.1)', (
         d.service.getBookingById('booking-ajena', desk),
       ).resolves.toMatchObject({ id: 'booking-ajena' });
       expect(d.representation.assertMayActForPatient).not.toHaveBeenCalled();
+    });
+
+    describe('SEG V-1 · un profesional opera SU agenda, no la de un colega ni la de otra organización', () => {
+      const ORG_A = 'aaaaaaaa-0000-0000-0000-000000000001';
+      const colleagueResource = {
+        id: 'res-1',
+        tenantId: SEARCH_TENANT,
+        resourceRefId: 'hp-otro',
+        resourceRefType: 'practitioner_profiles',
+      };
+      const ownResource = { ...colleagueResource, resourceRefId: 'hp-1' };
+      /** Médico de A con cuenta de paciente en la organización de la cita. */
+      const doctorOfA = {
+        id: 'user-doc-a',
+        roles: ['PATIENT', 'PRACTITIONER'],
+        scopedRoles: { [ORG_A]: ['PRACTITIONER'] },
+        practitionerProfileId: 'hp-A',
+        patientProfileId: 'pat-doc',
+      } as any;
+      const inTenantBooking = () => ({
+        ...foreignBooking(),
+        tenantId: SEARCH_TENANT,
+      });
+      const cancelDto = { cancelledBy: 'PROVIDER', reasonText: REASON } as any;
+      const rescheduleDto = {
+        toSlotId: '44444444-4444-4444-4444-444444444444',
+        reasonText: REASON,
+      } as any;
+
+      it('un profesional no cancela la cita de un colega de su organización', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+          inTenantBooking(),
+        );
+        d.catalogRepo.findResourceById.mockResolvedValue(colleagueResource);
+
+        await expect(
+          d.service.cancel('booking-ajena', cancelDto, practitioner),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+        expect(d.bookingsRepo.findSlotForUpdate).not.toHaveBeenCalled();
+      });
+
+      it('un profesional no reprograma la cita de un colega de su organización', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+          inTenantBooking(),
+        );
+        d.catalogRepo.findResourceById.mockResolvedValue(colleagueResource);
+
+        await expect(
+          d.service.reschedule('booking-ajena', rescheduleDto, practitioner),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
+        expect(d.bookingsRepo.findSlotForUpdate).not.toHaveBeenCalled();
+      });
+
+      it('un profesional sin recurso en la cita (sin agenda) tampoco la cancela', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue({
+          ...inTenantBooking(),
+          resourceId: undefined,
+        });
+
+        await expect(
+          d.service.cancel('booking-ajena', cancelDto, practitioner),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+      });
+
+      it('el profesional cancela y reprograma lo de su propia agenda', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+          inTenantBooking(),
+        );
+        d.catalogRepo.findResourceById.mockResolvedValue(ownResource);
+        d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+          openSlot({ startAt: new Date(Date.now() + 86_400_000) }),
+        );
+
+        await d.service.cancel('booking-ajena', cancelDto, practitioner);
+
+        expect(d.bookingsRepo.createCancellation).toHaveBeenCalled();
+      });
+
+      it('un profesional que es el titular de la cita la cancela aunque no sea de su agenda', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+          inTenantBooking(),
+        );
+        d.catalogRepo.findResourceById.mockResolvedValue(colleagueResource);
+        d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+          openSlot({ startAt: new Date(Date.now() + 5 * 86_400_000) }),
+        );
+
+        await d.service.cancel(
+          'booking-ajena',
+          { cancelledBy: 'PATIENT', reasonText: REASON } as any,
+          { ...practitioner, patientProfileId: 'pat-ajeno' },
+        );
+
+        expect(d.bookingsRepo.createCancellation).toHaveBeenCalled();
+      });
+
+      it('un profesional que representa al paciente (tutor) la cancela', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+          inTenantBooking(),
+        );
+        d.catalogRepo.findResourceById.mockResolvedValue(colleagueResource);
+        d.representation.representsPatient.mockResolvedValue(true);
+        d.bookingsRepo.findSlotForUpdate.mockResolvedValue(
+          openSlot({ startAt: new Date(Date.now() + 5 * 86_400_000) }),
+        );
+
+        await d.service.cancel(
+          'booking-ajena',
+          { cancelledBy: 'PATIENT', reasonText: REASON } as any,
+          practitioner,
+        );
+
+        expect(d.bookingsRepo.createCancellation).toHaveBeenCalled();
+      });
+
+      it('PoC dual.ts: el médico de A con cuenta de paciente en B no cancela una cita ajena de B', async () => {
+        // Antes: `isPatientActor` miraba `practitionerProfileId` (global), daba
+        // `false` y no se comprobaba nada: la cita ajena se cancelaba.
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+          inTenantBooking(),
+        );
+        d.catalogRepo.findResourceById.mockResolvedValue(colleagueResource);
+        d.representation.assertMayActForPatient.mockRejectedValue(
+          new ForbiddenException('No cuenta con autorización de tutoría'),
+        );
+
+        await expect(
+          d.service.cancel('booking-ajena', cancelDto, doctorOfA),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.representation.assertMayActForPatient).toHaveBeenCalled();
+        expect(d.bookingsRepo.createCancellation).not.toHaveBeenCalled();
+      });
+
+      it('PoC dual.ts: el médico de A con cuenta de paciente en B no reprograma una cita ajena de B', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingByIdForUpdate.mockResolvedValue(
+          inTenantBooking(),
+        );
+        d.representation.assertMayActForPatient.mockRejectedValue(
+          new ForbiddenException('No cuenta con autorización de tutoría'),
+        );
+
+        await expect(
+          d.service.reschedule('booking-ajena', rescheduleDto, doctorOfA),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.bookingsRepo.recordReschedule).not.toHaveBeenCalled();
+      });
+
+      it('PoC dual.ts: el médico de A con cuenta de paciente en B no lista las citas de un paciente ajeno de B', async () => {
+        const d = build();
+        d.representation.assertMayActForPatient.mockRejectedValue(
+          new ForbiddenException('No cuenta con autorización de tutoría'),
+        );
+
+        await expect(
+          d.service.searchBookings(
+            { patientProfileId: 'pat-victima', includeCancelled: false },
+            50,
+            doctorOfA,
+          ),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(d.bookingsRepo.findBookings).not.toHaveBeenCalled();
+      });
+
+      it('el médico de A tampoco lee el detalle de una cita ajena de B', async () => {
+        const d = build();
+        d.bookingsRepo.findBookingById.mockResolvedValue(inTenantBooking());
+        d.representation.assertMayActForPatient.mockRejectedValue(
+          new ForbiddenException('No cuenta con autorización de tutoría'),
+        );
+
+        await expect(
+          d.service.getBookingById('booking-ajena', doctorOfA),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+      });
+
+      describe('listar por paciente siendo profesional de la organización', () => {
+        const row = (id: string, resourceId: string) => ({
+          booking: {
+            ...inTenantBooking(),
+            id,
+            resourceId,
+            patientProfileId: 'pat-x',
+          },
+          slot: null,
+        });
+
+        it('solo devuelve las citas de su propia agenda (las del colega no)', async () => {
+          const d = build();
+          d.bookingsRepo.findBookings.mockResolvedValue({
+            rows: [row('b-mia', 'res-mia'), row('b-colega', 'res-colega')],
+            fetchCapReached: false,
+          });
+          d.catalogRepo.findResourceById.mockImplementation(
+            async (_em: unknown, id: string) => ({
+              id,
+              tenantId: SEARCH_TENANT,
+              resourceRefId: id === 'res-mia' ? 'hp-1' : 'hp-otro',
+              resourceRefType: 'practitioner_profiles',
+            }),
+          );
+
+          const res = await d.service.searchBookings(
+            { patientProfileId: 'pat-x', includeCancelled: false },
+            50,
+            practitioner,
+          );
+
+          expect(res.items.map((i: any) => i.id)).toEqual(['b-mia']);
+        });
+
+        it('si es el propio paciente, ve todo lo suyo', async () => {
+          const d = build();
+          d.bookingsRepo.findBookings.mockResolvedValue({
+            rows: [row('b-1', 'res-colega')],
+            fetchCapReached: false,
+          });
+          d.catalogRepo.findResourceById.mockResolvedValue({
+            id: 'res-colega',
+            tenantId: SEARCH_TENANT,
+            resourceRefId: 'hp-otro',
+            resourceRefType: 'practitioner_profiles',
+          });
+
+          const res = await d.service.searchBookings(
+            { patientProfileId: 'pat-x', includeCancelled: false },
+            50,
+            { ...practitioner, patientProfileId: 'pat-x' },
+          );
+
+          expect(res.items.map((i: any) => i.id)).toEqual(['b-1']);
+        });
+      });
     });
   });
 });

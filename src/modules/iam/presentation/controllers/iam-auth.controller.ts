@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Headers,
   HttpCode,
   HttpStatus,
   Ip,
@@ -37,6 +38,12 @@ import {
   type RefreshCookieEnv,
 } from '../../../../common';
 import type { RegistrationUploadedFile } from '../../application/ports/registration-files.port';
+import {
+  loadDeviceCookieEnv,
+  readDeviceCookieHeader,
+  setDeviceCookie,
+  type DeviceCookieEnv,
+} from '../http/device-cookie';
 import {
   IamAuthService,
   IamAssistedRegistrationService,
@@ -102,6 +109,9 @@ export class IamAuthController {
    * modos distintos.
    */
   private readonly cookieEnv: RefreshCookieEnv = loadRefreshCookieEnv();
+
+  /** Cookie de dispositivo firmada (apagada por defecto); ver `loadDeviceCookieEnv`. */
+  private readonly deviceCookieEnv: DeviceCookieEnv = loadDeviceCookieEnv();
 
   /**
    * Auto-registro de un paciente con su documento de identidad. El correo es
@@ -364,9 +374,25 @@ export class IamAuthController {
   async login(
     @Body() dto: LoginDto,
     @Ip() ip: string,
+    @Headers('user-agent') userAgent: string | undefined,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<TokenResponseDto> {
-    return this.deliverTokens(await this.authService.login(dto, ip), res);
+    const result = await this.authService.login(
+      dto,
+      ip,
+      userAgent,
+      this.deviceCookieEnv.enabled
+        ? readDeviceCookieHeader(req, this.deviceCookieEnv.name)
+        : undefined,
+    );
+    // La cookie de dispositivo es del navegador: va como cookie HttpOnly y no en
+    // el cuerpo, que lo lee JavaScript.
+    const { deviceCookie, ...body } = result;
+    if (deviceCookie && this.deviceCookieEnv.enabled) {
+      setDeviceCookie(res, deviceCookie, this.deviceCookieEnv);
+    }
+    return this.deliverTokens(body, res);
   }
 
   /**
@@ -441,7 +467,12 @@ export class IamAuthController {
       // tengo sesión que rotar", el mismo caso que una cookie caducada.
       throw new UnauthorizedException('No se presentó un refresh token');
     }
-    return this.deliverTokens(await this.authService.refresh(presented), res);
+    // `req.ip` ya respeta `TRUST_PROXY_HOPS`: un `X-Forwarded-For` inventado por
+    // el cliente no cambia el origen que evalúan las reglas de red.
+    return this.deliverTokens(
+      await this.authService.refresh(presented, req.ip),
+      res,
+    );
   }
 
   /**

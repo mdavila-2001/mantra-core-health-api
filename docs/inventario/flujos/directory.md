@@ -3,12 +3,12 @@
 # Flujos del módulo `directory`
 
 - **Procesos:** 1 · **Máquinas de estado:** 0
-- **Operaciones:** 26 (25 con decisiones propias, 1 sin ellas)
+- **Operaciones:** 29 (28 con decisiones propias, 1 sin ellas)
 - Inventario de endpoints del módulo: [directory](../endpoints/directory.md)
 
 ## Proceso: Módulo 04 — Directory (Tenants, Sub-tenants, Branches y Membresías)
 
-- **Código:** `directory` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 26
+- **Código:** `directory` · **Agrupación:** AGRUPACION_POR_CONTROLADOR · **Operaciones:** 29
 - **Actores:** Cualquier sesión válida · SECURITY_ADMIN · SUPERADMIN
 - **Revisión:** AUTO_DETECTADA
 - **Fuentes:** `src/modules/directory/README.md`
@@ -28,29 +28,32 @@ _Fuente: `src/modules/directory/README.md:3`_
 |  |  | PUT /admin/tenants/{tenantId}/public-profile | SUPERADMIN · SECURITY_ADMIN | MEDIO | 3 |
 |  |  | POST /admin/tenants/{tenantId}/suspend | SUPERADMIN | MEDIO | 6 |
 |  |  | POST /admin/tenants/{tenantId}/verification | SECURITY_ADMIN | MEDIO | 16 |
-| `ctrl:OrganizationLogoController` | Operaciones de OrganizationLogoController que el README no asigna a un caso de uso | GET /tenants/{tenantId}/logo | Cualquier sesión válida | BAJO | 3 |
-|  |  | PUT /tenants/{tenantId}/logo | Cualquier sesión válida | ALTO | 7 |
-|  |  | GET /tenants/{tenantId}/logo/content | Cualquier sesión válida | BAJO | 5 |
-| `ctrl:TenantsController` | Operaciones de TenantsController que el README no asigna a un caso de uso | GET /tenants/{tenantId} | Cualquier sesión válida | BAJO | 2 |
-|  |  | PATCH /tenants/{tenantId} | Cualquier sesión válida | ALTO | 5 |
-|  |  | POST /tenants/{tenantId}/affiliation-documents | Cualquier sesión válida | ALTO | 13 |
-|  |  | GET /tenants/{tenantId}/branches | Cualquier sesión válida | BAJO | 3 |
-|  |  | POST /tenants/{tenantId}/branches | Cualquier sesión válida | ALTO | 4 |
-|  |  | PATCH /tenants/{tenantId}/branches/{branchId} | Cualquier sesión válida | ALTO | 3 |
-|  |  | GET /tenants/{tenantId}/child-tenants | Cualquier sesión válida | BAJO | 2 |
+| `ctrl:OrganizationLogoController` | Operaciones de OrganizationLogoController que el README no asigna a un caso de uso | GET /tenants/{tenantId}/logo | Cualquier sesión válida | BAJO | 4 |
+|  |  | PUT /tenants/{tenantId}/logo | Cualquier sesión válida | ALTO | 8 |
+|  |  | GET /tenants/{tenantId}/logo/content | Cualquier sesión válida | BAJO | 6 |
+| `ctrl:TenantsController` | Operaciones de TenantsController que el README no asigna a un caso de uso | GET /tenants/{tenantId} | Cualquier sesión válida | BAJO | 3 |
+|  |  | PATCH /tenants/{tenantId} | Cualquier sesión válida | ALTO | 6 |
+|  |  | POST /tenants/{tenantId}/affiliation-documents | Cualquier sesión válida | ALTO | 14 |
+|  |  | GET /tenants/{tenantId}/branches | Cualquier sesión válida | BAJO | 4 |
+|  |  | POST /tenants/{tenantId}/branches | Cualquier sesión válida | ALTO | 5 |
+|  |  | PATCH /tenants/{tenantId}/branches/{branchId} | Cualquier sesión válida | ALTO | 4 |
+|  |  | GET /tenants/{tenantId}/child-tenants | Cualquier sesión válida | BAJO | 3 |
 |  |  | POST /tenants/{tenantId}/child-tenants | SECURITY_ADMIN | MEDIO | 14 |
-|  |  | GET /tenants/{tenantId}/laboratory-readiness | Cualquier sesión válida | BAJO | 11 |
-|  |  | GET /tenants/{tenantId}/memberships | Cualquier sesión válida | BAJO | 2 |
-|  |  | POST /tenants/{tenantId}/memberships | Cualquier sesión válida | ALTO | 2 |
-|  |  | GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | Cualquier sesión válida | BAJO | 3 |
-|  |  | POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | Cualquier sesión válida | ALTO | 5 |
-|  |  | POST /tenants/{tenantId}/memberships/{membershipId}/offboard | Cualquier sesión válida | ALTO | 4 |
-|  |  | PATCH /tenants/{tenantId}/memberships/{membershipId}/role | Cualquier sesión válida | ALTO | 2 |
-|  |  | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | Cualquier sesión válida | ALTO | 6 |
-|  |  | GET /tenants/{tenantId}/pharmacy-readiness | Cualquier sesión válida | BAJO | 11 |
+|  |  | GET /tenants/{tenantId}/laboratory-readiness | Cualquier sesión válida | BAJO | 12 |
+|  |  | GET /tenants/{tenantId}/memberships | Cualquier sesión válida | BAJO | 3 |
+|  |  | POST /tenants/{tenantId}/memberships | Cualquier sesión válida | ALTO | 3 |
+|  |  | GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | Cualquier sesión válida | BAJO | 4 |
+|  |  | POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments | Cualquier sesión válida | ALTO | 6 |
+|  |  | POST /tenants/{tenantId}/memberships/{membershipId}/offboard | Cualquier sesión válida | ALTO | 5 |
+|  |  | PATCH /tenants/{tenantId}/memberships/{membershipId}/role | Cualquier sesión válida | ALTO | 3 |
+|  |  | POST /tenants/{tenantId}/memberships/{membershipId}/transfer | Cualquier sesión válida | ALTO | 7 |
+|  |  | GET /tenants/{tenantId}/pharmacy-readiness | Cualquier sesión válida | BAJO | 12 |
 |  |  | GET /tenants/me | Cualquier sesión válida | BAJO | 13 |
+|  |  | GET /tenants/me/membership-invitations | Cualquier sesión válida | BAJO | 2 |
+|  |  | POST /tenants/me/membership-invitations/{membershipId}/accept | Cualquier sesión válida | BAJO | 1 |
+|  |  | POST /tenants/me/membership-invitations/{membershipId}/decline | Cualquier sesión válida | BAJO | 1 |
 
-### Diagrama — etapas `ctrl:AdminTenantsController`, `ctrl:OrganizationLogoController`, `ctrl:TenantsController`
+### Diagrama 1 de 2 — etapas `ctrl:AdminTenantsController`, `ctrl:OrganizationLogoController`
 
 ```mermaid
 flowchart LR
@@ -67,14 +70,9 @@ flowchart LR
   t11[("directory.tenant_memberships")]:::tabla
   t14[("community.public_profiles")]:::tabla
   t18[("directory.tenant_affiliation_documents")]:::tabla
-  t23[("common.file_versions")]:::tabla
-  t24[("common.files")]:::tabla
-  t29[("insurance.insurance_carriers")]:::tabla
-  t31[("directory.tenant_legal_representatives")]:::tabla
-  t40[("pharmacy.pharmacies")]:::tabla
-  t45[("directory.branch_memberships")]:::tabla
-  t53[("common.contact_points")]:::tabla
-  t54[("common.identifiers")]:::tabla
+  t22[("delegated_access.organization_user_assignments")]:::tabla
+  t24[("common.file_versions")]:::tabla
+  t25[("common.files")]:::tabla
   t12[("+8 tablas más")]
   t19[("+10 tablas más")]
   subgraph s0["ctrl:AdminTenantsController · Operaciones de AdminTenantsController que el READ…"]
@@ -84,36 +82,11 @@ flowchart LR
     o15["POST /admin/tenants/{tenantId}/suspend"]:::op
     o16["POST /admin/tenants/{tenantId}/verification"]:::op
   end
-  t25[("+1 tablas más")]
+  t26[("+2 tablas más")]
   subgraph s1["ctrl:OrganizationLogoController · Operaciones de OrganizationLogoController que…"]
     o20["GET /tenants/{tenantId}/logo"]:::op
-    o22["PUT /tenants/{tenantId}/logo"]:::op
-    o26["GET /tenants/{tenantId}/logo/content"]:::op
-  end
-  t32[("+7 tablas más")]
-  t38[("+8 tablas más")]
-  t41[("+5 tablas más")]
-  t51[("+5 tablas más")]
-  t55[("+7 tablas más")]
-  subgraph s2["ctrl:TenantsController · Operaciones de TenantsController que el README no asig…"]
-    o27["GET /tenants/{tenantId}"]:::op
-    o28["PATCH /tenants/{tenantId}"]:::op
-    o30["POST /tenants/{tenantId}/affiliation-documents"]:::op
-    o33["GET /tenants/{tenantId}/branches"]:::op
-    o34["POST /tenants/{tenantId}/branches"]:::op
-    o35["PATCH /tenants/{tenantId}/branches/{branchId}"]:::op
-    o36["GET /tenants/{tenantId}/child-tenants"]:::op
-    o37["POST /tenants/{tenantId}/child-tenants"]:::op
-    o39["GET /tenants/{tenantId}/laboratory-readiness"]:::op
-    o42["GET /tenants/{tenantId}/memberships"]:::op
-    o43["POST /tenants/{tenantId}/memberships"]:::op
-    o44["GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
-    o46["POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
-    o47["POST /tenants/{tenantId}/memberships/{membershipId}/offboard"]:::op
-    o48["PATCH /tenants/{tenantId}/memberships/{membershipId}/role"]:::op
-    o49["POST /tenants/{tenantId}/memberships/{membershipId}/transfer"]:::op
-    o50["GET /tenants/{tenantId}/pharmacy-readiness"]:::op
-    o52["GET /tenants/me"]:::op
+    o23["PUT /tenants/{tenantId}/logo"]:::op
+    o27["GET /tenants/{tenantId}/logo/content"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -146,118 +119,197 @@ flowchart LR
   o16 -.-> t19
   a21 --> o20
   o20 -->|"LEE"| t14
+  o20 -->|"LEE"| t22
   o20 -->|"LEE"| t11
   o20 -->|"LEE"| t3
-  a21 --> o22
-  o22 -->|"LEE"| t23
-  o22 -->|"LEE"| t24
-  o22 -->|"ACTUALIZA"| t14
-  o22 -->|"CREA"| t14
-  o22 -->|"LEE"| t14
-  o22 -->|"LEE"| t11
-  o22 -.-> t25
-  a21 --> o26
-  o26 -->|"LEE"| t23
-  o26 -->|"LEE"| t24
-  o26 -->|"LEE"| t14
-  o26 -->|"LEE"| t11
-  o26 -->|"LEE"| t3
+  a21 --> o23
+  o23 -->|"LEE"| t24
+  o23 -->|"LEE"| t25
+  o23 -->|"ACTUALIZA"| t14
+  o23 -->|"CREA"| t14
+  o23 -->|"LEE"| t14
+  o23 -->|"LEE"| t22
+  o23 -.-> t26
   a21 --> o27
+  o27 -->|"LEE"| t24
+  o27 -->|"LEE"| t25
+  o27 -->|"LEE"| t14
+  o27 -->|"LEE"| t22
   o27 -->|"LEE"| t11
   o27 -->|"LEE"| t3
-  a21 --> o28
-  o28 -->|"LEE"| t11
-  o28 -->|"ACTUALIZA"| t3
+  classDef op fill:#fff,stroke:#446
+  classDef actor fill:#eef,stroke:#66a
+  classDef tabla fill:#ffd,stroke:#aa3
+  classDef evento fill:#efe,stroke:#3a3
+```
+
+### Diagrama 2 de 2 — etapas `ctrl:TenantsController`
+
+```mermaid
+flowchart LR
+  a2(["Cualquier sesión válida"]):::actor
+  a19(["SECURITY_ADMIN"]):::actor
+  t3[("delegated_access.organization_user_assignments")]:::tabla
+  t4[("directory.tenant_memberships")]:::tabla
+  t5[("directory.tenants")]:::tabla
+  t7[("insurance.insurance_carriers")]:::tabla
+  t9[("common.file_versions")]:::tabla
+  t10[("common.files")]:::tabla
+  t11[("directory.tenant_affiliation_documents")]:::tabla
+  t14[("directory.branches")]:::tabla
+  t20[("common.addresses")]:::tabla
+  t21[("diagnostic_units.diagnostic_study_offerings")]:::tabla
+  t22[("diagnostic_units.diagnostic_unit_sites")]:::tabla
+  t23[("diagnostic_units.diagnostic_units")]:::tabla
+  t30[("directory.branch_memberships")]:::tabla
+  t39[("common.contact_points")]:::tabla
+  t40[("common.identifiers")]:::tabla
+  t41[("directory.tenant_legal_representatives")]:::tabla
+  t12[("+8 tablas más")]
+  t24[("+8 tablas más")]
+  t26[("+6 tablas más")]
+  t35[("+1 tablas más")]
+  t37[("+6 tablas más")]
+  t42[("+7 tablas más")]
+  subgraph s0["ctrl:TenantsController · Operaciones de TenantsController que el README no asig…"]
+    o1["GET /tenants/{tenantId}"]:::op
+    o6["PATCH /tenants/{tenantId}"]:::op
+    o8["POST /tenants/{tenantId}/affiliation-documents"]:::op
+    o13["GET /tenants/{tenantId}/branches"]:::op
+    o15["POST /tenants/{tenantId}/branches"]:::op
+    o16["PATCH /tenants/{tenantId}/branches/{branchId}"]:::op
+    o17["GET /tenants/{tenantId}/child-tenants"]:::op
+    o18["POST /tenants/{tenantId}/child-tenants"]:::op
+    o25["GET /tenants/{tenantId}/laboratory-readiness"]:::op
+    o27["GET /tenants/{tenantId}/memberships"]:::op
+    o28["POST /tenants/{tenantId}/memberships"]:::op
+    o29["GET /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
+    o31["POST /tenants/{tenantId}/memberships/{membershipId}/branch-assignments"]:::op
+    o32["POST /tenants/{tenantId}/memberships/{membershipId}/offboard"]:::op
+    o33["PATCH /tenants/{tenantId}/memberships/{membershipId}/role"]:::op
+    o34["POST /tenants/{tenantId}/memberships/{membershipId}/transfer"]:::op
+    o36["GET /tenants/{tenantId}/pharmacy-readiness"]:::op
+    o38["GET /tenants/me"]:::op
+    o43["GET /tenants/me/membership-invitations"]:::op
+    o44["POST /tenants/me/membership-invitations/{membershipId}/accept"]:::op
+    o45["POST /tenants/me/membership-invitations/{membershipId}/decline"]:::op
+  end
+  a2 --> o1
+  o1 -->|"LEE"| t3
+  o1 -->|"LEE"| t4
+  o1 -->|"LEE"| t5
+  a2 --> o6
+  o6 -->|"LEE"| t3
+  o6 -->|"LEE"| t4
+  o6 -->|"ACTUALIZA"| t5
+  o6 -->|"LEE"| t5
+  o6 -->|"ACTUALIZA"| t7
+  o6 -->|"LEE"| t7
+  a2 --> o8
+  o8 -->|"LEE"| t9
+  o8 -->|"ACTUALIZA"| t10
+  o8 -->|"LEE"| t10
+  o8 -->|"LEE"| t3
+  o8 -->|"CREA"| t11
+  o8 -->|"LEE"| t11
+  o8 -.-> t12
+  a2 --> o13
+  o13 -->|"LEE"| t3
+  o13 -->|"LEE"| t14
+  o13 -->|"LEE"| t4
+  o13 -->|"LEE"| t5
+  a2 --> o15
+  o15 -->|"LEE"| t3
+  o15 -->|"CREA"| t14
+  o15 -->|"LEE"| t14
+  o15 -->|"LEE"| t4
+  o15 -->|"LEE"| t5
+  a2 --> o16
+  o16 -->|"LEE"| t3
+  o16 -->|"ACTUALIZA"| t14
+  o16 -->|"LEE"| t14
+  o16 -->|"LEE"| t4
+  a2 --> o17
+  o17 -->|"LEE"| t3
+  o17 -->|"LEE"| t4
+  o17 -->|"LEE"| t5
+  a19 --> o18
+  o18 -->|"CREA"| t20
+  o18 -->|"CREA"| t21
+  o18 -->|"CREA"| t22
+  o18 -->|"CREA"| t23
+  o18 -->|"CREA"| t14
+  o18 -->|"CREA"| t4
+  o18 -.-> t24
+  a2 --> o25
+  o25 -->|"LEE"| t20
+  o25 -->|"LEE"| t3
+  o25 -->|"LEE"| t23
+  o25 -->|"LEE"| t11
+  o25 -->|"LEE"| t4
+  o25 -->|"LEE"| t5
+  o25 -.-> t26
+  a2 --> o27
+  o27 -->|"LEE"| t3
+  o27 -->|"LEE"| t4
+  o27 -->|"LEE"| t5
+  a2 --> o28
   o28 -->|"LEE"| t3
-  o28 -->|"ACTUALIZA"| t29
-  o28 -->|"LEE"| t29
-  a21 --> o30
-  o30 -->|"LEE"| t23
-  o30 -->|"ACTUALIZA"| t24
-  o30 -->|"LEE"| t24
-  o30 -->|"CREA"| t18
-  o30 -->|"LEE"| t18
-  o30 -->|"LEE"| t31
-  o30 -.-> t32
-  a21 --> o33
-  o33 -->|"LEE"| t10
-  o33 -->|"LEE"| t11
+  o28 -->|"CREA"| t4
+  o28 -->|"LEE"| t4
+  a2 --> o29
+  o29 -->|"LEE"| t3
+  o29 -->|"LEE"| t30
+  o29 -->|"LEE"| t4
+  o29 -->|"LEE"| t5
+  a2 --> o31
+  o31 -->|"LEE"| t3
+  o31 -->|"CREA"| t30
+  o31 -->|"LEE"| t30
+  o31 -->|"LEE"| t14
+  o31 -->|"ACTUALIZA"| t4
+  o31 -->|"LEE"| t4
+  a2 --> o32
+  o32 -->|"LEE"| t3
+  o32 -->|"ACTUALIZA"| t30
+  o32 -->|"LEE"| t30
+  o32 -->|"ACTUALIZA"| t4
+  o32 -->|"LEE"| t4
+  a2 --> o33
   o33 -->|"LEE"| t3
-  a21 --> o34
-  o34 -->|"CREA"| t10
-  o34 -->|"LEE"| t10
-  o34 -->|"LEE"| t11
+  o33 -->|"ACTUALIZA"| t4
+  o33 -->|"LEE"| t4
+  a2 --> o34
   o34 -->|"LEE"| t3
-  a21 --> o35
-  o35 -->|"ACTUALIZA"| t10
-  o35 -->|"LEE"| t10
-  o35 -->|"LEE"| t11
-  a21 --> o36
-  o36 -->|"LEE"| t11
+  o34 -->|"ACTUALIZA"| t30
+  o34 -->|"CREA"| t30
+  o34 -->|"LEE"| t30
+  o34 -->|"LEE"| t14
+  o34 -->|"ACTUALIZA"| t4
+  o34 -.-> t35
+  a2 --> o36
+  o36 -->|"LEE"| t20
   o36 -->|"LEE"| t3
-  a17 --> o37
-  o37 -->|"CREA"| t6
-  o37 -->|"CREA"| t7
-  o37 -->|"CREA"| t8
-  o37 -->|"CREA"| t9
-  o37 -->|"CREA"| t10
-  o37 -->|"CREA"| t11
-  o37 -.-> t38
-  a21 --> o39
-  o39 -->|"LEE"| t6
-  o39 -->|"LEE"| t9
-  o39 -->|"LEE"| t18
-  o39 -->|"LEE"| t11
-  o39 -->|"LEE"| t3
-  o39 -->|"LEE"| t40
-  o39 -.-> t41
-  a21 --> o42
-  o42 -->|"LEE"| t11
-  o42 -->|"LEE"| t3
-  a21 --> o43
-  o43 -->|"CREA"| t11
-  o43 -->|"LEE"| t11
-  a21 --> o44
-  o44 -->|"LEE"| t45
-  o44 -->|"LEE"| t11
-  o44 -->|"LEE"| t3
-  a21 --> o46
-  o46 -->|"CREA"| t45
-  o46 -->|"LEE"| t45
-  o46 -->|"LEE"| t10
-  o46 -->|"ACTUALIZA"| t11
-  o46 -->|"LEE"| t11
-  a21 --> o47
-  o47 -->|"ACTUALIZA"| t45
-  o47 -->|"LEE"| t45
-  o47 -->|"ACTUALIZA"| t11
-  o47 -->|"LEE"| t11
-  a21 --> o48
-  o48 -->|"ACTUALIZA"| t11
-  o48 -->|"LEE"| t11
-  a21 --> o49
-  o49 -->|"ACTUALIZA"| t45
-  o49 -->|"CREA"| t45
-  o49 -->|"LEE"| t45
-  o49 -->|"LEE"| t10
-  o49 -->|"ACTUALIZA"| t11
-  o49 -->|"LEE"| t11
-  a21 --> o50
-  o50 -->|"LEE"| t6
-  o50 -->|"LEE"| t9
-  o50 -->|"LEE"| t18
-  o50 -->|"LEE"| t11
-  o50 -->|"LEE"| t3
-  o50 -->|"LEE"| t40
-  o50 -.-> t51
-  a21 --> o52
-  o52 -->|"LEE"| t6
-  o52 -->|"LEE"| t53
-  o52 -->|"LEE"| t54
-  o52 -->|"LEE"| t18
-  o52 -->|"LEE"| t31
-  o52 -->|"LEE"| t11
-  o52 -.-> t55
+  o36 -->|"LEE"| t23
+  o36 -->|"LEE"| t11
+  o36 -->|"LEE"| t4
+  o36 -->|"LEE"| t5
+  o36 -.-> t37
+  a2 --> o38
+  o38 -->|"LEE"| t20
+  o38 -->|"LEE"| t39
+  o38 -->|"LEE"| t40
+  o38 -->|"LEE"| t11
+  o38 -->|"LEE"| t41
+  o38 -->|"LEE"| t4
+  o38 -.-> t42
+  a2 --> o43
+  o43 -->|"LEE"| t4
+  o43 -->|"LEE"| t5
+  a2 --> o44
+  o44 -->|"LEE"| t4
+  a2 --> o45
+  o45 -->|"LEE"| t4
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -781,18 +833,26 @@ flowchart TD
   n9 --> n10
   n11[("LEE directory.tenant_memberships")]:::efecto
   n10 --> n11
-  n12{"await this.activeMembershipOf(em, tenantId, actor)"}:::decision
+  n12["Llama a TenantMembershipsRepository.isSupportOnly"]:::llamada
   n11 --> n12
-  n13["Llama a TenantAdministrationService.activeMembershipOf"]:::llamada
-  n12 -->|"sí"| n13
-  n14["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
+  n13[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n12 --> n13
+  n14{"await this.activeMembershipOf(em, tenantId, actor)"}:::decision
   n13 --> n14
-  n15[("LEE directory.tenant_memberships")]:::efecto
-  n14 --> n15
-  n16(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
+  n15["Llama a TenantAdministrationService.activeMembershipOf"]:::llamada
+  n14 -->|"sí"| n15
+  n16["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
   n15 --> n16
-  n12 -->|"no"| n16
-  n17(("200 Responde con éxito")):::ok
+  n17[("LEE directory.tenant_memberships")]:::efecto
+  n16 --> n17
+  n18["Llama a TenantMembershipsRepository.isSupportOnly"]:::llamada
+  n17 --> n18
+  n19[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n18 --> n19
+  n20(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
+  n19 --> n20
+  n14 -->|"no"| n20
+  n21(("200 Responde con éxito")):::ok
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1563,34 +1623,42 @@ flowchart TD
   n5 --> n6
   n7[("LEE directory.tenant_memberships")]:::efecto
   n6 --> n7
-  n8{"await this.activeMembershipOf(em, tenantId, actor)"}:::decision
+  n8["Llama a TenantMembershipsRepository.isSupportOnly"]:::llamada
   n7 --> n8
-  n9["Llama a TenantAdministrationService.activeMembershipOf"]:::llamada
-  n8 -->|"sí"| n9
-  n10["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
+  n9[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n8 --> n9
+  n10{"await this.activeMembershipOf(em, tenantId, actor)"}:::decision
   n9 --> n10
-  n11[("LEE directory.tenant_memberships")]:::efecto
-  n10 --> n11
-  n12(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
+  n11["Llama a TenantAdministrationService.activeMembershipOf"]:::llamada
+  n10 -->|"sí"| n11
+  n12["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
   n11 --> n12
-  n8 -->|"no"| n12
-  n13["Llama a OrganizationLogoService.assertTenant"]:::llamada
-  n14["Llama a TenantsRepository.findById"]:::llamada
+  n13[("LEE directory.tenant_memberships")]:::efecto
+  n12 --> n13
+  n14["Llama a TenantMembershipsRepository.isSupportOnly"]:::llamada
   n13 --> n14
-  n15[("LEE directory.tenants")]:::efecto
+  n15[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
   n14 --> n15
-  n16{"!tenant"}:::decision
+  n16(["403 FORBIDDEN Se requiere pertenecer a la organización, o ser administrador de la plataforma"]):::error
   n15 --> n16
-  n17(["404 NOT_FOUND Organización no encontrada"]):::error
-  n16 -->|"sí"| n17
-  n18["Llama a PublicProfileProjectionService.getOrganizationLogo"]:::llamada
-  n16 -->|"no"| n18
-  n19["Llama a PublicProfilesRepository.findByTarget"]:::llamada
+  n10 -->|"no"| n16
+  n17["Llama a OrganizationLogoService.assertTenant"]:::llamada
+  n18["Llama a TenantsRepository.findById"]:::llamada
+  n17 --> n18
+  n19[("LEE directory.tenants")]:::efecto
   n18 --> n19
-  n20[("LEE community.public_profiles")]:::efecto
+  n20{"!tenant"}:::decision
   n19 --> n20
-  n21(("200 Responde con éxito")):::ok
-  n20 --> n21
+  n21(["404 NOT_FOUND Organización no encontrada"]):::error
+  n20 -->|"sí"| n21
+  n22["Llama a PublicProfileProjectionService.getOrganizationLogo"]:::llamada
+  n20 -->|"no"| n22
+  n23["Llama a PublicProfilesRepository.findByTarget"]:::llamada
+  n22 --> n23
+  n24[("LEE community.public_profiles")]:::efecto
+  n23 --> n24
+  n25(("200 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -1909,7 +1977,7 @@ Incorporar un usuario al tenant (membership)
 | 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos; El cuerpo cumple el DTO (sin propiedades extra) |
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Se requiere ser OWNER o ADMIN de la organización, o administrador de la plataforma; ForbiddenException: Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee |
-| 409 | `CONFLICT` | ConflictException: El usuario ya tiene una membresía activa en el tenant |
+| 409 | `CONFLICT` | ConflictException: El usuario ya tiene una membresía activa en el tenant; ConflictException: El usuario ya tiene una invitación pendiente de aceptar en el tenant |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
 ```mermaid
@@ -1934,22 +2002,34 @@ flowchart TD
   n9 --> n10
   n11[("LEE directory.tenant_memberships")]:::efecto
   n10 --> n11
-  n12(["403 FORBIDDEN Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee"]):::error
+  n12["Llama a TenantMembershipsRepository.isSupportOnly"]:::llamada
   n11 --> n12
-  n13["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
-  n7 -->|"no"| n13
-  n14[("LEE directory.tenant_memberships")]:::efecto
+  n13[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n12 --> n13
+  n14(["403 FORBIDDEN Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee"]):::error
   n13 --> n14
-  n15{"existing"}:::decision
-  n14 --> n15
-  n16(["409 CONFLICT El usuario ya tiene una membresía activa en el tenant"]):::error
-  n15 -->|"sí"| n16
-  n17["Llama a TenantMembershipsRepository.create"]:::llamada
-  n15 -->|"no"| n17
-  n18[("CREA directory.tenant_memberships")]:::efecto
-  n17 --> n18
-  n19(("201 Responde con éxito")):::ok
-  n18 --> n19
+  n15["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
+  n7 -->|"no"| n15
+  n16[("LEE directory.tenant_memberships")]:::efecto
+  n15 --> n16
+  n17{"existing"}:::decision
+  n16 --> n17
+  n18(["409 CONFLICT El usuario ya tiene una membresía activa en el tenant"]):::error
+  n17 -->|"sí"| n18
+  n19["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
+  n17 -->|"no"| n19
+  n20[("LEE directory.tenant_memberships")]:::efecto
+  n19 --> n20
+  n21{"pending"}:::decision
+  n20 --> n21
+  n22(["409 CONFLICT El usuario ya tiene una invitación pendiente de aceptar en el tenant"]):::error
+  n21 -->|"sí"| n22
+  n23["Llama a TenantMembershipsRepository.create"]:::llamada
+  n21 -->|"no"| n23
+  n24[("CREA directory.tenant_memberships")]:::efecto
+  n23 --> n24
+  n25(("201 Responde con éxito")):::ok
+  n24 --> n25
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2050,7 +2130,7 @@ flowchart TD
   n9 --> n10
   n11(["404 NOT_FOUND Membresía no encontrada"]):::error
   n10 -->|"sí"| n11
-  n12{"membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE"}:::decision
+  n12{"membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE && !pending"}:::decision
   n10 -->|"no"| n12
   n13(["422 PRECONDITION_FAILED La membresía no está activa"]):::error
   n12 -->|"sí"| n13
@@ -2131,7 +2211,7 @@ flowchart TD
   n9 --> n10
   n11(["404 NOT_FOUND Membresía no encontrada"]):::error
   n10 -->|"sí"| n11
-  n12{"membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE"}:::decision
+  n12{"membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE && !pending"}:::decision
   n10 -->|"no"| n12
   n13(["422 PRECONDITION_FAILED La membresía no está activa"]):::error
   n12 -->|"sí"| n13
@@ -2145,31 +2225,38 @@ flowchart TD
   n16 --> n17
   n18[("LEE directory.tenant_memberships")]:::efecto
   n17 --> n18
-  n19(["403 FORBIDDEN Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee"]):::error
+  n19["Llama a TenantMembershipsRepository.isSupportOnly"]:::llamada
   n18 --> n19
-  n20["Llama a DirectoryMembershipsService.assertNotLastOwner"]:::llamada
-  n21["Llama a TenantMembershipsRepository.countActiveByTenantRole"]:::llamada
+  n20[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n19 --> n20
+  n21(["403 FORBIDDEN Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee"]):::error
   n20 --> n21
-  n22[("LEE directory.tenant_memberships")]:::efecto
-  n21 --> n22
-  n23{"activeOwners ‹= 1"}:::decision
-  n22 --> n23
-  n24(["422 PRECONDITION_FAILED No se puede quitar al último OWNER de la organización: designe otro OWNER primero"]):::error
-  n23 -->|"sí"| n24
-  n25[("ACTUALIZA directory.tenant_memberships · ACTUALIZA directory.tenant_memberships")]:::efecto
-  n23 -->|"no"| n25
-  n14 -->|"no"| n25
-  n26["Llama a BranchMembershipsRepository.findByMembershipAndStatus"]:::llamada
+  n22{"membership.statusConceptId === DIR.MEMBERSHIP_ACTIVE"}:::decision
+  n23["Llama a DirectoryMembershipsService.assertNotLastOwner"]:::llamada
+  n22 -->|"sí"| n23
+  n24["Llama a TenantMembershipsRepository.countActiveByTenantRole"]:::llamada
+  n23 --> n24
+  n25[("LEE directory.tenant_memberships")]:::efecto
+  n24 --> n25
+  n26{"activeOwners ‹= 1"}:::decision
   n25 --> n26
-  n27[("LEE directory.branch_memberships")]:::efecto
-  n26 --> n27
-  n28["Repite: por cada const assignment de assignments"]:::bucle
-  n27 --> n28
-  n29[("ACTUALIZA directory.branch_memberships")]:::efecto
-  n28 -->|"cada elemento"| n29
-  n30(("200 Responde con éxito")):::ok
+  n27(["422 PRECONDITION_FAILED No se puede quitar al último OWNER de la organización: designe otro OWNER primero"]):::error
+  n26 -->|"sí"| n27
+  n28[("ACTUALIZA directory.tenant_memberships · ACTUALIZA directory.tenant_memberships")]:::efecto
+  n26 -->|"no"| n28
+  n22 -->|"no"| n28
+  n14 -->|"no"| n28
+  n29["Llama a BranchMembershipsRepository.findByMembershipAndStatus"]:::llamada
+  n28 --> n29
+  n30[("LEE directory.branch_memberships")]:::efecto
   n29 --> n30
-  n28 -->|"al terminar"| n30
+  n31["Repite: por cada const assignment de assignments"]:::bucle
+  n30 --> n31
+  n32[("ACTUALIZA directory.branch_memberships")]:::efecto
+  n31 -->|"cada elemento"| n32
+  n33(("200 Responde con éxito")):::ok
+  n32 --> n33
+  n31 -->|"al terminar"| n33
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2218,7 +2305,7 @@ flowchart TD
   n11 --> n12
   n13(["404 NOT_FOUND Membresía no encontrada"]):::error
   n12 -->|"sí"| n13
-  n14{"membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE"}:::decision
+  n14{"membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE && !pending"}:::decision
   n12 -->|"no"| n14
   n15(["422 PRECONDITION_FAILED La membresía no está activa"]):::error
   n14 -->|"sí"| n15
@@ -2232,33 +2319,37 @@ flowchart TD
   n18 --> n19
   n20[("LEE directory.tenant_memberships")]:::efecto
   n19 --> n20
-  n21(["403 FORBIDDEN Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee"]):::error
+  n21["Llama a TenantMembershipsRepository.isSupportOnly"]:::llamada
   n20 --> n21
-  n22{"targetIsOwner && dto.role && !grantsOwner"}:::decision
-  n16 -->|"no"| n22
-  n23["Llama a DirectoryMembershipsService.assertNotLastOwner"]:::llamada
-  n22 -->|"sí"| n23
-  n24["Llama a TenantMembershipsRepository.countActiveByTenantRole"]:::llamada
-  n23 --> n24
-  n25[("LEE directory.tenant_memberships")]:::efecto
-  n24 --> n25
-  n26{"activeOwners ‹= 1"}:::decision
+  n22[("LEE delegated_access.organization_user_assignments · LEE directory.tenant_memberships")]:::efecto
+  n21 --> n22
+  n23(["403 FORBIDDEN Sólo un OWNER de la organización o la plataforma pueden cambiar quién la posee"]):::error
+  n22 --> n23
+  n24{"targetIsOwner && dto.role && !grantsOwner && membership.statusConceptId === DIR.MEMBERSHIP_ACTIVE"}:::decision
+  n16 -->|"no"| n24
+  n25["Llama a DirectoryMembershipsService.assertNotLastOwner"]:::llamada
+  n24 -->|"sí"| n25
+  n26["Llama a TenantMembershipsRepository.countActiveByTenantRole"]:::llamada
   n25 --> n26
-  n27(["422 PRECONDITION_FAILED No se puede quitar al último OWNER de la organización: designe otro OWNER primero"]):::error
-  n26 -->|"sí"| n27
-  n28{"dto.role"}:::decision
-  n26 -->|"no"| n28
-  n22 -->|"no"| n28
-  n29[("ACTUALIZA directory.tenant_memberships")]:::efecto
+  n27[("LEE directory.tenant_memberships")]:::efecto
+  n26 --> n27
+  n28{"activeOwners ‹= 1"}:::decision
+  n27 --> n28
+  n29(["422 PRECONDITION_FAILED No se puede quitar al último OWNER de la organización: designe otro OWNER primero"]):::error
   n28 -->|"sí"| n29
-  n30{"dto.accessScope"}:::decision
-  n29 --> n30
+  n30{"dto.role"}:::decision
   n28 -->|"no"| n30
+  n24 -->|"no"| n30
   n31[("ACTUALIZA directory.tenant_memberships")]:::efecto
   n30 -->|"sí"| n31
-  n32(("200 Responde con éxito")):::ok
+  n32{"dto.accessScope"}:::decision
   n31 --> n32
   n30 -->|"no"| n32
+  n33[("ACTUALIZA directory.tenant_memberships")]:::efecto
+  n32 -->|"sí"| n33
+  n34(("200 Responde con éxito")):::ok
+  n33 --> n34
+  n32 -->|"no"| n34
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3
@@ -2303,7 +2394,7 @@ flowchart TD
   n9 --> n10
   n11(["404 NOT_FOUND Membresía no encontrada"]):::error
   n10 -->|"sí"| n11
-  n12{"membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE"}:::decision
+  n12{"membership.statusConceptId !== DIR.MEMBERSHIP_ACTIVE && !pending"}:::decision
   n10 -->|"no"| n12
   n13(["422 PRECONDITION_FAILED La membresía no está activa"]):::error
   n12 -->|"sí"| n13
@@ -2517,6 +2608,149 @@ flowchart TD
   n35(("200 Responde con éxito")):::ok
   n32 -->|"no"| n35
   n6 -->|"al terminar"| n35
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 26. GET /tenants/me/membership-invitations
+
+Mis membresías pendientes de aceptar
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a DirectoryMembershipsService.listMyInvitations"]:::llamada
+  n2 --> n3
+  n4["Transacción: withPersonScope(…)"]:::transaccion
+  n3 --> n4
+  n5["Llama a TenantMembershipsRepository.findActiveByUser"]:::llamada
+  n4 --> n5
+  n6[("LEE directory.tenant_memberships")]:::efecto
+  n5 --> n6
+  n7["Repite: por cada const membership de pending"]:::bucle
+  n6 --> n7
+  n8["Llama a TenantsRepository.findById"]:::llamada
+  n7 -->|"cada elemento"| n8
+  n9[("LEE directory.tenants")]:::efecto
+  n8 --> n9
+  n10(("200 Responde con éxito")):::ok
+  n9 --> n10
+  n7 -->|"al terminar"| n10
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 27. POST /tenants/me/membership-invitations/{membershipId}/accept
+
+Aceptar una membresía pendiente propia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Invitación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a DirectoryMembershipsService.acceptMine"]:::llamada
+  n2 --> n3
+  n4["Llama a DirectoryMembershipsService.decideMine"]:::llamada
+  n3 --> n4
+  n5["Transacción: withPersonScope(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a TenantMembershipsRepository.findByIdAndUser"]:::llamada
+  n5 --> n6
+  n7[("LEE directory.tenant_memberships")]:::efecto
+  n6 --> n7
+  n8{"!membership || membership.statusConceptId !== DIR.MEMBERSHIP_PENDING_ACCEPTANCE"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Invitación no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10["Transacción: inTenant(…)"]:::transaccion
+  n8 -->|"no"| n10
+  n11{"decision === 'ACTIVE'"}:::decision
+  n10 --> n11
+  n12["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
+  n11 -->|"sí"| n12
+  n13[("LEE directory.tenant_memberships")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  n11 -->|"no"| n14
+  classDef acceso fill:#eef,stroke:#66a
+  classDef error fill:#fee,stroke:#c33
+  classDef ok fill:#efe,stroke:#3a3
+  classDef efecto fill:#ffd,stroke:#aa3
+  classDef decision fill:#fff,stroke:#555
+  classDef corte fill:#eee,stroke:#999,stroke-dasharray: 4
+```
+
+#### 28. POST /tenants/me/membership-invitations/{membershipId}/decline
+
+Rechazar una membresía pendiente propia
+
+| HTTP | Código | Cuándo |
+|---|---|---|
+| 200 | — | Éxito |
+| 400 | `VALIDATION_FAILED` | Los parámetros de ruta son UUID válidos |
+| 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
+| 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
+| 404 | `NOT_FOUND` | ResourceNotFoundException: Invitación no encontrada |
+| 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
+
+```mermaid
+flowchart TD
+  n1(("Solicitud")):::inicio
+  n2{{"Acceso: sesión (401) · rol (403) · tenant (403) · parámetros de ruta (400) · límite de tasa (429)"}}:::acceso
+  n1 --> n2
+  n3["Llama a DirectoryMembershipsService.declineMine"]:::llamada
+  n2 --> n3
+  n4["Llama a DirectoryMembershipsService.decideMine"]:::llamada
+  n3 --> n4
+  n5["Transacción: withPersonScope(…)"]:::transaccion
+  n4 --> n5
+  n6["Llama a TenantMembershipsRepository.findByIdAndUser"]:::llamada
+  n5 --> n6
+  n7[("LEE directory.tenant_memberships")]:::efecto
+  n6 --> n7
+  n8{"!membership || membership.statusConceptId !== DIR.MEMBERSHIP_PENDING_ACCEPTANCE"}:::decision
+  n7 --> n8
+  n9(["404 NOT_FOUND Invitación no encontrada"]):::error
+  n8 -->|"sí"| n9
+  n10["Transacción: inTenant(…)"]:::transaccion
+  n8 -->|"no"| n10
+  n11{"decision === 'ACTIVE'"}:::decision
+  n10 --> n11
+  n12["Llama a TenantMembershipsRepository.findActiveByUserTenant"]:::llamada
+  n11 -->|"sí"| n12
+  n13[("LEE directory.tenant_memberships")]:::efecto
+  n12 --> n13
+  n14(("200 Responde con éxito")):::ok
+  n13 --> n14
+  n11 -->|"no"| n14
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
   classDef ok fill:#efe,stroke:#3a3

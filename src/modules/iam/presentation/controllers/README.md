@@ -26,3 +26,10 @@ No business logic lives here. Response bodies are DTOs.
 | `POST /iam/auth/token/refresh`  | UC-01-06 | `@Public`        | 200  |
 | `POST /iam/auth/logout-all`     | UC-01-08 | authenticated    | 200  |
 | `POST /iam/auth/sessions/purge` | UC-01-11 | `SECURITY_ADMIN` | 200  |
+
+## `IamStepUpController` — `/iam/me/step-up`
+
+| Method + path          | Guard         | Code | Notes                                                                 |
+| ---------------------- | ------------- | ---- | --------------------------------------------------------------------- |
+| `POST /iam/me/step-up` | authenticated | 200  | `@Audited` `SUPPORT_STEP_UP_VERIFIED`; 5/min; 422/429/503 (nunca 401) |
+| `GET /iam/me/step-up`  | authenticated | 200  | `{ fresh, ageMinutes }`; `maxAgeMinutes` opcional (1-60, 10)          |

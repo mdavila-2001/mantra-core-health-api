@@ -1,9 +1,10 @@
 import type { EntityManager } from '@mikro-orm/postgresql';
 
 export interface DependentLinkIdentifiersPort {
-  findActiveDuplicate(
+  /** Documento nacional activo de un paciente con este número (forma canónica). */
+  findActiveNationalIdDuplicate(
     em: EntityManager,
-    params: { readonly typeConceptId: string; readonly value: string },
+    nationalId: string,
   ): Promise<{ readonly ownerId: string } | null>;
 }
 

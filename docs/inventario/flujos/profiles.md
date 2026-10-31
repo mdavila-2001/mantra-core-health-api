@@ -86,10 +86,10 @@ _Fuente: `src/modules/profiles/README.md:3`_
 |  |  | PATCH /profiles/practitioners/me/specialties/{specialtyId}/primary | Cualquier sesión válida | ALTO | 4 |
 |  |  | GET /profiles/practitioners/me/summary | Cualquier sesión válida | BAJO | 15 |
 |  |  | GET /profiles/practitioners/specialty-counts | Cualquier sesión válida | BAJO | 2 |
-| `ctrl:TenantPractitionerRequestsController` | Operaciones de TenantPractitionerRequestsController que el README no asigna a un caso de uso | GET /tenants/{tenantId}/practitioner-requests | Cualquier sesión válida | BAJO | 5 |
-|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | Cualquier sesión válida | ALTO | 19 |
-|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | Cualquier sesión válida | ALTO | 19 |
-|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | Cualquier sesión válida | ALTO | 19 |
+| `ctrl:TenantPractitionerRequestsController` | Operaciones de TenantPractitionerRequestsController que el README no asigna a un caso de uso | GET /tenants/{tenantId}/practitioner-requests | Cualquier sesión válida | BAJO | 6 |
+|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve | Cualquier sesión válida | ALTO | 21 |
+|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject | Cualquier sesión válida | ALTO | 21 |
+|  |  | POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke | Cualquier sesión válida | ALTO | 21 |
 
 ### Diagrama 1 de 4 — etapas `H4 §C`, `P5 §3`, `ctrl:PatientAddressBookController`…
 
@@ -694,22 +694,21 @@ flowchart LR
 ```mermaid
 flowchart LR
   a2(["Cualquier sesión válida"]):::actor
-  t3[("directory.tenant_memberships")]:::tabla
-  t4[("practice.practice_sites")]:::tabla
-  t5[("profiles.jurisdiction_authorizations")]:::tabla
-  t6[("profiles.persons")]:::tabla
-  t7[("profiles.practitioner_affiliations")]:::tabla
-  t9[("iam.devices")]:::tabla
-  t10[("messaging.in_app_notifications")]:::tabla
-  t11[("messaging.message_channels")]:::tabla
-  t12[("+13 tablas más")]
-  t14[("+13 tablas más")]
-  t16[("+13 tablas más")]
+  t3[("delegated_access.organization_user_assignments")]:::tabla
+  t4[("directory.tenant_memberships")]:::tabla
+  t5[("practice.practice_sites")]:::tabla
+  t6[("profiles.jurisdiction_authorizations")]:::tabla
+  t7[("profiles.persons")]:::tabla
+  t8[("profiles.practitioner_affiliations")]:::tabla
+  t10[("iam.devices")]:::tabla
+  t11[("+15 tablas más")]
+  t13[("+15 tablas más")]
+  t15[("+15 tablas más")]
   subgraph s0["ctrl:TenantPractitionerRequestsController · Operaciones de TenantPractitionerRe…"]
     o1["GET /tenants/{tenantId}/practitioner-requests"]:::op
-    o8["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve"]:::op
-    o13["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject"]:::op
-    o15["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke"]:::op
+    o9["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/approve"]:::op
+    o12["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/reject"]:::op
+    o14["POST /tenants/{tenantId}/practitioner-requests/{affiliationId}/revoke"]:::op
   end
   a2 --> o1
   o1 -->|"LEE"| t3
@@ -717,30 +716,31 @@ flowchart LR
   o1 -->|"LEE"| t5
   o1 -->|"LEE"| t6
   o1 -->|"LEE"| t7
-  a2 --> o8
-  o8 -->|"CREA"| t3
-  o8 -->|"LEE"| t3
-  o8 -->|"ACTUALIZA"| t9
-  o8 -->|"LEE"| t9
-  o8 -->|"CREA"| t10
-  o8 -->|"LEE"| t11
-  o8 -.-> t12
-  a2 --> o13
-  o13 -->|"CREA"| t3
-  o13 -->|"LEE"| t3
-  o13 -->|"ACTUALIZA"| t9
-  o13 -->|"LEE"| t9
-  o13 -->|"CREA"| t10
-  o13 -->|"LEE"| t11
-  o13 -.-> t14
-  a2 --> o15
-  o15 -->|"CREA"| t3
-  o15 -->|"LEE"| t3
-  o15 -->|"ACTUALIZA"| t9
-  o15 -->|"LEE"| t9
-  o15 -->|"CREA"| t10
-  o15 -->|"LEE"| t11
-  o15 -.-> t16
+  o1 -->|"LEE"| t8
+  a2 --> o9
+  o9 -->|"LEE"| t3
+  o9 -->|"ACTUALIZA"| t4
+  o9 -->|"CREA"| t4
+  o9 -->|"LEE"| t4
+  o9 -->|"ACTUALIZA"| t10
+  o9 -->|"LEE"| t10
+  o9 -.-> t11
+  a2 --> o12
+  o12 -->|"LEE"| t3
+  o12 -->|"ACTUALIZA"| t4
+  o12 -->|"CREA"| t4
+  o12 -->|"LEE"| t4
+  o12 -->|"ACTUALIZA"| t10
+  o12 -->|"LEE"| t10
+  o12 -.-> t13
+  a2 --> o14
+  o14 -->|"LEE"| t3
+  o14 -->|"ACTUALIZA"| t4
+  o14 -->|"CREA"| t4
+  o14 -->|"LEE"| t4
+  o14 -->|"ACTUALIZA"| t10
+  o14 -->|"LEE"| t10
+  o14 -.-> t15
   classDef op fill:#fff,stroke:#446
   classDef actor fill:#eef,stroke:#66a
   classDef tabla fill:#ffd,stroke:#aa3
@@ -1847,9 +1847,9 @@ flowchart TD
   n12 -->|"sí"| n13
   n14["Llama a DependentLinkRequestsService.recipientByDocument"]:::llamada
   n12 -->|"no"| n14
-  n15["Llama a DependentLinkContextAdapter.findActiveDuplicate"]:::llamada
+  n15["Llama a DependentLinkContextAdapter.findActiveNationalIdDuplicate"]:::llamada
   n14 --> n15
-  n16["Llama a IdentifiersRepository.findActiveDuplicate"]:::llamada
+  n16["Llama a IdentifiersRepository.findActiveNationalIdDuplicate"]:::llamada
   n15 --> n16
   n17[("LEE common.identifiers")]:::efecto
   n16 --> n17
@@ -2171,9 +2171,9 @@ flowchart TD
   n27{"dto.nationalId !== undefined"}:::decision
   n25 -->|"no"| n27
   n20 -->|"no"| n27
-  n28["Llama a PersonRecordsAdapter.findActiveDuplicate"]:::llamada
+  n28["Llama a PersonRecordsAdapter.findActiveNationalIdDuplicate"]:::llamada
   n27 -->|"sí"| n28
-  n29["Llama a IdentifiersRepository.findActiveDuplicate"]:::llamada
+  n29["Llama a IdentifiersRepository.findActiveNationalIdDuplicate"]:::llamada
   n28 --> n29
   n30[("LEE common.identifiers")]:::efecto
   n29 --> n30
@@ -3245,7 +3245,7 @@ Corregir el perfil profesional de otro (titular o plataforma)
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor; ForbiddenException: Sólo el titular del perfil profesional o la plataforma pueden modificarlo |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil profesional no encontrado |
-| 409 | `CONFLICT` | ConflictException: El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número |
+| 409 | `CONFLICT` | ConflictException: El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número; ConflictException: Ese documento ya está registrado en la plataforma |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: Un idioma no puede declararse dos veces; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -3393,20 +3393,20 @@ flowchart TD
   n62 --> n63
   n64(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
   n63 -->|"sí"| n64
-  n65{"!documentReplaced && dto.issuerAdministrativeAreaConceptId !== undefined"}:::decision
+  n65["Intenta"]:::intento
   n63 -->|"no"| n65
   n61 -->|"no"| n65
-  n66["Llama a ProfilesPractitionersService.fixIssuance"]:::llamada
-  n65 -->|"sí"| n66
-  n67["Llama a AdministrativeAreaCatalogService.assertIsAdministrativeArea"]:::llamada
-  n66 --> n67
-  n68{"!members.has(conceptId)"}:::decision
-  n67 --> n68
-  n69(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
-  n68 -->|"sí"| n69
-  n70["Llama a PersonRecordsAdapter.findCurrentIdentifiers"]:::llamada
-  n68 -->|"no"| n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n66{"isNationalIdUniqueViolation(error)"}:::decision
+  n65 -->|"si falla"| n66
+  n67(["409 CONFLICT Ese documento ya está registrado en la plataforma"]):::error
+  n66 -->|"sí"| n67
+  n68(["↩ (relanza el error capturado)"]):::error
+  n66 -->|"no"| n68
+  n69{"!documentReplaced && dto.issuerAdministrativeAreaConceptId !== undefined"}:::decision
+  n65 --> n69
+  n70["Llama a ProfilesPractitionersService.fixIssuance"]:::llamada
+  n69 -->|"sí"| n70
+  n71["… el resto del árbol (5 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33
@@ -4083,7 +4083,7 @@ Editar la presentación del propio perfil profesional
 | 401 | `UNAUTHENTICATED` | Hay una sesión válida (JWT) |
 | 403 | `FORBIDDEN` | El rol está permitido; El tenant se resuelve y pertenece al actor |
 | 404 | `NOT_FOUND` | ResourceNotFoundException: Perfil profesional no encontrado |
-| 409 | `CONFLICT` | ConflictException: El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número |
+| 409 | `CONFLICT` | ConflictException: El documento no se puede corregir desde el perfil: su identidad ya está verificada, o en verificación, con ese número; ConflictException: Ese documento ya está registrado en la plataforma |
 | 422 | `PRECONDITION_FAILED` | PreconditionFailedException: La cuenta no tiene una persona vinculada; PreconditionFailedException: Un idioma no puede declararse dos veces; PreconditionFailedException: El departamento no pertenece al catálogo de departamentos de Bolivia |
 | 429 | `RATE_LIMITED` | No se supera el límite de solicitudes |
 
@@ -4232,20 +4232,20 @@ flowchart TD
   n62 --> n63
   n64(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
   n63 -->|"sí"| n64
-  n65{"!documentReplaced && dto.issuerAdministrativeAreaConceptId !== undefined"}:::decision
+  n65["Intenta"]:::intento
   n63 -->|"no"| n65
   n61 -->|"no"| n65
-  n66["Llama a ProfilesPractitionersService.fixIssuance"]:::llamada
-  n65 -->|"sí"| n66
-  n67["Llama a AdministrativeAreaCatalogService.assertIsAdministrativeArea"]:::llamada
-  n66 --> n67
-  n68{"!members.has(conceptId)"}:::decision
-  n67 --> n68
-  n69(["422 PRECONDITION_FAILED El departamento no pertenece al catálogo de departamentos de Bolivia"]):::error
-  n68 -->|"sí"| n69
-  n70["Llama a PersonRecordsAdapter.findCurrentIdentifiers"]:::llamada
-  n68 -->|"no"| n70
-  n71["… el resto del árbol (1 nodos) está en el JSON del inventario"]:::corte
+  n66{"isNationalIdUniqueViolation(error)"}:::decision
+  n65 -->|"si falla"| n66
+  n67(["409 CONFLICT Ese documento ya está registrado en la plataforma"]):::error
+  n66 -->|"sí"| n67
+  n68(["↩ (relanza el error capturado)"]):::error
+  n66 -->|"no"| n68
+  n69{"!documentReplaced && dto.issuerAdministrativeAreaConceptId !== undefined"}:::decision
+  n65 --> n69
+  n70["Llama a ProfilesPractitionersService.fixIssuance"]:::llamada
+  n69 -->|"sí"| n70
+  n71["… el resto del árbol (5 nodos) está en el JSON del inventario"]:::corte
   n70 --> n71
   classDef acceso fill:#eef,stroke:#66a
   classDef error fill:#fee,stroke:#c33

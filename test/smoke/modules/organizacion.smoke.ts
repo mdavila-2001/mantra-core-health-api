@@ -254,6 +254,43 @@ export const ORGANIZACION_SMOKE: SmokeCase[] = [
       c.vars.orgStaffMembershipId = String(b.id ?? '');
     },
   },
+  // La membresía nace PENDIENTE: el empleado inicia sesión y la acepta él mismo antes de
+  // usar la organización (la organización no la activa por él).
+  {
+    module: 'Organización',
+    endpoint: 'POST /iam/auth/login',
+    name: 'setup: el empleado inicia sesión',
+    method: 'post',
+    auth: false,
+    path: () => '/iam/auth/login',
+    body: (c) => ({
+      email: `empleado-${c.u}@example.test`,
+      password: 'S3cret-passw0rd',
+    }),
+    expectedStatus: 200,
+    capture: (b, c) => {
+      c.vars.orgStaffToken = String(b.accessToken ?? '');
+    },
+  },
+  {
+    module: 'Organización',
+    endpoint: 'GET /tenants/me/membership-invitations',
+    name: 'happy: el empleado ve su membresía pendiente',
+    method: 'get',
+    token: (c) => c.vars.orgStaffToken,
+    path: () => '/tenants/me/membership-invitations',
+    expectedStatus: 200,
+  },
+  {
+    module: 'Organización',
+    endpoint: 'POST /tenants/me/membership-invitations/{membershipId}/accept',
+    name: 'happy: el empleado acepta la membresía',
+    method: 'post',
+    token: (c) => c.vars.orgStaffToken,
+    path: (c) =>
+      `/tenants/me/membership-invitations/${c.vars.orgStaffMembershipId}/accept`,
+    expectedStatus: 200,
+  },
   {
     module: 'Organización',
     endpoint: 'PATCH /tenants/{tenantId}/memberships/{membershipId}/role',

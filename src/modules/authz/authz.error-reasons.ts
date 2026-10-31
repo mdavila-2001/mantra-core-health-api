@@ -99,4 +99,7 @@ export enum AuthzErrorReason {
   ROLE_ASSIGNMENT_NOT_ACTIVE = 'ROLE_ASSIGNMENT_NOT_ACTIVE',
   /** No se encontró el usuario cuyas asignaciones se piden. */
   ROLE_ASSIGNMENT_USER_NOT_FOUND = 'ROLE_ASSIGNMENT_USER_NOT_FOUND',
+
+  /** El acceso de emergencia (break-glass) no existe para el personal de apoyo: avise al clínico de turno. */
+  BREAK_GLASS_NOT_FOR_SUPPORT = 'BREAK_GLASS_NOT_FOR_SUPPORT',
 }

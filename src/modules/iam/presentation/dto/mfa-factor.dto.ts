@@ -69,4 +69,30 @@ export class MfaFactorDto {
   @IsString()
   @Length(6, 8)
   code?: string;
+
+  /**
+   * Reautenticación al dar de alta un factor PROPIO: la contraseña actual. Con un
+   * token robado nadie añade su propio segundo factor sin conocerla (o sin un
+   * código de un factor ya verificado, `mfaCode`).
+   */
+  @ApiPropertyOptional({
+    description:
+      'Contraseña actual (o `mfaCode`): obligatoria para dar de alta un factor propio',
+    maxLength: 200,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  currentPassword?: string;
+
+  /** Código vigente de un factor YA verificado, como alternativa a la contraseña. */
+  @ApiPropertyOptional({
+    description:
+      'Código de un factor ya verificado (o `currentPassword`): reautentica el alta de un factor propio',
+    example: '123456',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(6, 8)
+  mfaCode?: string;
 }

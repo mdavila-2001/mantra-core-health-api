@@ -5,7 +5,7 @@
 - **Bloque:** Farmacia (`Mantra Core Health Context/docs/architecture/semantic-data-analysis.md:30`)
 - **Operaciones:** 33 (33 en el contrato, 0 sólo en el código)
 - **Riesgo:** ALTO 3 · MEDIO 13 · BAJO 17
-- **Tablas distintas que tocan:** 35
+- **Tablas distintas que tocan:** 36
 - **Respuestas de error y detalle contractual:** `openapi/endpoints/pharmacy.md` (generado aparte por `yarn docs:endpoints:generate`)
 
 ## Índice
@@ -36,10 +36,10 @@
 | 22 | GET | `/pharmacy/catalog-products` | Buscar en el catálogo universal de medicamentos | BAJO | 4 | sesión (sin roles) |
 | 23 | GET | `/pharmacy/pharmacies` | Listar farmacias publicadas del tenant activo | BAJO | 4 | sesión (sin roles) |
 | 24 | GET | `/pharmacy/pharmacies/{id}` | Consultar el perfil de una farmacia | BAJO | 9 | sesión (sin roles) |
-| 25 | GET | `/pharmacy/pharmacies/{id}/contacts` | Representante legal y gerencias de la farmacia (sólo su personal) | BAJO | 10 | sesión (sin roles) |
-| 26 | GET | `/pharmacy/pharmacies/{id}/licenses` | Licencias de la farmacia (sólo su personal) | BAJO | 5 | sesión (sin roles) |
-| 27 | GET | `/pharmacy/pharmacies/{id}/summary` | Resumen del catálogo de la farmacia (sólo su personal) | BAJO | 8 | sesión (sin roles) |
-| 28 | GET | `/pharmacy/products` | Buscar productos publicados por texto, medicamento o farmacia | BAJO | 8 | sesión (sin roles) |
+| 25 | GET | `/pharmacy/pharmacies/{id}/contacts` | Representante legal y gerencias de la farmacia (sólo su personal) | BAJO | 11 | sesión (sin roles) |
+| 26 | GET | `/pharmacy/pharmacies/{id}/licenses` | Licencias de la farmacia (sólo su personal) | BAJO | 6 | sesión (sin roles) |
+| 27 | GET | `/pharmacy/pharmacies/{id}/summary` | Resumen del catálogo de la farmacia (sólo su personal) | BAJO | 9 | sesión (sin roles) |
+| 28 | GET | `/pharmacy/products` | Buscar productos publicados por texto, medicamento o farmacia | BAJO | 9 | sesión (sin roles) |
 | 29 | GET | `/pharmacy/sites` | Listar sedes publicadas, sueltas | BAJO | 7 | sesión (sin roles) |
 | 30 | GET | `/pharmacy/sites/{siteId}/prices` | Consultar los precios públicos vigentes de una sede | BAJO | 6 | sesión (sin roles) |
 | 31 | GET | `/public/medications` | Vitrina pública de medicamentos con disponibilidad por farmacia | BAJO | 9 | pública |
@@ -2674,7 +2674,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /pharmacy/pharmacies/{id}/contacts` la atiende `PharmacyReadController.getContacts` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:121). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.getContacts`. Lee common.contact_points, common.identifiers, directory.tenant_legal_representatives, directory.tenant_memberships, pharmacy.pharmacies, profiles.persons, terminology.catalog_concepts, terminology.value_set_members y 2 más.
+`GET /pharmacy/pharmacies/{id}/contacts` la atiende `PharmacyReadController.getContacts` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:121). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.getContacts`. Lee common.contact_points, common.identifiers, delegated_access.organization_user_assignments, directory.tenant_legal_representatives, directory.tenant_memberships, pharmacy.pharmacies, profiles.persons, terminology.catalog_concepts y 3 más.
 
 ### Requerimientos
 
@@ -2691,9 +2691,10 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `common.contact_points` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → ContactPointsRepository.findAllCurrentByOwners | `src/modules/common/repositories/contact-points.repository.ts:96` |
-| `common.identifiers` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → IdentifiersRepository.findByIds | `src/modules/common/repositories/identifiers.repository.ts:104` |
+| `common.identifiers` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → IdentifiersRepository.findByIds | `src/modules/common/repositories/identifiers.repository.ts:147` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
 | `directory.tenant_legal_representatives` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → DirectoryTenantLegalRepository.listLegalRepsByTenant | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:84` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → PharmacyStaffReadService.requireStaffPharmacy → PharmacyReadRepository.findByIdInTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:317` |
 | `profiles.persons` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → DirectoryTenantLegalRepository.findPersonsByIds | `src/modules/directory/repositories/directory-tenant-legal.repository.ts:167` |
 | `terminology.catalog_concepts` | LEE | LEE | DIRECTA | PharmacyReadController.getContacts → PharmacyStaffReadService.getContacts → DirectoryReadService.readRepresentation → DirectoryReadService.loadRepresentation → AffiliationDocumentConceptsService.resolve → AffiliationDocumentConceptsService.load → AffiliationDocumentConceptsService.resolveValueSet → CatalogConceptsRepository.findByIds | `src/modules/terminology/repositories/catalog-concepts.repository.ts:202` |
@@ -2767,7 +2768,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /pharmacy/pharmacies/{id}/licenses` la atiende `PharmacyReadController.listLicenses` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:92). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.listLicenses`. Lee directory.tenant_memberships, pharmacy.pharmacies, pharmacy.pharmacy_licenses, pharmacy.pharmacy_sites, terminology.catalog_concepts.
+`GET /pharmacy/pharmacies/{id}/licenses` la atiende `PharmacyReadController.listLicenses` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:92). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.listLicenses`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, pharmacy.pharmacies, pharmacy.pharmacy_licenses, pharmacy.pharmacy_sites, terminology.catalog_concepts.
 
 ### Requerimientos
 
@@ -2783,7 +2784,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyStaffReadService.requireStaffPharmacy → PharmacyReadRepository.findByIdInTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:317` |
 | `pharmacy.pharmacy_licenses` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyReadRepository.findLicenses | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:376` |
 | `pharmacy.pharmacy_sites` | LEE | LEE | DIRECTA | PharmacyReadController.listLicenses → PharmacyStaffReadService.listLicenses → PharmacyReadRepository.findSitesByIds | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:389` |
@@ -2864,7 +2866,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /pharmacy/pharmacies/{id}/summary` la atiende `PharmacyReadController.getSummary` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:105). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.getSummary`. Lee audit.audit_log, directory.tenant_memberships, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_categories, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, terminology.catalog_concepts.
+`GET /pharmacy/pharmacies/{id}/summary` la atiende `PharmacyReadController.getSummary` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:105). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.getSummary`. Lee audit.audit_log, delegated_access.organization_user_assignments, directory.tenant_memberships, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_categories, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products y 1 más.
 
 ### Requerimientos
 
@@ -2881,7 +2883,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
 | `audit.audit_log` | LEE | LEE | POR_SQL | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyCatalogRepository.findRecentActivity | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:355` |
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyStaffReadService.requireStaffPharmacy → PharmacyReadRepository.findByIdInTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:317` |
 | `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyCatalogRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:300` |
 | `pharmacy.pharmacy_product_categories` | LEE | LEE | DIRECTA | PharmacyReadController.getSummary → PharmacyStaffReadService.getSummary → PharmacyCatalogRepository.listCategories | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:55` |
@@ -2957,7 +2960,7 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 ### Cómo se atiende (sistema)
 
-`GET /pharmacy/products` la atiende `PharmacyReadController.searchProducts` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:208). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.listManagedProducts`, `PharmacyReadService.searchProducts`. Lee directory.tenant_memberships, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_categories, pharmacy.pharmacy_product_images, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products, terminology.catalog_concepts.
+`GET /pharmacy/products` la atiende `PharmacyReadController.searchProducts` (src/modules/pharmacy/controllers/pharmacy-read.controller.ts:208). Exige sesión; el controlador no declara roles. Delega en `PharmacyStaffReadService.listManagedProducts`, `PharmacyReadService.searchProducts`. Lee delegated_access.organization_user_assignments, directory.tenant_memberships, pharmacy.pharmacies, pharmacy.pharmacy_price_lists, pharmacy.pharmacy_product_categories, pharmacy.pharmacy_product_images, pharmacy.pharmacy_product_prices, pharmacy.pharmacy_products y 1 más.
 
 ### Requerimientos
 
@@ -2972,7 +2975,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.searchProducts → PharmacyStaffReadService.listManagedProducts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:70` |
+| `delegated_access.organization_user_assignments` | LEE | LEE | POR_SQL | PharmacyReadController.searchProducts → PharmacyStaffReadService.listManagedProducts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.isSupportOnly | `src/modules/directory/repositories/tenant-memberships.repository.ts:246` |
+| `directory.tenant_memberships` | LEE | LEE | DIRECTA | PharmacyReadController.searchProducts → PharmacyStaffReadService.listManagedProducts → PharmacyStaffReadService.requireStaffPharmacy → TenantAdministrationService.assertCanRead → TenantAdministrationService.activeMembershipOf → TenantMembershipsRepository.findActiveByUserTenant | `src/modules/directory/repositories/tenant-memberships.repository.ts:89` |
 | `pharmacy.pharmacies` | LEE | LEE | DIRECTA | PharmacyReadController.searchProducts → PharmacyReadService.searchProducts → PharmacyReadRepository.findVisibleByTenant | `src/modules/pharmacy/repositories/pharmacy-read.repository.ts:47` |
 | `pharmacy.pharmacy_price_lists` | LEE | LEE | POR_SQL | PharmacyReadController.searchProducts → PharmacyStaffReadService.listManagedProducts → PharmacyReadService.toCatalogDtos → PharmacyCatalogRepository.findCurrentPrices | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:300` |
 | `pharmacy.pharmacy_product_categories` | LEE | LEE | DIRECTA | PharmacyReadController.searchProducts → PharmacyStaffReadService.listManagedProducts → PharmacyReadService.toCatalogDtos → PharmacyCatalogRepository.findCategoriesByIds | `src/modules/pharmacy/repositories/pharmacy-catalog.repository.ts:68` |

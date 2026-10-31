@@ -50,10 +50,10 @@ _Fuente: `src/modules/pharmacy/README.md:3`_
 | `ctrl:PharmacyReadController` | Operaciones de PharmacyReadController que el README no asigna a un caso de uso | GET /pharmacy/catalog-products | Cualquier sesión válida | BAJO | 4 |
 |  |  | GET /pharmacy/pharmacies | Cualquier sesión válida | BAJO | 4 |
 |  |  | GET /pharmacy/pharmacies/{id} | Cualquier sesión válida | BAJO | 9 |
-|  |  | GET /pharmacy/pharmacies/{id}/contacts | Cualquier sesión válida | BAJO | 10 |
-|  |  | GET /pharmacy/pharmacies/{id}/licenses | Cualquier sesión válida | BAJO | 5 |
-|  |  | GET /pharmacy/pharmacies/{id}/summary | Cualquier sesión válida | BAJO | 8 |
-|  |  | GET /pharmacy/products | Cualquier sesión válida | BAJO | 8 |
+|  |  | GET /pharmacy/pharmacies/{id}/contacts | Cualquier sesión válida | BAJO | 11 |
+|  |  | GET /pharmacy/pharmacies/{id}/licenses | Cualquier sesión válida | BAJO | 6 |
+|  |  | GET /pharmacy/pharmacies/{id}/summary | Cualquier sesión válida | BAJO | 9 |
+|  |  | GET /pharmacy/products | Cualquier sesión válida | BAJO | 9 |
 |  |  | GET /pharmacy/sites | Cualquier sesión válida | BAJO | 7 |
 |  |  | GET /pharmacy/sites/{siteId}/prices | Cualquier sesión válida | BAJO | 6 |
 
@@ -220,9 +220,9 @@ flowchart LR
   t34[("directory.tenant_affiliation_documents")]:::tabla
   t35[("directory.tenants")]:::tabla
   t38[("common.contact_points")]:::tabla
-  t39[("directory.tenant_legal_representatives")]:::tabla
-  t40[("directory.tenant_memberships")]:::tabla
-  t41[("profiles.persons")]:::tabla
+  t39[("delegated_access.organization_user_assignments")]:::tabla
+  t40[("directory.tenant_legal_representatives")]:::tabla
+  t41[("directory.tenant_memberships")]:::tabla
   t44[("pharmacy.pharmacy_licenses")]:::tabla
   t46[("audit.audit_log")]:::tabla
   t49[("pharmacy.pharmacy_product_images")]:::tabla
@@ -243,9 +243,9 @@ flowchart LR
     o24["GET /public/pharmacies/open-now"]:::op
   end
   t36[("+3 tablas más")]
-  t42[("+4 tablas más")]
-  t47[("+2 tablas más")]
-  t50[("+2 tablas más")]
+  t42[("+5 tablas más")]
+  t47[("+3 tablas más")]
+  t50[("+3 tablas más")]
   t52[("+1 tablas más")]
   subgraph s2["ctrl:PharmacyReadController · Operaciones de PharmacyReadController que el READ…"]
     o25["GET /pharmacy/catalog-products"]:::op
@@ -334,30 +334,31 @@ flowchart LR
   o37 -->|"LEE"| t33
   o37 -->|"LEE"| t39
   o37 -->|"LEE"| t40
-  o37 -->|"LEE"| t18
   o37 -->|"LEE"| t41
+  o37 -->|"LEE"| t18
   o37 -.-> t42
   a26 --> o43
-  o43 -->|"LEE"| t40
+  o43 -->|"LEE"| t39
+  o43 -->|"LEE"| t41
   o43 -->|"LEE"| t18
   o43 -->|"LEE"| t44
   o43 -->|"LEE"| t9
   o43 -->|"LEE"| t27
   a26 --> o45
   o45 -->|"LEE"| t46
-  o45 -->|"LEE"| t40
+  o45 -->|"LEE"| t39
+  o45 -->|"LEE"| t41
   o45 -->|"LEE"| t18
   o45 -->|"LEE"| t19
   o45 -->|"LEE"| t3
-  o45 -->|"LEE"| t20
   o45 -.-> t47
   a26 --> o48
-  o48 -->|"LEE"| t40
+  o48 -->|"LEE"| t39
+  o48 -->|"LEE"| t41
   o48 -->|"LEE"| t18
   o48 -->|"LEE"| t19
   o48 -->|"LEE"| t3
   o48 -->|"LEE"| t49
-  o48 -->|"LEE"| t20
   o48 -.-> t50
   a26 --> o51
   o51 -->|"LEE"| t16

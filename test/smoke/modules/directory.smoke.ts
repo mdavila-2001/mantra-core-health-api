@@ -179,6 +179,26 @@ export const DIRECTORY_SMOKE: SmokeCase[] = [
       c.vars.dirMembershipId = String(b.id);
     },
   },
+  // La membresía nace PENDIENTE: no cuenta para la sesión hasta que la propia persona
+  // invitada la acepta. Aquí la invitada es el administrador del smoke.
+  {
+    module: 'Directory',
+    endpoint: 'POST /tenants/me/membership-invitations/{membershipId}/accept',
+    name: 'happy: la persona invitada acepta su membresía pendiente',
+    method: 'post',
+    path: (c) =>
+      `/tenants/me/membership-invitations/${c.vars.dirMembershipId}/accept`,
+    expectedStatus: 200,
+  },
+  {
+    module: 'Directory',
+    endpoint: 'POST /tenants/me/membership-invitations/{membershipId}/accept',
+    name: 'límite: una membresía ya aceptada no se acepta otra vez -> 404',
+    method: 'post',
+    path: (c) =>
+      `/tenants/me/membership-invitations/${c.vars.dirMembershipId}/accept`,
+    expectedStatus: 404,
+  },
   {
     module: 'Directory',
     endpoint: 'POST /tenants/{tenantId}/memberships',

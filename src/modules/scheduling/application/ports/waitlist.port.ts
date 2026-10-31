@@ -67,6 +67,27 @@ export interface WaitlistEntryView {
   readonly patientName?: string;
 }
 
+/**
+ * Un cupo visto para decidir quién puede apuntarse a su espera: su agenda, su
+ * horario y el espacio y servicio con los que se atiende.
+ */
+export interface WaitlistSlotView {
+  readonly id: string;
+  readonly resourceId: string;
+  readonly startAt: Date;
+  readonly endAt?: Date;
+  readonly careSpaceId?: string;
+  readonly healthcareServiceId?: string;
+}
+
+/** A quién pertenece una agenda y de qué es: lo que la política de apoyo necesita. */
+export interface WaitlistResourceOwner {
+  readonly id: string;
+  readonly tenantId: string;
+  readonly resourceRefType: string;
+  readonly resourceRefId: string;
+}
+
 /** Cita y hora de inicio de su slot, para calcular los recordatorios. */
 export interface BookingScheduleSnapshot {
   readonly bookingId: string;
@@ -163,6 +184,26 @@ export interface WaitlistReadPort {
     limit: number,
     context?: ReadContext,
   ): Promise<readonly WaitlistEntryView[]>;
+
+  /**
+   * El cupo con su horario, espacio y servicio, o `null` si no existe.
+   *
+   * @param slotId - El cupo.
+   */
+  findSlotPlacement(
+    slotId: string,
+    context?: ReadContext,
+  ): Promise<WaitlistSlotView | null>;
+
+  /**
+   * La organización y el profesional de una agenda, o `null` si no existe.
+   *
+   * @param resourceId - La agenda.
+   */
+  findResourceOwner(
+    resourceId: string,
+    context?: ReadContext,
+  ): Promise<WaitlistResourceOwner | null>;
 
   /**
    * El perfil profesional detrás de una agenda, o `null` si no cuelga de uno.

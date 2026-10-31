@@ -89,6 +89,10 @@ export interface SmokeCase {
   expectedStatus: number;
   /** Código de error estable esperado en respuestas 4xx (opcional). */
   expectedCode?: string;
+  /** `reason` de negocio esperado en la respuesta de error (opcional): distingue dos 403 o dos 422. */
+  expectedReason?: string;
+  /** Encabezados extra de la petición (p. ej. `X-Forwarded-For`, `User-Agent`). */
+  headers?: (c: SmokeCtx) => Record<string, string>;
   /** Prepara prerrequisitos que el API no permite crear directamente. */
   setup?: (c: SmokeCtx) => Promise<void>;
   /** Captura ids de la respuesta hacia `ctx.vars` para casos posteriores. */

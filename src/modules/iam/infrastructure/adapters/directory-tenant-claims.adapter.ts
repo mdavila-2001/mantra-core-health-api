@@ -7,6 +7,14 @@ import {
   type TenantTypeCode,
 } from '../../../directory/directory.concepts';
 import { TenantMemberships, Tenants } from '../../../directory/entities';
+import { PracticeSettings, Practices } from '../../../practice/entities';
+import {
+  resolveAccountKind,
+  type AccountKind,
+} from '../../domain/session-policy';
+
+/** Clave del interruptor por organización de la cuenta de organización. */
+export const ORG_ACCOUNT_MODE_KEY = 'org_account_mode';
 import type {
   TenantClaimsPort,
   TenantDisplay,
@@ -43,7 +51,9 @@ export class DirectoryTenantClaimsAdapter implements TenantClaimsPort {
     em: EntityManager,
     tenantIds: readonly string[],
   ): Promise<TenantDisplay> {
-    if (tenantIds.length === 0) return { tenantNames: {}, tenantTypes: {} };
+    if (tenantIds.length === 0) {
+      return { tenantNames: {}, tenantTypes: {}, tenantAccountKinds: {} };
+    }
     const rows = await em.find(Tenants, { id: { $in: [...tenantIds] } });
     const tenantNames = Object.fromEntries(
       rows.map((row) => [row.id, row.tradeName || row.legalName || row.code]),
@@ -62,6 +72,45 @@ export class DirectoryTenantClaimsAdapter implements TenantClaimsPort {
             entry[1] !== undefined,
         ),
     );
-    return { tenantNames, tenantTypes };
+    return {
+      tenantNames,
+      tenantTypes,
+      tenantAccountKinds: await this.accountKinds(em, tenantIds, tenantTypes),
+    };
+  }
+
+  /**
+   * Tipo de cuenta de cada tenant: el interruptor `org_account_mode` vive en
+   * `practice.practice_settings` de las prácticas de la organización (no existe
+   * una tabla de ajustes por tenant) y solo enciende hospitales, clínicas y
+   * prestadores.
+   */
+  private async accountKinds(
+    em: EntityManager,
+    tenantIds: readonly string[],
+    tenantTypes: Record<string, string>,
+  ): Promise<Record<string, AccountKind>> {
+    const practices = await em.find(Practices, {
+      tenantId: { $in: [...tenantIds] },
+    });
+    const settings =
+      practices.length === 0
+        ? []
+        : await em.find(PracticeSettings, {
+            practiceId: { $in: practices.map((p) => p.id) },
+            settingKey: ORG_ACCOUNT_MODE_KEY,
+          });
+    const tenantOfPractice = new Map(practices.map((p) => [p.id, p.tenantId]));
+    return Object.fromEntries(
+      tenantIds.map((tenantId) => [
+        tenantId,
+        resolveAccountKind(
+          tenantTypes[tenantId],
+          settings
+            .filter((s) => tenantOfPractice.get(s.practiceId) === tenantId)
+            .map((s) => s.valueJson),
+        ),
+      ]),
+    );
   }
 }

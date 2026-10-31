@@ -2,7 +2,6 @@ import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
 import {
-  CONCEPTS,
   ConflictException,
   PreconditionFailedException,
   ResourceNotFoundException,
@@ -408,10 +407,10 @@ export class DependentLinkRequestsService {
     titular: OwnPatient,
     actor: AuthenticatedUser,
   ) {
-    const identifier = await this.identifiersRepo.findActiveDuplicate(em, {
-      typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-      value: document,
-    });
+    const identifier = await this.identifiersRepo.findActiveNationalIdDuplicate(
+      em,
+      document,
+    );
     // El documento propio se contesta antes que «no existe»: quien escribe
     // su CI por error merece saber qué hizo, y no hay nada que ocultarle.
     if (identifier?.ownerId === titular.person.id) {

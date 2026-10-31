@@ -87,6 +87,7 @@ function build() {
     assertCanAdministerPractice: mockFn().mockResolvedValue({ id: 'p1' }),
   };
   const logger = { setContext: mockFn(), info: mockFn(), warn: mockFn() };
+  const membershipSync = { settle: mockFn().mockResolvedValue(0) };
   const service = new PracticeWorkforceService(
     em as any,
     practicesRepo as any,
@@ -97,8 +98,10 @@ function build() {
     supportRepo as any,
     administration as any,
     logger as any,
+    membershipSync as any,
   );
   return {
+    membershipSync,
     service: inTenant(service, TENANT_A),
     raw: service,
     tx,
@@ -254,12 +257,17 @@ describe('PracticeWorkforceService', () => {
           createdAt: new Date('2026-01-01'),
         },
       ]);
-      d.practicesRepo.findById.mockResolvedValue({ id: 'p1', name: 'Centro' });
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'p1',
+        name: 'Centro',
+        tenantId: 'tenant-1',
+      });
       d.forked.find.mockResolvedValue([]);
 
       const [row] = await d.service.listMyAssignments(professional);
 
       expect(row).toMatchObject({
+        tenantId: 'tenant-1',
         practiceSiteId: 's1',
         healthcareServiceId: null,
         serviceConceptId: null,
@@ -270,6 +278,26 @@ describe('PracticeWorkforceService', () => {
         status: PRAC.ROLE_ASSIGNMENT_INVITED,
         practiceName: 'Centro',
       });
+    });
+
+    it('tenantId es null si la organización ya no se encuentra (no se inventa)', async () => {
+      const d = build();
+      d.rolesRepo.findByPractitioner.mockResolvedValue([
+        {
+          id: 'r1',
+          practiceId: 'p-gone',
+          roleConceptId: 'role-attending',
+          statusConceptId: PRAC.ROLE_ASSIGNMENT_ACTIVE,
+          isPrimary: false,
+          createdAt: new Date('2026-01-01'),
+        },
+      ]);
+      d.practicesRepo.findById.mockResolvedValue(null);
+      d.forked.find.mockResolvedValue([]);
+
+      const [row] = await d.service.listMyAssignments(professional);
+
+      expect(row.tenantId).toBeNull();
     });
 
     it('has no logo when the organization never published a public profile', async () => {
@@ -708,6 +736,52 @@ describe('PracticeWorkforceService · aprobar y rechazar por administración de 
 
     expect(target.statusConceptId).toBe(PRAC.ROLE_ASSIGNMENT_REJECTED);
     expect(target.validTo).toBeInstanceOf(Date);
+  });
+
+  it('aprobar una solicitud pendiente activa la membresía que dejó el QR del médico (misma transacción)', async () => {
+    const d = build();
+    const target = pendingRole();
+    d.rolesRepo.findById.mockResolvedValue(target);
+
+    await d.raw.approveAssignment('r1', {} as any, orgAdmin);
+
+    expect(d.membershipSync.settle).toHaveBeenCalledTimes(1);
+    expect(d.membershipSync.settle).toHaveBeenCalledWith(
+      d.tx,
+      target,
+      true,
+      'admin-org',
+    );
+  });
+
+  it('rechazar una solicitud pendiente termina la membresía pendiente', async () => {
+    const d = build();
+    const target = pendingRole();
+    d.rolesRepo.findById.mockResolvedValue(target);
+
+    await d.raw.rejectAssignment('r1', {} as any, orgAdmin);
+
+    expect(d.membershipSync.settle).toHaveBeenCalledWith(
+      d.tx,
+      target,
+      false,
+      'admin-org',
+    );
+  });
+
+  it('reactivar una suspendida o finalizar una activa no toca ninguna membresía', async () => {
+    const d = build();
+    const suspended = pendingRole({
+      statusConceptId: PRAC.ROLE_ASSIGNMENT_SUSPENDED,
+    });
+    d.rolesRepo.findById.mockResolvedValue(suspended);
+    await d.raw.approveAssignment('r1', {} as any, orgAdmin);
+    expect(suspended.statusConceptId).toBe(PRAC.ROLE_ASSIGNMENT_ACTIVE);
+
+    await inTenant(d.raw, TENANT_A).endAssignment('r1', {} as any, orgAdmin);
+    expect(suspended.statusConceptId).toBe(PRAC.ROLE_ASSIGNMENT_ENDED);
+
+    expect(d.membershipSync.settle).not.toHaveBeenCalled();
   });
 
   it.each(['approveAssignment', 'rejectAssignment'] as const)(

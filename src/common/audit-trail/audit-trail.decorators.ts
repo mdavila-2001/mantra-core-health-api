@@ -24,6 +24,13 @@ export interface AuditedOptions {
   readonly entity: string;
   /** Origen del id del recurso; por defecto se deriva de la ruta. */
   readonly entityId?: AuditIdSource;
+  /**
+   * Tenant del sello cuando la ruta es `@TenantAgnostic` y no hay tenant en el
+   * contexto. Solo se admite un campo de la RESPUESTA (`result.<campo>`), que
+   * sale del servidor: un campo del cuerpo permitiría a un cliente escribir en
+   * la cadena de otra organización. Un fallo (sin respuesta) sigue sin tenant.
+   */
+  readonly tenantId?: `result.${string}`;
 }
 
 /**

@@ -138,5 +138,47 @@ export const { seeds: AUTHZ_CONCEPT_SEEDS, ids: AUTHZ } = defineModuleConcepts(
       code: 'REP_CURATOR',
       display: 'Curator representation',
     },
+
+    // --- Tipo de regla de red (ip_access_rules.rule_type_concept_id) ---
+    // El ámbito de una regla de toda la organización reutiliza `SCOPE_TENANT`
+    // y su estado, `CONCEPTS.STATE_ACTIVE` / `STATE_REVOKED`.
+    IP_RULE_ALLOW: {
+      code: 'IP_RULE_ALLOW',
+      display: 'Network rule: allow the range',
+    },
+    IP_RULE_DENY: {
+      code: 'IP_RULE_DENY',
+      display: 'Network rule: deny the range',
+    },
+
+    // --- Gobierno de accesos (v4.2.72, Anexo B): metadatos de authz.permissions ---
+    SENSITIVITY_LOW: {
+      code: 'SENSITIVITY_LOW',
+      display: 'Permission sensitivity: low',
+    },
+    SENSITIVITY_MEDIUM: {
+      code: 'SENSITIVITY_MEDIUM',
+      display: 'Permission sensitivity: medium',
+    },
+    SENSITIVITY_HIGH: {
+      code: 'SENSITIVITY_HIGH',
+      display: 'Permission sensitivity: high',
+    },
+    SENSITIVITY_CRITICAL: {
+      code: 'SENSITIVITY_CRITICAL',
+      display: 'Permission sensitivity: critical',
+    },
+    APPROVAL_DOCTOR: {
+      code: 'APPROVAL_DOCTOR',
+      display: 'Approval required from the practitioner',
+    },
+    APPROVAL_SECOND_APPROVER: {
+      code: 'APPROVAL_SECOND_APPROVER',
+      display: 'Approval required from a second approver (four eyes)',
+    },
+    APPROVAL_SERVICE_HEAD: {
+      code: 'APPROVAL_SERVICE_HEAD',
+      display: 'Approval required from the head of the service',
+    },
   },
 );

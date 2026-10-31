@@ -41,3 +41,5 @@ export type {
 } from './scheduling-offerings.repository';
 
 export { SchedulingPaymentReceiptsRepository } from './scheduling-payment-receipts.repository';
+export { SchedulingPlaceRepository } from './scheduling-place.repository';
+export { SchedulingSupportAgendaRepository } from './scheduling-support-agenda.repository';

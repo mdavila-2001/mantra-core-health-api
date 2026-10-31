@@ -2,6 +2,11 @@ import { Injectable } from '@nestjs/common';
 import type { EntityManager } from '@mikro-orm/postgresql';
 import { Identifiers } from '../entities';
 import { CONCEPTS, createdBy } from '../../../common';
+import {
+  nationalIdIndexPredicateSql,
+  normalizeNationalId,
+  normalizedNationalIdSql,
+} from '../../profiles/domain/national-id';
 
 /** Datos mínimos para dar de alta un identificador oficial. */
 export interface CreateIdentifierData {
@@ -83,6 +88,44 @@ export class IdentifiersRepository {
       system: params.system ?? null,
       value: params.value,
     });
+  }
+
+  /**
+   * Busca el documento nacional ACTIVO de un paciente que ya tiene este número,
+   * comparado en su forma canónica (mayúsculas, sin puntos, guiones ni espacios y
+   * sin ceros de relleno): «1.234.567», «01234567» y «1234567 » son el mismo
+   * documento aunque se hayan guardado distinto.
+   *
+   * La consulta repite la expresión Y los cuatro predicados del índice único
+   * parcial `common.uq_identifiers_national_id_normalized` (tipo nacional,
+   * activo, dueño paciente, sin cierre): solo así Postgres la resuelve con el
+   * índice y no con un recorrido de la tabla. Los ids van como literales para que
+   * un plan genérico también pruebe que el predicado se cumple. Un documento de
+   * otro dueño (representantes, organizaciones) no cuenta, igual que en el índice.
+   *
+   * @param em - Contexto de persistencia o transacción activa.
+   * @param nationalId - Documento tal como llegó; se normaliza aquí.
+   * @returns El identificador y su dueño, o `null` si el documento está libre.
+   */
+  async findActiveNationalIdDuplicate(
+    em: EntityManager,
+    nationalId: string,
+  ): Promise<{ id: string; ownerId: string } | null> {
+    const rows = await em.getConnection().execute<
+      {
+        id: string;
+        owner_id: string;
+      }[]
+    >(
+      `select i.id, i.owner_id
+         from common.identifiers i
+        where ${normalizedNationalIdSql('i.value')} = ?
+          and ${nationalIdIndexPredicateSql('i')}
+        limit 1`,
+      [normalizeNationalId(nationalId)],
+    );
+    const row = rows[0];
+    return row ? { id: row.id, ownerId: row.owner_id } : null;
   }
 
   /**

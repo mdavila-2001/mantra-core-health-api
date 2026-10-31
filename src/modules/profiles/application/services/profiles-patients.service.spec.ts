@@ -157,6 +157,7 @@ function build() {
     create: mockFn(),
     // Por defecto ningún documento está tomado: es el caso normal del alta.
     findActiveDuplicate: mockFn().mockResolvedValue(null),
+    findActiveNationalIdDuplicate: mockFn().mockResolvedValue(null),
   };
   // El municipio se valida contra la base, no contra el catálogo estático:
   // cualquier id que llegue acá se resuelve como sembrado, salvo que la
@@ -231,6 +232,9 @@ function build() {
     ),
     findActiveDuplicate: mockFn((em: any, data: any) =>
       identifiersRepo.findActiveDuplicate(em, data),
+    ),
+    findActiveNationalIdDuplicate: mockFn((em: any, nationalId: string) =>
+      identifiersRepo.findActiveNationalIdDuplicate(em, nationalId),
     ),
     createIdentifier: mockFn((...args: any[]) =>
       identifiersRepo.create(...args),
@@ -2433,13 +2437,15 @@ describe('ProfilesPatientsService', () => {
       await b.service.registerOwnDependent(child as never, actor);
 
       expect(b.identifiersRepo.create).not.toHaveBeenCalled();
-      expect(b.identifiersRepo.findActiveDuplicate).not.toHaveBeenCalled();
+      expect(
+        b.identifiersRepo.findActiveNationalIdDuplicate,
+      ).not.toHaveBeenCalled();
     });
 
     it('con documento lo registra y comprueba el departamento que lo expidió', async () => {
       const b = build();
       prepareRegistration(b);
-      b.identifiersRepo.findActiveDuplicate.mockResolvedValue(null);
+      b.identifiersRepo.findActiveNationalIdDuplicate.mockResolvedValue(null);
 
       await b.service.registerOwnDependent(
         {
@@ -2468,8 +2474,9 @@ describe('ProfilesPatientsService', () => {
       // misma persona, que es lo que la fusión existe para deshacer.
       const b = build();
       prepareRegistration(b);
-      b.identifiersRepo.findActiveDuplicate.mockResolvedValue({
+      b.identifiersRepo.findActiveNationalIdDuplicate.mockResolvedValue({
         id: 'ident-1',
+        ownerId: 'person-otro',
       });
 
       await expect(

@@ -116,3 +116,107 @@ describe('TokenService · claims de presentación', () => {
     expect(signedPayload(jwt)).toMatchObject({ name: 'Ana' });
   });
 });
+
+describe('TokenService: tipo de cuenta (accountKind)', () => {
+  it('emite accountKind ORGANIZATION si alguna organización del titular está en modo organización', () => {
+    const { service, jwt } = build();
+    service.signAccessToken('u1', 's1', ['USER'], ['t1', 't2'], {
+      tenantAccountKinds: { t1: 'PERSON', t2: 'ORGANIZATION' },
+    });
+    const payload = signedPayload(jwt);
+    expect(payload.accountKind).toBe('ORGANIZATION');
+    expect(payload.tenantAccountKinds).toEqual({
+      t1: 'PERSON',
+      t2: 'ORGANIZATION',
+    });
+  });
+
+  it('con todo en PERSON el claim es PERSON', () => {
+    const { service, jwt } = build();
+    service.signAccessToken('u1', 's1', ['USER'], ['t1'], {
+      tenantAccountKinds: { t1: 'PERSON' },
+    });
+    expect(signedPayload(jwt).accountKind).toBe('PERSON');
+  });
+
+  it('sin organizaciones no ocupa espacio en el token', () => {
+    const { service, jwt } = build();
+    service.signAccessToken('u1', 's1', ['USER'], [], {});
+    expect(signedPayload(jwt)).not.toHaveProperty('accountKind');
+  });
+});
+
+describe('TokenService: organizaciones que niegan y alcance limitado (N2/N6)', () => {
+  it('deniedTenants viaja en el token con el motivo, y las organizaciones que niegan no están en tenants', () => {
+    const { service, jwt } = build();
+    service.signAccessToken('u1', 's1', ['USER'], ['y'], {
+      deniedTenants: { x: 'OUTSIDE_ALLOWED_HOURS' },
+    });
+    const payload = signedPayload(jwt);
+    expect(payload.tenants).toEqual(['y']);
+    expect(payload.deniedTenants).toEqual({ x: 'OUTSIDE_ALLOWED_HOURS' });
+  });
+
+  it('sin organizaciones que niegan no ocupa espacio en el token', () => {
+    const { service, jwt } = build();
+    service.signAccessToken('u1', 's1', ['USER'], ['y'], { deniedTenants: {} });
+    expect(signedPayload(jwt)).not.toHaveProperty('deniedTenants');
+    expect(signedPayload(jwt)).not.toHaveProperty('mfaEnrollment');
+  });
+
+  it('el token de alcance limitado lleva mfaEnrollment: true', () => {
+    const { service, jwt } = build();
+    service.signAccessToken('u1', 's1', [], [], { mfaEnrollment: true });
+    expect(signedPayload(jwt).mfaEnrollment).toBe(true);
+  });
+
+  it('mfaEnrollment: false no se emite', () => {
+    const { service, jwt } = build();
+    service.signAccessToken('u1', 's1', ['USER'], ['t1'], {
+      mfaEnrollment: false,
+    });
+    expect(signedPayload(jwt)).not.toHaveProperty('mfaEnrollment');
+  });
+});
+
+describe('TokenService: marca de sesión con segundo factor en el refresh token', () => {
+  it('un refresh token común no lleva marca; el de una sesión verificada sí', () => {
+    const { service } = build();
+    const plain = service.issueRefreshToken();
+    const verified = service.issueRefreshToken(true);
+    expect(service.isMfaVerifiedRefreshToken(plain.raw)).toBe(false);
+    expect(service.isMfaVerifiedRefreshToken(verified.raw)).toBe(true);
+  });
+
+  it('la marca forma parte del secreto hasheado: quitarla o ponerla no encuentra el token', () => {
+    const { service } = build();
+    const verified = service.issueRefreshToken(true);
+    const stripped = verified.raw.replace(/^mfa\./, '');
+    expect(service.hashRefreshToken(stripped)).not.toBe(verified.hash);
+    const plain = service.issueRefreshToken();
+    expect(service.hashRefreshToken(`mfa.${plain.raw}`)).not.toBe(plain.hash);
+  });
+
+  it('el login emite el refresh token marcado solo si la sesión superó el factor', () => {
+    const { service } = build();
+    expect(
+      service.isMfaVerifiedRefreshToken(
+        service.issueSessionTokens('u1', ['USER'], ['t1'], {}, true)
+          .refreshToken,
+      ),
+    ).toBe(true);
+    expect(
+      service.isMfaVerifiedRefreshToken(
+        service.issueSessionTokens('u1', ['USER'], ['t1'], {}).refreshToken,
+      ),
+    ).toBe(false);
+  });
+
+  it('el refresh token sigue siendo único y de alta entropía', () => {
+    const { service } = build();
+    const a = service.issueRefreshToken(true).raw;
+    const b = service.issueRefreshToken(true).raw;
+    expect(a).not.toBe(b);
+    expect(a.length).toBeGreaterThan(60);
+  });
+});

@@ -104,6 +104,34 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
       code: 'SPACE_TYPE_ROOM',
       display: 'Room care space type',
     },
+    SPACE_TYPE_BUILDING: {
+      code: 'SPACE_TYPE_BUILDING',
+      display: 'Building care space type',
+    },
+    SPACE_TYPE_LEVEL: {
+      code: 'SPACE_TYPE_LEVEL',
+      display: 'Level (floor) care space type',
+    },
+    SPACE_TYPE_WING: {
+      code: 'SPACE_TYPE_WING',
+      display: 'Wing care space type',
+    },
+    SPACE_TYPE_CONSULTING_ROOM: {
+      code: 'SPACE_TYPE_CONSULTING_ROOM',
+      display: 'Consulting room care space type',
+    },
+    SPACE_TYPE_OPERATING_ROOM: {
+      code: 'SPACE_TYPE_OPERATING_ROOM',
+      display: 'Operating room care space type',
+    },
+    SPACE_TYPE_PROCEDURE_ROOM: {
+      code: 'SPACE_TYPE_PROCEDURE_ROOM',
+      display: 'Procedure room care space type',
+    },
+    SPACE_TYPE_BED: {
+      code: 'SPACE_TYPE_BED',
+      display: 'Bed care space type',
+    },
     SPACE_ACTIVE: { code: 'SPACE_ACTIVE', display: 'Care space active' },
     SPACE_RETIRED: { code: 'SPACE_RETIRED', display: 'Care space retired' },
     SPACE_OP_AVAILABLE: {

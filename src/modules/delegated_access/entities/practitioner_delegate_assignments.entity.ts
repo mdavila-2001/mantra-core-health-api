@@ -15,6 +15,10 @@ export class PractitionerDelegateAssignments {
   @PrimaryKey({ type: 'uuid' })
   id: string = randomUUID();
 
+  /** Organización de la delegación (v4.2.73): la de su set, su vínculo y su doctor, verificada por el modelo (trigger + RLS). */
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants
+  tenantId!: string;
+
   /**
    * Identificador asociado a practitioner role assignment.
    */
@@ -140,4 +144,27 @@ export class PractitionerDelegateAssignments {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /** Columna `may_reply_on_behalf`. */
+  @Property({
+    fieldName: 'may_reply_on_behalf',
+    type: 'boolean',
+  })
+  mayReplyOnBehalf!: boolean;
+
+  /** Columna `reply_disclosure_concept_id`. */
+  @Property({
+    fieldName: 'reply_disclosure_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts
+  replyDisclosureConceptId?: string;
+
+  /** Columna `accepted_at`. */
+  @Property({
+    fieldName: 'accepted_at',
+    columnType: 'timestamptz',
+    nullable: true,
+  })
+  acceptedAt?: Date;
 }

@@ -40,6 +40,8 @@ export interface RouteAuditIdentity {
   readonly action: string;
   readonly entity: string;
   readonly entityId?: string;
+  /** Tenant tomado de la respuesta, para rutas sin tenant en el contexto. */
+  readonly tenantId?: string;
 }
 
 /** Datos de la petición resuelta que alimentan la identidad derivada. */
@@ -144,6 +146,9 @@ export function deriveRouteAuditIdentity(
     entityId: options?.entityId
       ? readIdSource(options.entityId, input)
       : derivedEntityId,
+    tenantId: options?.tenantId
+      ? readIdSource(options.tenantId, input)
+      : undefined,
   };
 }
 

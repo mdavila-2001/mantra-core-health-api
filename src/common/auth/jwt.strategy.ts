@@ -22,6 +22,8 @@ export function toAuthenticatedUser(payload: JwtPayload): AuthenticatedUser {
     tenantIds: payload.tenants ?? [],
     practitionerProfileId: payload.hpid,
     patientProfileId: payload.pid,
+    deniedTenants: payload.deniedTenants,
+    mfaEnrollment: payload.mfaEnrollment === true,
   };
 }
 

@@ -1097,6 +1097,54 @@ const ENTRIES: readonly (readonly [string, SpanishDesignation])[] = [
     },
   ],
   [
+    DIR.MEMBERSHIP_PENDING_ACCEPTANCE,
+    {
+      display: 'Pendiente de aceptación',
+      definition:
+        'La organización incorporó a la persona y ella todavía no aceptó: hasta entonces la membresía no le da acceso a nada.',
+    },
+  ],
+  [
+    DIR.MEMBERSHIP_ORIGIN_OWNER_CREATED,
+    {
+      display: 'Creada por el dueño',
+      definition:
+        'La membresía la creó el dueño de la organización al darla de alta.',
+    },
+  ],
+  [
+    DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED,
+    {
+      display: 'Añadida por un administrador',
+      definition:
+        'Un administrador de la organización incorporó a la persona como miembro.',
+    },
+  ],
+  [
+    DIR.MEMBERSHIP_ORIGIN_INVITATION_REDEEMED,
+    {
+      display: 'Invitación canjeada',
+      definition:
+        'La persona se unió a la organización al canjear una invitación o un código QR.',
+    },
+  ],
+  [
+    DIR.MEMBERSHIP_ORIGIN_SUPPORT_ENGAGEMENT,
+    {
+      display: 'Solo por un vínculo de apoyo',
+      definition:
+        'La persona es miembro únicamente porque tiene un vínculo de apoyo: al terminar el último vínculo, la membresía se cierra.',
+    },
+  ],
+  [
+    DIR.MEMBERSHIP_ORIGIN_UNKNOWN,
+    {
+      display: 'Origen desconocido',
+      definition:
+        'No se sabe por qué existe la membresía; es el caso de las anteriores al registro del origen.',
+    },
+  ],
+  [
     DIR.MEMBERSHIP_ACTIVE,
     {
       display: 'Miembro activo',

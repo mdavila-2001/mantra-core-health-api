@@ -1341,8 +1341,8 @@ _Fuentes:_ CONTRATO (`summary de la operación`) · MODELO (`Mantra Core Health 
 
 | Tabla | Operación | Detalle | Confianza | Camino | Fuente |
 |---|---|---|---|---|---|
-| `common.identifiers` | ESCRIBE | CREA | DIRECTA | CommonIdentifiersController.create → IdentifiersService.create → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:131` |
-| `common.identifiers` | LEE | LEE | DIRECTA | CommonIdentifiersController.create → IdentifiersService.create → IdentifiersRepository.findActiveDuplicate | `src/modules/common/repositories/identifiers.repository.ts:80` |
+| `common.identifiers` | ESCRIBE | CREA | DIRECTA | CommonIdentifiersController.create → IdentifiersService.create → IdentifiersRepository.create | `src/modules/common/repositories/identifiers.repository.ts:174` |
+| `common.identifiers` | LEE | LEE | DIRECTA | CommonIdentifiersController.create → IdentifiersService.create → IdentifiersRepository.findActiveDuplicate | `src/modules/common/repositories/identifiers.repository.ts:85` |
 
 ### Cuerpo — DTO `CreateIdentifierDto` · `application/json`
 

@@ -28,7 +28,7 @@ export interface ConfirmacionDeCitaPorChat {
  * tiene la suya, no hace nada y devuelve `false`; el aviso de la campana sale
  * igual por su propio camino (`AgendaNoticePort`).
  *
- * Nunca lanza: una cita ya confirmada no puede fallar porque el chat no esté.
+ * Los errores de escritura se propagan; ver {@link enviarConfirmacion}.
  */
 @Injectable()
 export class CommunityBookingChatService {
@@ -41,60 +41,66 @@ export class CommunityBookingChatService {
     this.logger.setContext(CommunityBookingChatService.name);
   }
 
-  /** @returns `true` si el mensaje quedó en el hilo. */
+  /**
+   * Deja la confirmación en el hilo del profesional y el paciente.
+   *
+   * El remitente es el perfil del **profesional de la cita**; quien ejecutó la
+   * operación de agenda puede ser él, una persona de apoyo o la recepción. La
+   * autora real queda en `authored_by_user_id` y, si no es el profesional, el
+   * mensaje queda `on_behalf_of_profile_id` suyo.
+   *
+   * No traga errores: un fallo al escribir en el hilo se propaga con su causa,
+   * y quien llama decide qué hacer con una cita que ya está confirmada (el
+   * adaptador de agenda lo registra con nivel `error`). Sí devuelve `false` —sin
+   * lanzar— cuando falta una vitrina pública, que es un estado esperado.
+   *
+   * @returns `true` si el mensaje quedó en el hilo.
+   */
   async enviarConfirmacion(
     datos: ConfirmacionDeCitaPorChat,
     actor: AuthenticatedUser,
   ): Promise<boolean> {
-    try {
-      const em = this.em.fork();
-      let delProfesional = null;
-      for (const sujeto of [
-        datos.profesional.practitionerProfileId,
-        datos.profesional.userId,
-      ]) {
-        if (!sujeto) continue;
-        delProfesional = await this.profilesRepo.findByTarget(em, sujeto);
-        if (delProfesional) break;
-      }
-      const delPaciente = await this.profilesRepo.findByTarget(
-        em,
-        datos.pacienteUserId,
-      );
-      if (!delProfesional || !delPaciente) {
-        this.logger.info(
-          {
-            operation: 'community.booking-chat.skipped',
-            profesionalConVitrina: Boolean(delProfesional),
-            pacienteConVitrina: Boolean(delPaciente),
-          },
-          'Sin vitrina pública en ambos lados: la confirmación sólo sale por notificación',
-        );
-        return false;
-      }
-      // Es un aviso transaccional de la agenda: la preferencia de directorio del
-      // paciente (vitrina privada) no impide recibir la confirmación de SU cita.
-      // Por eso se usa el canal interno, que exige el rol `SYSTEM`; el rol se
-      // concede sólo a esta llamada, y el mensaje se firma con el actor real.
-      const hilo = await this.messaging.createSystemDirectConversation(
+    const em = this.em.fork();
+    let delProfesional = null;
+    for (const sujeto of [
+      datos.profesional.practitionerProfileId,
+      datos.profesional.userId,
+    ]) {
+      if (!sujeto) continue;
+      delProfesional = await this.profilesRepo.findByTarget(em, sujeto);
+      if (delProfesional) break;
+    }
+    const delPaciente = await this.profilesRepo.findByTarget(
+      em,
+      datos.pacienteUserId,
+    );
+    if (!delProfesional || !delPaciente) {
+      this.logger.info(
         {
-          conversationType: 'DIRECT',
-          participantProfileIds: [delProfesional.id, delPaciente.id],
+          operation: 'community.booking-chat.skipped',
+          profesionalConVitrina: Boolean(delProfesional),
+          pacienteConVitrina: Boolean(delPaciente),
         },
-        { ...actor, roles: [...actor.roles, 'SYSTEM'] },
-      );
-      await this.messaging.sendMessage(
-        hilo.id,
-        { senderProfileId: delProfesional.id, bodyText: datos.texto },
-        actor,
-      );
-      return true;
-    } catch (error) {
-      this.logger.warn(
-        { operation: 'community.booking-chat.failed', err: error },
-        'No se pudo dejar la confirmación en el chat',
+        'Sin vitrina pública en ambos lados: la confirmación sólo sale por notificación',
       );
       return false;
     }
+    // Es un aviso transaccional de la agenda: la preferencia de directorio del
+    // paciente (vitrina privada) no impide recibir la confirmación de SU cita.
+    // Por eso se usa el canal interno, que exige el rol `SYSTEM`; el rol se
+    // concede sólo a esta llamada.
+    const hilo = await this.messaging.createSystemDirectConversation(
+      {
+        conversationType: 'DIRECT',
+        participantProfileIds: [delProfesional.id, delPaciente.id],
+      },
+      { ...actor, roles: [...actor.roles, 'SYSTEM'] },
+    );
+    await this.messaging.sendAgendaMessage(
+      hilo.id,
+      { senderProfileId: delProfesional.id, bodyText: datos.texto },
+      actor,
+    );
+    return true;
   }
 }

@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { DelegatedAccessModule } from '../delegated_access/delegated_access.module';
+import { AuditModule } from '../audit/audit.module';
 import * as entities from './entities';
 import { CommonModule } from '../common/common.module';
 // Carril P2: enviar un mensaje avisa al destinatario por el canal in-app de P1.
@@ -44,6 +46,7 @@ import {
   CommunityPublicController,
   CommunitySearchIndexController,
   CommunityVerificationController,
+  CommunitySupportInboxController,
 } from './controllers';
 import {
   CommunitySocialService,
@@ -76,6 +79,10 @@ import {
   CommunityReviewsReadService,
   CommunityModerationReadService,
   CommunityPublicService,
+  CommunitySupportInboxService,
+  CommunitySupportReplyService,
+  CommunitySupportReplyEmailService,
+  CommunitySupportTeamViewService,
   PublicTerritoryFilterService,
   CommunitySearchIndexService,
   CommunityVerificationService,
@@ -102,6 +109,7 @@ import {
   CommunityPrestigeRepository,
   PublicSearchRepository,
   VerifiedBadgesRepository,
+  SupportInboxRepository,
 } from './repositories';
 
 /**
@@ -136,6 +144,10 @@ import {
     RedisRuntimeModule,
     MessagingModule,
     TerminologyModule,
+    // La política del personal de apoyo decide quién responde en nombre de un doctor.
+    DelegatedAccessModule,
+    // `DataAccessLogRepository`: la bandeja de apoyo sella «quién leyó al paciente X» (SEG A-A3).
+    AuditModule,
   ],
   controllers: [
     CommunitySocialController,
@@ -158,6 +170,8 @@ import {
     CommunityPublicController,
     CommunitySearchIndexController,
     CommunityVerificationController,
+    // Bandeja del equipo de apoyo: rutas `me/support-*` y de asignación.
+    CommunitySupportInboxController,
   ],
   providers: [
     // Repositorios
@@ -180,6 +194,7 @@ import {
     CommunityPrestigeRepository,
     PublicSearchRepository,
     VerifiedBadgesRepository,
+    SupportInboxRepository,
     PersonAccountLinksRepository,
     // La regla de «qué uuid es una especialidad médica», compartida con el alta
     // de profesional. Ver la nota del import.
@@ -234,6 +249,10 @@ import {
     CommunityReviewsReadService,
     CommunityModerationReadService,
     CommunityPublicService,
+    CommunitySupportInboxService,
+    CommunitySupportReplyService,
+    CommunitySupportReplyEmailService,
+    CommunitySupportTeamViewService,
   ],
   // La proyección la consume `diagnostic_units` al publicar un perfil; la nota,
   // su buscador de centros. Las dos salen de acá y no de un `find` ajeno: la

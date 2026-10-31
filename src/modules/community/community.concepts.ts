@@ -11,6 +11,40 @@ import { defineModuleConcepts } from '../../common/seed/concept-seed';
  */
 export const { seeds: COMMUNITY_CONCEPT_SEEDS, ids: COMM } =
   defineModuleConcepts('community', {
+    // --- Bandeja de conversaciones del equipo (claves fijadas por el modelo) ---
+    CONVERSATION_ASSIGNMENT_NEW: {
+      code: 'CONVERSATION_ASSIGNMENT_NEW',
+      display: 'Conversation assignment new',
+    },
+    CONVERSATION_ASSIGNMENT_TAKEN: {
+      code: 'CONVERSATION_ASSIGNMENT_TAKEN',
+      display: 'Conversation assignment taken',
+    },
+    CONVERSATION_ASSIGNMENT_WAITING_DOCTOR: {
+      code: 'CONVERSATION_ASSIGNMENT_WAITING_DOCTOR',
+      display: 'Conversation assignment waiting for the doctor',
+    },
+    CONVERSATION_ASSIGNMENT_RESOLVED: {
+      code: 'CONVERSATION_ASSIGNMENT_RESOLVED',
+      display: 'Conversation assignment resolved',
+    },
+    REPLY_TEMPLATE_CATEGORY_GENERAL: {
+      code: 'REPLY_TEMPLATE_CATEGORY_GENERAL',
+      display: 'Reply template category: general',
+    },
+    REPLY_TEMPLATE_CATEGORY_SCHEDULING: {
+      code: 'REPLY_TEMPLATE_CATEGORY_SCHEDULING',
+      display: 'Reply template category: scheduling',
+    },
+    REPLY_TEMPLATE_CATEGORY_BILLING: {
+      code: 'REPLY_TEMPLATE_CATEGORY_BILLING',
+      display: 'Reply template category: billing',
+    },
+    REPLY_TEMPLATE_CATEGORY_PREPARATION: {
+      code: 'REPLY_TEMPLATE_CATEGORY_PREPARATION',
+      display: 'Reply template category: visit preparation',
+    },
+
     // --- Public profiles ---
     PROFILE_TARGET_USER: {
       code: 'PROFILE_TARGET_USER',

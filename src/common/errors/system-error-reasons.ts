@@ -47,6 +47,20 @@ export enum SystemErrorReason {
   TENANT_REQUIRED = 'TENANT_REQUIRED',
   /** 403: el actor tiene varios tenants y no indicó cuál usar. */
   TENANT_AMBIGUOUS = 'TENANT_AMBIGUOUS',
+  /**
+   * 403: la política de sesión de la organización de `X-Tenant-Id` no deja
+   * actuar ahora a la persona (fuera de la franja horaria permitida). El resto
+   * de sus organizaciones sigue disponible; `details.tenantId` dice cuál.
+   */
+  OUTSIDE_ALLOWED_HOURS = 'OUTSIDE_ALLOWED_HOURS',
+  /** 403: el origen de la petición cae fuera de las redes permitidas de la organización de `X-Tenant-Id`. */
+  OUTSIDE_ALLOWED_NETWORK = 'OUTSIDE_ALLOWED_NETWORK',
+  /** 403: la inactividad superó el plazo de la política de la organización de `X-Tenant-Id`. */
+  IDLE_TIMEOUT = 'IDLE_TIMEOUT',
+  /** 403: la organización de `X-Tenant-Id` exige el segundo factor y esta sesión no lo presentó. */
+  MFA_REQUIRED = 'MFA_REQUIRED',
+  /** 403: la organización exige el segundo factor y la persona aún no tiene uno confirmado (alta en `/iam/me/mfa/totp`). */
+  MFA_ENROLLMENT_REQUIRED = 'MFA_ENROLLMENT_REQUIRED',
   /** 403: ruta, cuerpo o query declaran un tenant distinto del resuelto. */
   TENANT_SCOPE_CONFLICT = 'TENANT_SCOPE_CONFLICT',
   /** 403: un actor privilegiado declara tenants propietarios contradictorios. */

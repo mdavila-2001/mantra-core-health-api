@@ -1017,10 +1017,13 @@ export class ProfilesPatientsService {
       }
 
       if (dto.nationalId !== undefined) {
-        const duplicate = await this.personRecords.findActiveDuplicate(tx, {
-          typeConceptId: CONCEPTS.ID_TYPE_NATIONAL,
-          value: dto.nationalId,
-        });
+        // En la forma canónica y con los predicados del índice único del
+        // modelo: «1.234.567» y «01234567» son el mismo documento.
+        const duplicate =
+          await this.personRecords.findActiveNationalIdDuplicate(
+            tx,
+            dto.nationalId,
+          );
         if (duplicate) {
           this.logger.warn(
             {

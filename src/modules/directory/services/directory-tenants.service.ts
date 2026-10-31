@@ -180,6 +180,7 @@ export class DirectoryTenantsService {
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
         invitedByUserId: actor.id,
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_OWNER_CREATED,
         actorUserId: actor.id,
       });
 
@@ -550,6 +551,7 @@ export class DirectoryTenantsService {
         accessScopeConceptId: DIR.SCOPE_ALL_TENANT,
         startDate: new Date(),
         invitedByUserId: actor.id,
+        originConceptId: DIR.MEMBERSHIP_ORIGIN_ADMIN_ADDED,
         actorUserId: actor.id,
       });
 

@@ -52,13 +52,16 @@ Las siguientes pruebas se omiten a menos que se declare su prerrequisito. Una
 omisión no representa un resultado aprobado del proveedor o dataset: el job de
 CI/staging que posea esos recursos debe activar y conservar su propia evidencia.
 
-| Variable                           | Habilita                                                             | Prerrequisito                                                                                                               |
-| ---------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `TERMINOLOGY_DATASET_TESTS=1`      | `loinc`, `ndc`, `hcpcs`, `icd10cm`, `nucc`, `rxterms`, `rxnorm-full` | Todos los importadores correspondientes ya ejecutados contra la misma DB; salida a NLM/openFDA para los spot-checks en vivo |
-| `MOCK_PROVIDER_INTEGRATION_TEST=1` | llamada HTTP real de `worker-provider-adapter-swap`                  | `mock-provider-server` escuchando en `localhost:4100`, con tasa de fallo 0                                                  |
-| Credenciales Google completas      | `google-email-provider.int-spec.ts`                                  | OAuth/client id, secret, refresh token y destinatario de prueba                                                             |
-| `DATA_CATALOG_IT_DB_URL`           | `data-catalog.int-spec.ts`                                           | PostgreSQL **desechable** (crea schemas de fixtures, aplica el patch v4.2.19 y altera tablas); ver cabecera del spec        |
-| `RLS_TEST=1`                       | `rls.int-spec.ts`                                                    | rol runtime real sin `BYPASSRLS`; modifica políticas del esquema                                                            |
+| Variable                           | Habilita                                                             | Prerrequisito                                                                                                                                         |
+| ---------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TERMINOLOGY_DATASET_TESTS=1`      | `loinc`, `ndc`, `hcpcs`, `icd10cm`, `nucc`, `rxterms`, `rxnorm-full` | Todos los importadores correspondientes ya ejecutados contra la misma DB; salida a NLM/openFDA para los spot-checks en vivo                           |
+| `MOCK_PROVIDER_INTEGRATION_TEST=1` | llamada HTTP real de `worker-provider-adapter-swap`                  | `mock-provider-server` escuchando en `localhost:4100`, con tasa de fallo 0                                                                            |
+| Credenciales Google completas      | `google-email-provider.int-spec.ts`                                  | OAuth/client id, secret, refresh token y destinatario de prueba                                                                                       |
+| `DATA_CATALOG_IT_DB_URL`           | `data-catalog.int-spec.ts`                                           | PostgreSQL **desechable** (crea schemas de fixtures, aplica el patch v4.2.19 y altera tablas); ver cabecera del spec                                  |
+| `RLS_TEST=1`                       | `rls.int-spec.ts`                                                    | rol runtime real sin `BYPASSRLS`; modifica políticas del esquema                                                                                      |
+| `SUPPORT_RLS_TEST=1`               | `support-me-rls.int-spec.ts`                                         | base PROPIA con el modelo, los parches v4269 y tenant_rls y `mantra_app` con LOGIN; **deja filas sembradas**: no usarla sobre la base del piloto      |
+| `SUPPORT_GOV_RLS_TEST=1`           | `support-governance-rls.int-spec.ts` (gobierno de accesos v4.2.72)   | base PROPIA y LIMPIA con modelo + v4269 + v4272 + tenant_rls + demos 04/07/09 y `mantra_app` con LOGIN (receta en la cabecera); limpia lo que siembra |
+| `SUPPORT_GOV_TEST=1`               | `support-policy-governance.int-spec.ts`                              | la misma base del piloto (como superusuario, sin RLS); todo en transacciones que se revierten                                                         |
 
 Para una base local desechable, RLS puede crear temporalmente el login de prueba
 y revocarlo al finalizar:
