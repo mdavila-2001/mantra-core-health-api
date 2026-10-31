@@ -18,8 +18,8 @@ export const INFRA_F2_POLICY: InfraPolicy = {
         'ADMISSION',
         'HOUSEKEEPING',
         'MAINTENANCE',
-        'OR_MANAGER',
       ],
+      operatingRoomRoles: ['OR_MANAGER'],
     },
     'f2.availability.clinical': {
       roles: ['NURSE'],
@@ -43,22 +43,25 @@ export const INFRA_F2_POLICY: InfraPolicy = {
     'f2.isolation.set': { roles: ['NURSE'] },
     'f2.isolation.cohort-approve': { roles: ['INFECTION_CONTROL'] },
     'f2.cleaning.read': {
-      roles: [
-        'ORG_ADMIN',
-        'SITE_ADMIN',
-        'NURSE',
-        'ADMISSION',
-        'HOUSEKEEPING',
-        'OR_MANAGER',
-      ],
+      roles: ['ORG_ADMIN', 'SITE_ADMIN', 'NURSE', 'ADMISSION', 'HOUSEKEEPING'],
+      operatingRoomRoles: ['OR_MANAGER'],
     },
-    'f2.cleaning.create': { roles: ['NURSE', 'HOUSEKEEPING', 'OR_MANAGER'] },
-    'f2.cleaning.assign': { roles: ['NURSE', 'HOUSEKEEPING', 'OR_MANAGER'] },
+    'f2.cleaning.create': {
+      roles: ['NURSE', 'HOUSEKEEPING'],
+      operatingRoomRoles: ['OR_MANAGER'],
+    },
+    'f2.cleaning.assign': {
+      roles: ['NURSE', 'HOUSEKEEPING'],
+      operatingRoomRoles: ['OR_MANAGER'],
+    },
     'f2.cleaning.work': { roles: ['NURSE', 'HOUSEKEEPING'] },
     'f2.cleaning.inspect': {
       roles: ['NURSE_SUPERVISOR', 'HOUSEKEEPING_SUPERVISOR'],
     },
-    'f2.cleaning.cancel': { roles: ['NURSE', 'HOUSEKEEPING', 'OR_MANAGER'] },
+    'f2.cleaning.cancel': {
+      roles: ['NURSE', 'HOUSEKEEPING'],
+      operatingRoomRoles: ['OR_MANAGER'],
+    },
     'f2.events.read': {
       roles: [
         'SUPERADMIN',
@@ -68,8 +71,8 @@ export const INFRA_F2_POLICY: InfraPolicy = {
         'ADMISSION',
         'HOUSEKEEPING',
         'MAINTENANCE',
-        'OR_MANAGER',
       ],
+      operatingRoomRoles: ['OR_MANAGER'],
     },
   },
 };

@@ -100,6 +100,12 @@ export interface InfraActionRule {
   readonly roles: readonly InfraRole[];
   /** Roles que sólo valen si el objetivo es un quirófano (Jefe QX en F2). */
   readonly operatingRoomRoles?: readonly InfraRole[];
+  /**
+   * Roles **globales** (no asignados por alcance) que valen para esta acción:
+   * p. ej. `BILLING` global sólo en las rutas de facturación. Un rol global
+   * que no figura acá no cuenta.
+   */
+  readonly globalRoles?: readonly InfraRole[];
 }
 
 /** Política de una franja: sus acciones, en su propio archivo. */
@@ -111,19 +117,36 @@ export interface InfraPolicy {
 /**
  * Decide una acción.
  *
+ * - Un rol del alcance que figura en `roles` basta.
+ * - Un rol global sólo cuenta si la regla lo nombra en `globalRoles`, salvo
+ *   `OR_MANAGER` (el `PERIOP_ADMIN` global), que cuenta sólo por
+ *   `operatingRoomRoles` y sólo sobre un quirófano.
+ * - `operatingRoomRoles` (asignados o el global) valen sobre un quirófano; con
+ *   `partial` (objetivo sede/unidad de una lectura de colección) habilitan la
+ *   lectura y la colección filtra después por fila.
+ *
  * @param rule - Regla de la acción.
- * @param roles - Roles del actor sobre el objetivo.
+ * @param roles - Roles del alcance del actor sobre el objetivo.
  * @param isOperatingRoom - El objetivo es un quirófano.
+ * @param globals - Roles globales equivalentes del actor.
+ * @param partial - Objetivo de colección (sede o unidad).
  * @returns `true` si alguno de los roles basta.
  */
 export function allows(
   rule: InfraActionRule,
   roles: ReadonlySet<InfraRole>,
   isOperatingRoom: boolean,
+  globals: readonly InfraRole[] = [],
+  partial = false,
 ): boolean {
   if (rule.roles.some((r) => roles.has(r))) return true;
-  return (
-    isOperatingRoom && (rule.operatingRoomRoles ?? []).some((r) => roles.has(r))
+  if ((rule.globalRoles ?? []).some((r) => globals.includes(r))) return true;
+  if (!isOperatingRoom && !partial) return false;
+  const orGlobals: readonly InfraRole[] = globals.filter(
+    (r) => r === 'OR_MANAGER',
+  );
+  return (rule.operatingRoomRoles ?? []).some(
+    (r) => roles.has(r) || orGlobals.includes(r),
   );
 }
 
