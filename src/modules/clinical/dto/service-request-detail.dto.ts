@@ -3,7 +3,7 @@ import { IsOptional } from 'class-validator';
 import { IsConceptId } from './concept-id.validator';
 
 /**
- * Detalle de imagen de una orden (v4.2.80). Todos los campos son opcionales en
+ * Detalle de imagen de una orden (v4.2.82). Todos los campos son opcionales en
  * el cuerpo; cuáles son obligatorios lo decide el catálogo del estudio
  * (V5–V9, `StudyDetailReason`), no el DTO.
  */

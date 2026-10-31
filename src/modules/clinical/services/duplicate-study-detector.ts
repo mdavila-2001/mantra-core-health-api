@@ -24,7 +24,7 @@ export const MAX_DUPLICATE_STUDY_WINDOW_DAYS = 365;
  *
  * - Imagen: `(código, región, lateralidad)`; «mano izquierda» y «mano derecha»
  *   no son el mismo estudio. Un informe anterior SIN región/lateralidad
- *   (orden previa a v4.2.80) cuenta como cubriendo cualquiera: no se sabe.
+ *   (orden previa a v4.2.82) cuenta como cubriendo cualquiera: no se sabe.
  * - Laboratorio: `(código)` + conjunto de componentes; pedir componentes que
  *   el informe anterior no cubre no es duplicado. Una orden anterior sin
  *   componentes registrados se lee como «estudio completo».

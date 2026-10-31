@@ -1695,7 +1695,7 @@ export const DYNAMIC_ENUM_CATALOG: readonly DynamicEnumCatalogEntry[] = [
     ],
   }, // --- clinical: alergias e intolerancias (HL7 FHIR AllergyIntolerance) ---
   ...ALLERGY_DYNAMIC_ENUMS,
-  /* --- Detalle de la orden de imagen (modelo v4.2.80) ------------------------
+  /* --- Detalle de la orden de imagen (modelo v4.2.82) ------------------------
      Modalidad, región del cuerpo y contraste de `clinical.service_requests`.
      Los conceptos los declara `study_catalog.concepts.ts` desde el catálogo
      versionado `imagenologia.json`. La lateralidad y la muestra no abren

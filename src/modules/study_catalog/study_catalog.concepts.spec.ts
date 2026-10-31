@@ -72,7 +72,7 @@ describe('conceptos del catálogo de estudios', () => {
     expect(() => bodySiteConceptId('NOPE')).toThrow();
   });
 
-  it('los tres value sets nuevos gobiernan las columnas de v4.2.80 y todos los estudios del JSON usan conceptos declarados', () => {
+  it('los tres value sets nuevos gobiernan las columnas de v4.2.82 y todos los estudios del JSON usan conceptos declarados', () => {
     expect(entry('service-request-imaging-modality')?.targets).toEqual([
       'clinical.service_requests.modality_concept_id',
     ]);

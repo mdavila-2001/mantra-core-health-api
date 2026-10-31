@@ -70,7 +70,7 @@ function build() {
     assertUsable: mockFn().mockResolvedValue(undefined),
     link: mockFn(),
   };
-  // v4.2.80: el detalle (V1–V9) tiene su propia spec; acá devuelve lo que recibe.
+  // v4.2.82: el detalle (V1–V9) tiene su propia spec; acá devuelve lo que recibe.
   const detail = {
     prepare: mockFn(async (_tx: any, input: any) => ({
       categoryConceptId: input.categoryConceptId,

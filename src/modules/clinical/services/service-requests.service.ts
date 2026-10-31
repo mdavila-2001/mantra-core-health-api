@@ -93,7 +93,7 @@ export class ServiceRequestsService {
    * @param performerSelection - Reglas del modo de ejecutor (centros médicos).
    * @param siteNames - Nombre de la sede sugerida, para el paciente.
    * @param basedOnNotes - Notas que motivan la orden (P40).
-   * @param detail - Validación y lectura del detalle (muestra, componentes, imagen; v4.2.80).
+   * @param detail - Validación y lectura del detalle (muestra, componentes, imagen; v4.2.82).
    */
   constructor(
     private readonly em: EntityManager,
@@ -303,7 +303,7 @@ export class ServiceRequestsService {
         : this.em.transactional(work);
     return inTransaction(async (tx) => {
       await this.assertEncounterBelongsToPatient(tx, dto);
-      // v4.2.80: V1–V9 contra el catálogo, antes de escribir nada.
+      // v4.2.82: V1–V9 contra el catálogo, antes de escribir nada.
       const prepared = await this.detail.prepare(
         tx,
         {

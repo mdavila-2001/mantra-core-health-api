@@ -12,15 +12,19 @@ Medido el 2026-10-31 con `diff -rq ../mantra-core-health-model/SQL database/SQL`
   API (abajo) y es una decisión de quien despliega, no de esta franja.
 - **`patches/` en el modelo y no en el API** (copiados en esta franja, sin renumerar):
   `2026-10-29_infraestructura_f5_operaciones`, `2026-10-31_v4275_personal_apoyo`,
-  `2026-10-31_v4278_gobierno_de_accesos`, `2026-10-31_v4279_revision_seguridad_gobierno`,
-  `2026-11-01_v4280_service_request_detalle` (nuevo, de esta tarea).
+  `2026-10-31_v4278_gobierno_de_accesos`, `2026-10-31_v4279_revision_seguridad_gobierno`.
+  Quedan sin copiar los del modelo posteriores (de otras franjas): `2026-10-31_v4280_observabilidad_sistema`
+  y los cuatro `2026-10-31_v4281_*` (cargas masivas, gobierno de datos, idempotencia anónima,
+  motor de aprobación).
 - **`2026-08-05_tenant_rls.sql`** difería (el modelo añade la sección 4, tablas append-only); se copió la
   versión del modelo, que es superconjunto.
 - **`patches/` en el API y no en el modelo** (se dejan como están, NO se borran):
   `2026-10-28_v4263_medical_facility`, `2026-10-29_v4267_practitioner_admissions`,
-  `2026-10-31_secretaria_iniciador_vinculos`.
+  `2026-10-31_secretaria_iniciador_vinculos`, y `2026-11-01_v4282_service_request_detalle` (nuevo, de
+  esta tarea: todavía no está en el modelo).
 - **Colisiones de numeración ya existentes** (no se renumeran, ya están aplicadas): v4249, v4263, v4264, v4265, v4267.
-  Siguiente número libre: v4.2.80 (este parche).
+  En el modelo, v4.2.80 es observabilidad y v4.2.81 idempotencia, gobierno de datos y cargas masivas
+  (manifiesto 4.2.81): el siguiente número libre es v4.2.82 (este parche).
 
 ## Pendiente (decisión humana)
 

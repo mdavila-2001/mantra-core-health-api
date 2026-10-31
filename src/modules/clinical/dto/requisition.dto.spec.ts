@@ -30,7 +30,7 @@ async function paths(
 
 const head = { custodianTenantId: TENANT, patientProfileId: PATIENT };
 
-describe('CreateServiceRequestDto — detalle v4.2.80 (aditivo)', () => {
+describe('CreateServiceRequestDto — detalle v4.2.82 (aditivo)', () => {
   const base = { ...head, codeConceptId: STUDY };
 
   it('el cuerpo anterior, sin campos nuevos, sigue siendo válido', async () => {

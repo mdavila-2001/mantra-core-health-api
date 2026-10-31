@@ -292,7 +292,7 @@ import { InfraF3PolicyRegistrar } from './policies/infra-f3.policy';
     EncounterSealGuardService,
     ObservationsService,
     ServiceRequestsService,
-    // v4.2.80: detalle de la orden (V1–V9), lectura (C5) y requisición (C4). El
+    // v4.2.82: detalle de la orden (V1–V9), lectura (C5) y requisición (C4). El
     // puerto del catálogo de estudios lo implementa por defecto `terminology.*`;
     // `study_catalog` puede sustituir la clase sin tocar la validación.
     ServiceRequestDetailService,

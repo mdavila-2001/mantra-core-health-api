@@ -107,7 +107,7 @@ export class ClinicalOrdersController {
   }
 
   /**
-   * C4 (v4.2.80): N estudios pedidos juntos, un renglón de `service_requests`
+   * C4 (v4.2.82): N estudios pedidos juntos, un renglón de `service_requests`
    * por estudio, todo o nada. `Idempotency-Key` opcional: repetirla devuelve la
    * misma requisición (`replayed: true`); con otro contenido, 409.
    */
@@ -135,7 +135,7 @@ export class ClinicalOrdersController {
   }
 
   /**
-   * C5 (v4.2.80): una orden de servicio con su detalle. El paciente sale de la
+   * C5 (v4.2.82): una orden de servicio con su detalle. El paciente sale de la
    * orden, así que la autorización de expediente la hace el servicio (el guard
    * sólo mira `params.patientProfileId`).
    */

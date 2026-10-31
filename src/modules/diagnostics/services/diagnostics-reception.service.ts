@@ -61,7 +61,7 @@ export class DiagnosticsReceptionService {
    * @param receptionRepo - Lecturas de la bandeja.
    * @param specimensRepo - Contenedores y custodia de los especímenes.
    * @param logger - Registro estructurado.
-   * @param detail - Detalle pedido de la orden (muestra, componentes, imagen; v4.2.80).
+   * @param detail - Detalle pedido de la orden (muestra, componentes, imagen; v4.2.82).
    */
   constructor(
     private readonly em: EntityManager,

@@ -198,7 +198,7 @@ export class CreateServiceRequestDto {
   suggestedPracticeSiteId?: string;
 
   /**
-   * v4.2.80: muestra pedida (laboratorio / anatomía patológica).
+   * v4.2.82: muestra pedida (laboratorio / anatomía patológica).
    */
   @ApiPropertyOptional({
     description:
@@ -211,7 +211,7 @@ export class CreateServiceRequestDto {
   specimenTypeConceptId?: string;
 
   /**
-   * v4.2.80: componentes marcados del panel.
+   * v4.2.82: componentes marcados del panel.
    */
   @ApiPropertyOptional({
     description:
@@ -229,7 +229,7 @@ export class CreateServiceRequestDto {
   componentConceptIds?: string[];
 
   /**
-   * v4.2.80: modalidad, región, lateralidad y contraste de un estudio de imagen.
+   * v4.2.82: modalidad, región, lateralidad y contraste de un estudio de imagen.
    */
   @ApiPropertyOptional({ type: () => ImagingDetailDto })
   @IsOptional()
@@ -394,39 +394,39 @@ export class ServiceRequestResponseDto {
   suggestedCareSpace!: { id: string; code: string; name: string } | null;
 
   /**
-   * v4.2.80: requisición que agrupa los renglones pedidos juntos (nulo = alta individual).
+   * v4.2.82: requisición que agrupa los renglones pedidos juntos (nulo = alta individual).
    */
   @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   requisitionId?: string | null;
 
-  /** v4.2.80: el estudio pedido. */
+  /** v4.2.82: el estudio pedido. */
   @ApiPropertyOptional({ format: 'uuid' })
   codeConceptId?: string;
 
-  /** v4.2.80: nombre legible del estudio. */
+  /** v4.2.82: nombre legible del estudio. */
   @ApiPropertyOptional()
   codeDisplay?: string;
 
-  /** v4.2.80: muestra pedida (nulo = no se indicó). */
+  /** v4.2.82: muestra pedida (nulo = no se indicó). */
   @ApiPropertyOptional({ format: 'uuid', nullable: true, type: String })
   specimenTypeConceptId?: string | null;
 
-  /** v4.2.80: nombre legible de la muestra. */
+  /** v4.2.82: nombre legible de la muestra. */
   @ApiPropertyOptional({ nullable: true, type: String })
   specimenTypeDisplay?: string | null;
 
   /**
-   * v4.2.80: componentes marcados. Con `componentsSpecified: false` el arreglo
+   * v4.2.82: componentes marcados. Con `componentsSpecified: false` el arreglo
    * va vacío y significa «estudio completo, sin detalle» (órdenes anteriores).
    */
   @ApiPropertyOptional({ type: [ServiceRequestComponentDto] })
   components?: ServiceRequestComponentDto[];
 
-  /** v4.2.80: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). */
+  /** v4.2.82: `false` = orden sin detalle de componentes (anterior o estudio sin desglose). */
   @ApiPropertyOptional()
   componentsSpecified?: boolean;
 
-  /** v4.2.80: detalle de imagen; `null` si la orden no lo trae. */
+  /** v4.2.82: detalle de imagen; `null` si la orden no lo trae. */
   @ApiPropertyOptional({ type: () => ServiceRequestImagingDto, nullable: true })
   imaging?: ServiceRequestImagingDto | null;
 

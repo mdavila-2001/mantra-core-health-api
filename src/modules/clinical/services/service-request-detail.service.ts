@@ -70,7 +70,7 @@ export interface PrepareOptions {
 
 /**
  * V1–V9 de la orden de estudios y lectura/escritura de su detalle
- * (v4.2.80). Todo 422 lleva `details.reason` (ver `StudyDetailReason`),
+ * (v4.2.82). Todo 422 lleva `details.reason` (ver `StudyDetailReason`),
  * `details.field` y, en requisiciones, `details.itemIndex` (lo agrega quien
  * llama).
  */

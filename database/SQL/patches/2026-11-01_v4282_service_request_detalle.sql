@@ -1,5 +1,5 @@
 -- ============================================================================
--- SALUD · patch v4.2.80 (clinical · detalle de la orden de estudios) sobre BD viva
+-- SALUD · patch v4.2.82 (clinical · detalle de la orden de estudios) sobre BD viva
 -- Fecha: 2026-11-01
 -- Idempotente (ADD COLUMN IF NOT EXISTS / CREATE ... IF NOT EXISTS / FK y CHECK
 -- bajo guarda / DROP POLICY IF EXISTS). UNA sola pasada. SIN backfill.
@@ -229,9 +229,9 @@ BEGIN
         faltan := faltan || ' trigger:trg_service_request_component_tenant';
     END IF;
     IF faltan <> '' THEN
-        RAISE EXCEPTION 'v4.2.80 incompleto:%', faltan;
+        RAISE EXCEPTION 'v4.2.82 incompleto:%', faltan;
     END IF;
-    RAISE NOTICE 'v4.2.80 aplicado: clinical.service_requests con detalle de la orden y service_request_components.';
+    RAISE NOTICE 'v4.2.82 aplicado: clinical.service_requests con detalle de la orden y service_request_components.';
 END $$;
 
 COMMIT;

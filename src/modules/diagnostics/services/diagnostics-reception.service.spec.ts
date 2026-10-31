@@ -129,7 +129,7 @@ function build(
     receptionRepo as any,
     specimensRepo as any,
     logger as any,
-    // v4.2.80: el detalle pedido; estas pruebas no lo ejercitan.
+    // v4.2.82: el detalle pedido; estas pruebas no lo ejercitan.
     { describe: mockFn(() => Promise.resolve(new Map())) } as any,
   );
   return { service, receptionRepo, logger };

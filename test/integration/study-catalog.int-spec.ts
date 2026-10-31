@@ -16,7 +16,7 @@ import { ValueSetsRepository } from '../../src/modules/terminology/repositories/
 import { ValueSetMembers } from '../../src/modules/terminology/entities';
 
 /**
- * Catálogo de estudios contra Postgres real, con el esquema del modelo v4.2.80, los
+ * Catálogo de estudios contra Postgres real, con el esquema del modelo v4.2.82, los
  * seeds del arranque y `tools/study-catalogs/load-study-catalogs.mjs` ya aplicados
  * (precondición, no se siembra desde acá). Real: HTTP, controlador, servicio y SQL.
  * Doble: el guard de lectura (su matriz tiene su propio spec); no hay JWT acá.

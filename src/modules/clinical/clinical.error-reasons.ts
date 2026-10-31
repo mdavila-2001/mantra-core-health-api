@@ -101,7 +101,7 @@ export enum ClinicalErrorReason {
 
 /**
  * Motivos del 422 `PRECONDITION_FAILED` de la orden de estudios con detalle
- * (v4.2.80: muestra, componentes, modalidad, región, lateralidad, contraste).
+ * (v4.2.82: muestra, componentes, modalidad, región, lateralidad, contraste).
  *
  * **Convención para lo nuevo (H2.S3.M2): el motivo viaja en `details.reason`**
  * —nunca como tercer argumento de la excepción— junto con `details.field` (la
