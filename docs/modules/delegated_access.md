@@ -9,7 +9,7 @@
 # Módulo `delegated_access`
 
 **Fuente:** [`src/modules/delegated_access/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/delegated_access/README.md)
-· 7 controllers · 7 services · 9 repositories · 9 entidades · 13 DTO
+· 9 controllers · 8 services · 10 repositories · 9 entidades · 14 DTO
 
 ---
 
@@ -30,7 +30,7 @@ delegante y delegado quedan siempre auditados en `delegation_events`.
   find src/modules/delegated_access -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **5 controllers, 12 rutas HTTP, 7 entidades y 5 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **7 controllers, 31 rutas HTTP, 7 entidades y 6 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -52,6 +52,48 @@ Entidades (`tableName`, 7 de 7 archivos `*.entity.ts`): `delegated_access_approv
 | `POST /practitioner-delegates/:id/access-requests` | SECURITY_ADMIN | `practitioner-delegates` |
 | `POST /practitioner-delegates/:id/grants` | SECURITY_ADMIN | `practitioner-delegates` |
 | `POST /practitioner-delegates/:id/revoke` | SECURITY_ADMIN | `practitioner-delegates` |
+| `GET /me/support-engagements` | SUPPORT_STAFF (sin tenant) | `support-staff` |
+| `GET /me/support-access` | SUPPORT_STAFF (sin tenant) | `support-staff` |
+| `GET /me/support-catalog` | SUPPORT_STAFF (sin tenant) | `support-staff` |
+| `POST /support-engagement-requests` | SUPPORT_STAFF (sin tenant) | `support-staff` |
+| `POST /me/support-engagements/:id/confirm` | SUPPORT_STAFF (sin tenant) | `support-staff` |
+| `POST /me/support-engagements/:id/decline` | SUPPORT_STAFF (sin tenant) | `support-staff` |
+| `POST /me/support-engagements/:id/leave` | SUPPORT_STAFF (sin tenant) | `support-staff` |
+| `GET /me/support-agenda` | SUPPORT_STAFF (sin tenant) | `support-staff` |
+| `GET /org/support-catalog` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
+| `GET /org/support-engagement-requests` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
+| `POST /org/support-engagement-requests/:id/decision` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
+| `GET /org/support-engagements` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
+| `POST /org/support-engagements/:id/end` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
+| `POST /org/team/invitations` | sesión (OWNER/ADMIN del tenant, en el servicio) | `support-staff` |
+| `GET /me/practitioner/support-team` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
+| `POST /practitioner-delegates/:id/accept` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
+| `POST /practitioner-delegates/:id/reject` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
+| `POST /me/practitioner/support-team/:id/end` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
+| `POST /me/practitioner/support-invitations` | PRACTITIONER, CLINICIAN (sin tenant) | `practitioner-support` |
+
+## Secretarias (personal de apoyo hospitalario)
+
+La secretaria se da de alta con `POST /iam/auth/register-support-staff` (módulo `iam`; rol global
+`SUPPORT_STAFF`, perfil `profiles.secretary_profiles`). El acceso sale de **vínculos**, cada uno en
+la tabla que ya lo modelaba:
+
+- con un lugar (hospital, sede, servicio o piso): `organization_user_assignments` con rol
+  `DA_ASSIGN_SECRETARY` y la columna más específica (`practice_site_id`, `clinical_unit_id`,
+  `care_space_id`; ninguna = el hospital entero);
+- con un doctor: `practice.practitioner_support_assignments` sobre su vinculación
+  (`practitioner_role_assignment_id`).
+
+Todo vínculo nace `PENDING` y lo decide **la otra parte** (`domain/support-links.ts`): lo que pide
+la secretaria lo acepta el hospital (OWNER/ADMIN) o, si es con un doctor, el doctor o el hospital;
+lo que ofrecen el hospital o el doctor lo acepta ella. Al aceptar, su membresía del tenant
+(`DIR_ROLE_SUPPORT`, creada `INVITED` con el pedido) pasa a `ACTIVE` y el hospital entra a su
+token; esa membresía no lee la estructura completa del hospital
+(`TenantAdministrationService.assertCanRead`). Lo que ve —hospitales, sedes, servicios, pisos y
+doctores— es `GET /me/support-access`, armado sólo con vínculos `ACTIVE`; la agenda de un doctor
+(`GET /me/support-agenda`) exige un vínculo activo con ese doctor en ese hospital. Al terminar el
+último vínculo vivo de un hospital, la membresía de apoyo se cierra. Los motivos y mensajes de los
+cuerpos no se guardan: las tablas no tienen columna para ellos.
 
 ## Endpoints (UC → ruta)
 
