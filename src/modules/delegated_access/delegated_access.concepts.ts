@@ -49,6 +49,7 @@ export const { seeds: DELEGATED_ACCESS_CONCEPT_SEEDS, ids: DELEG } =
     SCOPE_PRACTICE: { code: 'DA_SCOPE_PRACTICE', display: 'Practice scope' },
     SCOPE_SITE: { code: 'DA_SCOPE_SITE', display: 'Site scope' },
     SCOPE_UNIT: { code: 'DA_SCOPE_UNIT', display: 'Clinical unit scope' },
+    SCOPE_SPACE: { code: 'DA_SCOPE_SPACE', display: 'Care space scope' },
 
     // --- Tipo de delegado del set de permisos (delegate_type_concept_id) ---
     DELEGATE_TYPE_SECRETARY: {

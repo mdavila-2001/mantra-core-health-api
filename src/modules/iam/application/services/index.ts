@@ -7,6 +7,7 @@ export * from './iam-devices.service';
 export * from './iam-auth.service';
 export * from './iam-assisted-registration.service';
 export * from './iam-patient-self-registration.service';
+export * from './iam-support-staff-self-registration.service';
 export * from './iam-organization-self-registration.service';
 export * from './iam-registration-document-upload.service';
 export * from './iam-practitioner-self-registration.service';

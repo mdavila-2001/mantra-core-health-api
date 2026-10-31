@@ -41,6 +41,7 @@ import {
   IamAuthService,
   IamAssistedRegistrationService,
   IamPatientSelfRegistrationService,
+  IamSupportStaffSelfRegistrationService,
   IamOrganizationSelfRegistrationService,
   IamRegistrationDocumentUploadService,
   IamPractitionerSelfRegistrationService,
@@ -58,6 +59,8 @@ import {
   ActivationResultDto,
   RegisterPatientDto,
   RegisterPatientResponseDto,
+  RegisterSupportStaffDto,
+  RegisterSupportStaffResponseDto,
   RegisterOrganizationDto,
   RegisterOrganizationResponseDto,
   RegistrationDocumentUploadResponseDto,
@@ -93,6 +96,7 @@ export class IamAuthController {
     private readonly practitionerRegistrationService: IamPractitionerSelfRegistrationService,
     private readonly passwordResetService: IamPasswordResetService,
     private readonly emailVerificationService: IamEmailVerificationService,
+    private readonly supportStaffRegistrationService: IamSupportStaffSelfRegistrationService,
   ) {}
 
   /**
@@ -124,6 +128,28 @@ export class IamAuthController {
     @Ip() ip: string,
   ): Promise<RegisterPatientResponseDto> {
     return this.selfRegistrationService.registerPatient(dto, ip);
+  }
+
+  /**
+   * Alta de una secretaria (personal de apoyo hospitalario) con su documento.
+   * Mismo modelo que el alta del paciente; no da acceso a ningún hospital: eso
+   * llega sólo con un vínculo aceptado (`/support-engagement-requests`).
+   */
+  @NotAudited(
+    'iam.security_events (SEC_ROLE_GRANT) en IamSupportStaffSelfRegistrationService.register.',
+  )
+  @Post('register-support-staff')
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Registrarse como secretaria (personal de apoyo hospitalario)',
+  })
+  registerSupportStaff(
+    @Body() dto: RegisterSupportStaffDto,
+    @Ip() ip: string,
+  ): Promise<RegisterSupportStaffResponseDto> {
+    return this.supportStaffRegistrationService.register(dto, ip);
   }
 
   /**

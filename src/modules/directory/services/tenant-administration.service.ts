@@ -134,7 +134,13 @@ export class TenantAdministrationService {
   ): Promise<void> {
     if (this.isPlatform(actor)) return;
 
-    if (await this.activeMembershipOf(em, tenantId, actor)) return;
+    // La membresía del personal de apoyo abre el tenant para el token, no para
+    // leer la organización entera: la secretaria ve sólo las sedes, servicios,
+    // pisos y doctores de sus vínculos aceptados (`GET /me/support-access`).
+    const membership = await this.activeMembershipOf(em, tenantId, actor);
+    if (membership && membership.tenantRoleConceptId !== DIR.ROLE_SUPPORT) {
+      return;
+    }
 
     throw new ForbiddenException(
       'Se requiere pertenecer a la organización, o ser administrador de la plataforma',
