@@ -1,3 +1,4 @@
+import { OutboxService } from '../../messaging/services/outbox.service';
 import { translateInfraWriteError } from '../../practice/services/ops/ops-errors';
 import { DELEG } from '../delegated_access.concepts';
 import {
@@ -37,6 +38,11 @@ import {
  * `em.transactional` + `flush` del padre antes de los hijos (las FK son columnas
  * uuid planas, MikroORM no ordena inserts entre entidades no relacionadas).
  */
+/** Código de alcance por concepto (`SCOPE_UNIT` → `UNIT`). */
+const SCOPE_CODE_BY_CONCEPT = new Map<string, string>(
+  Object.entries(ACCESS_SCOPE_CONCEPT).map(([code, id]) => [id, code]),
+);
+
 @Injectable()
 export class OrgUserAssignmentsService {
   /**
@@ -52,6 +58,7 @@ export class OrgUserAssignmentsService {
     private readonly assignmentsRepo: OrganizationUserAssignmentsRepository,
     private readonly delegatesRepo: PractitionerDelegateAssignmentsRepository,
     private readonly logger: PinoLogger,
+    private readonly outbox?: OutboxService,
   ) {
     this.logger.setContext(OrgUserAssignmentsService.name);
   }
@@ -164,9 +171,14 @@ export class OrgUserAssignmentsService {
       },
       'Updating organization user assignment',
     );
+    const targetsChange =
+      dto.practiceSiteId !== undefined ||
+      dto.clinicalUnitId !== undefined ||
+      dto.careSpaceId !== undefined;
     if (
       dto.supervisorUserId === undefined &&
       dto.accessScope === undefined &&
+      !targetsChange &&
       !dto.suspend
     ) {
       throw new PreconditionFailedException('No hay cambios que aplicar', {
@@ -198,8 +210,51 @@ export class OrgUserAssignmentsService {
 
       if (dto.supervisorUserId !== undefined)
         assignment.supervisorUserId = dto.supervisorUserId;
-      if (dto.accessScope !== undefined) {
-        assignment.accessScopeConceptId = ACCESS_SCOPE_CONCEPT[dto.accessScope];
+      // F5g (CONTRATO-F2-F5 §F5g): el alcance resultante se valida igual que
+      // en el alta —destino del tenant (404), destino presente (422
+      // ASSIGNMENT_SCOPE_TARGET_REQUIRED, no el 23514 del CHECK) y
+      // coherente (422)— y el jefe de unidad sigue siendo único (409).
+      const scopeChange = dto.accessScope !== undefined || targetsChange;
+      const before = {
+        accessScopeConceptId: assignment.accessScopeConceptId,
+        practiceSiteId: assignment.practiceSiteId ?? null,
+        clinicalUnitId: assignment.clinicalUnitId ?? null,
+        careSpaceId: assignment.careSpaceId ?? null,
+      };
+      if (scopeChange) {
+        const scope =
+          dto.accessScope ??
+          SCOPE_CODE_BY_CONCEPT.get(assignment.accessScopeConceptId) ??
+          'TENANT';
+        const targets = {
+          practiceId: assignment.practiceId ?? undefined,
+          practiceSiteId:
+            dto.practiceSiteId ?? assignment.practiceSiteId ?? undefined,
+          clinicalUnitId:
+            dto.clinicalUnitId ?? assignment.clinicalUnitId ?? undefined,
+          careSpaceId: dto.careSpaceId ?? assignment.careSpaceId ?? undefined,
+        };
+        await assertAssignmentTargets(
+          tx,
+          assignment.tenantMembershipId,
+          scope,
+          targets,
+        );
+        if (
+          assignment.assignmentRoleConceptId === DELEG.ASSIGN_ROLE_UNIT_HEAD &&
+          targets.clinicalUnitId &&
+          targets.clinicalUnitId !== (assignment.clinicalUnitId ?? undefined)
+        )
+          await assertSingleUnitHead(
+            tx,
+            targets.clinicalUnitId,
+            assignment.validFrom?.toISOString(),
+            assignment.validTo?.toISOString(),
+          );
+        assignment.accessScopeConceptId = ACCESS_SCOPE_CONCEPT[scope];
+        assignment.practiceSiteId = targets.practiceSiteId;
+        assignment.clinicalUnitId = targets.clinicalUnitId;
+        assignment.careSpaceId = targets.careSpaceId;
       }
       if (dto.suspend) {
         assignment.statusConceptId = STATUS.SUSPENDED;
@@ -214,6 +269,35 @@ export class OrgUserAssignmentsService {
         );
       }
       touch(assignment, actor.id);
+      if (scopeChange) {
+        try {
+          await tx.flush();
+        } catch (error) {
+          throw translateInfraWriteError(error);
+        }
+        const [m] = await tx.execute<{ tenant_id: string }[]>(
+          'SELECT tenant_id FROM directory.tenant_memberships WHERE id = ?',
+          [assignment.tenantMembershipId],
+          'all',
+        );
+        await this.outbox?.publishDomainEvent(tx, {
+          tenantId: m?.tenant_id,
+          eventType: 'delegated_access.assignment.scope_changed',
+          aggregateType: 'delegated_access.organization_user_assignments',
+          aggregateId: assignment.id,
+          payloadJson: {
+            assignmentId: assignment.id,
+            before,
+            after: {
+              accessScopeConceptId: assignment.accessScopeConceptId,
+              practiceSiteId: assignment.practiceSiteId ?? null,
+              clinicalUnitId: assignment.clinicalUnitId ?? null,
+              careSpaceId: assignment.careSpaceId ?? null,
+            },
+          },
+          actorUserId: actor.id,
+        });
+      }
 
       this.logger.info(
         {

@@ -537,6 +537,7 @@ components:
             - diagnostic_units.equipment.resource_linked
             - clinical.service_request.collection_point_suggested
             - scheduling.template.care_space_set
+            - delegated_access.assignment.scope_changed
         aggregateType:
           type: string
           enum:
@@ -546,6 +547,7 @@ components:
             - diagnostic_units.diagnostic_equipment
             - clinical.service_requests
             - scheduling.schedule_templates
+            - delegated_access.organization_user_assignments
         aggregateId:
           type: string
           format: uuid

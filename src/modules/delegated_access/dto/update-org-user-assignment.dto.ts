@@ -8,6 +8,27 @@ const SCOPES = ['TENANT', 'PRACTICE', 'SITE', 'UNIT', 'SPACE'] as const;
  * `supervisorUserId`, `accessScope` o `suspend` debe venir (validado en servicio).
  */
 export class UpdateOrgUserAssignmentDto {
+  /** F5g: nueva sede del alcance SITE. */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Sede (alcance SITE)' })
+  @IsOptional()
+  @IsUUID()
+  practiceSiteId?: string;
+
+  /** F5g: nueva unidad del alcance UNIT. */
+  @ApiPropertyOptional({ format: 'uuid', description: 'Unidad (alcance UNIT)' })
+  @IsOptional()
+  @IsUUID()
+  clinicalUnitId?: string;
+
+  /** F5g: nuevo espacio del alcance SPACE. */
+  @ApiPropertyOptional({
+    format: 'uuid',
+    description: 'Espacio (alcance SPACE)',
+  })
+  @IsOptional()
+  @IsUUID()
+  careSpaceId?: string;
+
   /**
    * Identificador asociado a supervisor user.
    */

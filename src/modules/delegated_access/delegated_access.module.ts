@@ -1,3 +1,4 @@
+import { MessagingModule } from '../messaging/messaging.module';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
@@ -41,7 +42,11 @@ import {
  */
 @Module({
   // `ClinicalModule` da el lector del prescriptor del enlace de receta.
-  imports: [MikroOrmModule.forFeature(Object.values(entities)), ClinicalModule],
+  imports: [
+    MikroOrmModule.forFeature(Object.values(entities)),
+    ClinicalModule,
+    MessagingModule,
+  ],
   controllers: [
     OrgUserAssignmentsController,
     DelegatedPermissionSetsController,

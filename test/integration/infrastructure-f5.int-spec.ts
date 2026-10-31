@@ -721,5 +721,73 @@ describe('Infraestructura F5 · integración', () => {
       [plantaB.room],
     );
     expect(n[0].n).toBe(0);
+
+    // PATCH: pasar a SPACE sin espacio → 422 guiado (no el 23514 del CHECK);
+    // con espacio de otro tenant → 404; con espacio propio → 200 + evento;
+    // mover al jefe de unidad a una unidad con jefe vigente → 409.
+    const nurseA = (
+      await http()
+        .post(`/org/${m2.id}/user-assignments`)
+        .set(admin)
+        .send({
+          role: 'NURSE',
+          accessScope: 'SITE',
+          practiceSiteId: orgA.siteId,
+        })
+        .expect(201)
+    ).body.id as string;
+    const sinDestino = await http()
+      .patch(`/org/user-assignments/${nurseA}`)
+      .set(admin)
+      .send({ accessScope: 'SPACE' })
+      .expect(422);
+    expect(sinDestino.body.reason).toBe('ASSIGNMENT_SCOPE_TARGET_REQUIRED');
+    await http()
+      .patch(`/org/user-assignments/${nurseA}`)
+      .set(admin)
+      .send({ accessScope: 'SPACE', careSpaceId: plantaB.room })
+      .expect(404);
+    await http()
+      .patch(`/org/user-assignments/${nurseA}`)
+      .set(admin)
+      .send({ accessScope: 'SPACE', careSpaceId: planta.beds[0] })
+      .expect(200);
+    const [moved] = await q(
+      'select access_scope_concept_id, care_space_id from delegated_access.organization_user_assignments where id = ?',
+      [nurseA],
+    );
+    expect(moved).toEqual({
+      access_scope_concept_id: DELEG.SCOPE_SPACE,
+      care_space_id: planta.beds[0],
+    });
+    const ev = await q(
+      `select count(*)::int as n from messaging.domain_events where event_type = 'delegated_access.assignment.scope_changed' and aggregate_id = ?`,
+      [nurseA],
+    );
+    expect(ev[0].n).toBe(1);
+    const otraUnidad = (
+      await http()
+        .post(`/sites/${orgA.siteId}/clinical-units`)
+        .set(como(orgA))
+        .send({ code: `U2-${tag}`, name: 'Unidad 2' })
+        .expect(201)
+    ).body.id as string;
+    const jefe2 = (
+      await http()
+        .post(`/org/${m2.id}/user-assignments`)
+        .set(admin)
+        .send({
+          role: 'UNIT_HEAD',
+          accessScope: 'UNIT',
+          clinicalUnitId: otraUnidad,
+        })
+        .expect(201)
+    ).body.id as string;
+    const choca = await http()
+      .patch(`/org/user-assignments/${jefe2}`)
+      .set(admin)
+      .send({ clinicalUnitId: planta.unit })
+      .expect(409);
+    expect(choca.body.reason).toBe('UNIT_HEAD_ALREADY_ASSIGNED');
   });
 });
