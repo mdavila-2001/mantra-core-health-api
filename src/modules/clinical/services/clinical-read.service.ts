@@ -775,6 +775,7 @@ export class ClinicalReadService {
         formInstanceId: row.formInstanceId,
         doseText: row.doseText,
         frequencyText: row.frequencyText,
+        quantityDecimal: quantityOf(row.quantityDecimal),
         validFrom: row.validFrom,
         validTo: row.validTo,
         patientInstructionsText: row.patientInstructionsText,
@@ -857,4 +858,11 @@ export class ClinicalReadService {
     }
     return rows;
   }
+}
+
+/** `numeric` de la cantidad recetada (texto) a número; sin cantidad, ausente. */
+function quantityOf(value: string | null | undefined): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }

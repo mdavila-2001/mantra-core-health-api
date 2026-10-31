@@ -50,6 +50,11 @@ export enum ClinicalErrorReason {
   IMMUNIZATION_DOSE_ALREADY_RECORDED = 'IMMUNIZATION_DOSE_ALREADY_RECORDED',
   /** La condición indicada no existe o no pertenece al paciente de la receta. */
   MEDICATION_INDICATION_INVALID = 'MEDICATION_INDICATION_INVALID',
+  /**
+   * El fin de vigencia (`validTo`) de la receta ya pasó: no se emite, edita,
+   * reemplaza ni renueva una receta que nacería vencida.
+   */
+  MEDICATION_VALID_TO_IN_PAST = 'MEDICATION_VALID_TO_IN_PAST',
   /** La receta referenciada no existe. */
   MEDICATION_REQUEST_NOT_FOUND = 'MEDICATION_REQUEST_NOT_FOUND',
   /** Solo un borrador (DRAFT) admite edición; la receta emitida es inmutable. */
