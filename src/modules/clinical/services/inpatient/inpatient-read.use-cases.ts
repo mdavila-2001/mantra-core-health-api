@@ -7,7 +7,13 @@ import {
   Encounters,
   PlacementIncidents,
 } from '../../entities';
-import { judgePlacement } from '../../domain/inpatient/bed-compatibility';
+import {
+  judgePlacement,
+  type Violation,
+} from '../../domain/inpatient/bed-compatibility';
+import { AuthzClinicalScopeService } from '../../../authz/services/authz-clinical-scope.service';
+import { findPractitionerNames } from '../../../profiles/infrastructure/read-models/practitioner-names';
+import { PRAC } from '../../../practice/practice.concepts';
 import { AdtSupport, type AdtRequest } from './adt-support';
 import { ClinicalReadService } from '../clinical-read.service';
 import { ResourceNotFoundException } from '../../../../common';
@@ -18,6 +24,20 @@ import { locationView } from './adt.use-cases';
  * estancia y censo vivo de la sede. Sin datos de paciente salvo el id del
  * perfil (la ficha clínica la sirve el expediente).
  */
+/** Respuesta de compatibilidad: veredicto, reglas (código, severidad, forzable) y violaciones. */
+function compatibilityView(violations: Violation[]) {
+  return {
+    assignable: judgePlacement(violations).ok,
+    rules: violations.map((v) => ({
+      code: v.rule,
+      severity: v.severity,
+      overridable: v.severity === 'OVERRIDABLE',
+      detail: v.detail,
+    })),
+    violations,
+  };
+}
+
 @Injectable()
 export class InpatientReadUseCases {
   constructor(
@@ -25,6 +45,7 @@ export class InpatientReadUseCases {
     private readonly access: InfrastructureAccessService,
     private readonly support: AdtSupport,
     private readonly clinicalRead: ClinicalReadService,
+    private readonly patients: AuthzClinicalScopeService,
   ) {}
 
   /**
@@ -57,7 +78,59 @@ export class InpatientReadUseCases {
       encounter,
       careSpaceId,
     );
-    return { assignable: judgePlacement(violations).ok, violations };
+    return compatibilityView(violations);
+  }
+
+  /**
+   * `POST /clinical/bed-compatibility`: evaluación prospectiva, sin encuentro
+   * (paso «Cama» del ingreso). Las mismas reglas que el ingreso
+   * (`AdtSupport.compatibilityFor`); el paciente tiene que ser del tenant
+   * (404) y el actor poder colocar en esa cama (`f3.adt.place`, 403/404).
+   *
+   * @param input - Cama, paciente, nivel de cuidado y aislamiento.
+   * @param req - Actor y tenant.
+   */
+  async prospectiveCompatibility(
+    input: {
+      careSpaceId: string;
+      patientProfileId: string;
+      levelOfCareCode?: string;
+      isolationPrecautionCode?: string;
+      isolationOrganismText?: string;
+    },
+    req: AdtRequest,
+  ) {
+    const em = this.em.fork();
+    await this.access.assertCan(
+      req.actor as never,
+      'f3.adt.place',
+      { careSpaceId: input.careSpaceId },
+      em,
+      req.tenantId,
+    );
+    if (
+      !(await this.patients.isPatientInTenant(
+        em,
+        input.patientProfileId,
+        req.tenantId,
+      ))
+    ) {
+      throw new ResourceNotFoundException('Paciente no encontrado', {
+        patientProfileId: input.patientProfileId,
+      });
+    }
+    const { violations } = await this.support.compatibilityFor(
+      em,
+      {
+        encounterId: null,
+        patientProfileId: input.patientProfileId,
+        isolation: input.isolationPrecautionCode ?? 'ISO_NONE',
+        organism: input.isolationOrganismText ?? null,
+        levelOfCare: input.levelOfCareCode ?? null,
+      },
+      input.careSpaceId,
+    );
+    return compatibilityView(violations);
   }
 
   /**
@@ -66,6 +139,94 @@ export class InpatientReadUseCases {
    * @param encounterId - Encuentro.
    * @param req - Actor y tenant.
    */
+  async currentStayOfPatient(patientProfileId: string, req: AdtRequest) {
+    const em = this.em.fork();
+    if (
+      !(await this.patients.isPatientInTenant(
+        em,
+        patientProfileId,
+        req.tenantId,
+      ))
+    )
+      throw new ResourceNotFoundException('Paciente no encontrado', {
+        patientProfileId,
+      });
+    const [row] = await em.execute<{ id: string }[]>(
+      `SELECT id FROM clinical.encounters
+        WHERE patient_profile_id = ? AND tenant_id = ? AND class_concept_id = ? AND status_concept_id = ?
+        ORDER BY start_at DESC NULLS LAST, id LIMIT 1`,
+      [
+        patientProfileId,
+        req.tenantId,
+        CLIN.ENCOUNTER_CLASS_INPATIENT,
+        CLIN.ENCOUNTER_IN_PROGRESS,
+      ],
+      'all',
+    );
+    if (!row)
+      throw new ResourceNotFoundException('El paciente no está internado', {
+        patientProfileId,
+      });
+    // La ficha se autoriza igual que `GET /clinical/encounters/:id/stay`.
+    return this.stay(row.id, req);
+  }
+
+  /**
+   * `GET /sites/:siteId/attending-practitioners`: profesionales con una
+   * asignación de rol vigente en la sede, para «Profesional a cargo» del
+   * ingreso. Exige poder colocar en la sede (`f3.adt.place`, 403/404); sólo
+   * ids, nombre y especialidad.
+   *
+   * @param siteId - Sede.
+   * @param req - Actor y tenant.
+   */
+  async attendingPractitioners(siteId: string, req: AdtRequest) {
+    const em = this.em.fork();
+    const { target } = await this.access.assertCan(
+      req.actor as never,
+      'f3.adt.place',
+      { siteId },
+      em,
+      req.tenantId,
+    );
+    const rows = await em.execute<
+      {
+        practitioner_profile_id: string;
+        specialty_code: string | null;
+        specialty_display: string | null;
+      }[]
+    >(
+      `SELECT DISTINCT ON (a.practitioner_profile_id)
+              a.practitioner_profile_id, sp.code AS specialty_code, sp.display AS specialty_display
+         FROM practice.practitioner_role_assignments a
+         LEFT JOIN terminology.catalog_concepts sp ON sp.id = a.specialty_concept_id
+        WHERE a.practice_id = ? AND (a.practice_site_id = ? OR a.practice_site_id IS NULL)
+          AND a.status_concept_id = ?
+          AND (a.valid_from IS NULL OR a.valid_from <= now())
+          AND (a.valid_to IS NULL OR a.valid_to > now())
+        ORDER BY a.practitioner_profile_id, a.is_primary DESC NULLS LAST
+        LIMIT 500`,
+      [target.site.practiceId, siteId, PRAC.ROLE_ASSIGNMENT_ACTIVE],
+      'all',
+    );
+    const names = await findPractitionerNames(
+      em,
+      rows.map((r) => r.practitioner_profile_id),
+    );
+    return rows
+      .map((r) => ({
+        practitionerProfileId: r.practitioner_profile_id,
+        displayName: names.get(r.practitioner_profile_id) ?? '',
+        specialty: r.specialty_code
+          ? {
+              code: r.specialty_code,
+              display: r.specialty_display ?? r.specialty_code,
+            }
+          : null,
+      }))
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }
+
   async stay(encounterId: string, req: AdtRequest) {
     const em = this.em.fork();
     const encounter = await this.support.encounter(

@@ -131,6 +131,58 @@ export class BedCompatibilityQueryDto {
   @ApiProperty({ format: 'uuid' }) @IsUUID() careSpaceId!: string;
 }
 
+/** `POST /clinical/bed-compatibility`: evaluación prospectiva, sin encuentro. */
+export class ProspectiveCompatibilityDto {
+  @ApiProperty({ format: 'uuid' }) @IsUUID() careSpaceId!: string;
+  @ApiProperty({ format: 'uuid' }) @IsUUID() patientProfileId!: string;
+  @ApiPropertyOptional({ enum: LEVELS })
+  @IsOptional()
+  @IsIn(LEVELS)
+  levelOfCareCode?: string;
+  @ApiPropertyOptional({ enum: ISO })
+  @IsOptional()
+  @IsIn(ISO)
+  isolationPrecautionCode?: string;
+  @ApiPropertyOptional({ maxLength: 200 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  isolationOrganismText?: string;
+}
+
+/** Una regla de compatibilidad evaluada. */
+export class CompatibilityRuleDto {
+  @ApiProperty() code!: string;
+  @ApiProperty({ enum: ['BLOCKING', 'OVERRIDABLE'] }) severity!: string;
+  @ApiProperty() overridable!: boolean;
+  @ApiProperty() detail!: string;
+}
+
+/** Respuesta de compatibilidad (con encuentro o prospectiva). */
+export class CompatibilityResultDto {
+  @ApiProperty() assignable!: boolean;
+  @ApiProperty({ type: [CompatibilityRuleDto] }) rules!: CompatibilityRuleDto[];
+  @ApiProperty({
+    type: [Object],
+    description: 'Forma anterior: rule, severity, detail',
+  })
+  violations!: Record<string, unknown>[];
+}
+
+/** Especialidad de un profesional. */
+export class PractitionerSpecialtyDto {
+  @ApiProperty() code!: string;
+  @ApiProperty() display!: string;
+}
+
+/** `GET /sites/:siteId/attending-practitioners`. */
+export class AttendingPractitionerDto {
+  @ApiProperty({ format: 'uuid' }) practitionerProfileId!: string;
+  @ApiProperty() displayName!: string;
+  @ApiProperty({ type: PractitionerSpecialtyDto, nullable: true })
+  specialty!: PractitionerSpecialtyDto | null;
+}
+
 /** `POST /clinical/encounters/:id/transfer`. */
 export class TransferDto {
   @ApiProperty({ format: 'uuid' }) @IsUUID() toCareSpaceId!: string;
@@ -243,4 +295,9 @@ export class AdtResultDto {
     string,
     unknown
   >[];
+  @ApiPropertyOptional({
+    description:
+      'Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación',
+  })
+  requestId?: string;
 }

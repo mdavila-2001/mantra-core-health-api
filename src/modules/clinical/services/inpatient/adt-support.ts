@@ -171,6 +171,50 @@ export class AdtSupport {
       siteId?: string;
     } = {},
   ): Promise<{ violations: Violation[]; state: CareSpaceOperationalState }> {
+    return this.compatibilityFor(
+      tx,
+      {
+        encounterId: encounter.id,
+        patientProfileId: encounter.patientProfileId,
+        isolation:
+          ISO_CODE_BY_PRAC_ID.get(
+            encounter.isolationPrecautionConceptId ?? '',
+          ) ?? 'ISO_NONE',
+        organism: encounter.isolationOrganismText ?? null,
+        levelOfCare:
+          LEVEL_CODE_BY_ID.get(encounter.levelOfCareConceptId ?? '') ?? null,
+      },
+      careSpaceId,
+      options,
+    );
+  }
+
+  /**
+   * Las mismas reglas para un sujeto que todavía puede no tener encuentro
+   * (evaluación prospectiva del paso «Cama» del ingreso).
+   *
+   * @param tx - Transacción.
+   * @param subject - Paciente, aislamiento, organismo y nivel de cuidado.
+   * @param careSpaceId - Cama.
+   * @param options - Reserva, y camas/encuentros que salen (intercambio).
+   */
+  async compatibilityFor(
+    tx: EntityManager,
+    subject: {
+      encounterId: string | null;
+      patientProfileId: string;
+      isolation: string;
+      organism: string | null;
+      levelOfCare: string | null;
+    },
+    careSpaceId: string,
+    options: {
+      reserve?: boolean;
+      ignoreOccupancy?: boolean;
+      leaving?: string[];
+      siteId?: string;
+    } = {},
+  ): Promise<{ violations: Violation[]; state: CareSpaceOperationalState }> {
     const state = await this.ops.getOperationalState(tx, careSpaceId);
     if (state.formCode !== 'LOC_FORM_BED')
       throw adtError('SPACE_NOT_A_BED', { careSpaceId });
@@ -180,16 +224,18 @@ export class AdtSupport {
       });
     }
     const ctx = await this.repo.bedContext(tx, careSpaceId);
-    const patient = await this.repo.patient(tx, encounter.patientProfileId);
+    const patient = await this.repo.patient(tx, subject.patientProfileId);
     const roommates = ctx?.room_id
-      ? await this.repo.roommates(tx, ctx.room_id, careSpaceId, [
-          encounter.id,
-          ...(options.leaving ?? []),
-        ])
+      ? await this.repo.roommates(
+          tx,
+          ctx.room_id,
+          careSpaceId,
+          [subject.encounterId, ...(options.leaving ?? [])].filter(
+            (x): x is string => !!x,
+          ),
+        )
       : [];
-    const isolation =
-      ISO_CODE_BY_PRAC_ID.get(encounter.isolationPrecautionConceptId ?? '') ??
-      'ISO_NONE';
+    const isolation = subject.isolation;
     const violations = evaluateCompatibility({
       bedViolations: state.violations.filter(
         (v) => !(options.ignoreOccupancy && v === 'OCCUPANCY'),
@@ -211,9 +257,8 @@ export class AdtSupport {
       patientSex: patient?.sex ?? null,
       patientBirthDate: patient?.birthDate ?? null,
       isolation,
-      organism: encounter.isolationOrganismText ?? null,
-      levelOfCare:
-        LEVEL_CODE_BY_ID.get(encounter.levelOfCareConceptId ?? '') ?? null,
+      organism: subject.organism,
+      levelOfCare: subject.levelOfCare,
       roommates: roommates.map((r) => ({
         sex: sexOf(r.gender_id),
         isolation: ISO_CODE_BY_PRAC_ID.get(r.isolation_id ?? '') ?? 'ISO_NONE',

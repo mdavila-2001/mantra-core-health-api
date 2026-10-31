@@ -15312,6 +15312,49 @@ paths:
       description: >-
         Compatibilidad de una cama con el encuentro. Requiere JWT y los roles o alcances declarados por el controlador.
         Todas las respuestas de error usan el envelope ErrorResponse.
+  /clinical/bed-compatibility:
+    post:
+      operationId: ClinicalAdtController_prospectiveCompatibility
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProspectiveCompatibilityDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompatibilityResultDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/PreconditionFailed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Compatibilidad prospectiva de una cama con un paciente
+      tags:
+        - clinical-adt
+      description: >-
+        Compatibilidad prospectiva de una cama con un paciente. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /clinical/admissions:
     post:
       operationId: ClinicalAdtController_admit
@@ -15654,6 +15697,80 @@ paths:
       description: >-
         Pacientes internados de una sede. Requiere JWT y los roles o alcances declarados por el controlador. Todas las
         respuestas de error usan el envelope ErrorResponse.
+  /clinical/patients/{id}/inpatient-stay:
+    get:
+      operationId: ClinicalAdtController_currentStay
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Estancia de internación vigente del paciente
+      tags:
+        - clinical-adt
+      description: >-
+        Estancia de internación vigente del paciente. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
+  /sites/{siteId}/attending-practitioners:
+    get:
+      operationId: ClinicalAdtController_attendingPractitioners
+      parameters:
+        - name: siteId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AttendingPractitionerDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Profesionales a cargo posibles en la sede
+      tags:
+        - clinical-adt
+      description: >-
+        Profesionales a cargo posibles en la sede. Requiere JWT y los roles o alcances declarados por el controlador.
+        Todas las respuestas de error usan el envelope ErrorResponse.
   /clinical/encounters/{id}/stay:
     get:
       operationId: ClinicalAdtController_stay
@@ -21397,6 +21514,37 @@ paths:
       description: >-
         Equipos diagnósticos de una sede (F5a). Requiere JWT y los roles o alcances declarados por el controlador. Todas
         las respuestas de error usan el envelope ErrorResponse.
+  /practice/infrastructure-access/me:
+    get:
+      operationId: InfrastructureAccessController_read
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfraAccessMeDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '504':
+          $ref: '#/components/responses/GatewayTimeout'
+      security:
+        - bearer: []
+      summary: Acceso del actor a la infraestructura del tenant activo
+      tags:
+        - practice-operations
+      description: >-
+        Acceso del actor a la infraestructura del tenant activo. Requiere JWT y los roles o alcances declarados por el
+        controlador. Todas las respuestas de error usan el envelope ErrorResponse.
   /search/{index}/documents:
     post:
       description: El servidor sella el documento con el `tenantId` del contexto; el del cuerpo se ignora.
@@ -83205,6 +83353,74 @@ components:
       required:
         - careSpaceId
       additionalProperties: false
+    ProspectiveCompatibilityDto:
+      type: object
+      properties:
+        careSpaceId:
+          type: string
+          format: uuid
+        patientProfileId:
+          type: string
+          format: uuid
+        levelOfCareCode:
+          type: string
+          enum:
+            - LOC_CARE_GENERAL
+            - LOC_CARE_INTERMEDIATE
+            - LOC_CARE_ICU
+            - LOC_CARE_NEONATAL_ICU
+        isolationPrecautionCode:
+          type: string
+          enum:
+            - ISO_NONE
+            - ISO_CONTACT
+            - ISO_DROPLET
+            - ISO_AIRBORNE
+            - ISO_PROTECTIVE
+        isolationOrganismText:
+          type: string
+          maxLength: 200
+      required:
+        - careSpaceId
+        - patientProfileId
+      additionalProperties: false
+    CompatibilityRuleDto:
+      type: object
+      properties:
+        code:
+          type: string
+        severity:
+          type: string
+          enum:
+            - BLOCKING
+            - OVERRIDABLE
+        overridable:
+          type: boolean
+        detail:
+          type: string
+      required:
+        - code
+        - severity
+        - overridable
+        - detail
+    CompatibilityResultDto:
+      type: object
+      properties:
+        assignable:
+          type: boolean
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompatibilityRuleDto'
+        violations:
+          description: 'Forma anterior: rule, severity, detail'
+          type: array
+          items:
+            type: object
+      required:
+        - assignable
+        - rules
+        - violations
     AdmissionBedDto:
       type: object
       properties:
@@ -83325,6 +83541,9 @@ components:
           type: array
           items:
             type: object
+        requestId:
+          type: string
+          description: Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación
     BedAssignmentDto:
       type: object
       properties:
@@ -83407,6 +83626,23 @@ components:
       required:
         - reasonText
       additionalProperties: false
+    AttendingPractitionerDto:
+      type: object
+      properties:
+        practitionerProfileId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        specialty:
+          nullable: true
+          type: object
+          allOf:
+            - $ref: '#/components/schemas/PractitionerSpecialtyDto'
+      required:
+        - practitionerProfileId
+        - displayName
+        - specialty
     ReviewIncidentDto:
       type: object
       properties:
@@ -87073,6 +87309,11 @@ components:
           nullable: true
         patient:
           $ref: '#/components/schemas/BedPatientDto'
+        encounterLocationId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Ubicación ADT vigente; sólo con rol clínico (igual que patient)
       required:
         - code
         - since
@@ -87128,6 +87369,18 @@ components:
           format: date-time
         opsVersion:
           type: number
+        unitId:
+          type: string
+          nullable: true
+          format: uuid
+          description: Unidad dueña de la cama (vínculo OWNER vigente o la del espacio)
+        actions:
+          description: >-
+            Acciones de F2/F3 que el actor puede hacer sobre esta cama (lo que la UI refleja; la API decide en cada
+            endpoint)
+          type: array
+          items:
+            type: string
       required:
         - id
         - code
@@ -87145,6 +87398,8 @@ components:
         - openCleaningOrderId
         - lastEventAt
         - opsVersion
+        - unitId
+        - actions
     BedBoardUnitDto:
       type: object
       properties:
@@ -87168,6 +87423,9 @@ components:
     BedBoardDto:
       type: object
       properties:
+        siteId:
+          type: string
+          format: uuid
         generatedAt:
           type: string
           format: date-time
@@ -87183,6 +87441,7 @@ components:
           type: string
           nullable: true
       required:
+        - siteId
         - generatedAt
         - lastEventAt
         - units
@@ -87226,6 +87485,9 @@ components:
           nullable: true
         rowVersion:
           type: number
+        requestId:
+          type: string
+          description: Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación
       required:
         - id
         - careSpaceId
@@ -87305,6 +87567,23 @@ components:
           type: number
         rowVersion:
           type: number
+        allowedTransitions:
+          type: array
+          description: Transiciones que admite el estado y que el actor puede hacer (la API decide en cada endpoint)
+          items:
+            type: string
+            enum:
+              - assign
+              - start
+              - finish
+              - inspect
+              - cancel
+        inspectionRequired:
+          type: boolean
+          description: 'La orden exige inspección: terminal (tipo o bandera del espacio) o ajuste de la práctica'
+        requestId:
+          type: string
+          description: Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación
       required:
         - id
         - careSpaceId
@@ -87327,6 +87606,8 @@ components:
         - previousOrderId
         - ageMinutes
         - rowVersion
+        - allowedTransitions
+        - inspectionRequired
     OperationalStateDto:
       type: object
       properties:
@@ -87379,6 +87660,18 @@ components:
           format: date-time
         opsVersion:
           type: number
+        unitId:
+          type: string
+          nullable: true
+          format: uuid
+          description: Unidad dueña de la cama (vínculo OWNER vigente o la del espacio)
+        actions:
+          description: >-
+            Acciones de F2/F3 que el actor puede hacer sobre esta cama (lo que la UI refleja; la API decide en cada
+            endpoint)
+          type: array
+          items:
+            type: string
         openBlocks:
           type: array
           items:
@@ -87405,6 +87698,8 @@ components:
         - openCleaningOrderId
         - lastEventAt
         - opsVersion
+        - unitId
+        - actions
         - openBlocks
         - openCleaningOrder
     AvailabilityChangeDto:
@@ -87467,6 +87762,9 @@ components:
           type: array
           items:
             type: string
+        requestId:
+          type: string
+          description: Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación
       required:
         - cell
         - blockId
@@ -87508,6 +87806,9 @@ components:
         cleaningOrderId:
           type: string
           format: uuid
+        requestId:
+          type: string
+          description: Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación
       required:
         - cell
         - cleaningOrderId
@@ -87560,6 +87861,9 @@ components:
           type: string
           nullable: true
           format: uuid
+        requestId:
+          type: string
+          description: Id de la petición (también en la cabecera X-Request-Id); sólo en respuestas de mutación
       required:
         - cell
         - companionBlocks
@@ -87726,6 +88030,97 @@ components:
       required:
         - applied
         - overdue
+    InfraAccessGrantDto:
+      type: object
+      properties:
+        scope:
+          type: string
+          enum:
+            - UNIT
+            - SPACE
+        role:
+          type: string
+        clinicalUnitId:
+          type: string
+          nullable: true
+          format: uuid
+        careSpaceId:
+          type: string
+          nullable: true
+          format: uuid
+        actions:
+          description: Acciones que esta asignación permite sobre su unidad o espacio
+          type: array
+          items:
+            type: string
+      required:
+        - scope
+        - role
+        - clinicalUnitId
+        - careSpaceId
+        - actions
+    InfraAccessSiteDto:
+      type: object
+      properties:
+        siteId:
+          type: string
+          format: uuid
+        practiceId:
+          type: string
+          format: uuid
+        code:
+          type: string
+        name:
+          type: string
+        timeZone:
+          type: string
+          nullable: true
+        roles:
+          description: Roles de nivel sede u organización (plataforma, admin, asignaciones TENANT/PRACTICE/SITE)
+          type: array
+          items:
+            type: string
+        globalRoles:
+          description: Roles globales equivalentes (BILLING, OR_MANAGER, ACCOUNTING)
+          type: array
+          items:
+            type: string
+        actions:
+          description: Acciones permitidas sobre la sede entera
+          type: array
+          items:
+            type: string
+        grants:
+          type: array
+          items:
+            $ref: '#/components/schemas/InfraAccessGrantDto'
+      required:
+        - siteId
+        - practiceId
+        - code
+        - name
+        - timeZone
+        - roles
+        - globalRoles
+        - actions
+        - grants
+    InfraAccessMeDto:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/InfraAccessSiteDto'
+      required:
+        - userId
+        - tenantId
+        - sites
     IndexDocumentDto:
       type: object
       properties:

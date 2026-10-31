@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -27,6 +28,7 @@ import {
   Roles,
   requireTenantId,
   type AuthenticatedUser,
+  RequestIdBodyInterceptor,
 } from '../../../common';
 import { InpatientAdtService } from '../services/inpatient-adt.service';
 import { InpatientCensusService } from '../services/inpatient-census.service';
@@ -34,7 +36,10 @@ import { InpatientIndicatorsService } from '../services/inpatient-indicators.ser
 import {
   AdtResultDto,
   BedAssignmentDto,
+  AttendingPractitionerDto,
   BedCompatibilityQueryDto,
+  CompatibilityResultDto,
+  ProspectiveCompatibilityDto,
   BedSwapDto,
   CancelLocationDto,
   CensusAdjustmentDto,
@@ -58,6 +63,7 @@ const IF_MATCH = {
 @ApiTags('clinical-adt')
 @ApiBearerAuth()
 @Controller()
+@UseInterceptors(RequestIdBodyInterceptor)
 export class ClinicalAdtController {
   constructor(private readonly adt: InpatientAdtService) {}
 
@@ -76,6 +82,28 @@ export class ClinicalAdtController {
     @CurrentUser() actor: AuthenticatedUser,
   ) {
     return this.adt.compatibility(id, dto.careSpaceId, {
+      actor,
+      tenantId: requireTenantId(),
+    });
+  }
+
+  /** Compatibilidad prospectiva de una cama, sin encuentro (paso «Cama» del ingreso). */
+  @Audited({
+    action: 'BED_COMPATIBILITY_CHECKED',
+    entity: 'care_space',
+    entityId: 'body.careSpaceId',
+  })
+  @Post('clinical/bed-compatibility')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Compatibilidad prospectiva de una cama con un paciente',
+  })
+  @ApiOkResponse({ type: CompatibilityResultDto })
+  prospectiveCompatibility(
+    @Body() dto: ProspectiveCompatibilityDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.adt.prospectiveCompatibility(dto, {
       actor,
       tenantId: requireTenantId(),
     });
@@ -237,6 +265,33 @@ export class ClinicalAdtController {
     });
   }
 
+  /** Estancia vigente del paciente (404 si no está internado). */
+  @Get('clinical/patients/:id/inpatient-stay')
+  @ApiOperation({ summary: 'Estancia de internación vigente del paciente' })
+  currentStay(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.adt.currentStayOfPatient(id, {
+      actor,
+      tenantId: requireTenantId(),
+    });
+  }
+
+  /** Profesionales que pueden quedar a cargo de un ingreso en la sede. */
+  @Get('sites/:siteId/attending-practitioners')
+  @ApiOperation({ summary: 'Profesionales a cargo posibles en la sede' })
+  @ApiOkResponse({ type: [AttendingPractitionerDto] })
+  attendingPractitioners(
+    @Param('siteId', ParseUUIDPipe) siteId: string,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.adt.attendingPractitioners(siteId, {
+      actor,
+      tenantId: requireTenantId(),
+    });
+  }
+
   /** Ficha de internación: encuentro, movimientos e incidentes. */
   @Get('clinical/encounters/:id/stay')
   @ApiOperation({ summary: 'Ficha de internación' })
@@ -273,6 +328,7 @@ export class ClinicalAdtController {
 @ApiTags('clinical-census')
 @ApiBearerAuth()
 @Controller()
+@UseInterceptors(RequestIdBodyInterceptor)
 export class ClinicalCensusController {
   constructor(
     private readonly census: InpatientCensusService,

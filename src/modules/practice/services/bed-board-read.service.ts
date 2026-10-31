@@ -207,6 +207,16 @@ export class BedBoardReadService {
         orderBySpace.get(space.id) ?? null,
         lastEvents.get(space.id) ?? null,
         patient,
+        {
+          unitId:
+            index.ownerBySpace.get(space.id) ?? space.clinicalUnitId ?? null,
+          actions: this.access.allowedActions(
+            roles,
+            space.spaceTypeConceptId === PRAC.SPACE_FN_OPERATING_ROOM,
+            scope,
+          ),
+          clinical: PATIENT_VIEWERS.some((r) => roles.has(r)),
+        },
       );
       if (v2Filter.size > 0 && !v2Filter.has(cell.v2Code)) continue;
       cellsOut.push({
@@ -256,6 +266,7 @@ export class BedBoardReadService {
       if (cell.isolation.code !== 'ISO_NONE') c.isolation += 1;
     }
     return {
+      siteId,
       generatedAt: new Date().toISOString(),
       lastEventAt: lastEventAt?.toISOString() ?? null,
       units: [...units.values()],
@@ -277,7 +288,7 @@ export class BedBoardReadService {
     tenantId: string,
   ): Promise<OperationalStateDto> {
     const em = this.em.fork();
-    const { target, roles } = await this.access.assertCan(
+    const { target, roles, scope } = await this.access.assertCan(
       actor,
       'f2.board.read',
       { careSpaceId: spaceId },
@@ -291,13 +302,27 @@ export class BedBoardReadService {
       space,
       target.site.practiceId,
       withPatient,
+      this.access.allowedActions(
+        roles,
+        space.spaceTypeConceptId === PRAC.SPACE_FN_OPERATING_ROOM,
+        scope,
+      ),
     );
     const blocks = await this.opsRepo.openBlocks(em, space.id);
     const [order] = await this.opsRepo.openCleaningOrders(em, [space.id]);
+    const isOR = space.spaceTypeConceptId === PRAC.SPACE_FN_OPERATING_ROOM;
+    const settings = order
+      ? await this.core.settings(em, target.site.practiceId)
+      : null;
     return {
       ...cell,
       openBlocks: blocks.map((b) => this.cells.block(b)),
-      openCleaningOrder: order ? this.cells.order(order, space) : null,
+      openCleaningOrder: order
+        ? this.cells.order(order, space, new Date(), {
+            settingsInspectionRequired: settings?.inspectionRequired,
+            allows: (k) => this.access.can(k, roles, isOR, scope),
+          })
+        : null,
     };
   }
 
@@ -359,6 +384,7 @@ export class BedBoardReadService {
     );
     this.access.assertTargetInScope(filter, { unitId: query.unitId });
     const index = await this.index(em, siteId);
+    const settings = await this.core.settings(em, target.site.practiceId);
     const limit = query.limit ?? ORDER_PAGE;
     const rows = await em.find(
       CleaningOrders,
@@ -395,7 +421,13 @@ export class BedBoardReadService {
         )
       )
         continue;
-      items.push(this.cells.order(order, space));
+      const isOR = space.spaceTypeConceptId === PRAC.SPACE_FN_OPERATING_ROOM;
+      items.push(
+        this.cells.order(order, space, new Date(), {
+          settingsInspectionRequired: settings.inspectionRequired,
+          allows: (k) => this.access.can(k, roles, isOR, scope),
+        }),
+      );
       if (items.length >= limit) break;
     }
     return {
