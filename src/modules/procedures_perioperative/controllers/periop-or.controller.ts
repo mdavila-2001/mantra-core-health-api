@@ -7,10 +7,16 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Headers,
   Query,
   Res,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -273,17 +279,26 @@ export class PeriopOrController {
     entityId: 'param:id',
   })
   @Post('or-blocks/:id/release')
+  @ApiHeader({
+    name: 'If-Match',
+    required: false,
+    description: 'rowVersion del bloque (412 si no coincide)',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Liberar un bloque' })
   release(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: OrBlockReasonDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('if-match') ifMatch: string | undefined,
   ) {
-    return this.blocks.close(id, 'release', dto.reasonText, {
-      actor,
-      tenantId: requireTenantId(),
-    });
+    return this.blocks.close(
+      id,
+      'release',
+      dto.reasonText,
+      { actor, tenantId: requireTenantId() },
+      ifMatch,
+    );
   }
 
   /** Cancelar un bloque. */
@@ -293,17 +308,26 @@ export class PeriopOrController {
     entityId: 'param:id',
   })
   @Post('or-blocks/:id/cancel')
+  @ApiHeader({
+    name: 'If-Match',
+    required: false,
+    description: 'rowVersion del bloque (412 si no coincide)',
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cancelar un bloque' })
   cancel(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: OrBlockReasonDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Headers('if-match') ifMatch: string | undefined,
   ) {
-    return this.blocks.close(id, 'cancel', dto.reasonText, {
-      actor,
-      tenantId: requireTenantId(),
-    });
+    return this.blocks.close(
+      id,
+      'cancel',
+      dto.reasonText,
+      { actor, tenantId: requireTenantId() },
+      ifMatch,
+    );
   }
 
   /** Utilización de quirófanos. */

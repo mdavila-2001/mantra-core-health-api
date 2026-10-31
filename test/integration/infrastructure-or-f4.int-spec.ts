@@ -398,4 +398,96 @@ describe('Infraestructura F4 · quirófanos', () => {
       .expect(422);
     expect(res.body.code).toBe('PRECONDITION_FAILED');
   });
+
+  it('lecturas para la web (§F4.3): detalle con sala, reserva, check-list y eventos; lista con sala; bloque con etiqueta e If-Match; utilización con totales', async () => {
+    const detail = await http()
+      .get(`/procedure-cases/${ids.caseA}`)
+      .set(como(manager))
+      .expect(200);
+    expect(detail.body.case).toMatchObject({
+      operatingRoom: { id: orId, name: 'Quirófano 1' },
+      prepMinutes: 15,
+      cleanupMinutes: 20,
+      reservedStartAt: expect.any(String),
+      reservedEndAt: expect.any(String),
+      caseType: expect.objectContaining({ code: expect.any(String) }),
+    });
+    expect(detail.body.checklist).toMatchObject({
+      id: expect.any(String),
+      signIn: { completedAt: null },
+      timeOut: { completedAt: null },
+      signOut: { completedAt: null },
+    });
+    expect(detail.body.roomEvents.map((e: any) => e.eventCode)).toEqual([
+      'PATIENT_IN_ROOM',
+    ]);
+    expect(detail.body.turnoverCleaning).toBeNull();
+    // Otro tenant no ve el caso.
+    await http()
+      .get(`/procedure-cases/${ids.caseA}`)
+      .set(como(orgB))
+      .expect((r) => expect([403, 404]).toContain(r.status));
+
+    const list = await http()
+      .get('/procedure-cases')
+      .query({ operatingRoomId: orId })
+      .set(como(manager))
+      .expect(200);
+    const row = list.body.items.find((c: any) => c.id === ids.caseA);
+    expect(row).toMatchObject({
+      operatingRoom: { id: orId },
+      reservedStartAt: expect.any(String),
+    });
+
+    const blk = await http()
+      .post(`/sites/${orgA.siteId}/or-blocks`)
+      .set(como(manager))
+      .send({
+        operatingRoomId: orId,
+        ownerKind: 'SURGEON',
+        surgeonProfileId: surgeonId,
+        startsAt: at('21:00'),
+        endsAt: at('22:00'),
+      })
+      .expect(201);
+    const block = blk.body.blocks[0];
+    expect(block.owner.label).toEqual(expect.any(String));
+    const blocks = await http()
+      .get(`/sites/${orgA.siteId}/or-blocks`)
+      .query({ operatingRoomId: orId })
+      .set(como(manager))
+      .expect(200);
+    const listed = blocks.body.find((b: any) => b.id === block.id);
+    expect(listed.owner.label).toBe(block.owner.label);
+    expect(listed.cases).toEqual([]);
+    const stale = await http()
+      .post(`/or-blocks/${block.id}/cancel`)
+      .set(como(manager))
+      .set('If-Match', String(block.rowVersion + 7))
+      .send({ reasonText: 'x' })
+      .expect(412);
+    expect(stale.body.reason).toBe('ROW_VERSION_MISMATCH');
+    await http()
+      .post(`/or-blocks/${block.id}/cancel`)
+      .set(como(manager))
+      .set('If-Match', String(block.rowVersion))
+      .send({ reasonText: 'x' })
+      .expect(200);
+
+    const util = await http()
+      .get(`/sites/${orgA.siteId}/or-utilization`)
+      .query({ from: day, to: day })
+      .set(como(manager))
+      .expect(200);
+    expect(util.body).toMatchObject({
+      asOf: expect.any(String),
+      totals: {
+        sessionMinutes: expect.any(Number),
+        touchMinutes: expect.any(Number),
+      },
+    });
+    expect(util.body.totals.sessionMinutes).toBe(
+      util.body.rooms.reduce((a: number, r: any) => a + r.sessionMinutes, 0),
+    );
+  });
 });

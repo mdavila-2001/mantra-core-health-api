@@ -1,6 +1,7 @@
 import { PracticeModule } from '../practice/practice.module';
 import { PeriopOrController } from './controllers/periop-or.controller';
 import { OperatingRoomValidator } from './services/or/operating-room.validator';
+import { CaseOrViewBuilder } from './services/or/case-or-view';
 import {
   OrBlocksUseCases,
   OrTurnoverObserver,
@@ -61,6 +62,7 @@ import { AuthzModule } from '../authz/authz.module';
   providers: [
     PeriopCasesRepository,
     OperatingRoomValidator,
+    CaseOrViewBuilder,
     SafetyChecklistUseCases,
     RecordRoomEventUseCase,
     OrBlocksUseCases,

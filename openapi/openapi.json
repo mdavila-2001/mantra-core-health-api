@@ -89591,6 +89591,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "rowVersion del bloque (412 si no coincide)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -89658,6 +89667,15 @@
             "name": "id",
             "required": true,
             "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "description": "rowVersion del bloque (412 si no coincide)",
+            "required": false,
             "schema": {
               "type": "string"
             }

@@ -25,6 +25,8 @@ import {
   SurgicalSafetyResponses,
 } from '../../entities';
 import { PERIOP } from '../../procedures_perioperative.concepts';
+import { checkIfMatchWhenPresent } from '../../../practice/services/structure-input';
+import { CaseOrViewBuilder } from './case-or-view';
 import { PRAC } from '../../../practice/practice.concepts';
 import { ProceduresPerioperativeErrorReason as R } from '../../procedures_perioperative.error-reasons';
 import { PeriopCasesRepository } from '../../repositories';
@@ -521,7 +523,23 @@ export class OrBlocksUseCases {
     private readonly access: InfrastructureAccessService,
     private readonly outbox: OutboxService,
     @Inject(CARE_SPACE_OPS_PORT) private readonly ops: CareSpaceOpsPort,
+    private readonly views?: CaseOrViewBuilder,
   ) {}
+
+  /** Etiquetas del dueño de los bloques (servicio o cirujano). */
+  private async labels(
+    tx: EntityManager,
+    blocks: readonly OperatingRoomBlocks[],
+    tenantId: string,
+  ): Promise<Map<string, string>> {
+    return (
+      (await this.views?.blockLabels(
+        tx,
+        blocks.map((b) => b.id),
+        tenantId,
+      )) ?? new Map()
+    );
+  }
 
   /**
    * `POST /sites/:siteId/or-blocks`.
@@ -719,7 +737,11 @@ export class OrBlocksUseCases {
           req.actor.id,
         );
       }
-      return { seriesId: seriesId ?? null, blocks: blocks.map(blockView) };
+      const labels = await this.labels(tx, blocks, req.tenantId);
+      return {
+        seriesId: seriesId ?? null,
+        blocks: blocks.map((b) => blockView(b, labels.get(b.id))),
+      };
     });
   }
 
@@ -736,6 +758,7 @@ export class OrBlocksUseCases {
     action: 'release' | 'cancel',
     reasonText: string | undefined,
     req: OrRequest,
+    ifMatch?: string,
   ) {
     return this.em.transactional(async (tx) => {
       const block = await tx.findOne(OperatingRoomBlocks, { id: blockId });
@@ -750,6 +773,9 @@ export class OrBlocksUseCases {
         tx,
         req.tenantId,
       );
+      // Liberar un bloque al que alguien acaba de ligar un caso tiene que
+      // fallar, no pisar: If-Match con la versión del bloque (412).
+      checkIfMatchWhenPresent(ifMatch, block.rowVersion);
       return this.closeInTx(tx, block, action, reasonText, req.actor.id);
     });
   }
@@ -838,6 +864,7 @@ export class OrBlocksUseCases {
           statusConceptId: { $ne: CONCEPTS.CASE_CANCELLED },
         })
       : [];
+    const labels = await this.labels(em, blocks, req.tenantId);
     return blocks.map((b) => {
       const linked = cases.filter((c) => c.operatingRoomBlockId === b.id);
       const used = linked.reduce(
@@ -849,7 +876,7 @@ export class OrBlocksUseCases {
         0,
       );
       return {
-        ...blockView(b),
+        ...blockView(b, labels.get(b.id)),
         usedMinutes: used,
         cases: linked.map((c) => c.id),
       };
@@ -922,7 +949,10 @@ export class OrBlocksUseCases {
 }
 
 /** Vista de un bloque. */
-export function blockView(b: OperatingRoomBlocks): Record<string, unknown> {
+export function blockView(
+  b: OperatingRoomBlocks,
+  label?: string,
+): Record<string, unknown> {
   return {
     id: b.id,
     seriesId: b.seriesId ?? null,
@@ -935,6 +965,7 @@ export function blockView(b: OperatingRoomBlocks): Record<string, unknown> {
       clinicalUnitId: b.clinicalUnitId ?? null,
       specialtyConceptId: b.surgicalSpecialtyConceptId ?? null,
       surgeonProfileId: b.surgeonProfileId ?? null,
+      label: label ?? null,
     },
     startsAt: b.startsAt.toISOString(),
     endsAt: b.endsAt.toISOString(),
