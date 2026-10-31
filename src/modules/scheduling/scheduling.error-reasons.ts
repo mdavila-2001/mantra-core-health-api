@@ -8,6 +8,10 @@
  * discriminar sobre esto sin parsear el mensaje en español.
  */
 export enum SchedulingErrorReason {
+  // R0 (CONTRATO-F2-F5 §F4.3): recurso agendable ligado a un espacio.
+  SPACE_NOT_SCHEDULABLE = 'SPACE_NOT_SCHEDULABLE',
+  SPACE_NOT_ACTIVE = 'SPACE_NOT_ACTIVE',
+  RESOURCE_ALREADY_EXISTS_FOR_SPACE = 'RESOURCE_ALREADY_EXISTS_FOR_SPACE',
   // Motivo de texto libre (corrección #14): cancelar, rechazar, reprogramar.
   REASON_REQUIRED = 'REASON_REQUIRED',
   REASON_PLACEHOLDER = 'REASON_PLACEHOLDER',

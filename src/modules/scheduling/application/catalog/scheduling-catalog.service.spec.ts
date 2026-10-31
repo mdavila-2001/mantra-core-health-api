@@ -26,6 +26,7 @@ const RESOURCE = '22222222-2222-2222-2222-222222222222';
  * Crea build catalog.
  * @returns Resultado de build catalog.
  */
+
 function buildCatalog() {
   const tx = { flush: mockFn() };
   // `fork()` además de `transactional`: las lecturas del servicio —listSlots y
@@ -127,6 +128,20 @@ function buildCatalog() {
     noticeRepo,
     notices,
     cancelBooking,
+    // R0: un recurso `care_spaces` exige un espacio real, agendable y activo
+    // del tenant; el doble describe uno así.
+    careSpaces: {
+      describe: async (_tx: unknown, id: string) => ({
+        tenantId: TENANT,
+        practiceSiteId: 'site-1',
+        functionCode: 'SPACE_FN_OPERATING_ROOM',
+        schedulable: true,
+        active: true,
+        id,
+      }),
+      hasActiveResource: async () => false,
+      announceLinked: async () => undefined,
+    },
   });
   return {
     service,

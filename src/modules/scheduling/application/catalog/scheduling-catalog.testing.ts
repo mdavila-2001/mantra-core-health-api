@@ -1,3 +1,4 @@
+import type { CareSpaceDirectoryPort } from '../ports/care-space-directory.port';
 import { SchedulingCatalogService } from './scheduling-catalog.service';
 import { AgendaOverlapGuard, CatalogAccess, SlotMoveNotifier } from './support';
 import { BlockedBookingsCanceller } from './support/blocked-bookings-canceller';
@@ -34,6 +35,8 @@ export interface CatalogServiceDoubles {
    * basta para ellas.
    */
   cancelBooking?: any;
+  /** R0: espacios físicos (por defecto, ninguno). */
+  careSpaces?: CareSpaceDirectoryPort;
 }
 
 /**
@@ -67,7 +70,17 @@ export function createCatalogService(d: CatalogServiceDoubles) {
   );
 
   return new SchedulingCatalogService(
-    new CreateResourceUseCase(em, catalogRepo, access, logger),
+    new CreateResourceUseCase(
+      em,
+      catalogRepo,
+      access,
+      logger,
+      d.careSpaces ?? {
+        describe: async () => null,
+        hasActiveResource: async () => false,
+        announceLinked: async () => undefined,
+      },
+    ),
     new CreateBookingPolicyUseCase(em, catalogRepo, access, logger),
     new CreateTemplateUseCase(em, catalogRepo, access, overlapGuard, logger),
     new UpdateTemplateUseCase(em, catalogRepo, access, logger),

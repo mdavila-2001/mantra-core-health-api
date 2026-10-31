@@ -1,3 +1,5 @@
+import { OperatingRoomValidator } from './or/operating-room.validator';
+import { assertChecklistPhase } from './or/checklist-gates';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
@@ -133,13 +135,6 @@ const CHARGE_TYPE_CONCEPT: Readonly<Record<ChargeType, string>> = {
   OR_TIME: CONCEPTS.CHARGE_TYPE_OR_TIME,
 };
 
-/** Estados en los que el caso todavía ocupa el quirófano reservado. */
-const BLOCKING_CASE_STATES: readonly string[] = [
-  CONCEPTS.CASE_SCHEDULED,
-  CONCEPTS.CASE_READY_FOR_SURGERY,
-  CONCEPTS.SURGICAL_CASE_IN_PROGRESS,
-];
-
 /** Estados desde los que todavía se puede cancelar. */
 const CANCELLABLE_CASE_STATES: readonly string[] = [
   CONCEPTS.CASE_SCHEDULED,
@@ -227,6 +222,8 @@ export class PeriopCasesService {
     private readonly logger: PinoLogger,
     // Regla de `authz` para el paciente del caso (#893).
     private readonly clinicalScope: AuthzClinicalScopeService,
+    // F4 (§F4.3): validaciones 1–7 del quirófano (espacio real, recurso, bloques).
+    private readonly orValidator: OperatingRoomValidator,
   ) {
     this.logger.setContext(PeriopCasesService.name);
   }
@@ -294,23 +291,18 @@ export class PeriopCasesService {
           dto.patientProfileId,
         );
       }
-      const overlapping = await this.casesRepo.findOverlappingCases(
-        tx,
-        dto.operatingRoomId,
-        scheduledStartAt,
-        scheduledEndAt,
-        [...BLOCKING_CASE_STATES],
-      );
-      if (overlapping.length > 0) {
-        throw new ConflictException(
-          'El quirófano ya está reservado en esa franja',
-          {
-            operatingRoomId: dto.operatingRoomId,
-            conflictingCaseId: overlapping[0].id,
-          },
-          ProceduresPerioperativeErrorReason.OPERATING_ROOM_SLOT_CONFLICT,
-        );
-      }
+      // F4 (§F4.3): quirófano real del tenant, misma sede, función, ciclo de
+      // vida y bloqueos de F2, recurso agendable, bloques y solape de la
+      // ventana reservada (prep + limpieza; la escribe el trigger).
+      const room = await this.orValidator.validate(tx, {
+        operatingRoomId: dto.operatingRoomId,
+        practiceSiteId: dto.practiceSiteId,
+        start: scheduledStartAt,
+        end: scheduledEndAt,
+        caseType: dto.caseType,
+        specialtyConceptId: dto.surgicalSpecialtyConceptId,
+        surgeonProfileId: dto.primarySurgeonProfileId,
+      });
 
       const caseNumber = await this.nextCaseNumber(tx, custodianTenantId);
       const surgicalCase = this.casesRepo.createCase(tx, {
@@ -333,6 +325,13 @@ export class PeriopCasesService {
         urgencyReasonText: dto.urgencyReasonText,
         actorUserId: actor.id,
       });
+      // Foto de prep/limpieza de la sala y vínculos de F4; la ventana
+      // reservada la deriva el trigger de estas columnas.
+      surgicalCase.prepMinutes = room.prepMinutes;
+      surgicalCase.cleanupMinutes = room.cleanupMinutes;
+      surgicalCase.schedulableResourceId = room.schedulableResourceId;
+      surgicalCase.operatingRoomBlockId =
+        room.operatingRoomBlockId ?? undefined;
       // Las cuatro filas de abajo referencian el caso por una columna uuid
       // plana, no por una relación de MikroORM: el ORM no sabe que dependen de
       // él y puede insertarlas antes en el mismo flush, violando la FK. Sin este
@@ -508,6 +507,31 @@ export class PeriopCasesService {
           { caseId },
           ProceduresPerioperativeErrorReason.SCHEDULE_END_BEFORE_START,
         );
+      }
+      // F4 (§F4.3): reprogramar valida otra vez el quirófano y la ventana
+      // reservada contra los demás casos (sin contar éste).
+      if (
+        (dto.scheduledStartAt || dto.scheduledEndAt) &&
+        surgicalCase.operatingRoomId &&
+        surgicalCase.scheduledStartAt &&
+        surgicalCase.scheduledEndAt
+      ) {
+        const room = await this.orValidator.validate(tx, {
+          operatingRoomId: surgicalCase.operatingRoomId,
+          practiceSiteId: surgicalCase.practiceSiteId,
+          start: surgicalCase.scheduledStartAt,
+          end: surgicalCase.scheduledEndAt,
+          caseType:
+            Object.entries(CASE_TYPE_CONCEPT).find(
+              ([, id]) => id === surgicalCase.caseTypeConceptId,
+            )?.[0] ?? 'ELECTIVE',
+          specialtyConceptId: surgicalCase.surgicalSpecialtyConceptId,
+          surgeonProfileId: surgicalCase.primarySurgeonProfileId,
+          excludeCaseId: surgicalCase.id,
+        });
+        surgicalCase.schedulableResourceId = room.schedulableResourceId;
+        surgicalCase.operatingRoomBlockId =
+          room.operatingRoomBlockId ?? undefined;
       }
 
       // Spec 227-230: una aceptación vale para **la versión que se aceptó**.
@@ -1615,6 +1639,18 @@ export class PeriopCasesService {
         tx,
         caseId,
       );
+      // F5e (§F5e): el uso de sala se devenga solo (quirófano por tiempo);
+      // cargarlo a mano lo cobraría dos veces. Cambio de comportamiento
+      // pedido por el contrato.
+      if (dto.items.some((item) => item.chargeType === 'OR_TIME')) {
+        throw new PreconditionFailedException(
+          'El cargo de sala se genera automáticamente al completar el caso',
+          { caseId },
+          ProceduresPerioperativeErrorReason.ROOM_CHARGE_IS_AUTOMATIC,
+        );
+      }
+      // F4 (§F4.3): facturar exige la Salida OMS.
+      await assertChecklistPhase(this.casesRepo, tx, caseId, 'SIGN_OUT');
       if (surgicalCase.statusConceptId !== CONCEPTS.CASE_COMPLETED) {
         throw new PreconditionFailedException(
           'Sólo se factura un caso completado',
@@ -1729,7 +1765,13 @@ export class PeriopCasesService {
     const total = await this.casesRepo.countCases(tx, custodianTenantId);
     for (let attempt = 1; attempt <= 5; attempt += 1) {
       const candidate = `CQ-${String(total + attempt).padStart(6, '0')}`;
-      if (!(await this.casesRepo.findCaseByNumber(tx, candidate)))
+      if (
+        !(await this.casesRepo.findCaseByNumber(
+          tx,
+          candidate,
+          custodianTenantId,
+        ))
+      )
         return candidate;
     }
     throw new ConflictException(

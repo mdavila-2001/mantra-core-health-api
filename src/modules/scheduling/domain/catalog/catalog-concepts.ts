@@ -183,6 +183,9 @@ export const MAX_SLOTS_PER_RUN = 2000;
  */
 export const TABLE_ALIAS: Readonly<Record<string, string>> = {
   practitioner_profiles: 'health_practitioner_profiles',
+  // R0 (CONTRATO-F2-F5 §F4.1): un recurso ligado a un espacio usa el nombre
+  // canónico `care_spaces`, con o sin schema.
+  'practice.care_spaces': 'care_spaces',
 };
 
 export function canonicalRefType(refType: string): string {
