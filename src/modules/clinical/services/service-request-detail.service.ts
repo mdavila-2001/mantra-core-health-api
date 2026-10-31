@@ -110,7 +110,11 @@ export class ServiceRequestDetailService {
       }
     }
     // Sin categoría en el alta, la que el catálogo da al estudio.
-    if (categoryConceptId === undefined && enforce && study?.family) {
+    if (
+      categoryConceptId === undefined &&
+      enforce &&
+      (study?.family === 'LAB' || study?.family === 'IMAGING')
+    ) {
       categoryConceptId = categoryConceptIdFor(study.family);
     }
     const category: AnalysisCategory | undefined =

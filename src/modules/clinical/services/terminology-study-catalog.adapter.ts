@@ -20,9 +20,12 @@ const MAX_PANEL_DEPTH = 6;
  * - componentes: `concept_relationships` de tipo `REL_PART_OF` (componente
  *   `part-of` panel; se acepta también el sentido inverso, panel→componente,
  *   porque el plan lo describe así);
- * - familia: propiedad de concepto `study_family` (`LAB|IMAGING|OTHER`);
- * - modalidad: relación cuyo tipo tiene `code = 'has-modality'`;
- * - lateralizable: propiedad de concepto `lateralizable` (boolean).
+ * - familia: propiedad de concepto `study_family` (`LAB|IMAGING|CARDIO|PATHOLOGY|PROCEDURE`,
+ *   la publica `study_catalog`); aquí `CARDIO`, `PATHOLOGY` y `PROCEDURE` son `OTHER`
+ *   (así las clasifica `analysisCategoryOf`). Los 88 estudios locales anteriores no la
+ *   tienen: familia `null` y V2 no se les aplica;
+ * - modalidad: relación estudio → modalidad cuyo tipo es `study_catalog:REL_HAS_MODALITY`;
+ * - lateralizable: propiedad de concepto `laterality_admitted` (boolean) de la región.
  *
  * Lo que el catálogo no declara devuelve `null` y la validación correspondiente
  * no se aplica: no se adivina una regla clínica.
@@ -43,7 +46,7 @@ export class TerminologyStudyCatalogAdapter implements StudyCatalogPort {
     ]);
     return {
       conceptId,
-      family: isFamily(family) ? family : null,
+      family: familyOf(family),
       componentsSelectable: components.size > 0,
       modalityConceptId: modality,
     };
@@ -113,7 +116,7 @@ export class TerminologyStudyCatalogAdapter implements StudyCatalogPort {
     if (!(await this.isInValueSet(em, 'imaging-body-structure', conceptId))) {
       return null;
     }
-    const value = await this.property(em, conceptId, 'lateralizable');
+    const value = await this.property(em, conceptId, 'laterality_admitted');
     return {
       conceptId,
       lateralizable: typeof value === 'boolean' ? value : null,
@@ -142,7 +145,7 @@ export class TerminologyStudyCatalogAdapter implements StudyCatalogPort {
       `SELECT r.target_concept_id AS target
          FROM terminology.concept_relationships r
          JOIN terminology.catalog_concepts t ON t.id = r.relationship_type_concept_id
-        WHERE r.source_concept_id = ? AND t.code = 'has-modality'
+        WHERE r.source_concept_id = ? AND t.code = 'study_catalog:REL_HAS_MODALITY'
         ORDER BY r.target_concept_id
         LIMIT 1`,
       [conceptId],
@@ -152,6 +155,19 @@ export class TerminologyStudyCatalogAdapter implements StudyCatalogPort {
   }
 }
 
-function isFamily(value: unknown): value is StudyFamily {
-  return value === 'LAB' || value === 'IMAGING' || value === 'OTHER';
+/** `study_family` del catálogo → familia que entiende la orden (`LAB|IMAGING|OTHER`). */
+function familyOf(value: unknown): StudyFamily | null {
+  switch (value) {
+    case 'LAB':
+      return 'LAB';
+    case 'IMAGING':
+      return 'IMAGING';
+    case 'CARDIO':
+    case 'PATHOLOGY':
+    case 'PROCEDURE':
+    case 'OTHER':
+      return 'OTHER';
+    default:
+      return null;
+  }
 }
