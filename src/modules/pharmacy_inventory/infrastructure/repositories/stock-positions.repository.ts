@@ -44,6 +44,16 @@ export interface CreateStockPositionData extends StockPositionKey {
   lastLedgerSequence?: string;
 }
 
+/** Un producto de la farmacia que todavía no tiene posición en una sede. */
+export interface ProductWithoutSitePosition {
+  /** Producto de la farmacia. */
+  readonly productId: string;
+  /** Conteo declarado en el catálogo; `null` es «hay» sin número. */
+  readonly stockQuantity: number | null;
+  /** «No tengo» de toda la farmacia. */
+  readonly outOfStockDeclared: boolean;
+}
+
 /**
  * Acceso a datos de `pharmacy_inventory.inventory_stock_positions`.
  *
