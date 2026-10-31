@@ -9,7 +9,7 @@
 # Módulo `marketing`
 
 **Fuente:** [`src/modules/marketing/README.md`](https://github.com/mdavila-2001/mantra-core-health-api/blob/dev/src/modules/marketing/README.md)
-· 3 controllers · 3 services · 3 repositories · 36 entidades · 3 DTO
+· 5 controllers · 5 services · 5 repositories · 36 entidades · 4 DTO
 
 ---
 
@@ -18,18 +18,18 @@
 Segmentación de audiencia, campañas multicanal, plantillas de contenido versionadas, journeys con
 inscripciones que avanzan paso a paso, enlaces rastreables y atribución multi-touch. Además sirve el
 dataset de **plataforma** de AloVida Insights (`/marketing/insights/*`, tablas `insights_*` sin
-`tenant_id`): por ahora sus dos lecturas de campañas, `catalog` y `campaign-facts`.
+`tenant_id`): sus dos lecturas de campañas (`catalog`, `campaign-facts`) y el flujo de trabajo de las personas (alertas, reglas, preferencias, vistas guardadas e informes).
 
 ## Rutas HTTP y alcance (medido)
 
-<!-- Medido el 2026-10-31 sobre origin/dev (f02f6544) más la rama claude/insights-f3-lecturas. Repetir con:
+<!-- Medido el 2026-10-31 sobre origin/dev (f02f6544) más las ramas claude/insights-f3-lecturas y claude/insights-f4-escrituras. Repetir con:
   find src/modules/marketing -name '*.controller.ts' | wc -l
   find src/modules/marketing -name '*.controller.ts' -exec grep -hE "^\s*@(Get|Post|Put|Patch|Delete)\(" {} + | wc -l
   find src/modules/marketing -name '*.entity.ts' | wc -l
   find src/modules/marketing -name '*.service.ts' | wc -l
 La tabla sale de los decoradores `@Controller`/`@Get`/`@Post`/`@Put`/`@Patch`/`@Delete`, `@Roles` y `@Public`. -->
 
-El módulo tiene **3 controllers, 17 rutas HTTP, 36 entidades y 3 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
+El módulo tiene **5 controllers, 31 rutas HTTP, 36 entidades y 5 servicios**. La columna *Acceso* sale del código: `pública` = `@Public()`; un rol = `@Roles(...)`; `sesión` = sin ninguno de los dos, o sea que sólo exige sesión autenticada (guards globales `JwtAuthGuard`, `TenantScopeGuard`, `RolesGuard`, `VerifiedIdentityGuard`). La autorización por recurso puede vivir además en el servicio y no se refleja acá.
 
 Si una tabla narrativa más abajo difiere de ésta (prefijo del controller omitido, sufijos `:accion` de la spec en lugar de sub-rutas), manda ésta: sale del código.
 
@@ -56,8 +56,16 @@ Entidades (`tableName`, 36 de 36 archivos `*.entity.ts`): las 14 del módulo (`a
 | `GET /r/:code` | pública | `tracked-link-redirect` |
 | `GET /marketing/insights/catalog` | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN (+ SUPERADMIN) | `insights-facts` |
 | `GET /marketing/insights/campaign-facts` | MARKETING_MANAGER, PLATFORM_ADMIN, DATA_PLATFORM_ADMIN (+ SUPERADMIN) | `insights-facts` |
+| `GET /marketing/insights/alert-workflow` | ídem | `insights-workflow` |
+| `PUT /marketing/insights/alert-workflow/:fingerprint` | ídem | `insights-workflow` |
+| `GET /marketing/insights/alert-rules` | ídem | `insights-workflow` |
+| `PATCH /marketing/insights/alert-rules/:code` | ídem | `insights-workflow` |
+| `GET` · `PUT /marketing/insights/notification-preferences` | ídem | `insights-workspace` |
+| `GET` · `PUT /marketing/insights/user-preferences` | ídem | `insights-workspace` |
+| `GET /marketing/insights/saved-views` · `PUT` · `DELETE /marketing/insights/saved-views/:id` | ídem | `insights-workspace` |
+| `GET /marketing/insights/reports` · `PUT` · `DELETE /marketing/insights/reports/:id` | ídem | `insights-workspace` |
 
-## Casos de uso cubiertos (14)
+## Casos de uso cubiertos (18)
 
 | UC | Endpoint | Descripción |
 | --- | --- | --- |
@@ -75,6 +83,10 @@ Entidades (`tableName`, 36 de 36 archivos `*.entity.ts`): las 14 del módulo (`a
 | UC-50-12 | `POST /marketing/attribution/compute` | Atribución multi-touch |
 | UC-50-13 | `GET /marketing/insights/catalog` | Catálogo de Insights: campañas (con canales derivados de sus creativos) e hitos |
 | UC-50-14 | `GET /marketing/insights/campaign-facts` | Hechos diarios por campaña y canal en una ventana de hasta 92 días, con `meta` (`dataset`, `asOf`, `notMeasured`) |
+| UC-50-15 | `GET /marketing/insights/alert-workflow` · `PUT /marketing/insights/alert-workflow/:fingerprint` | Estado, responsable e historial de una alerta detectada por la pantalla: el `PUT` la crea con su `snapshot` la primera vez y escribe una fila de `insights_alert_transitions` solo si cambia el estado o el responsable |
+| UC-50-16 | `GET /marketing/insights/alert-rules` · `PATCH /marketing/insights/alert-rules/:code` | Encender, apagar o cambiar el umbral (1 a 500) de una de las siete reglas; `If-Match` obligatorio |
+| UC-50-17 | `GET`·`PUT /marketing/insights/notification-preferences` · `user-preferences` | Preferencias de aviso (no se envía nada) y de interfaz del usuario autenticado |
+| UC-50-18 | `GET`·`PUT`·`DELETE /marketing/insights/saved-views` · `reports` | Vistas guardadas (nombre único por usuario) e historial de informes (máximo 12 por usuario) |
 
 ## Entidades
 
@@ -137,12 +149,14 @@ touchpoints del miembro en ventana ── attribution/compute ──> reparto co
 **AloVida Insights** (`/marketing/insights/*`, decisión D-7): `@Roles('MARKETING_MANAGER',
 'PLATFORM_ADMIN', 'DATA_PLATFORM_ADMIN')` en cada handler (`SUPERADMIN` entra por el comodín de
 `RolesGuard`) y `@PlatformTenantOptional('SUPERADMIN', 'PLATFORM_ADMIN', 'DATA_PLATFORM_ADMIN')` en
-la clase. Nunca `BUSINESS_ADMIN`. `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` son roles globales y leen
+la clase. Nunca `BUSINESS_ADMIN`. Las escrituras (`INSIGHTS_WRITE_ROLES`) usan los mismos roles que las
+lecturas y todas llevan `@Audited` (`MARKETING_INSIGHTS_*`). `PLATFORM_ADMIN` y `DATA_PLATFORM_ADMIN` son roles globales y leen
 sin cabecera. `MARKETING_MANAGER` está sembrado con ámbito de **tenant**: no está en la lista
 tenant-opcional a propósito, así que necesita `X-Tenant-Id` (o una sola membresía) y solo autoriza
 en el tenant donde se le concedió (`403 ROLE_INSUFFICIENT` en otro; `403 TENANT_AMBIGUOUS` /
 `TENANT_REQUIRED` sin cabecera con varias o ninguna membresía). Esa cadena está fijada por
-`insights-access.spec.ts`, que ejecuta `TenantScopeGuard` y `RolesGuard` reales.
+`insights-access.spec.ts`, que ejecuta `TenantScopeGuard` y `RolesGuard` reales contra los 16 handlers de
+Insights (lecturas y escrituras).
 
 **Resto del módulo:**
 
@@ -158,7 +172,12 @@ al destinatario).
 **Excepción: AloVida Insights es «plataforma, sin tenant».** Las tablas `marketing.insights_*` no
 llevan `tenant_id` y las lecturas de `/marketing/insights/*` no se filtran por tenant: lo que
 protege el dato es el rol (ver *Permisos*), no la fila. Para `MARKETING_MANAGER` el tenant solo
-sirve para pasar los guards; el contenido devuelto es el mismo en cualquier tenant. Lo que sigue
+sirve para pasar los guards; el contenido devuelto es el mismo en cualquier tenant. Las alertas y las
+reglas son **compartidas** por todo el portal. Lo que es de la persona (preferencias de aviso y de
+interfaz, vistas guardadas, informes) se acota por `user_id` = **id del usuario autenticado**
+(`@CurrentUser()`): ninguna ruta recibe un `userId`, todo SQL filtra por él, y un `id` de vista o
+informe que es de otro usuario responde `404 MARKETING_INSIGHTS_RESOURCE_NOT_AVAILABLE` (igual que
+uno inexistente); `DELETE` es idempotente y no toca filas ajenas. Lo que sigue
 describe el resto del módulo.
 
 El tenant sale del contexto autenticado (`requireTenantId()`), nunca del cuerpo: `tenantId` en los
@@ -178,6 +197,23 @@ rastreable (para no perder clicks) y miembro de campaña. `FOR UPDATE SKIP LOCKE
 inscripciones: varios orquestadores trabajan en paralelo y ninguno debe esperar a la inscripción que
 otro ya tiene tomada. `row_version` aporta bloqueo optimista automático.
 
+### Concurrencia de Insights (`If-Match`)
+
+- **Alertas** (`PUT alert-workflow/:fingerprint`): `SELECT … FOR UPDATE` por `fingerprint`. Alta sin
+  `If-Match` (si viene, solo vale `0`); si la alerta existe, `If-Match` con su `rowVersion` o
+  `412 MARKETING_INSIGHTS_VERSION_MISMATCH` (también si falta). Dos altas simultáneas: una crea
+  (`ON CONFLICT (fingerprint) DO NOTHING`), la otra recibe 412. Un PUT sin cambio de estado ni de
+  responsable no sube `rowVersion` ni escribe transición.
+- **Reglas** (`PATCH alert-rules/:code`): `If-Match` obligatorio (`428 MARKETING_INSIGHTS_IF_MATCH_REQUIRED`
+  si falta, `412` si está vieja). Umbral fuera de 1 a 500 → `422 MARKETING_INSIGHTS_RULE_THRESHOLD_OUT_OF_RANGE`
+  (lo valida el servicio, no el `ValidationPipe`, que respondería 400).
+- **Preferencias**: igual que las alertas; mientras el usuario no guardó nada, el `GET` devuelve valores
+  por defecto con `rowVersion` 0.
+- **Vistas e informes**: `PUT` idempotente por `id` del cliente, sin `If-Match`. Un
+  `pg_advisory_xact_lock` por usuario serializa sus escrituras: el nombre de vista repetido en otro
+  `id` es `409 MARKETING_INSIGHTS_VIEW_NAME_TAKEN` y el informe 13.º expulsa el más viejo (borra lo que
+  pase de 12, ordenado por `created_at`).
+
 ## Logs
 
 `operation: 'marketing.<área>.<acción>'`. No se loguean identificadores de miembro más allá del UUID
@@ -191,6 +227,13 @@ ni el contenido de las plantillas.
 (ventana, `NULL` a `notMeasured`, mapeos) y `insights-query.dto.spec.ts`. La integración opt-in con
 PostgreSQL real es `test/integration/marketing-insights.int-spec.ts` (`DATA_CATALOG_IT_DB_URL`, base
 desechable).
+
+Para el flujo de trabajo: `insights-workflow.service.spec.ts` y `insights-workspace.service.spec.ts`
+(transición solo con cambio, 412, 422, 409, límite de 12, aislamiento por usuario),
+`insights-workflow.controller.spec.ts` (`@Roles`, `@PlatformTenantOptional`, `@Audited` en cada
+handler) e `insights-workspace.dto.spec.ts`. Integración opt-in:
+`test/integration/marketing-insights-workflow.int-spec.ts` (PUT alerta → fila + transición, 412 con
+`If-Match` viejo, vista ×2 = una fila, informe 13.º expulsa el 1.º, aislamiento entre usuarios).
 
 ## Revisión backend 2026-10-04
 
