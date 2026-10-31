@@ -185,6 +185,26 @@ export class StructureAccessService {
     );
   }
 
+  /**
+   * Nivel de administración del actor sobre una sede (lo usa el evaluador de
+   * infraestructura de F2–F5, §0.3): plataforma, organización entera,
+   * sucursal de la sede, o ninguno.
+   *
+   * @param tx - Contexto.
+   * @param site - Sede (ya comprobada en el tenant).
+   * @param actor - Actor.
+   */
+  async adminLevelOf(
+    tx: EntityManager,
+    site: PracticeSites,
+    actor: AuthenticatedUser,
+  ): Promise<'PLATFORM' | 'ORG' | 'BRANCH' | null> {
+    if (this.isPlatform(actor)) return 'PLATFORM';
+    if (await this.isOrganizationAdmin(tx, site.tenantId, actor)) return 'ORG';
+    if (await this.isBranchAdmin(tx, site, actor)) return 'BRANCH';
+    return null;
+  }
+
   private isPlatform(actor: AuthenticatedUser): boolean {
     const roles = actor.roles ?? [];
     return PLATFORM_ROLES.some((role) => roles.includes(role));

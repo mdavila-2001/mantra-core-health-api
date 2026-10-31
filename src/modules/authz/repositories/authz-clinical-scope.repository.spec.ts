@@ -15,8 +15,11 @@ const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 function build(
   counts: Map<unknown, number>,
   link: { userId: string } | null = null,
+  admissionFootprints = 0,
 ) {
   const em = {
+    // «Admisión crea el vínculo»: huellas de ingreso (SQL directo).
+    execute: mockFn(() => Promise.resolve([{ n: admissionFootprints }])),
     count: mockFn((entity: unknown) =>
       Promise.resolve(counts.get(entity) ?? 0),
     ),
@@ -26,6 +29,25 @@ function build(
 }
 
 describe('AuthzClinicalScopeRepository.patientHasFootprintInTenant', () => {
+  it('«Admisión crea el vínculo»: la huella de un ingreso auditado cuenta aunque el paciente no tenga cuenta', async () => {
+    const d = build(new Map(), null, 1);
+    await expect(
+      d.repo.patientHasFootprintInTenant(d.em as any, 'pat-1', 't1'),
+    ).resolves.toBe(true);
+    expect(d.em.execute).toHaveBeenCalledWith(
+      expect.stringContaining('clinical.patient_admission_footprints'),
+      ['pat-1', 't1'],
+      'all',
+    );
+  });
+
+  it('sin huella de ingreso ni cuenta: sigue sin haber vínculo (la regla general no cambia)', async () => {
+    const d = build(new Map([[Encounters, 3]]), null, 0);
+    await expect(
+      d.repo.patientHasFootprintInTenant(d.em as any, 'pat-1', 't1'),
+    ).resolves.toBe(false);
+  });
+
   it('reconoce la reserva que la cuenta del paciente hizo en el tenant', async () => {
     const d = build(new Map([[AppointmentBookings, 1]]), { userId: 'u-pat' });
     await expect(
@@ -97,6 +119,7 @@ describe('AuthzClinicalScopeRepository.patientHasFootprintInTenant', () => {
         ),
       ),
       findOne: mockFn(() => Promise.resolve({ userId: 'u-pat' })),
+      execute: mockFn(() => Promise.resolve([{ n: 0 }])),
     };
     await expect(
       new AuthzClinicalScopeRepository().patientHasFootprintInTenant(

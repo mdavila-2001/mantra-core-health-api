@@ -23,7 +23,11 @@ const actor = { id: 'admin-1', roles: ['SECURITY_ADMIN'] } as any;
  * @returns Resultado de build.
  */
 function build() {
-  const tx = { flush: mockFn().mockResolvedValue(undefined) };
+  const tx = {
+    flush: mockFn().mockResolvedValue(undefined),
+    // F5g: la membresía es del tenant t1; sin destinos no hay más lecturas.
+    execute: mockFn().mockResolvedValue([{ tenant_id: 't1' }]),
+  };
   const em = { transactional: mockFn((cb: any) => cb(tx)) };
   const assignmentsRepo = {
     findActiveOverlap: mockFn().mockResolvedValue(null),

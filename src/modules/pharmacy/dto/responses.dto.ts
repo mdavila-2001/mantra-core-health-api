@@ -136,6 +136,35 @@ export class ProductResponseDto {
    */
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt!: Date;
+
+  /**
+   * Avisos sobre el producto guardado, calculados con lo que quedó (también lo
+   * derivado del catálogo oficial): `MEDICATION_NOT_LINKED` si pide receta y no
+   * tiene medicamento. Ausente si no hay ninguno.
+   */
+  @ApiPropertyOptional({ type: () => [ProductWarningDto] })
+  warnings?: ProductWarningDto[];
+}
+
+/** Un aviso sobre un producto que se guardó igual. */
+export class ProductWarningDto {
+  /**
+   * Campo al que se refiere el aviso.
+   */
+  @ApiProperty()
+  field!: string;
+
+  /**
+   * Código estable del aviso.
+   */
+  @ApiProperty()
+  reason!: string;
+
+  /**
+   * El aviso en castellano, para mostrarlo tal cual.
+   */
+  @ApiProperty()
+  message!: string;
 }
 
 /** Respuesta tras crear una lista de precios (UC-24-05). */
@@ -280,6 +309,12 @@ export class MappingResponseDto {
    */
   @ApiProperty()
   externalProductCode!: string;
+
+  /**
+   * Unidad del sistema externo que equivale a una del producto.
+   */
+  @ApiPropertyOptional({ nullable: true })
+  externalUnitCode!: string | null;
 
   /**
    * Valor de verification status mantenido por la instancia.

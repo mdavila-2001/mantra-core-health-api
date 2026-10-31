@@ -75,6 +75,9 @@
 #     matrícula profesional. `assertMockProviderNotInProduction` aborta el
 #     arranque de cualquier worker si `MOCK_PROVIDER_BASE_URL` trae valor en
 #     producción; la variable se fija vacía explícitamente más abajo.
+#     El simulador del sistema de la farmacia externa (`/pharmacy-erp/*`, en
+#     el mismo emulador) tampoco: `PHARMACY_ERP_BASE_URL` va vacía y la API
+#     no arranca en producción si trae valor. Ver el bloque de esa variable.
 #
 #  7. LOS `*-init` NO MONTAN NADA DEL REPOSITORIO: LO HORNEAN.
 #     Coolify clona el repositorio DENTRO de un contenedor auxiliar
@@ -264,6 +267,20 @@ x-app-env: &app-env
   MESSAGING_QUEUE_CODES: ${MESSAGING_QUEUE_CODES:-}
   # VACÍA, y es una condición de arranque: ver el punto 6 de la cabecera.
   MOCK_PROVIDER_BASE_URL: ""
+
+  # --- Sistema de gestión de la farmacia externa (pestaña Integración) ----
+  # VACÍAS por defecto: la sincronización responde «no configurada» y no llama
+  # a nadie. Hoy el único sistema que existe es el simulador de
+  # `mock-provider-server/` (`/pharmacy-erp/*`), y con NODE_ENV=production
+  # la API NO ARRANCA si `PHARMACY_ERP_BASE_URL` trae valor
+  # (`assertPharmacyErpNotInProduction`): escribiría stock inventado en el
+  # libro real. No reutilizar `MOCK_PROVIDER_BASE_URL` para esto. Si algún día
+  # se levanta el simulador para pruebas: sin dominio público y con
+  # `MOCK_API_KEY` igual a `PHARMACY_ERP_API_KEY` (sin ella el simulador deja
+  # pasar cualquier petición, `api-key.guard.ts`).
+  PHARMACY_ERP_BASE_URL: ${PHARMACY_ERP_BASE_URL:-}
+  PHARMACY_ERP_API_KEY: ${PHARMACY_ERP_API_KEY:-}
+  PHARMACY_ERP_TIMEOUT_MS: ${PHARMACY_ERP_TIMEOUT_MS:-5000}
 
   # --- Plazos HTTP --------------------------------------------------------
   # `keepAlive` por encima del idle timeout del proxy que va delante, o

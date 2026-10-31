@@ -68,18 +68,29 @@ export class SiteStockWriter {
     private readonly ledger: LedgerRepository,
   ) {}
 
+  /**
+   * Toma el candado de la sede hasta el final de la transacción. Es el primero
+   * de la escritura (sede → posiciones → libro, el orden del «Lo tengo» y de
+   * la confirmación de un pedido); el caso de uso que tiene que leer el estado
+   * de la sede antes de decidir qué escribir lo toma antes, y {@link write} lo
+   * vuelve a pedir sin efecto (el candado es de la transacción).
+   */
+  async lockSite(tx: EntityManager, siteId: string): Promise<void> {
+    // Una escritura por sede a la vez: la tabla de posiciones no tiene índice
+    // único por ubicación-producto-lote, y dos altas simultáneas del mismo
+    // producto duplicarían su posición.
+    await tx.execute('select pg_advisory_xact_lock(hashtext(?))', [
+      `pharmacy_inventory.site:${siteId}`,
+    ]);
+  }
+
   async write(
     tx: EntityManager,
     site: SiteScope,
     targets: readonly SiteStockTarget[],
     movement: SiteStockMovement,
   ): Promise<SiteStockWriteResult[]> {
-    // Una escritura por sede a la vez: la tabla de posiciones no tiene índice
-    // único por ubicación-producto-lote, y dos altas simultáneas del mismo
-    // producto duplicarían su posición.
-    await tx.execute('select pg_advisory_xact_lock(hashtext(?))', [
-      `pharmacy_inventory.site:${site.siteId}`,
-    ]);
+    await this.lockSite(tx, site.siteId);
     const locationId = await this.defaultLocationId(tx, site, movement);
     const looseElsewhere = await this.looseElsewhere(
       tx,
@@ -87,20 +98,32 @@ export class SiteStockWriter {
       locationId,
       targets.map((target) => target.productId),
     );
-    const sequences = new SequenceBlock(tx, this.ledger, site.pharmacyId);
 
-    const results: SiteStockWriteResult[] = [];
+    // Todas las posiciones quedan bloqueadas antes del primer asiento: el
+    // candado del libro (por farmacia, hasta el commit) va siempre al final.
+    // Bloquear una posición después de tomarlo cruzaría los candados con un
+    // pedido que tiene esa posición y espera el libro.
+    const rows: { position: InventoryStockPositions; isNew: boolean }[] = [];
     for (const target of targets) {
       const existing = await this.positions.findByKeyForUpdate(tx, {
         inventoryLocationId: locationId,
         pharmacyProductId: target.productId,
       });
-      const position =
-        existing ??
-        this.positions.create(tx, {
-          inventoryLocationId: locationId,
-          pharmacyProductId: target.productId,
-        });
+      rows.push({
+        position:
+          existing ??
+          this.positions.create(tx, {
+            inventoryLocationId: locationId,
+            pharmacyProductId: target.productId,
+          }),
+        isNew: existing === null,
+      });
+    }
+
+    const sequences = new SequenceBlock(tx, this.ledger, site.pharmacyId);
+    const results: SiteStockWriteResult[] = [];
+    for (const [index, target] of targets.entries()) {
+      const { position, isNew } = rows[index];
       // La primera escritura de un producto en la sede deja asiento aunque no
       // mueva unidades: desde ahí la sede lo lleva por el libro, y el libro
       // tiene que decir quién y cuándo lo decidió.
@@ -108,7 +131,7 @@ export class SiteStockWriter {
         position,
         sellable: target.availableQuantity,
         movement,
-        recordUnchanged: existing === null,
+        recordUnchanged: isNew,
       });
       // Lo vendible de la sede es la suma de sus ubicaciones activas: el stock
       // sin lote que quedó en otra ubicación (un traslado, una ubicación

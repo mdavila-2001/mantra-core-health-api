@@ -177,4 +177,28 @@ export class StockPositionsRepository {
     );
     return Number(rows?.[0]?.total ?? 0);
   }
+
+  /**
+   * Cuántas posiciones **sin lote** tiene un producto en las ubicaciones
+   * activas de una sede: con alguna, la sede ya lleva ese producto por su
+   * cuenta (stock propio) y deja de seguir lo que declara el catálogo.
+   */
+  async countLoosePositionsInSite(
+    em: EntityManager,
+    pharmacySiteId: string,
+    pharmacyProductId: string,
+  ): Promise<number> {
+    const rows = await em.execute<{ total: string | number }[]>(
+      `select count(*) as total
+         from pharmacy_inventory.inventory_locations loc
+         join pharmacy_inventory.inventory_stock_positions st
+           on st.inventory_location_id = loc.id
+        where loc.pharmacy_site_id = ?
+          and loc.status_concept_id = ?
+          and st.pharmacy_product_id = ?
+          and st.inventory_lot_id is null`,
+      [pharmacySiteId, PINV.LOCATION_ACTIVE, pharmacyProductId],
+    );
+    return Number(rows?.[0]?.total ?? 0);
+  }
 }

@@ -68,6 +68,9 @@ export class HealthcareServices {
   })
   telehealthAvailable?: boolean;
 
+  /**
+   * Identificador asociado a service catalog.
+   */
   @Property({ fieldName: 'service_catalog_id', type: 'uuid', nullable: true }) // FK → billing.service_catalog (inferida)
   serviceCatalogId?: string;
 
@@ -106,4 +109,10 @@ export class HealthcareServices {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a tenant.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
 }

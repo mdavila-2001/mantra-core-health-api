@@ -125,6 +125,136 @@ export const { seeds: PRACTICE_CONCEPT_SEEDS, ids: PRAC } =
     SPACE_PLANNED: { code: 'SPACE_PLANNED', display: 'Espacio planificado' },
     SPACE_SUSPENDED: { code: 'SPACE_SUSPENDED', display: 'Espacio suspendido' },
 
+    // --- F2 operación (CONTRATO-F2-F5 §F2.2) ---------------------------------
+    // Las claves `BLOCK_MAINTENANCE`, `CLN_PENDING`, `CLN_IN_PROGRESS`,
+    // `CLN_DONE`, `SPACE_OP_AVAILABLE`, `HYG_CLEAN` e `ISO_NONE` las fija el
+    // modelo por literal (patch f2_operacion, «Desvíos» M-F2): no se renombran.
+    // Eje disponibilidad (reutiliza `operational_status_concept_id`).
+    SPACE_OP_BLOCKED_CLINICAL: {
+      code: 'SPACE_OP_BLOCKED_CLINICAL',
+      display: 'Bloqueada (clínico)',
+    },
+    SPACE_OP_BLOCKED_ADMIN: {
+      code: 'SPACE_OP_BLOCKED_ADMIN',
+      display: 'Bloqueada (administrativo)',
+    },
+    SPACE_OP_MAINTENANCE: {
+      code: 'SPACE_OP_MAINTENANCE',
+      display: 'En mantenimiento',
+    },
+    // Eje higiene.
+    HYG_CLEAN: { code: 'HYG_CLEAN', display: 'Limpia' },
+    HYG_DIRTY: { code: 'HYG_DIRTY', display: 'Sucia' },
+    HYG_CLEANING: { code: 'HYG_CLEANING', display: 'En limpieza' },
+    HYG_INSPECTED: { code: 'HYG_INSPECTED', display: 'Limpia e inspeccionada' },
+    HYG_CONTAMINATED: { code: 'HYG_CONTAMINATED', display: 'Contaminada' },
+    // Eje aislamiento.
+    ISO_NONE: { code: 'ISO_NONE', display: 'Sin aislamiento' },
+    ISO_CONTACT: { code: 'ISO_CONTACT', display: 'Aislamiento de contacto' },
+    ISO_DROPLET: { code: 'ISO_DROPLET', display: 'Aislamiento por gotas' },
+    ISO_AIRBORNE: { code: 'ISO_AIRBORNE', display: 'Aislamiento aéreo' },
+    ISO_PROTECTIVE: {
+      code: 'ISO_PROTECTIVE',
+      display: 'Aislamiento protector',
+    },
+    // Ocupación (derivada de ADT, sólo lectura).
+    OCC_FREE: { code: 'OCC_FREE', display: 'Libre' },
+    OCC_RESERVED: { code: 'OCC_RESERVED', display: 'Reservada' },
+    OCC_OCCUPIED: { code: 'OCC_OCCUPIED', display: 'Ocupada' },
+    // Tipos de bloqueo.
+    BLOCK_CLINICAL: { code: 'BLOCK_CLINICAL', display: 'Bloqueo clínico' },
+    BLOCK_ADMIN: { code: 'BLOCK_ADMIN', display: 'Bloqueo administrativo' },
+    BLOCK_MAINTENANCE: { code: 'BLOCK_MAINTENANCE', display: 'Mantenimiento' },
+    BLOCK_CLOSURE: { code: 'BLOCK_CLOSURE', display: 'Cierre' },
+    // Motivos de bloqueo (perfil motivo → tipos en domain/ops/ops-catalog.ts).
+    BLOCK_RSN_STAFF_SHORTAGE: {
+      code: 'BLOCK_RSN_STAFF_SHORTAGE',
+      display: 'Falta de personal',
+    },
+    BLOCK_RSN_ISOLATION_COHORT: {
+      code: 'BLOCK_RSN_ISOLATION_COHORT',
+      display: 'Cohorte de aislamiento',
+    },
+    BLOCK_RSN_PATIENT_CONDITION: {
+      code: 'BLOCK_RSN_PATIENT_CONDITION',
+      display: 'Condición del paciente',
+    },
+    BLOCK_RSN_EQUIPMENT_FAILURE: {
+      code: 'BLOCK_RSN_EQUIPMENT_FAILURE',
+      display: 'Falla de equipo',
+    },
+    BLOCK_RSN_PREVENTIVE_MAINTENANCE: {
+      code: 'BLOCK_RSN_PREVENTIVE_MAINTENANCE',
+      display: 'Mantenimiento preventivo',
+    },
+    BLOCK_RSN_INFRASTRUCTURE: {
+      code: 'BLOCK_RSN_INFRASTRUCTURE',
+      display: 'Infraestructura',
+    },
+    BLOCK_RSN_PEST_CONTROL: {
+      code: 'BLOCK_RSN_PEST_CONTROL',
+      display: 'Control de plagas',
+    },
+    BLOCK_RSN_ADMIN_DECISION: {
+      code: 'BLOCK_RSN_ADMIN_DECISION',
+      display: 'Decisión administrativa',
+    },
+    BLOCK_RSN_OTHER: { code: 'BLOCK_RSN_OTHER', display: 'Otro motivo' },
+    // Ejes y fuentes de los eventos A20 (`care_space_status_events`).
+    AXIS_AVAILABILITY: { code: 'AXIS_AVAILABILITY', display: 'Disponibilidad' },
+    AXIS_HYGIENE: { code: 'AXIS_HYGIENE', display: 'Higiene' },
+    AXIS_ISOLATION: { code: 'AXIS_ISOLATION', display: 'Aislamiento' },
+    AXIS_OCCUPANCY: { code: 'AXIS_OCCUPANCY', display: 'Ocupación' },
+    SRC_MANUAL: { code: 'SRC_MANUAL', display: 'Cambio manual' },
+    SRC_ADT: { code: 'SRC_ADT', display: 'Movimiento ADT' },
+    SRC_CLEANING: { code: 'SRC_CLEANING', display: 'Orden de limpieza' },
+    SRC_BLOCK: { code: 'SRC_BLOCK', display: 'Bloqueo' },
+    SRC_ROOM_EVENT: { code: 'SRC_ROOM_EVENT', display: 'Evento de sala' },
+    SRC_SYSTEM: { code: 'SRC_SYSTEM', display: 'Proceso del sistema' },
+    // Órdenes de limpieza: tipo, disparador, prioridad, estado, resultado.
+    CLEAN_ROUTINE: { code: 'CLEAN_ROUTINE', display: 'Limpieza de rutina' },
+    CLEAN_DISCHARGE: { code: 'CLEAN_DISCHARGE', display: 'Limpieza de alta' },
+    CLEAN_TERMINAL: { code: 'CLEAN_TERMINAL', display: 'Limpieza terminal' },
+    CLEAN_OR_TURNOVER: {
+      code: 'CLEAN_OR_TURNOVER',
+      display: 'Recambio de quirófano',
+    },
+    CLEAN_SPOT: { code: 'CLEAN_SPOT', display: 'Limpieza puntual' },
+    CLN_TRG_DISCHARGE: { code: 'CLN_TRG_DISCHARGE', display: 'Por egreso' },
+    CLN_TRG_TRANSFER: { code: 'CLN_TRG_TRANSFER', display: 'Por traslado' },
+    CLN_TRG_MANUAL: { code: 'CLN_TRG_MANUAL', display: 'Pedido manual' },
+    CLN_TRG_ISOLATION_END: {
+      code: 'CLN_TRG_ISOLATION_END',
+      display: 'Fin de aislamiento',
+    },
+    CLN_TRG_CONTAMINATION: {
+      code: 'CLN_TRG_CONTAMINATION',
+      display: 'Contaminación',
+    },
+    CLN_TRG_MAINTENANCE_END: {
+      code: 'CLN_TRG_MAINTENANCE_END',
+      display: 'Fin de mantenimiento',
+    },
+    CLN_TRG_OR_TURNOVER: {
+      code: 'CLN_TRG_OR_TURNOVER',
+      display: 'Salida de quirófano',
+    },
+    CLN_TRG_INSPECTION_FAILED: {
+      code: 'CLN_TRG_INSPECTION_FAILED',
+      display: 'Inspección rechazada',
+    },
+    CLN_PRIO_ROUTINE: { code: 'CLN_PRIO_ROUTINE', display: 'Rutina' },
+    CLN_PRIO_URGENT: { code: 'CLN_PRIO_URGENT', display: 'Urgente' },
+    CLN_PRIO_STAT: { code: 'CLN_PRIO_STAT', display: 'Inmediata' },
+    CLN_PENDING: { code: 'CLN_PENDING', display: 'Pendiente' },
+    CLN_IN_PROGRESS: { code: 'CLN_IN_PROGRESS', display: 'En curso' },
+    CLN_DONE: { code: 'CLN_DONE', display: 'Terminada' },
+    CLN_INSPECTED: { code: 'CLN_INSPECTED', display: 'Inspeccionada' },
+    CLN_REJECTED: { code: 'CLN_REJECTED', display: 'Rechazada' },
+    CLN_CANCELLED: { code: 'CLN_CANCELLED', display: 'Cancelada' },
+    CLN_INSPECTION_PASS: { code: 'CLN_INSPECTION_PASS', display: 'Aprobada' },
+    CLN_INSPECTION_FAIL: { code: 'CLN_INSPECTION_FAIL', display: 'Rechazada' },
+
     // --- care_spaces.form_concept_id: forma FHIR Location.form (F1) ---------
     // El código FHIR va en el display; el catálogo lo expone además como
     // `fhirCode` (domain/structure/structure-catalog.ts).

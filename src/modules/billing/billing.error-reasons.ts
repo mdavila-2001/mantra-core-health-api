@@ -6,6 +6,15 @@
  * sobre `reason` sin parsear el texto de `message`.
  */
 export enum BillingErrorReason {
+  // F5e (CONTRATO-F2-F5 §F5e).
+  TARIFF_OVERLAP = 'TARIFF_OVERLAP',
+  TARIFF_SERVICE_NOT_IN_PRACTICE = 'TARIFF_SERVICE_NOT_IN_PRACTICE',
+  TARIFF_UNIT_MINUTES_REQUIRED = 'TARIFF_UNIT_MINUTES_REQUIRED',
+  CHARGE_ALREADY_INVOICED = 'CHARGE_ALREADY_INVOICED',
+  CHARGE_NOT_PENDING = 'CHARGE_NOT_PENDING',
+  /** F5e: el cargo devengado no tiene precio (sin tarifa vigente): no se factura (422). */
+  CHARGE_WITHOUT_PRICE = 'CHARGE_WITHOUT_PRICE',
+
   /** Ya existe un estado de cuenta de paciente para ese periodo. */
   PATIENT_STATEMENT_PERIOD_ALREADY_EXISTS = 'PATIENT_STATEMENT_PERIOD_ALREADY_EXISTS',
 

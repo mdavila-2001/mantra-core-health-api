@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 23 · schema diagnostic_units
+-- SALUD v4.2.68 · módulo 23 · schema diagnostic_units
 -- Generado de diagram_23_diagnostic_units.puml — NO editar a mano.
 
 
@@ -336,6 +336,20 @@ DO $$ BEGIN
     ALTER TABLE "diagnostic_units"."diagnostic_equipment"
         ADD CONSTRAINT "fk_diagnostic_equipment_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "diagnostic_units"."diagnostic_equipment"
+        ADD CONSTRAINT "fk_diagnostic_equipment_care_space_id" FOREIGN KEY ("care_space_id")
+        REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: scheduling.schedulable_resources (requiere schema scheduling)
+DO $$ BEGIN
+    ALTER TABLE "diagnostic_units"."diagnostic_equipment"
+        ADD CONSTRAINT "fk_diagnostic_equipment_schedulable_resource_id" FOREIGN KEY ("schedulable_resource_id")
+        REFERENCES "scheduling"."schedulable_resources" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: terminology.catalog_concepts (requiere schema terminology)

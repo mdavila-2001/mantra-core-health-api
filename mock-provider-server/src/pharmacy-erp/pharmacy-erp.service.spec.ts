@@ -47,6 +47,25 @@ describe('PharmacyErpService', () => {
     expect(central.items).not.toEqual(norte.items);
   });
 
+  it('dos farmacias con el mismo código de sede reciben stock distinto', async () => {
+    const service = build();
+
+    const a = await service.stock('SEDE-CENTRAL', 'FARMACIA-A');
+    const b = await service.stock('SEDE-CENTRAL', 'FARMACIA-B');
+
+    expect(a.items).not.toEqual(b.items);
+    expect(a.pharmacyCode).toBe('FARMACIA-A');
+  });
+
+  it('la misma farmacia y sede dan siempre el mismo stock', async () => {
+    const service = build();
+
+    const first = await service.stock('SEDE-CENTRAL', 'FARMACIA-A');
+    const second = await service.stock('SEDE-CENTRAL', ' FARMACIA-A ');
+
+    expect(first.items).toEqual(second.items);
+  });
+
   it('alguno queda en 0 y ninguno pasa de 40', async () => {
     const res = await build().stock('SEDE-CENTRAL');
     const quantities = res.items.map((line) => line.quantity);

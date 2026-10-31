@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { IsStrictBoolean } from '../../../pharmacy/dto/strict-boolean';
 
 /** Cuerpo de `POST /pharmacy/recall-holds/:id/release` (UC-25-09). */
 export class ReleaseRecallHoldDto {
@@ -12,6 +13,6 @@ export class ReleaseRecallHoldDto {
     default: false,
   })
   @IsOptional()
-  @IsBoolean()
+  @IsStrictBoolean()
   writeOff?: boolean;
 }

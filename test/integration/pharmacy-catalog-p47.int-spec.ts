@@ -27,7 +27,10 @@ import {
   PharmacyProductsRepository,
   PharmacyReadRepository,
 } from '../../src/modules/pharmacy/repositories';
+import { SystemContextRepository } from '../../src/modules/system_context/repositories';
+import { DynamicEnumsService } from '../../src/modules/system_context/services';
 import {
+  MedicationCatalogResolver,
   PharmacyCategoriesService,
   PharmacyProductsService,
   PharmacyReadService,
@@ -314,6 +317,13 @@ describe('P47 · catálogo de la farmacia (DB real)', () => {
         new FilesRepository(),
         new FileVersionsRepository(),
         logger as never,
+      ),
+      new MedicationCatalogResolver(
+        new DynamicEnumsService(
+          orm.em as never,
+          new SystemContextRepository(),
+          logger as never,
+        ),
       ),
     );
     // Doble declarado de `TenantAdministrationService.assertCanRead`: la regla

@@ -9,6 +9,7 @@ import { jest } from '@jest/globals';
 const mockFn = (impl?: any): any => (jest.fn as any)(impl);
 import { PharmacyProductsService } from './pharmacy-products.service';
 import { PharmacyReadService } from './pharmacy-read.service';
+import { MedicationCatalogResolver } from './medication-catalog.resolver';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import {
   CONCEPTS,
@@ -101,6 +102,20 @@ function build() {
     readRepo as any,
     pharmacyCatalogRepo as any,
   );
+  // El catálogo con que se receta: dos medicamentos (el resolutor es el real).
+  const enums = {
+    readEnum: mockFn().mockResolvedValue({
+      options: [
+        {
+          conceptId: 'c-med',
+          display: 'Amoxicillin',
+          displayEs: 'Amoxicilina',
+        },
+        { conceptId: 'c-ibu', display: 'Ibuprofen', displayEs: 'Ibuprofeno' },
+      ],
+    }),
+  };
+  const medications = new MedicationCatalogResolver(enums as any);
   const service = new PharmacyProductsService(
     em as any,
     pharmaciesRepo as any,
@@ -115,9 +130,11 @@ function build() {
     categories as any,
     readService,
     attachableFiles as any,
+    medications,
   );
   return {
     service,
+    enums,
     pharmacyCatalogRepo,
     categories,
     attachableFiles,
@@ -436,6 +453,49 @@ describe('PharmacyProductsService', () => {
       );
     });
 
+    it('avisa con lo que quedó guardado: del catálogo, con receta y sin ATC conocido, no tiene medicamento', async () => {
+      const d = ready();
+      d.productsRepo.create.mockImplementation(
+        (_tx: unknown, data: object) => ({
+          id: 'pr1',
+          createdAt: new Date(),
+          ...data,
+        }),
+      );
+      d.catalogRepo.findVademecumConceptIdByAtc.mockResolvedValue(null);
+      const unlinked = await inTenant(() =>
+        d.service.publishProduct(
+          'ph1',
+          {
+            productCode: 'SKU-1',
+            catalogProductId: 'cat-1',
+            catalogPresentationCode: '700002',
+          } as any,
+          actor,
+        ),
+      );
+      expect(unlinked.warnings).toEqual([
+        expect.objectContaining({
+          field: 'medicationConceptId',
+          reason: PharmacyErrorReason.MEDICATION_NOT_LINKED,
+        }),
+      ]);
+
+      d.catalogRepo.findVademecumConceptIdByAtc.mockResolvedValue('vad-ibu');
+      const linked = await inTenant(() =>
+        d.service.publishProduct(
+          'ph1',
+          {
+            productCode: 'SKU-2',
+            catalogProductId: 'cat-1',
+            catalogPresentationCode: '700002',
+          } as any,
+          actor,
+        ),
+      );
+      expect(linked.warnings).toBeUndefined();
+    });
+
     it('sin catalogProductId el alta sigue como antes (producto cargado a mano)', async () => {
       const d = ready();
       await inTenant(() =>
@@ -482,6 +542,80 @@ describe('PharmacyProductsService', () => {
         ),
       ).rejects.toBeInstanceOf(BadRequestException);
       expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateProduct vincula el medicamento', () => {
+    function given(product: Record<string, unknown>) {
+      const d = build();
+      d.pharmaciesRepo.findByIdInTenant.mockResolvedValue({
+        tenantId: T1,
+        id: 'ph1',
+        statusConceptId: PHARM.PHARMACY_ACTIVE,
+      });
+      const stored: Record<string, unknown> = {
+        id: 'pr1',
+        pharmacyId: 'ph1',
+        productCode: 'P-1',
+        requiresPrescription: true,
+        statusConceptId: PHARM.PRODUCT_ACTIVE,
+        ...product,
+      };
+      d.productsRepo.findById.mockResolvedValue(stored);
+      return { d, stored };
+    }
+    const update = (d: ReturnType<typeof build>, body: object) =>
+      inTenant(() => d.service.updateProduct('ph1', 'pr1', body as any, actor));
+
+    it('links a product loaded by hand to a medication of the prescription catalog', async () => {
+      const { d, stored } = given({});
+      await update(d, { medicationConceptId: 'c-med' });
+      expect(stored).toMatchObject({
+        medicationConceptId: 'c-med',
+        updatedByUserId: 'admin-1',
+      });
+      expect(d.tx.flush).toHaveBeenCalledTimes(1);
+    });
+
+    it('null unlinks it', async () => {
+      const { d, stored } = given({ medicationConceptId: 'c-med' });
+      await update(d, { medicationConceptId: null });
+      expect(stored.medicationConceptId).toBeNull();
+    });
+
+    it('a concept outside the prescription catalog is 422 and nothing changes', async () => {
+      const { d, stored } = given({});
+      const error = await rejection(
+        update(d, { medicationConceptId: 'c-other' }),
+      );
+      expect(error).toBeInstanceOf(PreconditionFailedException);
+      expect(error.getResponse()).toMatchObject({
+        reason: PharmacyErrorReason.MEDICATION_NOT_IN_CATALOG,
+      });
+      expect(stored).not.toHaveProperty('medicationConceptId');
+      expect(d.tx.flush).not.toHaveBeenCalled();
+    });
+
+    it('a product of the official catalog completes the missing one, but does not change the one it brought', async () => {
+      const missing = given({ catalogProductConceptId: 'cat-1' });
+      await update(missing.d, { medicationConceptId: 'c-ibu' });
+      expect(missing.stored).toMatchObject({ medicationConceptId: 'c-ibu' });
+
+      const official = given({
+        catalogProductConceptId: 'cat-1',
+        medicationConceptId: 'vad-ibu',
+      });
+      await expect(
+        update(official.d, { medicationConceptId: 'c-ibu' }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(official.stored.medicationConceptId).toBe('vad-ibu');
+    });
+
+    it('the same concept again changes nothing and does not ask the catalog', async () => {
+      const { d } = given({ medicationConceptId: 'c-med' });
+      await update(d, { medicationConceptId: 'c-med' });
+      expect(d.tx.flush).not.toHaveBeenCalled();
+      expect(d.enums.readEnum).not.toHaveBeenCalled();
     });
   });
 

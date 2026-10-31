@@ -16,3 +16,4 @@ export * from './bulk/categories.bulk-handler';
 export * from './bulk/products.bulk-handler';
 export * from './bulk/prices.bulk-handler';
 export * from './bulk/sites.bulk-handler';
+export * from './medication-catalog.resolver';

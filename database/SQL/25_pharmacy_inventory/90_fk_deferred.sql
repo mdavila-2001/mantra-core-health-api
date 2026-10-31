@@ -1,4 +1,4 @@
--- SALUD v4.0.10 · módulo 25 · schema pharmacy_inventory
+-- SALUD v4.2.68 · módulo 25 · schema pharmacy_inventory
 -- Generado de diagram_25_pharmacy_inventory.puml — NO editar a mano.
 
 
@@ -42,6 +42,20 @@ DO $$ BEGIN
     ALTER TABLE "pharmacy_inventory"."inventory_locations"
         ADD CONSTRAINT "fk_inventory_locations_updated_by_user_id" FOREIGN KEY ("updated_by_user_id")
         REFERENCES "iam"."users" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.care_spaces (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy_inventory"."inventory_locations"
+        ADD CONSTRAINT "fk_inventory_locations_care_space_id" FOREIGN KEY ("care_space_id")
+        REFERENCES "practice"."care_spaces" ("id");
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- destino: practice.clinical_units (requiere schema practice)
+DO $$ BEGIN
+    ALTER TABLE "pharmacy_inventory"."inventory_locations"
+        ADD CONSTRAINT "fk_inventory_locations_clinical_unit_id" FOREIGN KEY ("clinical_unit_id")
+        REFERENCES "practice"."clinical_units" ("id");
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- destino: pharmacy.pharmacy_products (requiere schema pharmacy)

@@ -28,9 +28,9 @@ export class PharmacyErpController {
   @ApiOperation({
     summary: 'Stock de una sucursal de la farmacia externa (emulado)',
     description:
-      'Determinista por sucursal: el mismo siteCode devuelve siempre las mismas cantidades.',
+      'Determinista por farmacia y sucursal: el mismo pharmacyCode y siteCode devuelven siempre las mismas cantidades; dos farmacias con sedes del mismo código no comparten stock.',
   })
   stock(@Query() query: ErpStockQueryDto): Promise<ErpStockResponseDto> {
-    return this.service.stock(query.siteCode);
+    return this.service.stock(query.siteCode, query.pharmacyCode);
   }
 }

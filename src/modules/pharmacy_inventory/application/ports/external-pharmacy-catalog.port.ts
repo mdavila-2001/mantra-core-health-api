@@ -19,8 +19,15 @@ export interface ExternalPharmacyCatalogPort {
   isConfigured(): boolean;
   /** El catálogo del sistema externo. */
   listProducts(): Promise<ExternalProduct[]>;
-  /** El stock de una sucursal, por el código que la farmacia le da a esa sede. */
-  stockForSite(siteCode: string): Promise<ExternalStockLine[]>;
+  /**
+   * El stock de una sucursal, por el código que la farmacia le da a esa sede y
+   * el de la farmacia (`pharmacies.code`): dos farmacias pueden tener sedes con
+   * el mismo código, y no comparten stock.
+   */
+  stockForSite(
+    siteCode: string,
+    pharmacyCode?: string,
+  ): Promise<ExternalStockLine[]>;
 }
 
 /** Token de inyección del puerto (resuelto por el adaptador HTTP). */

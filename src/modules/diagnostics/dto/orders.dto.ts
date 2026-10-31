@@ -65,6 +65,13 @@ export class DiagnosticOrderSummaryDto {
   @ApiProperty({ nullable: true, type: String })
   suggestedPracticeSiteName!: string | null;
 
+  /** F5b: punto de toma sugerido {id, code, name}, o `null`. */
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Punto de toma sugerido (F5b)',
+  })
+  suggestedCareSpace?: { id: string; code: string; name: string } | null;
+
   /** Cuándo se pidió. */
   @ApiProperty({ type: String, format: 'date-time' }) createdAt!: Date;
 

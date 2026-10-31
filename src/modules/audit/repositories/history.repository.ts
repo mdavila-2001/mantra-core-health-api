@@ -12,6 +12,15 @@ import {
   PracticeSitesHistory,
   ClinicalUnitsHistory,
   CareSpacesHistory,
+  CareSpaceBlocksHistory,
+  CleaningOrdersHistory,
+  EncounterLocationsHistory,
+  PlacementIncidentsHistory,
+  OperatingRoomBlockSeriesHistory,
+  OperatingRoomBlocksHistory,
+  CareSpaceCategoryPeriodsHistory,
+  SpaceTariffsHistory,
+  ChargeCapturesHistory,
 } from '../entities';
 
 /** Datos para sellar una revisión en una tabla `*_history` (write-side). */
@@ -161,6 +170,62 @@ const HISTORY_REGISTRY: Record<string, HistoryBinding> = {
   care_spaces: {
     entity: CareSpacesHistory,
     sourceField: 'careSpaceId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  // F2–F5 de infraestructura hospitalaria (CONTRATO-F2-F5 §0.1): toda tabla
+  // mutable nueva versiona en `audit.<tabla>_history`, con `tenant_id`.
+  care_space_blocks: {
+    entity: CareSpaceBlocksHistory,
+    sourceField: 'careSpaceBlockId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  cleaning_orders: {
+    entity: CleaningOrdersHistory,
+    sourceField: 'cleaningOrderId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  encounter_locations: {
+    entity: EncounterLocationsHistory,
+    sourceField: 'encounterLocationId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  placement_incidents: {
+    entity: PlacementIncidentsHistory,
+    sourceField: 'placementIncidentId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  operating_room_block_series: {
+    entity: OperatingRoomBlockSeriesHistory,
+    sourceField: 'operatingRoomBlockSeriesId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  operating_room_blocks: {
+    entity: OperatingRoomBlocksHistory,
+    sourceField: 'operatingRoomBlockId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  care_space_category_periods: {
+    entity: CareSpaceCategoryPeriodsHistory,
+    sourceField: 'careSpaceCategoryPeriodId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  space_tariffs: {
+    entity: SpaceTariffsHistory,
+    sourceField: 'spaceTariffId',
+    revisionField: 'revisionNo',
+    tenantScoped: true,
+  },
+  charge_captures: {
+    entity: ChargeCapturesHistory,
+    sourceField: 'chargeCaptureId',
     revisionField: 'revisionNo',
     tenantScoped: true,
   },

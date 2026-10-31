@@ -1,4 +1,5 @@
 import { AgendaOverlapGuard } from '../support/agenda-overlap-guard';
+import { TemplateCareSpaceGuard } from '../support/template-care-space-guard';
 import {
   CONCEPTS,
   PreconditionFailedException,
@@ -32,6 +33,7 @@ export class CreateTemplateUseCase {
     private readonly access: CatalogAccess,
     private readonly overlapGuard: AgendaOverlapGuard,
     private readonly logger: PinoLogger,
+    private readonly careSpaceGuard?: TemplateCareSpaceGuard,
   ) {
     this.logger.setContext(CreateTemplateUseCase.name);
   }
@@ -99,6 +101,14 @@ export class CreateTemplateUseCase {
         resource,
         dto,
       );
+      if (dto.careSpaceId)
+        await this.careSpaceGuard!.assert(
+          tx,
+          resource,
+          dto.careSpaceId,
+          dto.rules,
+          dto.validFrom ? new Date(dto.validFrom) : undefined,
+        );
 
       const template = this.catalogRepo.createTemplate(tx, {
         resourceId,
@@ -108,6 +118,7 @@ export class CreateTemplateUseCase {
         slotMinutes: dto.slotMinutes ?? DEFAULT_SLOT_MINUTES,
         flexibleHours: flexible,
         bookingPolicyId: dto.bookingPolicyId,
+        careSpaceId: dto.careSpaceId,
         statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
         actorUserId: actor.id,
       });
@@ -151,12 +162,23 @@ export class CreateTemplateUseCase {
         });
       }
 
+      if (dto.careSpaceId) {
+        await tx.flush();
+        await this.careSpaceGuard!.announce(
+          tx,
+          resource.tenantId,
+          template.id,
+          dto.careSpaceId,
+          actor.id,
+        );
+      }
       return {
         id: template.id,
         name: dto.name,
         ruleCount: dto.rules.length,
         statusConceptId: CONCEPTS.TEMPLATE_PUBLISHED,
         flexibleHours: flexible,
+        careSpaceId: dto.careSpaceId ?? null,
       };
     });
   }

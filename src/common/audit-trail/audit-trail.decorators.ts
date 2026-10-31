@@ -24,6 +24,12 @@ export interface AuditedOptions {
   readonly entity: string;
   /** Origen del id del recurso; por defecto se deriva de la ruta. */
   readonly entityId?: AuditIdSource;
+  /**
+   * Acción del sello cuando el cuerpo trae `dryRun: true`: una vista previa no
+   * escribe nada y no se registra como la operación que simula (p. ej.
+   * `PHARMACY_PRODUCTS_BULK_PREVIEWED` frente a `…_BULK_LOADED`).
+   */
+  readonly dryRunAction?: string;
 }
 
 /**
