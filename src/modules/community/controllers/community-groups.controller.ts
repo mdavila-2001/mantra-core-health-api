@@ -22,6 +22,7 @@ import {
   CurrentUser,
   ParseOptionalLimitPipe,
   type AuthenticatedUser,
+  Roles,
 } from '../../../common';
 import {
   CommunityGroupsService,
@@ -56,7 +57,14 @@ const JOIN_STATUS_BY_CODE: Record<string, string> = {
   REMOVED: COMM.GROUP_JOIN_REMOVED,
 };
 
-/** Endpoints de grupos/comunidades. */
+/** Endpoints de grupos/comunidades. *
+ * `@Roles()` vacío en cada ruta (O3-3): cualquier cuenta participa de la
+ * comunidad, así que no hay rol global que pedir. Decide el servicio:
+ * `CommunityGroupAccessService` por la membresía y el rol **en el grupo**
+ * (administrar miembros, publicar, ver un grupo secreto) y
+ * `CommunityVisibilityService` exige que el perfil con que se actúa sea del
+ * actor.
+ */
 @ApiTags('community-groups')
 @ApiBearerAuth()
 @Controller('community/groups')
@@ -81,6 +89,7 @@ export class CommunityGroupsController {
     entityId: 'result.id',
   })
   @Post()
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Crear un grupo/comunidad' })
   createGroup(
@@ -97,6 +106,7 @@ export class CommunityGroupsController {
     entityId: 'result.id',
   })
   @Post(':groupId/members')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Unirse a un grupo / comunidad' })
   joinGroup(
@@ -114,6 +124,7 @@ export class CommunityGroupsController {
     entityId: 'param:member',
   })
   @Patch(':groupId/members/:member')
+  @Roles()
   @ApiOperation({ summary: 'Aprobar/rechazar un alta o cambiar el rol' })
   @ApiParam({
     name: 'member',
@@ -146,6 +157,7 @@ export class CommunityGroupsController {
     entityId: 'param:member',
   })
   @Delete(':groupId/members/:member')
+  @Roles()
   @ApiOperation({ summary: 'Salir del grupo o dar de baja a un integrante' })
   @ApiParam({
     name: 'member',
@@ -167,6 +179,7 @@ export class CommunityGroupsController {
     entityId: 'result.id',
   })
   @Post(':groupId/posts')
+  @Roles()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Publicar en el muro del grupo' })
   createGroupPost(
@@ -186,6 +199,7 @@ export class CommunityGroupsController {
    * acotarlo mostraría los grupos de una organización a otra.
    */
   @Get()
+  @Roles()
   @ApiOperation({ summary: 'Grupos de una organización' })
   listGroups(
     @Query('tenantId', ParseUUIDPipe) tenantId: string,
@@ -209,6 +223,7 @@ export class CommunityGroupsController {
 
   /** P7: ficha del grupo con la posición del lector frente a él. */
   @Get(':groupId')
+  @Roles()
   @ApiOperation({ summary: 'Ficha de un grupo' })
   getGroup(
     @Param('groupId', ParseUUIDPipe) groupId: string,
@@ -220,6 +235,7 @@ export class CommunityGroupsController {
 
   /** Integrantes de un grupo. */
   @Get(':groupId/members')
+  @Roles()
   @ApiOperation({ summary: 'Integrantes de un grupo' })
   listMembers(
     @Param('groupId', ParseUUIDPipe) groupId: string,
@@ -240,6 +256,7 @@ export class CommunityGroupsController {
 
   /** P7: muro del grupo. */
   @Get(':groupId/posts')
+  @Roles()
   @ApiOperation({ summary: 'Muro de un grupo' })
   listWall(
     @Param('groupId', ParseUUIDPipe) groupId: string,
