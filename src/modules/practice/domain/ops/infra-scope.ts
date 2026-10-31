@@ -20,7 +20,13 @@ export type InfraRole =
   | 'INFECTION_CONTROL'
   | 'UNIT_HEAD'
   /** Global `ACCOUNTING_APPROVER` (F5f): sólo cuenta donde la regla lo nombra en `globalRoles`. */
-  | 'ACCOUNTING';
+  | 'ACCOUNTING'
+  /**
+   * Globales de periop (`PERIOP_NURSE`, `SURGERY_SCHEDULER`, `SURGEON`,
+   * `ANESTHESIOLOGIST`): «Ver agenda de quirófanos» R (matriz F4); sólo
+   * donde la regla lo nombra en `globalRoles`.
+   */
+  | 'PERIOP_STAFF';
 
 /** Alcance de una asignación (`organization_user_assignments.access_scope`). */
 export type GrantScope = 'TENANT' | 'PRACTICE' | 'SITE' | 'UNIT' | 'SPACE';

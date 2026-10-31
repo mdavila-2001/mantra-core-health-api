@@ -3,6 +3,7 @@ import { DELEG } from '../../delegated_access/delegated_access.concepts';
 import { PRAC } from '../practice.concepts';
 import { INFRA_F2_POLICY } from '../policies/infra-f2.policy';
 import { INFRA_F5F_POLICY } from '../../accounting/policies/infra-f5f.policy';
+import { INFRA_F4_POLICY } from '../../procedures_perioperative/policies/infra-f4.policy';
 import { grantContains, rolesOn } from '../domain/ops/infra-scope';
 import {
   InfraPolicyRegistry,
@@ -27,6 +28,7 @@ function build(
   const registry = new InfraPolicyRegistry();
   registry.register(INFRA_F2_POLICY);
   registry.register(INFRA_F5F_POLICY);
+  registry.register(INFRA_F4_POLICY);
   const structureAccess = {
     adminLevelOf: jest.fn<any>().mockResolvedValue(adminLevel),
   };
@@ -532,6 +534,31 @@ describe('translateInfraWriteError (§0.2)', () => {
       );
       expect(keeper).not.toContain('f2.availability.admin');
       expect(svc.allowedActions(new Set(), false, scope)).toEqual([]);
+    });
+  });
+
+  describe('personal de periop (PERIOP_STAFF global)', () => {
+    it('PERIOP_NURSE del tenant ve la agenda de quirófanos de la sede, pero no el tablero de camas', async () => {
+      const { svc } = build();
+      const nurse = { id: 'u-9', roles: ['PERIOP_NURSE'] } as any;
+      const scope = await svc.actorScope({} as any, nurse, site as any);
+      expect(scope.globals).toContain('PERIOP_STAFF');
+      expect(svc.canAtSiteLevel('f4.or.read', scope, site)).toBe(true);
+      expect(svc.canAtSiteLevel('f2.board.read', scope, site)).toBe(false);
+      expect(svc.canAtSiteLevel('f4.utilization.read', scope, site)).toBe(
+        false,
+      );
+    });
+    it('fail-closed por tenant: el rol con ámbito de otro tenant no cuenta (MCH-001)', async () => {
+      const { svc } = build();
+      const nurse = {
+        id: 'u-9',
+        roles: ['PERIOP_NURSE'],
+        scopedRoles: { 't-2': ['PERIOP_NURSE'] },
+      } as any;
+      const scope = await svc.actorScope({} as any, nurse, site as any);
+      expect(scope.globals).not.toContain('PERIOP_STAFF');
+      expect(svc.canAtSiteLevel('f4.or.read', scope, site)).toBe(false);
     });
   });
 });
