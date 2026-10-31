@@ -190,6 +190,40 @@ clasificación automática ──> ficha de columna en AUTO_DETECTED (certeza) o
   ausencia de dependencias (código, vistas, jobs, reportes, integraciones).
 - **Fechas** en ISO 8601 UTC; los cursores son opacos y conservan los microsegundos.
 
+## Dos entradas de menú, una fuente por pestaña
+
+El front tiene hoy **dos entradas** («Catálogo de datos» y «Portal de inventario») porque la API tiene
+**dos fuentes que no se fusionan** (decisión de la tanda F2: se documentan, no se unifican). Quien
+consume sabe de dónde sale cada cifra y no debe sumar ni comparar una con otra:
+
+| Entrada del front                             | Pestaña                             | Fuente (API)                                                                                           | Qué es                                                                                              |
+| --------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Catálogo de datos (`superadmin/data-catalog`) | Schemas, Cobertura, Objetos y ficha | `GET /admin/catalog/{schemas,coverage,objects,objects/:id…}`                                           | **Vivo**: lo que el último escaneo de `pg_catalog` observó + lo curado en `data_catalog.*`          |
+| Portal de inventario (`superadmin/portal`)    | Operaciones, Flujos, Procesos       | `GET /admin/portal/{operaciones,flujos,…}`                                                             | **Estático**: JSON generado del código (`inventario/`), sin base de datos; 503 si falta             |
+|                                               | Catálogo > Tablas                   | `GET /admin/portal/catalogo/tablas…`                                                                   | Estático (modelo `salud-db`), no lo observado                                                       |
+|                                               | Catálogo > Dominios                 | `GET /admin/portal/glosario` + `linaje`                                                                | Estático (`glosario.json`); los dominios **declarados** viven en `GET /admin/governance/domains`    |
+|                                               | Linaje                              | `GET /admin/portal/linaje…`                                                                            | Estático (endpoint → tabla); el impacto por FK observada es `GET /admin/catalog/objects/:id/impact` |
+|                                               | Deriva (sistemas)                   | `GET /admin/portal/catalogo/deriva`                                                                    | Estático (modelo vs. ORM vs. base desplegada)                                                       |
+|                                               | Revisión (sistemas)                 | `GET /admin/catalog/objects?reviewStatus=NEEDS_REVIEW` y `GET /admin/governance/review-queue`          | Vivo; la cola agrega objetos **y columnas**                                                         |
+|                                               | Esquemas                            | `GET /admin/catalog/schemas` + `coverage`                                                              | Vivo                                                                                                |
+| Gobierno y acceso                             | Datos personales                    | `GET /admin/catalog/pii/{summary,columns,reconciliation}`                                              | Vivo (clasificación) contra el registro **declarado** `system_ops.field_registry`                   |
+|                                               | Auditoría                           | `GET /audit/log`, `/audit/data-access`, `/audit/data-access/summary`, `GET /privacy/dsar`              | Bitácora WORM (`audit.*`)                                                                           |
+|                                               | Trabajos                            | `GET /admin/governance/jobs`                                                                           | Escaneos (`catalog_scan_runs`), clasificaciones (sello de auditoría) y retenciones                  |
+|                                               | Políticas, cambios, registro        | `GET /admin/governance/{policies,change-log,entity-registry,domains,legal-holds,retention-executions}` | `system_ops.*` (declarado, no observado)                                                            |
+
+Las lecturas de `admin/governance/*` viven aquí (`review-queue`, `jobs`) y en `system_ops` (el resto)
+bajo el mismo prefijo; ambas usan `GOVERNANCE_VIEW_ROLES` (`system_ops/governance-read.roles.ts`) =
+`PORTAL_READ_ROLES`.
+
+## Roles de gobierno: un solo concepto, dos nombres
+
+`GOVERNANCE_ADMIN` (sembrado aquí, `data_catalog.roles.ts`) y `DATA_GOVERNANCE_ADMIN` (sembrado por
+`authz`, exigido por `cross_store_consistency` y `graph_intelligence`) son **alias** (decisión X-6):
+`src/common/auth/role-aliases.ts` hace que `RolesGuard`, el alcance plataforma y
+`@PlatformTenantOptional` traten a los dos como uno, **sin migrar datos**: ambas filas de `authz.roles`
+y los tokens vigentes siguen valiendo, y el ámbito de tenant de cada código se respeta por separado.
+Prueba: `data_catalog.role-alias.spec.ts` (rutas reales de ambos módulos) y `role-aliases.spec.ts`.
+
 ## Qué no cubre
 
 - El inventario generado (`admin/portal/*`) se sirve tal como lo dejó `yarn inventario:*`; si el
