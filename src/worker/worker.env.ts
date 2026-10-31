@@ -86,6 +86,16 @@ export const workerEnvSchema = Joi.object({
     .integer()
     .min(1000)
     .default(10 * 60_000),
+  /**
+   * Cada cuánto el worker avisa a la API que sigue vivo (`POST
+   * /internal/ops/heartbeats`). La API deriva sus umbrales de 15 s (VIVA ≤ 30 s,
+   * DEGRADADA ≤ 60 s): subir este valor por encima de 15 s hace que workers
+   * sanos aparezcan degradados en el tablero de instancias. Mínimo 1 s.
+   */
+  WORKER_HEARTBEAT_INTERVAL_MS: Joi.number()
+    .integer()
+    .min(1000)
+    .default(15_000),
   /** Espera máxima a que terminen los ticks en vuelo durante el apagado. */
   WORKER_DRAIN_TIMEOUT_MS: Joi.number().integer().min(0).default(20_000),
   /**
@@ -192,6 +202,8 @@ export interface WorkerEnv {
   healthHost: string;
   tickTimeoutMs: number;
   stuckTickMs: number;
+  /** Intervalo del latido hacia la API (`WORKER_HEARTBEAT_INTERVAL_MS`). */
+  heartbeatIntervalMs: number;
   drainTimeoutMs: number;
   shutdownTimeoutMs: number;
   httpRetryAttempts: number;
@@ -256,6 +268,10 @@ export function loadWorkerEnv(): WorkerEnv {
     healthHost: (process.env.WORKER_HEALTH_HOST ?? '').trim() || '127.0.0.1',
     tickTimeoutMs: numberFromEnv('WORKER_TICK_TIMEOUT_MS', 5 * 60_000),
     stuckTickMs: numberFromEnv('WORKER_STUCK_TICK_MS', 10 * 60_000),
+    heartbeatIntervalMs: Math.max(
+      1000,
+      numberFromEnv('WORKER_HEARTBEAT_INTERVAL_MS', 15_000),
+    ),
     drainTimeoutMs: numberFromEnv('WORKER_DRAIN_TIMEOUT_MS', 20_000),
     shutdownTimeoutMs: numberFromEnv('WORKER_SHUTDOWN_TIMEOUT_MS', 30_000),
     httpRetryAttempts: numberFromEnv('WORKER_HTTP_RETRY_ATTEMPTS', 3),

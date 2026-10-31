@@ -28,6 +28,10 @@ import { SystemApiClientModule } from './system-api-client.module';
 import { MockProviderClientModule } from './mock-provider-client.module';
 import { GoogleEmailClientModule } from './google-email-client.module';
 import { WorkerLifecycleService } from './worker-lifecycle.service';
+import {
+  WORKER_NAME,
+  WorkerHeartbeatService,
+} from './worker-heartbeat.service';
 import { configureTicks } from './run-tick.util';
 import { workerHealth } from './worker-health.registry';
 import { startWorkerHealthServer } from './worker-health.server';
@@ -94,7 +98,13 @@ export async function bootstrapWorker(
       ScheduleModule.forRoot(),
       domainModule,
     ],
-    providers: [WorkerLifecycleService],
+    // El latido va DESPUÉS del ciclo de vida: éste marca `running` en su
+    // `onApplicationBootstrap` y el latido sólo emite estando `running`.
+    providers: [
+      WorkerLifecycleService,
+      { provide: WORKER_NAME, useValue: name },
+      WorkerHeartbeatService,
+    ],
   })
   class WorkerRootModule {}
 

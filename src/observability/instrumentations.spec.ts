@@ -36,6 +36,13 @@ describe('instrumentations', () => {
       expect(isExcludedPath('/iam/users')).toBe(false);
     });
 
+    it('H10: el latido de la sonda de vida no se traza ni se mide en /admin/ops/traffic', () => {
+      expect(isExcludedPath('/internal/ops/heartbeats')).toBe(true);
+      // Sólo esa ruta: el resto de /internal/ops sigue medido.
+      expect(isExcludedPath('/internal/ops/restore-test-runs')).toBe(false);
+      expect(isExcludedPath('/admin/ops/instances/liveness')).toBe(false);
+    });
+
     it('tolera una URL ausente', () => {
       expect(isExcludedPath(undefined)).toBe(false);
     });

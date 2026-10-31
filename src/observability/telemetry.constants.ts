@@ -105,6 +105,7 @@ export const EXCLUDED_HTTP_PATHS: readonly string[] = [
   '/readiness',
   '/liveness',
   '/metrics',
+  '/internal/ops/heartbeats',
   '/favicon.ico',
   '/docs',
   '/docs-json',
