@@ -153,8 +153,20 @@ export function evaluatePrescriptionOrder(
     };
   }
 
+  // Un pedido hecho con la receta la consume también en las líneas del mismo
+  // fármaco cuyo producto no declara si es de receta (`null`): si no, el
+  // indicador sin cargar dejaría pedir la misma receta sin tope (D-6). Lo
+  // declarado de venta libre sigue sin mirar la receta (D-4).
+  const againstPrescription = input.lines.filter(
+    (line) =>
+      line.requiresPrescription === true ||
+      (line.requiresPrescription !== false &&
+        line.medicationConceptId !== undefined &&
+        line.medicationConceptId !== null &&
+        remainingByDrug.has(line.medicationConceptId)),
+  );
   const linesByDrug = new Map<string, PrescriptionOrderLine[]>();
-  for (const line of controlled) {
+  for (const line of againstPrescription) {
     const conceptId = line.medicationConceptId as string;
     linesByDrug.set(conceptId, [...(linesByDrug.get(conceptId) ?? []), line]);
   }
