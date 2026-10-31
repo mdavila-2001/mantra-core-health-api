@@ -68,7 +68,11 @@ function build() {
   const sessionsRepo = {
     findIdByToken: mockFn((_tx: unknown, userId: string, token: string) =>
       Promise.resolve(
-        userId === 'user-a' && token === 'sess-token-a' ? IAM_SESSION_A : null,
+        userId === 'user-a' && token === 'sess-token-a'
+          ? IAM_SESSION_A
+          : userId === 'user-b' && token === 'sess-token-b'
+            ? 'iam-sess-b'
+            : null,
       ),
     ),
     belongsToUser: mockFn((_tx: unknown, sessionId: string, userId: string) =>
@@ -446,11 +450,42 @@ describe('TelemetryEventsService', () => {
         expect(d.eventsRepo.create.mock.calls[0][1].eventName).toBe(
           'pagina_vista_anonima',
         );
-        expect(d.eventsRepo.findByIdempotencyKey).toHaveBeenCalledWith(
-          expect.anything(),
-          'k1',
-          null,
+        // La clave del cliente no se guarda tal cual: se acota por un hash a
+        // quien la envía, para que nadie pueda adelantarse con la misma clave.
+        const [, usedKey, scope] =
+          d.eventsRepo.findByIdempotencyKey.mock.calls[0];
+        expect(usedKey).toMatch(/^[0-9a-f]{64}$/u);
+        expect(usedKey).not.toBe('k1');
+        expect(scope).toBeNull();
+        expect(d.eventsRepo.create.mock.calls[0][1].eventIdempotencyKey).toBe(
+          usedKey,
         );
+      });
+
+      it('Límite: la misma clave de dos personas distintas no colisiona entre anónimos', async () => {
+        const d = withoutConsentDecision();
+        d.eventsRepo.findByIdempotencyKey.mockResolvedValue(null);
+        const batch = {
+          events: [
+            {
+              eventSchemaDefinitionId: ANON_SCHEMA,
+              eventIdempotencyKey: 'misma',
+              routeTemplate: '/inicio',
+            },
+          ],
+        };
+
+        await d.service.captureActivityEvents(batch, actor);
+        await d.service.captureActivityEvents(batch, {
+          ...actor,
+          id: 'user-b',
+          sessionId: 'sess-token-b',
+        });
+
+        const keys = d.eventsRepo.findByIdempotencyKey.mock.calls.map(
+          (c: unknown[]) => c[1],
+        );
+        expect(new Set(keys).size).toBe(2);
       });
 
       it('Límite: el reenvío anónimo con la misma clave no inserta', async () => {
@@ -478,6 +513,14 @@ describe('TelemetryEventsService', () => {
         ['sin plantilla de ruta', undefined],
         ['con un correo en la ruta', '/u/ana@correo.com'],
         ['con un documento en la ruta', '/pacientes/12345678/ficha'],
+        [
+          'con un UUID en la ruta',
+          '/pacientes/3f2b8c1e-9d4a-4c7e-8a11-5b6d7e8f9a0b',
+        ],
+        ['con un tramo hexadecimal corto', '/enlace/a3f9c2e1b7'],
+        ['con texto libre en mayúsculas', '/Juan-Perez/ficha'],
+        ['con un punto o un espacio', '/inicio/mi ficha.v2'],
+        ['con más de ocho segmentos', '/a/b/c/d/e/f/g/h/i'],
       ])('Error 422: %s', async (_name, routeTemplate) => {
         const d = withoutConsentDecision();
 

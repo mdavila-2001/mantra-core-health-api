@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { HttpStatus } from '@nestjs/common';
 import {
   DomainException,
@@ -218,7 +218,20 @@ export class TelemetryEventsService {
 
         // Idempotencia por clave **del mismo usuario**: descarta reenvíos.
         // Un evento anónimo no tiene usuario: su clave se acota a los anónimos.
-        const idemKey = item.eventIdempotencyKey ?? randomUUID();
+        // La clave que elige el cliente nunca se guarda tal cual en un evento
+        // anónimo: se acota con un hash a quien la envía y a su organización,
+        // para que otra persona no pueda adelantarse con la misma clave y hacer
+        // que se descarte un evento ajeno.
+        const idemKey =
+          item.eventIdempotencyKey === undefined
+            ? randomUUID()
+            : anonymous
+              ? createHash('sha256')
+                  .update(
+                    `anon\u0000${actor.id}\u0000${tenantId}\u0000${item.eventIdempotencyKey}`,
+                  )
+                  .digest('hex')
+              : item.eventIdempotencyKey;
         if (item.eventIdempotencyKey) {
           const dup = await this.eventsRepo.findByIdempotencyKey(
             tx,
