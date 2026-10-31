@@ -32297,6 +32297,57 @@
         "description": "Equipos diagnósticos de una sede (F5a). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
       }
     },
+    "/sites/{siteId}/sample-collection-points": {
+      "get": {
+        "operationId": "SpaceAssetsController_collectionPoints",
+        "parameters": [
+          {
+            "name": "siteId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Puntos de toma de muestra de una sede (F5b)",
+        "tags": [
+          "practice-infrastructure"
+        ],
+        "description": "Puntos de toma de muestra de una sede (F5b). Requiere JWT y los roles o alcances declarados por el controlador. Todas las respuestas de error usan el envelope ErrorResponse."
+      }
+    },
     "/practice/infrastructure-access/me": {
       "get": {
         "operationId": "InfrastructureAccessController_read",
@@ -61330,6 +61381,16 @@
             "required": false,
             "in": "query",
             "description": "Profesional asignado",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "collectionCareSpaceId",
+            "required": false,
+            "in": "query",
+            "description": "Punto de toma (F5b)",
             "schema": {
               "format": "uuid",
               "type": "string"
@@ -125107,6 +125168,11 @@
             "description": "Sede sugerida (practice.practice_sites). Obligatoria con SR_PERF_SELF y SR_PERF_ORGANIZATION; prohibida con SR_PERF_PATIENT_CHOICE. Debe ofrecer el procedimiento con precio. No concede acceso a la orden",
             "format": "uuid"
           },
+          "suggestedCareSpaceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Punto de toma sugerido (F5b)"
+          },
           "previousDiagnosticReportId": {
             "type": "string",
             "description": "Informe previo que satisface el pedido (antiduplicación). Va con reusePreviousReport o duplicateOverrideReason.",
@@ -149484,6 +149550,11 @@
             "type": "string",
             "format": "uuid",
             "description": "Profesional que recolecta"
+          },
+          "collectionCareSpaceId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Punto de toma (F5b)"
           }
         },
         "required": [

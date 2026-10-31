@@ -46,4 +46,11 @@ export class SpaceAssetsController {
   ) {
     return this.read.siteEquipment(siteId, actor, requireTenantId());
   }
+
+  /** F5b: puntos de toma de muestra disponibles de la sede. */
+  @Get('sites/:siteId/sample-collection-points')
+  @ApiOperation({ summary: 'Puntos de toma de muestra de una sede (F5b)' })
+  collectionPoints(@Param('siteId', ParseUUIDPipe) siteId: string) {
+    return this.read.collectionPoints(siteId, requireTenantId());
+  }
 }
