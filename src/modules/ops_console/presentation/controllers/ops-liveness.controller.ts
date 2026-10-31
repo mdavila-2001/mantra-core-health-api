@@ -1,3 +1,4 @@
+import { PlatformScopeOptional } from '../../../../common/tenant/platform-scope';
 import { Controller, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../../../common';
@@ -13,6 +14,7 @@ import { OPS_READ_ROLES } from './ops-console.controller';
  */
 @ApiTags('ops-console')
 @ApiBearerAuth()
+@PlatformScopeOptional()
 @Controller('admin/ops')
 export class OpsLivenessController {
   constructor(private readonly liveness: InstanceLivenessService) {}
