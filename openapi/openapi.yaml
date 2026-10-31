@@ -117053,6 +117053,12 @@ components:
             - VALID
             - EXPIRED
             - REVOKED
+        endedReason:
+          type: string
+          enum:
+            - LINK_EXPIRED
+            - PRESCRIPTION_NOT_ACTIVE
+          nullable: true
         uses:
           type: number
       required:
@@ -117062,6 +117068,7 @@ components:
         - createdAt
         - expiresAt
         - status
+        - endedReason
         - uses
     PrescriptionShareOwnershipDto:
       type: object
@@ -117090,6 +117097,12 @@ components:
             - VALID
             - EXPIRED
             - REVOKED
+        endedReason:
+          type: string
+          enum:
+            - LINK_EXPIRED
+            - PRESCRIPTION_NOT_ACTIVE
+          nullable: true
         issuedAt:
           type: string
           format: date-time
@@ -117106,6 +117119,7 @@ components:
           type: number
       required:
         - status
+        - endedReason
         - issuedAt
         - itemCount
     MedicalCenterOfferDto:

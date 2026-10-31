@@ -168250,6 +168250,14 @@
               "REVOKED"
             ]
           },
+          "endedReason": {
+            "type": "string",
+            "enum": [
+              "LINK_EXPIRED",
+              "PRESCRIPTION_NOT_ACTIVE"
+            ],
+            "nullable": true
+          },
           "uses": {
             "type": "number"
           }
@@ -168261,6 +168269,7 @@
           "createdAt",
           "expiresAt",
           "status",
+          "endedReason",
           "uses"
         ]
       },
@@ -168300,6 +168309,14 @@
               "REVOKED"
             ]
           },
+          "endedReason": {
+            "type": "string",
+            "enum": [
+              "LINK_EXPIRED",
+              "PRESCRIPTION_NOT_ACTIVE"
+            ],
+            "nullable": true
+          },
           "issuedAt": {
             "type": "string",
             "format": "date-time",
@@ -168324,6 +168341,7 @@
         },
         "required": [
           "status",
+          "endedReason",
           "issuedAt",
           "itemCount"
         ]
