@@ -8,7 +8,9 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { PlatformAdminScopeGuard } from '../../../../common/auth/platform-admin-scope.guard';
 import {
   ApiBearerAuth,
   ApiConflictResponse,
@@ -294,6 +296,7 @@ export class IamUsersController {
   /** Estado de ciclo de vida de la cuenta y su historia (suspensiones, reactivaciones, bajas). */
   @Get(':id/lifecycle')
   @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
   @ApiOperation({
     summary: 'Estado de ciclo de vida de la cuenta y su historia, paginada',
   })
@@ -479,6 +482,7 @@ export class IamUsersController {
   })
   @Post(':id/suspend')
   @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
@@ -506,6 +510,7 @@ export class IamUsersController {
   })
   @Post(':id/reactivate')
   @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Reactivar una cuenta suspendida con motivo (idempotente)',
@@ -531,6 +536,7 @@ export class IamUsersController {
   })
   @Post(':id/deactivate')
   @Roles('SECURITY_ADMIN')
+  @UseGuards(PlatformAdminScopeGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:

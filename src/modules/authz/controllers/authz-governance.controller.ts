@@ -7,7 +7,9 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { PlatformAdminScopeGuard } from '../../../common/auth/platform-admin-scope.guard';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -77,6 +79,7 @@ import { AuthzGovernanceService } from '../services/authz-governance.service';
 @ApiTags('authz-governance')
 @ApiBearerAuth()
 @Controller('authz')
+@UseGuards(PlatformAdminScopeGuard)
 @PlatformTenantOptional('SECURITY_ADMIN', 'SUPERADMIN')
 export class AuthzGovernanceController {
   constructor(private readonly governance: AuthzGovernanceService) {}
