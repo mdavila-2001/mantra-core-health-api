@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsBoolean, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 /**
@@ -10,6 +11,11 @@ export class SetSiteAvailabilityDto {
    * cantidad en 0 aunque el cuerpo traiga una.
    */
   @ApiProperty({ description: '«Lo tengo» en esta sucursal' })
+  // Se valida lo que llegó en el cuerpo y no lo ya convertido: con la
+  // conversión implícita del `ValidationPipe`, `"false"` (un texto no vacío)
+  // llegaría como `true` y guardaría «Lo tengo». `obj` conserva el valor
+  // original, y un texto no pasa `@IsBoolean()`.
+  @Transform(({ obj }: { obj: Record<string, unknown> }) => obj?.available)
   @IsBoolean()
   available!: boolean;
 
