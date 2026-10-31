@@ -5,6 +5,7 @@ import { AUD } from '../../../../audit/audit.concepts';
 import { OutboxService } from '../../../../messaging/services/outbox.service';
 import { CleaningOrders, type CareSpaces } from '../../../entities';
 import { PRAC } from '../../../practice.concepts';
+import { DIR } from '../../../../directory/directory.concepts';
 import type {
   CleaningOrderDto,
   CreateCleaningOrderDto,
@@ -247,6 +248,18 @@ export class AssignCleaningOrderUseCase extends CleaningOrderTransition {
   ): Promise<CleaningOrderDto> {
     return this.em.transactional(async (tx) => {
       const loaded = await this.load(tx, orderId, ifMatch, req);
+      if (userId) {
+        // El asignado lo manda el cliente: tiene que ser miembro activo del tenant.
+        const rows = await tx.execute<{ id: string }[]>(
+          'SELECT id FROM directory.tenant_memberships WHERE user_id = ? AND tenant_id = ? AND status_concept_id = ? LIMIT 1',
+          [userId, req.tenantId, DIR.MEMBERSHIP_ACTIVE],
+          'all',
+        );
+        if (rows.length === 0)
+          throw new ResourceNotFoundException('Usuario no encontrado', {
+            userId,
+          });
+      }
       loaded.order.assignedUserId = userId ?? undefined;
       await this.seal(tx, loaded, OPS_EVENTS.cleaningAssigned, req);
       return this.cells.order(loaded.order, loaded.space);

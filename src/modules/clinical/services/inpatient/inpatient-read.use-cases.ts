@@ -193,11 +193,14 @@ export class InpatientReadUseCases {
     );
     const allowed = (u: string | null | undefined) =>
       this.access.canOnUnit('f3.adt.read', scope, target.site, u ?? null);
-    if (unitId && !allowed(unitId)) {
-      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
-        unitId,
-      });
-    }
+    const filter = await this.access.scopeFilter(
+      req.actor as never,
+      'f3.adt.read',
+      siteId,
+      em,
+      req.tenantId,
+    );
+    this.access.assertTargetInScope(filter, { unitId });
     const all = await em.find(EncounterLocations, {
       practiceSiteId: siteId,
       isBedAssignment: true,

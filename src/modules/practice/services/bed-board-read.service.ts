@@ -91,14 +91,18 @@ export class BedBoardReadService {
       em,
       tenantId,
     );
-    if (
-      query.unitId &&
-      !this.access.canOnUnit('f2.board.read', scope, target.site, query.unitId)
-    ) {
-      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
-        unitId: query.unitId,
-      });
-    }
+    // Ids del cliente: dentro de la sede y del alcance, o 404.
+    const filter = await this.access.scopeFilter(
+      actor,
+      'f2.board.read',
+      siteId,
+      em,
+      tenantId,
+    );
+    this.access.assertTargetInScope(filter, {
+      unitId: query.unitId,
+      careSpaceId: query.parentSpaceId,
+    });
     const index = await this.index(em, siteId);
     const functionIds = (query.functionCodes ?? '')
       .split(',')
@@ -349,19 +353,14 @@ export class BedBoardReadService {
       em,
       tenantId,
     );
-    if (
-      query.unitId &&
-      !this.access.canOnUnit(
-        'f2.cleaning.read',
-        scope,
-        target.site,
-        query.unitId,
-      )
-    ) {
-      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
-        unitId: query.unitId,
-      });
-    }
+    const filter = await this.access.scopeFilter(
+      actor,
+      'f2.cleaning.read',
+      siteId,
+      em,
+      tenantId,
+    );
+    this.access.assertTargetInScope(filter, { unitId: query.unitId });
     const index = await this.index(em, siteId);
     const limit = query.limit ?? ORDER_PAGE;
     const rows = await em.find(

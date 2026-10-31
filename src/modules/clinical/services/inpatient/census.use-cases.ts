@@ -134,6 +134,7 @@ export class InpatientCensusUseCases {
     unitId: string | undefined,
     req: AdtRequest,
   ): Promise<CensusDayView[]> {
+    assertDate(date);
     const em = this.em.fork();
     const { target, scope } = await this.access.assertCan(
       req.actor as never,
@@ -144,11 +145,15 @@ export class InpatientCensusUseCases {
     );
     const allowed = (u: string | null) =>
       this.access.canOnUnit('f3.census.read', scope, target.site, u);
-    if (unitId && !allowed(unitId)) {
-      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
-        unitId,
-      });
-    }
+    // El unitId del cliente: de la sede y del alcance, o 404.
+    const filter = await this.access.scopeFilter(
+      req.actor as never,
+      'f3.census.read',
+      siteId,
+      em,
+      req.tenantId,
+    );
+    this.access.assertTargetInScope(filter, { unitId });
     const tz = target.site.timeZone ?? TZ_DEFAULT;
     const closed = await em.find(InpatientCensusDays, {
       practiceSiteId: siteId,
@@ -205,6 +210,7 @@ export class InpatientCensusUseCases {
     unitIds: string[] | undefined,
     req: AdtRequest | null,
   ): Promise<CensusDayView[]> {
+    assertDate(date);
     return this.em.transactional(async (tx) => {
       let tz = TZ_DEFAULT;
       let tenantId: string;
@@ -220,7 +226,14 @@ export class InpatientCensusUseCases {
         allowed = (u) =>
           this.access.canOnUnit('f3.census.close', scope, target.site, u);
         // Una unidad pedida fuera del alcance → 403 y no se cierra ninguna.
-        const denied = (unitIds ?? []).filter((u) => !allowed(u));
+        const filter = await this.access.scopeFilter(
+          req.actor as never,
+          'f3.census.close',
+          siteId,
+          tx,
+          req.tenantId,
+        );
+        const denied = (unitIds ?? []).filter((u) => !filter.allowsUnit(u));
         if (denied.length > 0) {
           throw new InsufficientRoleException(
             'Su rol no permite cerrar el censo de esas unidades',
@@ -399,13 +412,21 @@ export class InpatientCensusUseCases {
         throw new ResourceNotFoundException('Día de censo no encontrado', {
           dayId,
         });
-      await this.access.assertCan(
+      const filter = await this.access.scopeFilter(
         req.actor as never,
         'f3.census.adjust',
-        { siteId: day.practiceSiteId },
+        day.practiceSiteId,
         tx,
         req.tenantId,
       );
+      // El ajuste es de un día de una unidad: hace falta la acción sobre esa unidad.
+      if (!filter.allowsUnit(day.clinicalUnitId)) {
+        throw new InsufficientRoleException(
+          'Su rol no permite ajustar el censo de esa unidad',
+          { unitId: day.clinicalUnitId },
+          'INFRA_ACTION_NOT_ALLOWED',
+        );
+      }
       if (day.statusConceptId !== CLIN.CENSUS_CLOSED)
         throw adtError('CENSUS_NOT_CLOSED');
       if (!dto.reasonText?.trim()) throw adtError('ADJUSTMENT_REASON_REQUIRED');
@@ -481,11 +502,15 @@ export class InpatientCensusUseCases {
     );
     const allowed = (u: string | null) =>
       this.access.canOnUnit('f3.indicators.read', scope, target.site, u);
-    if (unitId && !allowed(unitId)) {
-      throw new ResourceNotFoundException('Unidad clínica no encontrada', {
-        unitId,
-      });
-    }
+    // El unitId del cliente: de la sede y del alcance, o 404.
+    const filter = await this.access.scopeFilter(
+      req.actor as never,
+      'f3.indicators.read',
+      siteId,
+      em,
+      req.tenantId,
+    );
+    this.access.assertTargetInScope(filter, { unitId });
     const dates = dateRange(from, to);
     if (dates.length === 0 || dates.length > 366)
       throw adtError('INDICATOR_RANGE_TOO_LONG', { maxDays: 366 });
@@ -652,4 +677,14 @@ function adjView(a: InpatientCensusAdjustments): Record<string, unknown> {
     adjustedByUserId: a.adjustedByUserId,
     createdAt: a.createdAt.toISOString(),
   };
+}
+
+/** `yyyy-mm-dd` válido, o 422. */
+function assertDate(date: string): void {
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(date ?? '') ||
+    Number.isNaN(new Date(`${date}T00:00:00Z`).getTime())
+  ) {
+    throw adtError('INDICATOR_RANGE_TOO_LONG', { date });
+  }
 }

@@ -546,6 +546,18 @@ export class OrBlocksUseCases {
           R.OR_BLOCK_INVALID_ROOM,
         );
       }
+      if (input.clinicalUnitId) {
+        // La unidad dueña la manda el cliente: de la misma sede y tenant, o 404.
+        const [unit] = await tx.execute<{ id: string }[]>(
+          'SELECT id FROM practice.clinical_units WHERE id = ? AND practice_site_id = ? AND tenant_id = ?',
+          [input.clinicalUnitId, siteId, req.tenantId],
+          'all',
+        );
+        if (!unit)
+          throw new ResourceNotFoundException('Unidad clínica no encontrada', {
+            unitId: input.clinicalUnitId,
+          });
+      }
       const owner =
         input.ownerKind === 'SERVICE'
           ? PERIOP.ORB_OWNER_SERVICE
@@ -574,16 +586,44 @@ export class OrBlocksUseCases {
       const starts: Date[] = [input.startsAt];
       let seriesId: string | undefined;
       const now = new Date();
+      if (
+        input.endsAt.getTime() <= input.startsAt.getTime() ||
+        durationMs > 24 * 3_600_000
+      ) {
+        throw new PreconditionFailedException(
+          'El bloque debe terminar después de empezar y durar como mucho 24 h',
+          {},
+          R.OR_BLOCK_INVALID_ROOM,
+        );
+      }
       if (input.recurrence) {
         const until = new Date(`${input.recurrence.until}T23:59:59Z`);
+        const horizon = input.startsAt.getTime() + 366 * 86_400_000;
+        const weekdays = input.recurrence.weekdays;
+        if (
+          !/^\d{4}-\d{2}-\d{2}$/.test(input.recurrence.until) ||
+          Number.isNaN(until.getTime()) ||
+          until.getTime() < input.startsAt.getTime() ||
+          until.getTime() > horizon ||
+          weekdays.length === 0 ||
+          new Set(weekdays).size !== weekdays.length ||
+          weekdays.some((w) => !Number.isInteger(w) || w < 1 || w > 7)
+        ) {
+          throw new PreconditionFailedException(
+            'La serie necesita días ISO 1–7 sin repetir y un fin dentro del año siguiente',
+            {},
+            R.OR_BLOCK_OWNER_REQUIRED,
+          );
+        }
         starts.length = 0;
+        let iterations = 0;
         for (
           let d = new Date(input.startsAt);
-          d <= until && starts.length <= 400;
-          d = new Date(d.getTime() + 86_400_000)
+          d <= until && iterations < 366 && starts.length <= 400;
+          d = new Date(d.getTime() + 86_400_000), iterations += 1
         ) {
           const iso = d.getUTCDay() === 0 ? 7 : d.getUTCDay();
-          if (input.recurrence.weekdays.includes(iso)) starts.push(new Date(d));
+          if (weekdays.includes(iso)) starts.push(new Date(d));
         }
         if (starts.length > 400)
           throw new PreconditionFailedException(
@@ -755,27 +795,42 @@ export class OrBlocksUseCases {
     req: OrRequest,
   ) {
     const em = this.em.fork();
-    await this.access.assertCan(
+    const filter = await this.access.scopeFilter(
       req.actor,
       'f4.or.read',
-      { siteId },
+      siteId,
       em,
       req.tenantId,
     );
-    const rooms = await em.execute<{ id: string }[]>(
-      'SELECT id FROM practice.care_spaces WHERE practice_site_id = ? AND space_type_concept_id = ?',
-      [siteId, PRAC.SPACE_FN_OPERATING_ROOM],
-      'all',
-    );
+    const rooms = (
+      await em.execute<{ id: string }[]>(
+        'SELECT id FROM practice.care_spaces WHERE practice_site_id = ? AND space_type_concept_id = ?',
+        [siteId, PRAC.SPACE_FN_OPERATING_ROOM],
+        'all',
+      )
+    )
+      .map((r) => r.id)
+      .filter((id) => filter.allowsSpace(id));
+    // La sala que pide el cliente tiene que ser un quirófano de la sede y
+    // estar en el alcance; si no, 404 (revisión de seguridad F4).
+    if (q.operatingRoomId && !rooms.includes(q.operatingRoomId)) {
+      throw new ResourceNotFoundException('Quirófano no encontrado', {
+        operatingRoomId: q.operatingRoomId,
+      });
+    }
+    const from = parseInstant(q.from, 'from');
+    const to = parseInstant(q.to, 'to');
     const blocks = await em.find(
       OperatingRoomBlocks,
       {
         tenantId: req.tenantId,
-        operatingRoomId: q.operatingRoomId ?? { $in: rooms.map((r) => r.id) },
-        ...(q.from ? { endsAt: { $gte: new Date(q.from) } } : {}),
-        ...(q.to ? { startsAt: { $lte: new Date(q.to) } } : {}),
+        operatingRoomId: {
+          $in: q.operatingRoomId ? [q.operatingRoomId] : rooms,
+        },
+        ...(from ? { endsAt: { $gte: from } } : {}),
+        ...(to ? { startsAt: { $lte: to } } : {}),
       },
-      { orderBy: { startsAt: 'asc' } },
+      { orderBy: { startsAt: 'asc' }, limit: 1000 },
     );
     const cases = blocks.length
       ? await em.find(ProcedureCases, {
@@ -896,4 +951,26 @@ export function blockView(b: OperatingRoomBlocks): Record<string, unknown> {
     releasedMinutes: b.releasedMinutes ?? null,
     rowVersion: b.rowVersion,
   };
+}
+
+/**
+ * Instante de un parámetro de consulta, o 422 si no es una fecha.
+ *
+ * @param value - Texto ISO.
+ * @param name - Parámetro.
+ */
+function parseInstant(
+  value: string | undefined,
+  name: string,
+): Date | undefined {
+  if (!value) return undefined;
+  const d = new Date(value);
+  if (value.length > 40 || Number.isNaN(d.getTime())) {
+    throw new PreconditionFailedException(
+      'Fecha inválida',
+      { [name]: value },
+      R.INDICATOR_RANGE_TOO_LONG,
+    );
+  }
+  return d;
 }

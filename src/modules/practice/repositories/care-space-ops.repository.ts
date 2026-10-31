@@ -436,6 +436,43 @@ export class CareSpaceOpsRepository {
     return new Map(rows.map((r) => [r.setting_key, r.value_json]));
   }
 
+  /**
+   * Índice de alcance de una sede: espacios (padre, función, unidad propia),
+   * vínculos vigentes espacio↔unidad y unidades con su padre.
+   *
+   * @param em - Contexto.
+   * @param siteId - Sede.
+   */
+  async siteScopeIndex(
+    em: EntityManager,
+    siteId: string,
+  ): Promise<{
+    spaces: { id: string; parent_space_id: string | null; space_type_concept_id: string; clinical_unit_id: string | null }[];
+    links: { care_space_id: string; clinical_unit_id: string }[];
+    units: { id: string; parent_unit_id: string | null }[];
+  }> {
+    const [spaces, links, units] = await Promise.all([
+      em.execute<{ id: string; parent_space_id: string | null; space_type_concept_id: string; clinical_unit_id: string | null }[]>(
+        'SELECT id, parent_space_id, space_type_concept_id, clinical_unit_id FROM practice.care_spaces WHERE practice_site_id = ?',
+        [siteId],
+        'all',
+      ),
+      em.execute<{ care_space_id: string; clinical_unit_id: string }[]>(
+        `SELECT a.care_space_id, a.clinical_unit_id FROM practice.space_unit_assignments a
+           JOIN practice.care_spaces c ON c.id = a.care_space_id
+          WHERE c.practice_site_id = ? AND a.valid_from <= now() AND (a.valid_to IS NULL OR a.valid_to > now())`,
+        [siteId],
+        'all',
+      ),
+      em.execute<{ id: string; parent_unit_id: string | null }[]>(
+        'SELECT id, parent_unit_id FROM practice.clinical_units WHERE practice_site_id = ?',
+        [siteId],
+        'all',
+      ),
+    ]);
+    return { spaces, links, units };
+  }
+
   /** Espacios con forma cama de una sede (para el tablero). */
   bedFormId(): string {
     return PRAC.LOC_FORM_BED;
