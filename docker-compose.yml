@@ -217,6 +217,12 @@ x-app-env: &app-env
   # siquiera el aborto del plazo surtió efecto.
   WORKER_TICK_TIMEOUT_MS: ${WORKER_TICK_TIMEOUT_MS:-300000}
   WORKER_STUCK_TICK_MS: ${WORKER_STUCK_TICK_MS:-600000}
+  # Latido de cada worker hacia la API, y umbrales con los que la API lo juzga
+  # (`GET /admin/ops/instances/liveness`). Van juntos porque la API exige
+  # down > degraded >= intervalo al arrancar.
+  WORKER_HEARTBEAT_INTERVAL_MS: ${WORKER_HEARTBEAT_INTERVAL_MS:-15000}
+  OPS_LIVENESS_DEGRADED_AFTER_SECONDS: ${OPS_LIVENESS_DEGRADED_AFTER_SECONDS:-30}
+  OPS_LIVENESS_DOWN_AFTER_SECONDS: ${OPS_LIVENESS_DOWN_AFTER_SECONDS:-60}
   # Drenaje y apagado. `WORKER_SHUTDOWN_TIMEOUT_MS` debe quedar por DEBAJO del
   # `stop_grace_period` de cada servicio worker, o quien fuerza la salida es un
   # SIGKILL mudo y se pierde el diagnóstico de qué seguía pendiente.
