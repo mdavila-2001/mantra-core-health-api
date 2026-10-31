@@ -98,6 +98,36 @@ describe('route-audit-identity', () => {
     });
   });
 
+  it('con dryRunAction, una vista previa (`dryRun: true`) se sella con esa acción y no con la de la carga', () => {
+    const options = {
+      action: 'PHARMACY_PRODUCTS_BULK_LOADED',
+      dryRunAction: 'PHARMACY_PRODUCTS_BULK_PREVIEWED',
+      entity: 'pharmacy',
+      entityId: 'param:pharmacyId' as const,
+    };
+    const identity = (body: unknown) =>
+      deriveRouteAuditIdentity({
+        method: 'POST',
+        routeTemplate: '/pharmacies/:pharmacyId/products/bulk',
+        params: { pharmacyId: A },
+        body,
+        options,
+      });
+    expect(identity({ mode: 'UPSERT', dryRun: true, rows: [] })).toEqual({
+      action: 'PHARMACY_PRODUCTS_BULK_PREVIEWED',
+      entity: 'pharmacy',
+      entityId: A,
+    });
+    for (const body of [
+      { mode: 'UPSERT', dryRun: false },
+      { mode: 'UPSERT' },
+      { mode: 'UPSERT', dryRun: 'true' },
+      undefined,
+    ]) {
+      expect(identity(body).action).toBe('PHARMACY_PRODUCTS_BULK_LOADED');
+    }
+  });
+
   it('con body.<campo> el id sale del cuerpo de la petición', () => {
     expect(
       deriveRouteAuditIdentity({

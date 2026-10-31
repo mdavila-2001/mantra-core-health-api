@@ -136,9 +136,12 @@ export function deriveRouteAuditIdentity(
     ) ?? 'root';
 
   const options = input.options;
+  const preview =
+    options?.dryRunAction !== undefined &&
+    fieldOf(input.body, 'dryRun') === true;
   return {
     action:
-      options?.action ??
+      (preview ? options?.dryRunAction : options?.action) ??
       `${ROUTE_ACTION_PREFIX} ${verb} ${input.routeTemplate}`,
     entity: options?.entity ?? derivedEntity,
     entityId: options?.entityId
