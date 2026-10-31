@@ -87,4 +87,20 @@ export class OperatingRoomUtilizationEvents {
    */
   @Property({ fieldName: 'created_at', columnType: 'timestamptz' })
   createdAt!: Date;
+
+  /**
+   * Identificador asociado a tenant.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
+  /**
+   * Identificador asociado a operating room block.
+   */
+  @Property({
+    fieldName: 'operating_room_block_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → procedures_perioperative.operating_room_blocks (inferida)
+  operatingRoomBlockId?: string;
 }

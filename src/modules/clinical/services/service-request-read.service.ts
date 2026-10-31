@@ -5,6 +5,7 @@ import {
   requireTenantId,
   type AuthenticatedUser,
 } from '../../../common';
+import { collectionPoint } from '../../practice/services/ops/collection-points';
 import { ServiceRequests } from '../entities';
 import { ClinicalErrorReason } from '../clinical.error-reasons';
 import { DEFAULT_PERFORMER_SELECTION_CONCEPT } from '../performer-selection';
@@ -64,7 +65,7 @@ export class ServiceRequestReadService {
     em: EntityManager,
     requests: readonly ServiceRequests[],
   ): Promise<ServiceRequestResponseDto[]> {
-    const [details, noteIds, names] = await Promise.all([
+    const [details, noteIds, names, points] = await Promise.all([
       this.detail.describe(em, requests),
       this.notes.noteIdsFor(
         em,
@@ -74,6 +75,7 @@ export class ServiceRequestReadService {
         em,
         requests.map((r) => r.suggestedPracticeSiteId),
       ),
+      this.collectionPointsOf(em, requests),
     ]);
     return requests.map((sr) => {
       const view = details.get(sr.id);
@@ -101,9 +103,31 @@ export class ServiceRequestReadService {
         suggestedPracticeSiteName: sr.suggestedPracticeSiteId
           ? (names.get(sr.suggestedPracticeSiteId) ?? null)
           : null,
+        suggestedCareSpace: sr.suggestedCareSpaceId
+          ? (points.get(sr.suggestedCareSpaceId) ?? null)
+          : null,
         createdAt: sr.createdAt,
       };
     });
+  }
+
+  /** F5b: `{id, code, name}` de los puntos de toma sugeridos de las órdenes. */
+  private async collectionPointsOf(
+    em: EntityManager,
+    requests: readonly ServiceRequests[],
+  ): Promise<Map<string, { id: string; code: string; name: string }>> {
+    const ids = [
+      ...new Set(
+        requests
+          .map((r) => r.suggestedCareSpaceId)
+          .filter((id): id is string => !!id),
+      ),
+    ];
+    const rows = await Promise.all(ids.map((id) => collectionPoint(em, id)));
+    const out = new Map<string, { id: string; code: string; name: string }>();
+    for (const row of rows)
+      if (row) out.set(row.id, { id: row.id, code: row.code, name: row.name });
+    return out;
   }
 
   private notFound(id: string): ResourceNotFoundException {

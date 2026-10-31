@@ -95,6 +95,8 @@ export enum ClinicalErrorReason {
   BASED_ON_NOTE_ENCOUNTER_MISMATCH = 'BASED_ON_NOTE_ENCOUNTER_MISMATCH',
   /** P40: `category` y `categoryConceptId` viajan juntos y no dicen lo mismo. */
   SERVICE_REQUEST_CATEGORY_MISMATCH = 'SERVICE_REQUEST_CATEGORY_MISMATCH',
+  /** F5b: el punto de toma no es un punto disponible de la sede sugerida (422). */
+  COLLECTION_POINT_INVALID = 'COLLECTION_POINT_INVALID',
 }
 
 /**

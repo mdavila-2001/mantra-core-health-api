@@ -303,8 +303,15 @@ export class SearchBookingsUseCase {
       page.map(({ booking }) => booking),
     );
 
-    const items = page.map(({ booking, slot }) =>
-      this.assembler.toBookingItem(
+    const careSpaces =
+      (await this.clinical.findCareSpaces?.(em, appointmentIds)) ??
+      new Map<string, { id: string; code: string; name: string }>();
+    const items = page.map(({ booking, slot }) => ({
+      careSpace:
+        booking.appointmentId == null
+          ? null
+          : (careSpaces.get(booking.appointmentId) ?? null),
+      ...this.assembler.toBookingItem(
         booking,
         slot,
         reasons.get(booking.id),
@@ -325,7 +332,7 @@ export class SearchBookingsUseCase {
         representedPatients,
         followUps,
       ),
-    );
+    }));
 
     return {
       // FAC-01: lo cobrado de cada cita, en lote, desde su factura.

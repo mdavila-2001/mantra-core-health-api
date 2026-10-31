@@ -20,6 +20,11 @@ export const { seeds: DIAGNOSTICS_CONCEPT_SEEDS, ids: DIAG } =
       display: 'Specimen collected',
     },
     SPECIMEN_RECEIVED: { code: 'SPEC_RECEIVED', display: 'Specimen received' },
+    // --- Evento de toma (specimen_collection_events.event_type_concept_id, F5b) ---
+    COLLECTION_EVENT_COLLECTED: {
+      code: 'SPEC_COLLECTION_EVENT_COLLECTED',
+      display: 'Specimen collection performed',
+    },
     SPECIMEN_REJECTED: { code: 'SPEC_REJECTED', display: 'Specimen rejected' },
 
     // --- Acesión de laboratorio (laboratory_accessions.status_concept_id) ---

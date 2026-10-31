@@ -256,6 +256,7 @@ export class ClinicalStructureService {
         if (existing) throw alreadyOffered(existing.id);
 
         const service = this.servicesRepo.create(tx, {
+          tenantId: practice.tenantId,
           practiceId,
           practiceSiteId: dto.practiceSiteId,
           clinicalUnitId: dto.clinicalUnitId,

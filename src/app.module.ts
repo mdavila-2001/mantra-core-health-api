@@ -1,3 +1,4 @@
+import { admissionIdentityEnvSchema } from './modules/clinical/services/inpatient/admission-identity';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
@@ -139,6 +140,7 @@ import { StudyCatalogModule } from './modules/study_catalog/study_catalog.module
         .concat(pharmacyErpEnvSchema)
         .concat(paymentsGatewayEnvSchema)
         .concat(verificationBypassEnvSchema)
+        .concat(admissionIdentityEnvSchema)
         .concat(seedBootEnvSchema),
     }),
     // Rate limiting global como red anti-DoS/fuerza bruta. El límite global es

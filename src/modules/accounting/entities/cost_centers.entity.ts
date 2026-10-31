@@ -85,4 +85,16 @@ export class CostCenters {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a tenant.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
+  /**
+   * Identificador asociado a clinical unit.
+   */
+  @Property({ fieldName: 'clinical_unit_id', type: 'uuid', nullable: true }) // FK → practice.clinical_units (inferida)
+  clinicalUnitId?: string;
 }

@@ -91,4 +91,66 @@ export class EncounterLocations {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a tenant.
+   */
+  @Property({ fieldName: 'tenant_id', type: 'uuid' }) // FK → directory.tenants (inferida)
+  tenantId!: string;
+
+  /**
+   * Valor de is bed assignment mantenido por la instancia.
+   */
+  @Property({ fieldName: 'is_bed_assignment', type: 'boolean', default: false })
+  isBedAssignment!: boolean;
+
+  /**
+   * Identificador asociado a movement type concept.
+   */
+  @Property({
+    fieldName: 'movement_type_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  movementTypeConceptId?: string;
+
+  /**
+   * Identificador asociado a previous encounter location.
+   */
+  @Property({
+    fieldName: 'previous_encounter_location_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  previousEncounterLocationId?: string;
+
+  /**
+   * Identificador asociado a end reason concept.
+   */
+  @Property({
+    fieldName: 'end_reason_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  endReasonConceptId?: string;
+
+  /**
+   * Identificador asociado a bed category concept.
+   */
+  @Property({
+    fieldName: 'bed_category_concept_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → terminology.catalog_concepts (inferida)
+  bedCategoryConceptId?: string;
+
+  /**
+   * Identificador asociado a placement incident.
+   */
+  @Property({
+    fieldName: 'placement_incident_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK → clinical.placement_incidents (inferida)
+  placementIncidentId?: string;
 }

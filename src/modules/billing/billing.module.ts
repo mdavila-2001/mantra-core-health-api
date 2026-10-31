@@ -1,3 +1,9 @@
+import { MessagingModule } from '../messaging/messaging.module';
+import { BillingSpaceChargesController } from './controllers/billing-space-charges.controller';
+import {
+  InfraF5ePolicyRegistrar,
+  SpaceChargesService,
+} from './services/space-charges.service';
 import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import * as entities from './entities';
@@ -65,8 +71,11 @@ import {
     // Bytes de la imagen de un servicio (P-22-8): la autorización por contexto
     // la decide `billing`; `common` solo los sirve.
     CommonModule,
+    // F5e: eventos `billing.charge_capture.*` / `space_tariff.*` por outbox.
+    MessagingModule,
   ],
   controllers: [
+    BillingSpaceChargesController,
     BillingReceivablesController,
     BillingPayablesController,
     BillingOperationsController,
@@ -78,6 +87,9 @@ import {
     PatientSpendingController,
   ],
   providers: [
+    // F5e cargos de espacio (CONTRATO-F2-F5 §F5e).
+    SpaceChargesService,
+    InfraF5ePolicyRegistrar,
     // Repositorios
     InvoicesRepository,
     BillsRepository,

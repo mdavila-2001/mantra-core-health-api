@@ -182,4 +182,14 @@ export class ServiceRequests {
    */
   @Property({ fieldName: 'row_version', columnType: 'int', version: true })
   rowVersion!: number;
+
+  /**
+   * Identificador asociado a suggested care space.
+   */
+  @Property({
+    fieldName: 'suggested_care_space_id',
+    type: 'uuid',
+    nullable: true,
+  }) // FK (destino no resuelto)
+  suggestedCareSpaceId?: string;
 }
