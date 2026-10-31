@@ -20,6 +20,7 @@ import { SCHED } from '../../scheduling/domain/scheduling.concepts';
 import { ClinicalExtErrorReason } from '../clinical_ext.error-reasons';
 import { ACTIVE_TENANT, inTenant, thrown } from './clinical-ext-tenant.testing';
 import { Branches } from '../../directory/entities';
+import { AllExceptionsFilter } from '../../../common/filters/all-exceptions.filter';
 
 const actor = { id: 'md-1', roles: ['USER'] } as any;
 /** Destinatario de la referencia: profesional con su perfil en el token. */
@@ -254,10 +255,15 @@ describe('ReferralsService', () => {
         expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
       });
 
-      it('sin profesional destino NO avisa: no hay a quién recomendar', async () => {
+      it('a una organización (sin profesional) con encuentro también avisa', async () => {
         const d = build();
         d.encountersRepo.findById.mockResolvedValue(encounter);
-        d.referralsRepo.create.mockReturnValue(created);
+        d.referralsRepo.create.mockImplementation(
+          (_tx: unknown, data: any) => ({
+            ...created,
+            targetTenantId: data.targetTenantId,
+          }),
+        );
 
         await d.service.create(
           {
@@ -268,6 +274,79 @@ describe('ReferralsService', () => {
           doctor,
         );
 
+        expect(d.notifier.notifyRecommended).toHaveBeenCalledWith('ref1');
+        expect(d.referralsRepo.create.mock.invocationCallOrder[0]).toBeLessThan(
+          d.notifier.notifyRecommended.mock.invocationCallOrder[0],
+        );
+      });
+
+      it('a un servicio sin tenant explícito avisa: el tenant destino sale del servicio', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue(encounter);
+        d.serviceCatalogRepo.findById.mockResolvedValue({
+          id: 'svc-1',
+          practiceId: 'pr-1',
+          isActive: true,
+        });
+        d.practicesRepo.findById.mockResolvedValue({
+          id: 'pr-1',
+          tenantId: 'ten-dest',
+        });
+        d.referralsRepo.findDuplicate.mockResolvedValue(null);
+        d.referralsRepo.create.mockImplementation(
+          (_tx: unknown, data: any) => ({
+            ...created,
+            targetTenantId: data.targetTenantId,
+            targetServiceCatalogId: data.targetServiceCatalogId,
+          }),
+        );
+
+        await d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        );
+
+        expect(d.notifier.notifyRecommended).toHaveBeenCalledWith('ref1');
+      });
+
+      it('a una organización SIN encuentro NO avisa', async () => {
+        const d = build();
+        d.referralsRepo.create.mockImplementation(
+          (_tx: unknown, data: any) => ({
+            ...created,
+            targetTenantId: data.targetTenantId,
+          }),
+        );
+
+        await d.service.create(
+          { patientProfileId: 'p1', targetTenantId: 'ten-dest' } as any,
+          doctor,
+        );
+
+        expect(d.referralsRepo.create).toHaveBeenCalled();
+        expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
+      });
+
+      it('sin profesional ni organización destino (sede o externo) NO avisa', async () => {
+        const d = build();
+        d.encountersRepo.findById.mockResolvedValue(encounter);
+        d.tx.findOne.mockResolvedValue({ id: 'br-1' });
+        d.referralsRepo.create.mockReturnValue(created);
+
+        await d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetExternalName: 'Hospital de Clínicas',
+          } as any,
+          doctor,
+        );
+
+        expect(d.referralsRepo.create).toHaveBeenCalled();
         expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
       });
     });
@@ -386,6 +465,256 @@ describe('ReferralsService', () => {
         expect(d.referralsRepo.create).not.toHaveBeenCalled();
         expect(d.notifier.notifyRecommended).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('razones de error de POST /referrals', () => {
+    const service = {
+      id: 'svc-1',
+      practiceId: 'pr-1',
+      isActive: true,
+    };
+    const encounter = { id: 'e1', patientProfileId: 'p1', tenantId: 't-1' };
+
+    /** Pasa el error por el filtro global y devuelve el cuerpo HTTP. */
+    function httpBody(error: unknown): Record<string, unknown> {
+      const response: any = {
+        headersSent: false,
+        setHeader: mockFn(),
+        status: mockFn(),
+        json: mockFn(),
+      };
+      response.status.mockReturnValue(response);
+      const host: any = {
+        switchToHttp: () => ({
+          getResponse: () => response,
+          getRequest: () => ({
+            headers: {},
+            url: '/referrals',
+            method: 'POST',
+          }),
+        }),
+      };
+      const filter = new AllExceptionsFilter(
+        { setContext: mockFn(), warn: mockFn(), error: mockFn() } as any,
+        {
+          setAttribute: mockFn(),
+          recordException: mockFn(),
+          addEvent: mockFn(),
+        } as any,
+      );
+      filter.catch(error, host);
+      return response.json.mock.calls[0][0];
+    }
+
+    it('404 REFERRAL_TARGET_NOT_FOUND: el profesional destino no existe', async () => {
+      const d = build();
+      d.practitionersRepo.findById.mockResolvedValue(null);
+      const err = await thrown(
+        d.service.create(
+          { patientProfileId: 'p1', targetProfileId: 'hp-x' } as any,
+          doctor,
+        ),
+      );
+      expect(err).toMatchObject({
+        status: 404,
+        reason: ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      });
+      expect(httpBody(err)).toMatchObject({
+        code: 'NOT_FOUND',
+        reason: 'REFERRAL_TARGET_NOT_FOUND',
+        details: { targetProfileId: 'hp-x' },
+      });
+    });
+
+    it('404 REFERRAL_SERVICE_NOT_FOUND: el servicio destino no existe', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(null);
+      const err = await thrown(
+        d.service.create(
+          { patientProfileId: 'p1', targetServiceCatalogId: 'svc-x' } as any,
+          doctor,
+        ),
+      );
+      expect(err).toMatchObject({
+        status: 404,
+        reason: ClinicalExtErrorReason.REFERRAL_SERVICE_NOT_FOUND,
+      });
+      expect(httpBody(err)).toMatchObject({
+        code: 'NOT_FOUND',
+        reason: 'REFERRAL_SERVICE_NOT_FOUND',
+        details: { targetServiceCatalogId: 'svc-x' },
+      });
+    });
+
+    it('404 REFERRAL_ENCOUNTER_NOT_FOUND: el encuentro no existe o no es del paciente', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(null);
+      await expectReason(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e-x',
+            targetTenantId: 'ten-dest',
+          } as any,
+          doctor,
+        ),
+        404,
+        ClinicalExtErrorReason.REFERRAL_ENCOUNTER_NOT_FOUND,
+      );
+
+      d.encountersRepo.findById.mockResolvedValue({
+        ...encounter,
+        patientProfileId: 'otro',
+      });
+      const err = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetTenantId: 'ten-dest',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(err.reason).toBe(
+        ClinicalExtErrorReason.REFERRAL_ENCOUNTER_NOT_FOUND,
+      );
+      expect(httpBody(err)).toMatchObject({
+        code: 'NOT_FOUND',
+        reason: 'REFERRAL_ENCOUNTER_NOT_FOUND',
+        details: { encounterId: 'e1' },
+      });
+    });
+
+    it('409 REFERRAL_ALREADY_EXISTS va en el mismo lugar: reason de primer nivel', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue(encounter);
+      d.referralsRepo.findDuplicate.mockResolvedValue({ id: 'ref0' });
+      const err = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            sourceEncounterId: 'e1',
+            targetProfileId: 'hp-2',
+            specialtyConceptId: 's1',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(httpBody(err)).toMatchObject({
+        code: 'CONFLICT',
+        reason: 'REFERRAL_ALREADY_EXISTS',
+        details: { sourceEncounterId: 'e1' },
+      });
+    });
+
+    it('422 REFERRAL_TARGET_REQUIRED: reason de primer nivel y, como antes, en details', async () => {
+      const d = build();
+      const err = await thrown(
+        d.service.create(
+          { patientProfileId: 'p1', specialtyConceptId: 's1' } as any,
+          doctor,
+        ),
+      );
+      expect(err.reason).toBe(ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED);
+      expect(httpBody(err)).toMatchObject({
+        code: 'PRECONDITION_FAILED',
+        reason: 'REFERRAL_TARGET_REQUIRED',
+        details: { reason: 'REFERRAL_TARGET_REQUIRED' },
+      });
+    });
+
+    it('422 REFERRAL_SERVICE_INACTIVE: reason de primer nivel y en details', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue({
+        ...service,
+        isActive: false,
+      });
+      const err = await thrown(
+        d.service.create(
+          { patientProfileId: 'p1', targetServiceCatalogId: 'svc-1' } as any,
+          doctor,
+        ),
+      );
+      expect(err.reason).toBe(ClinicalExtErrorReason.REFERRAL_SERVICE_INACTIVE);
+      expect(httpBody(err)).toMatchObject({
+        code: 'PRECONDITION_FAILED',
+        reason: 'REFERRAL_SERVICE_INACTIVE',
+        details: {
+          targetServiceCatalogId: 'svc-1',
+          reason: 'REFERRAL_SERVICE_INACTIVE',
+        },
+      });
+    });
+
+    it('422 REFERRAL_SERVICE_TARGET_MISMATCH: organización ajena y profesional que no lo ofrece', async () => {
+      const d = build();
+      d.serviceCatalogRepo.findById.mockResolvedValue(service);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-otra',
+      });
+      const foreign = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            targetTenantId: 'ten-dest',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(foreign.reason).toBe(
+        ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
+      );
+
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      d.offeringsRepo.findOfferingOf.mockResolvedValue(null);
+      const notOffered = await thrown(
+        d.service.create(
+          {
+            patientProfileId: 'p1',
+            targetProfileId: 'hp-2',
+            targetServiceCatalogId: 'svc-1',
+          } as any,
+          doctor,
+        ),
+      );
+      expect(notOffered.reason).toBe(
+        ClinicalExtErrorReason.REFERRAL_SERVICE_TARGET_MISMATCH,
+      );
+      expect(httpBody(notOffered)).toMatchObject({
+        code: 'PRECONDITION_FAILED',
+        reason: 'REFERRAL_SERVICE_TARGET_MISMATCH',
+        details: {
+          targetServiceCatalogId: 'svc-1',
+          reason: 'REFERRAL_SERVICE_TARGET_MISMATCH',
+        },
+      });
+    });
+
+    it('GET /referrals/targets y /target-services usan el mismo catálogo', async () => {
+      const d = build();
+      await expectReason(
+        d.raw.searchTargets({ q: 'a' } as any),
+        422,
+        ClinicalExtErrorReason.REFERRAL_TARGET_QUERY_TOO_SHORT,
+      );
+      await expectReason(
+        d.raw.listTargetServices({} as any),
+        422,
+        ClinicalExtErrorReason.REFERRAL_TARGET_REQUIRED,
+      );
+      d.targetsRepo.isListableOrganization.mockResolvedValue(false);
+      await expectReason(
+        d.raw.listTargetServices({ targetTenantId: 'ten-x' } as any),
+        404,
+        ClinicalExtErrorReason.REFERRAL_TARGET_NOT_FOUND,
+      );
     });
   });
 
@@ -1156,6 +1485,51 @@ describe('ReferralsService', () => {
         ),
       ).rejects.toBeInstanceOf(PreconditionFailedException);
       expect(d.referralsRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('el mismo servicio con OTRO tipo no es duplicado: crea la derivación', async () => {
+      const d = build();
+      d.encountersRepo.findById.mockResolvedValue({
+        id: 'e1',
+        patientProfileId: 'p1',
+        tenantId: 't-1',
+      });
+      d.serviceCatalogRepo.findById.mockResolvedValue(activeService);
+      d.practicesRepo.findById.mockResolvedValue({
+        id: 'pr-1',
+        tenantId: 'ten-dest',
+      });
+      // Ya hay una derivación CONSULTATION a ese servicio desde ese encuentro:
+      // el repositorio la devuelve sólo si el tipo pedido coincide.
+      const existing = {
+        sourceEncounterId: 'e1',
+        targetServiceCatalogId: 'svc-1',
+        referralTypeConceptId: CEXT.REFERRAL_TYPE_CONSULTATION,
+      };
+      d.referralsRepo.findDuplicate.mockImplementation(
+        async (_tx: unknown, criteria: any) =>
+          criteria.referralTypeConceptId === existing.referralTypeConceptId
+            ? existing
+            : null,
+      );
+      d.referralsRepo.create.mockReturnValue(created);
+
+      await d.service.create(
+        {
+          patientProfileId: 'p1',
+          sourceEncounterId: 'e1',
+          targetServiceCatalogId: 'svc-1',
+          referralType: 'TREATMENT',
+        } as any,
+        doctor,
+      );
+
+      expect(d.referralsRepo.create).toHaveBeenCalled();
+      // La clave lógica también separa por tipo: dos tipos al mismo servicio no
+      // se serializan como si fueran el mismo pedido.
+      expect(d.tx.execute.mock.calls[0][1]).toEqual([
+        'clinical_ext.referral:e1:-:svc-1:TREATMENT',
+      ]);
     });
 
     it('el duplicado con servicio compara encuentro, servicio y tipo', async () => {

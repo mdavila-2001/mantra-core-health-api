@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { PinoLogger } from 'nestjs-pino';
-import { SEED, type AuthenticatedUser } from '../../../common';
+import { CONCEPTS, SEED, type AuthenticatedUser } from '../../../common';
 import { MESSAGING_SEED } from '../../../common/seed/messaging-seed.service';
 import {
   PersonAccountLinks,
@@ -10,6 +10,10 @@ import {
 } from '../../profiles/entities';
 import { NotificationsService } from '../../messaging/services';
 import { PROF } from '../../profiles/profiles.concepts';
+import { Tenants } from '../../directory/entities';
+import { ServiceCatalog } from '../../billing/entities';
+import { PublicProfiles } from '../../community/entities';
+import { COMM } from '../../community/community.concepts';
 import { CEXT } from '../clinical_ext.concepts';
 import { Referrals } from '../entities';
 
@@ -24,6 +28,22 @@ export function recommendedPractitionerRoute(targetProfileId: string): string {
  * (`core/notifications/notification-routes.ts`).
  */
 export const RECOMMENDED_PRACTITIONER_RESOURCE = 'PRACTITIONER_PROFILE';
+
+/**
+ * La ruta del portal con la ficha pública de la organización (`/o/:slug`; la
+ * API la sirve en `GET o/:slug` de `CommunityPublicController`), donde la
+ * paciente ve sus servicios y reserva.
+ */
+export function referredOrganizationRoute(slug: string): string {
+  return `/o/${slug}`;
+}
+
+/**
+ * El tipo de recurso del aviso de una derivación a una organización; el id es
+ * el tenant destino. La campana no puede armar `/o/:slug` desde ese id: la
+ * ruta va en `payloadJson.route`. Sólo se manda cuando hay ficha pública.
+ */
+export const REFERRED_ORGANIZATION_RESOURCE = 'ORGANIZATION_PROFILE';
 
 /** Prioridad de entrega de la campana (menor gana); la de un aviso de cita. */
 const NOTICE_PRIORITY = 4;
@@ -41,6 +61,12 @@ const NOTICE_PRIORITY = 4;
  * cuenta de portal, o un fallo de mensajería, se registran y se tragan, igual
  * que los avisos de agenda. La derivación ya existe y se ve en «Mis
  * derivaciones».
+ *
+ * Una derivación a una **organización** (tenant destino sin profesional)
+ * también avisa: «Su médico le derivó a {organización}», con el servicio si lo
+ * hay, y enlace a la ficha pública de la organización sólo si tiene una
+ * pública y activa (la misma regla con la que `GET o/:slug` la sirve). Sin ficha, el
+ * aviso sale sin enlace.
  *
  * No hay aviso por correo ni por push todavía: cada canal nuevo es un adaptador
  * nuevo, no un `if` más acá.
@@ -60,13 +86,10 @@ export class ReferralNotifier {
     try {
       const em = this.em.fork();
       const referral = await em.findOne(Referrals, { id: referralId });
-      if (
-        referral === null ||
-        referral.targetProfileId === undefined ||
-        referral.targetProfileId === null
-      ) {
-        return false;
-      }
+      if (referral === null) return false;
+      const targetProfileId = referral.targetProfileId ?? null;
+      const targetTenantId = referral.targetTenantId ?? null;
+      if (targetProfileId === null && targetTenantId === null) return false;
 
       const recipientUserId = await this.accountOf(
         em,
@@ -80,14 +103,26 @@ export class ReferralNotifier {
         return false;
       }
 
-      const target = await this.displayNameOf(em, referral.targetProfileId);
       const referrer =
         referral.referringProfileId === undefined ||
         referral.referringProfileId === null
           ? null
           : await this.displayNameOf(em, referral.referringProfileId);
-      const subject = 'Su médico le recomienda otra consulta';
-      const bodyText = this.bodyOf(referrer, target, referral.reasonText);
+      const notice =
+        targetProfileId !== null
+          ? await this.practitionerNotice(
+              em,
+              targetProfileId,
+              referrer,
+              referral.reasonText,
+            )
+          : await this.organizationNotice(
+              em,
+              targetTenantId as string,
+              referral.targetServiceCatalogId ?? null,
+              referral.reasonText,
+            );
+      const { subject, bodyText } = notice;
       const actor: AuthenticatedUser = {
         id: SEED.systemWorkerUserId,
         roles: ['SYSTEM'],
@@ -103,14 +138,18 @@ export class ReferralNotifier {
             kind: 'REFERRAL_RECOMMENDED',
             subject,
             bodyText,
-            route: recommendedPractitionerRoute(referral.targetProfileId),
+            ...(notice.route === null ? {} : { route: notice.route }),
             referralId,
           },
-          // El destino del aviso es el profesional recomendado: la campana lo
-          // abre en su ficha, donde la paciente reserva. La derivación misma
-          // viaja en el payload.
-          relatedResourceType: RECOMMENDED_PRACTITIONER_RESOURCE,
-          relatedResourceId: referral.targetProfileId,
+          // El destino del aviso es la ficha del profesional (o de la
+          // organización) donde la paciente reserva. La derivación misma viaja
+          // en el payload. Sin ficha a la que llevar, el aviso no lleva destino.
+          ...(notice.resource === null
+            ? {}
+            : {
+                relatedResourceType: notice.resource.type,
+                relatedResourceId: notice.resource.id,
+              }),
         },
         actor,
       );
@@ -141,21 +180,74 @@ export class ReferralNotifier {
     }
   }
 
-  private bodyOf(
+  /** El aviso de siempre: su médico le recomienda a un profesional. */
+  private async practitionerNotice(
+    em: EntityManager,
+    targetProfileId: string,
     referrer: string | null,
-    target: string | null,
     reason: string | undefined | null,
-  ): string {
+  ): Promise<Notice> {
+    const target = await this.displayNameOf(em, targetProfileId);
     const who = referrer === null ? 'Su médico' : referrer;
     const to = target === null ? 'otro profesional' : target;
-    const why =
-      reason === undefined || reason === null || reason.trim() === ''
-        ? ''
-        : ` Motivo: ${endWithPeriod(reason.trim())}`;
-    return (
-      `${who} le recomienda consultar con ${to}.${why} ` +
-      'Puede ver su ficha y reservar una cita desde su portal.'
-    );
+    return {
+      subject: 'Su médico le recomienda otra consulta',
+      bodyText:
+        `${who} le recomienda consultar con ${to}.${reasonSentence(reason)} ` +
+        'Puede ver su ficha y reservar una cita desde su portal.',
+      route: recommendedPractitionerRoute(targetProfileId),
+      resource: {
+        type: RECOMMENDED_PRACTITIONER_RESOURCE,
+        id: targetProfileId,
+      },
+    };
+  }
+
+  /**
+   * El aviso de una derivación a una organización: «Su médico le derivó a
+   * {organización}», con el servicio si lo hay. El enlace sale sólo si la
+   * organización tiene ficha pública activa.
+   */
+  private async organizationNotice(
+    em: EntityManager,
+    targetTenantId: string,
+    targetServiceCatalogId: string | null,
+    reason: string | undefined | null,
+  ): Promise<Notice> {
+    const tenant = await em.findOne(Tenants, { id: targetTenantId });
+    const trade = tenant?.tradeName?.trim();
+    const organization = trade ? trade : (tenant?.legalName ?? null);
+    const service =
+      targetServiceCatalogId === null
+        ? null
+        : await em.findOne(ServiceCatalog, { id: targetServiceCatalogId });
+    const serviceName = service?.name?.trim() ? service.name.trim() : null;
+    const profile = await em.findOne(PublicProfiles, {
+      targetId: targetTenantId,
+      targetTypeConceptId: COMM.PROFILE_TARGET_ORGANIZATION,
+      visibilityConceptId: COMM.PROFILE_VISIBILITY_PUBLIC,
+      statusConceptId: CONCEPTS.STATE_ACTIVE,
+    });
+    const route = profile?.slug
+      ? referredOrganizationRoute(profile.slug)
+      : null;
+
+    const to = organization === null ? 'otra organización' : organization;
+    const what = serviceName === null ? '' : ` para ${serviceName}`;
+    return {
+      subject: `Su médico le derivó a ${to}`,
+      bodyText:
+        endWithPeriod(`Su médico le derivó a ${to}${what}`) +
+        reasonSentence(reason) +
+        (route === null
+          ? ''
+          : ' Puede ver su ficha y reservar una cita desde su portal.'),
+      route,
+      resource:
+        route === null
+          ? null
+          : { type: REFERRED_ORGANIZATION_RESOURCE, id: targetTenantId },
+    };
   }
 
   private async personIdOf(
@@ -195,6 +287,23 @@ export class ReferralNotifier {
       .trim();
     return person.displayName ?? (composed === '' ? null : composed);
   }
+}
+
+/** Lo que la campana muestra y adónde lleva. */
+interface Notice {
+  subject: string;
+  bodyText: string;
+  /** Ruta del portal, o `null` si no hay a dónde llevar. */
+  route: string | null;
+  /** Destino de la campana (`relatedResource*`), o `null` sin enlace. */
+  resource: { type: string; id: string } | null;
+}
+
+/** « Motivo: …» con su punto, o nada si el médico no escribió motivo. */
+function reasonSentence(reason: string | undefined | null): string {
+  return reason === undefined || reason === null || reason.trim() === ''
+    ? ''
+    : ` Motivo: ${endWithPeriod(reason.trim())}`;
 }
 
 /**
